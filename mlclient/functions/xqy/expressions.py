@@ -12,7 +12,7 @@ import re
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import overload
+from typing import TypeAlias, overload
 
 from mlclient._experimental import experimental
 
@@ -26,6 +26,7 @@ _NAME_START = (
 _NCNAME = re.compile(
     f"[{_NAME_START}][{_NAME_START}" + r".0-9\-\u00B7\u0300-\u036F\u203F-\u2040]*",
 )
+_RANGE_BOUND_COUNT = 2
 
 
 class XqyCompilationContext:
@@ -178,34 +179,6 @@ def namespace_bindings(namespaces) -> dict[str, str]:
     return result
 
 
-def _namespace_declarations(namespaces: dict[str, str]) -> str:
-    """Serialize declarations, escaping URI literals without changing their content."""
-    declarations = []
-    for prefix, uri in namespaces.items():
-        literal = (
-            uri.replace("&", "&amp;")
-            .replace('"', '""')
-            .replace("\t", "&#9;")
-            .replace("\r", "&#13;")
-            .replace("\n", "&#10;")
-        )
-        name = f"namespace {prefix}" if prefix else "default element namespace"
-        separator = " = " if prefix else " "
-        declarations.append(f'declare {name}{separator}"{literal}";\n')
-    return "".join(declarations)
-
-
-def _namespace_code(namespaces, ctx: XqyCompilationContext) -> str:
-    """Render a namespace map with data bindings, never interpolated URIs."""
-    entries = [
-        f"map:entry({ctx.bind(prefix)}, {ctx.bind(uri)})"
-        for prefix, uri in namespaces.items()
-    ]
-    if len(entries) == 1:
-        return entries[0]
-    return "map:new((" + ", ".join(entries) + "))"
-
-
 @experimental()
 class XqyExpression(ABC):
     """An XQuery expression, reusable in builders or ``eval.expression``."""
@@ -248,41 +221,39 @@ class XqyExpression(ABC):
         prolog += ctx.declarations
         return prolog + body, variables
 
-    def range(
+    def pos(
         self,
-        start: int | XqyExpression,
-        end: int | XqyExpression,
-    ) -> Range:
-        """Select inclusive, one-based positions ``start`` through ``end``.
+        pos: Position | PositionRange | None,
+    ) -> XqyExpression:
+        """Select one one-based position or an inclusive two-position range.
 
         Parameters
         ----------
-        start : int | XqyExpression
-            Positive integer or fn.last(). Booleans are not positions.
-        end : int | XqyExpression
-            Positive integer or fn.last(); literal bounds must be ordered.
+        pos : Position | PositionRange | None
+            A positive integer or fn.last() selects one item. A two-item list
+            or tuple selects an inclusive range. None preserves the expression.
 
         Returns
         -------
-        Range
-            A composable positional predicate, evaluated by MarkLogic.
+        XqyExpression
+            A composable predicate, or this expression for None.
+
+        Raises
+        ------
+        TypeError
+            If a range does not contain exactly two positions or a position
+            is neither an integer nor fn.last().
+        ValueError
+            If a position is not positive or literal range bounds are reversed.
         """
-        return Range(self, start, end)
-
-    def index(self, position: int | XqyExpression) -> Index:
-        """Select one item by its one-based position.
-
-        Parameters
-        ----------
-        position : int | XqyExpression
-            Positive integer or fn.last(), evaluated inside the predicate.
-
-        Returns
-        -------
-        Index
-            Selected item, or an empty sequence if the position does not exist.
-        """
-        return Index(self, position)
+        if pos is None:
+            return self
+        if isinstance(pos, (list, tuple)):
+            if len(pos) != _RANGE_BOUND_COUNT:
+                message = "pos ranges must contain exactly two positions"
+                raise TypeError(message)
+            return Range(self, *pos)
+        return Index(self, pos)
 
     def xpath(self, path: str) -> ResultXPath:
         """Extract a restricted XPath from each result item in sequence order.
@@ -296,7 +267,7 @@ class XqyExpression(ABC):
         Returns
         -------
         ResultXPath
-            A simple-map expression. Apply index/range before this method to
+            A simple-map expression. Apply pos before this method to
             select hits before applying this XPath.
 
         Raises
@@ -312,6 +283,22 @@ class XqyExpression(ABC):
     def __str__(self) -> str:
         """Return compiled XQuery source without the external bindings."""
         return self.compile()[0]
+
+
+AtomicScalar = (
+    str | bool | int | float | decimal.Decimal | datetime.date | datetime.datetime
+)
+AtomicInput: TypeAlias = (
+    AtomicScalar
+    | XqyExpression
+    | list["AtomicInput"]
+    | tuple["AtomicInput", ...]
+    | None
+)
+StringInput = str | list[str] | XqyExpression | list[XqyExpression] | None
+FloatInput = float | list[float] | XqyExpression | list[XqyExpression] | None
+Position = int | XqyExpression
+PositionRange = list[Position] | tuple[Position, Position]
 
 
 @dataclass(frozen=True)
@@ -332,22 +319,6 @@ class DatabaseRoot(XqyExpression):
     def render(self, _ctx: XqyCompilationContext) -> str:
         """Return the built-in database root; no user source is involved."""
         return "/"
-
-
-def _validate_position(value: int | XqyExpression) -> None:
-    """Require a positive integer or the native zero-argument fn:last call."""
-    if type(value) is int:
-        if value < 1:
-            message = "index/range positions must be positive"
-            raise ValueError(message)
-    elif not (
-        isinstance(value, FunctionCall)
-        and value.fn == "fn:last"
-        and not value.args
-        and not value.optionals
-    ):
-        message = "index/range positions must be integers or fn.last()"
-        raise TypeError(message)
 
 
 @dataclass(frozen=True)
@@ -494,8 +465,8 @@ class ModuleFunctionCall(XqyExpression):
     def __init__(
         self,
         name: str,
-        args: Sequence[object] = (),
-        optionals: Sequence[object] = (),
+        args: Sequence[AtomicInput] = (),
+        optionals: Sequence[AtomicInput] = (),
         *,
         namespace: str,
         module_path: str,
@@ -506,11 +477,11 @@ class ModuleFunctionCall(XqyExpression):
         ----------
         name : str
             Function local name (an XML NCName), without a namespace prefix.
-        args : Sequence[object], default ()
+        args : Sequence[AtomicInput], default ()
             Positional arguments, including Python values or XqyExpression
             instances. A nested list/tuple is one sequence-valued argument;
             None is an explicit empty-sequence argument.
-        optionals : Sequence[object], default ()
+        optionals : Sequence[AtomicInput], default ()
             Optional trailing slots. Trailing None slots are omitted; interior
             None slots become empty sequences. Use args to pass a trailing
             empty sequence explicitly. Both argument collections are snapshotted.
@@ -678,6 +649,50 @@ def as_expr(value, *, cast: str | None = None) -> XqyExpression:
     if isinstance(expr, FunctionCall) and expr.fn == cast:
         return expr
     return FunctionCall(cast, (expr,)) if cast else expr
+
+
+def _namespace_declarations(namespaces: dict[str, str]) -> str:
+    """Serialize declarations, escaping URI literals without changing their content."""
+    declarations = []
+    for prefix, uri in namespaces.items():
+        literal = (
+            uri.replace("&", "&amp;")
+            .replace('"', '""')
+            .replace("\t", "&#9;")
+            .replace("\r", "&#13;")
+            .replace("\n", "&#10;")
+        )
+        name = f"namespace {prefix}" if prefix else "default element namespace"
+        separator = " = " if prefix else " "
+        declarations.append(f'declare {name}{separator}"{literal}";\n')
+    return "".join(declarations)
+
+
+def _namespace_code(namespaces, ctx: XqyCompilationContext) -> str:
+    """Render a namespace map with data bindings, never interpolated URIs."""
+    entries = [
+        f"map:entry({ctx.bind(prefix)}, {ctx.bind(uri)})"
+        for prefix, uri in namespaces.items()
+    ]
+    if len(entries) == 1:
+        return entries[0]
+    return "map:new((" + ", ".join(entries) + "))"
+
+
+def _validate_position(value: int | XqyExpression) -> None:
+    """Require a positive integer or the native zero-argument fn:last call."""
+    if type(value) is int:
+        if value < 1:
+            message = "index/range positions must be positive"
+            raise ValueError(message)
+    elif not (
+        isinstance(value, FunctionCall)
+        and value.fn == "fn:last"
+        and not value.args
+        and not value.optionals
+    ):
+        message = "index/range positions must be integers or fn.last()"
+        raise TypeError(message)
 
 
 def _scalar(value) -> AtomicValue:

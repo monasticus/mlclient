@@ -3,9 +3,9 @@ from mlclient.functions.xqy import cts, fn
 
 def run():
     return cts.geospatial_boxes(
-        cts.search().index(1),
+        cts.search().pos(1),
         latitude_bounds=[
-            fn.count(cts.search().index(1)),
-            fn.count(cts.search().index(2)),
+            fn.count(cts.search().pos(1)),
+            fn.count(cts.search().pos(2)),
         ],
     ).compile()

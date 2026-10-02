@@ -3,5 +3,5 @@ from mlclient.functions.xqy import cts
 
 def run():
     return cts.thresholds(
-        cts.search().index(1), cts.search().index(1), recall_weight=set(),
+        cts.search().pos(1), cts.search().pos(1), recall_weight=set(),
     )

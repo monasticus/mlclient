@@ -5,7 +5,7 @@ def run():
     return cts.element_geospatial_boxes(
         "item",
         longitude_bounds=[
-            fn.count(cts.search().index(1)),
-            fn.count(cts.search().index(2)),
+            fn.count(cts.search().pos(1)),
+            fn.count(cts.search().pos(2)),
         ],
     ).compile()

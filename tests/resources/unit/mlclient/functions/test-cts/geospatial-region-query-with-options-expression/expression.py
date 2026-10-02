@@ -6,5 +6,5 @@ def run():
         cts.geospatial_element_reference("region"),
         "operation",
         cts.box(10, 10, 20, 20),
-        options=fn.string(cts.search().index(1)),
+        options=fn.string(cts.search().pos(1)),
     ).compile()

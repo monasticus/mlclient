@@ -6,7 +6,7 @@ def run():
         "/ext/aggregate.so",
         "total",
         cts.element_reference("price"),
-        argument=cts.search().index(1),
+        argument=cts.search().pos(1),
         options="checked",
         query="needle",
         forest_ids=123,

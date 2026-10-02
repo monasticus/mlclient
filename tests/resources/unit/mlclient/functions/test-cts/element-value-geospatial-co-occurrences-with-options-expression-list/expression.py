@@ -5,5 +5,5 @@ def run():
     return cts.element_value_geospatial_co_occurrences(
         "item",
         "item",
-        options=[fn.string(cts.search().index(1)), fn.string(cts.search().index(2))],
+        options=[fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
     ).compile()

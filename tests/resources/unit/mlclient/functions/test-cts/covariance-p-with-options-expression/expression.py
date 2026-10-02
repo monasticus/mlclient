@@ -5,5 +5,5 @@ def run():
     return cts.covariance_p(
         cts.element_reference("price"),
         cts.element_reference("price"),
-        options=fn.string(cts.search().index(1)),
+        options=fn.string(cts.search().pos(1)),
     ).compile()

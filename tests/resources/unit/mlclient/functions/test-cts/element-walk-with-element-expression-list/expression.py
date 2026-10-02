@@ -4,7 +4,7 @@ from tests.utils.expressions import StaticExpression
 
 def run():
     return cts.element_walk(
-        cts.search().index(1),
+        cts.search().pos(1),
         [
             fn.qname("https://example.com/products", "p:item"),
             fn.qname("https://example.com/products", "p:item"),

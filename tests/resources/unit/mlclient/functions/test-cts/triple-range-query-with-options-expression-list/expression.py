@@ -6,5 +6,5 @@ def run():
         "subject",
         "predicate",
         "object",
-        options=[fn.string(cts.search().index(1)), fn.string(cts.search().index(2))],
+        options=[fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
     ).compile()

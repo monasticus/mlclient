@@ -6,5 +6,5 @@ def run():
     return fn.format_date(
         date(2026, 1, 2),
         "[Y0001]-[M01]-[D01]",
-        language=fn.string(cts.search().index(1)),
+        language=fn.string(cts.search().pos(1)),
     ).compile()

@@ -6,5 +6,5 @@ def run():
         cts.element_reference("price"),
         "operation",
         cts.box(10, 10, 20, 20),
-        forest_ids=[fn.count(cts.search().index(1)), fn.count(cts.search().index(2))],
+        forest_ids=[fn.count(cts.search().pos(1)), fn.count(cts.search().pos(2))],
     ).compile()

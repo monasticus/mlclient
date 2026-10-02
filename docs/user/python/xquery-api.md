@@ -22,7 +22,7 @@ from mlclient.functions.xqy import cts
 
 with MLClient() as ml:
     documents = ml.eval.expression(
-        cts.search(query=cts.collection_query("products")).range(1, 10),
+        cts.search(query=cts.collection_query("products")).pos([1, 10]),
     )
     categories = ml.eval.expression(
         cts.values(cts.json_property_reference("category")),
@@ -87,11 +87,11 @@ the native argument slots, including empty placeholders.
 `search(expression=None, query=None, ...)` permits omitting the native required
 slots: the expression defaults to `/` and the query to the empty sequence.
 `estimate` also permits omitting its query. Services keep these builder contracts
-and add execution options such as database, timeout and range/index.
+and add execution options such as database, timeout and `pos`.
 
 ### Selection and ordering
 
-Builders support `.index(position)` and `.range(start, end)`. Positions are
+Builders support `.pos(position)` and `.pos([start, end])`. Positions are
 one-based and range endpoints are inclusive. Bounds accept positive integers
 or `fn.last()`:
 
@@ -101,7 +101,7 @@ from mlclient.functions.xqy import cts, fn
 
 with MLClient() as ml:
     remaining = ml.eval.expression(
-        cts.uris(query=cts.collection_query("products")).range(2, fn.last()),
+        cts.uris(query=cts.collection_query("products")).pos([2, fn.last()]),
     )
 ```
 
@@ -120,14 +120,14 @@ with MLClient() as ml:
                 cts.json_property_reference("price"),
                 options="ascending",
             ),
-        ).range(11, 20),
+        ).pos([11, 20]),
     )
 ```
 
-The service offers the equivalent `range=[11, 20]` and `index=1` keywords.
+The service offers the equivalent `pos=[11, 20]` and `pos=1` forms.
 For XML selection, see the three levels in [Work with XML](search.md#work-with-xml).
 The expression-builder equivalent of server-side `xpath` is `.xpath(path)`;
-apply it **after** `.range()` or `.index()` to select hits before extracting nodes.
+apply it **after** `.pos()` to select hits before extracting nodes.
 
 Applying `.xpath()` preserves search order. In native XQuery, use
 `cts:search(...)[1 to 10] ! p:product/p:title`, not

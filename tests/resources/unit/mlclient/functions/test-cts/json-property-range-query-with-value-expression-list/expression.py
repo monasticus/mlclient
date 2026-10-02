@@ -5,5 +5,5 @@ def run():
     return cts.json_property_range_query(
         "price",
         "=",
-        [fn.count(cts.search().index(1)), fn.count(cts.search().index(2))],
+        [fn.count(cts.search().pos(1)), fn.count(cts.search().pos(2))],
     ).compile()

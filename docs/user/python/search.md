@@ -10,18 +10,19 @@ Build a query, pass it to a search operation, and work with parsed Python result
 
 ```python
 from mlclient import MLClient
+from mlclient.functions.xqy import Cts
 from mlclient.services import CtsService
 
 with MLClient() as ml:
     cts = CtsService(ml.rest)
     hits = cts.search(
-        query=cts.and_query(
+        query=Cts.and_query(
             [
-                cts.collection_query("products"),
-                cts.word_query("coffee"),
+                Cts.collection_query("products"),
+                Cts.word_query("coffee"),
             ]
         ),
-        range=[1, 10],
+        pos=[1, 10],
     )
     for hit in hits:
         print(hit.source_uri, hit.score, hit.content)
@@ -45,20 +46,20 @@ is held inside a hit's `content`, so it is not confused with the list of hits.
 
 ## Select results
 
-Pass `index=1` to select the first result, `range=10` for the first ten, or
-`range=[11, 20]` for the next ten. Positions are one-based, both range endpoints
+Pass `pos=1` to select the first result, `pos=[1, 10]` for the first ten, or
+`pos=[11, 20]` for the next ten. Positions are one-based, both range endpoints
 are included, and selection happens on the server.
 
 ```python
 with MLClient() as ml:
     cts = CtsService(ml.rest)
-    hits = cts.search(query=cts.collection_query("products"), index=1)
+    hits = cts.search(query=Cts.collection_query("products"), pos=1)
     if hits:
         print(hits[0].content)
 ```
 
 A selected position returns a one-item list; a missing position returns `[]`.
-Do not combine `index` and `range`.
+A two-item list or tuple selects an inclusive range.
 Use an explicit ordering option when your application needs stable page ordering;
 see [XQuery API: selection and ordering](xquery-api.md#selection-and-ordering).
 
@@ -70,7 +71,7 @@ the third runs locally in Python:
 | Selection | Where | What it changes |
 | --- | --- | --- |
 | `search(expression=...)` | XQuery, inside `cts:search` | Which candidate nodes are searched and filtered against `query` |
-| `search(xpath=...)` | XQuery, after search and range/index | Which parts of each matching node are sent back |
+| `search(xpath=...)` | XQuery, after search and `pos` | Which parts of each matching node are sent back |
 | `hit.xpath(...)` | Python, after retrieval | Which elements you access in the already returned XML tree |
 
 ### Choose what to search with expression
@@ -93,8 +94,8 @@ with MLClient() as ml:
     )
     products = cts.search(
         expression="/p:catalog/p:product",
-        query=cts.word_query("coffee"),
-        range=[1, 10],
+        query=Cts.word_query("coffee"),
+        pos=[1, 10],
     )
 ```
 
@@ -116,9 +117,9 @@ with MLClient() as ml:
     )
     titles = cts.search(
         expression="/p:catalog/p:product",
-        query=cts.word_query("coffee"),
+        query=Cts.word_query("coffee"),
         xpath="p:title",
-        range=[1, 10],
+        pos=[1, 10],
     )
 ```
 
@@ -152,8 +153,8 @@ with MLClient() as ml:
     )
     hits = cts.search(
         expression="/p:catalog/p:product",
-        query=cts.word_query("coffee"),
-        index=1,
+        query=Cts.word_query("coffee"),
+        pos=1,
     )
     for hit in hits:
         titles = hit.xpath(
@@ -180,7 +181,7 @@ back as whole documents.
 ```python
 with MLClient() as ml:
     cts = CtsService(ml.rest)
-    uris = cts.uris(query=cts.collection_query("products"), range=[1, 10])
+    uris = cts.uris(query=Cts.collection_query("products"), pos=[1, 10])
     matching_uris = cts.uri_match("/products/*.json")
 ```
 
@@ -195,8 +196,8 @@ Use a range index to retrieve distinct values and their frequencies:
 with MLClient() as ml:
     cts = CtsService(ml.rest)
     values = cts.values(
-        cts.json_property_reference("category"),
-        query=cts.collection_query("products"),
+        Cts.json_property_reference("category"),
+        query=Cts.collection_query("products"),
     )
     for hit in values:
         print(hit.value, hit.frequency)
@@ -211,7 +212,7 @@ Individual lexicon results are [ValueHit][mlclient.models.ValueHit] objects:
 `frequency` follows the lookup's item/fragment-frequency options. Aggregates
 such as `estimate()` and `sum_aggregate()` return a list containing the parsed
 aggregate value, without a hit wrapper. All result-producing CTS service methods
-use this list contract, including `index=1`. A JSON array remains one result
+use this list contract, including `pos=1`. A JSON array remains one result
 inside the outer list. Query/reference builders still return expressions.
 
 This differs from `ml.eval.expression()`, which retains its empty/singleton/list
@@ -225,14 +226,15 @@ Without `database`, the connected App Server's content database is used.
 
 ```python
 from mlclient import AsyncMLClient
+from mlclient.functions.xqy import Cts
 from mlclient.services import AsyncCtsService
 
 
 async def find_products():
     async with AsyncMLClient() as ml:
         cts = AsyncCtsService(ml.rest)
-        query = cts.collection_query("products")
-        return await cts.search(query=query, range=[1, 10])
+        query = Cts.collection_query("products")
+        return await cts.search(query=query, pos=[1, 10])
 ```
 
 Query builders are still synchronous; await only operations that execute.

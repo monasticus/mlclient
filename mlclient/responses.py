@@ -19,6 +19,7 @@ from httpx import Headers, Response
 from mlclient import _constants as const
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.mimetypes import Mimetypes
+from mlclient.models.results import ParsedValue
 from mlclient.models.types import DocumentType
 from mlclient.multipart import MultipartPart, decode_multipart_mixed
 
@@ -91,18 +92,7 @@ class MLResponseParser:
         cls,
         response: Response,
         output_type: type | None = None,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | Decimal
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Parse MarkLogic HTTP Response.
 
         Parameters
@@ -114,9 +104,7 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | Decimal | bool | dict |
-        ElemTree.ElementTree | ElemTree.Element |
-        list
+        ParsedValue
             A parsed response body. xs:decimal retains precision as Decimal;
             xs:float and xs:double become float. Empty results return [],
             singletons return their item, and multiple items return a list.

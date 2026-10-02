@@ -4,7 +4,7 @@ from tests.utils.expressions import StaticExpression
 
 def run():
     return cts.highlight(
-        cts.search().index(1),
+        cts.search().pos(1),
         "needle",
         StaticExpression("function($node, $queries) { $node }"),
     ).compile()

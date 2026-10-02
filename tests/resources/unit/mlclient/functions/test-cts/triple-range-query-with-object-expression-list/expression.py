@@ -5,5 +5,5 @@ def run():
     return cts.triple_range_query(
         "subject",
         "predicate",
-        [fn.count(cts.search().index(1)), fn.count(cts.search().index(2))],
+        [fn.count(cts.search().pos(1)), fn.count(cts.search().pos(2))],
     ).compile()

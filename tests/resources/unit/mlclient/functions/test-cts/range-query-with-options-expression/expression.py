@@ -6,5 +6,5 @@ def run():
         cts.element_reference("price"),
         "=",
         "value",
-        options=fn.string(cts.search().index(1)),
+        options=fn.string(cts.search().pos(1)),
     ).compile()

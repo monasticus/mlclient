@@ -3,5 +3,5 @@ from mlclient.functions.xqy import cts, fn
 
 def run():
     return cts.geospatial_json_property_pair_reference(
-        "price", "latitude", "longitude", options=fn.string(cts.search().index(1)),
+        "price", "latitude", "longitude", options=fn.string(cts.search().pos(1)),
     ).compile()

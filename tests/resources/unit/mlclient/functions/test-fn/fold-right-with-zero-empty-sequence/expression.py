@@ -7,5 +7,5 @@ def run():
             fn.qname("http://www.w3.org/2005/xpath-functions", "count"), 1,
         ),
         None,
-        cts.search().index(1),
+        cts.search().pos(1),
     ).compile()

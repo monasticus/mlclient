@@ -36,7 +36,9 @@ __experimental__ = EXPERIMENTAL_NOTICE
 
 __all__ = [
     "AtomicValue",
+    "Cts",
     "DatabaseRoot",
+    "Fn",
     "FunctionCall",
     "Index",
     "ModuleFunctionCall",
@@ -44,9 +46,11 @@ __all__ = [
     "Path",
     "Range",
     "ResultXPath",
+    "Xdmp",
     "XqyCompilationContext",
     "XqyExpression",
     "XqySequence",
+    "Xs",
     "as_searchable_expression",
     "cts",
     "fn",

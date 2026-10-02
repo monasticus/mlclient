@@ -4,7 +4,7 @@ from tests.utils.expressions import StaticExpression
 
 def run():
     return cts.entity_walk(
-        cts.search().index(1),
+        cts.search().pos(1),
         StaticExpression("function($node, $queries) { $node }"),
         dict=set(),
     )

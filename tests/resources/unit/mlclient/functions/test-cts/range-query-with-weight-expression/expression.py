@@ -6,5 +6,5 @@ def run():
         cts.element_reference("price"),
         "=",
         "value",
-        weight=fn.count(cts.search().index(1)),
+        weight=fn.count(cts.search().pos(1)),
     ).compile()

@@ -6,5 +6,5 @@ def run():
         "/ext/aggregate.so",
         "total",
         cts.element_reference("price"),
-        argument=[cts.search().index(1), cts.search().index(2)],
+        argument=[cts.search().pos(1), cts.search().pos(2)],
     ).compile()

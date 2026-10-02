@@ -3,5 +3,5 @@ from mlclient.functions.xqy import cts, fn
 
 def run():
     return fn.distinct_values(
-        cts.search().index(1), collation=fn.string(cts.search().index(1)),
+        cts.search().pos(1), collation=fn.string(cts.search().pos(1)),
     ).compile()

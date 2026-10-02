@@ -6,5 +6,5 @@ def run():
         "item",
         "latitude",
         "longitude",
-        longitude_bounds=fn.count(cts.search().index(1)),
+        longitude_bounds=fn.count(cts.search().pos(1)),
     ).compile()

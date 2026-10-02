@@ -7,5 +7,5 @@ def run():
         "latitude",
         "longitude",
         "prod*",
-        forest_ids=fn.count(cts.search().index(1)),
+        forest_ids=fn.count(cts.search().pos(1)),
     ).compile()

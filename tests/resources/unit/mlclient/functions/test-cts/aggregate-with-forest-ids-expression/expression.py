@@ -6,5 +6,5 @@ def run():
         "/ext/aggregate.so",
         "total",
         cts.element_reference("price"),
-        forest_ids=fn.count(cts.search().index(1)),
+        forest_ids=fn.count(cts.search().pos(1)),
     ).compile()

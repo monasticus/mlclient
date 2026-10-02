@@ -4,6 +4,26 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree
 from dataclasses import dataclass, field
+from datetime import date, datetime
+from decimal import Decimal
+from typing import TypeAlias
+
+
+ParsedValue: TypeAlias = (
+    bytes
+    | str
+    | int
+    | float
+    | Decimal
+    | bool
+    | date
+    | datetime
+    | dict
+    | list
+    | ElemTree.ElementTree
+    | ElemTree.Element
+    | None
+)
 
 
 @dataclass
@@ -12,20 +32,20 @@ class SearchHit:
 
     Parameters
     ----------
-    content : object
+    content : ParsedValue
         Parsed value, retained as-is: XML tree/element, JSON, scalar or bytes.
     score : int
         Native score captured before applying optional result XPath.
     source_uri : str | None
         Source URI when supplied by the server.
-    source_path : str
+    source_path : str | None
         Source path; '/' is a fallback, not a document-node type assertion.
     """
 
-    content: object
+    content: ParsedValue
     score: int = field(kw_only=True)
     source_uri: str | None = field(default=None, kw_only=True)
-    source_path: str = field(default="/", kw_only=True)
+    source_path: str | None = field(default="/", kw_only=True)
 
     def xpath(self, expr: str, **namespaces: str) -> list:
         """Call findall on the already parsed XML tree or element.
@@ -61,11 +81,11 @@ class ValueHit:
 
     Parameters
     ----------
-    value : object
+    value : ParsedValue
         Parsed value supplied by MLResponseParser, without further conversion.
     frequency : int
         Native frequency; item/fragment-frequency options determine its meaning.
     """
 
-    value: object
+    value: ParsedValue
     frequency: int = field(kw_only=True)

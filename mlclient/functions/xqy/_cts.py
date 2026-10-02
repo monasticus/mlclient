@@ -14,9 +14,11 @@ import datetime
 from mlclient._experimental import experimental
 from mlclient.functions.xqy._xs import Xs
 from mlclient.functions.xqy.expressions import (
-    XqyExpression,
     DatabaseRoot,
+    FloatInput,
     FunctionCall,
+    StringInput,
+    XqyExpression,
     as_expr,
     namespace_map,
     as_searchable_expression,
@@ -118,7 +120,7 @@ class Cts:
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
         argument: XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -140,7 +142,7 @@ class Cts:
         argument : XqyExpression | list[XqyExpression] | None
             A sequence containing the arguments for the aggregate function. A map can be
             used to pass in multiple sequences of arguments.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             options. The default is (). Options include: "any" Co-occurrences from any
             fragment should be included. "document" Co-occurrences from document
             fragments should be included. "properties" Co-occurrences from properties
@@ -226,9 +228,9 @@ class Cts:
 
     @staticmethod
     def and_query(
-        queries: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        queries: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:and-query`` call.
 
@@ -237,9 +239,9 @@ class Cts:
 
         Parameters
         ----------
-        queries : str | list[str] | XqyExpression | list[XqyExpression] | None
+        queries : StringInput
             A sequence of sub-queries.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "ordered" An
             ordered and-query, which specifies that the sub-query matches must occur in
             the order of the specified sub-queries. For example, if the sub-queries are
@@ -267,7 +269,7 @@ class Cts:
     def avg_aggregate(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -279,7 +281,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -569,7 +571,7 @@ class Cts:
     def collection_match(
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -583,7 +585,7 @@ class Cts:
         ----------
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -662,7 +664,7 @@ class Cts:
 
     @staticmethod
     def collection_query(
-        uris: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        uris: StringInput,
     ) -> FunctionCall:
         """Build a composable ``cts:collection-query`` call.
 
@@ -670,7 +672,7 @@ class Cts:
 
         Parameters
         ----------
-        uris : str | list[str] | XqyExpression | list[XqyExpression] | None
+        uris : StringInput
             One or more collection URIs. A document matches the query if it is in at
             least one of these collections.
 
@@ -691,7 +693,7 @@ class Cts:
     @staticmethod
     def collection_reference(
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:collection-reference`` call.
 
@@ -700,7 +702,7 @@ class Cts:
 
         Parameters
         ----------
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "nullable" Allow null values in
             tuples reported from cts:value-tuples when using this lexicon. "unchecked"
             Do not check the definition against the context database.
@@ -724,7 +726,7 @@ class Cts:
     def collections(
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -739,7 +741,7 @@ class Cts:
             A starting value. Return only this value and following values. If the
             parameter is not in the lexicon, then it returns the values beginning with
             the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" URIs should be
             returned in ascending order. "descending" URIs should be returned in
             descending order. "any" URIs from any fragment should be included.
@@ -828,7 +830,7 @@ class Cts:
         | None,
         *,
         operator: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:column-range-query`` call.
@@ -844,7 +846,7 @@ class Cts:
             The TDE view name.
         column : str | XqyExpression
             The TDE column name.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             One or more values used for querying.
         operator : str | XqyExpression | None
             Operator for the $value values. The default operator is "=". Operators
@@ -853,7 +855,7 @@ class Cts:
             greater than $value. ">=" Match range index values greater than or equal to
             $value. "=" Match range index values equal to $value. "!=" Match range index
             values not equal to $value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "score-function= function " Use the
@@ -948,7 +950,7 @@ class Cts:
     @staticmethod
     def confidence_order(
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:confidence-order`` call.
 
@@ -957,7 +959,7 @@ class Cts:
 
         Parameters
         ----------
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. Options include: "descending" Results should be returned in
             descending order of confidence. "ascending" Results should be returned in
             ascending order of confidence.
@@ -1015,7 +1017,7 @@ class Cts:
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -1029,7 +1031,7 @@ class Cts:
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1055,7 +1057,7 @@ class Cts:
     def count_aggregate(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -1067,7 +1069,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1094,7 +1096,7 @@ class Cts:
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -1109,7 +1111,7 @@ class Cts:
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1136,7 +1138,7 @@ class Cts:
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -1151,7 +1153,7 @@ class Cts:
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1201,7 +1203,7 @@ class Cts:
 
     @staticmethod
     def directory_query(
-        uris: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        uris: StringInput,
         depth: str | XqyExpression | None = "1",
     ) -> FunctionCall:
         """Build a composable ``cts:directory-query`` call.
@@ -1211,7 +1213,7 @@ class Cts:
 
         Parameters
         ----------
-        uris : str | list[str] | XqyExpression | list[XqyExpression] | None
+        uris : StringInput
             One or more directory URIs.
         depth : str | XqyExpression | None
             "1" for immediate children, "infinity" for all. If not supplied, depth is
@@ -1394,7 +1396,7 @@ class Cts:
     @staticmethod
     def document_order(
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:document-order`` call.
 
@@ -1403,7 +1405,7 @@ class Cts:
 
         Parameters
         ----------
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. Options include: "descending" Results should be returned in
             descending order of document. "ascending" Results should be returned in
             ascending order of document.
@@ -1456,7 +1458,7 @@ class Cts:
 
     @staticmethod
     def document_query(
-        uris: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        uris: StringInput,
     ) -> FunctionCall:
         """Build a composable ``cts:document-query`` call.
 
@@ -1464,7 +1466,7 @@ class Cts:
 
         Parameters
         ----------
-        uris : str | list[str] | XqyExpression | list[XqyExpression] | None
+        uris : StringInput
             One or more document URIs.
 
         Returns
@@ -1513,8 +1515,8 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -1526,7 +1528,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -1537,19 +1539,19 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -1652,7 +1654,7 @@ class Cts:
 
     @staticmethod
     def element_attribute_pair_geospatial_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
         latitude_attribute_names: str
         | list[str]
         | XqyExpression
@@ -1665,7 +1667,7 @@ class Cts:
         | None,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-pair-geospatial-query`` call.
@@ -1677,21 +1679,21 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more parent element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches.
-        latitude_attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_attribute_names : StringInput
             One or more latitude attribute QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching latitude attribute in any point instance will be checked.
-        longitude_attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_attribute_names : StringInput
             One or more longitude attribute QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching longitude attribute in any point instance will be checked.
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -1758,12 +1760,12 @@ class Cts:
 
     @staticmethod
     def element_attribute_pair_geospatial_value_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -1775,15 +1777,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -1872,12 +1874,12 @@ class Cts:
 
     @staticmethod
     def element_attribute_pair_geospatial_values(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -1889,16 +1891,16 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -1982,8 +1984,8 @@ class Cts:
 
     @staticmethod
     def element_attribute_range_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
+        attribute_name: StringInput,
         operator: str | XqyExpression,
         value: str
         | int
@@ -1994,7 +1996,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-range-query`` call.
@@ -2004,10 +2006,10 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        attribute_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_name : StringInput
             One or more attribute QNames to match. When multiple QNames are specified,
             the query matches if any QName matches.
         operator : str | XqyExpression
@@ -2016,10 +2018,10 @@ class Cts:
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             Some values to match. When multiple values are specified, the query matches
             if any value matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -2069,7 +2071,7 @@ class Cts:
         element: str | XqyExpression,
         attribute: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-reference`` call.
 
@@ -2082,7 +2084,7 @@ class Cts:
             An element QName.
         attribute : str | XqyExpression
             An attribute QName.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -2123,7 +2125,7 @@ class Cts:
         element_name_2: str | XqyExpression,
         attribute_name_2: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2145,7 +2147,7 @@ class Cts:
         attribute_name_2 : str | XqyExpression | None
             An attribute QName or empty sequence. The empty sequence specifies an
             element lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -2268,7 +2270,7 @@ class Cts:
         *,
         coord_child_name_1: str | XqyExpression | None = None,
         coord_child_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2303,7 +2305,7 @@ class Cts:
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -2422,11 +2424,11 @@ class Cts:
 
     @staticmethod
     def element_attribute_value_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2438,14 +2440,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -2545,11 +2547,11 @@ class Cts:
 
     @staticmethod
     def element_attribute_value_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        text: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
+        attribute_name: StringInput,
+        text: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-value-query`` call.
@@ -2559,16 +2561,16 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        attribute_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_name : StringInput
             One or more attribute QNames to match. When multiple QNames are specified,
             the query matches if any QName matches.
-        text : str | list[str] | XqyExpression | list[XqyExpression] | None
+        text : StringInput
             One or more attribute values to match. When multiple strings are specified,
             the query matches if any string matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -2616,8 +2618,8 @@ class Cts:
 
     @staticmethod
     def element_attribute_value_ranges(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         bounds: str
         | int
@@ -2627,7 +2629,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2639,14 +2641,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -2747,11 +2749,11 @@ class Cts:
 
     @staticmethod
     def element_attribute_values(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2762,15 +2764,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -2867,11 +2869,11 @@ class Cts:
 
     @staticmethod
     def element_attribute_word_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2883,13 +2885,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -2957,11 +2959,11 @@ class Cts:
 
     @staticmethod
     def element_attribute_word_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        text: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
+        attribute_name: StringInput,
+        text: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-word-query`` call.
@@ -2971,16 +2973,16 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        attribute_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_name : StringInput
             One or more attribute QNames to match. When multiple QNames are specified,
             the query matches if any QName matches.
-        text : str | list[str] | XqyExpression | list[XqyExpression] | None
+        text : StringInput
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -3053,11 +3055,11 @@ class Cts:
 
     @staticmethod
     def element_attribute_words(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -3068,15 +3070,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -3163,7 +3165,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -3174,17 +3176,17 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        child_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_element_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -3298,7 +3300,7 @@ class Cts:
         | None,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-child-geospatial-query`` call.
@@ -3310,10 +3312,10 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_name : StringInput
             One or more parent element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches.
-        child_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_element_names : StringInput
             One or more child element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching latitude child in any point instance will be checked. The element
@@ -3321,7 +3323,7 @@ class Cts:
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -3387,11 +3389,11 @@ class Cts:
 
     @staticmethod
     def element_child_geospatial_value_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        child_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        child_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -3403,13 +3405,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames identifying the parent element(s).
-        child_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_names : StringInput
             One or more child element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -3496,11 +3498,11 @@ class Cts:
 
     @staticmethod
     def element_child_geospatial_values(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        child_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        child_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -3512,14 +3514,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        child_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_names : StringInput
             One or more child element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -3607,7 +3609,7 @@ class Cts:
 
     @staticmethod
     def element_geospatial_boxes(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -3619,7 +3621,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -3630,15 +3632,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Use the following options to customize your lexicon query: "ascending" Boxes
             should be returned in ascending order. "descending" Boxes should be returned
             in descending order. "gridded" For each side that a bucket is bounded,
@@ -3740,10 +3742,10 @@ class Cts:
 
     @staticmethod
     def element_geospatial_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-geospatial-query`` call.
@@ -3754,13 +3756,13 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -3825,10 +3827,10 @@ class Cts:
 
     @staticmethod
     def element_geospatial_value_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -3840,11 +3842,11 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -3931,10 +3933,10 @@ class Cts:
 
     @staticmethod
     def element_geospatial_values(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -3945,12 +3947,12 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4042,8 +4044,8 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -4055,7 +4057,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4066,19 +4068,19 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -4181,7 +4183,7 @@ class Cts:
 
     @staticmethod
     def element_pair_geospatial_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
         latitude_element_names: str
         | list[str]
         | XqyExpression
@@ -4194,7 +4196,7 @@ class Cts:
         | None,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-pair-geospatial-query`` call.
@@ -4206,21 +4208,21 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more parent element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches.
-        latitude_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_element_names : StringInput
             One or more latitude element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching latitude child in any point instance will be checked.
-        longitude_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_element_names : StringInput
             One or more longitude element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching longitude child in any point instance will be checked.
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -4287,12 +4289,12 @@ class Cts:
 
     @staticmethod
     def element_pair_geospatial_value_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4304,15 +4306,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4401,12 +4403,12 @@ class Cts:
 
     @staticmethod
     def element_pair_geospatial_values(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4418,17 +4420,17 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames identifying the parent element of the latitude
             and longitude elements.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4512,7 +4514,7 @@ class Cts:
 
     @staticmethod
     def element_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
         query: str | XqyExpression,
     ) -> FunctionCall:
         """Build a composable ``cts:element-query`` call.
@@ -4522,7 +4524,7 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
         query : str | XqyExpression
@@ -4545,7 +4547,7 @@ class Cts:
 
     @staticmethod
     def element_range_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
         operator: str | XqyExpression,
         value: str
         | int
@@ -4556,7 +4558,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-range-query`` call.
@@ -4566,7 +4568,7 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
         operator : str | XqyExpression
@@ -4575,10 +4577,10 @@ class Cts:
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             One or more element values to match. When multiple values are specified, the
             query matches if any value matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -4627,7 +4629,7 @@ class Cts:
     def element_reference(
         element: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-reference`` call.
 
@@ -4639,7 +4641,7 @@ class Cts:
         ----------
         element : str | XqyExpression
             An element QName.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -4678,7 +4680,7 @@ class Cts:
         element_name_1: str | XqyExpression,
         element_name_2: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4695,7 +4697,7 @@ class Cts:
             An element QName.
         element_name_2 : str | XqyExpression
             An element QName.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -4812,7 +4814,7 @@ class Cts:
         *,
         coord_child_name_1: str | XqyExpression | None = None,
         coord_child_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4848,7 +4850,7 @@ class Cts:
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -4963,10 +4965,10 @@ class Cts:
 
     @staticmethod
     def element_value_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4978,12 +4980,12 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -5082,10 +5084,10 @@ class Cts:
 
     @staticmethod
     def element_value_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        text: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        element_name: StringInput,
+        text: StringInput = None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-value-query`` call.
@@ -5095,13 +5097,13 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        text : str | list[str] | XqyExpression | list[XqyExpression] | None
+        text : StringInput
             One or more element values to match. When multiple strings are specified,
             the query matches if any string matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -5149,7 +5151,7 @@ class Cts:
 
     @staticmethod
     def element_value_ranges(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         bounds: str
         | int
@@ -5159,7 +5161,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -5170,13 +5172,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -5277,10 +5279,10 @@ class Cts:
 
     @staticmethod
     def element_values(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -5291,14 +5293,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames. If you specify multiple lexicons, they must all
             be over the same value type (string, int, etc.).
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -5396,7 +5398,7 @@ class Cts:
     @staticmethod
     def element_walk(
         node: XqyExpression,
-        element: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element: StringInput,
         expr: XqyExpression | list[XqyExpression] | None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-walk`` call.
@@ -5409,7 +5411,7 @@ class Cts:
         node : XqyExpression
             A node to run the walk over. The node must be either a document node or an
             element node; it cannot be a text node.
-        element : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element : StringInput
             The name of elements to replace.
         expr : XqyExpression | list[XqyExpression] | None
             An expression with which to replace each match. You can use the variables
@@ -5431,10 +5433,10 @@ class Cts:
 
     @staticmethod
     def element_word_match(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -5446,11 +5448,11 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | XqyExpression | None
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -5518,10 +5520,10 @@ class Cts:
 
     @staticmethod
     def element_word_query(
-        element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        text: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_name: StringInput,
+        text: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:element-word-query`` call.
@@ -5531,13 +5533,13 @@ class Cts:
 
         Parameters
         ----------
-        element_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_name : StringInput
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        text : str | list[str] | XqyExpression | list[XqyExpression] | None
+        text : StringInput
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -5620,10 +5622,10 @@ class Cts:
 
     @staticmethod
     def element_words(
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -5634,13 +5636,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -5758,7 +5760,7 @@ class Cts:
     def entity_dictionary(
         entities: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:entity-dictionary`` call.
 
@@ -5768,7 +5770,7 @@ class Cts:
         ----------
         entities : XqyExpression | list[XqyExpression] | None
             The entities to put into the dictionary.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Dictionary building options. The default is case-sensitive, allow-overlaps,
             and whole-words. Options include: "case-sensitive" Entity names are
             case-sensitive. "case-insensitive" Entity names are case-insensitive.
@@ -5819,9 +5821,9 @@ class Cts:
 
     @staticmethod
     def entity_dictionary_parse(
-        contents: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        contents: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:entity-dictionary-parse`` call.
 
@@ -5830,14 +5832,14 @@ class Cts:
 
         Parameters
         ----------
-        contents : str | list[str] | XqyExpression | list[XqyExpression] | None
+        contents : StringInput
             The dictionary entries to parse. Each line (or string) must consist of four
             tab-delimited fields: The entity ID, the normalized form of the entity, the
             word or phrase to match during entity identification, and the entity type.
             For more details about the fields, see cts:entity . Multiple formatted
             strings can be passed in and they will be combined into a single dictionary
             object.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Dictionary building options. The default is case-sensitive, allow-overlaps,
             and whole-words. Options include: "case-sensitive" Entity names are
             case-sensitive. "case-insensitive" Entity names are case-insensitive.
@@ -5948,7 +5950,7 @@ class Cts:
     def estimate(
         query: str | XqyExpression | None = None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         maximum: float | XqyExpression | None = None,
@@ -5961,7 +5963,7 @@ class Cts:
         ----------
         query : str | XqyExpression | None
             Query to estimate. None supplies the required empty query slot.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this search. The default is (). See cts.search for details on
             available options.
         quality_weight : float | XqyExpression | None
@@ -6015,7 +6017,7 @@ class Cts:
 
     @staticmethod
     def field_range_query(
-        field_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_name: StringInput,
         operator: str | XqyExpression,
         value: str
         | int
@@ -6026,7 +6028,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:field-range-query`` call.
@@ -6036,7 +6038,7 @@ class Cts:
 
         Parameters
         ----------
-        field_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_name : StringInput
             One or more field names to match. When multiple field names are specified,
             the query matches if any field name matches.
         operator : str | XqyExpression
@@ -6045,11 +6047,11 @@ class Cts:
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             One or more field values to match. When multiple values are specified, the
             query matches if any value matches. The value must be a type for which there
             is a range index defined.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -6098,7 +6100,7 @@ class Cts:
     def field_reference(
         field: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:field-reference`` call.
 
@@ -6109,7 +6111,7 @@ class Cts:
         ----------
         field : str | XqyExpression
             A field name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -6148,7 +6150,7 @@ class Cts:
         field_name_1: str | XqyExpression,
         field_name_2: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -6164,7 +6166,7 @@ class Cts:
             A string.
         field_name_2 : str | XqyExpression
             A string.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -6278,10 +6280,10 @@ class Cts:
 
     @staticmethod
     def field_value_match(
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -6293,12 +6295,12 @@ class Cts:
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -6397,7 +6399,7 @@ class Cts:
 
     @staticmethod
     def field_value_query(
-        field_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_name: StringInput,
         text: str
         | int
         | float
@@ -6407,7 +6409,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:field-value-query`` call.
@@ -6417,17 +6419,17 @@ class Cts:
 
         Parameters
         ----------
-        field_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_name : StringInput
             One or more field names to search over. If multiple field names are
             supplied, the match can be in any of the specified fields (or-query
             semantics).
-        text : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        text : AtomicInput
             The values to match. If multiple values are specified, the query matches if
             any of the values match (or-query semantics). For XML and metadata, the
             values should be strings. For JSON, the values can be strings, numbers or
             booleans to match correspondingly typed nodes. To match null, pass in the
             empty sequence.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -6492,7 +6494,7 @@ class Cts:
 
     @staticmethod
     def field_value_ranges(
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         bounds: str
         | int
@@ -6502,7 +6504,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -6513,13 +6515,13 @@ class Cts:
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more element QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -6620,10 +6622,10 @@ class Cts:
 
     @staticmethod
     def field_values(
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -6634,13 +6636,13 @@ class Cts:
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -6730,10 +6732,10 @@ class Cts:
 
     @staticmethod
     def field_word_match(
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -6745,11 +6747,11 @@ class Cts:
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -6817,10 +6819,10 @@ class Cts:
 
     @staticmethod
     def field_word_query(
-        field_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        text: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_name: StringInput,
+        text: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:field-word-query`` call.
@@ -6830,14 +6832,14 @@ class Cts:
 
         Parameters
         ----------
-        field_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_name : StringInput
             One or more field names to search over. If multiple field names are
             supplied, the match can be in any of the specified fields (or-query
             semantics).
-        text : str | list[str] | XqyExpression | list[XqyExpression] | None
+        text : StringInput
             The word or phrase to match. If multiple strings are specified, the query
             matches if any of the words or phrases match (or-query semantics).
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -6919,10 +6921,10 @@ class Cts:
 
     @staticmethod
     def field_words(
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -6933,13 +6935,13 @@ class Cts:
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -7034,7 +7036,7 @@ class Cts:
     @staticmethod
     def fitness_order(
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:fitness-order`` call.
 
@@ -7043,7 +7045,7 @@ class Cts:
 
         Parameters
         ----------
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. Options include: "descending" Return results in descending order of
             fitness. "ascending" Return results in ascending order of fitness.
 
@@ -7096,7 +7098,7 @@ class Cts:
         lat: str | XqyExpression,
         long: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-attribute-pair-reference`` call.
 
@@ -7112,7 +7114,7 @@ class Cts:
             An attribute QName name.
         long : str | XqyExpression
             An attribute QName name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7158,7 +7160,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -7171,13 +7173,13 @@ class Cts:
         ----------
         geo_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to geospatial indexes.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -7286,7 +7288,7 @@ class Cts:
         child_1_name_2: str | XqyExpression | None = None,
         child_2_name_1: str | XqyExpression | None = None,
         child_2_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -7335,7 +7337,7 @@ class Cts:
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " For both geospatial lexicons, use the kind of
             geospatial lexicon specified by format (element, element-child,
@@ -7466,7 +7468,7 @@ class Cts:
         element: str | XqyExpression,
         child: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-element-child-reference`` call.
 
@@ -7479,7 +7481,7 @@ class Cts:
             An element QName name.
         child : str | XqyExpression
             An element QName name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7517,7 +7519,7 @@ class Cts:
         lat: str | XqyExpression,
         long: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-element-pair-reference`` call.
 
@@ -7532,7 +7534,7 @@ class Cts:
             An element QName name.
         long : str | XqyExpression
             An element QName name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7568,7 +7570,7 @@ class Cts:
     def geospatial_element_reference(
         element: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-element-reference`` call.
 
@@ -7579,7 +7581,7 @@ class Cts:
         ----------
         element : str | XqyExpression
             An element name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7616,7 +7618,7 @@ class Cts:
         property: str | XqyExpression,
         child: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-json-property-child-reference`` call.
 
@@ -7629,7 +7631,7 @@ class Cts:
             A JSON property name.
         child : str | XqyExpression
             A JSON property name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7667,7 +7669,7 @@ class Cts:
         lat: str | XqyExpression,
         long: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-json-property-pair-reference`` call.
 
@@ -7682,7 +7684,7 @@ class Cts:
             A JSON property name.
         long : str | XqyExpression
             A JSON property name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= name " Use the given coordinate system. Possible values
@@ -7712,7 +7714,7 @@ class Cts:
     def geospatial_json_property_reference(
         property: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-json-property-reference`` call.
 
@@ -7723,7 +7725,7 @@ class Cts:
         ----------
         property : str | XqyExpression
             A JSON property name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7759,7 +7761,7 @@ class Cts:
     def geospatial_path_reference(
         path_expression: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         map: XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-path-reference`` call.
@@ -7771,7 +7773,7 @@ class Cts:
         ----------
         path_expression : str | XqyExpression
             A path expression.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7812,7 +7814,7 @@ class Cts:
     def geospatial_region_path_reference(
         path_expression: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         namespaces: XqyExpression | None = None,
         geohash_precision: int | XqyExpression | None = None,
         units: str | XqyExpression | None = None,
@@ -7828,7 +7830,7 @@ class Cts:
         ----------
         path_expression : str | XqyExpression
             The XPath expression specified in the index configuration.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Index configuration options. The default is (). These options should match
             the configuration used when creating the index. Available options:
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -7879,7 +7881,7 @@ class Cts:
         operation: str | XqyExpression,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:geospatial-region-query`` call.
@@ -7903,7 +7905,7 @@ class Cts:
             Criteria regions to match against the regions specified in the
             $geospatial-region-reference parameter. These regions function as the right
             operand of $operation .
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Available options: "units= value "
             Measure distances and the radii of circles using the given units. Allowed
             values: miles (default), km , feet , and meters . This option only affects
@@ -7986,7 +7988,7 @@ class Cts:
     def index_order(
         index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:index-order`` call.
 
@@ -7997,7 +7999,7 @@ class Cts:
         ----------
         index : XqyExpression
             A reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "descending" Results should be
             returned in descending order of index. "ascending" Results should be
             returned in ascending order of index.
@@ -8052,7 +8054,7 @@ class Cts:
         | None,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-child-geospatial-query`` call.
@@ -8064,10 +8066,10 @@ class Cts:
 
         Parameters
         ----------
-        parent_property_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_property_name : StringInput
             One or more parent property names to match. When multiple names are
             specified, the query matches if any name matches.
-        child_property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_property_names : StringInput
             One or more child property names to match. When multiple names are
             specified, the query matches if any name matches; however, only the first
             matching latitude child in any point instance will be checked. The property
@@ -8075,7 +8077,7 @@ class Cts:
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -8141,10 +8143,10 @@ class Cts:
 
     @staticmethod
     def json_property_geospatial_query(
-        property_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_name: StringInput,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-geospatial-query`` call.
@@ -8155,13 +8157,13 @@ class Cts:
 
         Parameters
         ----------
-        property_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_name : StringInput
             One or more json property names to match. When multiple names are specified,
             the query matches if any name matches.
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -8227,7 +8229,7 @@ class Cts:
 
     @staticmethod
     def json_property_pair_geospatial_query(
-        property_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_name: StringInput,
         latitude_property_names: str
         | list[str]
         | XqyExpression
@@ -8240,7 +8242,7 @@ class Cts:
         | None,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-pair-geospatial-query`` call.
@@ -8252,21 +8254,21 @@ class Cts:
 
         Parameters
         ----------
-        property_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_name : StringInput
             One or more parent property names to match. When multiple names are
             specified, the query matches if any name matches.
-        latitude_property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_property_names : StringInput
             One or more latitude property names to match. When multiple names are
             specified, the query matches if any name matches; however, only the first
             matching latitude child in any point instance will be checked.
-        longitude_property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_property_names : StringInput
             One or more longitude property names to match. When multiple names are
             specified, the query matches if any name matches; however, only the first
             matching longitude child in any point instance will be checked.
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -8328,7 +8330,7 @@ class Cts:
 
     @staticmethod
     def json_property_range_query(
-        property_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_name: StringInput,
         operator: str | XqyExpression,
         value: str
         | int
@@ -8339,7 +8341,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-range-query`` call.
@@ -8349,7 +8351,7 @@ class Cts:
 
         Parameters
         ----------
-        property_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_name : StringInput
             One or more property name to match. When multiple names are specified, the
             query matches if any name matches.
         operator : str | XqyExpression
@@ -8358,11 +8360,11 @@ class Cts:
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             One or more property values to match. When multiple values are specified,
             the query matches if any value matches. The value must be a type for which
             there is a range index defined.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -8411,7 +8413,7 @@ class Cts:
     def json_property_reference(
         property: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-reference`` call.
 
@@ -8422,7 +8424,7 @@ class Cts:
         ----------
         property : str | XqyExpression
             A property name.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -8458,7 +8460,7 @@ class Cts:
 
     @staticmethod
     def json_property_scope_query(
-        property_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_name: StringInput,
         query: str | XqyExpression,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-scope-query`` call.
@@ -8468,7 +8470,7 @@ class Cts:
 
         Parameters
         ----------
-        property_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_name : StringInput
             One or more property names to match. When multiple names are specified, the
             query matches if any name matches.
         query : str | XqyExpression
@@ -8491,7 +8493,7 @@ class Cts:
 
     @staticmethod
     def json_property_value_query(
-        property_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_name: StringInput,
         value: str
         | int
         | float
@@ -8501,7 +8503,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-value-query`` call.
@@ -8511,15 +8513,15 @@ class Cts:
 
         Parameters
         ----------
-        property_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_name : StringInput
             One or more property names to match. When multiple names are specified, the
             query matches if any name matches.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             One or more property values to match. When multiple values are specified,
             the query matches if any value matches. The values can be strings, numbers
             or booleans to match correspondingly typed nodes. If the value is the empty
             sequence, the query matches null.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -8567,10 +8569,10 @@ class Cts:
 
     @staticmethod
     def json_property_word_match(
-        property_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_names: StringInput,
         pattern: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -8582,11 +8584,11 @@ class Cts:
 
         Parameters
         ----------
-        property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_names : StringInput
             One or more property names.
         pattern : str | XqyExpression | None
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -8654,10 +8656,10 @@ class Cts:
 
     @staticmethod
     def json_property_word_query(
-        property_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        text: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_name: StringInput,
+        text: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:json-property-word-query`` call.
@@ -8667,13 +8669,13 @@ class Cts:
 
         Parameters
         ----------
-        property_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_name : StringInput
             One or more JSON property names to match. When multiple names are specified,
             the query matches if any name matches.
-        text : str | list[str] | XqyExpression | list[XqyExpression] | None
+        text : StringInput
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -8756,10 +8758,10 @@ class Cts:
 
     @staticmethod
     def json_property_words(
-        property_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -8770,13 +8772,13 @@ class Cts:
 
         Parameters
         ----------
-        property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_names : StringInput
             One or more property names.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -8844,7 +8846,7 @@ class Cts:
     def linear_model(
         values: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -8858,7 +8860,7 @@ class Cts:
             References to two range indexes. The types of the range indexes must be
             numeric. If the size of this sequence is not 2, the function returns the
             empty sequence.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -8938,7 +8940,7 @@ class Cts:
         temporal_collection: str | XqyExpression,
         *,
         timestamp: datetime.datetime | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:lsqt-query`` call.
@@ -8954,7 +8956,7 @@ class Cts:
             Return only temporal documents with a system start time less than or equal
             to this value. Default is temporal:get-lsqt($temporal-collection) .
             Timestamps larger than LSQT are rejected.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "cached-incremental" Break down the
@@ -8996,7 +8998,7 @@ class Cts:
         operation: str | XqyExpression,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -9017,7 +9019,7 @@ class Cts:
         regions : XqyExpression | list[XqyExpression] | None
             One or more cts:region values to test against. A region matches if it
             matches against any of these regions.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             String options you can use to control the operation. The following options
             are supported: "coordinate-system= value " Use the given coordinate system.
             Valid values are wgs84 , wgs84/double , etrs89 , etrs89/double , raw and
@@ -9075,7 +9077,7 @@ class Cts:
     def max(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -9087,7 +9089,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -9111,7 +9113,7 @@ class Cts:
 
     @staticmethod
     def median(
-        arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
+        arg: FloatInput,
     ) -> FunctionCall:
         """Build a composable ``cts:median`` call.
 
@@ -9119,7 +9121,7 @@ class Cts:
 
         Parameters
         ----------
-        arg : float | list[float] | XqyExpression | list[XqyExpression] | None
+        arg : FloatInput
             The sequence of values. The values should be the result of a lexicon lookup.
 
         Returns
@@ -9140,7 +9142,7 @@ class Cts:
     def min(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -9152,7 +9154,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -9176,10 +9178,10 @@ class Cts:
 
     @staticmethod
     def near_query(
-        queries: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        queries: StringInput,
         *,
         distance: float | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         distance_weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:near-query`` call.
@@ -9189,7 +9191,7 @@ class Cts:
 
         Parameters
         ----------
-        queries : str | list[str] | XqyExpression | list[XqyExpression] | None
+        queries : StringInput
             A sequence of queries to match.
         distance : float | XqyExpression | None
             A distance, in number of words, between any two matching queries. The
@@ -9198,7 +9200,7 @@ class Cts:
             when the text is the exact same text or when there is overlapping text (see
             the third example below). A negative distance is treated as 0. The default
             value is 10.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default value is (). Options include: "ordered"
             Any near-query matches must occur in the order of the specified sub-queries.
             "unordered" Any near-query matches will satisfy the query, regardless of the
@@ -9290,9 +9292,9 @@ class Cts:
 
     @staticmethod
     def or_query(
-        queries: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        queries: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:or-query`` call.
 
@@ -9301,9 +9303,9 @@ class Cts:
 
         Parameters
         ----------
-        queries : str | list[str] | XqyExpression | list[XqyExpression] | None
+        queries : StringInput
             A sequence of sub-queries.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is () . Options include: "synonym"
             Specifies that all of the terms in the $queries parameter are considered
             synonyms for scoring purposes. The result is that occurrences of more than
@@ -9412,10 +9414,10 @@ class Cts:
 
     @staticmethod
     def path_geospatial_query(
-        path_expression: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        path_expression: StringInput,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:path-geospatial-query`` call.
@@ -9426,13 +9428,13 @@ class Cts:
 
         Parameters
         ----------
-        path_expression : str | list[str] | XqyExpression | list[XqyExpression] | None
+        path_expression : StringInput
             One or more path expressions to match. When multiple path expressions are
             specified, the query matches if any path expression matches.
         regions : XqyExpression | list[XqyExpression] | None
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -9497,7 +9499,7 @@ class Cts:
 
     @staticmethod
     def path_range_query(
-        path_expression: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        path_expression: StringInput,
         operator: str | XqyExpression,
         value: str
         | int
@@ -9508,7 +9510,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:path-range-query`` call.
@@ -9519,7 +9521,7 @@ class Cts:
 
         Parameters
         ----------
-        path_expression : str | list[str] | XqyExpression | list[XqyExpression] | None
+        path_expression : StringInput
             One or more XPath expressions that identify the content to match. When
             multiple paths are specified, the query matches if any path matches.
         operator : str | XqyExpression
@@ -9528,12 +9530,12 @@ class Cts:
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             One or more values to match. These values are compared to the value(s)
             addressed by the path-expression parameter. When multiple When multiple
             values are specified, the query matches if any value matches. The value must
             be a type for which there is a range index defined.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -9582,7 +9584,7 @@ class Cts:
     def path_reference(
         path_expression: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         namespaces: XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:path-reference`` call.
@@ -9594,7 +9596,7 @@ class Cts:
         ----------
         path_expression : str | XqyExpression
             A path range index expression.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -9645,7 +9647,7 @@ class Cts:
         | None,
         value: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:percent-rank`` call.
 
@@ -9654,11 +9656,11 @@ class Cts:
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values.
         value : str | int | float | bool | XqyExpression
             The value to be "ranked".
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -9684,8 +9686,8 @@ class Cts:
 
     @staticmethod
     def percentile(
-        arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
-        p: float | list[float] | XqyExpression | list[XqyExpression] | None,
+        arg: FloatInput,
+        p: FloatInput,
     ) -> FunctionCall:
         """Build a composable ``cts:percentile`` call.
 
@@ -9693,9 +9695,9 @@ class Cts:
 
         Parameters
         ----------
-        arg : float | list[float] | XqyExpression | list[XqyExpression] | None
+        arg : FloatInput
             The sequence of values. The values should be the result of a lexicon lookup.
-        p : float | list[float] | XqyExpression | list[XqyExpression] | None
+        p : FloatInput
             The sequence of percentage(s).
 
         Returns
@@ -9782,7 +9784,7 @@ class Cts:
         operator: str | XqyExpression,
         axis_2: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:period-compare-query`` call.
 
@@ -9833,7 +9835,7 @@ class Cts:
             i.e. period1 ends at period2 ends
         axis_2 : str | XqyExpression
             Name of the second period to compare
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache.
@@ -9855,11 +9857,11 @@ class Cts:
 
     @staticmethod
     def period_range_query(
-        axis_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        axis_name: StringInput,
         operator: str | XqyExpression,
         *,
         period: XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:period-range-query`` call.
 
@@ -9868,7 +9870,7 @@ class Cts:
 
         Parameters
         ----------
-        axis_name : str | list[str] | XqyExpression | list[XqyExpression] | None
+        axis_name : StringInput
             One or more axis to match on.
         operator : str | XqyExpression
             A comparison operator. Operators include: "aln_equals" Match documents whose
@@ -9905,7 +9907,7 @@ class Cts:
         period : XqyExpression | list[XqyExpression] | None
             the cts:period to perform operations on. When multiple values are specified,
             the query matches if any value matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "min-occurs= number " Specifies the
@@ -10059,7 +10061,7 @@ class Cts:
     @staticmethod
     def quality_order(
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:quality-order`` call.
 
@@ -10068,7 +10070,7 @@ class Cts:
 
         Parameters
         ----------
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. Options include: "descending" Results should be returned in
             descending order of quality. "ascending" Results should be returned in
             ascending order of quality.
@@ -10126,7 +10128,7 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:range-query`` call.
@@ -10145,10 +10147,10 @@ class Cts:
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        value : AtomicInput
             One or more values to match. When multiple values are specified, the query
             matches if any value matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "min-occurs= number " Specifies the
@@ -10199,7 +10201,7 @@ class Cts:
         | None,
         value: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:rank`` call.
 
@@ -10207,11 +10209,11 @@ class Cts:
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values.
         value : str | int | float | bool | XqyExpression
             The value to be "ranked".
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -10290,7 +10292,7 @@ class Cts:
     def registered_query(
         ids: int | list[int] | XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:registered-query`` call.
@@ -10302,7 +10304,7 @@ class Cts:
         ----------
         ids : int | list[int] | XqyExpression | list[XqyExpression] | None
             Some registered query identifiers.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "filtered" A
             filtered query (the default). Filtered queries eliminate any false-positive
             results and properly resolve cases where there are multiple candidate
@@ -10473,7 +10475,7 @@ class Cts:
     @staticmethod
     def score_order(
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
     ) -> FunctionCall:
         """Build a composable ``cts:score-order`` call.
 
@@ -10482,7 +10484,7 @@ class Cts:
 
         Parameters
         ----------
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. Options include: "descending" Return results in descending order of
             score. "ascending" Return results in ascending order of score.
 
@@ -10506,7 +10508,7 @@ class Cts:
         expression: XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -10524,7 +10526,7 @@ class Cts:
         query : str | XqyExpression | None
             A cts:query specifying the search to perform. If a string is entered, the
             string is treated as a cts:word-query of the specified string.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this search. The default is (). Options include: "filtered" A
             filtered search (the default). Filtered searches eliminate any
             false-positive matches and properly resolve cases where there are multiple
@@ -10679,7 +10681,7 @@ class Cts:
     def stddev(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -10692,7 +10694,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -10718,7 +10720,7 @@ class Cts:
     def stddev_p(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -10731,7 +10733,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -10794,7 +10796,7 @@ class Cts:
     def sum_aggregate(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -10806,7 +10808,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -11048,8 +11050,8 @@ class Cts:
         | list[XqyExpression]
         | None,
         *,
-        operator: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        operator: StringInput = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:triple-range-query`` call.
@@ -11059,23 +11061,23 @@ class Cts:
 
         Parameters
         ----------
-        subject : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        subject : AtomicInput
             The subjects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        predicate : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        predicate : AtomicInput
             The predicates to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any predicate are matched.
-        object : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        object : AtomicInput
             The objects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any object are matched.
-        operator : str | list[str] | XqyExpression | list[XqyExpression] | None
+        operator : StringInput
             One object operator or three subject/predicate/object operators.
             Includes sameTerm; empty sequences use the native default.
             MarkLogic validates these operators when the query is evaluated.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "score-function= function " Use the
@@ -11128,7 +11130,7 @@ class Cts:
 
         Parameters
         ----------
-        values : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        values : AtomicInput
             The values to look up.
         forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
             A sequence of IDs of forests to which the search will be constrained. An
@@ -11177,8 +11179,8 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        operator: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        operator: StringInput = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -11188,19 +11190,19 @@ class Cts:
 
         Parameters
         ----------
-        subject : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        subject : AtomicInput
             The subjects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        predicate : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        predicate : AtomicInput
             The predicates to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        object : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        object : AtomicInput
             The objects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        operator : str | list[str] | XqyExpression | list[XqyExpression] | None
+        operator : StringInput
             If a single string is provided it is treated as the operator for the $object
             values. If a sequence of three strings are provided, they give the operators
             for $subject, $predicate and $object in turn. The default operator is "=".
@@ -11212,7 +11214,7 @@ class Cts:
             $value. ">=" Match range index values greater than or equal to $value. "="
             Match range index values equal to $value. "!=" Match range index values not
             equal to $value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "order-pso" Return results
             ordered by predicate, then subject, then object. "order-sop" Return results
             ordered by subject, then object, then predicate. "order-ops" Return results
@@ -11314,7 +11316,7 @@ class Cts:
     def uri_match(
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -11328,7 +11330,7 @@ class Cts:
         ----------
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -11430,7 +11432,7 @@ class Cts:
     def uris(
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -11445,7 +11447,7 @@ class Cts:
             A starting value. Return only this value and following values. If the empty
             string, return all values. If the parameter is not in the lexicon, then it
             returns the values beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" URIs should be
             returned in ascending order. "descending" URIs should be returned in
             descending order. "any" URIs from any fragment should be included.
@@ -11695,7 +11697,7 @@ class Cts:
         range_index_1: XqyExpression,
         range_index_2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -11711,7 +11713,7 @@ class Cts:
             A reference to a range index.
         range_index_2 : XqyExpression
             A reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -11808,7 +11810,7 @@ class Cts:
         range_indexes: XqyExpression | list[XqyExpression] | None,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -11825,7 +11827,7 @@ class Cts:
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -11923,7 +11925,7 @@ class Cts:
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -11936,11 +11938,11 @@ class Cts:
         ----------
         range_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to range indexes.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -12032,7 +12034,7 @@ class Cts:
     def value_tuples(
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -12046,7 +12048,7 @@ class Cts:
         ----------
         range_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to range indexes.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -12139,7 +12141,7 @@ class Cts:
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -12156,7 +12158,7 @@ class Cts:
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -12244,7 +12246,7 @@ class Cts:
     def variance(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -12256,7 +12258,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -12282,7 +12284,7 @@ class Cts:
     def variance_p(
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
     ) -> FunctionCall:
@@ -12295,7 +12297,7 @@ class Cts:
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -12359,7 +12361,7 @@ class Cts:
     def word_match(
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -12372,7 +12374,7 @@ class Cts:
         ----------
         pattern : str | XqyExpression
             A wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -12440,9 +12442,9 @@ class Cts:
 
     @staticmethod
     def word_query(
-        text: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        text: StringInput,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         weight: float | XqyExpression | None = None,
     ) -> FunctionCall:
         """Build a composable ``cts:word-query`` call.
@@ -12451,10 +12453,10 @@ class Cts:
 
         Parameters
         ----------
-        text : str | list[str] | XqyExpression | list[XqyExpression] | None
+        text : StringInput
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -12539,7 +12541,7 @@ class Cts:
     def words(
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -12554,7 +12556,7 @@ class Cts:
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.

@@ -5,5 +5,5 @@ def run():
     return cts.covariance_p(
         cts.element_reference("price"),
         cts.element_reference("price"),
-        forest_ids=fn.count(cts.search().index(1)),
+        forest_ids=fn.count(cts.search().pos(1)),
     ).compile()

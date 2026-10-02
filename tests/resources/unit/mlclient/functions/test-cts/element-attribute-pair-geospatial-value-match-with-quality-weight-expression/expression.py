@@ -7,5 +7,5 @@ def run():
         "latitude",
         "longitude",
         "prod*",
-        quality_weight=fn.count(cts.search().index(1)),
+        quality_weight=fn.count(cts.search().pos(1)),
     ).compile()

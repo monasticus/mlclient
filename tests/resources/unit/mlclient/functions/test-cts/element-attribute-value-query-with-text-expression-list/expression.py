@@ -5,5 +5,5 @@ def run():
     return cts.element_attribute_value_query(
         "item",
         "id",
-        [fn.string(cts.search().index(1)), fn.string(cts.search().index(2))],
+        [fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
     ).compile()

@@ -1,0 +1,9 @@
+<item xmlns="https://monasticus.com/mlclient/examples/cts-test" amount="1.25" quantity="2" lat="10" lon="20">
+  <price>1.25</price>
+  <day>2026-01-01</day>
+  <label>alpha</label>
+  <origin>10,20</origin>
+  <destination>30,40</destination>
+  <location><point>10,20</point><lat>10</lat><lon>20</lon></location>
+  <region>10,20</region>
+</item>

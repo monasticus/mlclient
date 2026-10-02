@@ -2,4 +2,4 @@ from mlclient.functions.xqy import cts
 
 
 def run():
-    return cts.element_geospatial_values("item", start=cts.search().index(1)).compile()
+    return cts.element_geospatial_values("item", start=cts.search().pos(1)).compile()

@@ -19,7 +19,7 @@ from .documents import (
     XMLDocument,
 )
 from .mimetypes import Mimetypes
-from .results import SearchHit, ValueHit
+from .results import ParsedValue, SearchHit, ValueHit
 from .types import DocumentType, LogType, Mimetype
 from .version import MarkLogicVersion
 
@@ -39,6 +39,7 @@ __all__ = [
     "MetadataDocument",
     "Mimetype",
     "Mimetypes",
+    "ParsedValue",
     "Permission",
     "Repair",
     "SearchHit",

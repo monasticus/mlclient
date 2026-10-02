@@ -3,5 +3,5 @@ from mlclient.functions.xqy import cts, fn
 
 def run():
     return cts.near_query(
-        [fn.string(cts.search().index(1)), fn.string(cts.search().index(2))],
+        [fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
     ).compile()

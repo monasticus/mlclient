@@ -5,5 +5,5 @@ def run():
     return cts.value_match(
         cts.element_reference("price"),
         "prod*",
-        forest_ids=fn.count(cts.search().index(1)),
+        forest_ids=fn.count(cts.search().pos(1)),
     ).compile()

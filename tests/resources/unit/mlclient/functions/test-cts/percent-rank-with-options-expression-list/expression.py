@@ -5,5 +5,5 @@ def run():
     return cts.percent_rank(
         "arg",
         "value",
-        options=[fn.string(cts.search().index(1)), fn.string(cts.search().index(2))],
+        options=[fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
     ).compile()

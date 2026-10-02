@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.utils.xqy import discover_xqy_compilation_cases
+from tests.utils.resources import discover_xqy_compilation_cases
 
 
 @pytest.mark.parametrize(

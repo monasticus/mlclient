@@ -7,5 +7,5 @@ def run():
         "latitude",
         "longitude",
         "prod*",
-        options=fn.string(cts.search().index(1)),
+        options=fn.string(cts.search().pos(1)),
     ).compile()

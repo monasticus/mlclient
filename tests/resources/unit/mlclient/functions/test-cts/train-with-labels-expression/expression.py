@@ -2,4 +2,4 @@ from mlclient.functions.xqy import cts
 
 
 def run():
-    return cts.train(cts.search().index(1), cts.search().index(1)).compile()
+    return cts.train(cts.search().pos(1), cts.search().pos(1)).compile()

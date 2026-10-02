@@ -5,6 +5,6 @@ def run():
     return cts.element_pair_geospatial_value_match(
         "item",
         "latitude",
-        [fn.string(cts.search().index(1)), fn.string(cts.search().index(2))],
+        [fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
         "prod*",
     ).compile()

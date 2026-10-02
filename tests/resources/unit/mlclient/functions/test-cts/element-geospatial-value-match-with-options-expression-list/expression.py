@@ -5,5 +5,5 @@ def run():
     return cts.element_geospatial_value_match(
         "item",
         "prod*",
-        options=[fn.string(cts.search().index(1)), fn.string(cts.search().index(2))],
+        options=[fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
     ).compile()

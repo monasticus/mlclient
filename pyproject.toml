@@ -147,17 +147,14 @@ max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
 "mlclient/services/cts.py" = [
-    "A002", # allow shadowing range to name the result-selection parameter
-    "E501", # xs:anyAtomicType parameter type unions overflow numpydoc type headers
+    "A002", # allow native cts names: dict, id, map, object
 ]
 "mlclient/functions/xqy/_fn.py" = [
     "A002", # allow shadowing input to preserve native fn parameter names
-    "E501", # xs:anyAtomicType parameter type unions overflow numpydoc type headers
 ]
 "mlclient/functions/xqy/_cts.py" = [
     "PLR0913", # allow many arguments as they mirror native cts function signatures
     "A002", # allow native cts names: dict, format, id, map, object, property, type
-    "E501", # xs:anyAtomicType parameter type unions overflow numpydoc type headers
 ]
 "mlclient/ml_profile.py" = [
     "PLR6301" # allow for a non-static method as it is defined by the Pydantic lib

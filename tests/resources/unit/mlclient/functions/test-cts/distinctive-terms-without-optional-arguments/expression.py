@@ -2,4 +2,4 @@ from mlclient.functions.xqy import cts
 
 
 def run():
-    return cts.distinctive_terms(cts.search().index(1)).compile()
+    return cts.distinctive_terms(cts.search().pos(1)).compile()

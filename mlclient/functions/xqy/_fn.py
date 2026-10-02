@@ -11,7 +11,11 @@ import datetime
 
 from mlclient._experimental import experimental
 from mlclient._options import UNSET
-from mlclient.functions.xqy.expressions import XqyExpression, FunctionCall
+from mlclient.functions.xqy.expressions import (
+    FunctionCall,
+    StringInput,
+    XqyExpression,
+)
 
 
 def _optional_call(name: str, *arguments) -> FunctionCall:
@@ -65,35 +69,6 @@ class Fn:
         return FunctionCall("fn:abs", (arg,))
 
     @staticmethod
-    def adjust_date_to_timezone(
-        arg: datetime.date | XqyExpression | None,
-        *,
-        timezone: str | XqyExpression | None = UNSET,
-    ) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        Adjusts an xs:date value to a specific timezone, or to no timezone at all.
-
-        Parameters
-        ----------
-        arg : datetime.date | XqyExpression | None
-            The date to adjust to the new timezone.
-        timezone : str | XqyExpression | None
-            The new timezone for the date.
-            Omit to use the native default; None explicitly passes ().
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:adjust-date-to-timezone``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:adjust-date-to-timezone
-        """
-        return _optional_call("fn:adjust-date-to-timezone", arg, timezone)
-
-    @staticmethod
     def adjust_date_time_to_timezone(
         arg: datetime.datetime | XqyExpression | None,
         *,
@@ -121,6 +96,35 @@ class Fn:
         Native reference: https://docs.marklogic.com/fn:adjust-dateTime-to-timezone
         """
         return _optional_call("fn:adjust-dateTime-to-timezone", arg, timezone)
+
+    @staticmethod
+    def adjust_date_to_timezone(
+        arg: datetime.date | XqyExpression | None,
+        *,
+        timezone: str | XqyExpression | None = UNSET,
+    ) -> FunctionCall:
+        """Build a native XQuery expression.
+
+        Adjusts an xs:date value to a specific timezone, or to no timezone at all.
+
+        Parameters
+        ----------
+        arg : datetime.date | XqyExpression | None
+            The date to adjust to the new timezone.
+        timezone : str | XqyExpression | None
+            The new timezone for the date.
+            Omit to use the native default; None explicitly passes ().
+
+        Returns
+        -------
+        FunctionCall
+            Composable call to ``fn:adjust-date-to-timezone``.
+
+        Notes
+        -----
+        Native reference: https://docs.marklogic.com/fn:adjust-date-to-timezone
+        """
+        return _optional_call("fn:adjust-date-to-timezone", arg, timezone)
 
     @staticmethod
     def adjust_time_to_timezone(
@@ -205,7 +209,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values to average.
 
         Returns
@@ -349,7 +353,7 @@ class Fn:
 
     @staticmethod
     def collection(
-        uri: str | list[str] | XqyExpression | list[XqyExpression] | None = UNSET,
+        uri: StringInput = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -357,7 +361,7 @@ class Fn:
 
         Parameters
         ----------
-        uri : str | list[str] | XqyExpression | list[XqyExpression] | None
+        uri : StringInput
             The URI of the collection to retrieve. If you omit this parameter, returns
             all of the documents in the database. If you specify a list of URIs, returns
             all of the documents in all of the collections at the URIs specified in the
@@ -837,7 +841,7 @@ class Fn:
 
     @staticmethod
     def doc(
-        uri: str | list[str] | XqyExpression | list[XqyExpression] | None = UNSET,
+        uri: StringInput = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -845,7 +849,7 @@ class Fn:
 
         Parameters
         ----------
-        uri : str | list[str] | XqyExpression | list[XqyExpression] | None
+        uri : StringInput
             The URI of the document to retrieve. If you omit this parameter, returns all
             of the documents in the database - this is only allowed if you're not using
             xquery version 1.0 strict. If you specify a list of URIs, returns all of the
@@ -1765,7 +1769,7 @@ class Fn:
 
     @staticmethod
     def id(
-        arg: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        arg: StringInput,
         *,
         node: XqyExpression | None = UNSET,
     ) -> FunctionCall:
@@ -1776,7 +1780,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : str | list[str] | XqyExpression | list[XqyExpression] | None
+        arg : StringInput
             The IDs of the elements to return.
         node : XqyExpression | None
             The target node.
@@ -1795,7 +1799,7 @@ class Fn:
 
     @staticmethod
     def idref(
-        arg: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        arg: StringInput,
         *,
         node: XqyExpression | None = UNSET,
     ) -> FunctionCall:
@@ -1806,7 +1810,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : str | list[str] | XqyExpression | list[XqyExpression] | None
+        arg : StringInput
             The IDREFs of the elements and attributes to return.
         node : XqyExpression | None
             The target node.
@@ -1883,7 +1887,7 @@ class Fn:
 
         Parameters
         ----------
-        seq_param : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        seq_param : AtomicInput
             A sequence of values.
         srch_param : str | int | float | bool | XqyExpression
             A value to find on the list.
@@ -2221,7 +2225,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values whose maximum will be returned.
         collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
@@ -2259,7 +2263,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values whose minimum will be returned.
         collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
@@ -3175,7 +3179,7 @@ class Fn:
 
     @staticmethod
     def string_join(
-        parameter1: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        parameter1: StringInput,
         parameter2: str | XqyExpression,
     ) -> FunctionCall:
         """Build a native XQuery expression.
@@ -3185,7 +3189,7 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parameter1 : StringInput
             A sequence of strings.
         parameter2 : str | XqyExpression
             A separator string to concatenate between the items in $parameter1.
@@ -3494,7 +3498,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values to be summed.
         zero : str | int | float | bool | XqyExpression | None
             The value to return as zero if the input sequence is the empty sequence.

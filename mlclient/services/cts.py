@@ -16,205 +16,17 @@ from mlclient.functions.xqy import (
     namespace_bindings,
     xpath as xpath_expression,
 )
+from mlclient.functions.xqy.expressions import (
+    FloatInput,
+    Position,
+    PositionRange,
+    StringInput,
+)
 from mlclient.models.results import SearchHit, ValueHit
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
-
-Range = (
-    int | list[int | XqyExpression] | tuple[int | XqyExpression, int | XqyExpression]
-)
-_RANGE_BOUND_COUNT = 2
-
-
-def _check_lexicon_options(options: str | list[str] | XqyExpression | None) -> bool:
-    """Reject literal map output and report whether options require runtime checking.
-
-    Parameters
-    ----------
-    options : str | list[str] | XqyExpression | None
-        Native lexicon options, possibly containing nested XQuery expressions.
-
-    Returns
-    -------
-    bool
-        Whether an expression can supply options unknown before execution.
-
-    Raises
-    ------
-    ValueError
-        If a literal map option requests results incompatible with ValueHit.
-    """
-    if isinstance(options, (list, tuple)):
-        dynamic = [_check_lexicon_options(option) for option in options]
-        return any(dynamic)
-    if isinstance(options, str) and options == "map":
-        message = "Map output is not a value sequence; use ml.eval.expression(cts...)"
-        raise ValueError(message)
-    return isinstance(options, XqyExpression)
-
-
-class _ResultPairs(XqyExpression):
-    """Pair each selected result with its native score or frequency."""
-
-    def __init__(
-        self,
-        inner: XqyExpression,
-        model: type,
-        xpath: str | None = None,
-        *,
-        options: str | list[str] | XqyExpression | None = None,
-    ):
-        """Retain the selected expression and validate its XPath and lexicon options.
-
-        Parameters
-        ----------
-        inner : XqyExpression
-            Native expression after index/range selection.
-        model : type
-            SearchHit or ValueHit determines score versus frequency extraction.
-        xpath : str | None
-            Optional validated XPath applied to original search hits.
-        options : str | list[str] | XqyExpression | None
-            Lexicon options; literal map output is rejected before compilation.
-
-        Raises
-        ------
-        ValueError
-            If XPath is blank or a literal map option is supplied.
-        TypeError
-            If XPath is not a string.
-        """
-        self.inner = inner
-        self.measure = "score" if model is SearchHit else "frequency"
-        self.path = None if xpath is None else xpath_expression(xpath)
-        self.check_map = model is ValueHit and _check_lexicon_options(options)
-
-    def render(self, ctx: XqyCompilationContext) -> str:
-        """Render pairs with the measure captured before applying result XPath.
-
-        Parameters
-        ----------
-        ctx : XqyCompilationContext
-            Shared external bindings and extraction-path validation.
-
-        Returns
-        -------
-        str
-            One XQuery sequence containing a payload and integer per result.
-        """
-        source = f"for $res in {self.inner.render(ctx)}\n"
-        pairs = f"let $measure := cts:{self.measure}($res)\n"
-        if self.path is None:
-            pairs += "return ($res, $measure)"
-        else:
-            pairs += (
-                f"for $node in $res ! {self.path.render(ctx)}\nreturn ($node, $measure)"
-            )
-        if self.check_map:
-            return (
-                source + "return if ($res instance of map:map) then\n"
-                '    fn:error(fn:QName("", "MLCLIENT-LEXICON-MAP"),\n'
-                '        "Map output is not a value sequence; '
-                'use ml.eval.expression(cts...)")\n'
-                "else\n    " + pairs.replace("\n", "\n    ")
-            )
-        return source + pairs
-
-
-def _result_pairs(response, model: type):
-    """Parse payload/measure pairs into a list of result objects.
-
-    Parameters
-    ----------
-    response : httpx.Response
-        Eval response produced by the service's paired expression.
-    model : type
-        SearchHit or ValueHit to construct from each pair.
-
-    Returns
-    -------
-    list[SearchHit] | list[ValueHit]
-        One object per result; an empty sequence returns an empty list.
-
-    Raises
-    ------
-    ValueError
-        If a payload lacks a score/frequency partner or parsing fails.
-    MarkLogicError
-        If the response reports a recognized server failure.
-    HTTPStatusError
-        If the response reports another HTTP failure.
-    """
-    MLResponseParser.raise_for_status(response)
-    if not response.content:
-        return []
-    parts = MLResponseParser.parse_with_headers(response)
-    if isinstance(parts, tuple) or len(parts) % 2:
-        message = "CTS response is missing a score/frequency partner"
-        raise ValueError(message)
-    results = []
-    for (headers, content), (_, measure) in zip(parts[::2], parts[1::2]):
-        if model is SearchHit:
-            result = SearchHit(
-                content,
-                score=measure,
-                source_uri=headers.get("X-URI"),
-                source_path=headers.get("X-Path", "/"),
-            )
-        else:
-            result = ValueHit(
-                content,
-                frequency=measure,
-            )
-        results.append(result)
-    return results
-
-
-def _ranged(
-    expr: XqyExpression,
-    value: Range | None,
-    index: int | XqyExpression | None,
-) -> XqyExpression:
-    """Apply mutually exclusive server-side index or inclusive range."""
-    if index is not None:
-        if value is not None:
-            message = "index and range are mutually exclusive"
-            raise ValueError(message)
-        return expr.index(index)
-    if value is None:
-        return expr
-    if type(value) is int:
-        return expr.range(1, value)
-    if not isinstance(value, (list, tuple)) or len(value) != _RANGE_BOUND_COUNT:
-        message = "range must be an integer or a pair of integer positions"
-        raise TypeError(message)
-    return expr.range(*value)
-
-
-def _execution_options(default_namespaces: dict[str, str], options: dict) -> dict:
-    """Merge per-call namespace overrides without changing service defaults.
-
-    Parameters
-    ----------
-    default_namespaces : dict[str, str]
-        Namespace declarations owned by the CTS service.
-    options : dict
-        Per-call evaluator options, optionally including namespaces.
-
-    Returns
-    -------
-    dict
-        Independent options with namespace overrides applied by prefix.
-    """
-    return {
-        **options,
-        "namespaces": {
-            **default_namespaces,
-            **namespace_bindings(options.get("namespaces")),
-        },
-    }
 
 
 @experimental(log_on_init=True)
@@ -236,127 +48,15 @@ class CtsService(Cts):
         self._namespaces = namespace_bindings(namespaces)
         self._rest = rest
 
-    def _execute_native(
-        self,
-        expr,
-        *,
-        namespaces=None,
-        database=None,
-        txid=None,
-        output_type=None,
-        timeout=UNSET,
-    ) -> list:
-        """Execute a native expression and retain its result sequence.
-
-        Parameters
-        ----------
-        expr : XqyExpression
-            CTS operation to execute without score/frequency pairing.
-        namespaces : dict | None
-            Namespace declarations for compilation.
-        database : str | None
-            Target content database.
-        txid : str | None
-            Existing transaction identifier.
-        output_type : type | None
-            Per-item str/bytes conversion, or None for parsed values.
-        timeout : float | httpx.Timeout | None
-            HTTP timeout override; UNSET inherits client configuration.
-
-        Returns
-        -------
-        list
-            One entry per response part; JSON arrays remain nested lists.
-
-        Raises
-        ------
-        ValueError
-            If output_type is not None, str or bytes.
-        MarkLogicError
-            If the server rejects the evaluation.
-        HTTPStatusError
-            If another HTTP failure occurs.
-        """
-        if output_type not in (None, str, bytes):
-            message = "output_type must be None, str or bytes"
-            raise ValueError(message)
-        code, variables = expr.compile(namespaces=namespaces)
-        response = self._rest.eval.post(
-            xquery=code,
-            variables=variables,
-            database=database,
-            txid=txid,
-            timeout=timeout,
-        )
-        MLResponseParser.raise_for_status(response)
-        if not response.content:
-            return []
-        parts = MLResponseParser.parse_with_headers(response, output_type)
-        if isinstance(parts, tuple):
-            parts = [parts]
-        return [content for _, content in parts]
-
-    def _execute(
-        self,
-        expr,
-        model,
-        *,
-        namespaces=None,
-        database=None,
-        txid=None,
-        timeout=UNSET,
-    ):
-        """Execute a service transport expression and decode its paired results.
-
-        Parameters
-        ----------
-        expr : XqyExpression
-            Service expression producing payload/integer pairs.
-        model : type
-            SearchHit or ValueHit.
-        namespaces : dict | None
-            Effective namespace declarations for path validation and execution.
-        database : str | None
-            Target database.
-        txid : str | None
-            Existing transaction identifier.
-        timeout : float | httpx.Timeout | None
-            HTTP timeout override; UNSET inherits the client configuration.
-
-        Returns
-        -------
-        list[SearchHit] | list[ValueHit]
-            A list of result objects, including for a single result.
-
-        Raises
-        ------
-        ValueError
-            If the returned result pairs are malformed.
-        MarkLogicError
-            If MarkLogic rejects the evaluation.
-        HTTPStatusError
-            If another HTTP failure occurs.
-        """
-        code, variables = expr.compile(namespaces=namespaces)
-        response = self._rest.eval.post(
-            xquery=code,
-            variables=variables,
-            database=database,
-            txid=txid,
-            timeout=timeout,
-        )
-        return _result_pairs(response, model)
-
     def search(
         self,
         expression: XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         xpath: str | None = None,
         **kwargs,
     ) -> list:
@@ -374,7 +74,7 @@ class CtsService(Cts):
         query : str | XqyExpression | None
             A cts:query specifying the search to perform. If a string is entered, the
             string is treated as a cts:word-query of the specified string.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this search. The default is (). Options include: "filtered" A
             filtered search (the default). Filtered searches eliminate any
             false-positive matches and properly resolve cases where there are multiple
@@ -457,13 +157,11 @@ class CtsService(Cts):
             third example below). If you use this to constrain an XPath to one or more
             forests, you should set the quality-weight to zero to keep the XPath
             document order.
-        range : Range | None
-            Inclusive [start, end]; bounds accept positive integers or fn.last().
-            N means [1, N]. Cannot be combined with index.
-        index : int | XqyExpression | None
-            One-based positive position or fn.last(). Returns [item] or [].
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         xpath : str | None
-            Restricted extraction XPath applied to each hit after index/range.
+            Restricted extraction XPath applied to each hit after `pos` selection.
             Relative paths start at the hit; absolute paths start at its root.
             Uses the same namespaces as expression and preserves hit order.
             None returns hits unchanged; one hit may yield zero or many nodes.
@@ -481,7 +179,7 @@ class CtsService(Cts):
         TypeError
             For an unknown execution keyword or invalid input type.
         ValueError
-            For invalid positions or simultaneous index and range.
+            For invalid positions or ranges.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
 
@@ -489,7 +187,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:search
         """
-        expr = _ranged(
+        expr = _positioned(
             Cts.search(
                 expression,
                 query,
@@ -497,8 +195,7 @@ class CtsService(Cts):
                 quality_weight=quality_weight,
                 forest_ids=forest_ids,
             ),
-            range,
-            index,
+            pos,
         )
         return self._execute(
             _ResultPairs(expr, SearchHit, xpath),
@@ -510,12 +207,11 @@ class CtsService(Cts):
         self,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:uris`` via ``/v1/eval``.
@@ -528,7 +224,7 @@ class CtsService(Cts):
             A starting value. Return only this value and following values. If the empty
             string, return all values. If the parameter is not in the lexicon, then it
             returns the values beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" URIs should be
             returned in ascending order. "descending" URIs should be returned in
             descending order. "any" URIs from any fragment should be included.
@@ -586,11 +282,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive [start, end]; bounds accept positive integers or fn.last().
-            N means [1, N]. Cannot be combined with index.
-        index : int | XqyExpression | None
-            One-based positive position or fn.last(). Returns [item] or [].
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution options: database, txid, timeout and namespaces.
             Unknown names fail.
@@ -605,7 +299,7 @@ class CtsService(Cts):
         TypeError
             For an unknown execution keyword or invalid input type.
         ValueError
-            For invalid positions or simultaneous index and range.
+            For invalid positions or ranges.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
 
@@ -613,7 +307,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:uris
         """
-        expr = _ranged(
+        expr = _positioned(
             Cts.uris(
                 query=query,
                 start=start,
@@ -621,8 +315,7 @@ class CtsService(Cts):
                 quality_weight=quality_weight,
                 forest_ids=forest_ids,
             ),
-            range,
-            index,
+            pos,
         )
         return self._execute_native(
             expr,
@@ -634,12 +327,11 @@ class CtsService(Cts):
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:values`` via ``/v1/eval``.
@@ -654,7 +346,7 @@ class CtsService(Cts):
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -722,11 +414,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive [start, end]; bounds accept positive integers or fn.last().
-            N means [1, N]. Cannot be combined with index.
-        index : int | XqyExpression | None
-            One-based positive position or fn.last(). Returns [item] or [].
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution options: database, txid, timeout and namespaces.
             Unknown names fail.
@@ -741,7 +431,7 @@ class CtsService(Cts):
         TypeError
             For an unknown execution keyword or invalid input type.
         ValueError
-            For invalid positions or simultaneous index and range.
+            For invalid positions or ranges.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
 
@@ -749,7 +439,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:values
         """
-        expr = _ranged(
+        expr = _positioned(
             Cts.values(
                 range_indexes,
                 query=query,
@@ -758,8 +448,7 @@ class CtsService(Cts):
                 quality_weight=quality_weight,
                 forest_ids=forest_ids,
             ),
-            range,
-            index,
+            pos,
         )
         return self._execute(
             _ResultPairs(expr, ValueHit, options=options),
@@ -771,7 +460,7 @@ class CtsService(Cts):
         self,
         query: str | XqyExpression | None = None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         maximum: float | XqyExpression | None = None,
@@ -785,7 +474,7 @@ class CtsService(Cts):
         ----------
         query : str | XqyExpression | None
             Query to estimate. None supplies the required empty query slot.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options to this search. The default is (). See cts.search for details on
             available options.
         quality_weight : float | XqyExpression | None
@@ -839,7 +528,7 @@ class CtsService(Cts):
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
         argument: XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -862,7 +551,7 @@ class CtsService(Cts):
         argument : XqyExpression | list[XqyExpression] | None
             A sequence containing the arguments for the aggregate function. A map can be
             used to pass in multiple sequences of arguments.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             options. The default is (). Options include: "any" Co-occurrences from any
             fragment should be included. "document" Co-occurrences from document
             fragments should be included. "properties" Co-occurrences from properties
@@ -940,7 +629,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -953,7 +642,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1166,12 +855,11 @@ class CtsService(Cts):
         self,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:collection-match`` via ``/v1/eval``.
@@ -1183,7 +871,7 @@ class CtsService(Cts):
         ----------
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -1244,10 +932,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -1278,7 +965,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -1289,12 +976,11 @@ class CtsService(Cts):
         self,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:collections`` via ``/v1/eval``.
@@ -1307,7 +993,7 @@ class CtsService(Cts):
             A starting value. Return only this value and following values. If the
             parameter is not in the lexicon, then it returns the values beginning with
             the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" URIs should be
             returned in ascending order. "descending" URIs should be returned in
             descending order. "any" URIs from any fragment should be included.
@@ -1365,10 +1051,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -1399,7 +1084,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -1499,7 +1184,7 @@ class CtsService(Cts):
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -1514,7 +1199,7 @@ class CtsService(Cts):
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1559,7 +1244,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -1572,7 +1257,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1617,7 +1302,7 @@ class CtsService(Cts):
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -1633,7 +1318,7 @@ class CtsService(Cts):
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1679,7 +1364,7 @@ class CtsService(Cts):
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -1695,7 +1380,7 @@ class CtsService(Cts):
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -1903,8 +1588,8 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -1916,12 +1601,11 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-boxes`` via ``/v1/eval``.
@@ -1930,19 +1614,19 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -2016,10 +1700,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -2054,7 +1737,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -2063,17 +1746,16 @@ class CtsService(Cts):
 
     def element_attribute_pair_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
@@ -2083,15 +1765,15 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -2157,10 +1839,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -2194,7 +1875,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -2203,17 +1884,16 @@ class CtsService(Cts):
 
     def element_attribute_pair_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-values`` via ``/v1/eval``.
@@ -2223,16 +1903,16 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -2298,10 +1978,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -2335,7 +2014,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -2349,7 +2028,7 @@ class CtsService(Cts):
         element_name_2: str | XqyExpression,
         attribute_name_2: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2372,7 +2051,7 @@ class CtsService(Cts):
         attribute_name_2 : str | XqyExpression | None
             An attribute QName or empty sequence. The empty sequence specifies an
             element lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -2512,7 +2191,7 @@ class CtsService(Cts):
         *,
         coord_child_name_1: str | XqyExpression | None = None,
         coord_child_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2548,7 +2227,7 @@ class CtsService(Cts):
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -2678,16 +2357,15 @@ class CtsService(Cts):
 
     def element_attribute_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-value-match`` via ``/v1/eval``.
@@ -2697,14 +2375,14 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -2786,10 +2464,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -2822,7 +2499,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -2831,8 +2508,8 @@ class CtsService(Cts):
 
     def element_attribute_value_ranges(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         bounds: str
         | int
@@ -2842,7 +2519,7 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -2855,14 +2532,14 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -2984,16 +2661,15 @@ class CtsService(Cts):
 
     def element_attribute_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-values`` via ``/v1/eval``.
@@ -3002,15 +2678,15 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -3089,10 +2765,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -3125,7 +2800,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -3134,16 +2809,15 @@ class CtsService(Cts):
 
     def element_attribute_word_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-word-match`` via ``/v1/eval``.
@@ -3153,13 +2827,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -3209,10 +2883,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -3245,7 +2918,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -3254,16 +2927,15 @@ class CtsService(Cts):
 
     def element_attribute_words(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-words`` via ``/v1/eval``.
@@ -3272,15 +2944,15 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -3328,10 +3000,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -3364,7 +3035,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -3394,12 +3065,11 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-child-geospatial-boxes`` via ``/v1/eval``.
@@ -3408,17 +3078,17 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        child_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_element_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -3495,10 +3165,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -3532,7 +3201,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -3541,16 +3210,15 @@ class CtsService(Cts):
 
     def element_child_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        child_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        child_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-child-geospatial-value-match`` via ``/v1/eval``.
@@ -3560,13 +3228,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames identifying the parent element(s).
-        child_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_names : StringInput
             One or more child element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -3635,10 +3303,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -3671,7 +3338,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -3680,16 +3347,15 @@ class CtsService(Cts):
 
     def element_child_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        child_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        child_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-child-geospatial-values`` via ``/v1/eval``.
@@ -3699,14 +3365,14 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        child_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_names : StringInput
             One or more child element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -3776,10 +3442,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -3812,7 +3477,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -3821,7 +3486,7 @@ class CtsService(Cts):
 
     def element_geospatial_boxes(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -3833,12 +3498,11 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-geospatial-boxes`` via ``/v1/eval``.
@@ -3847,15 +3511,15 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Use the following options to customize your lexicon query: "ascending" Boxes
             should be returned in ascending order. "descending" Boxes should be returned
             in descending order. "gridded" For each side that a bucket is bounded,
@@ -3932,10 +3596,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -3968,7 +3631,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -3977,15 +3640,14 @@ class CtsService(Cts):
 
     def element_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-geospatial-value-match`` via ``/v1/eval``.
@@ -3995,11 +3657,11 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4068,10 +3730,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -4103,7 +3764,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -4112,15 +3773,14 @@ class CtsService(Cts):
 
     def element_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-geospatial-values`` via ``/v1/eval``.
@@ -4129,12 +3789,12 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4203,10 +3863,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -4238,7 +3897,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -4252,8 +3911,8 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -4265,12 +3924,11 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-pair-geospatial-boxes`` via ``/v1/eval``.
@@ -4279,19 +3937,19 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -4365,10 +4023,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -4403,7 +4060,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -4412,17 +4069,16 @@ class CtsService(Cts):
 
     def element_pair_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-pair-geospatial-value-match`` via ``/v1/eval``.
@@ -4432,15 +4088,15 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4506,10 +4162,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -4543,7 +4198,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -4552,17 +4207,16 @@ class CtsService(Cts):
 
     def element_pair_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-pair-geospatial-values`` via ``/v1/eval``.
@@ -4572,17 +4226,17 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames identifying the parent element of the latitude
             and longitude elements.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4648,10 +4302,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -4685,7 +4338,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -4697,7 +4350,7 @@ class CtsService(Cts):
         element_name_1: str | XqyExpression,
         element_name_2: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4715,7 +4368,7 @@ class CtsService(Cts):
             An element QName.
         element_name_2 : str | XqyExpression
             An element QName.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -4852,7 +4505,7 @@ class CtsService(Cts):
         *,
         coord_child_name_1: str | XqyExpression | None = None,
         coord_child_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -4889,7 +4542,7 @@ class CtsService(Cts):
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -5019,15 +4672,14 @@ class CtsService(Cts):
 
     def element_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-value-match`` via ``/v1/eval``.
@@ -5037,12 +4689,12 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -5123,10 +4775,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -5158,7 +4809,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -5167,7 +4818,7 @@ class CtsService(Cts):
 
     def element_value_ranges(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         bounds: str
         | int
@@ -5177,7 +4828,7 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -5189,13 +4840,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -5316,15 +4967,14 @@ class CtsService(Cts):
 
     def element_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-values`` via ``/v1/eval``.
@@ -5333,14 +4983,14 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames. If you specify multiple lexicons, they must all
             be over the same value type (string, int, etc.).
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -5419,10 +5069,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -5454,7 +5103,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -5464,7 +5113,7 @@ class CtsService(Cts):
     def element_walk(
         self,
         node: XqyExpression,
-        element: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element: StringInput,
         expr: XqyExpression | list[XqyExpression] | None,
         **kwargs,
     ) -> list:
@@ -5478,7 +5127,7 @@ class CtsService(Cts):
         node : XqyExpression
             A node to run the walk over. The node must be either a document node or an
             element node; it cannot be a text node.
-        element : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element : StringInput
             The name of elements to replace.
         expr : XqyExpression | list[XqyExpression] | None
             An expression with which to replace each match. You can use the variables
@@ -5514,15 +5163,14 @@ class CtsService(Cts):
 
     def element_word_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-word-match`` via ``/v1/eval``.
@@ -5532,11 +5180,11 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | XqyExpression | None
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -5586,10 +5234,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -5621,7 +5268,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -5630,15 +5277,14 @@ class CtsService(Cts):
 
     def element_words(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-words`` via ``/v1/eval``.
@@ -5647,13 +5293,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -5701,10 +5347,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -5736,7 +5381,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -5897,7 +5542,7 @@ class CtsService(Cts):
         field_name_1: str | XqyExpression,
         field_name_2: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -5914,7 +5559,7 @@ class CtsService(Cts):
             A string.
         field_name_2 : str | XqyExpression
             A string.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -6048,15 +5693,14 @@ class CtsService(Cts):
 
     def field_value_match(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-value-match`` via ``/v1/eval``.
@@ -6066,12 +5710,12 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -6152,10 +5796,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -6187,7 +5830,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -6196,7 +5839,7 @@ class CtsService(Cts):
 
     def field_value_ranges(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         bounds: str
         | int
@@ -6206,7 +5849,7 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -6218,13 +5861,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more element QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -6345,15 +5988,14 @@ class CtsService(Cts):
 
     def field_values(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-values`` via ``/v1/eval``.
@@ -6362,13 +6004,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -6440,10 +6082,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -6475,7 +6116,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -6484,15 +6125,14 @@ class CtsService(Cts):
 
     def field_word_match(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-word-match`` via ``/v1/eval``.
@@ -6502,11 +6142,11 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -6556,10 +6196,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -6591,7 +6230,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -6600,15 +6239,14 @@ class CtsService(Cts):
 
     def field_words(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-words`` via ``/v1/eval``.
@@ -6617,13 +6255,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -6671,10 +6309,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -6706,7 +6343,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -6808,12 +6445,11 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:geospatial-boxes`` via ``/v1/eval``.
@@ -6824,13 +6460,13 @@ class CtsService(Cts):
         ----------
         geo_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to geospatial indexes.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -6907,10 +6543,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -6943,7 +6578,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -6959,7 +6594,7 @@ class CtsService(Cts):
         child_1_name_2: str | XqyExpression | None = None,
         child_2_name_1: str | XqyExpression | None = None,
         child_2_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -7009,7 +6644,7 @@ class CtsService(Cts):
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " For both geospatial lexicons, use the kind of
             geospatial lexicon specified by format (element, element-child,
@@ -7202,15 +6837,14 @@ class CtsService(Cts):
 
     def json_property_word_match(
         self,
-        property_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_names: StringInput,
         pattern: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:json-property-word-match`` via ``/v1/eval``.
@@ -7220,11 +6854,11 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_names : StringInput
             One or more property names.
         pattern : str | XqyExpression | None
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -7274,10 +6908,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -7309,7 +6942,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -7318,15 +6951,14 @@ class CtsService(Cts):
 
     def json_property_words(
         self,
-        property_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:json-property-words`` via ``/v1/eval``.
@@ -7335,13 +6967,13 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_names : StringInput
             One or more property names.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -7389,10 +7021,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -7424,7 +7055,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -7435,7 +7066,7 @@ class CtsService(Cts):
         self,
         values: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -7450,7 +7081,7 @@ class CtsService(Cts):
             References to two range indexes. The types of the range indexes must be
             numeric. If the size of this sequence is not 2, the function returns the
             empty sequence.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -7496,7 +7127,7 @@ class CtsService(Cts):
         operation: str | XqyExpression,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -7518,7 +7149,7 @@ class CtsService(Cts):
         regions : XqyExpression | list[XqyExpression] | None
             One or more cts:region values to test against. A region matches if it
             matches against any of these regions.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             String options you can use to control the operation. The following options
             are supported: "coordinate-system= value " Use the given coordinate system.
             Valid values are wgs84 , wgs84/double , etrs89 , etrs89/double , raw and
@@ -7596,7 +7227,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -7609,7 +7240,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -7651,7 +7282,7 @@ class CtsService(Cts):
 
     def median(
         self,
-        arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
+        arg: FloatInput,
         **kwargs,
     ) -> list:
         """Execute ``cts:median`` via ``/v1/eval``.
@@ -7660,7 +7291,7 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        arg : float | list[float] | XqyExpression | list[XqyExpression] | None
+        arg : FloatInput
             The sequence of values. The values should be the result of a lexicon lookup.
         kwargs : dict
             Execution keywords: database, txid, output_type, timeout and namespaces.
@@ -7695,7 +7326,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -7708,7 +7339,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -7798,7 +7429,7 @@ class CtsService(Cts):
         | None,
         value: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:percent-rank`` via ``/v1/eval``.
@@ -7808,11 +7439,11 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values.
         value : str | int | float | bool | XqyExpression
             The value to be "ranked".
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -7851,8 +7482,8 @@ class CtsService(Cts):
 
     def percentile(
         self,
-        arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
-        p: float | list[float] | XqyExpression | list[XqyExpression] | None,
+        arg: FloatInput,
+        p: FloatInput,
         **kwargs,
     ) -> list:
         """Execute ``cts:percentile`` via ``/v1/eval``.
@@ -7861,9 +7492,9 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        arg : float | list[float] | XqyExpression | list[XqyExpression] | None
+        arg : FloatInput
             The sequence of values. The values should be the result of a lexicon lookup.
-        p : float | list[float] | XqyExpression | list[XqyExpression] | None
+        p : FloatInput
             The sequence of percentage(s).
         kwargs : dict
             Execution keywords: database, txid, output_type, timeout and namespaces.
@@ -7998,7 +7629,7 @@ class CtsService(Cts):
         | None,
         value: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:rank`` via ``/v1/eval``.
@@ -8007,11 +7638,11 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values.
         value : str | int | float | bool | XqyExpression
             The value to be "ranked".
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -8221,7 +7852,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -8235,7 +7866,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -8279,7 +7910,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -8293,7 +7924,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -8388,7 +8019,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -8401,7 +8032,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -8700,7 +8331,7 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        values : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        values : AtomicInput
             The values to look up.
         forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
             A sequence of IDs of forests to which the search will be constrained. An
@@ -8762,8 +8393,8 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        operator: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        operator: StringInput = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -8774,19 +8405,19 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        subject : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        subject : AtomicInput
             The subjects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        predicate : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        predicate : AtomicInput
             The predicates to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        object : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        object : AtomicInput
             The objects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        operator : str | list[str] | XqyExpression | list[XqyExpression] | None
+        operator : StringInput
             If a single string is provided it is treated as the operator for the $object
             values. If a sequence of three strings are provided, they give the operators
             for $subject, $predicate and $object in turn. The default operator is "=".
@@ -8798,7 +8429,7 @@ class CtsService(Cts):
             $value. ">=" Match range index values greater than or equal to $value. "="
             Match range index values equal to $value. "!=" Match range index values not
             equal to $value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "order-pso" Return results
             ordered by predicate, then subject, then object. "order-sop" Return results
             ordered by subject, then object, then predicate. "order-ops" Return results
@@ -8881,12 +8512,11 @@ class CtsService(Cts):
         self,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:uri-match`` via ``/v1/eval``.
@@ -8898,7 +8528,7 @@ class CtsService(Cts):
         ----------
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -8959,10 +8589,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -8993,14 +8622,18 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ranged(expr, range, index)
+        expr = _positioned(expr, pos)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
         )
 
     def valid_document_patch_path(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-document-patch-path`` via ``/v1/eval``.
 
@@ -9045,7 +8678,11 @@ class CtsService(Cts):
         )
 
     def valid_extract_path(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-extract-path`` via ``/v1/eval``.
 
@@ -9090,7 +8727,10 @@ class CtsService(Cts):
         )
 
     def valid_index_path(
-        self, string: str | XqyExpression, ignorens: bool | XqyExpression, **kwargs,
+        self,
+        string: str | XqyExpression,
+        ignorens: bool | XqyExpression,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-index-path`` via ``/v1/eval``.
 
@@ -9133,7 +8773,11 @@ class CtsService(Cts):
         )
 
     def valid_optic_path(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-optic-path`` via ``/v1/eval``.
 
@@ -9178,7 +8822,11 @@ class CtsService(Cts):
         )
 
     def valid_tde_context(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-tde-context`` via ``/v1/eval``.
 
@@ -9227,7 +8875,7 @@ class CtsService(Cts):
         range_index_1: XqyExpression,
         range_index_2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -9244,7 +8892,7 @@ class CtsService(Cts):
             A reference to a range index.
         range_index_2 : XqyExpression
             A reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -9361,12 +9009,11 @@ class CtsService(Cts):
         range_indexes: XqyExpression | list[XqyExpression] | None,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:value-match`` via ``/v1/eval``.
@@ -9381,7 +9028,7 @@ class CtsService(Cts):
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -9451,10 +9098,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -9486,7 +9132,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -9505,7 +9151,7 @@ class CtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -9519,11 +9165,11 @@ class CtsService(Cts):
         ----------
         range_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to range indexes.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -9635,7 +9281,7 @@ class CtsService(Cts):
         self,
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -9650,7 +9296,7 @@ class CtsService(Cts):
         ----------
         range_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to range indexes.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -9761,7 +9407,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -9774,7 +9420,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -9818,7 +9464,7 @@ class CtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -9832,7 +9478,7 @@ class CtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -9929,12 +9575,11 @@ class CtsService(Cts):
         self,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:word-match`` via ``/v1/eval``.
@@ -9945,7 +9590,7 @@ class CtsService(Cts):
         ----------
         pattern : str | XqyExpression
             A wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -9995,10 +9640,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -10029,7 +9673,7 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
@@ -10040,12 +9684,11 @@ class CtsService(Cts):
         self,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:words`` via ``/v1/eval``.
@@ -10058,7 +9701,7 @@ class CtsService(Cts):
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -10106,10 +9749,9 @@ class CtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -10140,17 +9782,616 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return self._execute(
             expr,
             ValueHit,
             **_execution_options(self._namespaces, kwargs),
         )
 
+    def _execute_native(
+        self,
+        expr,
+        *,
+        namespaces=None,
+        database=None,
+        txid=None,
+        output_type=None,
+        timeout=UNSET,
+    ) -> list:
+        """Execute a native expression and retain its result sequence.
+
+        Parameters
+        ----------
+        expr : XqyExpression
+            CTS operation to execute without score/frequency pairing.
+        namespaces : dict | None
+            Namespace declarations for compilation.
+        database : str | None
+            Target content database.
+        txid : str | None
+            Existing transaction identifier.
+        output_type : type | None
+            Per-item str/bytes conversion, or None for parsed values.
+        timeout : float | httpx.Timeout | None
+            HTTP timeout override; UNSET inherits client configuration.
+
+        Returns
+        -------
+        list
+            One entry per response part; JSON arrays remain nested lists.
+
+        Raises
+        ------
+        ValueError
+            If output_type is not None, str or bytes.
+        MarkLogicError
+            If the server rejects the evaluation.
+        HTTPStatusError
+            If another HTTP failure occurs.
+        """
+        if output_type not in (None, str, bytes):
+            message = "output_type must be None, str or bytes"
+            raise ValueError(message)
+        code, variables = expr.compile(namespaces=namespaces)
+        response = self._rest.eval.post(
+            xquery=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            timeout=timeout,
+        )
+        MLResponseParser.raise_for_status(response)
+        if not response.content:
+            return []
+        parts = MLResponseParser.parse_with_headers(response, output_type)
+        if isinstance(parts, tuple):
+            parts = [parts]
+        return [content for _, content in parts]
+
+    def _execute(
+        self,
+        expr,
+        model,
+        *,
+        namespaces=None,
+        database=None,
+        txid=None,
+        timeout=UNSET,
+    ):
+        """Execute a service transport expression and decode its paired results.
+
+        Parameters
+        ----------
+        expr : XqyExpression
+            Service expression producing payload/integer pairs.
+        model : type
+            SearchHit or ValueHit.
+        namespaces : dict | None
+            Effective namespace declarations for path validation and execution.
+        database : str | None
+            Target database.
+        txid : str | None
+            Existing transaction identifier.
+        timeout : float | httpx.Timeout | None
+            HTTP timeout override; UNSET inherits the client configuration.
+
+        Returns
+        -------
+        list[SearchHit] | list[ValueHit]
+            A list of result objects, including for a single result.
+
+        Raises
+        ------
+        ValueError
+            If the returned result pairs are malformed.
+        MarkLogicError
+            If MarkLogic rejects the evaluation.
+        HTTPStatusError
+            If another HTTP failure occurs.
+        """
+        code, variables = expr.compile(namespaces=namespaces)
+        response = self._rest.eval.post(
+            xquery=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            timeout=timeout,
+        )
+        return _result_pairs(response, model)
+
 
 @experimental(log_on_init=True)
 class AsyncCtsService(Cts):
     """Async execution of cts search, lexicon and estimate queries via ``/v1/eval``."""
+
+    def __init__(self, rest: AsyncRestApi, *, namespaces=None):
+        """Create async search utilities using the client's REST API.
+
+        Parameters
+        ----------
+        rest : AsyncRestApi
+            REST API used by the expression evaluator; no request is made here.
+        namespaces : dict[str, str] | None
+            Default XQuery namespace declarations, copied at construction. The
+            empty prefix sets the default element namespace. All execution
+            methods accept namespaces overrides through keyword arguments.
+        """
+        self._namespaces = namespace_bindings(namespaces)
+        self._rest = rest
+
+    async def search(
+        self,
+        expression: XqyExpression | list[XqyExpression] | None = None,
+        query: str | XqyExpression | None = None,
+        *,
+        options: StringInput = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        xpath: str | None = None,
+        **kwargs,
+    ) -> list:
+        """Execute ``cts:search`` via ``/v1/eval``.
+
+        Returns a relevance-ordered sequence of nodes specified by a given
+        query.
+
+        Parameters
+        ----------
+        expression : XqyExpression | list[XqyExpression] | None
+            An expression to be searched. This must be an inline fully searchable path
+            expression. Python strings are wrapped internally and validated
+            with the other literal paths in the expression before execution.
+        query : str | XqyExpression | None
+            A cts:query specifying the search to perform. If a string is entered, the
+            string is treated as a cts:word-query of the specified string.
+        options : StringInput
+            Options to this search. The default is (). Options include: "filtered" A
+            filtered search (the default). Filtered searches eliminate any
+            false-positive matches and properly resolve cases where there are multiple
+            candidate matches within the same fragment. Filtered search results fully
+            satisfy the specified cts:query . "unfiltered" An unfiltered search. An
+            unfiltered search selects fragments from the indexes that are candidates to
+            satisfy the specified cts:query , and then it returns a single node from
+            within each fragment that satisfies the specified searchable path
+            expression. Unfiltered searches are useful because of the performance they
+            afford when jumping deep into the result set (for example, when paginating a
+            long result set and jumping to the 1,000,000th result). However, depending
+            on the searchable path expression, the cts:query specified, the structure of
+            the documents in the database, and the configuration of the database,
+            unfiltered searches may yield false-positive results being included in the
+            search results. Unfiltered searches may also result in missed matches or in
+            incorrect matches, especially when there are multiple candidate matches
+            within a single fragment. To avoid these problems, you should only use
+            unfiltered searches on top-level XPath expressions (for example, document
+            nodes, collections, directories) or on fragment roots. Using unfiltered
+            searches on complex XPath expressions or on XPath expressions that traverse
+            below a fragment root can result in unexpected results. "score-logtfidf"
+            Compute scores using the logtfidf method (the default scoring method). This
+            uses the formula: log(term frequency) * (inverse document frequency)
+            "score-logtf" Compute scores using the logtf method. This does not take into
+            account how many documents have the term and uses the formula: log(term
+            frequency) "score-simple" Compute scores using the simple method. The
+            score-simple method gives a score of 8*weight for each matching term in the
+            cts:query expression, and then scales the score up by multiplying by 256. It
+            does not matter how many times a given term matches (that is, the term
+            frequency does not matter); each match contributes 8*weight to the score.
+            For example, the following query (assume the default weight of 1) would give
+            a score of 8*256=2048 for any fragment with one or more matches for "hello",
+            a score of 16*256=4096 for any fragment that also has one or more matches
+            for "goodbye", or a score of zero for fragments that have no matches for
+            either term: cts:or-query(("hello", "goodbye")) "score-random" Compute
+            scores using the random method. The score-random method gives a random value
+            to the score. You can use this to randomly choose fragments matching a
+            query. "score-zero" Compute all scores as zero. When combined with a quality
+            weight of zero, this is the fastest consistent scoring method. "score-bm25"
+            Compute scores using the bm25 method. This uses the formula: (log(term
+            frequency) / (1-'bm25-length-weight'+'bm25-length-weight'*(doc length /
+            average doc length))) * (inverse document frequency) "checked" Word
+            positions are checked (the default) when resolving the query. Checked
+            searches eliminate false-positive matches for phrases during the index
+            resolution phase of search processing. "unchecked" Word positions are not
+            checked when resolving the query. Unchecked searches do not take into
+            account word positions and can lead to false-positive matches during the
+            index resolution phase of search processing. This setting is useful for
+            debugging, but not recommended for normal use. "too-many-positions-error" If
+            too much memory is needed to perform positions calculations to check whether
+            a document matches a query, return an XDMP-TOOMANYPOSITIONS error, instead
+            of accepting the document as a match. "faceted" Do a little more work to
+            save faceting information about fragments matching this search so that
+            calculating facets will be faster. "unfaceted" Do not save faceting
+            information about fragments matching this search. "relevance-trace" Collect
+            relevance score computation details with which you can generate a trace
+            report using cts:relevance-info . Collecting this information is costly and
+            will significantly slow down your search, so you should only use it when
+            using cts:relevance-info to tune a query. "format- FORMAT " Limit the search
+            to documents in document format specified by FORMAT (binary, json, text, or
+            xml) cts:order Specification A sequence of cts:order specifications. The
+            order is evaluated in the order each appears in the sequence. Default:
+            (cts:score-order("descending"),cts:document-order("ascending")) . The
+            sequence typically consists of one or more of: cts:index-order ,
+            cts:score-order , cts:confidence-order , cts:fitness-order ,
+            cts:quality-order , cts:document-order , cts:unordered . When using
+            cts:index-order , there must be a range index defined on the index(es)
+            specified by the cts:reference specification (for example,
+            cts:element-reference .) "bm25-length-weight= NUMBER " The weight of the
+            document length to average document length ratio while using the
+            "score-BM25" option. Valid values are greater than 0.0 and less than or
+            equal to 1.0. The default is 0.333.
+        quality_weight : float | XqyExpression | None
+            A document quality weight to use when computing scores. The default is 1.0.
+        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
+            A sequence of IDs of forests to which the search will be constrained. An
+            empty sequence means to search all forests in the database. The default is
+            (). In the XQuery version, you can use cts:search with this parameter and an
+            empty cts:and-query to specify a forest-specific XPath statement (see the
+            third example below). If you use this to constrain an XPath to one or more
+            forests, you should set the quality-weight to zero to keep the XPath
+            document order.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
+        xpath : str | None
+            Restricted extraction XPath applied to each hit after `pos` selection.
+            Relative paths start at the hit; absolute paths start at its root.
+            Uses the same namespaces as expression and preserves hit order.
+            None returns hits unchanged; one hit may yield zero or many nodes.
+        kwargs : dict
+            Execution options: database, txid, timeout and namespaces.
+            Unknown names fail.
+
+        Returns
+        -------
+        list
+            Always a list; empty sequences return [] and singletons return [item].
+
+        Raises
+        ------
+        TypeError
+            For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or ranges.
+        MarkLogicError
+            For a server error, including missing indexes or unsupported functions.
+
+        Notes
+        -----
+        Native reference: https://docs.marklogic.com/cts:search
+        """
+        expr = _positioned(
+            Cts.search(
+                expression,
+                query,
+                options=options,
+                quality_weight=quality_weight,
+                forest_ids=forest_ids,
+            ),
+            pos,
+        )
+        return await self._execute(
+            _ResultPairs(expr, SearchHit, xpath),
+            SearchHit,
+            **_execution_options(self._namespaces, kwargs),
+        )
+
+    async def uris(
+        self,
+        *,
+        start: str | XqyExpression | None = None,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        **kwargs,
+    ) -> list:
+        """Execute ``cts:uris`` via ``/v1/eval``.
+
+        Returns values from the URI lexicon.
+
+        Parameters
+        ----------
+        start : str | XqyExpression | None
+            A starting value. Return only this value and following values. If the empty
+            string, return all values. If the parameter is not in the lexicon, then it
+            returns the values beginning with the next value.
+        options : StringInput
+            Options. The default is (). Options include: "ascending" URIs should be
+            returned in ascending order. "descending" URIs should be returned in
+            descending order. "any" URIs from any fragment should be included.
+            "document" URIs from document fragments should be included. "properties"
+            URIs from properties fragments should be included. "locks" URIs from locks
+            fragments should be included. "frequency-order" URIs should be returned
+            ordered by frequency. "item-order" URIs should be returned ordered by item.
+            "limit= N " Return no more than N URIs. You should not use this option with
+            the "skip" option. Use "truncate" instead. "skip= N " Skip over fragments
+            selected by the cts:query to treat the Nth fragment as the first fragment.
+            URIs from skipped fragments are not included. This option affects the number
+            of fragments selected by the cts:query to calculate frequencies. Only
+            applies when a $query parameter is specified. "sample= N " Return only URIs
+            from the first N fragments after skip selected by the cts:query . This
+            option does not affect the number of fragments selected by the cts:query to
+            calculate frequencies. Only applies when a $query parameter is specified.
+            "truncate= N " Include only URIs from the first N fragments after skip
+            selected by the cts:query . This option also affects the number of fragments
+            selected by the cts:query to calculate frequencies. Only applies when a
+            $query parameter is specified. "score-logtfidf" Compute scores using the
+            logtfidf method. Only applies when a $query parameter is specified.
+            "score-logtf" Compute scores using the logtf method. Only applies when a
+            $query parameter is specified. "score-simple" Compute scores using the
+            simple method. Only applies when a $query parameter is specified.
+            "score-random" Compute scores using the random method. Only applies when a
+            $query parameter is specified. "score-zero" Compute all scores as zero. Only
+            applies when a $query parameter is specified. "checked" Word positions
+            should be checked when resolving the query. "unchecked" Word positions
+            should not be checked when resolving the query. "too-many-positions-error"
+            If too much memory is needed to perform positions calculations to check
+            whether a document matches a query, return an XDMP-TOOMANYPOSITIONS error,
+            instead of accepting the document as a match. "eager" Perform most of the
+            work concurrently before returning the first item from the indexes, and only
+            some of the work sequentially while iterating through the rest of the items.
+            This usually takes the shortest time for a complete item-order result or for
+            any frequency-order result. "lazy" Perform only some the work concurrently
+            before returning the first item from the indexes, and most of the work
+            sequentially while iterating through the rest of the items. This usually
+            takes the shortest time for a small item-order partial result. "concurrent"
+            Perform the work concurrently in another thread. This is a hint to the query
+            optimizer to help parallelize the lexicon work, allowing the calling query
+            to continue performing other work while the lexicon processing occurs. This
+            is especially useful in cases where multiple lexicon calls occur in the same
+            query (for example, resolving many facets in a single query). "map" Return
+            results as a single map:map value instead of as an xs:string* sequence .
+        query : str | XqyExpression | None
+            Only include URIs from fragments selected by the cts:query , and compute
+            frequencies from this set of included URIs. The fragments are not filtered
+            to ensure they match the query, but instead selected in the same manner as
+            "unfiltered" cts:search operations. If a string is entered, the string is
+            treated as a cts:word-query of the specified string.
+        quality_weight : float | XqyExpression | None
+            A document quality weight to use when computing scores. The default is 1.0.
+        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
+            A sequence of IDs of forests to which the search will be constrained. An
+            empty sequence means to search all forests in the database. The default is
+            ().
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
+        kwargs : dict
+            Execution options: database, txid, timeout and namespaces.
+            Unknown names fail.
+
+        Returns
+        -------
+        list[str]
+            Always a list; empty sequences return [] and singletons return [item].
+
+        Raises
+        ------
+        TypeError
+            For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or ranges.
+        MarkLogicError
+            For a server error, including missing indexes or unsupported functions.
+
+        Notes
+        -----
+        Native reference: https://docs.marklogic.com/cts:uris
+        """
+        expr = _positioned(
+            Cts.uris(
+                query=query,
+                start=start,
+                options=options,
+                quality_weight=quality_weight,
+                forest_ids=forest_ids,
+            ),
+            pos,
+        )
+        return await self._execute_native(
+            expr,
+            **_execution_options(self._namespaces, kwargs),
+        )
+
+    async def values(
+        self,
+        range_indexes: XqyExpression | list[XqyExpression] | None,
+        *,
+        start: str | int | float | bool | XqyExpression | None = None,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        **kwargs,
+    ) -> list:
+        """Execute ``cts:values`` via ``/v1/eval``.
+
+        Returns values from the specified value lexicon(s).
+
+        Parameters
+        ----------
+        range_indexes : XqyExpression | list[XqyExpression] | None
+            A sequence of references to range indexes.
+        start : str | int | float | bool | XqyExpression | None
+            A starting value. The parameter type must match the lexicon type. If the
+            parameter value is not in the lexicon, then the values are returned
+            beginning with the next value.
+        options : StringInput
+            Options. The default is (). Options include: "ascending" Values should be
+            returned in ascending order. "descending" Values should be returned in
+            descending order. "any" Values from any fragment should be included.
+            "document" Values from document fragments should be included. "properties"
+            Values from properties fragments should be included. "locks" Values from
+            locks fragments should be included. "frequency-order" Values should be
+            returned ordered by frequency. "item-order" Values should be returned
+            ordered by item. "fragment-frequency" Frequency should be the number of
+            fragments with an included value. This option is used with cts:frequency .
+            "item-frequency" Frequency should be the number of occurrences of an
+            included value. This option is used with cts:frequency . "timezone= TZ "
+            Return timezone sensitive values (dateTime, time, date, gYearMonth, gYear,
+            gMonth, and gDay) adjusted to the timezone specified by TZ . Example
+            timezones: Z, -08:00, +01:00. "limit= N " Return no more than N values. You
+            should not use this option with the "skip" option. Use "truncate" instead.
+            "skip= N " Skip over fragments selected by the cts:query to treat the Nth
+            fragment as the first fragment. Values from skipped fragments are not
+            included. This option affects the number of fragments selected by the
+            cts:query to calculate frequencies. Only applies when a $query parameter is
+            specified. "sample= N " Return only values from the first N fragments after
+            skip selected by the cts:query . This option does not affect the number of
+            fragments selected by the cts:query to calculate frequencies. Only applies
+            when a $query parameter is specified. "truncate= N " Include only values
+            from the first N fragments after skip selected by the cts:query . This
+            option also affects the number of fragments selected by the cts:query to
+            calculate frequencies. Only applies when a $query parameter is specified.
+            "score-logtfidf" Compute scores using the logtfidf method. Only applies when
+            a $query parameter is specified. "score-logtf" Compute scores using the
+            logtf method. Only applies when a $query parameter is specified.
+            "score-simple" Compute scores using the simple method. Only applies when a
+            $query parameter is specified. "score-random" Compute scores using the
+            random method. Only applies when a $query parameter is specified.
+            "score-zero" Compute all scores as zero. Only applies when a $query
+            parameter is specified. "checked" Word positions should be checked when
+            resolving the query. "unchecked" Word positions should not be checked when
+            resolving the query. "too-many-positions-error" If too much memory is needed
+            to perform positions calculations to check whether a document matches a
+            query, return an XDMP-TOOMANYPOSITIONS error, instead of accepting the
+            document as a match. "eager" Perform most of the work concurrently before
+            returning the first item from the indexes, and only some of the work
+            sequentially while iterating through the rest of the items. This usually
+            takes the shortest time for a complete item-order result or for any
+            frequency-order result. "lazy" Perform only some the work concurrently
+            before returning the first item from the indexes, and most of the work
+            sequentially while iterating through the rest of the items. This usually
+            takes the shortest time for a small item-order partial result. "concurrent"
+            Perform the work concurrently in another thread. This is a hint to the query
+            optimizer to help parallelize the lexicon work, allowing the calling query
+            to continue performing other work while the lexicon processing occurs. This
+            is especially useful in cases where multiple lexicon calls occur in the same
+            query (for example, resolving many facets in a single query). "map" Return
+            results as a single map:map value instead of as an xs:anyAtomicType*
+            sequence .
+        query : str | XqyExpression | None
+            Only include values in fragments selected by the cts:query , and compute
+            frequencies from this set of included values. The values do not need to
+            match the query, but they must occur in fragments selected by the query. The
+            fragments are not filtered to ensure they match the query, but instead
+            selected in the same manner as "unfiltered" cts:search operations. If a
+            string is entered, the string is treated as a cts:word-query of the
+            specified string.
+        quality_weight : float | XqyExpression | None
+            A document quality weight to use when computing scores. The default is 1.0.
+        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
+            A sequence of IDs of forests to which the search will be constrained. An
+            empty sequence means to search all forests in the database. The default is
+            ().
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
+        kwargs : dict
+            Execution options: database, txid, timeout and namespaces.
+            Unknown names fail.
+
+        Returns
+        -------
+        list
+            Always a list; empty sequences return [] and singletons return [item].
+
+        Raises
+        ------
+        TypeError
+            For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or ranges.
+        MarkLogicError
+            For a server error, including missing indexes or unsupported functions.
+
+        Notes
+        -----
+        Native reference: https://docs.marklogic.com/cts:values
+        """
+        expr = _positioned(
+            Cts.values(
+                range_indexes,
+                query=query,
+                start=start,
+                options=options,
+                quality_weight=quality_weight,
+                forest_ids=forest_ids,
+            ),
+            pos,
+        )
+        return await self._execute(
+            _ResultPairs(expr, ValueHit, options=options),
+            ValueHit,
+            **_execution_options(self._namespaces, kwargs),
+        )
+
+    async def estimate(
+        self,
+        query: str | XqyExpression | None = None,
+        *,
+        options: StringInput = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        maximum: float | XqyExpression | None = None,
+        **kwargs,
+    ) -> list:
+        """Execute ``cts:estimate`` via ``/v1/eval``.
+
+        Returns the number of fragments selected by a search.
+
+        Parameters
+        ----------
+        query : str | XqyExpression | None
+            Query to estimate. None supplies the required empty query slot.
+        options : StringInput
+            Options to this search. The default is (). See cts.search for details on
+            available options.
+        quality_weight : float | XqyExpression | None
+            A document quality weight to use when computing scores. The default is 1.0.
+        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
+            A sequence of IDs of forests to which the search will be constrained. An
+            empty sequence means to search all forests in the database. The default is
+            (). In the XQuery version, you can use cts:search with this parameter and an
+            empty cts:and-query to specify a forest-specific XPath statement (see the
+            third example below). If you use this to constrain an XPath to one or more
+            forests, you should set the quality-weight to zero to keep the XPath
+            document order.
+        maximum : float | XqyExpression | None
+            The maximum value to return. Stop selecting fragments if this number is
+            reached.
+        kwargs : dict
+            Execution options: database, txid, output_type, timeout and namespaces.
+            Unknown names fail.
+
+        Returns
+        -------
+        list
+            One aggregate result, optionally converted with output_type.
+
+        Raises
+        ------
+        TypeError
+            For an unknown execution keyword or invalid input type.
+        MarkLogicError
+            For a server error, including missing indexes or unsupported functions.
+
+        Notes
+        -----
+        Native reference: https://docs.marklogic.com/cts:estimate
+        """
+        return await self._execute_native(
+            Cts.estimate(
+                query,
+                options=options,
+                quality_weight=quality_weight,
+                forest_ids=forest_ids,
+                maximum=maximum,
+            ),
+            **_execution_options(self._namespaces, kwargs),
+        )
 
     async def aggregate(
         self,
@@ -10159,7 +10400,7 @@ class AsyncCtsService(Cts):
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
         argument: XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -10182,7 +10423,7 @@ class AsyncCtsService(Cts):
         argument : XqyExpression | list[XqyExpression] | None
             A sequence containing the arguments for the aggregate function. A map can be
             used to pass in multiple sequences of arguments.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             options. The default is (). Options include: "any" Co-occurrences from any
             fragment should be included. "document" Co-occurrences from document
             fragments should be included. "properties" Co-occurrences from properties
@@ -10260,7 +10501,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -10273,7 +10514,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -10486,12 +10727,11 @@ class AsyncCtsService(Cts):
         self,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:collection-match`` via ``/v1/eval``.
@@ -10503,7 +10743,7 @@ class AsyncCtsService(Cts):
         ----------
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -10564,10 +10804,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -10598,7 +10837,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -10609,12 +10848,11 @@ class AsyncCtsService(Cts):
         self,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:collections`` via ``/v1/eval``.
@@ -10627,7 +10865,7 @@ class AsyncCtsService(Cts):
             A starting value. Return only this value and following values. If the
             parameter is not in the lexicon, then it returns the values beginning with
             the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" URIs should be
             returned in ascending order. "descending" URIs should be returned in
             descending order. "any" URIs from any fragment should be included.
@@ -10685,10 +10923,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -10719,7 +10956,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -10819,7 +11056,7 @@ class AsyncCtsService(Cts):
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -10834,7 +11071,7 @@ class AsyncCtsService(Cts):
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -10879,7 +11116,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -10892,7 +11129,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -10937,7 +11174,7 @@ class AsyncCtsService(Cts):
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -10953,7 +11190,7 @@ class AsyncCtsService(Cts):
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -10999,7 +11236,7 @@ class AsyncCtsService(Cts):
         value1: XqyExpression,
         value2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -11015,7 +11252,7 @@ class AsyncCtsService(Cts):
             Reference to a range index. The type of the range index must be numeric.
         value2 : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -11223,8 +11460,8 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -11236,12 +11473,11 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-boxes`` via ``/v1/eval``.
@@ -11250,19 +11486,19 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -11336,10 +11572,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -11374,7 +11609,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -11383,17 +11618,16 @@ class AsyncCtsService(Cts):
 
     async def element_attribute_pair_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
@@ -11403,15 +11637,15 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -11477,10 +11711,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -11514,7 +11747,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -11523,17 +11756,16 @@ class AsyncCtsService(Cts):
 
     async def element_attribute_pair_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-values`` via ``/v1/eval``.
@@ -11543,16 +11775,16 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -11618,10 +11850,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -11655,7 +11886,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -11669,7 +11900,7 @@ class AsyncCtsService(Cts):
         element_name_2: str | XqyExpression,
         attribute_name_2: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -11692,7 +11923,7 @@ class AsyncCtsService(Cts):
         attribute_name_2 : str | XqyExpression | None
             An attribute QName or empty sequence. The empty sequence specifies an
             element lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -11832,7 +12063,7 @@ class AsyncCtsService(Cts):
         *,
         coord_child_name_1: str | XqyExpression | None = None,
         coord_child_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -11868,7 +12099,7 @@ class AsyncCtsService(Cts):
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -11998,16 +12229,15 @@ class AsyncCtsService(Cts):
 
     async def element_attribute_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-value-match`` via ``/v1/eval``.
@@ -12017,14 +12247,14 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -12106,10 +12336,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -12142,7 +12371,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -12151,8 +12380,8 @@ class AsyncCtsService(Cts):
 
     async def element_attribute_value_ranges(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         bounds: str
         | int
@@ -12162,7 +12391,7 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -12175,14 +12404,14 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -12304,16 +12533,15 @@ class AsyncCtsService(Cts):
 
     async def element_attribute_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-values`` via ``/v1/eval``.
@@ -12322,15 +12550,15 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -12409,10 +12637,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -12445,7 +12672,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -12454,16 +12681,15 @@ class AsyncCtsService(Cts):
 
     async def element_attribute_word_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-word-match`` via ``/v1/eval``.
@@ -12473,13 +12699,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -12529,10 +12755,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -12565,7 +12790,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -12574,16 +12799,15 @@ class AsyncCtsService(Cts):
 
     async def element_attribute_words(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        attribute_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        attribute_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-attribute-words`` via ``/v1/eval``.
@@ -12592,15 +12816,15 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        attribute_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        attribute_names : StringInput
             One or more attribute QNames.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -12648,10 +12872,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -12684,7 +12907,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -12714,12 +12937,11 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-child-geospatial-boxes`` via ``/v1/eval``.
@@ -12728,17 +12950,17 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        child_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_element_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -12815,10 +13037,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -12852,7 +13073,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -12861,16 +13082,15 @@ class AsyncCtsService(Cts):
 
     async def element_child_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        child_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        child_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-child-geospatial-value-match`` via ``/v1/eval``.
@@ -12880,13 +13100,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames identifying the parent element(s).
-        child_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_names : StringInput
             One or more child element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -12955,10 +13175,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -12991,7 +13210,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -13000,16 +13219,15 @@ class AsyncCtsService(Cts):
 
     async def element_child_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        child_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        child_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-child-geospatial-values`` via ``/v1/eval``.
@@ -13019,14 +13237,14 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        child_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        child_names : StringInput
             One or more child element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -13096,10 +13314,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -13132,7 +13349,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -13141,7 +13358,7 @@ class AsyncCtsService(Cts):
 
     async def element_geospatial_boxes(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -13153,12 +13370,11 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-geospatial-boxes`` via ``/v1/eval``.
@@ -13167,15 +13383,15 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Use the following options to customize your lexicon query: "ascending" Boxes
             should be returned in ascending order. "descending" Boxes should be returned
             in descending order. "gridded" For each side that a bucket is bounded,
@@ -13252,10 +13468,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -13288,7 +13503,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -13297,15 +13512,14 @@ class AsyncCtsService(Cts):
 
     async def element_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-geospatial-value-match`` via ``/v1/eval``.
@@ -13315,11 +13529,11 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -13388,10 +13602,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -13423,7 +13636,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -13432,15 +13645,14 @@ class AsyncCtsService(Cts):
 
     async def element_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-geospatial-values`` via ``/v1/eval``.
@@ -13449,12 +13661,12 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -13523,10 +13735,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -13558,7 +13769,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -13572,8 +13783,8 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         latitude_bounds: float
         | list[float]
@@ -13585,12 +13796,11 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-pair-geospatial-boxes`` via ``/v1/eval``.
@@ -13599,19 +13809,19 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        parent_element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        parent_element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more element QNames.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -13685,10 +13895,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -13723,7 +13932,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -13732,17 +13941,16 @@ class AsyncCtsService(Cts):
 
     async def element_pair_geospatial_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-pair-geospatial-value-match`` via ``/v1/eval``.
@@ -13752,15 +13960,15 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -13826,10 +14034,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -13863,7 +14070,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -13872,17 +14079,16 @@ class AsyncCtsService(Cts):
 
     async def element_pair_geospatial_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        latitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
-        longitude_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
+        latitude_names: StringInput,
+        longitude_names: StringInput,
         *,
         start: XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-pair-geospatial-values`` via ``/v1/eval``.
@@ -13892,17 +14098,17 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames identifying the parent element of the latitude
             and longitude elements.
-        latitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        latitude_names : StringInput
             One or more latitude element QNames.
-        longitude_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        longitude_names : StringInput
             One or more longitude element QNames.
         start : XqyExpression | None
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -13968,10 +14174,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -14005,7 +14210,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -14017,7 +14222,7 @@ class AsyncCtsService(Cts):
         element_name_1: str | XqyExpression,
         element_name_2: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -14035,7 +14240,7 @@ class AsyncCtsService(Cts):
             An element QName.
         element_name_2 : str | XqyExpression
             An element QName.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -14172,7 +14377,7 @@ class AsyncCtsService(Cts):
         *,
         coord_child_name_1: str | XqyExpression | None = None,
         coord_child_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -14209,7 +14414,7 @@ class AsyncCtsService(Cts):
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -14339,15 +14544,14 @@ class AsyncCtsService(Cts):
 
     async def element_value_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-value-match`` via ``/v1/eval``.
@@ -14357,12 +14561,12 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -14443,10 +14647,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -14478,7 +14681,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -14487,7 +14690,7 @@ class AsyncCtsService(Cts):
 
     async def element_value_ranges(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         bounds: str
         | int
@@ -14497,7 +14700,7 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -14509,13 +14712,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -14636,15 +14839,14 @@ class AsyncCtsService(Cts):
 
     async def element_values(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-values`` via ``/v1/eval``.
@@ -14653,14 +14855,14 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames. If you specify multiple lexicons, they must all
             be over the same value type (string, int, etc.).
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -14739,10 +14941,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -14774,7 +14975,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -14784,7 +14985,7 @@ class AsyncCtsService(Cts):
     async def element_walk(
         self,
         node: XqyExpression,
-        element: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element: StringInput,
         expr: XqyExpression | list[XqyExpression] | None,
         **kwargs,
     ) -> list:
@@ -14798,7 +14999,7 @@ class AsyncCtsService(Cts):
         node : XqyExpression
             A node to run the walk over. The node must be either a document node or an
             element node; it cannot be a text node.
-        element : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element : StringInput
             The name of elements to replace.
         expr : XqyExpression | list[XqyExpression] | None
             An expression with which to replace each match. You can use the variables
@@ -14834,15 +15035,14 @@ class AsyncCtsService(Cts):
 
     async def element_word_match(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         pattern: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-word-match`` via ``/v1/eval``.
@@ -14852,11 +15052,11 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         pattern : str | XqyExpression | None
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -14906,10 +15106,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -14941,7 +15140,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -14950,15 +15149,14 @@ class AsyncCtsService(Cts):
 
     async def element_words(
         self,
-        element_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        element_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:element-words`` via ``/v1/eval``.
@@ -14967,13 +15165,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        element_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        element_names : StringInput
             One or more element QNames.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -15021,10 +15219,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -15056,7 +15253,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -15217,7 +15414,7 @@ class AsyncCtsService(Cts):
         field_name_1: str | XqyExpression,
         field_name_2: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -15234,7 +15431,7 @@ class AsyncCtsService(Cts):
             A string.
         field_name_2 : str | XqyExpression
             A string.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -15368,15 +15565,14 @@ class AsyncCtsService(Cts):
 
     async def field_value_match(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-value-match`` via ``/v1/eval``.
@@ -15386,12 +15582,12 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -15472,10 +15668,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -15507,7 +15702,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -15516,7 +15711,7 @@ class AsyncCtsService(Cts):
 
     async def field_value_ranges(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         bounds: str
         | int
@@ -15526,7 +15721,7 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -15538,13 +15733,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more element QNames.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -15665,15 +15860,14 @@ class AsyncCtsService(Cts):
 
     async def field_values(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-values`` via ``/v1/eval``.
@@ -15682,13 +15876,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         start : str | int | float | bool | XqyExpression | None
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -15760,10 +15954,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -15795,7 +15988,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -15804,15 +15997,14 @@ class AsyncCtsService(Cts):
 
     async def field_word_match(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-word-match`` via ``/v1/eval``.
@@ -15822,11 +16014,11 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -15876,10 +16068,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -15911,7 +16102,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -15920,15 +16111,14 @@ class AsyncCtsService(Cts):
 
     async def field_words(
         self,
-        field_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        field_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:field-words`` via ``/v1/eval``.
@@ -15937,13 +16127,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        field_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        field_names : StringInput
             One or more field names.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -15991,10 +16181,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -16026,7 +16215,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -16128,12 +16317,11 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:geospatial-boxes`` via ``/v1/eval``.
@@ -16144,13 +16332,13 @@ class AsyncCtsService(Cts):
         ----------
         geo_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to geospatial indexes.
-        latitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        latitude_bounds : FloatInput
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : float | list[float] | XqyExpression | list[XqyExpression] | None
+        longitude_bounds : FloatInput
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -16227,10 +16415,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -16263,7 +16450,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -16279,7 +16466,7 @@ class AsyncCtsService(Cts):
         child_1_name_2: str | XqyExpression | None = None,
         child_2_name_1: str | XqyExpression | None = None,
         child_2_name_2: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -16329,7 +16516,7 @@ class AsyncCtsService(Cts):
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). The following options are available:
             "geospatial-format= format " For both geospatial lexicons, use the kind of
             geospatial lexicon specified by format (element, element-child,
@@ -16522,15 +16709,14 @@ class AsyncCtsService(Cts):
 
     async def json_property_word_match(
         self,
-        property_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_names: StringInput,
         pattern: str | XqyExpression | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:json-property-word-match`` via ``/v1/eval``.
@@ -16540,11 +16726,11 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_names : StringInput
             One or more property names.
         pattern : str | XqyExpression | None
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -16594,10 +16780,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -16629,7 +16814,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -16638,15 +16823,14 @@ class AsyncCtsService(Cts):
 
     async def json_property_words(
         self,
-        property_names: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        property_names: StringInput,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:json-property-words`` via ``/v1/eval``.
@@ -16655,13 +16839,13 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        property_names : str | list[str] | XqyExpression | list[XqyExpression] | None
+        property_names : StringInput
             One or more property names.
         start : str | XqyExpression | None
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -16709,10 +16893,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -16744,7 +16927,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -16755,7 +16938,7 @@ class AsyncCtsService(Cts):
         self,
         values: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -16770,7 +16953,7 @@ class AsyncCtsService(Cts):
             References to two range indexes. The types of the range indexes must be
             numeric. If the size of this sequence is not 2, the function returns the
             empty sequence.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -16816,7 +16999,7 @@ class AsyncCtsService(Cts):
         operation: str | XqyExpression,
         regions: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -16838,7 +17021,7 @@ class AsyncCtsService(Cts):
         regions : XqyExpression | list[XqyExpression] | None
             One or more cts:region values to test against. A region matches if it
             matches against any of these regions.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             String options you can use to control the operation. The following options
             are supported: "coordinate-system= value " Use the given coordinate system.
             Valid values are wgs84 , wgs84/double , etrs89 , etrs89/double , raw and
@@ -16916,7 +17099,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -16929,7 +17112,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -16971,7 +17154,7 @@ class AsyncCtsService(Cts):
 
     async def median(
         self,
-        arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
+        arg: FloatInput,
         **kwargs,
     ) -> list:
         """Execute ``cts:median`` via ``/v1/eval``.
@@ -16980,7 +17163,7 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        arg : float | list[float] | XqyExpression | list[XqyExpression] | None
+        arg : FloatInput
             The sequence of values. The values should be the result of a lexicon lookup.
         kwargs : dict
             Execution keywords: database, txid, output_type, timeout and namespaces.
@@ -17015,7 +17198,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -17028,7 +17211,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -17118,7 +17301,7 @@ class AsyncCtsService(Cts):
         | None,
         value: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:percent-rank`` via ``/v1/eval``.
@@ -17128,11 +17311,11 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values.
         value : str | int | float | bool | XqyExpression
             The value to be "ranked".
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -17171,8 +17354,8 @@ class AsyncCtsService(Cts):
 
     async def percentile(
         self,
-        arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
-        p: float | list[float] | XqyExpression | list[XqyExpression] | None,
+        arg: FloatInput,
+        p: FloatInput,
         **kwargs,
     ) -> list:
         """Execute ``cts:percentile`` via ``/v1/eval``.
@@ -17181,9 +17364,9 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        arg : float | list[float] | XqyExpression | list[XqyExpression] | None
+        arg : FloatInput
             The sequence of values. The values should be the result of a lexicon lookup.
-        p : float | list[float] | XqyExpression | list[XqyExpression] | None
+        p : FloatInput
             The sequence of percentage(s).
         kwargs : dict
             Execution keywords: database, txid, output_type, timeout and namespaces.
@@ -17318,7 +17501,7 @@ class AsyncCtsService(Cts):
         | None,
         value: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:rank`` via ``/v1/eval``.
@@ -17327,11 +17510,11 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        arg : AtomicInput
             The sequence of values.
         value : str | int | float | bool | XqyExpression
             The value to be "ranked".
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -17541,7 +17724,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -17555,7 +17738,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -17599,7 +17782,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -17613,7 +17796,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -17708,7 +17891,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -17721,7 +17904,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -18020,7 +18203,7 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        values : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        values : AtomicInput
             The values to look up.
         forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
             A sequence of IDs of forests to which the search will be constrained. An
@@ -18082,8 +18265,8 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        operator: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        operator: StringInput = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -18094,19 +18277,19 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        subject : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        subject : AtomicInput
             The subjects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        predicate : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        predicate : AtomicInput
             The predicates to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        object : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        object : AtomicInput
             The objects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        operator : str | list[str] | XqyExpression | list[XqyExpression] | None
+        operator : StringInput
             If a single string is provided it is treated as the operator for the $object
             values. If a sequence of three strings are provided, they give the operators
             for $subject, $predicate and $object in turn. The default operator is "=".
@@ -18118,7 +18301,7 @@ class AsyncCtsService(Cts):
             $value. ">=" Match range index values greater than or equal to $value. "="
             Match range index values equal to $value. "!=" Match range index values not
             equal to $value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "order-pso" Return results
             ordered by predicate, then subject, then object. "order-sop" Return results
             ordered by subject, then object, then predicate. "order-ops" Return results
@@ -18201,12 +18384,11 @@ class AsyncCtsService(Cts):
         self,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:uri-match`` via ``/v1/eval``.
@@ -18218,7 +18400,7 @@ class AsyncCtsService(Cts):
         ----------
         pattern : str | XqyExpression
             Wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -18279,10 +18461,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -18313,14 +18494,18 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ranged(expr, range, index)
+        expr = _positioned(expr, pos)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
         )
 
     async def valid_document_patch_path(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-document-patch-path`` via ``/v1/eval``.
 
@@ -18365,7 +18550,11 @@ class AsyncCtsService(Cts):
         )
 
     async def valid_extract_path(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-extract-path`` via ``/v1/eval``.
 
@@ -18410,7 +18599,10 @@ class AsyncCtsService(Cts):
         )
 
     async def valid_index_path(
-        self, string: str | XqyExpression, ignorens: bool | XqyExpression, **kwargs,
+        self,
+        string: str | XqyExpression,
+        ignorens: bool | XqyExpression,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-index-path`` via ``/v1/eval``.
 
@@ -18453,7 +18645,11 @@ class AsyncCtsService(Cts):
         )
 
     async def valid_optic_path(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-optic-path`` via ``/v1/eval``.
 
@@ -18498,7 +18694,11 @@ class AsyncCtsService(Cts):
         )
 
     async def valid_tde_context(
-        self, string: str | XqyExpression, *, map: XqyExpression | None = None, **kwargs,
+        self,
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+        **kwargs,
     ) -> list:
         """Execute ``cts:valid-tde-context`` via ``/v1/eval``.
 
@@ -18547,7 +18747,7 @@ class AsyncCtsService(Cts):
         range_index_1: XqyExpression,
         range_index_2: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -18564,7 +18764,7 @@ class AsyncCtsService(Cts):
             A reference to a range index.
         range_index_2 : XqyExpression
             A reference to a range index.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -18681,12 +18881,11 @@ class AsyncCtsService(Cts):
         range_indexes: XqyExpression | list[XqyExpression] | None,
         pattern: str | int | float | bool | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:value-match`` via ``/v1/eval``.
@@ -18701,7 +18900,7 @@ class AsyncCtsService(Cts):
         pattern : str | int | float | bool | XqyExpression
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -18771,10 +18970,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -18806,7 +19004,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -18825,7 +19023,7 @@ class AsyncCtsService(Cts):
         | XqyExpression
         | list[XqyExpression]
         | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -18839,11 +19037,11 @@ class AsyncCtsService(Cts):
         ----------
         range_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to range indexes.
-        bounds : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
+        bounds : AtomicInput
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -18955,7 +19153,7 @@ class AsyncCtsService(Cts):
         self,
         range_indexes: XqyExpression | list[XqyExpression] | None,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
@@ -18970,7 +19168,7 @@ class AsyncCtsService(Cts):
         ----------
         range_indexes : XqyExpression | list[XqyExpression] | None
             A sequence of references to range indexes.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -19081,7 +19279,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -19094,7 +19292,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -19138,7 +19336,7 @@ class AsyncCtsService(Cts):
         self,
         range_index: XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         **kwargs,
@@ -19152,7 +19350,7 @@ class AsyncCtsService(Cts):
         ----------
         range_index : XqyExpression
             Reference to a range index. The type of the range index must be numeric.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Same as the "options" parameter in cts:aggregate .
         query : str | XqyExpression | None
             Same as the "query" parameter in cts:aggregate .
@@ -19249,12 +19447,11 @@ class AsyncCtsService(Cts):
         self,
         pattern: str | XqyExpression,
         *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:word-match`` via ``/v1/eval``.
@@ -19265,7 +19462,7 @@ class AsyncCtsService(Cts):
         ----------
         pattern : str | XqyExpression
             A wildcard pattern to match.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -19315,10 +19512,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -19349,7 +19545,7 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
@@ -19360,12 +19556,11 @@ class AsyncCtsService(Cts):
         self,
         *,
         start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+        options: StringInput = None,
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        pos: Position | PositionRange | None = None,
         **kwargs,
     ) -> list:
         """Execute ``cts:words`` via ``/v1/eval``.
@@ -19378,7 +19573,7 @@ class AsyncCtsService(Cts):
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
+        options : StringInput
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -19426,10 +19621,9 @@ class AsyncCtsService(Cts):
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
-        range : Range | None
-            Inclusive server-side selection; N means [1, N].
-        index : int | XqyExpression | None
-            One-based position; cannot be combined with range.
+        pos : Position | PositionRange | None
+            One-based position, or an inclusive two-item [start, end] range.
+            Positions accept positive integers or fn.last().
         kwargs : dict
             Execution keywords: database, txid, timeout and namespaces.
 
@@ -19460,27 +19654,12 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit, options=options)
+        expr = _ResultPairs(_positioned(expr, pos), ValueHit, options=options)
         return await self._execute(
             expr,
             ValueHit,
             **_execution_options(self._namespaces, kwargs),
         )
-
-    def __init__(self, rest: AsyncRestApi, *, namespaces=None):
-        """Create async search utilities using the client's REST API.
-
-        Parameters
-        ----------
-        rest : AsyncRestApi
-            REST API used by the expression evaluator; no request is made here.
-        namespaces : dict[str, str] | None
-            Default XQuery namespace declarations, copied at construction. The
-            empty prefix sets the default element namespace. All execution
-            methods accept namespaces overrides through keyword arguments.
-        """
-        self._namespaces = namespace_bindings(namespaces)
-        self._rest = rest
 
     async def _execute_native(
         self,
@@ -19593,487 +19772,178 @@ class AsyncCtsService(Cts):
         )
         return _result_pairs(response, model)
 
-    async def search(
+
+def _check_lexicon_options(options: str | list[str] | XqyExpression | None) -> bool:
+    """Reject literal map output and report whether options require runtime checking.
+
+    Parameters
+    ----------
+    options : str | list[str] | XqyExpression | None
+        Native lexicon options, possibly containing nested XQuery expressions.
+
+    Returns
+    -------
+    bool
+        Whether an expression can supply options unknown before execution.
+
+    Raises
+    ------
+    ValueError
+        If a literal map option requests results incompatible with ValueHit.
+    """
+    if isinstance(options, (list, tuple)):
+        dynamic = [_check_lexicon_options(option) for option in options]
+        return any(dynamic)
+    if isinstance(options, str) and options == "map":
+        message = "Map output is not a value sequence; use ml.eval.expression(cts...)"
+        raise ValueError(message)
+    return isinstance(options, XqyExpression)
+
+
+class _ResultPairs(XqyExpression):
+    """Pair each selected result with its native score or frequency."""
+
+    def __init__(
         self,
-        expression: XqyExpression | list[XqyExpression] | None = None,
-        query: str | XqyExpression | None = None,
-        *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        quality_weight: float | XqyExpression | None = None,
-        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
+        inner: XqyExpression,
+        model: type,
         xpath: str | None = None,
-        **kwargs,
-    ) -> list:
-        """Execute ``cts:search`` via ``/v1/eval``.
-
-        Returns a relevance-ordered sequence of nodes specified by a given
-        query.
+        *,
+        options: str | list[str] | XqyExpression | None = None,
+    ):
+        """Retain the selected expression and validate its XPath and lexicon options.
 
         Parameters
         ----------
-        expression : XqyExpression | list[XqyExpression] | None
-            An expression to be searched. This must be an inline fully searchable path
-            expression. Python strings are wrapped internally and validated
-            with the other literal paths in the expression before execution.
-        query : str | XqyExpression | None
-            A cts:query specifying the search to perform. If a string is entered, the
-            string is treated as a cts:word-query of the specified string.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
-            Options to this search. The default is (). Options include: "filtered" A
-            filtered search (the default). Filtered searches eliminate any
-            false-positive matches and properly resolve cases where there are multiple
-            candidate matches within the same fragment. Filtered search results fully
-            satisfy the specified cts:query . "unfiltered" An unfiltered search. An
-            unfiltered search selects fragments from the indexes that are candidates to
-            satisfy the specified cts:query , and then it returns a single node from
-            within each fragment that satisfies the specified searchable path
-            expression. Unfiltered searches are useful because of the performance they
-            afford when jumping deep into the result set (for example, when paginating a
-            long result set and jumping to the 1,000,000th result). However, depending
-            on the searchable path expression, the cts:query specified, the structure of
-            the documents in the database, and the configuration of the database,
-            unfiltered searches may yield false-positive results being included in the
-            search results. Unfiltered searches may also result in missed matches or in
-            incorrect matches, especially when there are multiple candidate matches
-            within a single fragment. To avoid these problems, you should only use
-            unfiltered searches on top-level XPath expressions (for example, document
-            nodes, collections, directories) or on fragment roots. Using unfiltered
-            searches on complex XPath expressions or on XPath expressions that traverse
-            below a fragment root can result in unexpected results. "score-logtfidf"
-            Compute scores using the logtfidf method (the default scoring method). This
-            uses the formula: log(term frequency) * (inverse document frequency)
-            "score-logtf" Compute scores using the logtf method. This does not take into
-            account how many documents have the term and uses the formula: log(term
-            frequency) "score-simple" Compute scores using the simple method. The
-            score-simple method gives a score of 8*weight for each matching term in the
-            cts:query expression, and then scales the score up by multiplying by 256. It
-            does not matter how many times a given term matches (that is, the term
-            frequency does not matter); each match contributes 8*weight to the score.
-            For example, the following query (assume the default weight of 1) would give
-            a score of 8*256=2048 for any fragment with one or more matches for "hello",
-            a score of 16*256=4096 for any fragment that also has one or more matches
-            for "goodbye", or a score of zero for fragments that have no matches for
-            either term: cts:or-query(("hello", "goodbye")) "score-random" Compute
-            scores using the random method. The score-random method gives a random value
-            to the score. You can use this to randomly choose fragments matching a
-            query. "score-zero" Compute all scores as zero. When combined with a quality
-            weight of zero, this is the fastest consistent scoring method. "score-bm25"
-            Compute scores using the bm25 method. This uses the formula: (log(term
-            frequency) / (1-'bm25-length-weight'+'bm25-length-weight'*(doc length /
-            average doc length))) * (inverse document frequency) "checked" Word
-            positions are checked (the default) when resolving the query. Checked
-            searches eliminate false-positive matches for phrases during the index
-            resolution phase of search processing. "unchecked" Word positions are not
-            checked when resolving the query. Unchecked searches do not take into
-            account word positions and can lead to false-positive matches during the
-            index resolution phase of search processing. This setting is useful for
-            debugging, but not recommended for normal use. "too-many-positions-error" If
-            too much memory is needed to perform positions calculations to check whether
-            a document matches a query, return an XDMP-TOOMANYPOSITIONS error, instead
-            of accepting the document as a match. "faceted" Do a little more work to
-            save faceting information about fragments matching this search so that
-            calculating facets will be faster. "unfaceted" Do not save faceting
-            information about fragments matching this search. "relevance-trace" Collect
-            relevance score computation details with which you can generate a trace
-            report using cts:relevance-info . Collecting this information is costly and
-            will significantly slow down your search, so you should only use it when
-            using cts:relevance-info to tune a query. "format- FORMAT " Limit the search
-            to documents in document format specified by FORMAT (binary, json, text, or
-            xml) cts:order Specification A sequence of cts:order specifications. The
-            order is evaluated in the order each appears in the sequence. Default:
-            (cts:score-order("descending"),cts:document-order("ascending")) . The
-            sequence typically consists of one or more of: cts:index-order ,
-            cts:score-order , cts:confidence-order , cts:fitness-order ,
-            cts:quality-order , cts:document-order , cts:unordered . When using
-            cts:index-order , there must be a range index defined on the index(es)
-            specified by the cts:reference specification (for example,
-            cts:element-reference .) "bm25-length-weight= NUMBER " The weight of the
-            document length to average document length ratio while using the
-            "score-BM25" option. Valid values are greater than 0.0 and less than or
-            equal to 1.0. The default is 0.333.
-        quality_weight : float | XqyExpression | None
-            A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
-            A sequence of IDs of forests to which the search will be constrained. An
-            empty sequence means to search all forests in the database. The default is
-            (). In the XQuery version, you can use cts:search with this parameter and an
-            empty cts:and-query to specify a forest-specific XPath statement (see the
-            third example below). If you use this to constrain an XPath to one or more
-            forests, you should set the quality-weight to zero to keep the XPath
-            document order.
-        range : Range | None
-            Inclusive [start, end]; bounds accept positive integers or fn.last().
-            N means [1, N]. Cannot be combined with index.
-        index : int | XqyExpression | None
-            One-based positive position or fn.last(). Returns [item] or [].
+        inner : XqyExpression
+            Native expression after positional selection.
+        model : type
+            SearchHit or ValueHit determines score versus frequency extraction.
         xpath : str | None
-            Restricted extraction XPath applied to each hit after index/range.
-            Relative paths start at the hit; absolute paths start at its root.
-            Uses the same namespaces as expression and preserves hit order.
-            None returns hits unchanged; one hit may yield zero or many nodes.
-        kwargs : dict
-            Execution options: database, txid, timeout and namespaces.
-            Unknown names fail.
-
-        Returns
-        -------
-        list
-            Always a list; empty sequences return [] and singletons return [item].
+            Optional validated XPath applied to original search hits.
+        options : str | list[str] | XqyExpression | None
+            Lexicon options; literal map output is rejected before compilation.
 
         Raises
         ------
-        TypeError
-            For an unknown execution keyword or invalid input type.
         ValueError
-            For invalid positions or simultaneous index and range.
-        MarkLogicError
-            For a server error, including missing indexes or unsupported functions.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/cts:search
+            If XPath is blank or a literal map option is supplied.
+        TypeError
+            If XPath is not a string.
         """
-        expr = _ranged(
-            Cts.search(
-                expression,
-                query,
-                options=options,
-                quality_weight=quality_weight,
-                forest_ids=forest_ids,
-            ),
-            range,
-            index,
-        )
-        return await self._execute(
-            _ResultPairs(expr, SearchHit, xpath),
-            SearchHit,
-            **_execution_options(self._namespaces, kwargs),
-        )
+        self.inner = inner
+        self.measure = "score" if model is SearchHit else "frequency"
+        self.path = None if xpath is None else xpath_expression(xpath)
+        self.check_map = model is ValueHit and _check_lexicon_options(options)
 
-    async def uris(
-        self,
-        *,
-        start: str | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        query: str | XqyExpression | None = None,
-        quality_weight: float | XqyExpression | None = None,
-        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
-        **kwargs,
-    ) -> list:
-        """Execute ``cts:uris`` via ``/v1/eval``.
-
-        Returns values from the URI lexicon.
+    def render(self, ctx: XqyCompilationContext) -> str:
+        """Render pairs with the measure captured before applying result XPath.
 
         Parameters
         ----------
-        start : str | XqyExpression | None
-            A starting value. Return only this value and following values. If the empty
-            string, return all values. If the parameter is not in the lexicon, then it
-            returns the values beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
-            Options. The default is (). Options include: "ascending" URIs should be
-            returned in ascending order. "descending" URIs should be returned in
-            descending order. "any" URIs from any fragment should be included.
-            "document" URIs from document fragments should be included. "properties"
-            URIs from properties fragments should be included. "locks" URIs from locks
-            fragments should be included. "frequency-order" URIs should be returned
-            ordered by frequency. "item-order" URIs should be returned ordered by item.
-            "limit= N " Return no more than N URIs. You should not use this option with
-            the "skip" option. Use "truncate" instead. "skip= N " Skip over fragments
-            selected by the cts:query to treat the Nth fragment as the first fragment.
-            URIs from skipped fragments are not included. This option affects the number
-            of fragments selected by the cts:query to calculate frequencies. Only
-            applies when a $query parameter is specified. "sample= N " Return only URIs
-            from the first N fragments after skip selected by the cts:query . This
-            option does not affect the number of fragments selected by the cts:query to
-            calculate frequencies. Only applies when a $query parameter is specified.
-            "truncate= N " Include only URIs from the first N fragments after skip
-            selected by the cts:query . This option also affects the number of fragments
-            selected by the cts:query to calculate frequencies. Only applies when a
-            $query parameter is specified. "score-logtfidf" Compute scores using the
-            logtfidf method. Only applies when a $query parameter is specified.
-            "score-logtf" Compute scores using the logtf method. Only applies when a
-            $query parameter is specified. "score-simple" Compute scores using the
-            simple method. Only applies when a $query parameter is specified.
-            "score-random" Compute scores using the random method. Only applies when a
-            $query parameter is specified. "score-zero" Compute all scores as zero. Only
-            applies when a $query parameter is specified. "checked" Word positions
-            should be checked when resolving the query. "unchecked" Word positions
-            should not be checked when resolving the query. "too-many-positions-error"
-            If too much memory is needed to perform positions calculations to check
-            whether a document matches a query, return an XDMP-TOOMANYPOSITIONS error,
-            instead of accepting the document as a match. "eager" Perform most of the
-            work concurrently before returning the first item from the indexes, and only
-            some of the work sequentially while iterating through the rest of the items.
-            This usually takes the shortest time for a complete item-order result or for
-            any frequency-order result. "lazy" Perform only some the work concurrently
-            before returning the first item from the indexes, and most of the work
-            sequentially while iterating through the rest of the items. This usually
-            takes the shortest time for a small item-order partial result. "concurrent"
-            Perform the work concurrently in another thread. This is a hint to the query
-            optimizer to help parallelize the lexicon work, allowing the calling query
-            to continue performing other work while the lexicon processing occurs. This
-            is especially useful in cases where multiple lexicon calls occur in the same
-            query (for example, resolving many facets in a single query). "map" Return
-            results as a single map:map value instead of as an xs:string* sequence .
-        query : str | XqyExpression | None
-            Only include URIs from fragments selected by the cts:query , and compute
-            frequencies from this set of included URIs. The fragments are not filtered
-            to ensure they match the query, but instead selected in the same manner as
-            "unfiltered" cts:search operations. If a string is entered, the string is
-            treated as a cts:word-query of the specified string.
-        quality_weight : float | XqyExpression | None
-            A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
-            A sequence of IDs of forests to which the search will be constrained. An
-            empty sequence means to search all forests in the database. The default is
-            ().
-        range : Range | None
-            Inclusive [start, end]; bounds accept positive integers or fn.last().
-            N means [1, N]. Cannot be combined with index.
-        index : int | XqyExpression | None
-            One-based positive position or fn.last(). Returns [item] or [].
-        kwargs : dict
-            Execution options: database, txid, timeout and namespaces.
-            Unknown names fail.
+        ctx : XqyCompilationContext
+            Shared external bindings and extraction-path validation.
 
         Returns
         -------
-        list[str]
-            Always a list; empty sequences return [] and singletons return [item].
-
-        Raises
-        ------
-        TypeError
-            For an unknown execution keyword or invalid input type.
-        ValueError
-            For invalid positions or simultaneous index and range.
-        MarkLogicError
-            For a server error, including missing indexes or unsupported functions.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/cts:uris
+        str
+            One XQuery sequence containing a payload and integer per result.
         """
-        expr = _ranged(
-            Cts.uris(
-                query=query,
-                start=start,
-                options=options,
-                quality_weight=quality_weight,
-                forest_ids=forest_ids,
-            ),
-            range,
-            index,
-        )
-        return await self._execute_native(
-            expr,
-            **_execution_options(self._namespaces, kwargs),
-        )
+        source = f"for $res in {self.inner.render(ctx)}\n"
+        pairs = f"let $measure := cts:{self.measure}($res)\n"
+        if self.path is None:
+            pairs += "return ($res, $measure)"
+        else:
+            pairs += (
+                f"for $node in $res ! {self.path.render(ctx)}\nreturn ($node, $measure)"
+            )
+        if self.check_map:
+            return (
+                source + "return if ($res instance of map:map) then\n"
+                '    fn:error(fn:QName("", "MLCLIENT-LEXICON-MAP"),\n'
+                '        "Map output is not a value sequence; '
+                'use ml.eval.expression(cts...)")\n'
+                "else\n    " + pairs.replace("\n", "\n    ")
+            )
+        return source + pairs
 
-    async def values(
-        self,
-        range_indexes: XqyExpression | list[XqyExpression] | None,
-        *,
-        start: str | int | float | bool | XqyExpression | None = None,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        query: str | XqyExpression | None = None,
-        quality_weight: float | XqyExpression | None = None,
-        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        range: Range | None = None,
-        index: int | XqyExpression | None = None,
-        **kwargs,
-    ) -> list:
-        """Execute ``cts:values`` via ``/v1/eval``.
 
-        Returns values from the specified value lexicon(s).
+def _result_pairs(response, model: type):
+    """Parse payload/measure pairs into a list of result objects.
 
-        Parameters
-        ----------
-        range_indexes : XqyExpression | list[XqyExpression] | None
-            A sequence of references to range indexes.
-        start : str | int | float | bool | XqyExpression | None
-            A starting value. The parameter type must match the lexicon type. If the
-            parameter value is not in the lexicon, then the values are returned
-            beginning with the next value.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
-            Options. The default is (). Options include: "ascending" Values should be
-            returned in ascending order. "descending" Values should be returned in
-            descending order. "any" Values from any fragment should be included.
-            "document" Values from document fragments should be included. "properties"
-            Values from properties fragments should be included. "locks" Values from
-            locks fragments should be included. "frequency-order" Values should be
-            returned ordered by frequency. "item-order" Values should be returned
-            ordered by item. "fragment-frequency" Frequency should be the number of
-            fragments with an included value. This option is used with cts:frequency .
-            "item-frequency" Frequency should be the number of occurrences of an
-            included value. This option is used with cts:frequency . "timezone= TZ "
-            Return timezone sensitive values (dateTime, time, date, gYearMonth, gYear,
-            gMonth, and gDay) adjusted to the timezone specified by TZ . Example
-            timezones: Z, -08:00, +01:00. "limit= N " Return no more than N values. You
-            should not use this option with the "skip" option. Use "truncate" instead.
-            "skip= N " Skip over fragments selected by the cts:query to treat the Nth
-            fragment as the first fragment. Values from skipped fragments are not
-            included. This option affects the number of fragments selected by the
-            cts:query to calculate frequencies. Only applies when a $query parameter is
-            specified. "sample= N " Return only values from the first N fragments after
-            skip selected by the cts:query . This option does not affect the number of
-            fragments selected by the cts:query to calculate frequencies. Only applies
-            when a $query parameter is specified. "truncate= N " Include only values
-            from the first N fragments after skip selected by the cts:query . This
-            option also affects the number of fragments selected by the cts:query to
-            calculate frequencies. Only applies when a $query parameter is specified.
-            "score-logtfidf" Compute scores using the logtfidf method. Only applies when
-            a $query parameter is specified. "score-logtf" Compute scores using the
-            logtf method. Only applies when a $query parameter is specified.
-            "score-simple" Compute scores using the simple method. Only applies when a
-            $query parameter is specified. "score-random" Compute scores using the
-            random method. Only applies when a $query parameter is specified.
-            "score-zero" Compute all scores as zero. Only applies when a $query
-            parameter is specified. "checked" Word positions should be checked when
-            resolving the query. "unchecked" Word positions should not be checked when
-            resolving the query. "too-many-positions-error" If too much memory is needed
-            to perform positions calculations to check whether a document matches a
-            query, return an XDMP-TOOMANYPOSITIONS error, instead of accepting the
-            document as a match. "eager" Perform most of the work concurrently before
-            returning the first item from the indexes, and only some of the work
-            sequentially while iterating through the rest of the items. This usually
-            takes the shortest time for a complete item-order result or for any
-            frequency-order result. "lazy" Perform only some the work concurrently
-            before returning the first item from the indexes, and most of the work
-            sequentially while iterating through the rest of the items. This usually
-            takes the shortest time for a small item-order partial result. "concurrent"
-            Perform the work concurrently in another thread. This is a hint to the query
-            optimizer to help parallelize the lexicon work, allowing the calling query
-            to continue performing other work while the lexicon processing occurs. This
-            is especially useful in cases where multiple lexicon calls occur in the same
-            query (for example, resolving many facets in a single query). "map" Return
-            results as a single map:map value instead of as an xs:anyAtomicType*
-            sequence .
-        query : str | XqyExpression | None
-            Only include values in fragments selected by the cts:query , and compute
-            frequencies from this set of included values. The values do not need to
-            match the query, but they must occur in fragments selected by the query. The
-            fragments are not filtered to ensure they match the query, but instead
-            selected in the same manner as "unfiltered" cts:search operations. If a
-            string is entered, the string is treated as a cts:word-query of the
-            specified string.
-        quality_weight : float | XqyExpression | None
-            A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
-            A sequence of IDs of forests to which the search will be constrained. An
-            empty sequence means to search all forests in the database. The default is
-            ().
-        range : Range | None
-            Inclusive [start, end]; bounds accept positive integers or fn.last().
-            N means [1, N]. Cannot be combined with index.
-        index : int | XqyExpression | None
-            One-based positive position or fn.last(). Returns [item] or [].
-        kwargs : dict
-            Execution options: database, txid, timeout and namespaces.
-            Unknown names fail.
+    Parameters
+    ----------
+    response : httpx.Response
+        Eval response produced by the service's paired expression.
+    model : type
+        SearchHit or ValueHit to construct from each pair.
 
-        Returns
-        -------
-        list
-            Always a list; empty sequences return [] and singletons return [item].
+    Returns
+    -------
+    list[SearchHit] | list[ValueHit]
+        One object per result; an empty sequence returns an empty list.
 
-        Raises
-        ------
-        TypeError
-            For an unknown execution keyword or invalid input type.
-        ValueError
-            For invalid positions or simultaneous index and range.
-        MarkLogicError
-            For a server error, including missing indexes or unsupported functions.
+    Raises
+    ------
+    ValueError
+        If a payload lacks a score/frequency partner or parsing fails.
+    MarkLogicError
+        If the response reports a recognized server failure.
+    HTTPStatusError
+        If the response reports another HTTP failure.
+    """
+    MLResponseParser.raise_for_status(response)
+    if not response.content:
+        return []
+    parts = MLResponseParser.parse_with_headers(response)
+    if isinstance(parts, tuple) or len(parts) % 2:
+        message = "CTS response is missing a score/frequency partner"
+        raise ValueError(message)
+    results = []
+    for (headers, content), (_, measure) in zip(parts[::2], parts[1::2]):
+        if model is SearchHit:
+            result = SearchHit(
+                content,
+                score=measure,
+                source_uri=headers.get("X-URI"),
+                source_path=headers.get("X-Path", "/"),
+            )
+        else:
+            result = ValueHit(
+                content,
+                frequency=measure,
+            )
+        results.append(result)
+    return results
 
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/cts:values
-        """
-        expr = _ranged(
-            Cts.values(
-                range_indexes,
-                query=query,
-                start=start,
-                options=options,
-                quality_weight=quality_weight,
-                forest_ids=forest_ids,
-            ),
-            range,
-            index,
-        )
-        return await self._execute(
-            _ResultPairs(expr, ValueHit, options=options),
-            ValueHit,
-            **_execution_options(self._namespaces, kwargs),
-        )
 
-    async def estimate(
-        self,
-        query: str | XqyExpression | None = None,
-        *,
-        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-        quality_weight: float | XqyExpression | None = None,
-        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        maximum: float | XqyExpression | None = None,
-        **kwargs,
-    ) -> list:
-        """Execute ``cts:estimate`` via ``/v1/eval``.
+def _positioned(
+    expr: XqyExpression,
+    pos: Position | PositionRange | None,
+) -> XqyExpression:
+    """Apply a server-side position or inclusive range."""
+    return expr.pos(pos)
 
-        Returns the number of fragments selected by a search.
 
-        Parameters
-        ----------
-        query : str | XqyExpression | None
-            Query to estimate. None supplies the required empty query slot.
-        options : str | list[str] | XqyExpression | list[XqyExpression] | None
-            Options to this search. The default is (). See cts.search for details on
-            available options.
-        quality_weight : float | XqyExpression | None
-            A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : int | list[int] | XqyExpression | list[XqyExpression] | None
-            A sequence of IDs of forests to which the search will be constrained. An
-            empty sequence means to search all forests in the database. The default is
-            (). In the XQuery version, you can use cts:search with this parameter and an
-            empty cts:and-query to specify a forest-specific XPath statement (see the
-            third example below). If you use this to constrain an XPath to one or more
-            forests, you should set the quality-weight to zero to keep the XPath
-            document order.
-        maximum : float | XqyExpression | None
-            The maximum value to return. Stop selecting fragments if this number is
-            reached.
-        kwargs : dict
-            Execution options: database, txid, output_type, timeout and namespaces.
-            Unknown names fail.
+def _execution_options(default_namespaces: dict[str, str], options: dict) -> dict:
+    """Merge per-call namespace overrides without changing service defaults.
 
-        Returns
-        -------
-        list
-            One aggregate result, optionally converted with output_type.
+    Parameters
+    ----------
+    default_namespaces : dict[str, str]
+        Namespace declarations owned by the CTS service.
+    options : dict
+        Per-call evaluator options, optionally including namespaces.
 
-        Raises
-        ------
-        TypeError
-            For an unknown execution keyword or invalid input type.
-        MarkLogicError
-            For a server error, including missing indexes or unsupported functions.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/cts:estimate
-        """
-        return await self._execute_native(
-            Cts.estimate(
-                query,
-                options=options,
-                quality_weight=quality_weight,
-                forest_ids=forest_ids,
-                maximum=maximum,
-            ),
-            **_execution_options(self._namespaces, kwargs),
-        )
+    Returns
+    -------
+    dict
+        Independent options with namespace overrides applied by prefix.
+    """
+    return {
+        **options,
+        "namespaces": {
+            **default_namespaces,
+            **namespace_bindings(options.get("namespaces")),
+        },
+    }

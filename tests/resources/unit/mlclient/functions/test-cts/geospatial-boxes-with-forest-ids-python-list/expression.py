@@ -2,4 +2,4 @@ from mlclient.functions.xqy import cts
 
 
 def run():
-    return cts.geospatial_boxes(cts.search().index(1), forest_ids=[123]).compile()
+    return cts.geospatial_boxes(cts.search().pos(1), forest_ids=[123]).compile()

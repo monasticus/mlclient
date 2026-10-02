@@ -3,7 +3,7 @@ from mlclient.functions.xqy import cts
 
 def run():
     return cts.search(
-        cts.search().index(1),
+        cts.search().pos(1),
         "needle",
         options="checked",
         quality_weight=2.5,

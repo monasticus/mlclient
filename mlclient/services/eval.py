@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
 from mlclient.functions.xqy import XqyExpression
+from mlclient.models.results import ParsedValue
 from mlclient.responses import MLResponseParser
 
 _LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
@@ -53,7 +54,7 @@ class EvalService:
         txid: str | None = None,
         output_type: type | None = None,
         timeout=UNSET,
-    ) -> object:
+    ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
         Parameters
@@ -76,7 +77,7 @@ class EvalService:
 
         Returns
         -------
-        object | list
+        ParsedValue
             Empty sequences return []; a singleton returns its item; multiple
             items return a list. Decimal results retain precision. A singleton
             JSON array returns that array without an extra outer list.
@@ -639,7 +640,7 @@ class AsyncEvalService:
         txid: str | None = None,
         output_type: type | None = None,
         timeout=UNSET,
-    ) -> object:
+    ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
         Parameters
@@ -662,7 +663,7 @@ class AsyncEvalService:
 
         Returns
         -------
-        object | list
+        ParsedValue
             Empty sequences return []; a singleton returns its item; multiple
             items return a list. Decimal results retain precision. A singleton
             JSON array returns that array without an extra outer list.

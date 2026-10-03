@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.path_geospatial_query() missing 2 required positional arguments: 'path_expression' and 'regions'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "xs:decimal requires a finite Decimal"
+}

@@ -1,0 +1,5 @@
+from mlclient.functions.xqy import fn
+
+
+def run():
+    return fn.key("product", "42", top=None).compile()

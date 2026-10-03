@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.element_pair_geospatial_values() missing 3 required positional arguments: 'element_names', 'latitude_names', and 'longitude_names'"
+}

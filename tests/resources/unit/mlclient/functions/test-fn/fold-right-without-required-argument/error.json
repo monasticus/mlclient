@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.fold_right() missing 3 required positional arguments: 'function', 'zero', and 'seq'"
+}

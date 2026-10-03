@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.covariance() missing 2 required positional arguments: 'value1' and 'value2'"
+}

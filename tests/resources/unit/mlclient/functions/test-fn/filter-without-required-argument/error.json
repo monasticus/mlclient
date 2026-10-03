@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.filter() missing 2 required positional arguments: 'function' and 'seq'"
+}

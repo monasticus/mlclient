@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.near_query() missing 1 required positional argument: 'queries'"
+}

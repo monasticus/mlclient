@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.period_compare_query() missing 3 required positional arguments: 'axis_1', 'operator', and 'axis_2'"
+}

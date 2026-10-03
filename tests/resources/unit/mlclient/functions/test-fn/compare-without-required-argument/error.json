@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.compare() missing 2 required positional arguments: 'comparand1' and 'comparand2'"
+}

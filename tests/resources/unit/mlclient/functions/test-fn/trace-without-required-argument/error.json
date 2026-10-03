@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.trace() missing 2 required positional arguments: 'value' and 'label'"
+}

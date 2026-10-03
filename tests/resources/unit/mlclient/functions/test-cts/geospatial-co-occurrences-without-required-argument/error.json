@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.geospatial_co_occurrences() missing 2 required positional arguments: 'geo_element_name_1' and 'geo_element_name_2'"
+}

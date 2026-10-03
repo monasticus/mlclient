@@ -80,6 +80,17 @@ class TestEncodeMultipartMixed:
 
 
 class TestDecodeMultipartMixed:
+    def test_decode_empty(self):
+        raw = b"--boundary--\r\n"
+
+        assert (
+            decode_multipart_mixed(
+                raw,
+                "multipart/mixed; boundary=boundary",
+            )
+            == []
+        )
+
     def test_decode_single_part(self):
         raw = b"--boundary\r\nContent-Type: text/plain\r\n\r\nhello\r\n--boundary--\r\n"
         parts = decode_multipart_mixed(raw, "multipart/mixed; boundary=boundary")

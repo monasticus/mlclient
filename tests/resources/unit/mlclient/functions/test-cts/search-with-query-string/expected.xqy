@@ -1,0 +1,19 @@
+xquery version "1.0-ml";
+declare variable $v0 as xs:string external;
+declare variable $v1 as xs:string external;
+let $invalid-paths := (
+    <path kind="search" binding="v0">{$v0}</path>
+)[fn:not(
+    try { cts:valid-extract-path(.) }
+    catch ($error) { fn:false() }
+)]
+return if (fn:empty($invalid-paths)) then
+    xdmp:value($v1)
+else
+    fn:error(fn:QName("", "MLCLIENT-INVALID-PATH"),
+        fn:concat("Invalid XPath(s): ", fn:string-join(
+            for $path in $invalid-paths
+            return fn:concat("[", fn:string($path/@kind), ":",
+                fn:string($path/@binding), "] ", fn:string($path)),
+            "; ")),
+        $invalid-paths)

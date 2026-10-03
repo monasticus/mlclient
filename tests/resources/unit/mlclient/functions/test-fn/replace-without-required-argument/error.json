@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.replace() missing 3 required positional arguments: 'input', 'pattern', and 'replacement'"
+}

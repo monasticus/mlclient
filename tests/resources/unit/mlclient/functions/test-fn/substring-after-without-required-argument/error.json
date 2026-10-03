@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.substring_after() missing 2 required positional arguments: 'input' and 'after'"
+}

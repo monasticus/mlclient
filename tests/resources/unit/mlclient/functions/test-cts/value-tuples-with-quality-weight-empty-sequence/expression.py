@@ -1,0 +1,7 @@
+from mlclient.functions.xqy import cts
+
+
+def run():
+    return cts.value_tuples(
+        cts.element_reference("price"), quality_weight=None,
+    ).compile()

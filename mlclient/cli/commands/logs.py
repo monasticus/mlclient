@@ -24,7 +24,7 @@ from mlclient._manager import MLClientManager
 from mlclient.exceptions import WrongParametersError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
-from mlclient.services.logs import AsyncLogsService, LogsService
+from mlclient.services.diagnostics.logs import AsyncLogsService, LogsService
 
 
 class LogsCommand(Command):

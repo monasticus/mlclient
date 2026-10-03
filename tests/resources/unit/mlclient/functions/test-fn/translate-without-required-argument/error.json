@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.translate() missing 3 required positional arguments: 'src', 'map_string', and 'trans_string'"
+}

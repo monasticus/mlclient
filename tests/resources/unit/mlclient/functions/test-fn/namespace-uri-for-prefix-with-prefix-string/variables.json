@@ -1,0 +1,5 @@
+{
+  "v0": "p",
+  "v1": "/p:item",
+  "v2": "fn:namespace-uri-for-prefix($v0, /p:item)"
+}

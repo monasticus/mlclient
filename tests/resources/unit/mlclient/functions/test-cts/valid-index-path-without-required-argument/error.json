@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.valid_index_path() missing 2 required positional arguments: 'string' and 'ignorens'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.avg_aggregate() missing 1 required positional argument: 'range_index'"
+}

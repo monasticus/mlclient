@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import httpx
 import pytest
 import pytest_asyncio
@@ -11,9 +13,11 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.services.eval import _LOCAL_NS
+from mlclient.functions.xqy import fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
+
+LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
 
 
 @pytest_asyncio.fixture
@@ -25,10 +29,13 @@ async def svc():
 @pytest.mark.asyncio
 @respx.mock
 async def test_eval_preserves_bodyless_http_failure(svc):
-    route = respx.post(
-        "http://localhost:8000/v1/eval",
-        data={"xquery": "1"},
-    ).respond(403)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": "1"})
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_post()
 
     with pytest.raises(httpx.HTTPStatusError) as raised:
         await svc.xquery("1")
@@ -315,14 +322,14 @@ async def test_eval_variables_using_namespace(svc):
     ml_mocker.with_request_body(
         {
             "xquery": code,
-            "vars": f'{{"{{{_LOCAL_NS}}}VARIABLE": "X"}}',
+            "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}',
         },
     )
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_body_part("string", "X")
     ml_mocker.mock_post()
 
-    resp = await svc.xquery(code, variables={f"{{{_LOCAL_NS}}}VARIABLE": "X"})
+    resp = await svc.xquery(code, variables={f"{{{LOCAL_NS}}}VARIABLE": "X"})
 
     assert resp == "X"
 
@@ -368,7 +375,7 @@ async def test_eval_using_txid_param(svc):
 @pytest.mark.asyncio
 @respx.mock
 async def test_eval_file_xquery(svc):
-    code = 'xquery version "1.0-ml"; ()'
+    code = 'xquery version "1.0-ml";\n\n()\n'
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
@@ -391,7 +398,7 @@ async def test_eval_file_xquery(svc):
 @pytest.mark.asyncio
 @respx.mock
 async def test_eval_file_javascript(svc):
-    code = "'use strict'; Sequence.from([]);"
+    code = "'use strict';\n\nSequence.from([]);\n"
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["js", "sjs"]:
@@ -446,8 +453,9 @@ async def test_eval_execute_rejects_file_with_xquery(svc):
     with pytest.raises(WrongParametersError) as err:
         await svc.execute(file="code.xqy", xq="()")
 
-    assert "file" in err.value.args[0]
-    assert "xquery" in err.value.args[0]
+    assert str(err.value) == (
+        "You cannot include both the file and the xquery parameter!"
+    )
 
 
 @pytest.mark.asyncio
@@ -455,8 +463,9 @@ async def test_eval_execute_rejects_file_with_javascript(svc):
     with pytest.raises(WrongParametersError) as err:
         await svc.execute(file="code.sjs", js="[];")
 
-    assert "file" in err.value.args[0]
-    assert "javascript" in err.value.args[0]
+    assert str(err.value) == (
+        "You cannot include both the file and the javascript parameter!"
+    )
 
 
 @pytest.mark.asyncio
@@ -507,3 +516,50 @@ async def test_eval_with_bytes_output_type(svc):
 
     assert isinstance(resp, bytes)
     assert resp == b"<root/>"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_expression(svc):
+    expression = fn.upper_case("value")
+    code, variables = expression.compile(namespaces={"p": "urn:test"})
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("txid", "transaction")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "VALUE")
+    route = ml_mocker.mock_post()
+
+    result = await svc.expression(
+        expression,
+        namespaces={"p": "urn:test"},
+        database="Documents",
+        txid="transaction",
+        timeout=2,
+    )
+
+    assert result == "VALUE"
+    assert route.calls.last.request.extensions["timeout"]["read"] == 2
+
+
+@pytest.mark.asyncio
+async def test_expression_rejects_non_expression(svc):
+    with pytest.raises(
+        TypeError, match=r"^expression requires an XqyExpression$",
+    ) as error:
+        await svc.expression("fn:true()")
+
+    assert str(error.value) == "expression requires an XqyExpression"
+
+
+@pytest.mark.asyncio
+async def test_expression_rejects_output_type(svc):
+    with pytest.raises(
+        ValueError, match=r"^output_type must be None, str or bytes$",
+    ) as error:
+        await svc.expression(fn.true(), output_type=int)
+
+    assert str(error.value) == "output_type must be None, str or bytes"

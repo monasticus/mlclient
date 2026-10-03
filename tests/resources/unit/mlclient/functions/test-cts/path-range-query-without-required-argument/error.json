@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.path_range_query() missing 3 required positional arguments: 'path_expression', 'operator', and 'value'"
+}

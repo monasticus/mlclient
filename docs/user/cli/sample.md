@@ -1,17 +1,17 @@
 # sample
 
 Inspect a few XML or JSON documents or nodes without writing a query.
-The command evaluates `cts.search(...).pos([1, limit])` with `ml.eval.expression`
-on the selected connection's content database. It returns content without score
-or source-location metadata and does not modify documents. XML is the default,
-and the limit defaults to 1. Results are formatted with two-space indentation by
-default; use `--no-pretty` to retain the server's formatting.
+By default, print one XML result from the selected connection's content database.
+Use `--json` (`-j`) for JSON, a path to select specific content, and `--limit` to
+show more results. The command reads data without modifying documents.
+Results use two-space indentation by default; `--no-pretty` retains the server's
+formatting.
 
 ```sh
 ml sample order
 ml sample '/order/item' --limit 3
 ml sample '*:order' -c content
-ml sample / --json
+ml sample / -j
 ml sample address --json
 ml sample / --json --limit 2 --no-pretty
 ```
@@ -24,8 +24,8 @@ Optional root name or XPath, defaulting to `/` (whole documents). A bare name su
 as `order` becomes `/order`. Input containing a slash or starting with `.` is
 passed unchanged. For a namespace-independent XML root name, use `*:order`.
 
-Paths must be fully searchable by MarkLogic's `cts:search`. This is a database
-XPath, not a document URI or a JSONPath expression. Empty input is rejected.
+Use a database XPath supported by MarkLogic. Document URIs and JSONPath
+expressions are not accepted. Empty input is rejected.
 An empty result produces no output and succeeds.
 
 ## Options
@@ -33,15 +33,13 @@ An empty result produces no output and succeeds.
 ### `--limit`, `-l`
 
 Integer maximum number of returned nodes from `1` to `100`, defaulting to `1`.
-Values outside this range are rejected before a request is made. Selection
-happens on the server via `.pos([1, limit])`, not by truncating downloaded results.
-The limit counts selected nodes, which are not necessarily whole documents.
-Results follow the normal CTS search order; this is not random sampling.
+Values outside this range are rejected. The limit counts selected nodes, which
+may be whole documents or parts of documents. Results are returned in search
+order rather than chosen randomly.
 
-### `--json`
+### `--json`, `-j`
 
-Select JSON documents instead of XML using the CTS `format-json` option.
-Without this flag the search uses `format-xml`.
+Select JSON documents instead of the default XML documents.
 
 JSON documents do not need a named outer property: `ml sample / --json` prints
 whole documents. To inspect an object property, use `ml sample address --json`
@@ -55,7 +53,6 @@ Disable the default two-space indentation. Each selected result is printed on it
 own line, with no score or source-location metadata. JSON arrays remain single
 results rather than being split into separate samples.
 
-Each result is decoded as text without model conversion or re-serialization.
 `--no-pretty` preserves the server's formatting. With pretty-printing enabled,
 an existing XML declaration is preserved verbatim; none is added when absent.
 Mixed XML content and `xml:space="preserve"` are not re-indented.

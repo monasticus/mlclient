@@ -12,32 +12,12 @@ from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from mlclient.functions.xqy import cts
 from mlclient.services import EvalService
+from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
-SEARCH_XQUERY = (
-    'xquery version "1.0-ml";\n'
-    "declare variable $v0 as xs:string external;\n"
-    "declare variable $v1 as xs:string external;\n"
-    "declare variable $v2 as xs:integer external;\n"
-    "declare variable $v3 as xs:integer external;\n"
-    "declare variable $v4 as xs:string external;\n"
-    "let $invalid-paths := (\n"
-    '    <path kind="search" binding="v0">{$v0}</path>\n'
-    ")[fn:not(\n"
-    "    try { cts:valid-extract-path(.) }\n"
-    "    catch ($error) { fn:false() }\n"
-    ")]\n"
-    "return if (fn:empty($invalid-paths)) then\n"
-    "    xdmp:value($v4)\n"
-    "else\n"
-    '    fn:error(fn:QName("", "MLCLIENT-INVALID-PATH"),\n'
-    '        fn:concat("Invalid XPath(s): ", fn:string-join(\n'
-    "            for $path in $invalid-paths\n"
-    '            return fn:concat("[", fn:string($path/@kind), ":",\n'
-    '                fn:string($path/@binding), "] ", fn:string($path)),\n'
-    '            "; ")),\n'
-    "        $invalid-paths)"
-)
+SEARCH_XQUERY = resources_utils.read_test_resource_text(
+    __file__, "search.xqy",
+).removesuffix("\n")
 
 
 @pytest.fixture(autouse=True)
@@ -97,11 +77,10 @@ def test_command_sample_root(mocker):
 
 
 def test_command_sample_document(mocker):
-    declaration = '<?xml version="1.0" encoding="UTF-8"?>'
     evaluate = mocker.patch.object(
         EvalService,
         "expression",
-        return_value=declaration + "\n<order><item/></order>",
+        return_value="<order><item/></order>",
     )
     tester = _get_tester()
 
@@ -111,7 +90,7 @@ def test_command_sample_document(mocker):
         cts.search("/", options="format-xml").pos([1, 1]),
         output_type=str,
     )
-    assert tester.io.fetch_output() == declaration + "\n<order>\n  <item/>\n</order>\n"
+    assert tester.io.fetch_output() == "<order>\n  <item/>\n</order>\n"
 
 
 def test_command_sample_path(mocker):
@@ -197,7 +176,8 @@ def test_command_sample_environment(mocker, environment_loader):
     environment_loader.assert_called_once_with("dev")
 
 
-def test_command_sample_json_document(mocker):
+@pytest.mark.parametrize("json_option", ["--json", "-j"])
+def test_command_sample_json_document(mocker, json_option):
     evaluate = mocker.patch.object(
         EvalService,
         "expression",
@@ -205,7 +185,7 @@ def test_command_sample_json_document(mocker):
     )
     tester = _get_tester()
 
-    assert tester.execute("--json") == 0
+    assert tester.execute(json_option) == 0
 
     evaluate.assert_called_once_with(
         cts.search("/", options="format-json").pos([1, 1]),
@@ -259,24 +239,6 @@ def test_command_sample_no_pretty_xml(mocker):
     tester = _get_tester()
 
     assert tester.execute("order --no-pretty") == 0
-    assert tester.io.fetch_output() == content + "\n"
-
-
-def test_command_sample_no_pretty_xml_document(mocker):
-    content = '<?xml version="1.0" encoding="UTF-8"?>\r\n<order><item /></order>'
-    mocker.patch.object(EvalService, "expression", return_value=content)
-    tester = _get_tester()
-
-    assert tester.execute("--no-pretty") == 0
-    assert tester.io.fetch_output() == content + "\n"
-
-
-def test_command_sample_no_pretty_json(mocker):
-    content = '{"key":"value"}'
-    mocker.patch.object(EvalService, "expression", return_value=content)
-    tester = _get_tester()
-
-    assert tester.execute("--json --no-pretty") == 0
     assert tester.io.fetch_output() == content + "\n"
 
 

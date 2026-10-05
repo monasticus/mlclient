@@ -18,7 +18,7 @@ _MAX_SAMPLE_LIMIT = 100
 
 
 class SampleCommand(Command):
-    """Print sample XML or JSON content using CTS search.
+    """Print sample XML or JSON content from the database.
 
     Usage:
       sample [options] [--] [<path>]
@@ -34,7 +34,7 @@ class SampleCommand(Command):
             Connection identifier from the environment or TCP port
       -l, --limit=LIMIT
             Maximum number of sample results (1-100) [default: "1"]
-          --json
+      -j, --json
             Sample JSON documents instead of XML documents
           --no-pretty
             Print sample content without pretty-printing
@@ -66,7 +66,9 @@ class SampleCommand(Command):
             flag=False,
             default="1",
         ),
-        option("json", description="Sample JSON documents instead of XML documents"),
+        option(
+            "json", "j", description="Sample JSON documents instead of XML documents",
+        ),
         option("no-pretty", description="Print sample content without pretty-printing"),
     ]
 

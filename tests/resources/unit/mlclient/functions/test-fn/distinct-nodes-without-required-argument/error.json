@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.distinct_nodes() missing 1 required positional argument: 'nodes'"
+}

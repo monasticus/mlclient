@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.column_range_query() missing 4 required positional arguments: 'schema', 'view', 'column', and 'value'"
+}

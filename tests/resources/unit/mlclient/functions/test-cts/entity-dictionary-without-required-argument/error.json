@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.entity_dictionary() missing 1 required positional argument: 'entities'"
+}

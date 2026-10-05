@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.point() missing 1 required positional argument: 'latitude_or_wkt'"
+}

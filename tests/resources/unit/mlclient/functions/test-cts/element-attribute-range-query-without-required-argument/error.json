@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.element_attribute_range_query() missing 4 required positional arguments: 'element_name', 'attribute_name', 'operator', and 'value'"
+}

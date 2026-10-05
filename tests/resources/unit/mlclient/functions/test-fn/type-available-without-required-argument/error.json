@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.type_available() missing 1 required positional argument: 'type_name'"
+}

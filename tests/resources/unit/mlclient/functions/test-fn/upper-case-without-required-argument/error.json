@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.upper_case() missing 1 required positional argument: 'string'"
+}

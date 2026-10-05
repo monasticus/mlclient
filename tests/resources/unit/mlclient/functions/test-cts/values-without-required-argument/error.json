@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.values() missing 1 required positional argument: 'range_indexes'"
+}

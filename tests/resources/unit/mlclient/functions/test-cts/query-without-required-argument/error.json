@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.query() missing 1 required positional argument: 'query'"
+}

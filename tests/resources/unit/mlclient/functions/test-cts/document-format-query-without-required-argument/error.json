@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.document_format_query() missing 1 required positional argument: 'format'"
+}

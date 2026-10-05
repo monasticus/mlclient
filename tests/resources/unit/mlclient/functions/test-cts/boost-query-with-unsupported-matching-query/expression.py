@@ -1,0 +1,5 @@
+from mlclient.functions.xqy import cts
+
+
+def run():
+    return cts.boost_query(set(), "boosting-query")

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.index_of() missing 2 required positional arguments: 'seq_param' and 'srch_param'"
+}

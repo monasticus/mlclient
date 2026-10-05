@@ -1,0 +1,4 @@
+{
+  "v0": "/p:item",
+  "v1": "fn:namespace-uri-for-prefix((), /p:item)"
+}

@@ -1,0 +1,7 @@
+from mlclient.functions.xqy import cts, fn
+
+
+def run():
+    return cts.geospatial_co_occurrences(
+        "item", "item", child_2_name_2=fn.string(cts.search().pos(1)),
+    ).compile()

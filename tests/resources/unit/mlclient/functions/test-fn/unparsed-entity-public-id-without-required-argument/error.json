@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.unparsed_entity_public_id() missing 1 required positional argument: 'entity_name'"
+}

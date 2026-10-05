@@ -1,0 +1,5 @@
+from mlclient.functions.xqy import cts
+
+
+def run():
+    return cts.period_range_query(set(), "aln_before")

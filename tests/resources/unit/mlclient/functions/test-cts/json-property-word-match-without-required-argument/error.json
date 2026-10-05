@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.json_property_word_match() missing 2 required positional arguments: 'property_names' and 'pattern'"
+}

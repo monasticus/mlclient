@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.function_lookup() missing 2 required positional arguments: 'name' and 'arity'"
+}

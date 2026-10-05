@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.classify() missing 2 required positional arguments: 'data_nodes' and 'classifier'"
+}

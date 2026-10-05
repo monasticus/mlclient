@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.valid_extract_path() missing 1 required positional argument: 'string'"
+}

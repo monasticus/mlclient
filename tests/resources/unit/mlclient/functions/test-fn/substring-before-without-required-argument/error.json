@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.substring_before() missing 2 required positional arguments: 'input' and 'before'"
+}

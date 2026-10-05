@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.namespace_uri_from_qname() missing 1 required positional argument: 'arg'"
+}

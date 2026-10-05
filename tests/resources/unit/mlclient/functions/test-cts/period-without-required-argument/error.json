@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.period() missing 2 required positional arguments: 'start' and 'end'"
+}

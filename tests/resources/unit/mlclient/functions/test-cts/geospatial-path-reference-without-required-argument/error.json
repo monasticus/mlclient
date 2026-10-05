@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.geospatial_path_reference() missing 1 required positional argument: 'path_expression'"
+}

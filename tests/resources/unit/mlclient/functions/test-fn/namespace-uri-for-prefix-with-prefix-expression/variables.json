@@ -1,0 +1,5 @@
+{
+  "v0": "1",
+  "v1": "/p:item",
+  "v2": "fn:namespace-uri-for-prefix(fn:string(cts:search(/, ())[$v0]), /p:item)"
+}

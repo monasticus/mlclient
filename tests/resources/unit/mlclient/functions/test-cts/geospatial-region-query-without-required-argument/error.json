@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.geospatial_region_query() missing 3 required positional arguments: 'geospatial_region_reference', 'operation', and 'regions'"
+}

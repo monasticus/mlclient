@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.tail() missing 1 required positional argument: 'seq'"
+}

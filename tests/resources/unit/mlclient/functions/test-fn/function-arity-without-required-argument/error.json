@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.function_arity() missing 1 required positional argument: 'function'"
+}

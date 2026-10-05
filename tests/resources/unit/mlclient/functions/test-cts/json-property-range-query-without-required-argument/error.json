@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.json_property_range_query() missing 3 required positional arguments: 'property_name', 'operator', and 'value'"
+}

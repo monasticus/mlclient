@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.and_query() missing 1 required positional argument: 'queries'"
+}

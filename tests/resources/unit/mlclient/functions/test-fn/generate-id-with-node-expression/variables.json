@@ -1,0 +1,4 @@
+{
+  "v0": "/p:item",
+  "v1": "fn:generate-id(/p:item)"
+}

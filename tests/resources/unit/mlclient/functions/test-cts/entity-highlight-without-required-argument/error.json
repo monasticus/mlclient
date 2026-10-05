@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.entity_highlight() missing 2 required positional arguments: 'node' and 'expr'"
+}

@@ -34,6 +34,7 @@ from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
+from mlclient.cli.commands.sample import SampleCommand
 from mlclient.cli.commands.trace_events import TraceEventsCommand
 from mlclient.cli.commands.url import UrlCommand
 from mlclient.cli.commands.version import VersionCommand
@@ -55,6 +56,7 @@ class MLCLIentApplication(Application):
         self.add(LogsCommand())
         self.add(EvalCommand())
         self.add(HttpCommand())
+        self.add(SampleCommand())
         self.add(EnvInitCommand())
         self.add(EnvShowCommand())
         self.add(EnvEditCommand())

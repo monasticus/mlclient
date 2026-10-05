@@ -63,6 +63,7 @@ ml env compare local dev                  # Compare inherited settings
 ml env remove dev                         # Remove it after confirmation
 ml eval -x '"Hello World!"'               # Evaluate code
 ml http get /v1/documents uri=/doc.json   # Send a raw request
+ml sample order                           # Inspect sample XML content
 ml logs -s 8002                           # Read a server's logs
 ml logs --all-hosts --regex 'Forest M.*'  # Merge error logs across the cluster
 ml log-level                              # Inspect the group log level
@@ -76,6 +77,9 @@ You can import an ml-gradle configuration or discover App Servers from a host.
 Store multiple connections in one environment and select one with
 `-c/--connection` where supported. `logs -s/--server` selects logs by identifier
 or port; `log-level -s/--server` selects an actual MarkLogic App Server name.
+`eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation.
+Use `--no-pretty` to keep the original formatting.
+
 Read the [CLI guide](https://monasticus.github.io/mlclient/latest/user/cli/).
 
 ## Background and stability

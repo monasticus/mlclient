@@ -280,9 +280,46 @@ def test_command_eval_output():
         "1",
         "string-value",
         "<root/>",
-        '{"key": "value"}',
+        '{\n  "key": "value"\n}',
     ]
     assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
+@respx.mock
+def test_command_eval_formats_results_by_default():
+    code = "<root><item>one</item><item>two</item></root>"
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", code)
+    ml_mocker.mock_post()
+
+    tester = _get_tester("eval")
+    assert tester.execute(f"-x '{code}'") == 0
+    assert tester.io.fetch_output() == (
+        "Evaluating code using REST App-Server http://localhost:8002\n\n"
+        "<root>\n  <item>one</item>\n  <item>two</item>\n</root>\n"
+    )
+
+
+@respx.mock
+def test_command_eval_no_pretty_preserves_xml():
+    code = "<root><item>one</item></root>"
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", code)
+    ml_mocker.mock_post()
+
+    tester = _get_tester("eval")
+    assert tester.execute(f"-x '{code}' --no-pretty") == 0
+    assert tester.io.fetch_output() == (
+        "Evaluating code using REST App-Server http://localhost:8002\n\n" + code + "\n"
+    )
 
 
 def _get_tester(

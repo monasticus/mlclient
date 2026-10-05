@@ -45,6 +45,7 @@ server. Removal asks for confirmation.
 ```sh
 ml eval -x '"Hello World!"'
 ml http get /v1/documents uri=/example.json
+ml sample order
 ml logs -s 8002
 ml log-level
 ml url qc
@@ -53,6 +54,8 @@ ml version
 ```
 
 The `local` environment is the default. Use `-e dev` for another environment.
+`eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation;
+pass `--no-pretty` to keep the original formatting.
 A connection selector chooses where the request is sent; an operation target
 chooses what the server acts on. The distinction is explained below and on each
 command page.
@@ -64,6 +67,7 @@ command page.
 | Create or inspect project configuration | [`ml env`](cli/env.md), with [`init`](cli/env/init.md) and [`show`](cli/env/show.md) |
 | Run XQuery or JavaScript | [`ml eval`](cli/eval.md) |
 | Send an HTTP request | [`ml http`](cli/http.md) |
+| Inspect sample XML or JSON content | [`ml sample`](cli/sample.md) |
 | Read server logs | [`ml logs`](cli/logs.md) |
 | Inspect or change a log level | [`ml log-level`](cli/log-level.md) |
 | Inspect or change diagnostic trace events | [`ml trace-events`](cli/trace-events.md) |
@@ -76,7 +80,7 @@ for its arguments. The pages above explain workflows, defaults and examples.
 
 ## Connection and target selection
 
-`http`, `eval`, `version`, `log-level` and `trace-events` use `-c / --connection` to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.
+`http`, `eval`, `sample`, `version`, `log-level` and `trace-events` use `-c / --connection` to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.
 
 `logs -s / --server` selects whose logs to read by an environment identifier or port. `log-level -s / --server` instead takes the actual App Server name in MarkLogic. It does not select the connection used for the request.
 

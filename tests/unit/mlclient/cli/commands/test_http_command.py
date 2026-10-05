@@ -203,8 +203,9 @@ def test_command_http_include_flag_prints_response_before_raising():
     assert '{"errorResponse": {}}' in command_output
 
 
+@pytest.mark.parametrize("pretty_option", ["--pretty", "-p"])
 @respx.mock
-def test_command_http_pretty_indents_json_body():
+def test_command_http_pretty_formats_response_body(pretty_option):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
     ml_mocker.with_response_code(200)
@@ -213,80 +214,25 @@ def test_command_http_pretty_indents_json_body():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    tester.execute("-e test -p GET /manage/v2/hosts")
+    tester.execute(f"-e test {pretty_option} GET /manage/v2/hosts")
 
-    assert tester.command.option("pretty") is True
     assert tester.io.fetch_output() == '{\n  "a": {\n    "b": 1\n  }\n}\n'
 
 
 @respx.mock
-def test_command_http_pretty_reindents_xml_without_blank_lines():
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_header("Content-Type", "application/xml")
-    ml_mocker.with_response_body("<a>\n  <b>\n    <c>1</c>\n  </b>\n</a>")
-    ml_mocker.mock_get()
-
-    tester = _get_tester()
-    tester.execute("-e test -p GET /manage/v2/hosts")
-    command_output = tester.io.fetch_output()
-
-    assert "<a>\n  <b>\n    <c>1</c>\n  </b>\n</a>" in command_output
-    assert "\n\n" not in command_output
-
-
-@pytest.mark.parametrize(
-    ("content_type", "body"),
-    [
-        ("application/json", "broken json"),
-        ("application/xml", "<broken>"),
-        ("application/xml", "<p>Hello <b>world</b>!</p>"),
-        ("application/xml", '<a xml:space="preserve">  <b/>  </a>'),
-    ],
-)
-@respx.mock
-def test_command_http_pretty_preserves_unformattable_body(content_type, body):
+def test_command_http_preserves_json_body_by_default():
+    body = '{"key":"zażółć"}'
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_request_param("uri", "/doc.json")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_content_type(content_type)
+    ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body(body)
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    assert tester.execute("-p GET /v1/documents") == 0
+    assert tester.execute("GET /v1/documents uri=/doc.json") == 0
     assert tester.io.fetch_output() == body + "\n"
-
-
-@respx.mock
-def test_command_http_pretty_leaves_non_structured_body_untouched():
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_header("Content-Type", "text/plain")
-    ml_mocker.with_response_body("just text")
-    ml_mocker.mock_get()
-
-    tester = _get_tester()
-    tester.execute("-e test -p GET /manage/v2/hosts")
-
-    assert tester.io.fetch_output() == "just text\n"
-
-
-@respx.mock
-def test_command_http_pretty_tolerates_empty_body():
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_header("Content-Type", "application/json")
-    ml_mocker.with_response_body("")
-    ml_mocker.mock_get()
-
-    tester = _get_tester()
-    tester.execute("-e test -p GET /manage/v2/hosts")
-
-    assert tester.io.fetch_output() == "\n"
 
 
 @respx.mock

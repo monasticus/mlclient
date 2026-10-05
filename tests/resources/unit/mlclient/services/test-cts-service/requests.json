@@ -1,0 +1,1658 @@
+{
+  "aggregate-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:aggregate(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "avg_aggregate-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:avg-aggregate(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "classify-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:classify(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "cluster-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:cluster(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "collection_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:collection-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "collection_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:collection-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "collection_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:collection-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "collections-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:collections(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "collections-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:collections(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "collections-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:collections(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "confidence-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:confidence(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "contains-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:contains(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "correlation-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:correlation(fn:true(), fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "count_aggregate-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:count-aggregate(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "covariance-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:covariance(fn:true(), fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "covariance_p-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:covariance-p(fn:true(), fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "deregister-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:deregister(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "distinctive_terms-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:distinctive-terms(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_boxes-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_boxes-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_boxes-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_pair_geospatial_values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-attribute-pair-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_value_co_occurrences-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:element-attribute-value-co-occurrences(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_value_geospatial_co_occurrences-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:element-attribute-value-geospatial-co-occurrences(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-attribute-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_value_ranges-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:element-attribute-value-ranges(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-attribute-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_word_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-word-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_word_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-word-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_word_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-attribute-word-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_words-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-words(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_words-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-attribute-words(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_attribute_words-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-attribute-words(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_boxes-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-child-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_boxes-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-child-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_boxes-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-child-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-child-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-child-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-child-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-child-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-child-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_child_geospatial_values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-child-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_boxes-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_boxes-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_boxes-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_geospatial_values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_boxes-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-pair-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_boxes-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-pair-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_boxes-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-pair-geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-pair-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-pair-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-pair-geospatial-value-match(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-pair-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-pair-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_pair_geospatial_values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-pair-geospatial-values(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_value_co_occurrences-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:element-value-co-occurrences(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_value_geospatial_co_occurrences-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:element-value-geospatial-co-occurrences(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_value_ranges-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:element-value-ranges(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_walk-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:element-walk(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_word_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_word_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_word_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_words-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_words-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:element-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "element_words-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:element-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "entity_dictionary_get-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:entity-dictionary-get(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "entity_highlight-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:entity-highlight(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "entity_walk-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:entity-walk(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "estimate-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:estimate(fn:true(), fn:true(), xs:double(fn:true()), fn:true(), xs:double(fn:true()))"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_value_co_occurrences-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:field-value-co-occurrences(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:field-value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_value_ranges-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:field-value-ranges(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:field-values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_word_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_word_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_word_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:field-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_words-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_words-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:field-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "field_words-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:field-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "fitness-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:fitness(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "frequency-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:frequency(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "geospatial_boxes-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "geospatial_boxes-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "geospatial_boxes-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:geospatial-boxes(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "geospatial_co_occurrences-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:geospatial-co-occurrences(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "highlight-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:highlight(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "json_property_word_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:json-property-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "json_property_word_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:json-property-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "json_property_word_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:json-property-word-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "json_property_words-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:json-property-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "json_property_words-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:json-property-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "json_property_words-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:json-property-words(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "linear_model-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:linear-model(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "match_regions-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:match-regions(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "max-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:max(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "median-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:median(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "min-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:min(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "part_of_speech-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:part-of-speech(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "percent_rank-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:percent-rank(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "percentile-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:percentile(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "period_compare-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:period-compare(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "quality-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:quality(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "rank-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:rank(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "register-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:register(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "relevance_info-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:relevance-info(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "remainder-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:remainder(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "score-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:score(fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "search-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\", \"v1\": \"t:child\", \"v2\": \"for $res in cts:search(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\\nlet $measure := cts:score($res)\\nfor $node in $res ! t:child\\nreturn ($node, $measure)\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:string external;\ndeclare variable $v2 as xs:string external;\nlet $invalid-paths := (\n    <path kind=\"xpath\" binding=\"v1\">{$v1}</path>\n)[fn:not(\n    try { cts:valid-extract-path(.) }\n    catch ($error) { fn:false() }\n)]\nreturn if (fn:empty($invalid-paths)) then\n    xdmp:value($v2)\nelse\n    fn:error(fn:QName(\"\", \"MLCLIENT-INVALID-PATH\"),\n        fn:concat(\"Invalid XPath(s): \", fn:string-join(\n            for $path in $invalid-paths\n            return fn:concat(\"[\", fn:string($path/@kind), \":\",\n                fn:string($path/@binding), \"] \", fn:string($path)),\n            \"; \")),\n        $invalid-paths)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "search-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"t:child\", \"v2\": \"for $res in cts:search(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\\nlet $measure := cts:score($res)\\nfor $node in $res ! t:child\\nreturn ($node, $measure)\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:string external;\ndeclare variable $v2 as xs:string external;\nlet $invalid-paths := (\n    <path kind=\"xpath\" binding=\"v1\">{$v1}</path>\n)[fn:not(\n    try { cts:valid-extract-path(.) }\n    catch ($error) { fn:false() }\n)]\nreturn if (fn:empty($invalid-paths)) then\n    xdmp:value($v2)\nelse\n    fn:error(fn:QName(\"\", \"MLCLIENT-INVALID-PATH\"),\n        fn:concat(\"Invalid XPath(s): \", fn:string-join(\n            for $path in $invalid-paths\n            return fn:concat(\"[\", fn:string($path/@kind), \":\",\n                fn:string($path/@binding), \"] \", fn:string($path)),\n            \"; \")),\n        $invalid-paths)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "search-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\", \"v2\": \"t:child\", \"v3\": \"for $res in cts:search(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\\nlet $measure := cts:score($res)\\nfor $node in $res ! t:child\\nreturn ($node, $measure)\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\ndeclare variable $v2 as xs:string external;\ndeclare variable $v3 as xs:string external;\nlet $invalid-paths := (\n    <path kind=\"xpath\" binding=\"v2\">{$v2}</path>\n)[fn:not(\n    try { cts:valid-extract-path(.) }\n    catch ($error) { fn:false() }\n)]\nreturn if (fn:empty($invalid-paths)) then\n    xdmp:value($v3)\nelse\n    fn:error(fn:QName(\"\", \"MLCLIENT-INVALID-PATH\"),\n        fn:concat(\"Invalid XPath(s): \", fn:string-join(\n            for $path in $invalid-paths\n            return fn:concat(\"[\", fn:string($path/@kind), \":\",\n                fn:string($path/@binding), \"] \", fn:string($path)),\n            \"; \")),\n        $invalid-paths)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "stddev-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:stddev(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "stddev_p-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:stddev-p(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "stem-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:stem(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "sum_aggregate-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:sum-aggregate(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "thresholds-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:thresholds(fn:true(), fn:true(), xs:double(fn:true()))"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "tokenize-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:tokenize(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "train-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:train(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "triple_value_statistics-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:triple-value-statistics(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "triples-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:triples(fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "uri_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ncts:uri-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "uri_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ncts:uri-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "uri_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\ncts:uri-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "uris-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ncts:uris(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "uris-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ncts:uris(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "uris-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\ncts:uris(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "valid_document_patch_path-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:valid-document-patch-path(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "valid_extract_path-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:valid-extract-path(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "valid_index_path-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:valid-index-path(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "valid_optic_path-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:valid-optic-path(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "valid_tde_context-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:valid-tde-context(fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "value_co_occurrences-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:value-co-occurrences(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "value_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "value_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "value_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:value-match(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "value_ranges-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:value-ranges(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "value_tuples-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:value-tuples(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "values-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "values-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "values-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:values(fn:true(), fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "variance-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:variance(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "variance_p-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:variance-p(fn:true(), fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "walk-all": {
+    "body": {
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ncts:walk(fn:true(), fn:true(), fn:true())"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "word_match-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:word-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "word_match-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:word-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "word_match-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:word-match(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "words-index": {
+    "body": {
+      "vars": "{\"v0\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:words(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "words-range-expr": {
+    "body": {
+      "vars": "{\"v0\": \"1\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\nfor $res in cts:words(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to fn:last()]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  },
+  "words-range-literal": {
+    "body": {
+      "vars": "{\"v0\": \"1\", \"v1\": \"2\"}",
+      "xquery": "xquery version \"1.0-ml\";\ndeclare namespace t = \"https://monasticus.com/mlclient/examples/cts-test\";\ndeclare variable $v0 as xs:integer external;\ndeclare variable $v1 as xs:integer external;\nfor $res in cts:words(fn:true(), fn:true(), fn:true(), xs:double(fn:true()), fn:true())[$v0 to $v1]\nreturn if ($res instance of map:map) then\n    fn:error(fn:QName(\"\", \"MLCLIENT-LEXICON-MAP\"),\n        \"Map output is not a value sequence; use ml.eval.expression(cts...)\")\nelse\n    let $measure := cts:frequency($res)\n    return ($res, $measure)"
+    },
+    "params": {
+      "database": "Documents",
+      "txid": "transaction"
+    }
+  }
+}

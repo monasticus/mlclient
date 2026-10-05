@@ -104,6 +104,7 @@ Name a namespaced variable in Clark notation (`{namespace-uri}local-name`):
 
 ```python
 >>> from mlclient import MLClient
+>>> from mlclient.functions.xqy import LOCAL_NS_URI
 
 >>> xq = '''
 ... declare variable $local:DAYS external;
@@ -114,7 +115,7 @@ Name a namespaced variable in Clark notation (`{namespace-uri}local-name`):
 ...     result = ml.eval.xquery(
 ...         xq,
 ...         variables={
-...             "{http://www.w3.org/2005/xquery-local-functions}DAYS": 5,
+...             f"{{{LOCAL_NS_URI}}}DAYS": 5,
 ...         },
 ...     )
 >>> result

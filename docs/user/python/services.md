@@ -15,13 +15,15 @@ See [Clients](../clients.md) for the full tier map.
 
 ## Client services
 
-The essential services hang off a connected client, ready to use:
+Documents, evaluation and transactions are available directly on the client.
+Construct the search service from `ml.rest`:
 
 | Service | Access | Guide |
 | --- | --- | --- |
 | Documents | `ml.documents` | [Documents](documents.md) |
 | Evaluate code | `ml.eval` | [Evaluate code](eval.md) |
 | Transactions | `ml.transaction()` | [Transactions](transactions.md) |
+| Search | `CtsService(ml.rest)` | [Search](search.md) |
 
 ```python
 from mlclient import MLClient
@@ -40,7 +42,10 @@ context manager that commits on a clean exit, rolls back on error, and unpacks
 with `**` into the operations it should cover. See
 [Transactions](transactions.md).
 
-## Additional services
+## Diagnostics
+
+Operational services live in `mlclient.services.diagnostics`: Logs, LogLevel
+and TraceEvents.
 
 Other services are not on the client facade. They cover narrower or more
 operational needs, so instead of a ready property you construct them yourself
@@ -49,12 +54,12 @@ Python output, defaults applied - just off the curated client surface.
 
 ### Logs
 
-[LogsService][mlclient.services.LogsService] returns parsed log records
+[LogsService][mlclient.services.diagnostics.LogsService] returns parsed log records
 through the Management API. Construct it from `ml.manage`:
 
 ```python
 from mlclient import MLClient
-from mlclient.services import LogsService
+from mlclient.services.diagnostics import LogsService
 
 with MLClient() as ml:
     logs = LogsService(ml.manage)
@@ -70,7 +75,7 @@ logs. Use the [logs command](../cli/logs.md) when you only need terminal output.
 
 ### Log level
 
-[LogLevelService][mlclient.services.LogLevelService] reads or changes
+[LogLevelService][mlclient.services.diagnostics.LogLevelService] reads or changes
 a group or App Server log level. It evaluates
 the Admin module through the REST server first and falls back to the Management
 API only when the connecting user lacks the eval privilege - so it needs both
@@ -78,7 +83,7 @@ API only when the connecting user lacks the eval privilege - so it needs both
 
 ```python
 from mlclient import MLClient
-from mlclient.services import LogLevelService
+from mlclient.services.diagnostics import LogLevelService
 
 with MLClient() as ml:
     levels = LogLevelService(ml.rest, ml.manage)
@@ -93,12 +98,12 @@ supported levels and the Management permissions each path needs.
 
 ### Trace events
 
-[TraceEventsService][mlclient.services.TraceEventsService] reads and changes
+[TraceEventsService][mlclient.services.diagnostics.TraceEventsService] reads and changes
 group diagnostics through the REST server's Admin-module evaluation:
 
 ```python
 from mlclient import MLClient
-from mlclient.services import TraceEventsService
+from mlclient.services.diagnostics import TraceEventsService
 
 with MLClient() as ml:
     traces = TraceEventsService(ml.rest)
@@ -106,7 +111,7 @@ with MLClient() as ml:
     print(state.activated, state.events)
 ```
 
-The immutable [TraceEvents][mlclient.services.TraceEvents] result contains the
+The immutable [TraceEvents][mlclient.services.diagnostics.TraceEvents] result contains the
 master `activated` flag and an alphabetically sorted tuple of configured event
 names. `set_event("XDMP Deadlock", enabled=True)` adds an event without changing
 activation; `set_activated(value=True)` changes the master switch without changing

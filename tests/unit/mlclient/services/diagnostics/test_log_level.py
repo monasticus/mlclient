@@ -13,7 +13,7 @@ from mlclient import MLClient
 from mlclient._options import UNSET
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.http import HTTPConfig
-from mlclient.services import LogLevelService
+from mlclient.services.diagnostics import LogLevelService
 from tests.utils.ml_mockers import MLRespXMocker
 
 EVAL_URL = "http://localhost:8000/v1/eval"
@@ -152,7 +152,7 @@ def test_set_server_level_uses_appserver_eval(ml):
 
 @respx.mock
 def test_get_group_falls_back_to_manage_on_privilege_error(ml, caplog):
-    caplog.set_level(logging.DEBUG, logger="mlclient.services.log_level")
+    caplog.set_level(logging.DEBUG, logger="mlclient.services.diagnostics.log_level")
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(EVAL_URL)
     ml_mocker.with_response_code(403)
@@ -250,7 +250,7 @@ def test_get_server_falls_back_to_manage_servers_on_privilege_error(ml):
 
 @respx.mock
 def test_set_group_falls_back_to_manage_put_on_privilege_error(ml, caplog):
-    caplog.set_level(logging.DEBUG, logger="mlclient.services.log_level")
+    caplog.set_level(logging.DEBUG, logger="mlclient.services.diagnostics.log_level")
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(EVAL_URL)
     ml_mocker.with_response_code(403)
@@ -378,7 +378,7 @@ def test_eval_timeout_propagates_without_manage_fallback(operation):
 @pytest.mark.parametrize("operation", ["get", "set"])
 @respx.mock
 def test_manage_timeout_is_logged_and_propagated(operation, caplog):
-    caplog.set_level(logging.DEBUG, logger="mlclient.services.log_level")
+    caplog.set_level(logging.DEBUG, logger="mlclient.services.diagnostics.log_level")
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(EVAL_URL)
     ml_mocker.with_response_code(403)

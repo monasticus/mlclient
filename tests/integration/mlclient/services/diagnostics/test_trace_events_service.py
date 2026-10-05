@@ -6,7 +6,7 @@ import pytest
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.services import TraceEventsService
+from mlclient.services.diagnostics import TraceEventsService
 
 
 @pytest.fixture(scope="class")

@@ -8,7 +8,7 @@ import respx
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.types import LogType
-from mlclient.services import AsyncLogsService
+from mlclient.services.diagnostics import AsyncLogsService
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -24,10 +24,13 @@ async def svc():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_logs_preserves_bodyless_http_failure(svc):
-    route = respx.get(
-        "http://localhost:8002/manage/v2/logs",
-        params={"format": "json", "filename": "ErrorLog.txt"},
-    ).respond(403)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/logs")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "ErrorLog.txt")
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_get()
 
     with pytest.raises(httpx.HTTPStatusError) as raised:
         await svc.get()

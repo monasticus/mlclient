@@ -1,6 +1,6 @@
 install:
 	@pip install poetry
-	@poetry install
+	@poetry install --extras mcp
 	@poetry self add 'poetry-plugin-export<=1.9.0'
 
 update:
@@ -59,7 +59,7 @@ branches:
 .PHONY: docs-install docs-serve docs-build docs-deploy-dev
 
 docs-install:
-	@poetry install --only main,docs
+	@poetry install --only main,docs --extras mcp
 
 docs-serve:
 	@poetry run mkdocs serve

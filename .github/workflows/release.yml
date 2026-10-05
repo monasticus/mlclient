@@ -54,7 +54,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install poetry==2.2.0
-      - run: poetry install --with docs
+      - run: poetry install --with docs --extras mcp
       - run: make docs-build
       - run: poetry build
       - name: Install built wheel without development dependencies

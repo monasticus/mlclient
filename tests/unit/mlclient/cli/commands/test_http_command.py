@@ -156,7 +156,7 @@ def test_command_http_include_flag_prepends_status_and_headers():
 
     assert tester.command.option("include") is True
     assert command_output.startswith("HTTP/1.1 200 OK\n")
-    assert '{\n  "host-default-list": {}\n}' in command_output
+    assert '{"host-default-list": {}}' in command_output
 
 
 @respx.mock
@@ -204,7 +204,7 @@ def test_command_http_include_flag_prints_response_before_raising():
 
 
 @respx.mock
-def test_command_http_indents_json_body_by_default():
+def test_command_http_pretty_indents_json_body():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
     ml_mocker.with_response_code(200)
@@ -213,7 +213,7 @@ def test_command_http_indents_json_body_by_default():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    tester.execute("-e test GET /manage/v2/hosts")
+    tester.execute("-e test --pretty GET /manage/v2/hosts")
 
     assert tester.io.fetch_output() == '{\n  "a": {\n    "b": 1\n  }\n}\n'
 
@@ -235,7 +235,7 @@ def test_command_http_pretty_reindents_xml_without_blank_lines():
 
 
 @respx.mock
-def test_command_http_no_pretty_preserves_json_body():
+def test_command_http_preserves_json_body_by_default():
     body = '{"key":"zażółć"}'
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/documents")
@@ -246,12 +246,12 @@ def test_command_http_no_pretty_preserves_json_body():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    assert tester.execute("GET /v1/documents uri=/doc.json --no-pretty") == 0
+    assert tester.execute("GET /v1/documents uri=/doc.json") == 0
     assert tester.io.fetch_output() == body + "\n"
 
 
 @respx.mock
-def test_command_http_preserves_xml_declaration():
+def test_command_http_pretty_preserves_xml_declaration():
     declaration = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/documents")
@@ -262,14 +262,14 @@ def test_command_http_preserves_xml_declaration():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    assert tester.execute("GET /v1/documents uri=/doc.xml") == 0
+    assert tester.execute("GET /v1/documents uri=/doc.xml --pretty") == 0
     assert tester.io.fetch_output() == (
         declaration + "\n<root>\n  <item>one</item>\n</root>\n"
     )
 
 
 @respx.mock
-def test_command_http_no_pretty_preserves_xml_body():
+def test_command_http_preserves_xml_body_by_default():
     body = '<?xml version="1.0" encoding="UTF-8"?><root><item>one</item></root>'
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/documents")
@@ -280,7 +280,7 @@ def test_command_http_no_pretty_preserves_xml_body():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    assert tester.execute("GET /v1/documents uri=/doc.xml --no-pretty") == 0
+    assert tester.execute("GET /v1/documents uri=/doc.xml") == 0
     assert tester.io.fetch_output() == body + "\n"
 
 

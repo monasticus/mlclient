@@ -48,9 +48,7 @@ class HttpCommand(Command):
       -i, --include
             Include the status line and response headers in the output
       -p, --pretty
-            Pretty-print an XML or JSON body (enabled by default)
-          --no-pretty
-            Print the response body without reformatting
+            Pretty-print an XML or JSON body
     """
 
     name: str = "http"
@@ -99,11 +97,7 @@ class HttpCommand(Command):
         option(
             "pretty",
             "p",
-            description="Pretty-print an XML or JSON body (enabled by default)",
-        ),
-        option(
-            "no-pretty",
-            description="Print the response body without reformatting",
+            description="Pretty-print an XML or JSON body",
         ),
     ]
 
@@ -162,7 +156,7 @@ class HttpCommand(Command):
             Decoded body with optional formatting and protocol metadata
         """
         body = response.text
-        if not self.option("no-pretty"):
+        if self.option("pretty"):
             body = prettify(body, response.headers.get("content-type", ""))
         if method == "HEAD" or self.option("include"):
             return HttpClient.format_http_response(response, body)

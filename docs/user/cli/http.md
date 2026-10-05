@@ -1,13 +1,15 @@
 # http
 
-Send an HTTP request and print its response body. JSON and XML are formatted with
-two-space indentation by default. Use lowercase method names; method matching is
+Send an HTTP request and print its decoded response body without reformatting
+by default. Use `--pretty` to format JSON and XML with two-space indentation.
+Unlike `http`, `eval` and `sample` format results by default and offer `--no-pretty`
+to disable formatting. Use lowercase method names; method matching is
 case-insensitive.
 
 ```sh
 ml http get /v1/documents uri=/doc.json
 ml http get /v1/documents uri=/doc.json --include
-ml http get /v1/documents uri=/doc.json --no-pretty
+ml http get /v1/documents uri=/doc.json --pretty
 ```
 
 Supply headers with `name:value`, query parameters with `name=value`, and a body
@@ -66,15 +68,9 @@ always prints them because it has no response body.
 
 ### `--pretty`, `-p`
 
-Format JSON and element-only XML with two-space indentation. This is already
-enabled by default; the flag remains available for existing commands.
+Format JSON and element-only XML with two-space indentation. Disabled by default.
 Invalid JSON/XML, mixed XML content and `xml:space="preserve"` are left unchanged.
 An existing XML declaration is preserved verbatim; none is added when absent.
-
-### `--no-pretty`
-
-Print the decoded response body without reformatting. Use this when piping output
-to another tool or retaining the server's formatting. Overrides `--pretty`.
 
 ### `--environment`, `-e`
 

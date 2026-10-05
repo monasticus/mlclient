@@ -7,6 +7,8 @@ It contains all CLI commands modules:
         The Logs Command module.
     * http
         The HTTP Command module.
+    * sample
+        The Sample Command module.
     * env_init
         The Env Init Command module.
     * env_show
@@ -35,6 +37,8 @@ It exports the following commands:
         Sends a GET request to the /manage/v2/logs endpoint.
     * HttpCommand
         Sends a raw HTTP request to any REST endpoint.
+    * SampleCommand
+        Prints sample XML or JSON content from the database.
     * EnvInitCommand
         Scaffolds an MLClient environment configuration file.
     * EnvShowCommand
@@ -68,6 +72,7 @@ from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
+from mlclient.cli.commands.sample import SampleCommand
 from mlclient.cli.commands.url import UrlCommand
 from mlclient.cli.commands.version import VersionCommand
 
@@ -83,6 +88,7 @@ __all__ = [
     "HttpCommand",
     "LogLevelCommand",
     "LogsCommand",
+    "SampleCommand",
     "UrlCommand",
     "VersionCommand",
 ]

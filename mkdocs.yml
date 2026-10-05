@@ -107,6 +107,7 @@ nav:
           - compare: user/cli/env/compare.md
       - eval: user/cli/eval.md
       - http: user/cli/http.md
+      - sample: user/cli/sample.md
       - logs: user/cli/logs.md
       - log-level: user/cli/log-level.md
       - trace-events: user/cli/trace-events.md

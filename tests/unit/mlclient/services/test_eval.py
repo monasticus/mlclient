@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import httpx
@@ -12,10 +13,9 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.services.eval import _LOCAL_NS
+from mlclient.functions.xqy import LOCAL_NS_URI, fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
-
 
 @pytest.fixture(autouse=True)
 def ml() -> MLClient:
@@ -33,10 +33,13 @@ def _setup_and_teardown(ml):
 
 @respx.mock
 def test_eval_preserves_bodyless_http_failure(ml):
-    route = respx.post(
-        "http://localhost:8000/v1/eval",
-        data={"xquery": "1"},
-    ).respond(403)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": "1"})
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_post()
 
     with pytest.raises(httpx.HTTPStatusError) as raised:
         ml.eval.xquery("1")
@@ -309,14 +312,14 @@ def test_eval_variables_using_namespace(ml):
     ml_mocker.with_request_body(
         {
             "xquery": code,
-            "vars": f'{{"{{{_LOCAL_NS}}}VARIABLE": "X"}}',
+            "vars": f'{{"{{{LOCAL_NS_URI}}}VARIABLE": "X"}}',
         },
     )
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_body_part("string", "X")
     ml_mocker.mock_post()
 
-    resp = ml.eval.xquery(code, variables={f"{{{_LOCAL_NS}}}VARIABLE": "X"})
+    resp = ml.eval.xquery(code, variables={f"{{{LOCAL_NS_URI}}}VARIABLE": "X"})
 
     assert resp == "X"
 
@@ -359,7 +362,7 @@ def test_eval_using_txid_param(ml):
 
 @respx.mock
 def test_eval_file_xquery(ml):
-    code = 'xquery version "1.0-ml"; ()'
+    code = 'xquery version "1.0-ml";\n\n()\n'
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
@@ -381,7 +384,7 @@ def test_eval_file_xquery(ml):
 
 @respx.mock
 def test_eval_file_javascript(ml):
-    code = "'use strict'; Sequence.from([]);"
+    code = "'use strict';\n\nSequence.from([]);\n"
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["js", "sjs"]:
@@ -434,16 +437,18 @@ def test_eval_execute_rejects_file_with_xquery(ml):
     with pytest.raises(WrongParametersError) as err:
         ml.eval.execute(file="code.xqy", xq="()")
 
-    assert "file" in err.value.args[0]
-    assert "xquery" in err.value.args[0]
+    assert str(err.value) == (
+        "You cannot include both the file and the xquery parameter!"
+    )
 
 
 def test_eval_execute_rejects_file_with_javascript(ml):
     with pytest.raises(WrongParametersError) as err:
         ml.eval.execute(file="code.sjs", js="[];")
 
-    assert "file" in err.value.args[0]
-    assert "javascript" in err.value.args[0]
+    assert str(err.value) == (
+        "You cannot include both the file and the javascript parameter!"
+    )
 
 
 def test_eval_file_unknown_extension(ml):
@@ -491,3 +496,47 @@ def test_eval_with_bytes_output_type(ml):
 
     assert isinstance(resp, bytes)
     assert resp == b"<root/>"
+
+
+@respx.mock
+def test_expression(ml):
+    expression = fn.upper_case("value")
+    code, variables = expression.compile(namespaces={"p": "urn:test"})
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("txid", "transaction")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "VALUE")
+    route = ml_mocker.mock_post()
+
+    result = ml.eval.expression(
+        expression,
+        namespaces={"p": "urn:test"},
+        database="Documents",
+        txid="transaction",
+        timeout=2,
+    )
+
+    assert result == "VALUE"
+    assert route.calls.last.request.extensions["timeout"]["read"] == 2
+
+
+def test_expression_rejects_non_expression(ml):
+    with pytest.raises(
+        TypeError, match=r"^expression requires an XqyExpression$",
+    ) as error:
+        ml.eval.expression("fn:true()")
+
+    assert str(error.value) == "expression requires an XqyExpression"
+
+
+def test_expression_rejects_output_type(ml):
+    with pytest.raises(
+        ValueError, match=r"^output_type must be None, str or bytes$",
+    ) as error:
+        ml.eval.expression(fn.true(), output_type=int)
+
+    assert str(error.value) == "output_type must be None, str or bytes"

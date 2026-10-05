@@ -67,54 +67,6 @@ def test_body_with_variables():
     }
 
 
-def test_body_is_normalized():
-    xquery = """
-    xquery version '1.0-ml';  
-
-    declare variable $data as xs:string? external;
-
-    let $a =
-        if (fn:empty($data)) then
-            'default'
-        else $data
-    return $a
-    """
-
-    call = EvalCall(xquery=xquery, variables={"data": "custom-value"})
-
-    assert call.body == {  # No new line in the xquery code
-        "xquery": "xquery version '1.0-ml'; "
-        "declare variable $data as xs:string? external; "
-        "let $a = if (fn:empty($data)) then 'default' else $data "
-        "return $a",
-        "vars": '{"data": "custom-value"}',
-    }
-
-
-def test_body_normalization_does_not_break_code():
-    xquery = """
-    xquery version '1.0-ml';
-
-    declare variable $data as xs:string? external;
-
-    let $a =
-        if (fn:empty($data)) then
-            '    default'
-        else $data
-    return $a
-    """
-
-    call = EvalCall(xquery=xquery, variables={"data": "custom-value"})
-
-    assert call.body == {  # No new line in the xquery code
-        "xquery": "xquery version '1.0-ml'; "
-        "declare variable $data as xs:string? external; "
-        "let $a = if (fn:empty($data)) then '    default' else $data "
-        "return $a",
-        "vars": '{"data": "custom-value"}',
-    }
-
-
 def test_fully_parametrized_xquery_call():
     call = EvalCall(
         xquery="()",

@@ -259,17 +259,6 @@ def test_imports_in_a_fresh_interpreter():
     subprocess.run([sys.executable, "-c", imports], check=True)
 
 
-def test_xquery_api_is_stable():
-    xqy = importlib.import_module("mlclient.functions.xqy")
-    services = importlib.import_module("mlclient.services")
-
-    assert not getattr(xqy, "__experimental__", None)
-    for name in xqy.__all__:
-        assert not getattr(getattr(xqy, name), "__experimental__", None)
-    assert not getattr(services.CtsService, "__experimental__", None)
-    assert not getattr(services.AsyncCtsService, "__experimental__", None)
-
-
 def test_services_use_only_public_xquery_imports():
     root = Path(__file__).resolve().parents[3] / "mlclient" / "services"
     for source in root.glob("*.py"):

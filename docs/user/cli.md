@@ -53,6 +53,8 @@ ml version
 ```
 
 The `local` environment is the default. Use `-e dev` for another environment.
+`eval` and `http` pretty-print XML and JSON with two-space indentation by default;
+pass `--no-pretty` to keep the original formatting.
 A connection selector chooses where the request is sent; an operation target
 chooses what the server acts on. The distinction is explained below and on each
 command page.

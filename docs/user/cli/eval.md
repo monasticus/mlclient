@@ -1,11 +1,15 @@
 # eval
 
 Run XQuery or server-side JavaScript and print the result.
+XML and JSON results are formatted with two-space indentation by default.
+An existing XML declaration is preserved verbatim; none is added when absent.
+Mixed XML content and `xml:space="preserve"` retain their original formatting.
 
 ```sh
 ml eval -x '"Hello World!"'
 ml eval -j '"Hello World!"'
 ml eval ./query.xqy
+ml eval -x '<root><item>one</item></root>' --no-pretty
 ```
 
 Use `-d` to select a content database, or pass external variables with `--var`:
@@ -53,6 +57,11 @@ App Server's default content database. The user must have permission to access i
 
 Run within an existing multi-statement transaction. This command does not create,
 commit or roll back that transaction.
+
+### `--no-pretty`
+
+Print each result without reformatting XML or JSON, for example when piping output
+to another tool. Plain text and other scalar results are always printed unchanged.
 
 ### `--environment`, `-e`
 

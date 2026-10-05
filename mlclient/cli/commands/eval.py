@@ -15,6 +15,7 @@ from cleo.io.outputs.output import Type
 
 from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
+from mlclient.cli.formatting import prettify
 from mlclient.exceptions import WrongParametersError
 
 
@@ -43,6 +44,8 @@ class EvalCommand(Command):
             Evaluate the code on the named content database
       -t, --txid=TXID
             The transaction identifier of the multi-statement transaction
+          --no-pretty
+            Print results without reformatting XML or JSON
     """
 
     name: str = "eval"
@@ -95,6 +98,10 @@ class EvalCommand(Command):
             description="The transaction identifier of the multi-statement transaction",
             flag=False,
         ),
+        option(
+            "no-pretty",
+            description="Print results without reformatting XML or JSON",
+        ),
     ]
 
     def handle(
@@ -103,6 +110,12 @@ class EvalCommand(Command):
         """Execute the command."""
         eval_params = self._get_eval_params()
         results = self._call_eval(eval_params)
+        if not self.option("no-pretty"):
+            results = (
+                [prettify(item) for item in results]
+                if isinstance(results, list)
+                else prettify(results)
+            )
 
         self._io.write("\n")
         self._io.write(results, new_line=True, type=Type.RAW)

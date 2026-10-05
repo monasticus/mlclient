@@ -7,11 +7,8 @@ It exports an implementation for the 'http' command:
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
-from xml.dom import minidom
-from xml.parsers.expat import ExpatError
 
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
@@ -22,6 +19,7 @@ from httpx import Headers, Response
 
 from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
+from mlclient.cli.formatting import prettify
 from mlclient.clients.http import HttpClient
 from mlclient.exceptions import WrongParametersError
 
@@ -50,7 +48,9 @@ class HttpCommand(Command):
       -i, --include
             Include the status line and response headers in the output
       -p, --pretty
-            Pretty-print an XML or JSON body with a 2-space indent
+            Pretty-print an XML or JSON body (enabled by default)
+          --no-pretty
+            Print the response body without reformatting
     """
 
     name: str = "http"
@@ -99,7 +99,11 @@ class HttpCommand(Command):
         option(
             "pretty",
             "p",
-            description="Pretty-print an XML or JSON body with a 2-space indent",
+            description="Pretty-print an XML or JSON body (enabled by default)",
+        ),
+        option(
+            "no-pretty",
+            description="Print the response body without reformatting",
         ),
     ]
 
@@ -158,102 +162,11 @@ class HttpCommand(Command):
             Decoded body with optional formatting and protocol metadata
         """
         body = response.text
-        if self.option("pretty"):
-            body = _prettify(body, response.headers.get("content-type", ""))
+        if not self.option("no-pretty"):
+            body = prettify(body, response.headers.get("content-type", ""))
         if method == "HEAD" or self.option("include"):
             return HttpClient.format_http_response(response, body)
         return body
-
-
-def _prettify(
-    text: str,
-    content_type: str,
-) -> str:
-    """Indent valid structured responses without hiding malformed response bodies.
-
-    Parameters
-    ----------
-    text : str
-        Decoded response body
-    content_type : str
-        Response media type
-
-    Returns
-    -------
-    str
-        Formatted JSON/XML or the original text when formatting is unsuitable
-    """
-    if not text:
-        return text
-    try:
-        if "json" in content_type.lower():
-            return json.dumps(json.loads(text), indent=2, ensure_ascii=False)
-        if "xml" in content_type.lower():
-            return _prettify_xml(text)
-    except (ValueError, ExpatError):
-        return text
-    return text
-
-
-def _prettify_xml(
-    text: str,
-) -> str:
-    """Re-indent XML by 2 spaces.
-
-    Whitespace-only text nodes between elements are dropped first; left in, the
-    server's own indentation turns into blank lines under toprettyxml.
-    Mixed content and explicit whitespace preservation retain the original text.
-
-    Parameters
-    ----------
-    text : str
-        XML response text
-
-    Returns
-    -------
-    str
-        Indented element-only XML or the original whitespace-sensitive XML
-
-    Raises
-    ------
-    ExpatError
-        If the input is not well-formed XML
-    """
-    dom = minidom.parseString(text)
-    for element in dom.getElementsByTagName("*"):
-        if element.getAttribute("xml:space") == "preserve" or (
-            any(child.nodeType == child.ELEMENT_NODE for child in element.childNodes)
-            and any(
-                child.nodeType in (child.TEXT_NODE, child.CDATA_SECTION_NODE)
-                and (child.data.strip() or (child.data and "\n" not in child.data))
-                for child in element.childNodes
-            )
-        ):
-            return text
-    _strip_blank_text_nodes(dom)
-    return dom.toprettyxml(indent="  ").rstrip("\n")
-
-
-def _strip_blank_text_nodes(
-    node: minidom.Node,
-) -> None:
-    """Remove indentation around child elements, preserving leaf text.
-
-    Parameters
-    ----------
-    node : minidom.Node
-        DOM subtree to modify in place
-    """
-    has_elements = any(item.nodeType == item.ELEMENT_NODE for item in node.childNodes)
-    for child in list(node.childNodes):
-        if (
-            child.nodeType == child.TEXT_NODE
-            and not child.data.strip()
-            and has_elements
-        ):
-            node.removeChild(child)
-        else:
-            _strip_blank_text_nodes(child)
 
 
 def _parse_params(

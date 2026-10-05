@@ -76,6 +76,9 @@ You can import an ml-gradle configuration or discover App Servers from a host.
 Store multiple connections in one environment and select one with
 `-c/--connection` where supported. `logs -s/--server` selects logs by identifier
 or port; `log-level -s/--server` selects an actual MarkLogic App Server name.
+`eval` and `http` pretty-print XML and JSON with two-space indentation by default.
+Use `--no-pretty` to keep the original formatting.
+
 Read the [CLI guide](https://monasticus.github.io/mlclient/latest/user/cli/).
 
 ## Background and stability

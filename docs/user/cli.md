@@ -54,8 +54,9 @@ ml version
 ```
 
 The `local` environment is the default. Use `-e dev` for another environment.
-`eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation;
-pass `--no-pretty` to keep the original formatting.
+`eval` and `sample` pretty-print XML and JSON with two-space indentation;
+pass `--no-pretty` to keep the original formatting. `http` prints the original
+body by default; use `--pretty` to format it.
 A connection selector chooses where the request is sent; an operation target
 chooses what the server acts on. The distinction is explained below and on each
 command page.
@@ -64,6 +65,8 @@ command page.
 
 | Task | Command |
 | --- | --- |
+| Upgrade MLClient and installed skills | [`ml self update`](cli/self/update.md) |
+| Install AI knowledge | [`ml install`](cli/install.md) |
 | Create or inspect project configuration | [`ml env`](cli/env.md), with [`init`](cli/env/init.md) and [`show`](cli/env/show.md) |
 | Run XQuery or JavaScript | [`ml eval`](cli/eval.md) |
 | Send an HTTP request | [`ml http`](cli/http.md) |

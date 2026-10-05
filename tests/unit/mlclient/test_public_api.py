@@ -214,7 +214,6 @@ EXPECTED_EXPORTS = {
         "xs",
     ],
     "mlclient.io": ["DocumentsLoader", "DocumentsWriter"],
-    "mlclient.mcp": ["main", "mcp"],
     "mlclient.jobs": [
         "DocumentJobReport",
         "ReadDocumentsJob",

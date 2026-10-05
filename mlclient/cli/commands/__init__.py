@@ -1,6 +1,10 @@
 """The ML Client CLI Commands package.
 
 It contains all CLI commands modules:
+    * self_update
+        Upgrade MLClient and existing agent integrations.
+    * install_skill
+        Install bundled agent knowledge.
     * eval
         The Eval Command module.
     * logs
@@ -31,6 +35,10 @@ It contains all CLI commands modules:
         The URL Command module.
 
 It exports the following commands:
+    * SelfUpdateCommand
+        Upgrade MLClient and existing agent integrations.
+    * InstallSkillCommand
+        Install bundled agent knowledge.
     * EvalCommand
         Sends a GET request to the /v1/eval endpoint.
     * LogsCommand
@@ -70,9 +78,11 @@ from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
 from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
+from mlclient.cli.commands.install_skill import InstallSkillCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
 from mlclient.cli.commands.sample import SampleCommand
+from mlclient.cli.commands.self_update import SelfUpdateCommand
 from mlclient.cli.commands.url import UrlCommand
 from mlclient.cli.commands.version import VersionCommand
 
@@ -86,9 +96,11 @@ __all__ = [
     "EvalCommand",
     "HealthCommand",
     "HttpCommand",
+    "InstallSkillCommand",
     "LogLevelCommand",
     "LogsCommand",
     "SampleCommand",
+    "SelfUpdateCommand",
     "UrlCommand",
     "VersionCommand",
 ]

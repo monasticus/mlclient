@@ -32,9 +32,11 @@ from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
 from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
+from mlclient.cli.commands.install_skill import InstallSkillCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
 from mlclient.cli.commands.sample import SampleCommand
+from mlclient.cli.commands.self_update import SelfUpdateCommand
 from mlclient.cli.commands.trace_events import TraceEventsCommand
 from mlclient.cli.commands.url import UrlCommand
 from mlclient.cli.commands.version import VersionCommand
@@ -53,6 +55,8 @@ class MLCLIentApplication(Application):
         """Initialize MLCLIentApplication instance."""
         super().__init__(self._APP_NAME, ml_client_version)
         self.set_display_name(self._DISPLAY_NAME)
+        self.add(SelfUpdateCommand())
+        self.add(InstallSkillCommand())
         self.add(LogsCommand())
         self.add(EvalCommand())
         self.add(HttpCommand())

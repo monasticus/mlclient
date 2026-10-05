@@ -75,7 +75,7 @@ nav:
   - Quickstart: quickstart.md
   - Guides:
       - Clients: user/clients.md
-      - MCP server: user/mcp.md
+      - AI integration: user/ai.md
       - Environments: user/environments.md
       - Documents: user/python/documents.md
       - Evaluate code: user/python/eval.md
@@ -106,6 +106,12 @@ nav:
           - copy: user/cli/env/copy.md
           - remove: user/cli/env/remove.md
           - compare: user/cli/env/compare.md
+      - self:
+          - Overview: user/cli/self.md
+          - update: user/cli/self/update.md
+      - install:
+          - Overview: user/cli/install.md
+          - skill: user/cli/install/skill.md
       - eval: user/cli/eval.md
       - http: user/cli/http.md
       - sample: user/cli/sample.md

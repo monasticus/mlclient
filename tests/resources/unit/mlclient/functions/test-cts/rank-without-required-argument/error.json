@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.rank() missing 2 required positional arguments: 'arg' and 'value'"
+}

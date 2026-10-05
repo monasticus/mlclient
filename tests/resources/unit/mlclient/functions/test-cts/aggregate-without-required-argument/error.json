@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.aggregate() missing 3 required positional arguments: 'native_plugin', 'aggregate_name', and 'range_indexes'"
+}

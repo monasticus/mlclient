@@ -1,0 +1,7 @@
+xquery version "1.0-ml";
+declare variable $v0 as xs:string external;
+declare variable $v1 as xs:string external;
+declare variable $v2 as xs:string external;
+declare variable $v3 as xs:integer external;
+declare variable $v4 as xs:integer external;
+cts:range-query(cts:element-reference(xs:QName($v0)), xs:string($v1), $v2, (fn:string(cts:search(/, ())[$v3]), fn:string(cts:search(/, ())[$v4])))

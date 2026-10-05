@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.expanded_qname() missing 2 required positional arguments: 'param_uri' and 'param_local'"
+}

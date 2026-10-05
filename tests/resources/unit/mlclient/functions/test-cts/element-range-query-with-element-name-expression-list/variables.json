@@ -1,0 +1,8 @@
+{
+  "v0": "https://example.com/products",
+  "v1": "p:item",
+  "v2": "https://example.com/products",
+  "v3": "p:item",
+  "v4": "=",
+  "v5": "value"
+}

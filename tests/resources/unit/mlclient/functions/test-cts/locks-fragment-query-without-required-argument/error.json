@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.locks_fragment_query() missing 1 required positional argument: 'query'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.json_property_child_geospatial_query() missing 3 required positional arguments: 'parent_property_name', 'child_property_names', and 'regions'"
+}

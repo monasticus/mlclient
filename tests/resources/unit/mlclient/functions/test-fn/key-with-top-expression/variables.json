@@ -1,0 +1,6 @@
+{
+  "v0": "product",
+  "v1": "42",
+  "v2": "/p:item",
+  "v3": "fn:key($v0, $v1, /p:item)"
+}

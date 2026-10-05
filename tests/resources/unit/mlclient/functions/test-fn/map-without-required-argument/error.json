@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.map() missing 2 required positional arguments: 'function' and 'seq'"
+}

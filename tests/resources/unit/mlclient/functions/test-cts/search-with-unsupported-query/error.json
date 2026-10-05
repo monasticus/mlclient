@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "searchable expressions require a path string or XqyExpression"
+}

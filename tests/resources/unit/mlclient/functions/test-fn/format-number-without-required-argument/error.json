@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.format_number() missing 2 required positional arguments: 'value' and 'picture'"
+}

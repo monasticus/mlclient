@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.namespace_uri_for_prefix() missing 2 required positional arguments: 'prefix' and 'element'"
+}

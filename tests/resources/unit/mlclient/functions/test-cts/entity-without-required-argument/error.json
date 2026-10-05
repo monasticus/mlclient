@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.entity() missing 4 required positional arguments: 'id', 'normalized_text', 'text', and 'type'"
+}

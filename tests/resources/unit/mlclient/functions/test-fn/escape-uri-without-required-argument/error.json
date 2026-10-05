@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.escape_uri() missing 2 required positional arguments: 'uri_part' and 'escape_reserved'"
+}

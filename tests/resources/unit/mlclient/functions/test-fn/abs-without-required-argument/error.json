@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.abs() missing 1 required positional argument: 'arg'"
+}

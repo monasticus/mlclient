@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.max() missing 1 required positional argument: 'arg'"
+}

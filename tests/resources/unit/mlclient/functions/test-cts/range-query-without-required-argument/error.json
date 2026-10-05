@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.range_query() missing 3 required positional arguments: 'index', 'operator', and 'value'"
+}

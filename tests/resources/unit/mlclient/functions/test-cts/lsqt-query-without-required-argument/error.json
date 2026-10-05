@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.lsqt_query() missing 1 required positional argument: 'temporal_collection'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.element_attribute_words() missing 2 required positional arguments: 'element_names' and 'attribute_names'"
+}

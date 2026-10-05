@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.before_query() missing 1 required positional argument: 'timestamp'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.complex_polygon() missing 2 required positional arguments: 'outer' and 'inner'"
+}

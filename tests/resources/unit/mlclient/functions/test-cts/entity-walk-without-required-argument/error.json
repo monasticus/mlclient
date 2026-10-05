@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.entity_walk() missing 2 required positional arguments: 'node' and 'expr'"
+}

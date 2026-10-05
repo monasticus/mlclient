@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.similar_query() missing 1 required positional argument: 'nodes'"
+}

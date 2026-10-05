@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.distinct_values() missing 1 required positional argument: 'arg'"
+}

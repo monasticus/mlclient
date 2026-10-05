@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ElemTree
 import zlib
 from datetime import date, datetime
+from decimal import Decimal
 
 import httpx
 import pytest
@@ -15,6 +16,1435 @@ from tests.utils.ml_mockers import MLRespXMocker
 RESOURCES = resources_utils.get_test_resources(__file__)
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000")
 ml_mock = ml_mocker.router
+
+
+ml_mocker.with_name("single-text-node-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "text()-response"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("text()", "text", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_text_node_response(ml):
+    resp = ml.rest.eval.post(xquery="text()-response")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "text"
+
+
+@ml_mock
+def test_parse_text_single_text_node_response(ml):
+    resp = ml.rest.eval.post(xquery="text()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "text"
+
+
+@ml_mock
+def test_parse_bytes_single_text_node_response(ml):
+    resp = ml.rest.eval.post(xquery="text()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"text"
+
+
+@ml_mock
+def test_parse_with_headers_single_text_node_response(ml):
+    resp = ml.rest.eval.post(xquery="text()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "text"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "text()",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_text_node_response(ml):
+    resp = ml.rest.eval.post(xquery="text()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "text"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "text()",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_text_node_response(ml):
+    resp = ml.rest.eval.post(xquery="text()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"text"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "text()",
+    }
+
+
+ml_mocker.with_name("single-attribute-node-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "attribute()-response"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("attribute()", "value", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_attribute_node_response(ml):
+    resp = ml.rest.eval.post(xquery="attribute()-response")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "value"
+
+
+@ml_mock
+def test_parse_text_single_attribute_node_response(ml):
+    resp = ml.rest.eval.post(xquery="attribute()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "value"
+
+
+@ml_mock
+def test_parse_bytes_single_attribute_node_response(ml):
+    resp = ml.rest.eval.post(xquery="attribute()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"value"
+
+
+@ml_mock
+def test_parse_with_headers_single_attribute_node_response(ml):
+    resp = ml.rest.eval.post(xquery="attribute()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "value"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "attribute()",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_attribute_node_response(ml):
+    resp = ml.rest.eval.post(xquery="attribute()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "value"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "attribute()",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_attribute_node_response(ml):
+    resp = ml.rest.eval.post(xquery="attribute()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"value"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "attribute()",
+    }
+
+
+ml_mocker.with_name("single-comment-node-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "comment()-response"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("comment()", "<!--comment-->", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_comment_node_response(ml):
+    resp = ml.rest.eval.post(xquery="comment()-response")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<!--comment-->"
+
+
+@ml_mock
+def test_parse_text_single_comment_node_response(ml):
+    resp = ml.rest.eval.post(xquery="comment()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<!--comment-->"
+
+
+@ml_mock
+def test_parse_bytes_single_comment_node_response(ml):
+    resp = ml.rest.eval.post(xquery="comment()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"<!--comment-->"
+
+
+@ml_mock
+def test_parse_with_headers_single_comment_node_response(ml):
+    resp = ml.rest.eval.post(xquery="comment()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<!--comment-->"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "comment()",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_comment_node_response(ml):
+    resp = ml.rest.eval.post(xquery="comment()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<!--comment-->"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "comment()",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_comment_node_response(ml):
+    resp = ml.rest.eval.post(xquery="comment()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"<!--comment-->"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "comment()",
+    }
+
+
+ml_mocker.with_name("single-processing-instruction-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "processing-instruction()-response"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part(
+    "processing-instruction()",
+    "<?target value?>",
+    "text/plain",
+)
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_processing_instruction_response(ml):
+    resp = ml.rest.eval.post(xquery="processing-instruction()-response")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<?target value?>"
+
+
+@ml_mock
+def test_parse_text_single_processing_instruction_response(ml):
+    resp = ml.rest.eval.post(xquery="processing-instruction()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<?target value?>"
+
+
+@ml_mock
+def test_parse_bytes_single_processing_instruction_response(ml):
+    resp = ml.rest.eval.post(xquery="processing-instruction()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"<?target value?>"
+
+
+@ml_mock
+def test_parse_with_headers_single_processing_instruction_response(ml):
+    resp = ml.rest.eval.post(xquery="processing-instruction()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<?target value?>"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "processing-instruction()",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_processing_instruction_response(ml):
+    resp = ml.rest.eval.post(xquery="processing-instruction()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<?target value?>"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "processing-instruction()",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_processing_instruction_response(ml):
+    resp = ml.rest.eval.post(xquery="processing-instruction()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"<?target value?>"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "processing-instruction()",
+    }
+
+
+ml_mocker.with_name("single-binary-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "binary()-response"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("binary()", "binary", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_binary_response(ml):
+    resp = ml.rest.eval.post(xquery="binary()-response")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"binary"
+
+
+@ml_mock
+def test_parse_text_single_binary_response(ml):
+    resp = ml.rest.eval.post(xquery="binary()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"binary"
+
+
+@ml_mock
+def test_parse_bytes_single_binary_response(ml):
+    resp = ml.rest.eval.post(xquery="binary()-response")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"binary"
+
+
+@ml_mock
+def test_parse_with_headers_single_binary_response(ml):
+    resp = ml.rest.eval.post(xquery="binary()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"binary"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "binary()",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_binary_response(ml):
+    resp = ml.rest.eval.post(xquery="binary()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"binary"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "binary()",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_binary_response(ml):
+    resp = ml.rest.eval.post(xquery="binary()-response")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"binary"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "binary()",
+    }
+
+
+ml_mocker.with_name("single-byte-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:byte(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("byte", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:byte(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:byte(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:byte(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:byte(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "byte",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:byte(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "byte",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:byte(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "byte",
+    }
+
+
+ml_mocker.with_name("single-short-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:short(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("short", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:short(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:short(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:short(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:short(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "short",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:short(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "short",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:short(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "short",
+    }
+
+
+ml_mocker.with_name("single-int-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:int(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("int", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:int(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:int(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:int(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:int(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "int",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:int(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "int",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:int(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "int",
+    }
+
+
+ml_mocker.with_name("single-long-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:long(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("long", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:long(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:long(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:long(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:long(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "long",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:long(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "long",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:long(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "long",
+    }
+
+
+ml_mocker.with_name("single-non-positive-integer-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:nonPositiveInteger(0)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("nonPositiveInteger", "0", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_non_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonPositiveInteger(0)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 0
+
+
+@ml_mock
+def test_parse_text_single_non_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonPositiveInteger(0)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "0"
+
+
+@ml_mock
+def test_parse_bytes_single_non_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonPositiveInteger(0)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"0"
+
+
+@ml_mock
+def test_parse_with_headers_single_non_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonPositiveInteger(0)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 0
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "nonPositiveInteger",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_non_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonPositiveInteger(0)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "0"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "nonPositiveInteger",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_non_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonPositiveInteger(0)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"0"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "nonPositiveInteger",
+    }
+
+
+ml_mocker.with_name("single-negative-integer-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:negativeInteger(-1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("negativeInteger", "-1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:negativeInteger(-1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == -1
+
+
+@ml_mock
+def test_parse_text_single_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:negativeInteger(-1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "-1"
+
+
+@ml_mock
+def test_parse_bytes_single_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:negativeInteger(-1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"-1"
+
+
+@ml_mock
+def test_parse_with_headers_single_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:negativeInteger(-1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == -1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "negativeInteger",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:negativeInteger(-1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "-1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "negativeInteger",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:negativeInteger(-1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"-1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "negativeInteger",
+    }
+
+
+ml_mocker.with_name("single-non-negative-integer-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:nonNegativeInteger(0)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("nonNegativeInteger", "0", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_non_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonNegativeInteger(0)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 0
+
+
+@ml_mock
+def test_parse_text_single_non_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonNegativeInteger(0)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "0"
+
+
+@ml_mock
+def test_parse_bytes_single_non_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonNegativeInteger(0)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"0"
+
+
+@ml_mock
+def test_parse_with_headers_single_non_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonNegativeInteger(0)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 0
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "nonNegativeInteger",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_non_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonNegativeInteger(0)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "0"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "nonNegativeInteger",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_non_negative_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:nonNegativeInteger(0)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"0"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "nonNegativeInteger",
+    }
+
+
+ml_mocker.with_name("single-positive-integer-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:positiveInteger(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("positiveInteger", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:positiveInteger(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:positiveInteger(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:positiveInteger(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:positiveInteger(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "positiveInteger",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:positiveInteger(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "positiveInteger",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_positive_integer_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:positiveInteger(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "positiveInteger",
+    }
+
+
+ml_mocker.with_name("single-unsigned-byte-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:unsignedByte(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("unsignedByte", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_unsigned_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedByte(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_unsigned_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedByte(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_unsigned_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedByte(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_unsigned_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedByte(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedByte",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_unsigned_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedByte(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedByte",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_unsigned_byte_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedByte(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedByte",
+    }
+
+
+ml_mocker.with_name("single-unsigned-short-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:unsignedShort(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("unsignedShort", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_unsigned_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedShort(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_unsigned_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedShort(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_unsigned_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedShort(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_unsigned_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedShort(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedShort",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_unsigned_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedShort(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedShort",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_unsigned_short_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedShort(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedShort",
+    }
+
+
+ml_mocker.with_name("single-unsigned-int-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:unsignedInt(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("unsignedInt", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_unsigned_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedInt(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_unsigned_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedInt(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_unsigned_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedInt(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_unsigned_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedInt(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedInt",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_unsigned_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedInt(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedInt",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_unsigned_int_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedInt(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedInt",
+    }
+
+
+ml_mocker.with_name("single-unsigned-long-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:unsignedLong(1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("unsignedLong", "1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_unsigned_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedLong(1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+
+
+@ml_mock
+def test_parse_text_single_unsigned_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedLong(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+
+
+@ml_mock
+def test_parse_bytes_single_unsigned_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedLong(1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+
+
+@ml_mock
+def test_parse_with_headers_single_unsigned_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedLong(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, int)
+    assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedLong",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_unsigned_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedLong(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedLong",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_unsigned_long_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:unsignedLong(1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "unsignedLong",
+    }
+
+
+ml_mocker.with_name("single-float-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:float(1.1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("float", "1.1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_float_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:float(1.1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, float)
+    assert parsed_resp == 1.1
+
+
+@ml_mock
+def test_parse_text_single_float_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:float(1.1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1.1"
+
+
+@ml_mock
+def test_parse_bytes_single_float_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:float(1.1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1.1"
+
+
+@ml_mock
+def test_parse_with_headers_single_float_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:float(1.1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, float)
+    assert parsed_resp == 1.1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "float",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_float_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:float(1.1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1.1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "float",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_float_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:float(1.1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1.1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "float",
+    }
+
+
+ml_mocker.with_name("single-double-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "xs:double(1.1)"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("double", "1.1", "text/plain")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_double_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:double(1.1)")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, float)
+    assert parsed_resp == 1.1
+
+
+@ml_mock
+def test_parse_text_single_double_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:double(1.1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1.1"
+
+
+@ml_mock
+def test_parse_bytes_single_double_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:double(1.1)")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1.1"
+
+
+@ml_mock
+def test_parse_with_headers_single_double_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:double(1.1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, float)
+    assert parsed_resp == 1.1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "double",
+    }
+
+
+@ml_mock
+def test_parse_text_with_headers_single_double_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:double(1.1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1.1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "double",
+    }
+
+
+@ml_mock
+def test_parse_bytes_with_headers_single_double_response(ml):
+    resp = ml.rest.eval.post(xquery="xs:double(1.1)")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1.1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "double",
+    }
 
 
 @pytest.fixture(scope="module")
@@ -1330,8 +2760,8 @@ def test_parse_single_plain_text_decimal_response(ml):
     resp = ml.rest.eval.post(xquery="1.1")
     parsed_resp = MLResponseParser.parse(resp)
 
-    assert isinstance(parsed_resp, float)
-    assert parsed_resp == 1.1
+    assert isinstance(parsed_resp, Decimal)
+    assert parsed_resp == Decimal("1.1")
 
 
 @ml_mock
@@ -1357,8 +2787,8 @@ def test_parse_with_headers_single_plain_text_decimal_response(ml):
     resp = ml.rest.eval.post(xquery="1.1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
-    assert isinstance(parsed_resp, float)
-    assert parsed_resp == 1.1
+    assert isinstance(parsed_resp, Decimal)
+    assert parsed_resp == Decimal("1.1")
     assert headers == {
         "Content-Type": "text/plain",
         "X-Primitive": "decimal",

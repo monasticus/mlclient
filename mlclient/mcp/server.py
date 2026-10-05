@@ -17,9 +17,9 @@ It exports the following:
 from __future__ import annotations
 
 import asyncio
+import base64
 import heapq
 import json
-import time
 import xml.etree.ElementTree as ElemTree
 from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager
@@ -28,29 +28,40 @@ from pathlib import Path
 from typing import Any
 
 from dateutil.parser import isoparse
-from httpx import TransportError
+from httpx import Headers, TransportError
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel, ConfigDict, Field
+from mcp.server.fastmcp.exceptions import ToolError
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from mlclient import AsyncMLClient, MLClientManager
+from mlclient._client import AsyncMLClient
+from mlclient._manager import MLClientManager
 from mlclient.env import find_mlclient_directory
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
 )
+from mlclient.models import Metadata
 from mlclient.responses import MLResponseParser
-from mlclient.services.logs import AsyncLogsService
+from mlclient.services.diagnostics import AsyncLogsService
 
 mcp = FastMCP("mlclient_mcp")
 
 _ENV_FILE_PATTERN = "mlclient-*.yaml"
 _ENV_NAME_PREFIX = "mlclient-"
+_MAX_RESULT_CHARS = 200000
 
 _READ_ONLY_HINTS = {
     "readOnlyHint": True,
     "destructiveHint": False,
     "idempotentHint": True,
     "openWorldHint": False,
+}
+
+_CODE_HINTS = {
+    "readOnlyHint": False,
+    "destructiveHint": True,
+    "idempotentHint": False,
+    "openWorldHint": True,
 }
 
 _RANGE_INDEX_KEYS = (
@@ -90,7 +101,7 @@ class HttpMethod(str, Enum):
 class EnvironmentInput(BaseModel):
     """Input selecting a single mlclient environment."""
 
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    model_config = ConfigDict(extra="forbid")
 
     environment: str = Field(
         ...,
@@ -101,6 +112,40 @@ class EnvironmentInput(BaseModel):
         ),
         min_length=1,
     )
+
+    connection: str | None = Field(
+        default=None,
+        description="Configured app-server identifier; defaults depend on the tool",
+        min_length=1,
+    )
+
+    @field_validator("environment", "connection")
+    @classmethod
+    def validate_selector(cls, value: str | None) -> str | None:
+        """Normalize configuration selectors, rejecting blank names.
+
+        Parameters
+        ----------
+        value : str or None
+            Environment or connection name.
+
+        Returns
+        -------
+        str or None
+            Stripped selector, or None for default connection selection.
+
+        Raises
+        ------
+        ValueError
+            If a selector contains only whitespace.
+        """
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            message = "environment and connection names cannot be blank"
+            raise ValueError(message)
+        return value
 
 
 class HealthInput(EnvironmentInput):
@@ -174,6 +219,10 @@ class QueryInput(DatabaseTargetInput):
         ),
         min_length=1,
     )
+    root_namespace: str = Field(
+        default="",
+        description="Namespace URI of document_root; empty selects no namespace",
+    )
     document_root: str | None = Field(
         default=None,
         description=(
@@ -220,7 +269,7 @@ class SearchInput(QueryInput):
 
 
 class ValuesInput(DatabaseTargetInput):
-    """Input for reading co-occurring lexicon values from a range index."""
+    """Input for reading distinct lexicon values from a range index."""
 
     reference: str = Field(
         ...,
@@ -254,6 +303,7 @@ class DocsInput(DatabaseTargetInput):
         ...,
         description="Document URIs to read",
         min_length=1,
+        max_length=100,
     )
     category: list[str] | None = Field(
         default=None,
@@ -261,6 +311,13 @@ class DocsInput(DatabaseTargetInput):
             "Content categories to read (e.g. 'content', 'metadata'); "
             "omit to read document content"
         ),
+    )
+
+    max_chars: int = Field(
+        default=20000,
+        description="Maximum content characters per document; metadata is retained",
+        ge=100,
+        le=100000,
     )
 
 
@@ -313,6 +370,13 @@ class LogsInput(EnvironmentInput):
         ),
     )
 
+    limit: int = Field(
+        default=100,
+        description="Maximum latest log entries returned, after filtering",
+        ge=1,
+        le=1000,
+    )
+
 
 class HttpInput(EnvironmentInput):
     """Input for a raw HTTP request against the environment's primary server."""
@@ -332,29 +396,69 @@ class HttpInput(EnvironmentInput):
     )
     body: str | dict[str, Any] | None = Field(
         default=None,
-        description="Request body; a dict is sent as JSON",
+        description="Dict body defaults to JSON; Content-Type can override it",
     )
     headers: dict[str, str] | None = Field(
         default=None,
         description="Request headers",
     )
 
+    @field_validator("endpoint")
+    @classmethod
+    def validate_endpoint(cls, value: str) -> str:
+        """Require a path on the selected server, without a URL fragment.
+
+        Parameters
+        ----------
+        value : str
+            Request endpoint supplied by the caller.
+
+        Returns
+        -------
+        str
+            The unchanged path.
+
+        Raises
+        ------
+        ValueError
+            If the endpoint is not an absolute server path or has a fragment.
+        """
+        if not value.startswith("/") or value.startswith("//") or "#" in value:
+            message = "endpoint must be an absolute server path without a fragment"
+            raise ValueError(message)
+        return value
+
 
 @asynccontextmanager
-async def _connect(environment: str) -> AsyncIterator[AsyncMLClient]:
+async def _connect(
+    environment: str,
+    connection: str | None = None,
+    *,
+    tier: str | None = None,
+) -> AsyncIterator[AsyncMLClient]:
     """Yield a connected async client for a named mlclient environment.
 
     Parameters
     ----------
     environment : str
         An mlclient environment name selecting its configuration file.
+    connection : str or None
+        Configured server identifier; None selects the default for this tool.
+    tier : str or None
+        Bind manage/health to the selected connection instead of auxiliary defaults.
 
     Yields
     ------
     AsyncMLClient
-        A connected client bound to the environment's first REST server.
+        A connected client bound to the selected environment server.
     """
-    async with MLClientManager(environment).get_async_client() as client:
+    manager = MLClientManager(environment)
+    if tier is None:
+        client = manager.get_async_client(connection)
+    else:
+        config = manager.get_config(connection or tier)
+        client = AsyncMLClient(config=config, **{f"{tier}_config": config})
+    async with client:
         yield client
 
 
@@ -384,15 +488,17 @@ async def _wait_for_health(
         ``{"healthy": bool, "attempts": int, "timed_out": bool}`` where
         ``timed_out`` is True only when the deadline passed while unhealthy.
     """
-    deadline = time.monotonic() + timeout_seconds
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + timeout_seconds
     attempts = 0
     while True:
+        remaining = deadline - loop.time()
         attempts += 1
         try:
-            healthy = await client.healthcheck()
-        except TransportError:
+            healthy = await asyncio.wait_for(client.healthcheck(), timeout=remaining)
+        except (TransportError, asyncio.TimeoutError):
             healthy = False
-        remaining = deadline - time.monotonic()
+        remaining = deadline - loop.time()
         if healthy or remaining <= 0:
             return {
                 "healthy": bool(healthy),
@@ -414,7 +520,7 @@ def _to_jsonable(value: Any) -> Any:
     Returns
     -------
     Any
-        The value with XML nodes rendered as strings and bytes decoded as UTF-8;
+        The value with XML nodes rendered as strings and bytes encoded as base64;
         lists are converted item by item and other values pass through.
     """
     if isinstance(value, ElemTree.ElementTree):
@@ -422,14 +528,16 @@ def _to_jsonable(value: Any) -> Any:
     if isinstance(value, ElemTree.Element):
         return ElemTree.tostring(value, encoding="unicode")
     if isinstance(value, bytes):
-        return value.decode("utf-8", errors="replace")
+        return {"encoding": "base64", "data": base64.b64encode(value).decode("ascii")}
     if isinstance(value, list):
         return [_to_jsonable(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _to_jsonable(item) for key, item in value.items()}
     return value
 
 
-def _dump(value: Any) -> str:
-    """Serialize a value as an indented JSON string.
+def _result(value: dict[str, Any]) -> dict[str, Any]:
+    """Normalize a structured result to JSON-compatible values.
 
     Parameters
     ----------
@@ -438,16 +546,17 @@ def _dump(value: Any) -> str:
 
     Returns
     -------
-    str
-        An indented JSON representation, with Decimal and datetime rendered via
-        their string form.
+    dict
+        A JSON-compatible dictionary, with Decimal and datetime rendered as strings.
     """
-    return json.dumps(
-        _to_jsonable(value),
-        indent=2,
-        ensure_ascii=False,
-        default=str,
-    )
+    serialized = json.dumps(_to_jsonable(value), ensure_ascii=False, default=str)
+    if len(serialized) > _MAX_RESULT_CHARS:
+        message = (
+            "Result exceeds 200000 characters; reduce page_size, limit or max_chars, "
+            "or request a smaller result with Eval/Http."
+        )
+        raise ToolError(message)
+    return json.loads(serialized)
 
 
 def _error(exc: Exception) -> str:
@@ -483,6 +592,7 @@ async def _eval(
     *,
     variables: dict[str, Any] | None = None,
     database: str | None = None,
+    connection: str | None = None,
 ) -> Any:
     """Evaluate XQuery on an environment and return the parsed result.
 
@@ -496,13 +606,20 @@ async def _eval(
         External variables bound in the query, by name.
     database : str or None, optional
         Target database name; defaults to the REST content database.
+    connection : str or None
+        Configured app-server identifier.
 
     Returns
     -------
     Any
         The value parsed by mlclient from the server response.
     """
-    async with _connect(environment) as client:
+    if variables and "root" in variables:
+        code = (
+            "declare variable $root as xs:string external;\n"
+            "declare variable $root_namespace as xs:string external;\n" + code
+        )
+    async with _connect(environment, connection) as client:
         return await client.eval.xquery(code, variables=variables, database=database)
 
 
@@ -527,7 +644,7 @@ def _scoped(query: str, document_root: str | None) -> str:
         return "(" + query + ")"
     return (
         "cts:and-query(("
-        "cts:document-root-query(xs:QName($root)), "
+        "cts:document-root-query(fn:QName($root_namespace, $root)), "
         "(" + query + ")"
         "))"
     )
@@ -551,20 +668,26 @@ def _page_slice(start: int, page_size: int) -> str:
     return "[" + str(start) + " to " + str(start + page_size - 1) + "]"
 
 
-def _root_vars(document_root: str | None) -> dict[str, str] | None:
+def _root_vars(document_root: str | None, root_namespace: str) -> dict[str, str] | None:
     """Build the external-variable map binding a document root, if present.
 
     Parameters
     ----------
     document_root : str or None
         A document root local name, or None.
+    root_namespace : str
+        Namespace URI; an empty string selects unnamespaced roots.
 
     Returns
     -------
     dict or None
         ``{"root": document_root}`` when a root is given, otherwise None.
     """
-    return {"root": document_root} if document_root is not None else None
+    return (
+        {"root": document_root, "root_namespace": root_namespace}
+        if document_root is not None
+        else None
+    )
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -588,23 +711,31 @@ def _as_list(value: Any) -> list[Any]:
     return [value]
 
 
-def _document_summary(document: Any) -> dict[str, Any]:
+def _document_summary(document: Any, max_chars: int) -> dict[str, Any]:
     """Summarize a parsed Document as a JSON-serializable object.
 
     Parameters
     ----------
     document : Any
         A Document returned by the documents service.
+    max_chars : int
+        Maximum content size, in serialized characters.
 
     Returns
     -------
     dict
-        ``{"uri", "docType", "content"}`` with the content normalized for JSON.
+        URI, type, content, truncation flag and metadata in JSON-compatible form.
     """
+    content = _to_jsonable(document.content)
+    rendered = content if isinstance(content, str) else json.dumps(content, default=str)
+    truncated = len(rendered) > max_chars
+    metadata = document.metadata
     return {
         "uri": document.uri,
         "docType": document.doc_type.value if document.doc_type else None,
-        "content": _to_jsonable(document.content),
+        "content": rendered[:max_chars] if truncated else content,
+        "truncated": truncated,
+        "metadata": metadata.to_json() if isinstance(metadata, Metadata) else metadata,
     }
 
 
@@ -623,7 +754,7 @@ def _response_body(response: Any) -> Any:
     """
     try:
         return response.json()
-    except Exception:
+    except ValueError:
         return response.text
 
 
@@ -700,9 +831,16 @@ async def _all_hosts_error_logs(
         Host-tagged error log entries from all hosts, ordered by timestamp.
     """
     hosts = await _cluster_hosts(client)
-    per_host = await asyncio.gather(
-        *[_host_error_logs(service, params, host) for host in hosts],
-    )
+    tasks = [
+        asyncio.create_task(_host_error_logs(service, params, host)) for host in hosts
+    ]
+    try:
+        per_host = await asyncio.gather(*tasks)
+    except BaseException:
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        raise
     return list(heapq.merge(*per_host, key=lambda entry: isoparse(entry["timestamp"])))
 
 
@@ -710,46 +848,35 @@ async def _all_hosts_error_logs(
     name="MLClientEnvs",
     annotations={"title": "List MarkLogic environments", **_READ_ONLY_HINTS},
 )
-async def ml_client_envs() -> str:
-    """List mlclient environments discoverable from the working directory.
+async def ml_client_envs() -> dict[str, Any]:
+    """Discover mlclient environment names and paths from the working directory.
 
-    Finds the nearest ``.mlclient`` directory (searching the server's working
-    directory and its parents) and reports every ``mlclient-<name>.yaml``
-    configuration in it. Call this first to learn which environment names the
-    other tools accept.
+    The nearest .mlclient directory is searched from this directory upward.
 
     Returns
     -------
-    str
-        A JSON object, or an 'Error:' message when no .mlclient directory
-        exists. On success:
+    dict
+        Environment directory, count and configuration names/paths.
 
-        {
-            "directory": str,          # Absolute path of the .mlclient directory
-            "count": int,              # Number of environments found
-            "environments": [
-                {
-                    "name": str,       # Environment name, e.g. "local"
-                    "file": str        # Absolute path of its YAML file
-                }
-            ]
-        }
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
         directory = find_mlclient_directory(Path.cwd())
     except MLClientDirectoryNotFoundError as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
     environments = [
         {"name": path.stem.removeprefix(_ENV_NAME_PREFIX), "file": str(path)}
         for path in sorted(directory.glob(_ENV_FILE_PATTERN))
     ]
-    return json.dumps(
+    return _result(
         {
             "directory": str(directory),
             "count": len(environments),
             "environments": environments,
         },
-        indent=2,
     )
 
 
@@ -757,60 +884,66 @@ async def ml_client_envs() -> str:
     name="MLClientVersion",
     annotations={"title": "Read MarkLogic version", **_READ_ONLY_HINTS},
 )
-async def ml_client_version(params: EnvironmentInput) -> str:
-    """Return the MarkLogic Server version for an environment.
+async def ml_client_version(params: EnvironmentInput) -> dict[str, Any]:
+    """Read the MarkLogic version for an environment.
+
+    Uses the selected connection, or the first configured REST connection.
 
     Parameters
     ----------
     params : EnvironmentInput
-        Validated input containing:
-            - environment (str): mlclient environment name
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment": str, "version": str}`` on success, or an
-        'Error:' message describing a connection or configuration failure.
+    dict
+        Environment name and server version.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
-        async with _connect(params.environment) as client:
+        async with _connect(params.environment, params.connection) as client:
             version = await client.version()
-        return _dump({"environment": params.environment, "version": str(version)})
+        return _result({"environment": params.environment, "version": str(version)})
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientHealth",
     annotations={"title": "Check MarkLogic health", **_READ_ONLY_HINTS},
 )
-async def ml_client_health(params: HealthInput) -> str:
-    """Report whether the environment's MarkLogic health app server responds.
+async def ml_client_health(params: HealthInput) -> dict[str, Any]:
+    """Check MarkLogic health once or wait for readiness.
 
-    By default this checks once. With ``wait`` it polls every
-    ``interval_seconds`` and returns on the first healthy response, giving up
-    after ``timeout_seconds``; this is the way to wait for a server that is
-    still starting or restarting.
+    Defaults to the health connection. With wait=true, temporary transport
+    failures are retried until healthy or the deadline expires. The deadline
+    includes in-flight probes; an unhealthy timeout is a normal result.
 
     Parameters
     ----------
     params : HealthInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - wait (bool): poll until healthy instead of a single check
-            - interval_seconds (float): seconds between polls when wait=true
-            - timeout_seconds (float): maximum total seconds to wait
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object on success, or an 'Error:' message describing a connection
-        or configuration failure. A single check returns
-        ``{"environment": str, "healthy": bool}``; a wait additionally returns
-        ``"attempts"`` (int) and ``"timed_out"`` (bool).
+    dict
+        Environment and healthy flag; waits add attempts and timed_out.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
-        async with _connect(params.environment) as client:
+        async with _connect(
+            params.environment,
+            params.connection,
+            tier="health",
+        ) as client:
             if params.wait:
                 result = await _wait_for_health(
                     client,
@@ -819,9 +952,9 @@ async def ml_client_health(params: HealthInput) -> str:
                 )
             else:
                 result = {"healthy": await client.healthcheck()}
-        return _dump({"environment": params.environment, **result})
+        return _result({"environment": params.environment, **result})
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
@@ -831,35 +964,32 @@ async def ml_client_health(params: HealthInput) -> str:
         "readOnlyHint": False,
         "destructiveHint": True,
         "idempotentHint": False,
-        "openWorldHint": False,
+        "openWorldHint": True,
     },
 )
-async def ml_client_eval(params: EvalInput) -> str:
-    """Evaluate XQuery or JavaScript on MarkLogic and return the parsed result.
+async def ml_client_eval(params: EvalInput) -> dict[str, Any]:
+    """Evaluate XQuery or JavaScript and return its parsed result.
 
-    This runs arbitrary server-side code and can modify data; prefer a dedicated
-    read tool for routine lookups. The result is parsed by mlclient and
-    serialized to JSON.
+    Runs arbitrary server-side code and may modify data or call external
+    systems. XQuery external variables must be declared in the supplied code.
 
     Parameters
     ----------
     params : EvalInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - code (str): XQuery or JavaScript source
-            - language (EvalLanguage): 'xquery' (default) or 'javascript'
-            - variables (Optional[dict]): external variables bound by name
-            - database (Optional[str]): target database name
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        The parsed result serialized as JSON (a scalar, object, string-rendered
-        XML node, or a list of these), or an 'Error:' message describing a query
-        or connection failure.
+    dict
+        Environment and result; XML is text and binary values are base64 objects.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
-        async with _connect(params.environment) as client:
+        async with _connect(params.environment, params.connection) as client:
             if params.language is EvalLanguage.JAVASCRIPT:
                 result = await client.eval.javascript(
                     params.code,
@@ -872,118 +1002,118 @@ async def ml_client_eval(params: EvalInput) -> str:
                     variables=params.variables,
                     database=params.database,
                 )
-        return _dump(result)
+        return _result({"environment": params.environment, "result": result})
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientEstimate",
-    annotations={"title": "Estimate matching fragment count", **_READ_ONLY_HINTS},
+    annotations={"title": "Estimate matching fragment count", **_CODE_HINTS},
 )
-async def ml_client_estimate(params: EstimateInput) -> str:
-    """Estimate how many fragments match a query, directly from indexes.
+async def ml_client_estimate(params: EstimateInput) -> dict[str, Any]:
+    """Estimate matching fragments from the indexes.
 
-    This is an estimate from cts:estimate - a fast, index-only fragment count,
-    not an exact document count. Use it to size a result set before searching.
+    The query is an XQuery expression, not a restricted query language; it may
+    modify data or call external systems. Root names are scoped to the supplied
+    namespace URI, defaulting to no namespace. This is not an exact document count.
 
     Parameters
     ----------
     params : EstimateInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - query (str): cts:query expression to count
-            - document_root (str, optional): root element to scope to
-            - database (str, optional): target database name
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment": str, "estimate": int}`` on success, or an
-        'Error:' message describing a query or connection failure.
+    dict
+        Environment and estimated fragment count.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
         result = await _eval(
             params.environment,
             "cts:estimate(" + _scoped(params.query, params.document_root) + ")",
-            variables=_root_vars(params.document_root),
+            variables=_root_vars(params.document_root, params.root_namespace),
             database=params.database,
+            connection=params.connection,
         )
-        return _dump({"environment": params.environment, "estimate": result})
+        return _result({"environment": params.environment, "estimate": result})
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientUris",
-    annotations={"title": "List matching document URIs", **_READ_ONLY_HINTS},
+    annotations={"title": "List matching document URIs", **_CODE_HINTS},
 )
-async def ml_client_uris(params: UrisInput) -> str:
-    """List the URIs of documents matching a query, with pagination.
+async def ml_client_uris(params: UrisInput) -> dict[str, Any]:
+    """Read a page of document URIs matching a CTS query.
 
-    Returns only URIs, not document content; pair with MLClientDocs to fetch the
-    documents themselves.
+    Uses filtered search. Pagination starts at 1. Query is arbitrary XQuery
+    code and may modify data or call external systems. Pair with Docs to read
+    the selected content.
 
     Parameters
     ----------
     params : UrisInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - query (str): cts:query expression to match
-            - document_root (str, optional): root element to scope to
-            - start (int): 1-based index of the first URI
-            - page_size (int): maximum number of URIs
-            - database (str, optional): target database name
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment": str, "uris": [str]}`` on success, or an
-        'Error:' message describing a query or connection failure.
+    dict
+        Environment and document URI list.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
         result = await _eval(
             params.environment,
             "cts:search(fn:collection(), "
             + _scoped(params.query, params.document_root)
-            + ', "unfiltered")'
+            + ', "filtered")'
             + _page_slice(params.start, params.page_size)
             + " ! xdmp:node-uri(.)",
-            variables=_root_vars(params.document_root),
+            variables=_root_vars(params.document_root, params.root_namespace),
             database=params.database,
+            connection=params.connection,
         )
-        return _dump({"environment": params.environment, "uris": _as_list(result)})
+        return _result({"environment": params.environment, "uris": _as_list(result)})
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientSearch",
-    annotations={"title": "Search documents", **_READ_ONLY_HINTS},
+    annotations={"title": "Search documents", **_CODE_HINTS},
 )
-async def ml_client_search(params: SearchInput) -> str:
-    """Search documents matching a query and return a page plus the total.
+async def ml_client_search(params: SearchInput) -> dict[str, Any]:
+    """Search matching documents and return a page with an estimated total.
 
-    Each result carries the document URI and its serialized content. The total
-    is an index estimate of all matches, independent of the returned page.
+    Uses filtered search. The total is a fragment estimate independent of the
+    page. Query is arbitrary XQuery code and may modify data or call external
+    systems. Root selection includes its namespace URI.
 
     Parameters
     ----------
     params : SearchInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - query (str): cts:query expression to match
-            - document_root (str, optional): root element to scope to
-            - start (int): 1-based index of the first result
-            - page_size (int): maximum number of documents
-            - database (str, optional): target database name
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment", "total", "start", "pageSize", "results"}``
-        where each result is ``{"uri", "document"}``, or an 'Error:' message
-        describing a query or connection failure.
+    dict
+        Environment, total, start, pageSize and results with URI/document text.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
         scoped = _scoped(params.query, params.document_root)
@@ -994,45 +1124,47 @@ async def ml_client_search(params: SearchInput) -> str:
             ' "start": ' + str(params.start) + ","
             ' "pageSize": ' + str(params.page_size) + ","
             ' "results": array-node {'
-            " cts:search(fn:collection(), " + scoped + ', "unfiltered")'
+            " cts:search(fn:collection(), "
+            + scoped
+            + ', "filtered")'
             + _page_slice(params.start, params.page_size)
             + ' ! object-node { "uri": xdmp:node-uri(.), "document": xdmp:quote(.) }'
             " }"
             "}",
-            variables=_root_vars(params.document_root),
+            variables=_root_vars(params.document_root, params.root_namespace),
             database=params.database,
+            connection=params.connection,
         )
-        return _dump({"environment": params.environment, **result})
+        return _result({"environment": params.environment, **result})
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientValues",
-    annotations={"title": "Read range-index values", **_READ_ONLY_HINTS},
+    annotations={"title": "Read range-index values", **_CODE_HINTS},
 )
-async def ml_client_values(params: ValuesInput) -> str:
-    """Read co-occurring values from a range index, by descending frequency.
+async def ml_client_values(params: ValuesInput) -> dict[str, Any]:
+    """Read distinct range-index values in descending frequency order.
 
-    Reads the lexicon of a range index named by a cts:reference expression,
-    optionally constrained to documents matching a query. Use it to discover the
-    distinct values of a field, such as facet candidates.
+    The reference names a configured range index. Query restricts contributing
+    fragments. Both fields are arbitrary XQuery code and may modify data or
+    call external systems.
 
     Parameters
     ----------
     params : ValuesInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - reference (str): cts:reference expression naming the range index
-            - query (str): cts:query expression constraining contributing docs
-            - limit (int): maximum number of values
-            - database (str, optional): target database name
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment": str, "values": [...]}`` on success, or an
-        'Error:' message describing a query or connection failure.
+    dict
+        Environment and a list of parsed lexicon values.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
         result = await _eval(
@@ -1046,94 +1178,99 @@ async def ml_client_values(params: ValuesInput) -> str:
             + params.query
             + ")",
             database=params.database,
+            connection=params.connection,
         )
-        return _dump({"environment": params.environment, "values": _as_list(result)})
+        return _result({"environment": params.environment, "values": _as_list(result)})
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientDocs",
     annotations={"title": "Read documents by URI", **_READ_ONLY_HINTS},
 )
-async def ml_client_docs(params: DocsInput) -> str:
-    """Read one or more documents by URI and return their content.
+async def ml_client_docs(params: DocsInput) -> dict[str, Any]:
+    """Read documents by URI, preserving requested metadata.
+
+    Accepts up to 100 URIs. Content exceeding max_chars is returned as a
+    preview with truncated=true. XML is text; binary content is base64.
 
     Parameters
     ----------
     params : DocsInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - uris (list[str]): document URIs to read
-            - category (list[str], optional): content categories to read
-            - database (str, optional): target database name
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment": str, "documents": [...]}`` where each
-        document is ``{"uri", "docType", "content"}``, or an 'Error:' message
-        describing a read or connection failure.
+    dict
+        Environment and documents with URI, type, content, metadata and truncation.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
-        async with _connect(params.environment) as client:
+        async with _connect(params.environment, params.connection) as client:
             documents = await client.documents.read(
                 params.uris,
                 category=params.category,
                 database=params.database,
             )
         found = documents.values() if isinstance(documents, dict) else [documents]
-        return _dump(
+        return _result(
             {
                 "environment": params.environment,
-                "documents": [_document_summary(document) for document in found],
+                "documents": [
+                    _document_summary(document, params.max_chars) for document in found
+                ],
             },
         )
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientLogs",
     annotations={"title": "Read server logs", **_READ_ONLY_HINTS},
 )
-async def ml_client_logs(params: LogsInput) -> str:
-    """Read a MarkLogic server's logs, optionally filtered by time and regex.
+async def ml_client_logs(params: LogsInput) -> dict[str, Any]:
+    """Read the latest log entries, optionally filtered or combined across hosts.
 
-    Time and regex filters apply to error logs only; they are ignored for other
-    log kinds.
-
-    Set ``all_hosts`` to aggregate error logs from every cluster host, merged by
-    timestamp and tagged with their host; it supports the error log type only and
-    cannot be combined with ``host``.
+    Defaults to the manage connection. Time and regex filters apply to error
+    logs only. all_hosts supports error logs and cannot be combined with host.
+    Returns at most limit latest entries, in timestamp order for error logs;
+    this bounds output, not log retrieval work.
 
     Parameters
     ----------
     params : LogsInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - app_server (str, optional): app server port whose logs to read
-            - log_type (LogKind): 'error' (default), 'access', 'request', 'audit'
-            - start_time, end_time (str, optional): ISO 8601 bounds, error logs
-            - regex (str, optional): line filter, error logs
-            - host (str, optional): host whose logs to read
-            - all_hosts (bool): aggregate error logs across every cluster host
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment": str, "logs": [...]}`` on success, or an
-        'Error:' message describing a connection, validation or retrieval failure.
+    dict
+        Environment, log entries, fetched total and truncation flag.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     if params.all_hosts and (
         params.host is not None or params.log_type is not LogKind.ERROR
     ):
-        return (
-            "Error: all_hosts supports the error log type only and cannot be "
-            "combined with host."
+        message = (
+            "all_hosts supports the error log type only "
+            "and cannot be combined with host."
         )
+        raise ToolError(message)
     try:
-        async with _connect(params.environment) as client:
+        async with _connect(
+            params.environment,
+            params.connection,
+            tier="manage",
+        ) as client:
             service = AsyncLogsService(client.manage)
             if params.all_hosts:
                 logs = await _all_hosts_error_logs(client, service, params)
@@ -1148,44 +1285,56 @@ async def ml_client_logs(params: LogsInput) -> str:
                         host=params.host,
                     ),
                 )
-        return _dump({"environment": params.environment, "logs": logs})
+        return _result(
+            {
+                "environment": params.environment,
+                "logs": logs[-params.limit :],
+                "total": len(logs),
+                "truncated": len(logs) > params.limit,
+            },
+        )
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientIndexes",
     annotations={"title": "List database range indexes", **_READ_ONLY_HINTS},
 )
-async def ml_client_indexes(params: DatabaseInput) -> str:
-    """List the range indexes configured on a database.
+async def ml_client_indexes(params: DatabaseInput) -> dict[str, Any]:
+    """Inspect the range indexes configured on a database.
 
-    Returns the element, element-attribute, path and field range index
-    definitions from the database properties. Use it to find which fields are
-    available for range queries, sorting and lexicon reads.
+    Defaults to the manage connection. Includes element, element-attribute,
+    path and field range indexes.
 
     Parameters
     ----------
     params : DatabaseInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - database (str): database name to inspect
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment", "database", "indexes"}`` on success, or an
-        'Error:' message describing a connection or management failure.
+    dict
+        Environment, database and range-index definitions.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
-        async with _connect(params.environment) as client:
+        async with _connect(
+            params.environment,
+            params.connection,
+            tier="manage",
+        ) as client:
             response = await client.manage.databases.get_properties(
                 params.database,
                 data_format="json",
             )
         MLResponseParser.raise_for_status(response)
         properties = response.json()
-        return _dump(
+        return _result(
             {
                 "environment": params.environment,
                 "database": params.database,
@@ -1197,38 +1346,46 @@ async def ml_client_indexes(params: DatabaseInput) -> str:
             },
         )
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
     name="MLClientDbStatus",
     annotations={"title": "Read database status", **_READ_ONLY_HINTS},
 )
-async def ml_client_db_status(params: DatabaseInput) -> str:
-    """Report a database's runtime status from the Management API.
+async def ml_client_db_status(params: DatabaseInput) -> dict[str, Any]:
+    """Read database runtime status from the Management API.
+
+    Defaults to the manage connection.
 
     Parameters
     ----------
     params : DatabaseInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - database (str): database name to inspect
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment", "database", "status"}`` on success, or an
-        'Error:' message describing a connection or management failure.
+    dict
+        Environment, database and the native status response.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
-        async with _connect(params.environment) as client:
+        async with _connect(
+            params.environment,
+            params.connection,
+            tier="manage",
+        ) as client:
             response = await client.manage.databases.get(
                 params.database,
                 view="status",
                 data_format="json",
             )
         MLResponseParser.raise_for_status(response)
-        return _dump(
+        return _result(
             {
                 "environment": params.environment,
                 "database": params.database,
@@ -1236,7 +1393,7 @@ async def ml_client_db_status(params: DatabaseInput) -> str:
             },
         )
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 @mcp.tool(
@@ -1249,41 +1406,42 @@ async def ml_client_db_status(params: DatabaseInput) -> str:
         "openWorldHint": True,
     },
 )
-async def ml_client_http(params: HttpInput) -> str:
-    """Send a raw HTTP request to the environment's primary app server.
+async def ml_client_http(params: HttpInput) -> dict[str, Any]:
+    """Send a raw HTTP request to the selected connection.
 
-    This is the generic fallback for endpoints without a dedicated tool. It can
-    modify data depending on method and endpoint, so prefer a dedicated read tool
-    when one exists. Requests target the primary REST app server connection.
+    The default is the first REST connection. Endpoint must be an absolute
+    server path. Dictionary bodies default to JSON. The request may modify data;
+    HTTP error responses retain their status and body for inspection.
 
     Parameters
     ----------
     params : HttpInput
-        Validated input containing:
-            - environment (str): mlclient environment name
-            - method (HttpMethod): GET (default), POST, PUT, DELETE or HEAD
-            - endpoint (str): request path on the primary app server
-            - params (dict, optional): query-string parameters
-            - body (str or dict, optional): request body; a dict is sent as JSON
-            - headers (dict, optional): request headers
+        Validated tool parameters; see the input schema for fields and defaults.
 
     Returns
     -------
-    str
-        A JSON object ``{"environment", "status", "body"}`` where body is parsed
-        JSON when possible else text, or an 'Error:' message describing a request
-        or connection failure.
+    dict
+        Environment, HTTP status and JSON or text response body.
+
+    Raises
+    ------
+    ToolError
+        For configuration, execution or output-size failures.
     """
     try:
-        async with _connect(params.environment) as client:
+        headers = params.headers
+        if isinstance(params.body, dict):
+            headers = Headers(headers)
+            headers.setdefault("Content-Type", "application/json")
+        async with _connect(params.environment, params.connection) as client:
             response = await client.http.request(
                 params.method.value,
                 params.endpoint,
                 body=params.body,
                 params=params.params,
-                headers=params.headers,
+                headers=headers,
             )
-        return _dump(
+        return _result(
             {
                 "environment": params.environment,
                 "status": response.status_code,
@@ -1291,7 +1449,7 @@ async def ml_client_http(params: HttpInput) -> str:
             },
         )
     except Exception as exc:
-        return _error(exc)
+        raise ToolError(_error(exc)) from exc
 
 
 def main() -> None:

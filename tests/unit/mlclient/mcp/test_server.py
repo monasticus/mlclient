@@ -1,694 +1,694 @@
+"""Public MCP contracts; parsed-value mocks exercise serialization, not MarkLogic."""
+
 from __future__ import annotations
 
+import asyncio
 import json
+import sys
 import xml.etree.ElementTree as ElemTree
-from types import SimpleNamespace
+from datetime import datetime, timezone
+from decimal import Decimal
 
 import httpx
 import pytest
+import respx
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+from mcp.server.fastmcp.exceptions import ToolError
 
-from mlclient.exceptions import (
-    MLClientDirectoryNotFoundError,
-    MLClientEnvironmentNotFoundError,
-)
-from mlclient.mcp import server
-from mlclient.mcp.server import (
-    EvalInput,
-    EvalLanguage,
-    ml_client_envs,
-    ml_client_eval,
-    ml_client_health,
-    ml_client_version,
-)
-
-
-class _FakeClient:
-    def __init__(self, **attrs):
-        for name, value in attrs.items():
-            setattr(self, name, value)
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *exc):
-        return False
+from mlclient import AsyncMLClient, MLClientManager
+from mlclient.api import AsyncDatabasesApi, AsyncHostsApi
+from mlclient.clients import AsyncHttpClient
+from mlclient.mcp import main, mcp
+from mlclient.models import Document, Metadata
+from mlclient.services import AsyncDocumentsService, AsyncEvalService
+from mlclient.services.diagnostics import AsyncLogsService
+from tests.utils import resources as resources_utils
 
 
-def _patch_manager(mocker, *, client=None, error=None):
-    if error is not None:
-        return mocker.patch(
-            "mlclient.mcp.server.MLClientManager",
-            side_effect=error,
-        )
-    manager = mocker.Mock()
-    manager.get_async_client.return_value = client
-    return mocker.patch(
-        "mlclient.mcp.server.MLClientManager",
-        return_value=manager,
-    )
-
-
-def test_dump_renders_xml_bytes_lists_and_scalars():
-    element = ElemTree.Element("rn")
-    element.text = "50-00-0"
-    tree = ElemTree.ElementTree(ElemTree.fromstring("<n>1</n>"))
-
-    assert json.loads(server._dump(3)) == 3
-    assert json.loads(server._dump(b"abc")) == "abc"
-    assert "<rn>50-00-0</rn>" in json.loads(server._dump(element))
-    assert "<n>1</n>" in json.loads(server._dump(tree))
-    assert json.loads(server._dump([1, b"x"])) == [1, "x"]
-
-
-def test_error_messages_are_actionable():
-    env_error = MLClientEnvironmentNotFoundError("missing env!")
-    dir_error = MLClientDirectoryNotFoundError("no dir!")
-
-    assert "MLClientEnvs" in server._error(env_error)
-    assert "ml env init" in server._error(dir_error)
-    assert server._error(ValueError("boom")) == "Error: ValueError: boom"
-
-
-@pytest.mark.asyncio
-async def test_envs_lists_configurations(mocker, tmp_path):
+@pytest.fixture(autouse=True)
+def project(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     directory = tmp_path / ".mlclient"
     directory.mkdir()
-    (directory / "mlclient-local.yaml").write_text("host: localhost")
-    (directory / "mlclient-dev.yaml").write_text("host: dev")
-    mocker.patch(
-        "mlclient.mcp.server.find_mlclient_directory",
-        return_value=directory,
+    (directory / "mlclient-local.yaml").write_text(
+        "app-name: mcp-test\nhost: localhost\nusername: admin\npassword: admin\n"
+        "protocol: http\napp-servers:\n"
+        "  - id: content\n    port: 8100\n    auth: digest\n    rest: true\n"
+        "  - id: alternate\n    port: 8101\n    auth: digest\n    rest: true\n",
     )
-
-    result = json.loads(await ml_client_envs())
-
-    assert result["count"] == 2
-    assert [env["name"] for env in result["environments"]] == ["dev", "local"]
+    return directory
 
 
-@pytest.mark.asyncio
-async def test_envs_without_directory_returns_actionable_error(mocker):
-    mocker.patch(
-        "mlclient.mcp.server.find_mlclient_directory",
-        side_effect=MLClientDirectoryNotFoundError("none!"),
-    )
-
-    assert "ml env init" in await ml_client_envs()
+async def call(name, **params):
+    content, result = await mcp.call_tool(name, {"params": params})
+    assert json.loads(content[0].text) == result
+    return result
 
 
 @pytest.mark.asyncio
-async def test_version_returns_environment_and_version(mocker):
-    client = _FakeClient(version=mocker.AsyncMock(return_value="MarkLogic 12.0.1"))
-    _patch_manager(mocker, client=client)
-
-    params = server.EnvironmentInput(environment="local")
-    result = json.loads(await ml_client_version(params))
-
-    assert result == {"environment": "local", "version": "MarkLogic 12.0.1"}
-
-
-@pytest.mark.asyncio
-async def test_health_reports_boolean(mocker):
-    client = _FakeClient(healthcheck=mocker.AsyncMock(return_value=True))
-    _patch_manager(mocker, client=client)
-
-    params = server.HealthInput(environment="local")
-    result = json.loads(await ml_client_health(params))
-
-    assert result == {"environment": "local", "healthy": True}
-
-
-@pytest.mark.asyncio
-async def test_health_wait_returns_on_first_healthy_response(mocker):
-    healthcheck = mocker.AsyncMock(side_effect=[False, True])
-    client = _FakeClient(healthcheck=healthcheck)
-    _patch_manager(mocker, client=client)
-    sleep = mocker.patch("mlclient.mcp.server.asyncio.sleep", mocker.AsyncMock())
-
-    params = server.HealthInput(environment="local", wait=True, interval_seconds=1)
-    result = json.loads(await ml_client_health(params))
-
+async def test_envs_discovers_names_in_project(project):
+    (project / "mlclient-dev.yaml").write_text("host: dev")
+    content, result = await mcp.call_tool("MLClientEnvs", {})
+    assert json.loads(content[0].text) == result
     assert result == {
-        "environment": "local",
-        "healthy": True,
-        "attempts": 2,
-        "timed_out": False,
-    }
-    sleep.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_wait_for_health_treats_transport_error_as_unhealthy(mocker):
-    healthcheck = mocker.AsyncMock(side_effect=[httpx.ConnectError("down"), True])
-    client = _FakeClient(healthcheck=healthcheck)
-    mocker.patch("mlclient.mcp.server.asyncio.sleep", mocker.AsyncMock())
-
-    result = await server._wait_for_health(
-        client,
-        interval_seconds=1,
-        timeout_seconds=120,
-    )
-
-    assert result == {"healthy": True, "attempts": 2, "timed_out": False}
-
-
-@pytest.mark.asyncio
-async def test_wait_for_health_reports_timeout(mocker):
-    client = _FakeClient(healthcheck=mocker.AsyncMock(return_value=False))
-    sleep = mocker.patch("mlclient.mcp.server.asyncio.sleep", mocker.AsyncMock())
-
-    result = await server._wait_for_health(
-        client,
-        interval_seconds=1,
-        timeout_seconds=0,
-    )
-
-    assert result == {"healthy": False, "attempts": 1, "timed_out": True}
-    sleep.assert_not_awaited()
-
-
-@pytest.mark.asyncio
-async def test_version_reports_connection_failure(mocker):
-    _patch_manager(mocker, error=MLClientEnvironmentNotFoundError("no env for [prod]!"))
-
-    result = await ml_client_version(server.EnvironmentInput(environment="prod"))
-
-    assert "MLClientEnvs" in result
-
-
-@pytest.mark.asyncio
-async def test_health_reports_connection_failure(mocker):
-    _patch_manager(mocker, error=MLClientDirectoryNotFoundError("none!"))
-
-    result = await ml_client_health(server.HealthInput(environment="prod"))
-
-    assert "ml env init" in result
-
-
-@pytest.mark.asyncio
-async def test_eval_xquery_passes_variables_and_database(mocker):
-    xquery = mocker.AsyncMock(return_value=3)
-    client = _FakeClient(
-        eval=SimpleNamespace(xquery=xquery, javascript=mocker.AsyncMock()),
-    )
-    _patch_manager(mocker, client=client)
-
-    result = await ml_client_eval(
-        EvalInput(
-            environment="local",
-            code="xdmp:estimate(cts:search(fn:doc(),cts:true-query()))",
-            variables={"x": 1},
-            database="scifinder-content",
-        ),
-    )
-
-    assert json.loads(result) == 3
-    xquery.assert_awaited_once_with(
-        "xdmp:estimate(cts:search(fn:doc(),cts:true-query()))",
-        variables={"x": 1},
-        database="scifinder-content",
-    )
-
-
-@pytest.mark.asyncio
-async def test_eval_routes_javascript(mocker):
-    javascript = mocker.AsyncMock(return_value="ok")
-    client = _FakeClient(
-        eval=SimpleNamespace(xquery=mocker.AsyncMock(), javascript=javascript),
-    )
-    _patch_manager(mocker, client=client)
-
-    result = await ml_client_eval(
-        EvalInput(environment="local", code="1", language=EvalLanguage.JAVASCRIPT),
-    )
-
-    assert json.loads(result) == "ok"
-    javascript.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_eval_reports_missing_environment(mocker):
-    _patch_manager(mocker, error=MLClientEnvironmentNotFoundError("no env for [prod]!"))
-
-    result = await ml_client_eval(EvalInput(environment="prod", code="1"))
-
-    assert "MLClientEnvs" in result
-
-
-def test_scoped_wraps_query_with_and_without_root():
-    assert server._scoped("cts:true-query()", None) == "(cts:true-query())"
-    assert server._scoped("cts:true-query()", "substance") == (
-        "cts:and-query((cts:document-root-query(xs:QName($root)), (cts:true-query())))"
-    )
-
-
-def test_as_list_normalizes_list_none_and_scalar():
-    assert server._as_list(["a", "b"]) == ["a", "b"]
-    assert server._as_list(None) == []
-    assert server._as_list("x") == ["x"]
-
-
-def test_page_slice_renders_positional_predicate():
-    assert server._page_slice(1, 10) == "[1 to 10]"
-    assert server._page_slice(5, 3) == "[5 to 7]"
-
-
-def test_root_vars_binds_root_when_present():
-    assert server._root_vars("substance") == {"root": "substance"}
-    assert server._root_vars(None) is None
-
-
-def test_response_body_prefers_json_then_text():
-    def _raise():
-        raise ValueError("no")
-
-    assert server._response_body(SimpleNamespace(json=lambda: {"a": 1})) == {"a": 1}
-    assert server._response_body(SimpleNamespace(json=_raise, text="raw")) == "raw"
-
-
-@pytest.mark.asyncio
-async def test_estimate_scopes_query_to_document_root(mocker):
-    xquery = mocker.AsyncMock(return_value=42)
-    client = _FakeClient(
-        eval=SimpleNamespace(xquery=xquery, javascript=mocker.AsyncMock()),
-    )
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_estimate(
-            server.EstimateInput(environment="local", document_root="substance"),
-        ),
-    )
-
-    assert result == {"environment": "local", "estimate": 42}
-    xquery.assert_awaited_once_with(
-        "cts:estimate(cts:and-query((cts:document-root-query(xs:QName($root)), "
-        "(cts:true-query()))))",
-        variables={"root": "substance"},
-        database=None,
-    )
-
-
-@pytest.mark.asyncio
-async def test_estimate_without_root_leaves_query_unscoped(mocker):
-    xquery = mocker.AsyncMock(return_value=3)
-    client = _FakeClient(
-        eval=SimpleNamespace(xquery=xquery, javascript=mocker.AsyncMock()),
-    )
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_estimate(
-            server.EstimateInput(
-                environment="local",
-                query='cts:word-query("x")',
-                database="scifinder-content",
-            ),
-        ),
-    )
-
-    assert result == {"environment": "local", "estimate": 3}
-    xquery.assert_awaited_once_with(
-        'cts:estimate((cts:word-query("x")))',
-        variables=None,
-        database="scifinder-content",
-    )
-
-
-@pytest.mark.asyncio
-async def test_uris_lists_matching_document_uris(mocker):
-    xquery = mocker.AsyncMock(return_value=["/a.xml", "/b.xml"])
-    client = _FakeClient(
-        eval=SimpleNamespace(xquery=xquery, javascript=mocker.AsyncMock()),
-    )
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_uris(
-            server.UrisInput(environment="local", document_root="reaction"),
-        ),
-    )
-
-    assert result == {"environment": "local", "uris": ["/a.xml", "/b.xml"]}
-    xquery.assert_awaited_once_with(
-        "cts:search(fn:collection(), "
-        "cts:and-query((cts:document-root-query(xs:QName($root)), "
-        '(cts:true-query()))), "unfiltered")[1 to 100] ! xdmp:node-uri(.)',
-        variables={"root": "reaction"},
-        database=None,
-    )
-
-
-@pytest.mark.asyncio
-async def test_search_returns_page_and_total(mocker):
-    payload = {
-        "total": 7,
-        "start": 1,
-        "pageSize": 10,
-        "results": [{"uri": "/a.xml", "document": "<a/>"}],
-    }
-    xquery = mocker.AsyncMock(return_value=payload)
-    client = _FakeClient(
-        eval=SimpleNamespace(xquery=xquery, javascript=mocker.AsyncMock()),
-    )
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_search(
-            server.SearchInput(environment="local", query='cts:word-query("pd")'),
-        ),
-    )
-
-    assert result == {"environment": "local", **payload}
-    code = xquery.await_args.args[0]
-    assert code.startswith("object-node {")
-    assert 'cts:estimate((cts:word-query("pd")))' in code
-    assert '"start": 1' in code
-    assert '"pageSize": 10' in code
-    assert "[1 to 10]" in code
-    assert "xdmp:quote(.)" in code
-
-
-@pytest.mark.asyncio
-async def test_values_reads_lexicon_by_frequency(mocker):
-    xquery = mocker.AsyncMock(return_value=["open", "closed"])
-    client = _FakeClient(
-        eval=SimpleNamespace(xquery=xquery, javascript=mocker.AsyncMock()),
-    )
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_values(
-            server.ValuesInput(
-                environment="local",
-                reference='cts:element-reference(xs:QName("status"))',
-            ),
-        ),
-    )
-
-    assert result == {"environment": "local", "values": ["open", "closed"]}
-    xquery.assert_awaited_once_with(
-        'cts:values(cts:element-reference(xs:QName("status")), (), '
-        '("frequency-order", "descending", "limit=100"), cts:true-query())',
-        variables=None,
-        database=None,
-    )
-
-
-@pytest.mark.asyncio
-async def test_docs_reads_multiple_documents(mocker):
-    documents = {
-        "/a.xml": SimpleNamespace(
-            uri="/a.xml",
-            doc_type=SimpleNamespace(value="xml"),
-            content="<a/>",
-        ),
-        "/b.json": SimpleNamespace(uri="/b.json", doc_type=None, content={"k": 1}),
-    }
-    read = mocker.AsyncMock(return_value=documents)
-    client = _FakeClient(documents=SimpleNamespace(read=read))
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_docs(
-            server.DocsInput(environment="local", uris=["/a.xml", "/b.json"]),
-        ),
-    )
-
-    assert result["environment"] == "local"
-    summaries = {document["uri"]: document for document in result["documents"]}
-    assert summaries["/a.xml"] == {"uri": "/a.xml", "docType": "xml", "content": "<a/>"}
-    assert summaries["/b.json"] == {
-        "uri": "/b.json",
-        "docType": None,
-        "content": {"k": 1},
-    }
-    read.assert_awaited_once_with(
-        ["/a.xml", "/b.json"],
-        category=None,
-        database=None,
-    )
-
-
-@pytest.mark.asyncio
-async def test_docs_reads_single_document(mocker):
-    document = SimpleNamespace(
-        uri="/only.xml",
-        doc_type=SimpleNamespace(value="xml"),
-        content="<only/>",
-    )
-    read = mocker.AsyncMock(return_value=document)
-    client = _FakeClient(documents=SimpleNamespace(read=read))
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_docs(
-            server.DocsInput(
-                environment="local",
-                uris=["/only.xml"],
-                category=["content"],
-            ),
-        ),
-    )
-
-    assert result["documents"] == [
-        {"uri": "/only.xml", "docType": "xml", "content": "<only/>"},
-    ]
-    read.assert_awaited_once_with(
-        ["/only.xml"],
-        category=["content"],
-        database=None,
-    )
-
-
-@pytest.mark.asyncio
-async def test_logs_reads_single_host(mocker):
-    entries = [{"timestamp": "2026-01-01T00:00:00", "message": "boom"}]
-    get = mocker.AsyncMock(return_value=iter(entries))
-    service = mocker.Mock()
-    service.get = get
-    mocker.patch("mlclient.mcp.server.AsyncLogsService", return_value=service)
-    client = _FakeClient(manage=mocker.Mock())
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_logs(
-            server.LogsInput(environment="local", app_server="3693", regex="boom"),
-        ),
-    )
-
-    assert result == {"environment": "local", "logs": entries}
-    get.assert_awaited_once_with(
-        app_server="3693",
-        log_type="error",
-        start_time=None,
-        end_time=None,
-        regex="boom",
-        host=None,
-    )
-
-
-@pytest.mark.asyncio
-async def test_logs_aggregates_all_hosts_by_timestamp(mocker):
-    hosts_response = SimpleNamespace(
-        json=lambda: {
-            "host-default-list": {
-                "list-items": {
-                    "list-item": [{"nameref": "host-a"}, {"nameref": "host-b"}],
-                },
-            },
-        },
-    )
-    manage = mocker.Mock()
-    manage.hosts.get_list = mocker.AsyncMock(return_value=hosts_response)
-    mocker.patch("mlclient.mcp.server.MLResponseParser.raise_for_status")
-    get = mocker.AsyncMock(
-        side_effect=[
-            iter([{"timestamp": "2026-01-01T00:00:02", "message": "a2"}]),
-            iter([{"timestamp": "2026-01-01T00:00:01", "message": "b1"}]),
+        "directory": str(project),
+        "count": 2,
+        "environments": [
+            {"name": "dev", "file": str(project / "mlclient-dev.yaml")},
+            {"name": "local", "file": str(project / "mlclient-local.yaml")},
         ],
-    )
-    service = mocker.Mock()
-    service.get = get
-    mocker.patch("mlclient.mcp.server.AsyncLogsService", return_value=service)
-    client = _FakeClient(manage=manage)
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_logs(
-            server.LogsInput(environment="local", all_hosts=True),
-        ),
-    )
-
-    assert result["logs"] == [
-        {"timestamp": "2026-01-01T00:00:01", "message": "b1", "host": "host-b"},
-        {"timestamp": "2026-01-01T00:00:02", "message": "a2", "host": "host-a"},
-    ]
-
-
-@pytest.mark.asyncio
-async def test_logs_all_hosts_rejects_non_error_type(mocker):
-    manager = _patch_manager(mocker, client=_FakeClient())
-
-    result = await server.ml_client_logs(
-        server.LogsInput(
-            environment="local",
-            all_hosts=True,
-            log_type=server.LogKind.ACCESS,
-        ),
-    )
-
-    assert "all_hosts supports the error log type only" in result
-    manager.assert_not_called()
-
-
-@pytest.mark.asyncio
-async def test_indexes_filters_range_index_definitions(mocker):
-    properties = {
-        "range-element-index": [{"localname": "status"}],
-        "range-path-index": [{"path-expression": "/a/b"}],
-        "word-lexicon": ["x"],
     }
-    manage = mocker.Mock()
-    manage.databases.get_properties = mocker.AsyncMock(
-        return_value=SimpleNamespace(json=lambda: properties),
-    )
-    mocker.patch("mlclient.mcp.server.MLResponseParser.raise_for_status")
-    client = _FakeClient(manage=manage)
-    _patch_manager(mocker, client=client)
 
-    result = json.loads(
-        await server.ml_client_indexes(
-            server.DatabaseInput(environment="local", database="scifinder-content"),
-        ),
-    )
 
-    assert result == {
+@pytest.mark.asyncio
+async def test_envs_reports_missing_directory(project):
+    (project / "mlclient-local.yaml").unlink()
+    project.rmdir()
+    with pytest.raises(ToolError, match="ml env init"):
+        await mcp.call_tool("MLClientEnvs", {})
+
+
+@pytest.mark.asyncio
+async def test_tool_discovery_reports_code_capabilities_and_schemas():
+    tools = {tool.name: tool for tool in await mcp.list_tools()}
+    assert len(tools) == 13
+    for name in ("Eval", "Estimate", "Uris", "Search", "Values", "Http"):
+        tool = tools["MLClient" + name]
+        assert tool.annotations.readOnlyHint is False
+        assert tool.annotations.destructiveHint is True
+        assert tool.annotations.idempotentHint is False
+        assert tool.annotations.openWorldHint is True
+        assert tool.outputSchema["type"] == "object"
+    assert tools["MLClientDocs"].annotations.readOnlyHint is True
+    schema = tools["MLClientSearch"].inputSchema["$defs"]["SearchInput"]
+    assert "connection" in schema["properties"]
+    assert "root_namespace" in schema["properties"]
+
+
+@pytest.mark.asyncio
+async def test_version_uses_named_connection(mocker):
+    version = mocker.patch.object(AsyncMLClient, "version", return_value="12.0.1")
+    factory = mocker.spy(MLClientManager, "get_async_client")
+    assert await call(
+        "MLClientVersion",
+        environment=" local ",
+        connection=" alternate ",
+    ) == {
         "environment": "local",
-        "database": "scifinder-content",
-        "indexes": {
-            "range-element-index": [{"localname": "status"}],
-            "range-path-index": [{"path-expression": "/a/b"}],
-        },
+        "version": "12.0.1",
     }
-    manage.databases.get_properties.assert_awaited_once_with(
-        "scifinder-content",
-        data_format="json",
-    )
+    factory.assert_called_once_with(mocker.ANY, "alternate")
+    assert factory.spy_return.http.base_url == "http://localhost:8101"
+    version.assert_awaited_once()
+
+
+@pytest.mark.parametrize("language", ["xquery", "javascript"])
+@pytest.mark.asyncio
+async def test_eval_preserves_code_variables_and_database(mocker, language):
+    evaluate = mocker.patch.object(AsyncEvalService, language, return_value=3)
+    code = "  1 + 2\n"
+    assert await call(
+        "MLClientEval",
+        environment="local",
+        code=code,
+        language=language,
+        variables={"x": 1},
+        database="Documents",
+    ) == {"environment": "local", "result": 3}
+    evaluate.assert_awaited_once_with(code, variables={"x": 1}, database="Documents")
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (None, None),
+        ([], []),
+        (3, 3),
+        (b"\x00\xff", {"encoding": "base64", "data": "AP8="}),
+        (ElemTree.fromstring("<root>one</root>"), "<root>one</root>"),
+        (
+            ElemTree.ElementTree(ElemTree.fromstring("<root>one</root>")),
+            "<root>one</root>",
+        ),
+        (
+            {"nested": [b"x", Decimal("1.25")]},
+            {"nested": [{"encoding": "base64", "data": "eA=="}, "1.25"]},
+        ),
+        (datetime(2026, 10, 5, tzinfo=timezone.utc), "2026-10-05 00:00:00+00:00"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_eval_serializes_parsed_values_losslessly(mocker, value, expected):
+    mocker.patch.object(AsyncEvalService, "xquery", return_value=value)
+    assert (await call("MLClientEval", environment="local", code="()"))[
+        "result"
+    ] == expected
 
 
 @pytest.mark.asyncio
-async def test_db_status_returns_runtime_status(mocker):
-    status = {"status-properties": {"enabled": True}}
-    manage = mocker.Mock()
-    manage.databases.get = mocker.AsyncMock(
-        return_value=SimpleNamespace(json=lambda: status),
-    )
-    mocker.patch("mlclient.mcp.server.MLResponseParser.raise_for_status")
-    client = _FakeClient(manage=manage)
-    _patch_manager(mocker, client=client)
+async def test_eval_rejects_oversized_output(mocker):
+    mocker.patch.object(AsyncEvalService, "xquery", return_value="x" * 200001)
+    with pytest.raises(ToolError, match="reduce page_size"):
+        await call("MLClientEval", environment="local", code="()")
 
-    result = json.loads(
-        await server.ml_client_db_status(
-            server.DatabaseInput(environment="local", database="scifinder-content"),
-        ),
-    )
 
-    assert result == {
+@pytest.mark.asyncio
+@respx.mock
+async def test_eval_uses_real_transport_and_named_connection():
+    # Empty sequences are a real /v1/eval response without multipart content.
+    route = respx.post("http://localhost:8101/v1/eval").respond(200)
+    assert await call(
+        "MLClientEval",
+        environment="local",
+        connection="alternate",
+        code="()",
+    ) == {
         "environment": "local",
-        "database": "scifinder-content",
-        "status": status,
+        "result": [],
     }
-    manage.databases.get.assert_awaited_once_with(
-        "scifinder-content",
-        view="status",
-        data_format="json",
-    )
+    assert route.calls.last.request.content == b"xquery=%28%29"
+
+
+@pytest.mark.parametrize(
+    ("tool", "fields"),
+    [
+        ("Version", {}),
+        ("Health", {}),
+        ("Eval", {"code": "1"}),
+        ("Estimate", {}),
+        ("Uris", {}),
+        ("Search", {}),
+        ("Values", {"reference": "cts:path-reference('/a')"}),
+        ("Docs", {"uris": ["/a"]}),
+        ("Logs", {}),
+        ("Indexes", {"database": "Documents"}),
+        ("DbStatus", {"database": "Documents"}),
+        ("Http", {"endpoint": "/v1/ping"}),
+    ],
+)
+@pytest.mark.asyncio
+async def test_tools_report_missing_environment(tool, fields):
+    with pytest.raises(ToolError, match="MLClientEnvs"):
+        await call("MLClient" + tool, environment="missing", **fields)
 
 
 @pytest.mark.asyncio
-async def test_http_returns_status_and_json_body(mocker):
-    response = SimpleNamespace(status_code=200, json=lambda: {"ok": True})
-    request = mocker.AsyncMock(return_value=response)
-    client = _FakeClient(http=SimpleNamespace(request=request))
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_http(
-            server.HttpInput(
-                environment="local",
-                method=server.HttpMethod.POST,
-                endpoint="/v1/search",
-                body={"q": "x"},
-                params={"format": "json"},
-                headers={"X": "1"},
-            ),
-        ),
+async def test_eval_reports_service_error_as_tool_error(mocker):
+    mocker.patch.object(
+        AsyncEvalService,
+        "xquery",
+        side_effect=ValueError("synthetic failure"),
     )
-
-    assert result == {"environment": "local", "status": 200, "body": {"ok": True}}
-    request.assert_awaited_once_with(
-        "POST",
-        "/v1/search",
-        body={"q": "x"},
-        params={"format": "json"},
-        headers={"X": "1"},
-    )
-
-
-@pytest.mark.asyncio
-async def test_http_falls_back_to_text_body(mocker):
-    response = SimpleNamespace(
-        status_code=204,
-        json=mocker.Mock(side_effect=ValueError),
-        text="plain text",
-    )
-    request = mocker.AsyncMock(return_value=response)
-    client = _FakeClient(http=SimpleNamespace(request=request))
-    _patch_manager(mocker, client=client)
-
-    result = json.loads(
-        await server.ml_client_http(
-            server.HttpInput(environment="local", endpoint="/v1/ping"),
-        ),
-    )
-
-    assert result == {"environment": "local", "status": 204, "body": "plain text"}
+    with pytest.raises(ToolError, match="ValueError: synthetic failure"):
+        await call("MLClientEval", environment="local", code="()")
 
 
 @pytest.mark.parametrize(
     ("tool", "params"),
     [
-        (server.ml_client_estimate, server.EstimateInput(environment="prod")),
-        (server.ml_client_uris, server.UrisInput(environment="prod")),
-        (server.ml_client_search, server.SearchInput(environment="prod")),
-        (
-            server.ml_client_values,
-            server.ValuesInput(environment="prod", reference="r"),
-        ),
-        (server.ml_client_docs, server.DocsInput(environment="prod", uris=["/a"])),
-        (server.ml_client_logs, server.LogsInput(environment="prod")),
-        (
-            server.ml_client_indexes,
-            server.DatabaseInput(environment="prod", database="d"),
-        ),
-        (
-            server.ml_client_db_status,
-            server.DatabaseInput(environment="prod", database="d"),
-        ),
-        (server.ml_client_http, server.HttpInput(environment="prod", endpoint="/x")),
+        ("Version", {"environment": " "}),
+        ("Version", {"environment": "local", "connection": " "}),
+        ("Version", {"environment": "local", "unknown": True}),
+        ("Uris", {"environment": "local", "page_size": 1001}),
+        ("Search", {"environment": "local", "start": 0}),
+        ("Docs", {"environment": "local", "uris": []}),
+        ("Docs", {"environment": "local", "uris": ["/a"] * 101}),
+        ("Docs", {"environment": "local", "uris": ["/a"], "max_chars": 99}),
+        ("Logs", {"environment": "local", "limit": 1001}),
+        ("Http", {"environment": "local", "endpoint": "https://example.com/"}),
+        ("Http", {"environment": "local", "endpoint": "//example.com/"}),
+        ("Http", {"environment": "local", "endpoint": "/v1/ping#fragment"}),
     ],
 )
 @pytest.mark.asyncio
-async def test_data_tools_report_connection_failure(mocker, tool, params):
-    _patch_manager(mocker, error=MLClientEnvironmentNotFoundError("no env for [prod]!"))
+async def test_tool_validation_rejects_invalid_input(tool, params):
+    with pytest.raises(ToolError, match="validation error"):
+        await call("MLClient" + tool, **params)
 
-    assert "MLClientEnvs" in await tool(params)
+
+@pytest.mark.asyncio
+async def test_health_does_not_require_rest_configuration(project, mocker):
+    (project / "mlclient-local.yaml").write_text(
+        "app-name: health-only\nhost: localhost\n",
+    )
+    health = mocker.patch.object(AsyncMLClient, "healthcheck", return_value=True)
+    assert await call("MLClientHealth", environment="local") == {
+        "environment": "local",
+        "healthy": True,
+    }
+    health.assert_awaited_once()
 
 
-def test_main_runs_server_over_stdio(mocker):
-    run = mocker.patch.object(server.mcp, "run")
+@pytest.mark.parametrize("first", [False, httpx.ConnectError("synthetic unavailable")])
+@pytest.mark.asyncio
+async def test_health_wait_retries_until_ready(mocker, first):
+    mocker.patch.object(AsyncMLClient, "healthcheck", side_effect=[first, True])
+    mocker.patch("asyncio.sleep", new_callable=mocker.AsyncMock)
+    assert await call("MLClientHealth", environment="local", wait=True) == {
+        "environment": "local",
+        "healthy": True,
+        "attempts": 2,
+        "timed_out": False,
+    }
 
-    server.main()
 
+@pytest.mark.asyncio
+async def test_health_wait_bounds_slow_request(mocker):
+    cancelled = asyncio.Event()
+
+    async def slow_probe():
+        try:
+            await asyncio.sleep(30)
+        finally:
+            cancelled.set()
+
+    mocker.patch.object(AsyncMLClient, "healthcheck", side_effect=slow_probe)
+    result = await asyncio.wait_for(
+        call(
+            "MLClientHealth",
+            environment="local",
+            wait=True,
+            timeout_seconds=1,
+        ),
+        timeout=2,
+    )
+    assert result == {
+        "environment": "local",
+        "healthy": False,
+        "attempts": 1,
+        "timed_out": True,
+    }
+    assert cancelled.is_set()
+
+
+@pytest.mark.parametrize("tool", ["Estimate", "Uris", "Search"])
+@pytest.mark.asyncio
+async def test_query_tools_bind_namespaced_root_and_filter_search(mocker, tool):
+    evaluate = mocker.patch.object(
+        AsyncEvalService,
+        "xquery",
+        return_value={"results": [], "total": 0}
+        if tool == "Search"
+        else 0
+        if tool == "Estimate"
+        else [],
+    )
+    await call(
+        "MLClient" + tool,
+        environment="local",
+        document_root="order",
+        root_namespace="urn:orders",
+    )
+    code = evaluate.call_args.args[0]
+    expected = resources_utils.read_test_resource_text(
+        __file__,
+        tool.lower() + ".xqy",
+    ).removesuffix("\n")
+    assert code == expected
+    assert evaluate.call_args.kwargs == {
+        "variables": {"root": "order", "root_namespace": "urn:orders"},
+        "database": None,
+    }
+
+
+@pytest.mark.parametrize(
+    ("tool", "value", "key", "expected"),
+    [
+        ("Estimate", 3, "estimate", 3),
+        ("Uris", "/one.xml", "uris", ["/one.xml"]),
+        ("Uris", None, "uris", []),
+        ("Uris", ["/one.xml", "/two.xml"], "uris", ["/one.xml", "/two.xml"]),
+    ],
+)
+@pytest.mark.asyncio
+async def test_query_tools_normalize_results_without_root(
+    mocker,
+    tool,
+    value,
+    key,
+    expected,
+):
+    evaluate = mocker.patch.object(AsyncEvalService, "xquery", return_value=value)
+    assert (await call("MLClient" + tool, environment="local", database="Documents"))[
+        key
+    ] == expected
+    assert evaluate.call_args.kwargs == {"variables": None, "database": "Documents"}
+    assert "$root" not in evaluate.call_args.args[0]
+
+
+@pytest.mark.asyncio
+async def test_values_preserves_reference_query_and_limit(mocker):
+    evaluate = mocker.patch.object(
+        AsyncEvalService,
+        "xquery",
+        return_value=["open", "closed"],
+    )
+    assert await call(
+        "MLClientValues",
+        environment="local",
+        reference='cts:path-reference("/order/status")',
+        limit=2,
+    ) == {
+        "environment": "local",
+        "values": ["open", "closed"],
+    }
+    assert evaluate.call_args.args[0] == (
+        'cts:values(cts:path-reference("/order/status"), (), '
+        '("frequency-order", "descending", "limit=2"), cts:true-query())'
+    )
+
+
+@pytest.mark.parametrize("as_mapping", [False, True])
+@pytest.mark.asyncio
+async def test_docs_preserves_content_and_metadata(mocker, as_mapping):
+    document = Document.json(
+        "/a.json",
+        {"key": 1},
+        metadata=Metadata(collections=["orders"]),
+    )
+    read = mocker.patch.object(
+        AsyncDocumentsService,
+        "read",
+        return_value={"/a.json": document} if as_mapping else document,
+    )
+    result = await call(
+        "MLClientDocs",
+        environment="local",
+        uris=["/a.json"],
+        category=["content", "metadata"],
+        database="Documents",
+    )
+    assert result["documents"][0] == {
+        "uri": "/a.json",
+        "docType": "json",
+        "content": {"key": 1},
+        "metadata": document.metadata.to_json(),
+        "truncated": False,
+    }
+    read.assert_awaited_once_with(
+        ["/a.json"],
+        category=["content", "metadata"],
+        database="Documents",
+    )
+
+
+@pytest.mark.asyncio
+async def test_docs_supports_metadata_only_and_binary(mocker):
+    metadata = Metadata(collections=["orders"])
+    documents = {
+        "/metadata": Document.metadata_update("/metadata", metadata),
+        "/binary": Document.binary("/binary", b"\x00\xff"),
+    }
+    mocker.patch.object(AsyncDocumentsService, "read", return_value=documents)
+    result = await call("MLClientDocs", environment="local", uris=list(documents))
+    assert result["documents"][0]["metadata"] == metadata.to_json()
+    assert result["documents"][0]["content"] is None
+    assert result["documents"][0]["docType"] is None
+    assert result["documents"][1]["content"] == {"encoding": "base64", "data": "AP8="}
+
+
+@pytest.mark.asyncio
+async def test_docs_marks_truncated_preview(mocker):
+    document = Document.text("/a.txt", "x" * 101)
+    mocker.patch.object(
+        AsyncDocumentsService,
+        "read",
+        return_value={"/a.txt": document},
+    )
+    result = await call(
+        "MLClientDocs",
+        environment="local",
+        uris=["/a.txt"],
+        max_chars=100,
+    )
+    assert result["documents"][0]["content"] == "x" * 100
+    assert result["documents"][0]["truncated"] is True
+
+
+@pytest.mark.parametrize("limit", [1, 100])
+@pytest.mark.asyncio
+async def test_logs_forwards_filters_and_limits_latest_entries(mocker, limit):
+    entries = [
+        {"timestamp": f"2026-10-05T08:00:0{i}Z", "message": str(i)} for i in range(3)
+    ]
+    get = mocker.patch.object(AsyncLogsService, "get", return_value=iter(entries))
+    result = await call(
+        "MLClientLogs",
+        environment="local",
+        app_server="8100",
+        start_time="2026-10-05T08:00:00Z",
+        regex="Error",
+        host="node-a",
+        limit=limit,
+    )
+    assert result == {
+        "environment": "local",
+        "logs": entries[-limit:],
+        "total": 3,
+        "truncated": limit < 3,
+    }
+    get.assert_awaited_once_with(
+        app_server="8100",
+        log_type="error",
+        start_time="2026-10-05T08:00:00Z",
+        end_time=None,
+        regex="Error",
+        host="node-a",
+    )
+
+
+@pytest.mark.parametrize("extra", [{"log_type": "access"}, {"host": "node-a"}])
+@pytest.mark.asyncio
+async def test_logs_rejects_invalid_all_hosts_combination(extra):
+    with pytest.raises(ToolError, match="all_hosts supports"):
+        await call("MLClientLogs", environment="local", all_hosts=True, **extra)
+
+
+@pytest.mark.asyncio
+async def test_logs_merges_hosts_by_timestamp(mocker):
+    hosts = resources_utils.get_test_resource_json(__file__, "hosts.json")
+    names = [
+        item["nameref"]
+        for item in hosts["host-default-list"]["list-items"]["list-item"]
+    ]
+    mocker.patch.object(
+        AsyncHostsApi,
+        "get_list",
+        return_value=httpx.Response(200, json=hosts),
+    )
+
+    async def get(**kwargs):
+        index = names.index(kwargs["host"])
+        return iter(
+            [{"timestamp": f"2026-10-05T08:00:0{1 - index}Z", "message": "entry"}],
+        )
+
+    mocker.patch.object(AsyncLogsService, "get", side_effect=get)
+    result = await call("MLClientLogs", environment="local", all_hosts=True)
+    assert [entry["host"] for entry in result["logs"]] == names[::-1]
+    assert result["total"] == 2
+
+
+@pytest.mark.parametrize("operation", ["Indexes", "DbStatus"])
+@pytest.mark.asyncio
+async def test_database_tools_use_management_api(mocker, operation):
+    properties = resources_utils.get_test_resource_json(
+        __file__,
+        "database-properties.json",
+    )
+    method = "get_properties" if operation == "Indexes" else "get"
+    api = mocker.patch.object(
+        AsyncDatabasesApi,
+        method,
+        return_value=httpx.Response(200, json=properties),
+    )
+    result = await call(
+        "MLClient" + operation,
+        environment="local",
+        database="Documents",
+    )
+    assert result["environment"] == "local"
+    assert result["database"] == "Documents"
+    if operation == "Indexes":
+        assert result["indexes"] == {
+            key: value
+            for key, value in properties.items()
+            if key
+            in (
+                "range-element-index",
+                "range-element-attribute-index",
+                "range-path-index",
+                "range-field-index",
+            )
+        }
+        api.assert_awaited_once_with("Documents", data_format="json")
+    else:
+        assert result["status"] == properties
+        api.assert_awaited_once_with("Documents", view="status", data_format="json")
+
+
+@pytest.mark.parametrize(
+    ("status", "body"),
+    [(200, {"ok": True}), (404, {"error": "synthetic"}), (204, "")],
+)
+@pytest.mark.asyncio
+async def test_http_exposes_status_and_body_and_preserves_request(mocker, status, body):
+    response = (
+        httpx.Response(status, json=body)
+        if isinstance(body, dict)
+        else httpx.Response(status, text=body)
+    )
+    request = mocker.patch.object(AsyncHttpClient, "request", return_value=response)
+    assert await call(
+        "MLClientHttp",
+        environment="local",
+        method="POST",
+        endpoint="/v1/search",
+        body="  raw body\n",
+        headers={"X-Test": "a"},
+        params={"q": "x"},
+    ) == {
+        "environment": "local",
+        "status": status,
+        "body": body,
+    }
+    request.assert_awaited_once_with(
+        "POST",
+        "/v1/search",
+        body="  raw body\n",
+        params={"q": "x"},
+        headers={"X-Test": "a"},
+    )
+
+
+@pytest.mark.asyncio
+async def test_stdio_protocol_reports_structured_success_and_real_error(project):
+    async with (
+        stdio_client(
+            StdioServerParameters(
+                command=sys.executable,
+                args=["-m", "mlclient.mcp"],
+                cwd=str(project.parent),
+            ),
+        ) as (read, write),
+        ClientSession(read, write) as session,
+    ):
+        await session.initialize()
+        result = await session.call_tool("MLClientEnvs", {})
+        assert result.isError is False
+        assert result.structuredContent["count"] == 1
+        result = await session.call_tool(
+            "MLClientVersion",
+            {"params": {"environment": "missing"}},
+        )
+        assert result.isError is True
+        assert "MLClientEnvs" in result.content[0].text
+
+
+def test_main_uses_stdio(mocker):
+    run = mocker.patch.object(mcp, "run")
+    main()
     run.assert_called_once_with()
+
+
+@pytest.mark.asyncio
+async def test_version_accepts_explicit_default_connection(mocker):
+    mocker.patch.object(AsyncMLClient, "version", return_value="12.0.1")
+    assert (await call("MLClientVersion", environment="local", connection=None))[
+        "version"
+    ] == "12.0.1"
+
+
+@pytest.mark.asyncio
+async def test_logs_cancels_other_hosts_before_reporting_failure(mocker):
+    hosts = resources_utils.get_test_resource_json(__file__, "hosts.json")
+    names = [
+        item["nameref"]
+        for item in hosts["host-default-list"]["list-items"]["list-item"]
+    ]
+    mocker.patch.object(
+        AsyncHostsApi,
+        "get_list",
+        return_value=httpx.Response(200, json=hosts),
+    )
+    started = asyncio.Event()
+    cancelled = asyncio.Event()
+
+    async def get(**kwargs):
+        if kwargs["host"] == names[0]:
+            await started.wait()
+            message = "synthetic host failure"
+            raise httpx.ConnectError(message)
+        started.set()
+        try:
+            await asyncio.sleep(30)
+        finally:
+            cancelled.set()
+
+    mocker.patch.object(AsyncLogsService, "get", side_effect=get)
+    with pytest.raises(ToolError, match="synthetic host failure"):
+        await call("MLClientLogs", environment="local", all_hosts=True)
+    assert cancelled.is_set()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_management_connection_override_reaches_selected_server():
+    properties = resources_utils.get_test_resource_json(
+        __file__,
+        "database-properties.json",
+    )
+    route = respx.get(
+        "http://localhost:8101/manage/v2/databases/Documents/properties",
+        params={"format": "json"},
+    ).respond(200, json=properties)
+    result = await call(
+        "MLClientIndexes",
+        environment="local",
+        connection="alternate",
+        database="Documents",
+    )
+    assert result["database"] == "Documents"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_health_connection_override_reaches_selected_server():
+    route = respx.head("http://localhost:8101/").respond(200)
+    assert (await call("MLClientHealth", environment="local", connection="alternate"))[
+        "healthy"
+    ] is True
+    assert route.called
+
+
+@pytest.mark.parametrize(
+    ("headers", "content_type", "expected_body"),
+    [
+        (None, "application/json", b'{"key": "value"}'),
+        ({"content-type": "application/json"}, "application/json", b'{"key": "value"}'),
+        (
+            {"content-type": "application/x-www-form-urlencoded"},
+            "application/x-www-form-urlencoded",
+            b"key=value",
+        ),
+    ],
+)
+@pytest.mark.asyncio
+@respx.mock
+async def test_http_dictionary_body_defaults_to_json_and_respects_explicit_header(
+    headers, content_type, expected_body,
+):
+    route = respx.post("http://localhost:8100/v1/search").respond(204)
+    result = await call(
+        "MLClientHttp",
+        environment="local",
+        method="POST",
+        endpoint="/v1/search",
+        body={"key": "value"},
+        headers=headers,
+    )
+    assert result == {"environment": "local", "status": 204, "body": ""}
+    assert route.calls.last.request.headers["content-type"] == content_type
+    assert route.calls.last.request.content == expected_body

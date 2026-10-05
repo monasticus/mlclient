@@ -28,6 +28,7 @@ namespaces = (
     "mlclient.exceptions",
     "mlclient.logging",
     "mlclient.jobs",
+    "mlclient.mcp",
 )
 nav = mkdocs_gen_files.Nav()
 # A dedicated landing page prevents section-index from consuming the first

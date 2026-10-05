@@ -75,6 +75,7 @@ nav:
   - Quickstart: quickstart.md
   - Guides:
       - Clients: user/clients.md
+      - MCP server: user/mcp.md
       - Environments: user/environments.md
       - Documents: user/python/documents.md
       - Evaluate code: user/python/eval.md

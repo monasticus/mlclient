@@ -14,8 +14,6 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import TypeAlias, overload
 
-from mlclient._experimental import experimental
-
 # XML 1.0 NCName character ranges, excluding the QName separator ':'.
 _NAME_START = (
     r"A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF"
@@ -179,7 +177,6 @@ def namespace_bindings(namespaces) -> dict[str, str]:
     return result
 
 
-@experimental()
 class XqyExpression(ABC):
     """An XQuery expression, reusable in builders or ``eval.expression``."""
 
@@ -454,7 +451,6 @@ class FunctionCall(XqyExpression):
         return f"{self.fn}({', '.join(parts)})"
 
 
-@experimental()
 class ModuleFunctionCall(XqyExpression):
     """A composable call to a function in a deployed XQuery library module.
 

@@ -1,8 +1,8 @@
 # Recipes
 
 Start with a test database and credentials allowed to perform the operations
-shown. The custom expression recipe uses the experimental XQuery API; the other
-recipes use stable document and client APIs. Experimental jobs are not required.
+shown. These recipes use stable document, client and XQuery APIs.
+Experimental jobs are not required.
 
 ## Replace a collection without rewriting content
 

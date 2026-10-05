@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import datetime
 
-from mlclient._experimental import experimental
 from mlclient._options import UNSET
 from mlclient.functions.xqy.expressions import (
     FunctionCall,
@@ -42,7 +41,6 @@ def _optional_call(name: str, *arguments) -> FunctionCall:
     )
 
 
-@experimental()
 class Fn:
     """Pure fn: builders; native context and dialect requirements still apply."""
 

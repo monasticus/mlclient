@@ -6,11 +6,9 @@ convert scalar values or composed expressions to the requested XQuery type.
 
 from __future__ import annotations
 
-from mlclient._experimental import experimental
 from mlclient.functions.xqy.expressions import AtomicInput, XqyExpression, as_expr
 
 
-@experimental()
 class Xs:
     """Build native XML Schema atomic type constructors.
 

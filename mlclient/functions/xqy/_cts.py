@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import datetime
 
-from mlclient._experimental import experimental
 from mlclient.functions.xqy._xs import Xs
 from mlclient.functions.xqy.expressions import (
     DatabaseRoot,
@@ -82,7 +81,6 @@ def _depth(value) -> XqyExpression:
     return as_expr(value, cast="xs:string")
 
 
-@experimental()
 class Cts:
     """Pure builders for supported non-deprecated ``cts:`` functions."""
 

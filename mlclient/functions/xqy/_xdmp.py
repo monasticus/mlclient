@@ -5,7 +5,6 @@ Builders compose expressions; services execute through the common evaluator.
 
 from __future__ import annotations
 
-from mlclient._experimental import experimental
 from mlclient.functions.xqy.expressions import (
     XqyExpression,
     FunctionCall,
@@ -13,7 +12,6 @@ from mlclient.functions.xqy.expressions import (
 )
 
 
-@experimental()
 class Xdmp:
     """Pure ``xdmp:`` builders returning expression trees."""
 

@@ -4,15 +4,53 @@ The singletons in `mlclient.functions.xqy` mirror native XQuery functions.
 They build composable expressions without making requests. Pass a complete
 expression to `ml.eval.expression()` to execute it in one request.
 
-!!! note "Experimental API"
-    The expression builders and CTS service are experimental.
-
 ## CTS: search, lexicons and queries
 
 Start with the [search guide](search.md) when you want `SearchHit` objects with
 scores or `ValueHit` objects with frequencies. Use the `cts` **singleton** from
 `mlclient.functions.xqy` when you want native results or need to compose CTS
 under another XQuery function. It is not a `CtsService` instance.
+
+### Choose execution or composition
+
+The API is designed to use the name `cts` for the layer you need. Assign
+`CtsService(ml.rest)` to `cts` when executing queries through the service. When
+only building expressions, import the `cts` singleton from
+`mlclient.functions.xqy` instead. Query and reference constructors such as
+`word_query()` and `json_property_reference()` build expressions in either case;
+result-producing service methods execute immediately.
+
+When mixing execution with nested CTS expressions, keep `cts` assigned to the
+service and import the `Cts` class for the nested operations. Its static methods
+only build expressions, even when the service method with the same name would
+execute a request.
+
+For example, find the frequency of the most common category in the `products`
+collection. This assumes at least one matching category and a range index on
+the `category` JSON property. Both `frequency()` and `values()` are service methods,
+but only the outer `frequency()` should initiate execution:
+
+```python
+from mlclient import MLClient
+from mlclient.functions.xqy import Cts
+from mlclient.services import CtsService
+
+with MLClient() as ml:
+    cts = CtsService(ml.rest)
+    frequencies = cts.frequency(
+        Cts.values(
+            cts.json_property_reference("category"),
+            options="frequency-order",
+            query=cts.collection_query("products"),
+        ).pos(1),
+    )
+```
+
+`Cts.values(...).pos(1)` stays inside the XQuery expression. The service sends
+one request, and MarkLogic selects the most frequent category and reads its
+native frequency in that request. `frequencies` contains one integer. Calling
+`cts.values(...)` here would execute a separate request and return Python
+`ValueHit` objects, not a composable XQuery expression.
 
 ### Native results without scores or frequencies
 

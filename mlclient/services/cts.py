@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mlclient._experimental import experimental
 from mlclient._options import UNSET
 from mlclient.functions.xqy import (
     Cts,
@@ -29,7 +28,6 @@ if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
 
-@experimental(log_on_init=True)
 class CtsService(Cts):
     """Executes cts search, lexicon and estimate queries via ``/v1/eval``."""
 
@@ -9901,7 +9899,6 @@ class CtsService(Cts):
         return _result_pairs(response, model)
 
 
-@experimental(log_on_init=True)
 class AsyncCtsService(Cts):
     """Async execution of cts search, lexicon and estimate queries via ``/v1/eval``."""
 

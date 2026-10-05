@@ -3,9 +3,6 @@
 Use `CtsService` to find documents, retrieve their URIs or read indexed values.
 Build a query, pass it to a search operation, and work with parsed Python results.
 
-!!! note "Experimental API"
-    The search API is experimental.
-
 ## Find documents
 
 ```python

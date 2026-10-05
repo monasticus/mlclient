@@ -16,7 +16,7 @@
         <link rel="prev" href="../eval/">
       
       
-        <link rel="next" href="../logs/">
+        <link rel="next" href="../sample/">
       
       
         
@@ -1087,6 +1087,8 @@
       
         
       
+        
+      
     
     
     
@@ -1653,6 +1655,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sample/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    sample
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -8720,10 +8750,14 @@
 
 
 <h1 id="http">http<a class="headerlink" href="#http" title="Permanent link">&para;</a></h1>
-<p>Send an HTTP request and print its response body. Use lowercase method names;
-method matching is case-insensitive.</p>
+<p>Send an HTTP request and print its decoded response body without reformatting
+by default. Use <code>--pretty</code> to format JSON and XML with two-space indentation.
+Unlike <code>http</code>, <code>eval</code> and <code>sample</code> format results by default and offer <code>--no-pretty</code>
+to disable formatting. Use lowercase method names; method matching is
+case-insensitive.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.json
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.json<span class="w"> </span>--include<span class="w"> </span>--pretty
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.json<span class="w"> </span>--include
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.json<span class="w"> </span>--pretty
 </code></pre></div>
 <p>Supply headers with <code>name:value</code>, query parameters with <code>name=value</code>, and a body
 with <code>--body</code>:</p>
@@ -8760,8 +8794,9 @@ Set the appropriate <code>Content-Type</code> header yourself.</p>
 <p>Print the HTTP status line and response headers before the body. A <code>head</code> request
 always prints them because it has no response body.</p>
 <h3 id="-pretty-p"><code>--pretty</code>, <code>-p</code><a class="headerlink" href="#-pretty-p" title="Permanent link">&para;</a></h3>
-<p>Format JSON and element-only XML with two-space indentation. Invalid JSON/XML,
-mixed XML content and <code>xml:space="preserve"</code> are left unchanged.</p>
+<p>Format JSON and element-only XML with two-space indentation. Disabled by default.
+Invalid JSON/XML, mixed XML content and <code>xml:space="preserve"</code> are left unchanged.
+An existing XML declaration is preserved verbatim; none is added when absent.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
 <code>.mlclient/mlclient-dev.yaml</code>.</p>

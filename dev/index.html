@@ -1174,6 +1174,8 @@
       
         
       
+        
+      
     
     
     
@@ -1552,6 +1554,34 @@
     
   
     http
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user/cli/sample/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    sample
   
 
     
@@ -8568,7 +8598,7 @@ hosts, async usage and CLI setup.</p>
 </tr>
 <tr>
 <td>CLI</td>
-<td><code>ml env init</code>, <code>ml eval</code>, <code>ml logs</code>, <code>ml url</code></td>
+<td><code>ml env init</code>, <code>ml eval</code>, <code>ml sample</code>, <code>ml logs</code>, <code>ml url</code></td>
 <td>Import Gradle settings, discover App Servers and select multiple connections</td>
 </tr>
 </tbody>
@@ -8576,7 +8606,9 @@ hosts, async usage and CLI setup.</p>
 <p><a href="user/clients/">The Python guide</a> helps choose between <code>ml.documents</code>,
 <code>ml.rest.documents</code> and <code>ml.http</code>. <a href="user/cli/">The CLI guide</a> gets a project
 connected without writing Python. <a href="recipes/">Recipes</a> show metadata cleanup,
-concurrent evaluations and a custom application API.</p>
+concurrent evaluations and a custom application API.
+CLI <code>eval</code>, <code>http</code> and <code>sample</code> pretty-print XML and JSON with two-space indentation;
+<code>--no-pretty</code> keeps the original formatting.</p>
 <h2 id="from-simple-usage-to-application-specific-control">From simple usage to application-specific control<a class="headerlink" href="#from-simple-usage-to-application-specific-control" title="Permanent link">&para;</a></h2>
 <p>Use <a href="user/environments/">environments</a> to share connection settings across scripts and
 commands. Configure <a href="user/python/connections/">authentication and TLS</a>, then

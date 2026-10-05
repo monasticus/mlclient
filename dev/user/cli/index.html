@@ -1087,6 +1087,8 @@
       
         
       
+        
+      
     
     
     
@@ -1639,6 +1641,34 @@
     
   
     http
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="sample/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    sample
   
 
     
@@ -8737,13 +8767,16 @@ server. Removal asks for confirmation.</p>
 <h2 id="run-everyday-commands">Run everyday commands<a class="headerlink" href="#run-everyday-commands" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/example.json
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>ml<span class="w"> </span>logs<span class="w"> </span>-s<span class="w"> </span><span class="m">8002</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>ml<span class="w"> </span>log-level
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>ml<span class="w"> </span>url<span class="w"> </span>qc
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>ml<span class="w"> </span>health
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>ml<span class="w"> </span>version
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>ml<span class="w"> </span>sample<span class="w"> </span>order
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>ml<span class="w"> </span>logs<span class="w"> </span>-s<span class="w"> </span><span class="m">8002</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>ml<span class="w"> </span>log-level
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>ml<span class="w"> </span>url<span class="w"> </span>qc
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>ml<span class="w"> </span>health
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>ml<span class="w"> </span>version
 </code></pre></div>
 <p>The <code>local</code> environment is the default. Use <code>-e dev</code> for another environment.
+<code>eval</code>, <code>http</code> and <code>sample</code> pretty-print XML and JSON with two-space indentation;
+pass <code>--no-pretty</code> to keep the original formatting.
 A connection selector chooses where the request is sent; an operation target
 chooses what the server acts on. The distinction is explained below and on each
 command page.</p>
@@ -8767,6 +8800,10 @@ command page.</p>
 <tr>
 <td>Send an HTTP request</td>
 <td><a href="http/"><code>ml http</code></a></td>
+</tr>
+<tr>
+<td>Inspect sample XML or JSON content</td>
+<td><a href="sample/"><code>ml sample</code></a></td>
 </tr>
 <tr>
 <td>Read server logs</td>
@@ -8797,7 +8834,7 @@ command page.</p>
 <p>Use <code>ml --help</code> for global options and <code>ml env init --help</code> (or another command)
 for its arguments. The pages above explain workflows, defaults and examples.</p>
 <h2 id="connection-and-target-selection">Connection and target selection<a class="headerlink" href="#connection-and-target-selection" title="Permanent link">&para;</a></h2>
-<p><code>http</code>, <code>eval</code>, <code>version</code>, <code>log-level</code> and <code>trace-events</code> use <code>-c / --connection</code> to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.</p>
+<p><code>http</code>, <code>eval</code>, <code>sample</code>, <code>version</code>, <code>log-level</code> and <code>trace-events</code> use <code>-c / --connection</code> to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.</p>
 <p><code>logs -s / --server</code> selects whose logs to read by an environment identifier or port. <code>log-level -s / --server</code> instead takes the actual App Server name in MarkLogic. It does not select the connection used for the request.</p>
 <p>Server commands default to the <code>local</code> environment; <code>-e / --environment</code> selects another environment.</p>
 <h2 id="global-options">Global options<a class="headerlink" href="#global-options" title="Permanent link">&para;</a></h2>

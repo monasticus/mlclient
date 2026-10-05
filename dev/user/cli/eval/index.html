@@ -1087,6 +1087,8 @@
       
         
       
+        
+      
     
     
     
@@ -1584,6 +1586,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-no-pretty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --no-pretty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-environment-e" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1634,6 +1647,34 @@
     
   
     http
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sample/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    sample
   
 
     
@@ -8651,6 +8692,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-no-pretty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --no-pretty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-environment-e" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8698,10 +8750,14 @@
 
 
 <h1 id="eval">eval<a class="headerlink" href="#eval" title="Permanent link">&para;</a></h1>
-<p>Run XQuery or server-side JavaScript and print the result.</p>
+<p>Run XQuery or server-side JavaScript and print the result.
+XML and JSON results are formatted with two-space indentation by default.
+An existing XML declaration is preserved verbatim; none is added when absent.
+Mixed XML content and <code>xml:space="preserve"</code> retain their original formatting.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-j<span class="w"> </span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./query.xqy
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;&lt;root&gt;&lt;item&gt;one&lt;/item&gt;&lt;/root&gt;&#39;</span><span class="w"> </span>--no-pretty
 </code></pre></div>
 <p>Use <code>-d</code> to select a content database, or pass external variables with <code>--var</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./query.xqy<span class="w"> </span>-d<span class="w"> </span>Documents
@@ -8730,6 +8786,9 @@ App Server's default content database. The user must have permission to access i
 <h3 id="-txid-t"><code>--txid</code>, <code>-t</code><a class="headerlink" href="#-txid-t" title="Permanent link">&para;</a></h3>
 <p>Run within an existing multi-statement transaction. This command does not create,
 commit or roll back that transaction.</p>
+<h3 id="-no-pretty"><code>--no-pretty</code><a class="headerlink" href="#-no-pretty" title="Permanent link">&para;</a></h3>
+<p>Print each result without reformatting XML or JSON, for example when piping output
+to another tool. Plain text and other scalar results are always printed unchanged.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
 <code>.mlclient/mlclient-dev.yaml</code>.</p>

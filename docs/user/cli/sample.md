@@ -55,7 +55,8 @@ results rather than being split into separate samples.
 
 `--no-pretty` preserves the server's formatting. With pretty-printing enabled,
 an existing XML declaration is preserved verbatim; none is added when absent.
-Mixed XML content and `xml:space="preserve"` are not re-indented.
+Mixed XML content and `xml:space="preserve"` subtrees are not re-indented;
+the surrounding XML is still formatted with two-space indentation.
 
 ### `--environment`, `-e`
 

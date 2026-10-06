@@ -46,9 +46,8 @@ def prettify(text: str, content_type: str | None = None) -> str:
 def _prettify_xml(text: str) -> str:
     """Re-indent XML while preserving its declaration and significant whitespace.
 
-    Whitespace-only text nodes between elements are dropped first; left in, the
-    server's own indentation turns into blank lines under toprettyxml.
-    Mixed content and explicit whitespace preservation retain the original text.
+    Re-indent element-only content while leaving mixed content and subtrees with
+    explicit whitespace preservation unindented.
 
     Parameters
     ----------
@@ -58,7 +57,7 @@ def _prettify_xml(text: str) -> str:
     Returns
     -------
     str
-        Indented element-only XML or the original whitespace-sensitive XML
+        XML with indentation only outside whitespace-sensitive subtrees
 
     Raises
     ------
@@ -66,39 +65,45 @@ def _prettify_xml(text: str) -> str:
         If the input is not well-formed XML
     """
     dom = minidom.parseString(text)
-    for element in dom.getElementsByTagName("*"):
-        if element.getAttribute("xml:space") == "preserve" or (
-            any(child.nodeType == child.ELEMENT_NODE for child in element.childNodes)
-            and any(
-                child.nodeType in (child.TEXT_NODE, child.CDATA_SECTION_NODE)
-                and (child.data.strip() or (child.data and "\n" not in child.data))
-                for child in element.childNodes
-            )
-        ):
-            return text
-    _strip_blank_text_nodes(dom)
-    body = dom.toprettyxml(indent="  ").partition("\n")[2].rstrip("\n")
+    body = "\n".join(_format_xml_node(child) for child in dom.childNodes)
     if text.startswith("<?xml") and text[5:6].isspace():
         declaration = text.partition("?>")[0] + "?>"
         return declaration + "\n" + body
     return body
 
 
-def _strip_blank_text_nodes(node: minidom.Node) -> None:
-    """Remove indentation around child elements, preserving leaf text.
+def _format_xml_node(node: minidom.Node, indent: str = "") -> str:
+    """Indent a node without inserting whitespace inside sensitive subtrees.
 
     Parameters
     ----------
     node : minidom.Node
-        DOM subtree to modify in place
+        DOM subtree to serialize
+    indent : str, default ""
+        Indentation before the node
+
+    Returns
+    -------
+    str
+        Serialized node, with two-space indentation for element-only content
     """
+    if node.nodeType != node.ELEMENT_NODE:
+        return indent + node.toxml()
     has_elements = any(item.nodeType == item.ELEMENT_NODE for item in node.childNodes)
-    for child in list(node.childNodes):
-        if (
-            child.nodeType == child.TEXT_NODE
-            and not child.data.strip()
-            and has_elements
-        ):
-            node.removeChild(child)
-        else:
-            _strip_blank_text_nodes(child)
+    if (
+        not has_elements
+        or node.getAttribute("xml:space") == "preserve"
+        or any(
+            child.nodeType in (child.TEXT_NODE, child.CDATA_SECTION_NODE)
+            and (child.data.strip() or (child.data and "\n" not in child.data))
+            for child in node.childNodes
+        )
+    ):
+        return indent + node.toxml()
+    opening = node.cloneNode(deep=False).toxml()[:-2] + ">"
+    children = "\n".join(
+        _format_xml_node(child, indent + "  ")
+        for child in node.childNodes
+        if child.nodeType != child.TEXT_NODE or child.data.strip()
+    )
+    return f"{indent}{opening}\n{children}\n{indent}</{node.tagName}>"

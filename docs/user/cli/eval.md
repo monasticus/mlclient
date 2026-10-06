@@ -3,7 +3,8 @@
 Run XQuery or server-side JavaScript and print the result.
 XML and JSON results are formatted with two-space indentation by default.
 An existing XML declaration is preserved verbatim; none is added when absent.
-Mixed XML content and `xml:space="preserve"` retain their original formatting.
+Mixed XML content and `xml:space="preserve"` subtrees are not re-indented;
+the surrounding XML is still formatted with two-space indentation.
 
 ```sh
 ml eval -x '"Hello World!"'

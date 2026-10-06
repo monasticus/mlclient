@@ -51,16 +51,77 @@ def test_prettify_preserves_xml_declaration_verbatim(declaration):
 
 
 @pytest.mark.parametrize(
-    "text",
+    ("text", "expected"),
     [
-        "<p>Hello <b>world</b>!</p>",
-        "<root><p> <b>one</b> </p></root>",
-        "<root><![CDATA[hello]]><item/></root>",
-        '<root><item xml:space="preserve">  <value/>  </item></root>',
+        ("<p>Hello <b>world</b>!</p>", "<p>Hello <b>world</b>!</p>"),
+        (
+            "<root><p> <b>one</b> </p></root>",
+            "<root>\n  <p> <b>one</b> </p>\n</root>",
+        ),
+        (
+            "<root><![CDATA[hello]]><item/></root>",
+            "<root><![CDATA[hello]]><item/></root>",
+        ),
+        (
+            '<root><item xml:space="preserve">  <value/>  </item></root>',
+            '<root>\n  <item xml:space="preserve">  <value/>  </item>\n</root>',
+        ),
     ],
 )
-def test_prettify_preserves_whitespace_sensitive_xml(text):
-    assert prettify(text) == text
+def test_prettify_preserves_whitespace_sensitive_xml(text, expected):
+    assert prettify(text) == expected
+
+
+def test_prettify_formats_xml_around_mixed_content():
+    text = (
+        "<root><group>\n    <p>Hello <b>world</b>!</p>"
+        "\n    <item>one</item>\n</group>"
+        "<other><item>two</item></other></root>"
+    )
+    assert prettify(text) == (
+        "<root>\n"
+        "  <group>\n"
+        "    <p>Hello <b>world</b>!</p>\n"
+        "    <item>one</item>\n"
+        "  </group>\n"
+        "  <other>\n"
+        "    <item>two</item>\n"
+        "  </other>\n"
+        "</root>"
+    )
+
+
+def test_prettify_preserves_nested_elements_inside_mixed_content():
+    assert prettify("<root><p>Hello <b><i>world</i></b>!</p><item/></root>") == (
+        "<root>\n  <p>Hello <b><i>world</i></b>!</p>\n  <item/>\n</root>"
+    )
+
+
+def test_prettify_preserves_xml_space_subtree():
+    assert (
+        prettify(
+            '<root xml:space="preserve"> <group><item/><item/></group> </root>',
+        )
+        == '<root xml:space="preserve"> <group><item/><item/></group> </root>'
+    )
+
+
+def test_prettify_preserves_declaration_with_mixed_content():
+    declaration = '<?xml version="1.0" encoding="UTF-8"?>'
+    assert prettify(declaration + "<root><p>Hello <b>world</b>!</p></root>") == (
+        declaration + "\n<root>\n  <p>Hello <b>world</b>!</p>\n</root>"
+    )
+
+
+def test_prettify_preserves_comments_processing_instructions_and_namespaces():
+    assert prettify(
+        '<?view sample?><root xmlns:q="urn:example">'
+        "<!--sample--><q:p>Hello <q:b>world</q:b>!</q:p><q:item/></root>",
+    ) == (
+        '<?view sample?>\n<root xmlns:q="urn:example">\n'
+        "  <!--sample-->\n  <q:p>Hello <q:b>world</q:b>!</q:p>\n"
+        "  <q:item/>\n</root>"
+    )
 
 
 def test_prettify_preserves_xml_leaf_whitespace():

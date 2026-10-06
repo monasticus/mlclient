@@ -69,7 +69,8 @@ always prints them because it has no response body.
 ### `--pretty`, `-p`
 
 Format JSON and element-only XML with two-space indentation. Disabled by default.
-Invalid JSON/XML, mixed XML content and `xml:space="preserve"` are left unchanged.
+Invalid JSON/XML is left unchanged. Mixed XML content and `xml:space="preserve"`
+subtrees are not re-indented; the surrounding XML is still formatted.
 An existing XML declaration is preserved verbatim; none is added when absent.
 
 ### `--environment`, `-e`

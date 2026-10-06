@@ -8753,7 +8753,8 @@
 <p>Run XQuery or server-side JavaScript and print the result.
 XML and JSON results are formatted with two-space indentation by default.
 An existing XML declaration is preserved verbatim; none is added when absent.
-Mixed XML content and <code>xml:space="preserve"</code> retain their original formatting.</p>
+Mixed XML content and <code>xml:space="preserve"</code> subtrees are not re-indented;
+the surrounding XML is still formatted with two-space indentation.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-j<span class="w"> </span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./query.xqy

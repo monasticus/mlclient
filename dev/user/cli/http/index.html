@@ -8795,7 +8795,8 @@ Set the appropriate <code>Content-Type</code> header yourself.</p>
 always prints them because it has no response body.</p>
 <h3 id="-pretty-p"><code>--pretty</code>, <code>-p</code><a class="headerlink" href="#-pretty-p" title="Permanent link">&para;</a></h3>
 <p>Format JSON and element-only XML with two-space indentation. Disabled by default.
-Invalid JSON/XML, mixed XML content and <code>xml:space="preserve"</code> are left unchanged.
+Invalid JSON/XML is left unchanged. Mixed XML content and <code>xml:space="preserve"</code>
+subtrees are not re-indented; the surrounding XML is still formatted.
 An existing XML declaration is preserved verbatim; none is added when absent.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load

@@ -8724,7 +8724,8 @@ own line, with no score or source-location metadata. JSON arrays remain single
 results rather than being split into separate samples.</p>
 <p><code>--no-pretty</code> preserves the server's formatting. With pretty-printing enabled,
 an existing XML declaration is preserved verbatim; none is added when absent.
-Mixed XML content and <code>xml:space="preserve"</code> are not re-indented.</p>
+Mixed XML content and <code>xml:space="preserve"</code> subtrees are not re-indented;
+the surrounding XML is still formatted with two-space indentation.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
 <code>.mlclient/mlclient-dev.yaml</code>.</p>

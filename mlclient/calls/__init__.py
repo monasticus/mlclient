@@ -38,6 +38,7 @@ from mlclient.calls.roles import (
     RolesGetCall,
     RolesPostCall,
 )
+from mlclient.calls.search import SearchDeleteCall, SearchGetCall, SearchPostCall
 from mlclient.calls.servers import (
     ServerDeleteCall,
     ServerGetCall,
@@ -59,6 +60,7 @@ from mlclient.calls.users import (
     UsersGetCall,
     UsersPostCall,
 )
+from mlclient.calls.values import ValueGetCall, ValuePostCall, ValuesGetCall
 
 __all__ = [
     "ApiCall",
@@ -91,6 +93,9 @@ __all__ = [
     "RolePropertiesPutCall",
     "RolesGetCall",
     "RolesPostCall",
+    "SearchDeleteCall",
+    "SearchGetCall",
+    "SearchPostCall",
     "ServerConfigGetCall",
     "ServerDeleteCall",
     "ServerGetCall",
@@ -108,4 +113,7 @@ __all__ = [
     "UserPropertiesPutCall",
     "UsersGetCall",
     "UsersPostCall",
+    "ValueGetCall",
+    "ValuePostCall",
+    "ValuesGetCall",
 ]

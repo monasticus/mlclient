@@ -3,10 +3,32 @@ import pytest
 import respx
 
 from mlclient import AsyncMLClient
+from mlclient.exceptions import WrongParametersError
 from mlclient.calls import EvalCall
 from mlclient.models import DocumentsBodyPart
-from tests.utils import resources as resources_utils
+from tests.utils import data as test_data, resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
+
+
+STRUCTURED_QUERY = '{"search": {"ctsquery": {"wordQuery": {"text": ["coffee"]}}}}'
+COMBINED_QUERY = {"search": {"ctsquery": {"wordQuery": {"text": ["coffee"]}}}}
+URIS_VALUES_QUERY = {"search": {"options": {"values": [{"name": "uris", "uri": None}]}}}
+URIS_VALUES_RESPONSE = {
+    "values-response": {
+        "name": "uris",
+        "type": "xs:string",
+        "distinct-value": [{"frequency": 1, "_value": "/a.json"}],
+    },
+}
+VALUES_ERROR = {
+    "errorResponse": {
+        "statusCode": 400,
+        "status": "Bad Request",
+        "messageCode": "REST-INVALIDPARAM",
+        "message": "REST-INVALIDPARAM: (err:FOER0000) Invalid parameter: "
+        "No values or tuples specification named: category",
+    },
+}
 
 
 @pytest.mark.asyncio
@@ -204,3 +226,200 @@ async def test_post_transaction():
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert resp.content == b""
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_search_documents():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_request_param("structuredQuery", STRUCTURED_QUERY)
+    ml_mocker.with_request_param("pageLength", "1")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_header("vnd.marklogic.result-estimate", "3")
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.search.get(
+            structured_query=STRUCTURED_QUERY,
+            page_length=1,
+            multipart=True,
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.headers["vnd.marklogic.result-estimate"] == "3"
+    assert b'filename="/products/coffee.json"' in resp.content
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_post_search():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body(COMBINED_QUERY)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body({"total": 1, "results": [{"uri": "/a.json"}]})
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.search.post(COMBINED_QUERY, data_format="json")
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json() == {"total": 1, "results": [{"uri": "/a.json"}]}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_search():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_request_param("collection", "products")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.search.delete(collection="products")
+
+    assert resp.status_code == httpx.codes.NO_CONTENT
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_search_clearing_database():
+    route = respx.delete("http://localhost:8000/v1/search").respond(204)
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.search.delete(database="Documents", clear_database=True)
+
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert dict(route.calls.last.request.url.params) == {"database": "Documents"}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_search_without_filters_is_rejected_before_any_request():
+    route = respx.delete("http://localhost:8000/v1/search").respond(204)
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(WrongParametersError):
+            await ml.rest.search.delete(database="Documents")
+
+    assert not route.called
+
+
+@pytest.mark.parametrize("name", ["collection", "directory"])
+@pytest.mark.parametrize("value", [[], ()])
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_search_empty_filters_are_rejected_before_any_request(name, value):
+    route = respx.delete("http://localhost:8000/v1/search").respond(204)
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(WrongParametersError):
+            await ml.rest.search.delete(**{name: value})
+
+    assert not route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_values_list():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(
+        {"values-list": {"values": [{"name": "category"}]}},
+    )
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.values.get_list(
+            data_format="json",
+            options="product-options",
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json() == {"values-list": {"values": [{"name": "category"}]}}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_values():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/values/category")
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(VALUES_ERROR)
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.values.get(
+            "category",
+            options="product-options",
+            data_format="json",
+        )
+
+    assert resp.status_code == httpx.codes.BAD_REQUEST
+    assert resp.json()["errorResponse"]["messageCode"] == "REST-INVALIDPARAM"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_values_of_a_named_definition():
+    body = {
+        "values-response": {
+            "name": "category",
+            "type": "xs:string",
+            "distinct-value": [{"frequency": 2, "_value": "drinks"}],
+        },
+    }
+    url = "http://localhost:8000/v1/values/category"
+    route = respx.get(url).respond(200, json=body)
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.values.get(
+            "category",
+            options="product-options",
+            data_format="json",
+            limit=5,
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json() == body
+    request = route.calls.last.request
+    assert dict(request.url.params) == {
+        "options": "product-options",
+        "format": "json",
+        "limit": "5",
+    }
+    assert request.headers["Accept"] == "application/json"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_post_values():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/values/uris")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body(URIS_VALUES_QUERY)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(URIS_VALUES_RESPONSE)
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.values.post("uris", URIS_VALUES_QUERY, data_format="json")
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json() == URIS_VALUES_RESPONSE

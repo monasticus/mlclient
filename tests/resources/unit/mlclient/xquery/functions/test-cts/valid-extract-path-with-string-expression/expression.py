@@ -1,0 +1,5 @@
+from mlclient.xquery import cts, fn
+
+
+def run():
+    return cts.valid_extract_path(fn.string(cts.search().pos(1))).compile()

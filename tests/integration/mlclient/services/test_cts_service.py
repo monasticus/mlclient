@@ -5,7 +5,7 @@ from decimal import Decimal
 import pytest
 
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import Cts, fn, xs
+from mlclient.xquery import Cts, fn, xs
 from mlclient.services import CtsService
 from tests.utils.expressions import StaticExpression
 

@@ -13,7 +13,7 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.functions.xqy import LOCAL_NS_URI, fn
+from mlclient.xquery import LOCAL_NS_URI, fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 

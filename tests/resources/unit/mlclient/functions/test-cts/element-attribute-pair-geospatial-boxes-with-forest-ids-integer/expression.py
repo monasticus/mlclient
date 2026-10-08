@@ -1,7 +1,0 @@
-from mlclient.functions.xqy import cts
-
-
-def run():
-    return cts.element_attribute_pair_geospatial_boxes(
-        "item", "latitude", "longitude", forest_ids=123,
-    ).compile()

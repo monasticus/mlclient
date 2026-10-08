@@ -1,0 +1,9 @@
+from mlclient.xquery import cts, fn
+
+
+def run():
+    return cts.geospatial_json_property_child_reference(
+        "price",
+        "child",
+        options=[fn.string(cts.search().pos(1)), fn.string(cts.search().pos(2))],
+    ).compile()

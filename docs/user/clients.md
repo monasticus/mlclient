@@ -26,7 +26,9 @@ Additional types are grouped by purpose:
 | `mlclient.clients` | `HttpClient`, `ApiClient` and their async counterparts |
 | `mlclient.api` | `RestApi`, `DocumentsApi` and other endpoint wrappers |
 | `mlclient.calls` | `ApiCall`, `EvalCall` and other request objects |
-| `mlclient.services` | `DocumentsService`, `TransactionService` |
+| `mlclient.services` | `DocumentsService`, `TransactionService`, `SearchService`, `SearchScope` |
+| `mlclient.search` | Structured queries (`mlclient.search.structured`) and search options (`mlclient.search.options`) |
+| `mlclient.xquery` | The `cts`, `fn`, `xdmp`, `xs` builders, CTS query types and XQuery expressions |
 | `mlclient.responses` | `MLResponseParser` |
 | `mlclient.io` | `DocumentsLoader`, `DocumentsWriter` |
 | `mlclient.exceptions` | `MarkLogicError`, `ConfigError` |
@@ -45,6 +47,7 @@ each axis.
 | Entry point               | Returns                    | Server (port)       | Reach for it when |
 | ------------------------- | -------------------------- | ------------------- | ----------------- |
 | `ml.documents`, `ml.eval` | Parsed values and models   | REST (main)         | You want Python values without handling HTTP yourself |
+| `ml.search`               | Parsed documents, URIs, lexicon values and reports | REST (main) | You search with structured, CTS or string queries without eval privileges |
 | `ml.transaction()`        | Transaction context manager | REST (main)        | You group operations to commit or roll back together |
 | `ml.rest`                 | `httpx.Response`           | REST (main)         | Named `/v1/*` operations where you read the response |
 | `ml.manage`               | `httpx.Response`           | Manage (8002)       | Management API (`/manage/v2/*`) operations |
@@ -61,8 +64,8 @@ one. See [Transactions](#transactions).
 The client works at three levels of abstraction. Use the highest one that fits
 the task; you can mix them in one application.
 
-- **Services** (`ml.documents`, `ml.eval`) parse the response into Python values
-  and document models.
+- **Services** (`ml.documents`, `ml.eval`, `ml.search`) parse the response into
+  Python values and document models.
 - **Wrappers** (`ml.rest`, `ml.manage`, `ml.admin`) build the request for a named
   endpoint and return the raw `httpx.Response`.
 - **Raw HTTP** (`ml.http`) sends an arbitrary request on the primary connection.

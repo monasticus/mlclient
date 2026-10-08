@@ -42,6 +42,9 @@ response = ml.http.get("/v1/documents", params={"uri": "/example.json"})
 ```
 
 - Document models, metadata operations, eval and transactions for application code.
+- REST search with composable CTS and structured queries, search options and
+  typed lexicon values, needing the rest-reader role rather than eval privileges.
+- XQuery builders mirroring `cts:`, `fn:`, `xdmp:` and `xs:` for composing native code.
 - REST, Manage and Admin APIs with explicit routing and raw responses.
 - HTTP/HTTPS, TLS client certificates, Cloud and configurable authentication.
 - Runtime retry, timeout and pool limits; independent auxiliary connections.

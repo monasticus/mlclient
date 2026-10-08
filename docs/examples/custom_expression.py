@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from mlclient.functions.xqy import ModuleFunctionCall, XqyExpression
+from mlclient.xquery import ModuleFunctionCall, XqyExpression
 
 _NAMESPACE = "https://monasticus.com/mlclient/examples/labels"
 _MODULE_PATH = "/ext/example/labels.xqy"

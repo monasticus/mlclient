@@ -87,6 +87,7 @@ nav:
   - Advanced:
       - Services: user/python/services.md
       - XQuery API: user/python/xquery-api.md
+      - Structured and CTS queries: user/python/queries.md
       - More on environments: user/python/more-on-environments.md
       - Connections and authentication: user/python/connections.md
       - HTTP configuration:

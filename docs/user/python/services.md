@@ -15,15 +15,16 @@ See [Clients](../clients.md) for the full tier map.
 
 ## Client services
 
-Documents, evaluation and transactions are available directly on the client.
-Construct the search service from `ml.rest`:
+Documents, evaluation, search and transactions are available directly on the
+client. Construct the CTS search service from `ml.rest`:
 
 | Service | Access | Guide |
 | --- | --- | --- |
 | Documents | `ml.documents` | [Documents](documents.md) |
 | Evaluate code | `ml.eval` | [Evaluate code](eval.md) |
+| Search | `ml.search` | [Search](search.md) |
 | Transactions | `ml.transaction()` | [Transactions](transactions.md) |
-| Search | `CtsService(ml.rest)` | [Search](search.md) |
+| CTS search (eval) | `CtsService(ml.rest)` | [CTS search with eval](search.md#cts-search-with-eval) |
 
 ```python
 from mlclient import MLClient
@@ -33,14 +34,26 @@ with MLClient() as ml:
     result = ml.eval.xquery("1 + 1")
 ```
 
-`ml.documents` and `ml.eval` are properties returning stateless services.
+Services come in three kinds, and the access syntax tells them apart:
+
+| Kind | Example | What it holds | Creating it |
+| --- | --- | --- | --- |
+| Stateless | `ml.documents`, `ml.eval` | Nothing; every call takes its own arguments | A property, no request |
+| Scoped | `ml.search`, `ml.search(database="catalog")` | An immutable [SearchScope][mlclient.services.SearchScope] applied to every call | Calling the service, no request |
+| Opened | `ml.transaction(database="catalog")` | Server-side state: an open transaction | A method that sends a request |
+
+`ml.search` is itself a scoped service with an empty scope. Calling it returns a
+new, narrower service and never changes the original, so scoped services can be
+created freely and shared. Each operation can still override the scope for one
+request with `scope=SearchScope(...)`. See [Search](search.md#scope-databases-filters-and-options).
+
 `ml.transaction()` is a method instead: opening a transaction performs a
 request, so it returns a
 [TransactionService][mlclient.services.TransactionService] scoped
 to that transaction - a
 context manager that commits on a clean exit, rolls back on error, and unpacks
-with `**` into the operations it should cover. See
-[Transactions](transactions.md).
+with `**` into the operations it should cover, including a search scope:
+`ml.search(**txn)`. See [Transactions](transactions.md).
 
 ## Diagnostics
 

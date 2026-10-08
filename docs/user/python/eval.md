@@ -104,7 +104,7 @@ Name a namespaced variable in Clark notation (`{namespace-uri}local-name`):
 
 ```python
 >>> from mlclient import MLClient
->>> from mlclient.functions.xqy import LOCAL_NS_URI
+>>> from mlclient.xquery import LOCAL_NS_URI
 
 >>> xq = '''
 ... declare variable $local:DAYS external;

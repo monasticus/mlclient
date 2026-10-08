@@ -8,7 +8,7 @@ using a layered composition architecture:
     - .admin    -> AdminApi / AsyncAdminApi (/admin/v1/* on port 8001)
     - .healthcheck() -> HEAD / on the HealthCheck server (port 7997)
     - .parser   -> MLResponseParser
-    - .documents, .eval -> higher-level services
+    - .documents, .eval, .search -> higher-level services
     - .transaction() -> open a scoped transaction (context manager)
 """
 
@@ -44,6 +44,7 @@ from mlclient.models.version import MarkLogicVersion
 from mlclient.responses import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
+from mlclient.services.search import AsyncSearchService, SearchService
 from mlclient.services.transactions import (
     AsyncTransactionService,
     TransactionService,
@@ -67,6 +68,8 @@ class MLClient:
     - ``ml.rest.call(SomeApiCall())`` -- advanced: custom Call objects
     - ``ml.parser.parse(resp)`` -- manual parsing of raw responses
     - ``ml.documents.read("/doc.json")`` -- higher-level, parsed results
+    - ``ml.search.documents(query)`` -- higher-level, parsed search results;
+      ``ml.search(database=...)`` narrows its scope
     - ``ml.eval.xquery("1+1")`` -- higher-level, parsed results
     - ``ml.version`` -- complete MarkLogic version with four numeric parts
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
@@ -379,6 +382,24 @@ class MLClient:
         return DocumentsService(self.rest)
 
     @cached_property
+    def search(self) -> SearchService:
+        """Search documents, URIs and lexicon values through the REST Search API.
+
+        Uses the primary REST connection and sends structured, CTS or string
+        queries to /v1/search and /v1/values as JSON, without evaluating XQuery.
+        The service is created once per client without network I/O; every
+        search sends its own request and results are not cached. Call it, as
+        in ``ml.search(database="catalog")``, for a service with a narrower
+        SearchScope.
+
+        Returns
+        -------
+        SearchService
+            The connection-bound API or service object.
+        """
+        return SearchService(self.rest)
+
+    @cached_property
     def eval(self) -> EvalService:
         """Evaluate XQuery or JavaScript and parse the returned values.
 
@@ -601,6 +622,8 @@ class AsyncMLClient:
     - ``ml.rest.call(SomeApiCall())`` -- advanced: custom Call objects
     - ``ml.parser.parse(resp)`` -- manual parsing of raw responses
     - ``ml.documents.read("/doc.json")`` -- higher-level, parsed results
+    - ``ml.search.documents(query)`` -- higher-level, parsed search results;
+      ``ml.search(database=...)`` narrows its scope
     - ``ml.eval.xquery("1+1")`` -- higher-level, parsed results
     - ``await ml.version()`` -- complete MarkLogic version with four numeric parts
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
@@ -859,6 +882,24 @@ class AsyncMLClient:
             The connection-bound API or service object.
         """
         return AsyncDocumentsService(self.rest)
+
+    @cached_property
+    def search(self) -> AsyncSearchService:
+        """Search documents, URIs and lexicon values through the REST Search API.
+
+        Uses the primary REST connection and sends structured, CTS or string
+        queries to /v1/search and /v1/values as JSON, without evaluating XQuery.
+        The service is created once per client without network I/O; every
+        search sends its own request and results are not cached. Call it, as
+        in ``ml.search(database="catalog")``, for a service with a narrower
+        SearchScope.
+
+        Returns
+        -------
+        AsyncSearchService
+            The connection-bound API or service object.
+        """
+        return AsyncSearchService(self.rest)
 
     @cached_property
     def eval(self) -> AsyncEvalService:

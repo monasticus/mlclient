@@ -6,9 +6,7 @@ Provides parsed document operations on MarkLogic.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Iterator
-from typing import TYPE_CHECKING, Any
-
-from httpx import Response
+from typing import TYPE_CHECKING
 
 from mlclient import _constants as constants
 from mlclient._options import UNSET
@@ -16,14 +14,11 @@ from mlclient._options import UNSET
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
-from mlclient.models.document_parts import (
-    Category,
-    DocumentsBodyPart,
-    DocumentsDisposition,
-)
+from mlclient.models.document_parts import Category, DocumentsBodyPart
 from mlclient.models.documents import Document, Metadata, MetadataDocument
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.responses import MLResponseParser
+from mlclient.services._documents_parsing import DocumentsReader, normalize_category
 
 _MAX_QUERY_BYTES = 48 * 1024
 """Soft limit on the total size of ``uri=...`` query parameters per request.
@@ -35,19 +30,6 @@ URL, the endpoint path, and other query parameters (``database``, ``category``,
 """
 
 _URI_PARAM_OVERHEAD = len("&uri=")
-
-
-def _normalize_category(
-    category: Category | str | list[Category | str] | None,
-) -> str | list[str] | None:
-    """Normalize category values from Category enums to strings."""
-    if category is None:
-        return None
-    if isinstance(category, list):
-        return [c.value if isinstance(c, Category) else c for c in category]
-    if isinstance(category, Category):
-        return category.value
-    return category
 
 
 def _batched_uris(
@@ -246,7 +228,7 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
-        category = _normalize_category(category)
+        category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = self._rest.documents.get(
                 batch,
@@ -257,7 +239,7 @@ class DocumentsService:
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
-            yield from _DocumentsReader.parse(resp, batch, category)
+            yield from DocumentsReader.parse(resp, category, uris=batch)
 
     def delete(
         self,
@@ -305,7 +287,7 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
-        category = _normalize_category(category)
+        category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = self._rest.documents.delete(
                 batch,
@@ -398,171 +380,6 @@ class _DocumentsSender:
                 },
                 "content": metadata.to_json_string(),
             },
-        )
-
-
-class _DocumentsReader:
-    """A class parsing raw MarkLogic response to Document instance(s)."""
-
-    @classmethod
-    def parse(
-        cls,
-        resp: Response,
-        uris: str | list[str] | tuple[str] | set[str],
-        category: str | list[str] | None,
-    ) -> Iterator[Document]:
-        """Parse a MarkLogic response to Documents."""
-        parsed_resp = cls._parse_response(resp)
-        content_type = resp.headers.get(constants.HEADER_NAME_CONTENT_TYPE)
-        is_multipart = content_type.startswith(constants.HEADER_MULTIPART_MIXED)
-        documents_data = cls._pre_format_data(parsed_resp, is_multipart, uris, category)
-        return cls._parse_to_documents(documents_data)
-
-    @classmethod
-    def _parse_response(
-        cls,
-        resp: Response,
-    ) -> list[tuple]:
-        """Parse a response from a MarkLogic server."""
-        parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
-        if not isinstance(parsed_resp, list):
-            headers, _ = parsed_resp
-            if headers.get(constants.HEADER_NAME_CONTENT_LENGTH) == "0":
-                return []
-            return [parsed_resp]
-        return parsed_resp
-
-    @classmethod
-    def _pre_format_data(
-        cls,
-        parsed_resp: list[tuple],
-        is_multipart: bool,
-        uris: str | list[str] | tuple[str] | set[str],
-        category: str | list[str] | None,
-    ) -> Iterator[dict]:
-        """Prepare data to initialize Document instances."""
-        if is_multipart:
-            return cls._pre_format_documents(parsed_resp, category)
-        return cls._pre_format_document(parsed_resp, uris, category)
-
-    @classmethod
-    def _pre_format_documents(
-        cls,
-        parsed_resp: list[tuple],
-        origin_category: str | list[str] | None,
-    ) -> Iterator[dict]:
-        """Prepare document parts to initialize Document instances."""
-        expect_content, expect_metadata = cls._expect_categories(origin_category)
-        pre_formatted_data = {}
-        for headers, parse_resp_body in parsed_resp:
-            raw_content_disp = headers.get(constants.HEADER_NAME_CONTENT_DISP)
-            content_disp = DocumentsDisposition.from_header(raw_content_disp)
-            partial_data = cls._get_partial_data(content_disp, parse_resp_body)
-
-            if not (expect_content and expect_metadata):
-                yield partial_data
-            elif content_disp.filename not in pre_formatted_data:
-                pre_formatted_data[content_disp.filename] = partial_data
-            elif content_disp.category == Category.CONTENT:
-                pre_formatted_data[content_disp.filename].update(partial_data)
-                yield pre_formatted_data[content_disp.filename]
-            else:
-                partial_data.update(pre_formatted_data[content_disp.filename])
-                yield partial_data
-
-    @classmethod
-    def _pre_format_document(
-        cls,
-        parsed_resp: list[tuple],
-        origin_uris: str | list[str] | tuple[str] | set[str],
-        origin_category: str | list[str] | None,
-    ) -> Iterator[dict]:
-        """Prepare a single-part document to initialize Document instances."""
-        headers, parsed_resp_body = parsed_resp[0]
-        uri = origin_uris[0] if isinstance(origin_uris, list) else origin_uris
-        expect_content, _ = cls._expect_categories(origin_category)
-        if expect_content:
-            yield {
-                "uri": uri,
-                "format": headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT),
-                "content": parsed_resp_body,
-            }
-        else:
-            yield {
-                "uri": uri,
-                "metadata": cls._pre_format_metadata(parsed_resp_body),
-            }
-
-    @classmethod
-    def _pre_format_metadata(
-        cls,
-        raw_metadata: bytes | str,
-    ) -> bytes | str:
-        """Forward raw metadata bytes/string from a MarkLogic server response."""
-        return raw_metadata
-
-    @classmethod
-    def _expect_categories(
-        cls,
-        origin_category: str | list[str] | None,
-    ) -> tuple[bool, bool]:
-        """Return expectation flags based on categories sent by a user."""
-        expect_content = (
-            not origin_category or Category.CONTENT.value in origin_category
-        )
-        expect_metadata = origin_category and any(
-            cat.value in origin_category for cat in Category if cat != Category.CONTENT
-        )
-        return expect_content, expect_metadata
-
-    @classmethod
-    def _get_partial_data(
-        cls,
-        content_disp: DocumentsDisposition,
-        parsed_resp_body: Any,
-    ) -> dict:
-        """Return pre-formatted partial data."""
-        if content_disp.category == Category.CONTENT:
-            return {
-                "uri": content_disp.filename,
-                "format": content_disp.format_,
-                "content": parsed_resp_body,
-            }
-        return {
-            "uri": content_disp.filename,
-            "metadata": cls._pre_format_metadata(parsed_resp_body),
-        }
-
-    @classmethod
-    def _parse_to_documents(
-        cls,
-        documents_data: Iterator[dict],
-    ) -> Iterator[Document]:
-        """Parse pre-formatted data to Document instances."""
-        for document_data in documents_data:
-            yield cls._parse_to_document(document_data)
-
-    @classmethod
-    def _parse_to_document(
-        cls,
-        document_data: dict,
-    ) -> Document:
-        """Parse pre-formatted data to a Document instance."""
-        uri = document_data.get("uri")
-        doc_format = document_data.get("format")
-        content = document_data.get("content")
-        raw_metadata = document_data.get("metadata")
-
-        metadata = Metadata(raw=raw_metadata) if raw_metadata else None
-
-        if content is None:
-            return Document.metadata_update(uri, metadata or Metadata())
-
-        return Document.create(
-            content=content,
-            doc_type=doc_format,
-            uri=uri,
-            metadata=metadata,
         )
 
 
@@ -724,7 +541,7 @@ class AsyncDocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
-        category = _normalize_category(category)
+        category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = await self._rest.documents.get(
                 batch,
@@ -735,7 +552,7 @@ class AsyncDocumentsService:
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
-            for doc in _DocumentsReader.parse(resp, batch, category):
+            for doc in DocumentsReader.parse(resp, category, uris=batch):
                 yield doc
 
     async def delete(
@@ -784,7 +601,7 @@ class AsyncDocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
-        category = _normalize_category(category)
+        category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = await self._rest.documents.delete(
                 batch,

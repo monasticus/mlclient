@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import xml.etree.ElementTree as ElemTree
 from datetime import date, datetime
 from decimal import Decimal
@@ -24,6 +25,33 @@ from mlclient.models.types import DocumentType
 from mlclient.multipart import MultipartPart, decode_multipart_mixed
 
 logger = logging.getLogger(__name__)
+
+
+_FRACTIONAL_SECONDS = re.compile(r"(T\d{2}:\d{2}:\d{2})\.(\d+)")
+
+
+def _parse_date_time(lexical: str) -> datetime:
+    """Convert an xs:dateTime lexical form, whatever its fraction length.
+
+    MarkLogic writes the canonical form, which drops trailing zeros from the
+    fractional seconds (``.5``, ``.12345``); Python 3.10 parses only 3 or 6
+    digits, so the fraction is padded, or truncated beyond microseconds.
+
+    Parameters
+    ----------
+    lexical : str
+        The xs:dateTime value, with ``Z`` or an offset, or none.
+
+    Returns
+    -------
+    datetime
+        The value, timezone-aware when the lexical form has a zone.
+    """
+    normalized = _FRACTIONAL_SECONDS.sub(
+        lambda match: f"{match.group(1)}.{match.group(2)[:6].ljust(6, '0')}",
+        lexical,
+    )
+    return datetime.fromisoformat(normalized.replace("Z", "+00:00"))
 
 
 class MLResponseParser:
@@ -82,9 +110,7 @@ class MLResponseParser:
         const.HEADER_PRIMITIVE_DOUBLE: float,
         const.HEADER_PRIMITIVE_FLOAT: float,
         const.HEADER_PRIMITIVE_DATE: lambda data: date.fromisoformat(data[:10]),
-        const.HEADER_PRIMITIVE_DATE_TIME: lambda data: datetime.fromisoformat(
-            data.replace("Z", "+00:00"),
-        ),
+        const.HEADER_PRIMITIVE_DATE_TIME: _parse_date_time,
     }
 
     @classmethod
@@ -152,6 +178,33 @@ class MLResponseParser:
             return cls._parse_bytes(response, with_headers=True)
 
         return cls._parse(response, with_headers=True)
+
+    @classmethod
+    def parse_atomic(
+        cls,
+        lexical: str,
+        atomic_type: str,
+    ) -> str | int | float | Decimal | bool | date | datetime:
+        """Convert a lexical value reported with its XML Schema type.
+
+        The REST API reports lexicon values this way, e.g. in /v1/values
+        responses. Conversion follows the same rules as typed eval results.
+
+        Parameters
+        ----------
+        lexical : str
+            The value's lexical form.
+        atomic_type : str
+            Its type name, with or without the ``xs:`` prefix (``xs:decimal``).
+
+        Returns
+        -------
+        str | int | float | Decimal | bool | date | datetime
+            The converted value; types without a conversion stay strings.
+        """
+        primitive_type = atomic_type.removeprefix("xs:")
+        parser = cls._PLAIN_TEXT_PARSERS.get(primitive_type)
+        return parser(lexical) if parser else lexical
 
     @classmethod
     def raise_for_status(

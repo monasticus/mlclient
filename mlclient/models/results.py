@@ -89,3 +89,54 @@ class ValueHit:
 
     value: ParsedValue
     frequency: int = field(kw_only=True)
+
+
+@dataclass
+class TupleHit:
+    """Co-occurring, individually typed range-index values and their frequency.
+
+    Parameters
+    ----------
+    values : tuple[ParsedValue, ...]
+        Components in the order of the tuples definition's indexes.
+    frequency : int
+        Native item or fragment frequency.
+    """
+
+    values: tuple[ParsedValue, ...]
+    frequency: int = field(kw_only=True)
+
+
+@dataclass
+class SearchReport:
+    """A REST search report, distinct from a multi-document read.
+
+    Parameters
+    ----------
+    total : int
+        Estimated matching fragments, not an exact document count.
+    start : int
+        One-based result start.
+    page_length : int
+        Requested maximum page length, not the number of returned results.
+    results : list[dict]
+        Native JSON results, including URI, score and snippets or extracts.
+        Snippets are not whole Document objects.
+    facets : dict
+        Native facet names, values and counts.
+    metrics : dict
+        Native query timing metrics.
+    effective_timestamp : str | None
+        Server snapshot timestamp usable by subsequent service operations.
+    response : dict
+        Complete parsed JSON report, retaining additional server fields.
+    """
+
+    total: int
+    start: int
+    page_length: int
+    results: list[dict]
+    facets: dict
+    metrics: dict
+    effective_timestamp: str | None
+    response: dict

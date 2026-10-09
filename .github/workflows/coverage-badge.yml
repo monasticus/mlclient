@@ -4,8 +4,19 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: read
+
 jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+
   update-badge:
+    needs: changes
+    if: needs.changes.outputs.unit == 'true'
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
 
     steps:

@@ -2,14 +2,19 @@ name: Test MLClient
 
 on:
   push:
-    branches: [main, "feature/**"]
+    branches: [main]
   pull_request:
   workflow_call:
 
 permissions:
   contents: read
 jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+
   test-python-version:
+    needs: changes
+    if: needs.changes.outputs.unit == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:

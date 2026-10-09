@@ -1,0 +1,51 @@
+name: Select checks
+
+on:
+  workflow_call:
+    outputs:
+      unit:
+        value: ${{ jobs.changes.outputs.unit }}
+      integration:
+        value: ${{ jobs.changes.outputs.integration }}
+      lint:
+        value: ${{ jobs.changes.outputs.lint }}
+      docs:
+        value: ${{ jobs.changes.outputs.docs }}
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      unit: ${{ steps.select.outputs.unit }}
+      integration: ${{ steps.select.outputs.integration }}
+      lint: ${{ steps.select.outputs.lint }}
+      docs: ${{ steps.select.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Verify check selection rules
+        run: bash .github/scripts/test-select-checks.sh
+      - name: Select checks from the complete change
+        id: select
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE: ${{ github.event.before }}
+          PUSH_HEAD: ${{ github.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            git diff --no-renames --name-only -z "$PR_BASE...$PR_HEAD" > changed-files
+          elif [[ "$EVENT_NAME" == push && "$EVENT_REF" == refs/heads/main && "$PUSH_BASE" != 0000000000000000000000000000000000000000 ]]; then
+            git diff --no-renames --name-only -z "$PUSH_BASE" "$PUSH_HEAD" > changed-files
+          else
+            # Releases and manual runs always validate everything.
+            printf 'unit=true\nintegration=true\nlint=true\ndocs=true\n' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          bash .github/scripts/select-checks.sh < changed-files >> "$GITHUB_OUTPUT"

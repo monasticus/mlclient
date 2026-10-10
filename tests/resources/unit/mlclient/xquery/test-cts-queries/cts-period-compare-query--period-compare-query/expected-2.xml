@@ -1,1 +1,0 @@
-<cts:period-compare-query xmlns:cts="http://marklogic.com/cts" operator="aln_equals"><cts:axis1>system</cts:axis1><cts:axis2>valid</cts:axis2><cts:option>cached-incremental</cts:option></cts:period-compare-query>

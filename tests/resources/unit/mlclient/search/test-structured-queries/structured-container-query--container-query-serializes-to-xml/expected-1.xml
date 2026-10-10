@@ -1,1 +1,0 @@
-<expected xmlns="http://marklogic.com/appservices/search"><container-query><element name="section" ns="urn:example" /><fragment-scope>properties</fragment-scope><term-query><text>blue</text></term-query></container-query></expected>

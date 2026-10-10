@@ -1,0 +1,6 @@
+{
+  "v0": "<node0:report xmlns:node0=\"https://example.com/reports\">blue</node0:report>",
+  "v1": "*",
+  "v2": "auxiliary",
+  "v3": "cts:highlight(xdmp:unquote($v0) ! *, cts:true-query(), fn:string($v2))"
+}

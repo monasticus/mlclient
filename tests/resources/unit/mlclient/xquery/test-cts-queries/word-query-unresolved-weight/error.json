@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:word-query: weight: CTS numeric argument requires server evaluation, got fn:last()."
+}

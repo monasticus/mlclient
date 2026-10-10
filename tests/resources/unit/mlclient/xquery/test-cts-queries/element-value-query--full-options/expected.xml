@@ -1,1 +1,0 @@
-<cts:element-value-query xmlns:cts="http://marklogic.com/cts" weight="3"><cts:element>title</cts:element><cts:text>*</cts:text><cts:option>exact</cts:option></cts:element-value-query>

@@ -1,9 +1,0 @@
-{
-  "range": {
-    "type": "xs:string",
-    "field": {
-      "name": "category",
-      "collation": "urn:collation"
-    }
-  }
-}

@@ -1,1 +1,0 @@
-<cts:json-property-value-query xmlns:cts="http://marklogic.com/cts" weight="3"><cts:property>label</cts:property><cts:value>gamma</cts:value><cts:option>exact</cts:option></cts:json-property-value-query>

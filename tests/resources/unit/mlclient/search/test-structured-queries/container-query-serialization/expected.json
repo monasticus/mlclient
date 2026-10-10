@@ -1,0 +1,14 @@
+{
+  "container-query": {
+    "element": {
+      "name": "section",
+      "ns": "https://example.com/example"
+    },
+    "fragment-scope": "properties",
+    "term-query": {
+      "text": [
+        "blue"
+      ]
+    }
+  }
+}

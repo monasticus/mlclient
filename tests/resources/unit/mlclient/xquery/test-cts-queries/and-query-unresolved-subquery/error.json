@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:and-query: queries: CTS subquery requires server evaluation, got fn:string('blue')."
+}

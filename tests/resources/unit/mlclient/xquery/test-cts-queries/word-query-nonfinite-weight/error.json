@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:word-query: weight: CTS numbers must be finite for local serialization."
+}

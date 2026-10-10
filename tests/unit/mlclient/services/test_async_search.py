@@ -67,7 +67,9 @@ async def test_documents_for_structured_query():
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-104.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-for-structured-query-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -90,7 +92,9 @@ async def test_documents_for_string_query():
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-122.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-for-string-query-request.json",
+        ),
     )
     route = ml_mocker.mock_post()
 
@@ -112,7 +116,9 @@ async def test_documents_without_query():
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-139.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-without-query-request.json",
+        ),
     )
     route = ml_mocker.mock_post()
 
@@ -136,7 +142,9 @@ async def test_documents_at_single_position():
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-156.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-at-single-position-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -159,7 +167,9 @@ async def test_documents_in_position_range():
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-172.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-in-position-range-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -188,7 +198,9 @@ async def test_documents_with_metadata():
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-197.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-with-metadata-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -214,7 +226,10 @@ async def test_documents_forwards_options_database_and_transaction():
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-219.json"),
+        resources_utils.get_test_resource_json(
+            __file__,
+            ("documents-forwards-options-database-and-transaction-request.json"),
+        ),
     )
     ml_mocker.mock_post()
 
@@ -239,7 +254,9 @@ async def test_documents_without_matches():
     ml_mocker.with_response_header("vnd.marklogic.result-estimate", "0")
     ml_mocker.with_empty_response_body()
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-239.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-without-matches-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -260,7 +277,9 @@ async def test_documents_error():
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(ERROR_RESPONSE)
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-255.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "documents-error-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -318,7 +337,9 @@ async def test_uris_of_single_match():
         ),
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-305.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "uris-of-single-match-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -338,7 +359,9 @@ async def test_uris_without_matches():
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-319.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "uris-without-matches-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -360,7 +383,7 @@ async def test_uris_error():
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(ERROR_RESPONSE)
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-335.json"),
+        resources_utils.get_test_resource_json(__file__, "uris-error-request.json"),
     )
     ml_mocker.mock_post()
 
@@ -438,7 +461,9 @@ async def test_values_are_converted_from_their_type(atomic_type, lexical, expect
         },
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-402.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "values-are-converted-from-their-type-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -463,7 +488,9 @@ async def test_values_without_matches():
         {"values-response": {"name": "category", "type": "xs:string"}},
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-419.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "values-without-matches-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -485,7 +512,9 @@ async def test_values_reject_tuples():
         {"values-response": {"name": "category", "tuple": [{"frequency": 1}]}},
     )
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-435.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "values-reject-tuples-request.json",
+        ),
     )
     ml_mocker.mock_post()
 
@@ -509,7 +538,7 @@ async def test_values_error():
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(ERROR_RESPONSE)
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-453.json"),
+        resources_utils.get_test_resource_json(__file__, "values-error-request.json"),
     )
     ml_mocker.mock_post()
 
@@ -758,7 +787,9 @@ async def test_tuples_have_individual_types():
     ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
     ml_mocker.with_request_header("Accept", "application/xml")
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-677.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "tuples-have-individual-types-request.json",
+        ),
     )
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     # ML10 XML capture; timing metrics omitted.
@@ -814,9 +845,8 @@ async def test_tuples_reject_values_definition():
         with pytest.raises(ValueError, match="tuples definitions") as error:
             await ml.search(options=PRICE_OPTIONS).tuples("price")
 
-    assert (
-        str(error.value)
-        == "tuples() reads tuples definitions; use values() for single values"
+    assert str(error.value) == (
+        "tuples() reads tuples definitions; use values() for single values"
     )
 
 
@@ -842,7 +872,9 @@ async def test_report_retains_empty_native_report_and_timestamp():
     }
     ml_mocker.with_response_body(payload)
     ml_mocker.with_request_body(
-        resources_utils.get_test_resource_json(__file__, "request-775.json"),
+        resources_utils.get_test_resource_json(
+            __file__, "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
     )
     ml_mocker.mock_post()
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Read NUL-separated changed paths from stdin (git diff --name-only -z).
+# Emit unit/integration/lint/docs flags for the reusable changes workflow.
+# Unknown build inputs enable every check; flags accumulate across paths.
 set -euo pipefail
 
 unit=false

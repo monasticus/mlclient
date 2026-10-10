@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "runtime query: CTS runtime query requires server evaluation before serialization."
+}

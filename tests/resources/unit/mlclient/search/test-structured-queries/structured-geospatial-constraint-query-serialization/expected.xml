@@ -1,0 +1,1 @@
+<search:geospatial-constraint-query xmlns:search="http://marklogic.com/appservices/search"><search:constraint-name>location</search:constraint-name><search:point><search:latitude>10</search:latitude><search:longitude>20</search:longitude></search:point><search:text>nearby</search:text></search:geospatial-constraint-query>

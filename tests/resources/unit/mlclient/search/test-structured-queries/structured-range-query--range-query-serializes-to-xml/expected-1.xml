@@ -1,1 +1,0 @@
-<expected xmlns="http://marklogic.com/appservices/search"><range-query type="xs:int" collation="urn:example"><element name="price" ns="" /><attribute name="amount" ns="" /><fragment-scope>documents</fragment-scope><value>3</value><value>4</value><range-operator>EQ</range-operator><range-option>cached</range-option><weight>2</weight></range-query></expected>

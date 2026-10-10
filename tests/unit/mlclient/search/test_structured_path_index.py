@@ -8,11 +8,11 @@ from mlclient.search.structured import PathIndex
 
 
 def test_path_index_serializes_to_json_with_namespaces():
-    query = PathIndex("/r:report/r:price", namespaces={"r": "urn:example:reports"})
+    query = PathIndex("/r:report/r:price", namespaces={"r": "https://example.com/example/reports"})
     assert query.serialize() == {
         "path-index": {
             "text": "/r:report/r:price",
-            "namespaces": {"r": "urn:example:reports"},
+            "namespaces": {"r": "https://example.com/example/reports"},
         },
     }
 
@@ -35,18 +35,18 @@ def test_path_index_serializes_to_xml():
 
 
 def test_path_index_with_namespaces():
-    query = PathIndex("/r:report/r:price", {"r": "urn:example:reports"})
+    query = PathIndex("/r:report/r:price", {"r": "https://example.com/example/reports"})
 
     assert ElementTree.tostring(query.serialize("xml"), encoding="unicode") == (
         '<search:path-index xmlns:search="http://marklogic.com/appservices/search" '
-        'xmlns:r="urn:example:reports">/r:report/r:price</search:path-index>'
+        'xmlns:r="https://example.com/example/reports">/r:report/r:price</search:path-index>'
     )
 
 
 @pytest.mark.parametrize("prefix", ["search", "xml", "xmlns", ""])
 def test_path_index_rejects_reserved_or_empty_prefixes(prefix):
     with pytest.raises(ValueError, match="PathIndex namespace prefixes") as exc:
-        PathIndex("/x:report", {prefix: "urn:other"})
+        PathIndex("/x:report", {prefix: "https://example.com/other"})
 
     assert str(exc.value) == (
         "PathIndex namespace prefixes must be non-empty and not search, xml or xmlns."
@@ -54,11 +54,11 @@ def test_path_index_rejects_reserved_or_empty_prefixes(prefix):
 
 
 def test_path_index_is_hashable_and_keeps_a_copy_of_its_namespaces():
-    namespaces = {"r": "urn:example:reports"}
+    namespaces = {"r": "https://example.com/example/reports"}
     index = PathIndex("/r:report", namespaces)
-    namespaces["r"] = "urn:changed"
+    namespaces["r"] = "https://example.com/changed"
 
-    assert index.namespaces == {"r": "urn:example:reports"}
-    assert hash(index) == hash(PathIndex("/r:report", {"r": "urn:example:reports"}))
+    assert index.namespaces == {"r": "https://example.com/example/reports"}
+    assert hash(index) == hash(PathIndex("/r:report", {"r": "https://example.com/example/reports"}))
     with pytest.raises(TypeError):
-        index.namespaces["r"] = "urn:changed"
+        index.namespaces["r"] = "https://example.com/changed"

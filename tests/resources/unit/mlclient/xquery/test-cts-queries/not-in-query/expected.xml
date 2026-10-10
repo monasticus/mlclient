@@ -1,0 +1,1 @@
+<cts:not-in-query xmlns:cts="http://marklogic.com/cts"><cts:positive><cts:collection-query><cts:uri>reports</cts:uri></cts:collection-query></cts:positive><cts:negative><cts:collection-query><cts:uri>notes</cts:uri></cts:collection-query></cts:negative></cts:not-in-query>

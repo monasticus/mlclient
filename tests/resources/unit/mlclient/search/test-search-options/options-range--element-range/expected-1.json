@@ -1,9 +1,0 @@
-{
-  "range": {
-    "type": "xs:decimal",
-    "element": {
-      "name": "price",
-      "ns": "urn:products"
-    }
-  }
-}

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import builtins
-import inspect
-import itertools
 import json
 import runpy
 import re
@@ -10,6 +8,7 @@ from collections.abc import Callable, Generator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
+from xml.etree.ElementTree import tostring
 
 import pytest
 
@@ -133,69 +132,32 @@ def _read_json(path: Path) -> dict:
 
 
 @dataclass(frozen=True)
-class QueryCase:
+class SerializationCase:
     name: str
     directory: Path
-    parameter_indices: tuple[int, ...]
 
-    def assert_matches(self, request=None) -> None:
-        namespace = runpy.run_path(
-            str(self.directory / "case.py"),
-        )
+    def assert_matches(self) -> None:
+        namespace = runpy.run_path(str(self.directory / "expression.py"))
         run = namespace["run"]
-        parameters = {}
-        marks = [
-            mark
-            for mark in getattr(run, "pytestmark", [])
-            if mark.name == "parametrize"
-        ]
-        for mark, index in zip(marks, self.parameter_indices, strict=True):
-            names = mark.args[0]
-            names = names.split(",") if isinstance(names, str) else names
-            selected = mark.args[1][index]
-            values = (
-                selected.values
-                if hasattr(selected, "marks") and hasattr(selected, "values")
-                else ((selected,) if len(names) == 1 else selected)
-            )
-            parameters.update(
-                zip((name.strip() for name in names), values, strict=True),
-            )
-        for name in inspect.signature(run).parameters:
-            if name not in parameters:
-                parameters[name] = request.getfixturevalue(name)
-        run(**parameters)
+        error_path = self.directory / "error.json"
+        if error_path.is_file():
+            _assert_error(run, _read_json(error_path))
+            return
+
+        component = run()
+        expected_json = _read_json(self.directory / "expected.json")
+        expected_xml = (self.directory / "expected.xml").read_text().removesuffix("\n")
+        assert component.to_json() == expected_json
+        assert tostring(component.to_xml(), encoding="unicode") == expected_xml
 
 
-def discover_query_cases(test_path: str) -> list[QueryCase]:
+def discover_serialization_cases(test_path: str) -> list[SerializationCase]:
     resources = Path(get_test_resources_path(test_path))
-    cases = []
-    for path in sorted(resources.iterdir()):
-        if not path.is_dir() or not (path / "case.py").is_file():
-            continue
-        namespace = runpy.run_path(str(path / "case.py"))
-        run = namespace.get("run")
-        if not callable(run):
-            message = f"{path}/case.py must define run()"
-            raise TypeError(message)
-        marks = [
-            mark
-            for mark in getattr(run, "pytestmark", [])
-            if mark.name == "parametrize"
-        ]
-        for indices in itertools.product(*(range(len(mark.args[1])) for mark in marks)):
-            suffix = "-".join(map(str, indices))
-            cases.append(
-                QueryCase(
-                    f"{path.name}-{suffix}" if suffix else path.name,
-                    path,
-                    indices,
-                ),
-            )
-    if not cases:
-        message = f"No query cases in {resources}"
-        raise ValueError(message)
-    return cases
+    return [
+        SerializationCase(path.name, path)
+        for path in sorted(resources.iterdir())
+        if path.is_dir() and (path / "expression.py").is_file()
+    ]
 
 
 def render_test_resource(test_path: str, name: str, /, **fragments: str) -> str:
@@ -206,11 +168,6 @@ def render_test_resource(test_path: str, name: str, /, **fragments: str) -> str:
         message = f"Expected fragments {sorted(placeholders)}, got {sorted(fragments)}"
         raise ValueError(message)
     return re.sub(r"@@(\w+)@@", lambda match: fragments[match[1]], source)
-
-
-def read_query_expectation(case_path: str, name: str):
-    path = Path(case_path).parent / name
-    return _read_json(path) if path.suffix == ".json" else path.read_text()
 
 
 def read_query_input(test_path: str, name: str):

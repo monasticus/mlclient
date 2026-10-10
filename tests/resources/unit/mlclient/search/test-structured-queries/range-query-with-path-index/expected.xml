@@ -1,0 +1,1 @@
+<search:range-query xmlns:search="http://marklogic.com/appservices/search"><search:path-index>/report/price</search:path-index><search:value>2</search:value><search:range-operator>LT</search:range-operator></search:range-query>

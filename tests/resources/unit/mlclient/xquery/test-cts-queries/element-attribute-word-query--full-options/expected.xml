@@ -1,1 +1,0 @@
-<cts:element-attribute-word-query xmlns:cts="http://marklogic.com/cts" weight="3"><cts:element>item</cts:element><cts:attribute>status</cts:attribute><cts:text>ok</cts:text><cts:option>exact</cts:option></cts:element-attribute-word-query>

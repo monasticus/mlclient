@@ -1,1 +1,0 @@
-<cts:json-property-geospatial-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" weight="3"><cts:property>origin</cts:property><cts:region xmlns:cts="http://marklogic.com/cts" xsi:type="cts:point">10,20</cts:region><cts:option>coordinate-system=wgs84</cts:option></cts:json-property-geospatial-query>

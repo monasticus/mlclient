@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "option 'minimum-distance=1.5' is not a near-query option"
+}

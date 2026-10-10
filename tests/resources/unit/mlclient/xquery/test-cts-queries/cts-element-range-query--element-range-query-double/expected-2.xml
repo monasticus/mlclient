@@ -1,1 +1,0 @@
-<cts:element-range-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="&gt;"><cts:element>price</cts:element><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:double">1.5</cts:value></cts:element-range-query>

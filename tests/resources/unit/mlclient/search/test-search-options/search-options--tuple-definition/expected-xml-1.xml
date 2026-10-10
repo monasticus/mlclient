@@ -1,1 +1,0 @@
-<search:options xmlns:search="http://marklogic.com/appservices/search"><search:tuples name="prices"><search:range type="xs:decimal"><search:element name="price" ns="" /></search:range><search:range type="xs:date"><search:element name="day" ns="" /></search:range></search:tuples></search:options>

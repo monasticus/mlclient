@@ -501,7 +501,7 @@ def test_eval_with_bytes_output_type(ml):
 @respx.mock
 def test_expression(ml):
     expression = fn.upper_case("value")
-    code, variables = expression.compile(namespaces={"p": "urn:test"})
+    code, variables = expression.compile(namespaces={"p": "https://example.com/test"})
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_param("database", "Documents")
@@ -514,7 +514,7 @@ def test_expression(ml):
 
     result = ml.eval.expression(
         expression,
-        namespaces={"p": "urn:test"},
+        namespaces={"p": "https://example.com/test"},
         database="Documents",
         txid="transaction",
         timeout=2,

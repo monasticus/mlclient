@@ -22,9 +22,9 @@ hosts, async usage and CLI setup.
 
 ## One library, several ways to work
 
-| Interface | Start with | Go further |
+| Interface | Common tasks | Configuration and extensions |
 | --- | --- | --- |
-| Python | Services for documents, search, eval and transactions | Sync/async clients, transactions, raw API wrappers and custom endpoints |
+| Python | Services for documents, search, eval and transactions | Connection settings, raw API wrappers and custom endpoints |
 | CLI | `ml env init`, `ml eval`, `ml sample`, `ml logs`, `ml url` | Import Gradle settings, discover App Servers and select multiple connections |
 
 [The Python guide](user/clients.md) helps choose between `ml.documents`,

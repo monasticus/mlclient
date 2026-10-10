@@ -1,1 +1,0 @@
-<cts:json-property-range-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="&gt;" weight="3"><cts:property>price</cts:property><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:integer">10</cts:value><cts:option>cached</cts:option></cts:json-property-range-query>

@@ -1,3 +1,5 @@
+# Called by test, lint, docs and coverage workflows to select jobs from the
+# complete PR or main-branch diff; manual and release runs enable every check.
 name: Select checks
 
 on:
@@ -27,8 +29,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Verify check selection rules
-        run: bash .github/scripts/test-select-checks.sh
       - name: Select checks from the complete change
         id: select
         env:

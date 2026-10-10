@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "option 'synonym' is not a near-query option"
+}

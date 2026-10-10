@@ -1,1 +1,0 @@
-<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="type"><search:collection facet="true" prefix="cts-" /></search:constraint></search:options>

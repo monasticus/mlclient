@@ -1,1 +1,0 @@
-<expected xmlns="http://marklogic.com/appservices/search"><term-query><text>blue</text><text>green</text><weight>2</weight><term-option>case-sensitive</term-option><term-option>unstemmed</term-option></term-query></expected>

@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:triple-range-query: CTS triple operator requires one or three values."
+}

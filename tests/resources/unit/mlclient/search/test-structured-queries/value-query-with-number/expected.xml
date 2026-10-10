@@ -1,0 +1,1 @@
+<search:value-query xmlns:search="http://marklogic.com/appservices/search" type="number"><search:json-property>count</search:json-property><search:text>7</search:text></search:value-query>

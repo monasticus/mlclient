@@ -1,0 +1,11 @@
+{
+  "range": {
+    "type": "xs:decimal",
+    "path-index": {
+      "namespaces": {
+        "p": "https://example.com/products"
+      },
+      "text": "/p:product/p:price"
+    }
+  }
+}

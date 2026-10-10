@@ -1,0 +1,1 @@
+<search:period-compare-query xmlns:search="http://marklogic.com/appservices/search"><search:axis1>system</search:axis1><search:temporal-operator>aln_equals</search:temporal-operator><search:axis2>valid</search:axis2><search:temporal-option>cached</search:temporal-option></search:period-compare-query>

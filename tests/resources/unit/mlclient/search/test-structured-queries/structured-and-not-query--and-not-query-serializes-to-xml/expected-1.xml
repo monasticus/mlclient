@@ -1,1 +1,0 @@
-<expected xmlns="http://marklogic.com/appservices/search"><and-not-query><positive-query><term-query><text>blue</text></term-query></positive-query><negative-query><term-query><text>green</text></term-query></negative-query></and-not-query></expected>

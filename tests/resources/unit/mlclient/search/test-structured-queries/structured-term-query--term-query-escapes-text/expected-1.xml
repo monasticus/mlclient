@@ -1,1 +1,0 @@
-<expected xmlns="http://marklogic.com/appservices/search"><term-query><text>a &lt; b &amp; c</text></term-query></expected>

@@ -1,1 +1,0 @@
-<search:options xmlns:search="http://marklogic.com/appservices/search"><search:values name="price"><search:range type="xs:decimal"><search:element name="price" ns="" /></search:range></search:values></search:options>

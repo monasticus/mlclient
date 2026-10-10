@@ -1,0 +1,1 @@
+<search:range-constraint-query xmlns:search="http://marklogic.com/appservices/search"><search:constraint-name>price</search:constraint-name><search:value>3</search:value><search:value>4</search:value><search:range-operator>EQ</search:range-operator><search:range-option>cached</search:range-option></search:range-constraint-query>

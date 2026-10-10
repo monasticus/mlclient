@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:json-property-value-query: value: Unsupported local JSON property value type: xs:date"
+}

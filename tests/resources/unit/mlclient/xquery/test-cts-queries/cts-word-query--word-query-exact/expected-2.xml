@@ -1,1 +1,0 @@
-<cts:word-query xmlns:cts="http://marklogic.com/cts" weight="2"><cts:text>blue</cts:text><cts:text>green</cts:text><cts:option>lang=FR</cts:option><cts:option>exact</cts:option></cts:word-query>

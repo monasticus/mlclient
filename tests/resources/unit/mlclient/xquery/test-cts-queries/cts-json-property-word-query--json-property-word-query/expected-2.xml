@@ -1,1 +1,0 @@
-<cts:json-property-word-query xmlns:cts="http://marklogic.com/cts" weight="2"><cts:property>title</cts:property><cts:property>body</cts:property><cts:text>blue</cts:text><cts:text>green</cts:text><cts:option>lang=en</cts:option><cts:option>exact</cts:option></cts:json-property-word-query>

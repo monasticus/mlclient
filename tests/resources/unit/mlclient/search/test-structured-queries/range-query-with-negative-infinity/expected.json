@@ -1,0 +1,10 @@
+{
+  "range-query": {
+    "type": "xs:double",
+    "element": {
+      "name": "price",
+      "ns": ""
+    },
+    "value": "-INF"
+  }
+}

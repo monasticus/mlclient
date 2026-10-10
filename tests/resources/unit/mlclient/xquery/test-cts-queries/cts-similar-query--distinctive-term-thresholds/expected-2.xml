@@ -1,1 +1,0 @@
-<cts:similar-query xmlns:cts="http://marklogic.com/cts" xmlns:ns1="cts:distinctive-terms"><ns1:options xmlns="cts:distinctive-terms"><ns1:min-val>1</ns1:min-val><ns1:min-weight>2</ns1:min-weight><ns1:complete>true</ns1:complete></ns1:options></cts:similar-query>

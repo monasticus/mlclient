@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:element-geospatial-query: region: CTS region argument requires server evaluation, got cts:linestring([Point(latitude_or_wkt=0, longitude=0), Point(latitude_or_wkt=1, longitude=1)])."
+}

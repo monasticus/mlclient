@@ -1,1 +1,0 @@
-<expected xmlns="http://marklogic.com/appservices/search"><geo-region-path-query coord="wgs84"><path-index>/place/region</path-index><geospatial-operator>intersects</geospatial-operator><geo-option>units=miles</geo-option><fragment-scope>properties</fragment-scope><point><latitude>10</latitude><longitude>20</longitude></point><weight>2</weight></geo-region-path-query></expected>

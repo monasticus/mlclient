@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:range-query: reference: CTS reference argument requires server evaluation, got fn:doc('/reference.xml')."
+}

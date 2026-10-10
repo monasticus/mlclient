@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:similar-query: options: CTS node argument requires a literal xdmp:unquote call or server evaluation."
+}

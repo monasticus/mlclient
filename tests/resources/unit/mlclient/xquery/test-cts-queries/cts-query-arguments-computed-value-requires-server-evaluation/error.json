@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:element-range-query: value: CTS value argument requires server evaluation, got fn:count(fn:doc())."
+}

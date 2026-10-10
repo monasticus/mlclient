@@ -1,0 +1,1 @@
+<cts:near-query xmlns:cts="http://marklogic.com/cts" weight="0.5" distance="3" minimum-distance="2"><cts:true-query /><cts:false-query /><cts:option>ordered</cts:option></cts:near-query>

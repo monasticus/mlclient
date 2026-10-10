@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:word-query: Query format must be json or xml."
+}

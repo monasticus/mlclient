@@ -1,1 +1,0 @@
-<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="label"><search:value><search:json-property>label</search:json-property><search:term-option>case-sensitive</search:term-option></search:value></search:constraint></search:options>

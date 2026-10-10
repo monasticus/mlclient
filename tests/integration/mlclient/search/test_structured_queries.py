@@ -1,18 +1,16 @@
-"""Verify structured-query XML against native MarkLogic query constructors."""
+(
+    "Verify structured-query XML against native MarkLogic qu"
+    "ery constructors."
+)
 
 from __future__ import annotations
-
 from tests.utils.resources import render_test_resource
-
-import os
 import json
-from uuid import uuid4
+import os
 from xml.etree import ElementTree
-
 import pytest
-
 from mlclient import MLClient
-from mlclient.http import HTTPConfig
+from mlclient.search import QueryComponent
 from mlclient.search.structured import (
     AndNotQuery,
     AndQuery,
@@ -61,14 +59,17 @@ from mlclient.search.structured import (
     Query,
     RangeConstraintQuery,
     RangeQuery,
-    StructuredQuery,
     TermQuery,
     TrueQuery,
     ValueConstraintQuery,
     ValueQuery,
     WordConstraintQuery,
     WordQuery,
+    sq,
 )
+from uuid import uuid4
+from mlclient.http import HTTPConfig
+from mlclient.search.structured import StructuredQuery
 
 pytestmark = pytest.mark.ml_access
 
@@ -80,12 +81,9 @@ class TestStructuredQueries:
         port = int(os.environ.get("MLCLIENT_CTS_PORT", "8000"))
         manage_port = int(os.environ.get("MLCLIENT_CTS_MANAGE_PORT", "8002"))
         name = f"mlclient-structured-test-{uuid4().hex}"
-        # Temporal axes live in the schema database, so the test database gets
-        # its own one rather than writing them into the shared Schemas.
         schemas = f"{name}-schemas"
         with MLClient(
-            port=port,
-            manage_config=HTTPConfig.resolve(port=manage_port),
+            port=port, manage_config=HTTPConfig.resolve(port=manage_port),
         ) as ml:
             host = ml.eval.xquery(render_test_resource(__file__, "ml-database.xqy"))
             ml.manage.databases.create({"database-name": schemas}).raise_for_status()
@@ -102,16 +100,14 @@ class TestStructuredQueries:
                         {"forest-name": name, "host": host, "database": name},
                     ).raise_for_status()
                     _create_temporal_axes(ml, name)
-                    yield ml, name
+                    yield (ml, name)
                 finally:
                     ml.manage.databases.delete(
-                        name,
-                        forest_delete="data",
+                        name, forest_delete="data",
                     ).raise_for_status()
             finally:
                 ml.manage.databases.delete(
-                    schemas,
-                    forest_delete="data",
+                    schemas, forest_delete="data",
                 ).raise_for_status()
 
     def test_and_query(self, ml_database):
@@ -145,7 +141,9 @@ class TestStructuredQueries:
     def test_container_query(self, ml_database):
         self._assert_native_query(
             ml_database,
-            ContainerQuery(Element("section", "urn:example"), TermQuery("blue")),
+            ContainerQuery(
+                Element("section", "https://example.com/example"), TermQuery("blue"),
+            ),
             render_test_resource(__file__, "test-container-query.xqy"),
         )
 
@@ -250,9 +248,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             TermQuery(
-                ["blue", "green"],
-                weight=2,
-                options=["case-sensitive", "unstemmed"],
+                ["blue", "green"], weight=2, options=["case-sensitive", "unstemmed"],
             ),
             render_test_resource(__file__, "test-term-query.xqy"),
         )
@@ -308,7 +304,9 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             RangeQuery(
-                PathIndex("/r:report/r:price", {"r": "urn:example:reports"}),
+                PathIndex(
+                    "/r:report/r:price", {"r": "https://example.com/example/reports"},
+                ),
                 3,
                 operator="GE",
                 index_type="xs:int",
@@ -322,8 +320,8 @@ class TestStructuredQueries:
             CollectionConstraintQuery("category", ["blue", "green"]),
             render_test_resource(__file__, "test-collection-constraint-query.xqy"),
             options=(
-                '<constraint name="category">'
-                '<collection prefix="reports/"/></constraint>'
+                '<constraint name="category"><collection prefix="reports'
+                '/"/></constraint>'
             ),
         )
 
@@ -333,8 +331,8 @@ class TestStructuredQueries:
             ContainerConstraintQuery("section", TermQuery("blue")),
             render_test_resource(__file__, "test-container-constraint-query.xqy"),
             options=(
-                '<constraint name="section"><container>'
-                '<element name="section" ns=""/></container></constraint>'
+                '<constraint name="section"><container><element name="se'
+                'ction" ns=""/></container></constraint>'
             ),
         )
 
@@ -344,8 +342,8 @@ class TestStructuredQueries:
             ElementConstraintQuery("section", TermQuery("blue")),
             render_test_resource(__file__, "test-element-constraint-query.xqy"),
             options=(
-                '<constraint name="section">'
-                '<element-query name="section" ns=""/></constraint>'
+                '<constraint name="section"><element-query name="section'
+                '" ns=""/></constraint>'
             ),
         )
 
@@ -363,8 +361,8 @@ class TestStructuredQueries:
             RangeConstraintQuery("price", 3, operator="GE", options=["cached"]),
             render_test_resource(__file__, "test-range-constraint-query.xqy"),
             options=(
-                '<constraint name="price"><range type="xs:int" facet="false">'
-                '<element name="price" ns=""/></range></constraint>'
+                '<constraint name="price"><range type="xs:int" facet="fa'
+                'lse"><element name="price" ns=""/></range></constraint>'
             ),
         )
 
@@ -374,8 +372,8 @@ class TestStructuredQueries:
             WordConstraintQuery("title", ["blue", "green"], weight=2),
             render_test_resource(__file__, "test-word-constraint-query.xqy"),
             options=(
-                '<constraint name="title"><word>'
-                '<element name="title" ns=""/></word></constraint>'
+                '<constraint name="title"><word><element name="title" ns'
+                '=""/></word></constraint>'
             ),
         )
 
@@ -385,8 +383,8 @@ class TestStructuredQueries:
             ValueConstraintQuery("status", ["blue", "green"], weight=2),
             render_test_resource(__file__, "test-value-text-constraint-query.xqy"),
             options=(
-                '<constraint name="status"><value>'
-                '<element name="status" ns=""/></value></constraint>'
+                '<constraint name="status"><value><element name="status"'
+                ' ns=""/></value></constraint>'
             ),
         )
 
@@ -396,8 +394,8 @@ class TestStructuredQueries:
             ValueConstraintQuery("active", False),
             render_test_resource(__file__, "test-value-boolean-constraint-query.xqy"),
             options=(
-                '<constraint name="active"><value type="boolean">'
-                "<json-property>active</json-property></value></constraint>"
+                '<constraint name="active"><value type="boolean"><json-p'
+                'roperty>active</json-property></value></constraint>'
             ),
         )
 
@@ -407,8 +405,8 @@ class TestStructuredQueries:
             ValueConstraintQuery("count", 7),
             render_test_resource(__file__, "test-value-number-constraint-query.xqy"),
             options=(
-                '<constraint name="count"><value type="number">'
-                "<json-property>count</json-property></value></constraint>"
+                '<constraint name="count"><value type="number"><json-pro'
+                'perty>count</json-property></value></constraint>'
             ),
         )
 
@@ -418,8 +416,8 @@ class TestStructuredQueries:
             ValueConstraintQuery("count"),
             render_test_resource(__file__, "test-value-null-constraint-query.xqy"),
             options=(
-                '<constraint name="count"><value type="null">'
-                "<json-property>count</json-property></value></constraint>"
+                '<constraint name="count"><value type="null"><json-prope'
+                'rty>count</json-property></value></constraint>'
             ),
         )
 
@@ -434,15 +432,14 @@ class TestStructuredQueries:
             ),
             render_test_resource(__file__, "test-alternative-word-constraints.xqy"),
             options=(
-                '<constraint name="title"><word>'
-                '<element name="title" ns=""/></word></constraint>'
-                '<constraint name="label"><word>'
-                '<element name="label" ns=""/></word></constraint>'
+                '<constraint name="title"><word><element name="title" ns'
+                '=""/></word></constraint><constraint name="label"><word'
+                '><element name="label" ns=""/></word></constraint>'
             ),
         )
 
     def test_custom_constraint_query(self, ml_database):
-        ml, database = ml_database
+        (ml, database) = ml_database
         module = render_test_resource(__file__, "test-custom-constraint-query.xqy")
         ml.eval.xquery(
             render_test_resource(__file__, "test-custom-constraint-query-2.xqy"),
@@ -454,9 +451,10 @@ class TestStructuredQueries:
             CustomConstraintQuery("custom", ["blue", "green"]),
             render_test_resource(__file__, "test-custom-constraint-query-3.xqy"),
             options=(
-                '<constraint name="custom"><custom facet="false">'
-                '<parse apply="parse" ns="urn:example:structured-custom" '
-                'at="/structured-custom.xqy"/></custom></constraint>'
+                '<constraint name="custom"><custom facet="false"><parse '
+                'apply="parse" ns="https://example.com/example/structure'
+                'd-custom" at="/structured-custom.xqy"/></custom></const'
+                'raint>'
             ),
             modules_database=True,
         )
@@ -465,10 +463,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             GeoElementQuery(
-                Element("location"),
-                Point(10, 20),
-                options=["units=miles"],
-                weight=2,
+                Element("location"), Point(10, 20), options=["units=miles"], weight=2,
             ),
             render_test_resource(__file__, "test-geo-element-query.xqy"),
         )
@@ -477,9 +472,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             GeoElementQuery(
-                Element("location"),
-                Point(10, 20),
-                parent=Element("place"),
+                Element("location"), Point(10, 20), parent=Element("place"),
             ),
             render_test_resource(__file__, "test-geo-child-element-query.xqy"),
         )
@@ -488,10 +481,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             GeoElementPairQuery(
-                Element("place"),
-                Element("lat"),
-                Element("lon"),
-                Box(1, 2, 3, 4),
+                Element("place"), Element("lat"), Element("lon"), Box(1, 2, 3, 4),
             ),
             render_test_resource(__file__, "test-geo-element-pair-query.xqy"),
         )
@@ -616,8 +606,8 @@ class TestStructuredQueries:
             GeospatialConstraintQuery("loc", Point(10, 20)),
             render_test_resource(__file__, "test-geospatial-constraint-query.xqy"),
             options=(
-                '<constraint name="loc"><geo-elem>'
-                '<element name="location" ns=""/></geo-elem></constraint>'
+                '<constraint name="loc"><geo-elem><element name="locatio'
+                'n" ns=""/></geo-elem></constraint>'
             ),
         )
 
@@ -628,8 +618,8 @@ class TestStructuredQueries:
             render_test_resource(__file__, "test-geo-region-constraint-query.xqy"),
             options=(
                 '<constraint name="area"><geo-region-path coord="wgs84">'
-                "<path-index>/report/area</path-index></geo-region-path>"
-                "</constraint>"
+                '<path-index>/report/area</path-index></geo-region-path>'
+                '</constraint>'
             ),
         )
 
@@ -641,14 +631,13 @@ class TestStructuredQueries:
         )
 
     def test_operator_state(self, ml_database):
-        ml, database = ml_database
+        (ml, database) = ml_database
         query = Query([TrueQuery(), OperatorState("nresults", "few")])
         result = ml.eval.xquery(
             render_test_resource(__file__, "test-operator-state.xqy"),
             variables={
                 "query": ElementTree.tostring(
-                    query.serialize("xml"),
-                    encoding="unicode",
+                    query.serialize("xml"), encoding="unicode",
                 ),
                 "query_json": json.dumps(query.serialize()),
             },
@@ -665,33 +654,29 @@ class TestStructuredQueries:
         options: str = "",
         modules_database: bool = False,
     ):
-        ml, database = ml_database
+        (ml, database) = ml_database
         wrapper = query if isinstance(query, Query) else Query(query)
         xml = ElementTree.tostring(wrapper.serialize("xml"), encoding="unicode")
         code = render_test_resource(__file__, "assert-native-query.xqy", native=native)
         variables = {
             "query": xml,
             "query_json": json.dumps(wrapper.serialize()),
-            "options": (
-                '<options xmlns="http://marklogic.com/appservices/search">'
-                f"{options}</options>"
-            ),
+            "options": f'<options xmlns="http://marklogic.com/appservices/search">{options}</options>',
         }
         if modules_database:
             variables["code"] = code
             code = render_test_resource(__file__, "assert-native-query-2.xqy")
-        result = ml.eval.xquery(
-            code,
-            variables=variables,
-            database=database,
-        )
+        result = ml.eval.xquery(code, variables=variables, database=database)
         assert result is True, [
             ElementTree.tostring(item, encoding="unicode") for item in result
         ]
 
 
 def _configure_indexes(ml: MLClient, database: str):
-    """Add the range indexes the native comparisons and temporal axes need."""
+    (
+        "Add the range indexes the native comparisons and tempor"
+        "al axes need."
+    )
     temporal_indexes = [
         {
             "scalar-type": "dateTime",
@@ -716,10 +701,7 @@ def _configure_indexes(ml: MLClient, database: str):
                 *temporal_indexes,
             ],
             "path-namespace": [
-                {
-                    "prefix": "r",
-                    "namespace-uri": "urn:example:reports",
-                },
+                {"prefix": "r", "namespace-uri": "https://example.com/example/reports"},
             ],
             "range-path-index": [
                 {
@@ -757,17 +739,263 @@ def _configure_indexes(ml: MLClient, database: str):
 
 
 def _create_temporal_axes(ml: MLClient, database: str):
-    """Create the system and valid axes and an LSQT-enabled temporal collection."""
-    ml.eval.xquery(
-        render_test_resource(__file__, "create-temporal-axes.xqy"),
-        database=database,
+    (
+        "Create the system and valid axes and an LSQT-enabled te"
+        "mporal collection."
     )
     ml.eval.xquery(
-        render_test_resource(__file__, "create-temporal-axes-2.xqy"),
-        database=database,
+        render_test_resource(__file__, "create-temporal-axes.xqy"), database=database,
     )
-    # A new temporal collection is visible only after its own transaction.
     ml.eval.xquery(
-        render_test_resource(__file__, "create-temporal-axes-3.xqy"),
-        database=database,
+        render_test_resource(__file__, "create-temporal-axes-2.xqy"), database=database,
     )
+    ml.eval.xquery(
+        render_test_resource(__file__, "create-temporal-axes-3.xqy"), database=database,
+    )
+
+
+class TestStructuredComponentSerialization:
+    @pytest.fixture(scope="class")
+    @staticmethod
+    def ml_client():
+        with MLClient(port=int(os.environ.get("MLCLIENT_CTS_PORT", "8000"))) as ml:
+            yield ml
+
+    def test_attribute(self, ml_client):
+        query = Attribute("status", "https://example.com/example")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_box(self, ml_client):
+        query = Box(5, 15, 25, 35)
+        self._assert_native_serialization(ml_client, query)
+
+    def test_circle(self, ml_client):
+        query = Circle(3, Point(10, 20))
+        self._assert_native_serialization(ml_client, query)
+
+    def test_container_constraint_query(self, ml_client):
+        query = ContainerConstraintQuery("section", TrueQuery())
+        self._assert_native_serialization(ml_client, query)
+
+    def test_container_query(self, ml_client):
+        query = ContainerQuery(
+            Element("section", "https://example.com/example"),
+            TermQuery("blue"),
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_element(self, ml_client):
+        query = Element("label", "https://example.com/example")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_element_constraint_query(self, ml_client):
+        query = ElementConstraintQuery("section", TrueQuery())
+        self._assert_native_serialization(ml_client, query)
+
+    def test_field(self, ml_client):
+        query = Field("body", collation="http://marklogic.com/collation/")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_attribute_pair_query(self, ml_client):
+        query = GeoAttributePairQuery(
+            Element("place"),
+            Attribute("lat"),
+            Attribute("lon"),
+            Point(10, 20),
+            options=["units=miles"],
+            weight=2,
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_element_pair_query(self, ml_client):
+        query = GeoElementPairQuery(
+            Element("place"),
+            Element("lat"),
+            Element("lon"),
+            Point(10, 20),
+            options=["units=miles"],
+            weight=2,
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_element_query(self, ml_client):
+        query = GeoElementQuery(
+            Element("location"),
+            Point(10, 20),
+            parent=Element("place"),
+            options=["units=miles"],
+            weight=2,
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_json_property_pair_query(self, ml_client):
+        query = GeoJsonPropertyPairQuery(
+            JsonProperty("place"),
+            JsonProperty("lat"),
+            JsonProperty("lon"),
+            Point(10, 20),
+            options=["units=miles"],
+            weight=2,
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_json_property_query(self, ml_client):
+        query = GeoJsonPropertyQuery(
+            JsonProperty("location"),
+            Point(10, 20),
+            parent=JsonProperty("place"),
+            options=["units=miles"],
+            weight=2,
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_path_query(self, ml_client):
+        query = GeoPathQuery(
+            PathIndex("/place/location"),
+            Point(10, 20),
+            options=["units=miles"],
+            weight=2,
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_region_constraint_query(self, ml_client):
+        query = GeoRegionConstraintQuery(
+            "location", Point(10, 20), operator="intersects", weight=2,
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geo_region_path_query(self, ml_client):
+        query = GeoRegionPathQuery(
+            PathIndex("/place/region"),
+            Point(10, 20),
+            operator="intersects",
+            coord="wgs84",
+            options=["units=miles"],
+            weight=2,
+            fragment_scope="properties",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_geospatial_constraint_query(self, ml_client):
+        query = GeospatialConstraintQuery("location", Point(10, 20), text="nearby")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_json_property(self, ml_client):
+        query = JsonProperty("title")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_lsqt_query(self, ml_client):
+        query = LsqtQuery(
+            "reports",
+            timestamp="2024-01-01T00:00:00Z",
+            options=["cached-incremental"],
+            weight=2,
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_operator_state(self, ml_client):
+        query = OperatorState("sort", "relevance")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_path_index(self, ml_client):
+        query = PathIndex("/report/price")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_period(self, ml_client):
+        query = Period("2024-01-01T00:00:00Z", "2025-01-01T00:00:00Z")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_period_compare_query(self, ml_client):
+        query = PeriodCompareQuery("system", "aln_equals", "valid", options=["cached"])
+        self._assert_native_serialization(ml_client, query)
+
+    def test_period_range_query(self, ml_client):
+        query = PeriodRangeQuery(
+            ["valid", "system"],
+            "aln_contains",
+            [Period("2024-01-01T00:00:00Z", "2025-01-01T00:00:00Z")],
+            options=["cached"],
+            weight=2,
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_point(self, ml_client):
+        query = Point(10, 20)
+        self._assert_native_serialization(ml_client, query)
+
+    def test_polygon(self, ml_client):
+        query = Polygon([Point(10, 20), Point(11, 21), Point(10, 22)])
+        self._assert_native_serialization(ml_client, query)
+
+    def test_properties_constraint_query(self, ml_client):
+        query = PropertiesConstraintQuery("metadata", TrueQuery())
+        self._assert_native_serialization(ml_client, query)
+
+    def test_qtext_query(self, ml_client):
+        query = QtextQuery("blue AND green")
+        self._assert_native_serialization(ml_client, query)
+
+    def test_query_builder(self, ml_client):
+        query = sq.query(
+            sq.and_(
+                sq.range(sq.element("price"), 20, operator="GE", index_type="xs:int"),
+                sq.term("blue"),
+            ),
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_range_constraint_query(self, ml_client):
+        query = RangeConstraintQuery("price", [3, 4], operator="EQ", options=["cached"])
+        self._assert_native_serialization(ml_client, query)
+
+    def test_range_query(self, ml_client):
+        query = RangeQuery(
+            Element("price"),
+            [3, 4],
+            operator="EQ",
+            index_type="xs:int",
+            collation="https://example.com/example",
+            options=["cached"],
+            weight=2,
+            fragment_scope="documents",
+            attribute=Attribute("amount"),
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_value_query(self, ml_client):
+        query = ValueQuery(
+            JsonProperty("active"),
+            True,
+            node_type="boolean",
+            options=["exact"],
+            weight=2,
+            fragment_scope="documents",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    def test_word_query(self, ml_client):
+        query = WordQuery(
+            [Element("title"), Element("label")],
+            ["blue", "green"],
+            attribute=[Attribute("name"), Attribute("alt")],
+            options=["case-sensitive"],
+            weight=2,
+            fragment_scope="documents",
+        )
+        self._assert_native_serialization(ml_client, query)
+
+    @staticmethod
+    def _assert_native_serialization(ml: MLClient, query: QueryComponent):
+        xml = ElementTree.tostring(query.serialize("xml"), encoding="unicode")
+        result = ml.eval.xquery(
+            render_test_resource(__file__, "assert-native-serialization.xqy"),
+            variables={"xml": xml, "json": json.dumps(query.serialize())},
+        )
+        assert result is True, result

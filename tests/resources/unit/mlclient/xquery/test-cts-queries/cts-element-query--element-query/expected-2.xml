@@ -1,1 +1,0 @@
-<cts:element-query xmlns:cts="http://marklogic.com/cts"><cts:element>a</cts:element><cts:element xmlns:q="urn:mlclient:cts-test">q:b</cts:element><cts:word-query><cts:text>x</cts:text></cts:word-query></cts:element-query>

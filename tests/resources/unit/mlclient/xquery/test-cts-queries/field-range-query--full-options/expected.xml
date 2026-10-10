@@ -1,1 +1,0 @@
-<cts:field-range-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="&lt;=" weight="3"><cts:field>price</cts:field><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:integer">2</cts:value><cts:option>cached</cts:option></cts:field-range-query>

@@ -1,0 +1,1 @@
+<search:geo-elem-query xmlns:search="http://marklogic.com/appservices/search"><search:element name="location" ns="" /><search:point><search:latitude>10</search:latitude><search:longitude>20</search:longitude></search:point></search:geo-elem-query>

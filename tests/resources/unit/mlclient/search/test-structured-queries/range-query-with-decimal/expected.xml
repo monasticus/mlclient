@@ -1,0 +1,1 @@
+<search:range-query xmlns:search="http://marklogic.com/appservices/search"><search:json-property>price</search:json-property><search:value>2.50</search:value></search:range-query>

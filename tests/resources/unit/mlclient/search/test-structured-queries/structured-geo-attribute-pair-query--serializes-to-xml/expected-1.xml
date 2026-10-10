@@ -1,1 +1,0 @@
-<expected xmlns="http://marklogic.com/appservices/search"><geo-attr-pair-query><parent name="place" ns=""/><lat name="lat" ns=""/><lon name="lon" ns=""/><geo-option>units=miles</geo-option><fragment-scope>properties</fragment-scope><point><latitude>10</latitude><longitude>20</longitude></point><weight>2</weight></geo-attr-pair-query></expected>

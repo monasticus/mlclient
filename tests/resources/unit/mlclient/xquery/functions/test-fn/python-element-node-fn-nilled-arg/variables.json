@@ -1,0 +1,5 @@
+{
+  "v0": "<node0:report xmlns:node0=\"https://example.com/reports\">blue</node0:report>",
+  "v1": "*",
+  "v2": "fn:nilled(xdmp:unquote($v0) ! *)"
+}

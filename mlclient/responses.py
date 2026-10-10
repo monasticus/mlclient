@@ -27,8 +27,6 @@ from mlclient.multipart import MultipartPart, decode_multipart_mixed
 logger = logging.getLogger(__name__)
 
 
-
-
 class MLResponseParser:
     """A MarkLogic HTTP response parser.
 
@@ -62,30 +60,6 @@ class MLResponseParser:
 
     _FRACTIONAL_SECONDS = re.compile(r"(T\d{2}:\d{2}:\d{2})\.(\d+)")
 
-    @classmethod
-    def _parse_date_time(cls, lexical: str) -> datetime:
-        """Convert an xs:dateTime lexical form, whatever its fraction length.
-
-        MarkLogic writes the canonical form, which drops trailing zeros from the
-        fractional seconds (``.5``, ``.12345``); Python 3.10 parses only 3 or 6
-        digits, so the fraction is padded, or truncated beyond microseconds.
-
-        Parameters
-        ----------
-        lexical : str
-            The xs:dateTime value, with ``Z`` or an offset, or none.
-
-        Returns
-        -------
-        datetime
-            The value, timezone-aware when the lexical form has a zone.
-        """
-        normalized = cls._FRACTIONAL_SECONDS.sub(
-            lambda match: f"{match.group(1)}.{match.group(2)[:6].ljust(6, '0')}",
-            lexical,
-        )
-        return datetime.fromisoformat(normalized.replace("Z", "+00:00"))
-
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
         None: lambda data: data,
         const.HEADER_PRIMITIVE_STRING: lambda data: data,
@@ -111,7 +85,7 @@ class MLResponseParser:
         const.HEADER_PRIMITIVE_DOUBLE: float,
         const.HEADER_PRIMITIVE_FLOAT: float,
         const.HEADER_PRIMITIVE_DATE: lambda data: date.fromisoformat(data[:10]),
-        const.HEADER_PRIMITIVE_DATE_TIME: _parse_date_time,
+        const.HEADER_PRIMITIVE_DATE_TIME: "_parse_date_time",
     }
 
     @classmethod
@@ -205,8 +179,8 @@ class MLResponseParser:
         """
         primitive_type = atomic_type.removeprefix("xs:")
         parser = cls._PLAIN_TEXT_PARSERS.get(primitive_type)
-        if isinstance(parser, classmethod):
-            parser = parser.__get__(None, cls)
+        if isinstance(parser, str):
+            parser = getattr(cls, parser)
         return parser(lexical) if parser else lexical
 
     @classmethod
@@ -540,6 +514,30 @@ class MLResponseParser:
         if not with_headers:
             return parsed
         return headers, parsed
+
+    @classmethod
+    def _parse_date_time(cls, lexical: str) -> datetime:
+        """Convert an xs:dateTime lexical form, whatever its fraction length.
+
+        MarkLogic writes the canonical form, which drops trailing zeros from the
+        fractional seconds (``.5``, ``.12345``); Python 3.10 parses only 3 or 6
+        digits, so the fraction is padded, or truncated beyond microseconds.
+
+        Parameters
+        ----------
+        lexical : str
+            The xs:dateTime value, with ``Z`` or an offset, or none.
+
+        Returns
+        -------
+        datetime
+            The value, timezone-aware when the lexical form has a zone.
+        """
+        normalized = cls._FRACTIONAL_SECONDS.sub(
+            lambda match: f"{match.group(1)}.{match.group(2)[:6].ljust(6, '0')}",
+            lexical,
+        )
+        return datetime.fromisoformat(normalized.replace("Z", "+00:00"))
 
     @classmethod
     def _parse_type_specific(

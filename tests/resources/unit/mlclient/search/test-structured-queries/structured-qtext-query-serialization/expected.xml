@@ -1,0 +1,1 @@
+<search:qtext xmlns:search="http://marklogic.com/appservices/search">blue AND green</search:qtext>

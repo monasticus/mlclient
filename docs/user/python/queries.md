@@ -169,7 +169,7 @@ from mlclient.search.structured import Element, PathIndex, RangeQuery
 
 price = RangeQuery(Element("price"), 20, operator="GE", index_type="xs:decimal")
 path = RangeQuery(
-    PathIndex("/r:report/r:price", namespaces={"r": "urn:example:reports"}),
+    PathIndex("/r:report/r:price", namespaces={"r": "https://example.com/example/reports"}),
     20,
     operator="GE",
     index_type="xs:decimal",

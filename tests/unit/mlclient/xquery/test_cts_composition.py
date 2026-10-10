@@ -69,8 +69,8 @@ def test_operators_reject_non_queries(other):
     [
         (cts.word_query("a", weight=2), "WordQuery(text='a', weight=2)"),
         (
-            cts.element_range_query(fn.qname("urn:x", "p"), ">=", 10),
-            "ElementRangeQuery(element_name=fn:QName('urn:x', 'p'), "
+            cts.element_range_query(fn.qname("https://example.com/x", "p"), ">=", 10),
+            "ElementRangeQuery(element_name=fn:QName('https://example.com/x', 'p'), "
             "operator='>=', value=10)",
         ),
         (

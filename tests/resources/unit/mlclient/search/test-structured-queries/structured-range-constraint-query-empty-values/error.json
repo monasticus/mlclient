@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "Range queries require at least one value."
+}

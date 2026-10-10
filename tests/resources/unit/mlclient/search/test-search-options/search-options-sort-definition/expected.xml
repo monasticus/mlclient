@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:sort-order type="xs:decimal" direction="descending"><search:element name="price" ns="" /></search:sort-order></search:options>

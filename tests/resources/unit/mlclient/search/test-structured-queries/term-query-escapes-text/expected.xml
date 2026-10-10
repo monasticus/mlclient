@@ -1,0 +1,1 @@
+<search:term-query xmlns:search="http://marklogic.com/appservices/search"><search:text>a &lt; b &amp; c</search:text></search:term-query>

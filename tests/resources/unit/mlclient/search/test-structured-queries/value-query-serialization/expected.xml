@@ -1,0 +1,1 @@
+<search:value-query xmlns:search="http://marklogic.com/appservices/search" type="boolean"><search:json-property>active</search:json-property><search:fragment-scope>documents</search:fragment-scope><search:text>true</search:text><search:term-option>exact</search:term-option><search:weight>2</search:weight></search:value-query>

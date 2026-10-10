@@ -1,0 +1,15 @@
+{
+  "search": {
+    "query": {
+      "queries": [
+        {
+          "term-query": {
+            "text": [
+              "coffee"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

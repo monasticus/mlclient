@@ -345,7 +345,7 @@ class Index(XqyExpression):
 
     def render(self, ctx: XqyCompilationContext) -> str:
         """Keep fn:last inside the selected sequence's predicate context."""
-        position = _as_expr(self.position).render(ctx)
+        position = as_expr(self.position).render(ctx)
         inner = self.inner.render(ctx)
         if not isinstance(
             self.inner,
@@ -379,8 +379,8 @@ class Range(XqyExpression):
             (FunctionCall, ModuleFunctionCall, Index, Range),
         ):
             inner = f"({inner})"
-        start = _as_expr(self.start).render(ctx)
-        end = _as_expr(self.end).render(ctx)
+        start = as_expr(self.start).render(ctx)
+        end = as_expr(self.end).render(ctx)
         return f"{inner}[{start} to {end}]"
 
 
@@ -448,11 +448,11 @@ class FunctionCall(XqyExpression):
 
     def __post_init__(self):
         """Snapshot arguments as expression objects."""
-        object.__setattr__(self, "args", tuple(_as_expr(arg) for arg in self.args))
+        object.__setattr__(self, "args", tuple(as_expr(arg) for arg in self.args))
         object.__setattr__(
             self,
             "optionals",
-            tuple(None if arg is None else _as_expr(arg) for arg in self.optionals),
+            tuple(None if arg is None else as_expr(arg) for arg in self.optionals),
         )
 
     def render(self, ctx: XqyCompilationContext) -> str:
@@ -619,7 +619,7 @@ class NamespaceMap(XqyExpression):
         return _namespace_code(dict(self.bindings), ctx)
 
 
-def _namespace_map(value):
+def namespace_map(value):
     """Convert Python namespace mappings while preserving native map expressions."""
     if isinstance(value, Mapping):
         return NamespaceMap(tuple(namespace_bindings(value).items()))
@@ -644,7 +644,7 @@ def as_searchable_expression(expression: str | XqyExpression) -> XqyExpression:
     return expression
 
 
-def _as_expr(value, *, cast: str | None = None) -> XqyExpression:
+def as_expr(value, *, cast: str | None = None) -> XqyExpression:
     """Snapshot Python values into immutable XQuery expressions.
 
     Parameters
@@ -687,7 +687,7 @@ def _as_expr(value, *, cast: str | None = None) -> XqyExpression:
     elif value is None:
         expr = XqySequence(())
     elif isinstance(value, (list, tuple)):
-        expr = XqySequence(tuple(_as_expr(item) for item in value))
+        expr = XqySequence(tuple(as_expr(item) for item in value))
     else:
         expr = _scalar(value)
     if isinstance(expr, AtomicValue) and expr.cast == cast:
@@ -779,7 +779,7 @@ def _validate_json_keys(value):
             _validate_json_keys(item)
 
 
-def _as_qname(value) -> XqyExpression:
+def as_qname(value) -> XqyExpression:
     """Convert local-name strings, QName expressions or their sequences.
 
     Parameters
@@ -793,10 +793,10 @@ def _as_qname(value) -> XqyExpression:
         The expression unchanged, or each string cast to ``xs:QName``.
     """
     if isinstance(value, (list, tuple)):
-        return _as_expr(tuple(_as_qname(item) for item in value))
+        return as_expr(tuple(as_qname(item) for item in value))
     if isinstance(value, XqyExpression):
         return value
-    return _as_expr(value, cast="xs:QName")
+    return as_expr(value, cast="xs:QName")
 
 
 def _namespace_declarations(namespaces: dict[str, str]) -> str:

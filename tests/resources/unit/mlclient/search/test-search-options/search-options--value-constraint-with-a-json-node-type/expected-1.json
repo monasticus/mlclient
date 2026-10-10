@@ -1,0 +1,9 @@
+[
+  {
+    "name": "price",
+    "value": {
+      "type": "number",
+      "json-property": "price"
+    }
+  }
+]

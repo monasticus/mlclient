@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "PeriodRangeQuery.periods items must be Period, got str"
+}

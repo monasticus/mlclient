@@ -1,0 +1,12 @@
+{
+  "values-response": {
+    "name": "category",
+    "type": "xs:string",
+    "distinct-value": [
+      {
+        "frequency": 2,
+        "_value": "drinks"
+      }
+    ]
+  }
+}

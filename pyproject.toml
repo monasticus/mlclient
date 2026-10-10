@@ -156,7 +156,7 @@ max-complexity = 10
     "PLR0913", # allow many arguments as they mirror native cts function signatures
     "A002", # allow native cts names: dict, format, id, map, object, property, type
 ]
-"mlclient/xquery/_cts_queries.py" = [
+"mlclient/xquery/_cts_query.py" = [
     "PLR0913", # allow many arguments as they mirror native cts function signatures
     "A002", # allow native cts names: format
 ]

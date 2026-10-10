@@ -1,0 +1,1 @@
+<expected xmlns="http://marklogic.com/appservices/search"><period-range-query><axis>valid</axis><axis>system</axis><temporal-operator>aln_contains</temporal-operator><period><period-start>2024-01-01T00:00:00Z</period-start><period-end>2025-01-01T00:00:00Z</period-end></period><temporal-option>cached</temporal-option><weight>2</weight></period-range-query></expected>

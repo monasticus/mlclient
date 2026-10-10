@@ -1,5 +1,7 @@
 """Verify structured JSON preserves XML through MarkLogic REST conversion."""
 
+from tests.utils.resources import render_test_resource
+
 import json
 import os
 from xml.etree import ElementTree
@@ -406,14 +408,7 @@ class TestStructuredQuerySerialization:
     def _assert_native_serialization(ml: MLClient, query: QueryComponent):
         xml = ElementTree.tostring(query.serialize("xml"), encoding="unicode")
         result = ml.eval.xquery(
-            "import module namespace csu="
-            '"http://marklogic.com/rest-api/config-query-util" '
-            'at "/MarkLogic/rest-api/lib/config-query-util.xqy"; '
-            "declare variable $xml external; declare variable $json external; "
-            "let $actual := csu:json-to-xml(xdmp:unquote($json)) "
-            "let $expected := xdmp:unquote($xml)/* "
-            "return if (deep-equal($actual, $expected)) then true() "
-            "else (<actual>{$actual}</actual>, <expected>{$expected}</expected>)",
+            render_test_resource(__file__, "assert-native-serialization.xqy"),
             variables={"xml": xml, "json": json.dumps(query.serialize())},
         )
         assert result is True, result

@@ -1,0 +1,1 @@
+<expected xmlns="http://marklogic.com/appservices/search"><word-query><element name="title" ns="" /><element name="label" ns="" /><attribute name="name" ns="" /><attribute name="alt" ns="" /><fragment-scope>documents</fragment-scope><text>blue</text><text>green</text><term-option>case-sensitive</term-option><weight>2</weight></word-query></expected>

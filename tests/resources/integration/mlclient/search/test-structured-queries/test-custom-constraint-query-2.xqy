@@ -1,0 +1,1 @@
+declare variable $module external; xdmp:document-insert("/structured-custom.xqy", text {$module})

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
-from xml.etree.ElementTree import tostring
 
 import pytest
 import respx
@@ -14,63 +13,26 @@ from mlclient.xquery import cts
 from mlclient.models import JSONDocument, SearchReport, TupleHit, ValueHit, XMLDocument
 from mlclient.search.options import Range, SearchOptions
 from mlclient.search.structured import Element, sq
-from tests.utils import data as test_data
+from tests.utils import data as test_data, resources as resources_utils
 from tests.utils.data import MetadataSpec
 from tests.utils.ml_mockers import MLRespXMocker
 
 SEARCH_URL = "http://localhost:8000/v1/search"
 VALUES_URL = "http://localhost:8000/v1/values/category"
-CTS_QUERY = cts.and_query([cts.collection_query("products"), cts.word_query("coffee")])
-CTS_BODY = {
-    "search": {
-        "ctsquery": {
-            "andQuery": {
-                "queries": [
-                    {"collectionQuery": {"uris": ["products"]}},
-                    {"wordQuery": {"text": ["coffee"]}},
-                ],
-            },
-        },
-    },
-}
-CTS_XML = tostring(CTS_QUERY.to_xml(), encoding="unicode")
-ERROR_RESPONSE = {
-    "errorResponse": {
-        "statusCode": 400,
-        "status": "Bad Request",
-        "messageCode": "REST-INVALIDPARAM",
-        "message": "REST-INVALIDPARAM: Invalid parameter",
-    },
-}
-
-
-def multi_document_read_mock(*params: tuple[str, str]) -> MLRespXMocker:
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(SEARCH_URL)
-    for name, value in params:
-        ml_mocker.with_request_param(name, value)
-    ml_mocker.with_request_header("Accept", "multipart/mixed")
-    ml_mocker.with_response_code(200)
-    return ml_mocker
-
-
-def values_mock(*params: tuple[str, str]) -> MLRespXMocker:
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(VALUES_URL)
-    for name, value in params:
-        ml_mocker.with_request_param(name, value)
-    ml_mocker.with_request_header("Accept", "application/json")
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
-    return ml_mocker
+CTS_QUERY = resources_utils.read_query_input(__file__, "cts-query.py")
+CTS_BODY = resources_utils.get_test_resource_json(__file__, "cts-body.json")
+CTS_XML = resources_utils.read_test_resource_text(__file__, "cts-query.xml")
+ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-response.json")
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_for_cts_query():
-    ml_mocker = multi_document_read_mock(
-        ("format", "json"),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.xml_doc_body_part("/products/coffee.xml"),
     )
@@ -97,17 +59,22 @@ async def test_documents_for_cts_query():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_for_structured_query():
-    ml_mocker = multi_document_read_mock()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
     )
     ml_mocker.with_request_body(
-        {"search": {"query": {"queries": [{"term-query": {"text": ["coffee"]}}]}}},
+        resources_utils.get_test_resource_json(__file__, "request-104.json"),
     )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        docs = await ml.search.documents(sq.term("coffee"))
+        docs = await ml.search.documents(
+            resources_utils.read_query_input(__file__, "structured-query.py"),
+        )
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
 
@@ -115,11 +82,16 @@ async def test_documents_for_structured_query():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_for_string_query():
-    ml_mocker = multi_document_read_mock()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
     )
-    ml_mocker.with_request_body({"search": {"qtext": "coffee AND tea"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-122.json"),
+    )
     route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -132,11 +104,16 @@ async def test_documents_for_string_query():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_without_query():
-    ml_mocker = multi_document_read_mock()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
     )
-    ml_mocker.with_request_body({"search": {}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-139.json"),
+    )
     route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -149,11 +126,18 @@ async def test_documents_without_query():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_at_single_position():
-    ml_mocker = multi_document_read_mock(("start", "3"), ("pageLength", "1"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("start", "3")
+    ml_mocker.with_request_param("pageLength", "1")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
     )
-    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-156.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -165,11 +149,18 @@ async def test_documents_at_single_position():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_in_position_range():
-    ml_mocker = multi_document_read_mock(("start", "11"), ("pageLength", "10"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("start", "11")
+    ml_mocker.with_request_param("pageLength", "10")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
     )
-    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-172.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -181,10 +172,12 @@ async def test_documents_in_position_range():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_with_metadata():
-    ml_mocker = multi_document_read_mock(
-        ("category", "content"),
-        ("category", "collections"),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "content")
+    ml_mocker.with_request_param("category", "collections")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.doc_metadata_body_part(
             "/products/coffee.json",
@@ -194,7 +187,9 @@ async def test_documents_with_metadata():
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
     )
-    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-197.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -208,15 +203,19 @@ async def test_documents_with_metadata():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_forwards_options_database_and_transaction():
-    ml_mocker = multi_document_read_mock(
-        ("options", "product-options"),
-        ("database", "Documents"),
-        ("txid", "12345"),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("txid", "12345")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
     )
-    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-219.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -233,10 +232,15 @@ async def test_documents_forwards_options_database_and_transaction():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_without_matches():
-    ml_mocker = multi_document_read_mock()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_header("vnd.marklogic.result-estimate", "0")
     ml_mocker.with_empty_response_body()
-    ml_mocker.with_request_body({"search": {"qtext": "zzz"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-239.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -248,11 +252,16 @@ async def test_documents_without_matches():
 @pytest.mark.asyncio
 @respx.mock
 async def test_documents_error():
-    ml_mocker = multi_document_read_mock()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(ERROR_RESPONSE)
-    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-255.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -265,12 +274,14 @@ async def test_documents_error():
 @pytest.mark.asyncio
 @respx.mock
 async def test_uris():
-    ml_mocker = multi_document_read_mock(
-        ("category", "quality"),
-        ("format", "json"),
-        ("start", "2"),
-        ("pageLength", "2"),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.doc_metadata_body_part(
             "/products/coffee.xml",
@@ -295,14 +306,20 @@ async def test_uris():
 @pytest.mark.asyncio
 @respx.mock
 async def test_uris_of_single_match():
-    ml_mocker = multi_document_read_mock(("category", "quality"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.doc_metadata_body_part(
             "/products/coffee.json",
             MetadataSpec(quality=0),
         ),
     )
-    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-305.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -314,9 +331,15 @@ async def test_uris_of_single_match():
 @pytest.mark.asyncio
 @respx.mock
 async def test_uris_without_matches():
-    ml_mocker = multi_document_read_mock(("category", "quality"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
-    ml_mocker.with_request_body({"search": {"qtext": "zzz"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-319.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -328,11 +351,17 @@ async def test_uris_without_matches():
 @pytest.mark.asyncio
 @respx.mock
 async def test_uris_error():
-    ml_mocker = multi_document_read_mock(("category", "quality"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_response_code(200)
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(ERROR_RESPONSE)
-    ml_mocker.with_request_body({"search": {}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-335.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -345,11 +374,14 @@ async def test_uris_error():
 @pytest.mark.asyncio
 @respx.mock
 async def test_values_of_strings():
-    ml_mocker = values_mock(
-        ("options", "product-options"),
-        ("view", "values"),
-        ("format", "json"),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(
         {
             "values-response": {
@@ -390,7 +422,13 @@ async def test_values_of_strings():
 @pytest.mark.asyncio
 @respx.mock
 async def test_values_are_converted_from_their_type(atomic_type, lexical, expected):
-    ml_mocker = values_mock(("start", "1"), ("pageLength", "1"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("start", "1")
+    ml_mocker.with_request_param("pageLength", "1")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(
         {
             "values-response": {
@@ -399,7 +437,9 @@ async def test_values_are_converted_from_their_type(atomic_type, lexical, expect
             },
         },
     )
-    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-402.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -412,11 +452,19 @@ async def test_values_are_converted_from_their_type(atomic_type, lexical, expect
 @pytest.mark.asyncio
 @respx.mock
 async def test_values_without_matches():
-    ml_mocker = values_mock(("database", "Documents"), ("txid", "12345"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("txid", "12345")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(
         {"values-response": {"name": "category", "type": "xs:string"}},
     )
-    ml_mocker.with_request_body({"search": {}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-419.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -428,11 +476,17 @@ async def test_values_without_matches():
 @pytest.mark.asyncio
 @respx.mock
 async def test_values_reject_tuples():
-    ml_mocker = values_mock()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(
         {"values-response": {"name": "category", "tuple": [{"frequency": 1}]}},
     )
-    ml_mocker.with_request_body({"search": {}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-435.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -447,10 +501,16 @@ async def test_values_reject_tuples():
 @pytest.mark.asyncio
 @respx.mock
 async def test_values_error():
-    ml_mocker = values_mock()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(ERROR_RESPONSE)
-    ml_mocker.with_request_body({"search": {}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-453.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -531,11 +591,14 @@ async def test_aggregate_native_result(name, scalar_type, function, lexical, exp
             },
         ],
     }
-    ml_mocker = values_mock(
-        ("format", "json"),
-        ("view", "aggregate"),
-        ("aggregate", function),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", function)
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url(f"http://localhost:8000/v1/values/{name}")
     ml_mocker.with_request_body({"search": {"options": options}})
     ml_mocker.with_response_body(
@@ -559,11 +622,14 @@ async def test_aggregate_native_result(name, scalar_type, function, lexical, exp
 @pytest.mark.asyncio
 @respx.mock
 async def test_aggregate_without_matches():
-    ml_mocker = values_mock(
-        ("format", "json"),
-        ("view", "aggregate"),
-        ("aggregate", "avg"),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
     ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
     ml_mocker.with_response_body(
@@ -593,7 +659,10 @@ async def test_aggregate_without_matches():
                 "options": {
                     **PRICE_OPTIONS,
                     "additional-query": [
-                        '<cts:word-query xmlns:cts="http://marklogic.com/cts"><cts:text>zzz</cts:text></cts:word-query>',
+                        (
+                            '<cts:word-query xmlns:cts="http://marklogic.com/cts"><c'
+                            "ts:text>zzz</cts:text></cts:word-query>"
+                        ),
                     ],
                 },
             },
@@ -604,7 +673,13 @@ async def test_aggregate_without_matches():
 @pytest.mark.asyncio
 @respx.mock
 async def test_inline_options_with_query(query, fragment):
-    ml_mocker = values_mock(("format", "json"), ("view", "values"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
     ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, **fragment}})
     ml_mocker.with_response_body(
@@ -620,13 +695,16 @@ async def test_inline_options_with_query(query, fragment):
 @respx.mock
 async def test_values_with_options_builder_and_controls():
     options = SearchOptions().values("price", Range(Element("price"), "xs:decimal"))
-    ml_mocker = values_mock(
-        ("format", "json"),
-        ("view", "values"),
-        ("direction", "descending"),
-        ("frequency", "fragment"),
-        ("limit", "1"),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("direction", "descending")
+    ml_mocker.with_request_param("frequency", "fragment")
+    ml_mocker.with_request_param("limit", "1")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
     ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS}})
     ml_mocker.with_response_body(
@@ -658,8 +736,7 @@ async def test_invalid_options():
             await ml.search(options=123).values("price")
 
     assert str(error.value) == (
-        "options must be an installed name, inline dictionary or SearchOptions, "
-        "got int"
+        "options must be an installed name, inline dictionary or SearchOptions, got int"
     )
 
 
@@ -671,31 +748,17 @@ async def test_tuples_have_individual_types():
         Range(Element("price"), "xs:decimal"),
         Range(Element("day"), "xs:date"),
     )
-    ml_mocker = values_mock(("format", "xml"), ("view", "values"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
     ml_mocker.with_request_header("Accept", "application/xml")
     ml_mocker.with_request_body(
-        {
-            "search": {
-                "options": {
-                    "tuples": [
-                        {
-                            "name": "price-day",
-                            "range": [
-                                {
-                                    "type": "xs:decimal",
-                                    "element": {"ns": "", "name": "price"},
-                                },
-                                {
-                                    "type": "xs:date",
-                                    "element": {"ns": "", "name": "day"},
-                                },
-                            ],
-                        },
-                    ],
-                },
-            },
-        },
+        resources_utils.get_test_resource_json(__file__, "request-677.json"),
     )
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     # ML10 XML capture; timing metrics omitted.
@@ -726,7 +789,13 @@ async def test_tuples_have_individual_types():
 @pytest.mark.asyncio
 @respx.mock
 async def test_tuples_reject_values_definition():
-    ml_mocker = values_mock(("format", "xml"), ("view", "values"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
     ml_mocker.with_request_header("Accept", "application/xml")
     ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS}})
@@ -772,7 +841,9 @@ async def test_report_retains_empty_native_report_and_timestamp():
         "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
     }
     ml_mocker.with_response_body(payload)
-    ml_mocker.with_request_body({"search": {"qtext": "product"}})
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(__file__, "request-775.json"),
+    )
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -942,9 +1013,15 @@ async def test_operation_forwards_all_controls_and_transaction_error(
 @pytest.mark.parametrize(
     "additional",
     [
-        '<cts:document-query xmlns:cts="http://marklogic.com/cts"><cts:uri>/probe/a.xml</cts:uri></cts:document-query>',
+        (
+            '<cts:document-query xmlns:cts="http://marklogic.com/cts'
+            '"><cts:uri>/probe/a.xml</cts:uri></cts:document-query>'
+        ),
         [
-            '<cts:document-query xmlns:cts="http://marklogic.com/cts"><cts:uri>/probe/a.xml</cts:uri></cts:document-query>',
+            (
+                '<cts:document-query xmlns:cts="http://marklogic.com/cts'
+                '"><cts:uri>/probe/a.xml</cts:uri></cts:document-query>'
+            ),
         ],
     ],
 )
@@ -952,7 +1029,13 @@ async def test_operation_forwards_all_controls_and_transaction_error(
 @respx.mock
 async def test_inline_cts_query_preserves_existing_additional_query(additional):
     options = {**PRICE_OPTIONS, "additional-query": additional}
-    ml_mocker = values_mock(("format", "json"), ("view", "values"))
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
     ml_mocker.with_request_body(
         {
@@ -960,8 +1043,14 @@ async def test_inline_cts_query_preserves_existing_additional_query(additional):
                 "options": {
                     **PRICE_OPTIONS,
                     "additional-query": [
-                        '<cts:document-query xmlns:cts="http://marklogic.com/cts"><cts:uri>/probe/a.xml</cts:uri></cts:document-query>',
-                        '<cts:word-query xmlns:cts="http://marklogic.com/cts"><cts:text>zzz</cts:text></cts:word-query>',
+                        (
+                            '<cts:document-query xmlns:cts="http://marklogic.com/cts'
+                            '"><cts:uri>/probe/a.xml</cts:uri></cts:document-query>'
+                        ),
+                        (
+                            '<cts:word-query xmlns:cts="http://marklogic.com/cts"><c'
+                            "ts:text>zzz</cts:text></cts:word-query>"
+                        ),
                     ],
                 },
             },

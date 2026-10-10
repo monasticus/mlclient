@@ -1,0 +1,1 @@
+<cts:element-attribute-range-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="!=" weight="3"><cts:element>item</cts:element><cts:attribute>amount</cts:attribute><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:integer">3</cts:value><cts:option>cached</cts:option></cts:element-attribute-range-query>

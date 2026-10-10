@@ -1,0 +1,1 @@
+<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" weight="2"><cts:element>origin</cts:element><cts:region xmlns:cts="http://marklogic.com/cts" xsi:type="cts:point">10.5,-20.25</cts:region><cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>

@@ -1,0 +1,11 @@
+{
+  "range-constraint-query": {
+    "constraint-name": "price",
+    "value": [
+      "3",
+      "4"
+    ],
+    "range-operator": "EQ",
+    "range-option": "cached"
+  }
+}

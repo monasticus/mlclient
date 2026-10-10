@@ -1,0 +1,14 @@
+{
+  "geo-elem-query": {
+    "element": {
+      "name": "location",
+      "ns": ""
+    },
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ]
+  }
+}

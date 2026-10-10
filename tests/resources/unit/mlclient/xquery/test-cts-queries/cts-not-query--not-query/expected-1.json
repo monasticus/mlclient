@@ -1,0 +1,11 @@
+{
+  "notQuery": {
+    "query": {
+      "collectionQuery": {
+        "uris": [
+          "reports"
+        ]
+      }
+    }
+  }
+}

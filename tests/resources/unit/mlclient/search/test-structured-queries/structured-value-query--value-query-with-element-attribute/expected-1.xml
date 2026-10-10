@@ -1,0 +1,1 @@
+<expected xmlns="http://marklogic.com/appservices/search"><value-query><element name="label" ns="" /><attribute name="color" ns="" /><text>blue</text></value-query></expected>

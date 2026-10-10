@@ -11,25 +11,20 @@ from tests.utils import data as test_data, resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 
-STRUCTURED_QUERY = '{"search": {"ctsquery": {"wordQuery": {"text": ["coffee"]}}}}'
-COMBINED_QUERY = {"search": {"ctsquery": {"wordQuery": {"text": ["coffee"]}}}}
-URIS_VALUES_QUERY = {"search": {"options": {"values": [{"name": "uris", "uri": None}]}}}
-URIS_VALUES_RESPONSE = {
-    "values-response": {
-        "name": "uris",
-        "type": "xs:string",
-        "distinct-value": [{"frequency": 1, "_value": "/a.json"}],
-    },
-}
-VALUES_ERROR = {
-    "errorResponse": {
-        "statusCode": 400,
-        "status": "Bad Request",
-        "messageCode": "REST-INVALIDPARAM",
-        "message": "REST-INVALIDPARAM: (err:FOER0000) Invalid parameter: "
-        "No values or tuples specification named: category",
-    },
-}
+STRUCTURED_QUERY = resources_utils.read_test_resource_text(
+    __file__,
+    "structured-query.txt",
+)
+COMBINED_QUERY = resources_utils.get_test_resource_json(__file__, "combined-query.json")
+URIS_VALUES_QUERY = resources_utils.get_test_resource_json(
+    __file__,
+    "uris-values-query.json",
+)
+URIS_VALUES_RESPONSE = resources_utils.get_test_resource_json(
+    __file__,
+    "uris-values-response.json",
+)
+VALUES_ERROR = resources_utils.get_test_resource_json(__file__, "values-error.json")
 
 
 @pytest.fixture
@@ -266,7 +261,11 @@ def test_delete_search():
 
 @respx.mock
 def test_delete_search_clearing_database():
-    route = respx.delete("http://localhost:8000/v1/search").respond(204)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_delete()
 
     with MLClient() as ml:
         resp = ml.rest.search.delete(database="Documents", clear_database=True)
@@ -277,7 +276,11 @@ def test_delete_search_clearing_database():
 
 @respx.mock
 def test_delete_search_without_filters_is_rejected_before_any_request():
-    route = respx.delete("http://localhost:8000/v1/search").respond(204)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_delete()
 
     with MLClient() as ml, pytest.raises(WrongParametersError):
         ml.rest.search.delete(database="Documents")
@@ -289,7 +292,11 @@ def test_delete_search_without_filters_is_rejected_before_any_request():
 @pytest.mark.parametrize("value", [[], ()])
 @respx.mock
 def test_delete_search_empty_filters_are_rejected_before_any_request(name, value):
-    route = respx.delete("http://localhost:8000/v1/search").respond(204)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_delete()
 
     with MLClient() as ml, pytest.raises(WrongParametersError):
         ml.rest.search.delete(**{name: value})
@@ -343,15 +350,16 @@ def test_get_values():
 
 @respx.mock
 def test_get_values_of_a_named_definition():
-    body = {
-        "values-response": {
-            "name": "category",
-            "type": "xs:string",
-            "distinct-value": [{"frequency": 2, "_value": "drinks"}],
-        },
-    }
+    body = resources_utils.get_test_resource_json(__file__, "named-values.json")
     url = "http://localhost:8000/v1/values/category"
-    route = respx.get(url).respond(200, json=body)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(url)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("limit", "5")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_get()
 
     with MLClient() as ml:
         resp = ml.rest.values.get(

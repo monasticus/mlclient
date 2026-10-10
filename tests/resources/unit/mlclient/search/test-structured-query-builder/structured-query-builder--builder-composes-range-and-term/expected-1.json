@@ -1,0 +1,30 @@
+{
+  "query": {
+    "queries": [
+      {
+        "and-query": {
+          "queries": [
+            {
+              "range-query": {
+                "type": "xs:int",
+                "element": {
+                  "name": "price",
+                  "ns": ""
+                },
+                "value": "20",
+                "range-operator": "GE"
+              }
+            },
+            {
+              "term-query": {
+                "text": [
+                  "blue"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

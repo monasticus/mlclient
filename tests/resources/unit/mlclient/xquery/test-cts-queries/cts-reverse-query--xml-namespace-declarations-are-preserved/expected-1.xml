@@ -1,0 +1,1 @@
+<cts:reverse-query xmlns:cts="http://marklogic.com/cts"><cts:node><report kind="r:blue" xmlns:r="urn:reports">blue</report></cts:node></cts:reverse-query>

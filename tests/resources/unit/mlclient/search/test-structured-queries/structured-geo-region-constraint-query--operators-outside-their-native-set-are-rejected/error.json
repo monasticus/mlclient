@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "GeoRegionConstraintQuery.operator 'bogus' is not a geospatial operator"
+}

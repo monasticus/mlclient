@@ -1,0 +1,33 @@
+{
+  "word-query": {
+    "element": [
+      {
+        "name": "title",
+        "ns": ""
+      },
+      {
+        "name": "label",
+        "ns": ""
+      }
+    ],
+    "attribute": [
+      {
+        "name": "name",
+        "ns": ""
+      },
+      {
+        "name": "alt",
+        "ns": ""
+      }
+    ],
+    "fragment-scope": "documents",
+    "text": [
+      "blue",
+      "green"
+    ],
+    "term-option": [
+      "case-sensitive"
+    ],
+    "weight": 2
+  }
+}

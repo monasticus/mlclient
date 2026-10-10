@@ -1,5 +1,7 @@
 """Check that MarkLogic reads both CTS serializations as the native constructor."""
 
+from tests.utils.resources import render_test_resource
+
 import json
 import os
 from xml.etree.ElementTree import tostring
@@ -8,7 +10,7 @@ import pytest
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.xquery import FunctionCall, cts
+from mlclient.xquery import cts, xdmp
 
 pytestmark = pytest.mark.ml_access
 
@@ -22,17 +24,17 @@ class TestCtsQuerySerialization:
 
     def test_runtime_parse(self, ml_client):
         query = cts.parse("blue AND green")
-        document = FunctionCall("xdmp:unquote", ("<report>blue green</report>",))
+        document = xdmp.unquote("<report>blue green</report>")
         assert ml_client.eval.expression(cts.contains(document, query)) is True
-        document = FunctionCall("xdmp:unquote", ("<report>blue</report>",))
+        document = xdmp.unquote("<report>blue</report>")
         assert ml_client.eval.expression(cts.contains(document, query)) is False
 
     def test_runtime_query(self, ml_client):
         source = json.dumps(cts.word_query("blue", options="lang=en").to_json())
-        query = cts.query(FunctionCall("xdmp:unquote", (source,)).xpath("node()"))
-        document = FunctionCall("xdmp:unquote", ("<report>blue</report>",))
+        query = cts.query(xdmp.unquote(source).xpath("node()"))
+        document = xdmp.unquote("<report>blue</report>")
         assert ml_client.eval.expression(cts.contains(document, query)) is True
-        document = FunctionCall("xdmp:unquote", ("<report>green</report>",))
+        document = xdmp.unquote("<report>green</report>")
         assert ml_client.eval.expression(cts.contains(document, query)) is False
 
     def test_word_query(self, ml_client):
@@ -246,14 +248,12 @@ class TestCtsQuerySerialization:
         variables["serialized_json"] = json.dumps(query.to_json())
         assert (
             ml_client.eval.xquery(
-                prolog + "\ndeclare variable $serialized_xml as xs:string external;\n"
-                "declare variable $serialized_json as xs:string external;\n"
-                "let $native := " + body + "\n"
-                "let $xml := xdmp:unquote($serialized_xml)/*\n"
-                "let $json := xdmp:unquote($serialized_json)/node()\n"
-                "return "
-                "fn:deep-equal(<a>{cts:query($xml)}</a>/*, <a>{$native}</a>/*) and "
-                "fn:deep-equal(<a>{cts:query($json)}</a>/*, <a>{$native}</a>/*)",
+                render_test_resource(
+                    __file__,
+                    "assert-native.xqy",
+                    prolog=prolog,
+                    body=body,
+                ),
                 variables=variables,
             )
             is True

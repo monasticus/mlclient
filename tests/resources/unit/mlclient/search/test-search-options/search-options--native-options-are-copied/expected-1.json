@@ -1,0 +1,7 @@
+{
+  "options": {
+    "transform-results": {
+      "apply": "empty-snippet"
+    }
+  }
+}

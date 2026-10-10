@@ -1,0 +1,13 @@
+{
+  "wordQuery": {
+    "text": [
+      "blue",
+      "green"
+    ],
+    "options": [
+      "lang=FR",
+      "exact"
+    ],
+    "weight": 2
+  }
+}

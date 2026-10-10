@@ -1,0 +1,24 @@
+{
+  "search": {
+    "ctsquery": {
+      "andQuery": {
+        "queries": [
+          {
+            "collectionQuery": {
+              "uris": [
+                "products"
+              ]
+            }
+          },
+          {
+            "wordQuery": {
+              "text": [
+                "coffee"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

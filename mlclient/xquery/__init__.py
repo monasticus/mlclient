@@ -10,7 +10,7 @@ implements; mlclient.search never imports this package.
 """
 
 from mlclient.xquery._cts import Cts
-from mlclient.xquery._cts_queries import (
+from mlclient.xquery._cts_query import (
     CTS_NS_URI,
     AfterQuery,
     AndNotQuery,

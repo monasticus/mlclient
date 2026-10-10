@@ -1,0 +1,12 @@
+{
+  "jsonPropertyWordQuery": {
+    "property": [
+      "title",
+      "body"
+    ],
+    "text": [
+      "blue",
+      "green"
+    ]
+  }
+}

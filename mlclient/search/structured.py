@@ -99,7 +99,7 @@ _GeospatialOperator = Literal[
     "touches",
     "within",
 ]
-_SCALAR_TYPES = (str, int, float, bool, Decimal, date, datetime)
+_SCALAR_TYPES = get_args(_Scalar)
 _TemporalOperator = Literal[
     "aln_after",
     "aln_before",
@@ -3625,6 +3625,34 @@ def _node(
     """
     if output_format == "json":
         return _json_node(name, children, attributes=attributes, text=text)
+    return _xml_node(name, children, attributes=attributes, text=text)
+
+
+def _xml_node(
+    name: str,
+    children: Sequence[XmlElement] = (),
+    *,
+    attributes: Mapping[str, str] | None = None,
+    text: str | None = None,
+) -> XmlElement:
+    """Build a named Search API XML component without creating JSON.
+
+    Parameters
+    ----------
+    name : str
+        Local element name.
+    children : Sequence[XmlElement], optional
+        Ordered child elements.
+    attributes : Mapping[str, str] or None, default None
+        XML attributes and namespace declarations.
+    text : str or None, default None
+        Literal element text.
+
+    Returns
+    -------
+    XmlElement
+        Fresh native component.
+    """
     node = XmlElement(f"{{{SEARCH_NS_URI}}}{name}", dict(attributes or {}))
     node.extend(children)
     node.text = text

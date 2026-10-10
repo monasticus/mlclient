@@ -1,0 +1,1 @@
+<cts:element-range-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="&gt;=" weight="2"><cts:element>price</cts:element><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:integer">10</cts:value><cts:option>min-occurs=1</cts:option></cts:element-range-query>

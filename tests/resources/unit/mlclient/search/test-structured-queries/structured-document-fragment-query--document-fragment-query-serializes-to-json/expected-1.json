@@ -1,0 +1,9 @@
+{
+  "document-fragment-query": {
+    "term-query": {
+      "text": [
+        "blue"
+      ]
+    }
+  }
+}

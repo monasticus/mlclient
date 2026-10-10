@@ -1,0 +1,1 @@
+xdmp:host-name(xdmp:host())

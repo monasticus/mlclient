@@ -1,0 +1,41 @@
+{
+  "rangeQuery": {
+    "reference": [
+      {
+        "fieldReference": {
+          "fieldName": "price",
+          "scalarType": "int",
+          "nullable": false
+        }
+      },
+      {
+        "jsonPropertyReference": {
+          "property": "price",
+          "scalarType": "int"
+        }
+      },
+      {
+        "pathReference": {
+          "pathExpression": "/report/price",
+          "scalarType": "int"
+        }
+      },
+      {
+        "uriReference": {}
+      },
+      {
+        "collectionReference": {}
+      },
+      {
+        "iriReference": {}
+      }
+    ],
+    "operator": "=",
+    "value": [
+      {
+        "type": "string",
+        "val": "blue"
+      }
+    ]
+  }
+}

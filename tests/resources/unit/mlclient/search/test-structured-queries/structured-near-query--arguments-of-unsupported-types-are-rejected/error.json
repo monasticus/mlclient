@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "NearQuery.distance must be an integer, got float"
+}

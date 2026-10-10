@@ -1,0 +1,9 @@
+{
+  "custom-constraint-query": {
+    "constraint-name": "custom",
+    "text": [
+      "blue",
+      "green"
+    ]
+  }
+}

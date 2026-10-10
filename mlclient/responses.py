@@ -27,31 +27,6 @@ from mlclient.multipart import MultipartPart, decode_multipart_mixed
 logger = logging.getLogger(__name__)
 
 
-_FRACTIONAL_SECONDS = re.compile(r"(T\d{2}:\d{2}:\d{2})\.(\d+)")
-
-
-def _parse_date_time(lexical: str) -> datetime:
-    """Convert an xs:dateTime lexical form, whatever its fraction length.
-
-    MarkLogic writes the canonical form, which drops trailing zeros from the
-    fractional seconds (``.5``, ``.12345``); Python 3.10 parses only 3 or 6
-    digits, so the fraction is padded, or truncated beyond microseconds.
-
-    Parameters
-    ----------
-    lexical : str
-        The xs:dateTime value, with ``Z`` or an offset, or none.
-
-    Returns
-    -------
-    datetime
-        The value, timezone-aware when the lexical form has a zone.
-    """
-    normalized = _FRACTIONAL_SECONDS.sub(
-        lambda match: f"{match.group(1)}.{match.group(2)[:6].ljust(6, '0')}",
-        lexical,
-    )
-    return datetime.fromisoformat(normalized.replace("Z", "+00:00"))
 
 
 class MLResponseParser:
@@ -84,6 +59,32 @@ class MLResponseParser:
     --6a5df7d535c71968--
     Parsed: App-Services
     """
+
+    _FRACTIONAL_SECONDS = re.compile(r"(T\d{2}:\d{2}:\d{2})\.(\d+)")
+
+    @classmethod
+    def _parse_date_time(cls, lexical: str) -> datetime:
+        """Convert an xs:dateTime lexical form, whatever its fraction length.
+
+        MarkLogic writes the canonical form, which drops trailing zeros from the
+        fractional seconds (``.5``, ``.12345``); Python 3.10 parses only 3 or 6
+        digits, so the fraction is padded, or truncated beyond microseconds.
+
+        Parameters
+        ----------
+        lexical : str
+            The xs:dateTime value, with ``Z`` or an offset, or none.
+
+        Returns
+        -------
+        datetime
+            The value, timezone-aware when the lexical form has a zone.
+        """
+        normalized = cls._FRACTIONAL_SECONDS.sub(
+            lambda match: f"{match.group(1)}.{match.group(2)[:6].ljust(6, '0')}",
+            lexical,
+        )
+        return datetime.fromisoformat(normalized.replace("Z", "+00:00"))
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
         None: lambda data: data,
@@ -204,6 +205,8 @@ class MLResponseParser:
         """
         primitive_type = atomic_type.removeprefix("xs:")
         parser = cls._PLAIN_TEXT_PARSERS.get(primitive_type)
+        if isinstance(parser, classmethod):
+            parser = parser.__get__(None, cls)
         return parser(lexical) if parser else lexical
 
     @classmethod
@@ -576,7 +579,7 @@ class MLResponseParser:
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         doc_type = Mimetypes.get_doc_type(content_type)
         if doc_type == DocumentType.TEXT and primitive_type in cls._PLAIN_TEXT_PARSERS:
-            return cls._PLAIN_TEXT_PARSERS[primitive_type](body_part.text)
+            return cls.parse_atomic(body_part.text, primitive_type or "")
         if doc_type == DocumentType.JSON:
             return json.loads(body_part.text)
         if doc_type == DocumentType.XML:

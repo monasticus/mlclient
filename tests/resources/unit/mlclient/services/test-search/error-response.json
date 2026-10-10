@@ -1,0 +1,8 @@
+{
+  "errorResponse": {
+    "statusCode": 400,
+    "status": "Bad Request",
+    "messageCode": "REST-INVALIDPARAM",
+    "message": "REST-INVALIDPARAM: Invalid parameter"
+  }
+}

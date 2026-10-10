@@ -5,6 +5,8 @@ Queries are compared through their native JSON form: XML QName prefixes may
 differ from the constructor's while naming the same QNames.
 """
 
+from tests.utils.resources import render_test_resource
+
 import datetime
 import json
 import os
@@ -196,9 +198,8 @@ QUERIES = {
         fn.qname(NS, "t:status"),
         "ok",
     ),
-    "composed-operators": (
-        cts.word_query("blue") | cts.word_query("red")
-    ) & ~cts.collection_query("archive"),
+    "composed-operators": (cts.word_query("blue") | cts.word_query("red"))
+    & ~cts.collection_query("archive"),
 }
 
 ML11_QUERIES = {
@@ -234,23 +235,30 @@ class TestCtsConstructorSerialization:
         code, variables = query.compile()
         lines = code.splitlines(keepends=True)
         boundary = next(
-            index for index, line in enumerate(lines)
+            index
+            for index, line in enumerate(lines)
             if not line.startswith(("xquery version", "declare variable"))
         )
         prolog, body = "".join(lines[:boundary]), "".join(lines[boundary:])
         variables["serialized_json"] = json.dumps(query.to_json())
         native, from_json = ml_client.eval.xquery(
-            prolog + "\ndeclare variable $serialized_json as xs:string external;\n"
-            "let $native := " + body + "\n"
-            "return ("
-            "xdmp:quote(xdmp:to-json($native)), "
-            "xdmp:quote(xdmp:to-json(cts:query(xdmp:unquote($serialized_json)/node()))))",
+            render_test_resource(
+                __file__,
+                "test-namespaced-document-root-reconstructs-from-json-only.xqy",
+                prolog=prolog,
+                body=body,
+            ),
             variables=variables,
         )
         assert from_json == native
         with pytest.raises(MarkLogicError, match="XDMP-CAST"):
             ml_client.eval.xquery(
-                prolog + "\ncts:query(<a>{" + body + "}</a>/*)",
+                render_test_resource(
+                    __file__,
+                    "test-namespaced-document-root-reconstructs-from-json-only-2.xqy",
+                    prolog=prolog,
+                    body=body,
+                ),
                 variables=variables,
             )
 
@@ -269,23 +277,30 @@ class TestCtsConstructorSerialization:
         code, variables = query.compile()
         lines = code.splitlines(keepends=True)
         boundary = next(
-            index for index, line in enumerate(lines)
+            index
+            for index, line in enumerate(lines)
             if not line.startswith(("xquery version", "declare variable"))
         )
         prolog, body = "".join(lines[:boundary]), "".join(lines[boundary:])
         variables["serialized_xml"] = tostring(query.to_xml(), encoding="unicode")
         native, from_xml = ml_client.eval.xquery(
-            prolog + "\ndeclare variable $serialized_xml as xs:string external;\n"
-            "let $native := " + body + "\n"
-            "return ("
-            "xdmp:quote(xdmp:to-json($native)), "
-            "xdmp:quote(xdmp:to-json(cts:query(xdmp:unquote($serialized_xml)/*))))",
+            render_test_resource(
+                __file__,
+                "test-element-attribute-reference-reconstructs-from-xml-only.xqy",
+                prolog=prolog,
+                body=body,
+            ),
             variables=variables,
         )
         assert from_xml == native
         with pytest.raises(MarkLogicError, match="XDMP-RANGEINDEXNODE"):
             ml_client.eval.xquery(
-                prolog + "\ncts:query(xdmp:to-json(" + body + ")/node())",
+                render_test_resource(
+                    __file__,
+                    "test-element-attribute-reference-reconstructs-from-xml-only-2.xqy",
+                    prolog=prolog,
+                    body=body,
+                ),
                 variables=variables,
             )
         with pytest.raises(TypeError, match="element-attribute reference"):
@@ -293,9 +308,8 @@ class TestCtsConstructorSerialization:
 
     def test_reverse_xml_model_nodes(self, ml_client):
         query = cts.reverse_query(
-            FunctionCall(
-                "xdmp:unquote",
-                ('<report xmlns:r="urn:reports"><r:label>blue</r:label></report>',),
+            xdmp.unquote(
+                '<report xmlns:r="urn:reports"><r:label>blue</r:label></report>',
             ).xpath("*"),
             weight=2,
         )
@@ -303,14 +317,12 @@ class TestCtsConstructorSerialization:
 
     def test_similar_xml_model_nodes_and_options(self, ml_client):
         query = cts.similar_query(
-            FunctionCall("xdmp:unquote", ("<report>blue</report>",)).xpath("*"),
-            options=FunctionCall(
-                "xdmp:unquote",
-                (
-                    '<options xmlns="cts:distinctive-terms"><max-terms>20</max-terms>'
-                    "<score>logtf</score><min-val>1</min-val><min-weight>2</min-weight>"
-                    "<complete>true</complete></options>",
-                ),
+            xdmp.unquote("<report>blue</report>").xpath("*"),
+            options=xdmp.unquote(
+                '<options xmlns="cts:distinctive-terms">'
+                '<max-terms>20</max-terms><score>logtf</score>'
+                '<min-val>1</min-val><min-weight>2</min-weight>'
+                '<complete>true</complete></options>',
             ).xpath("*"),
             weight=2,
         )
@@ -325,14 +337,19 @@ class TestCtsConstructorSerialization:
         assert ml_client.eval.expression(fn.count([price, ElementTree(price)])) == 2
         model = {"label": "blue", "nested": [{"count": 2}]}
         assert ml_client.eval.expression(fn.head(model)) == model
-        assert ml_client.eval.expression(
-            xdmp.unquote(fromstring("<text>&lt;report/&gt;</text>")),
-        ).getroot().tag == "report"
+        assert (
+            ml_client.eval.expression(
+                xdmp.unquote(fromstring("<text>&lt;report/&gt;</text>")),
+            )
+            .getroot()
+            .tag
+            == "report"
+        )
         query = cts.similar_query(
             price,
             options=fromstring(
                 '<options xmlns="cts:distinctive-terms"><max-terms>20</max-terms>'
-                '</options>',
+                "</options>",
             ),
         )
         self.assert_model_nodes(ml_client, query, "similar")
@@ -340,7 +357,9 @@ class TestCtsConstructorSerialization:
     def test_unquote_parsing_options_and_default_namespace(self, ml_client):
         root = ml_client.eval.expression(
             xdmp.unquote(
-                "<report/>", default_namespace="urn:reports", options="repair-none",
+                "<report/>",
+                default_namespace="urn:reports",
+                options="repair-none",
             ).xpath("*"),
         )
         assert root.tag == "{urn:reports}report"
@@ -355,7 +374,8 @@ class TestCtsConstructorSerialization:
         code, variables = query.compile()
         lines = code.splitlines(keepends=True)
         boundary = next(
-            index for index, line in enumerate(lines)
+            index
+            for index, line in enumerate(lines)
             if not line.startswith(("xquery version", "declare variable"))
         )
         prolog, body = "".join(lines[:boundary]), "".join(lines[boundary:])
@@ -364,12 +384,12 @@ class TestCtsConstructorSerialization:
             json=json.dumps(query.to_json()),
         )
         results = ml_client.eval.xquery(
-            prolog + "\ndeclare variable $xml external;"
-            "declare variable $json external;\n"
-            "let $native := " + body + "\nreturn array-node {\n"
-            "xdmp:to-json(cts:query(<a>{$native}</a>/*))/node(), "
-            "xdmp:to-json(cts:query(xdmp:unquote($xml)/*))/node(), "
-            "xdmp:to-json(cts:query(xdmp:unquote($json)/node()))/node()}",
+            render_test_resource(
+                __file__,
+                "test-similar-json-model-has-the-native-xml-reader-limitation.xqy",
+                prolog=prolog,
+                body=body,
+            ),
             variables=variables,
         )
         assert results == [
@@ -393,17 +413,13 @@ class TestCtsConstructorSerialization:
             json=json.dumps(query.to_json()),
         )
         result = ml_client.eval.xquery(
-            prolog + "declare variable $xml external;declare variable $json external;\n"
-            "let $native := (" + body + ")\n"
-            "let $xml := cts:query(xdmp:unquote($xml)/*)\n"
-            "let $json := cts:query(xdmp:unquote($json)/node())\n"
-            "return object-node {\n"
-            '"xmlNodes": fn:deep-equal(cts:' + kind + "-query-nodes($native), "
-            "cts:" + kind + "-query-nodes($xml)),\n"
-            '"jsonNodes": fn:deep-equal(cts:' + kind + "-query-nodes($native), "
-            "cts:" + kind + "-query-nodes($json)),\n"
-            '"native": xdmp:to-json($native)/node(), '
-            '"xml": xdmp:to-json($xml)/node(), "json": xdmp:to-json($json)/node()}',
+            render_test_resource(
+                __file__,
+                "assert-model-nodes.xqy",
+                prolog=prolog,
+                body=body,
+                kind=kind,
+            ),
             variables=variables,
         )
         assert result["xmlNodes"] is True
@@ -417,20 +433,20 @@ class TestCtsConstructorSerialization:
         code, variables = query.compile()
         lines = code.splitlines(keepends=True)
         boundary = next(
-            index for index, line in enumerate(lines)
+            index
+            for index, line in enumerate(lines)
             if not line.startswith(("xquery version", "declare variable"))
         )
         prolog, body = "".join(lines[:boundary]), "".join(lines[boundary:])
         variables["serialized_xml"] = tostring(query.to_xml(), encoding="unicode")
         variables["serialized_json"] = json.dumps(query.to_json())
         native, from_xml, from_json = ml_client.eval.xquery(
-            prolog + "\ndeclare variable $serialized_xml as xs:string external;\n"
-            "declare variable $serialized_json as xs:string external;\n"
-            "let $native := " + body + "\n"
-            "return ("
-            "xdmp:quote(xdmp:to-json($native)), "
-            "xdmp:quote(xdmp:to-json(cts:query(xdmp:unquote($serialized_xml)/*))), "
-            "xdmp:quote(xdmp:to-json(cts:query(xdmp:unquote($serialized_json)/node()))))",
+            render_test_resource(
+                __file__,
+                "assert-reconstructed.xqy",
+                prolog=prolog,
+                body=body,
+            ),
             variables=variables,
         )
         assert from_xml == native

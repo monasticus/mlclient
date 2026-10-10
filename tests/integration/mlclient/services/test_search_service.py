@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tests.utils.resources import render_test_resource
+
 from datetime import date
 from decimal import Decimal
 from xml.etree.ElementTree import Element as XmlElement, tostring
@@ -75,19 +77,7 @@ class TransformCall(ApiCall):
 def response_transform(indexed_database):
     ml, _, _ = indexed_database
     name = f"mlclient-search-{uuid4().hex}"
-    body = f"""xquery version "1.0-ml";
-module namespace example = "http://marklogic.com/rest-api/transform/{name}";
-declare function example:transform(
-  $context as map:map, $params as map:map, $content as document-node()
-) as document-node() {{
-  let $root := $content/*
-  return document {{
-    element {{node-name($root)}} {{
-      attribute transformed {{map:get($params, "value")}},
-      $root/@*, $root/node()
-    }}
-  }}
-}};"""
+    body = render_test_resource(__file__, "response-transform.xqy", name=name)
     ml.rest.call(TransformCall(name, "PUT", body)).raise_for_status()
     try:
         yield name
@@ -183,7 +173,9 @@ class TestSearchService:
         }
 
     def test_transformed_documents_with_inline_options(
-        self, indexed_database, response_transform,
+        self,
+        indexed_database,
+        response_transform,
     ):
         ml, database, _ = indexed_database
 
@@ -245,7 +237,8 @@ class TestSearchService:
     def test_options_as_native_xml(self, indexed_database):
         ml, database, _ = indexed_database
         options = SearchOptions().values(
-            "price", Range(Element("price", NS), "xs:decimal"),
+            "price",
+            Range(Element("price", NS), "xs:decimal"),
         )
         body = XmlElement(f"{{{SEARCH_NS_URI}}}search")
         body.append(options.to_xml())
@@ -267,7 +260,8 @@ class TestSearchService:
     def test_zero_values_limit(self, indexed_database):
         ml, database, _ = indexed_database
         options = SearchOptions().values(
-            "price", Range(Element("price", NS), "xs:decimal"),
+            "price",
+            Range(Element("price", NS), "xs:decimal"),
         )
 
         assert (
@@ -277,7 +271,8 @@ class TestSearchService:
     def test_empty_aggregate(self, indexed_database):
         ml, database, _ = indexed_database
         options = SearchOptions().values(
-            "price", Range(Element("price", NS), "xs:decimal"),
+            "price",
+            Range(Element("price", NS), "xs:decimal"),
         )
 
         assert (
@@ -312,7 +307,8 @@ class TestSearchService:
 
             assert result == [
                 TupleHit(
-                    (Decimal("0.123456789123456789"), date(2026, 1, 1)), frequency=1,
+                    (Decimal("0.123456789123456789"), date(2026, 1, 1)),
+                    frequency=1,
                 ),
             ]
         finally:
@@ -531,10 +527,10 @@ class TestSearchService:
         )
 
         report = ml.eval.xquery(
-            'import module namespace search="http://marklogic.com/appservices/search" '
-            'at "/MarkLogic/appservices/search/search.xqy"; '
-            "declare variable $options external; "
-            "fn:count(search:check-options(xdmp:unquote($options)/*, fn:true()))",
+            render_test_resource(
+                __file__,
+                "test-constraint-options-are-valid-native-xml.xqy",
+            ),
             variables={"options": tostring(options.to_xml(), encoding="unicode")},
             database=database,
         )

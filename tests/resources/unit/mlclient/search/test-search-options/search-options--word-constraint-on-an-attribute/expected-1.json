@@ -1,0 +1,15 @@
+[
+  {
+    "name": "code",
+    "word": {
+      "element": {
+        "name": "item",
+        "ns": ""
+      },
+      "attribute": {
+        "name": "code",
+        "ns": ""
+      }
+    }
+  }
+]

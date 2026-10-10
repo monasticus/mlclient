@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from tests.utils.resources import render_test_resource
+
 import os
 import json
 from uuid import uuid4
@@ -85,7 +87,7 @@ class TestStructuredQueries:
             port=port,
             manage_config=HTTPConfig.resolve(port=manage_port),
         ) as ml:
-            host = ml.eval.xquery("xdmp:host-name(xdmp:host())")
+            host = ml.eval.xquery(render_test_resource(__file__, "ml-database.xqy"))
             ml.manage.databases.create({"database-name": schemas}).raise_for_status()
             try:
                 ml.manage.forests.create(
@@ -116,72 +118,70 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             AndQuery([TermQuery("blue"), TermQuery("green")], ordered=True),
-            'cts:and-query((cts:word-query("blue"), cts:word-query("green")), '
-            '"ordered")',
+            render_test_resource(__file__, "test-and-query.xqy"),
         )
 
     def test_and_not_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             AndNotQuery(TermQuery("blue"), TermQuery("green")),
-            'cts:and-not-query(cts:word-query("blue"), cts:word-query("green"))',
+            render_test_resource(__file__, "test-and-not-query.xqy"),
         )
 
     def test_boost_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             BoostQuery(TermQuery("blue"), TermQuery("green", weight=2)),
-            'cts:boost-query(cts:word-query("blue"), cts:word-query("green", (), 2))',
+            render_test_resource(__file__, "test-boost-query.xqy"),
         )
 
     def test_collection_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             CollectionQuery(["reports", "notes"]),
-            'cts:collection-query(("reports", "notes"))',
+            render_test_resource(__file__, "test-collection-query.xqy"),
         )
 
     def test_container_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             ContainerQuery(Element("section", "urn:example"), TermQuery("blue")),
-            'cts:element-query(fn:QName("urn:example", "section"), '
-            'cts:word-query("blue"))',
+            render_test_resource(__file__, "test-container-query.xqy"),
         )
 
     def test_directory_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             DirectoryQuery(["/reports/", "/notes/"], infinite=False),
-            'cts:directory-query(("/reports/", "/notes/"), "1")',
+            render_test_resource(__file__, "test-directory-query.xqy"),
         )
 
     def test_document_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             DocumentQuery(["/reports/first.xml", "/reports/second.json"]),
-            'cts:document-query(("/reports/first.xml", "/reports/second.json"))',
+            render_test_resource(__file__, "test-document-query.xqy"),
         )
 
     def test_document_fragment_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             DocumentFragmentQuery(TermQuery("blue")),
-            'cts:document-fragment-query(cts:word-query("blue"))',
+            render_test_resource(__file__, "test-document-fragment-query.xqy"),
         )
 
     def test_false_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             FalseQuery(),
-            "cts:false-query()",
+            render_test_resource(__file__, "test-false-query.xqy"),
         )
 
     def test_locks_fragment_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             LocksFragmentQuery(TermQuery("blue")),
-            'cts:locks-fragment-query(cts:word-query("blue"))',
+            render_test_resource(__file__, "test-locks-fragment-query.xqy"),
         )
 
     def test_near_query(self, ml_database):
@@ -194,43 +194,42 @@ class TestStructuredQueries:
                 distance_weight=2,
                 ordered=False,
             ),
-            'cts:near-query((cts:word-query("blue"), cts:word-query("green")), '
-            '3, "minimum-distance=1", 2)',
+            render_test_resource(__file__, "test-near-query.xqy"),
         )
 
     def test_not_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             NotQuery(TermQuery("blue")),
-            'cts:not-query(cts:word-query("blue"))',
+            render_test_resource(__file__, "test-not-query.xqy"),
         )
 
     def test_not_in_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             NotInQuery(TermQuery("blue"), TermQuery("green")),
-            'cts:not-in-query(cts:word-query("blue"), cts:word-query("green"))',
+            render_test_resource(__file__, "test-not-in-query.xqy"),
         )
 
     def test_or_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             OrQuery([TermQuery("blue"), TermQuery("green")]),
-            'cts:or-query((cts:word-query("blue"), cts:word-query("green")))',
+            render_test_resource(__file__, "test-or-query.xqy"),
         )
 
     def test_properties_fragment_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             PropertiesFragmentQuery(TermQuery("blue")),
-            'cts:properties-fragment-query(cts:word-query("blue"))',
+            render_test_resource(__file__, "test-properties-fragment-query.xqy"),
         )
 
     def test_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             Query([TermQuery("blue"), CollectionQuery("reports")]),
-            'cts:and-query((cts:word-query("blue"), cts:collection-query("reports")))',
+            render_test_resource(__file__, "test-query.xqy"),
         )
 
     def test_range_query(self, ml_database):
@@ -244,8 +243,7 @@ class TestStructuredQueries:
                 options=["cached"],
                 weight=2,
             ),
-            'cts:element-range-query(xs:QName("price"), "=", '
-            '(xs:int(3), xs:int(4)), ("cached"), 2)',
+            render_test_resource(__file__, "test-range-query.xqy"),
         )
 
     def test_term_query(self, ml_database):
@@ -256,14 +254,14 @@ class TestStructuredQueries:
                 weight=2,
                 options=["case-sensitive", "unstemmed"],
             ),
-            'cts:word-query(("blue", "green"), ("case-sensitive", "unstemmed"), 2)',
+            render_test_resource(__file__, "test-term-query.xqy"),
         )
 
     def test_true_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             TrueQuery(),
-            "cts:true-query()",
+            render_test_resource(__file__, "test-true-query.xqy"),
         )
 
     def test_value_query(self, ml_database):
@@ -276,21 +274,21 @@ class TestStructuredQueries:
                 options=["exact"],
                 weight=2,
             ),
-            'cts:json-property-value-query("active", fn:true(), "exact", 2)',
+            render_test_resource(__file__, "test-value-query.xqy"),
         )
 
     def test_value_query_number(self, ml_database):
         self._assert_native_query(
             ml_database,
             ValueQuery(JsonProperty("count"), 7, node_type="number"),
-            'cts:json-property-value-query("count", xs:double(7))',
+            render_test_resource(__file__, "test-value-query-number.xqy"),
         )
 
     def test_value_query_null(self, ml_database):
         self._assert_native_query(
             ml_database,
             ValueQuery(JsonProperty("count"), "", node_type="null"),
-            'cts:json-property-value-query("count", null-node {})',
+            render_test_resource(__file__, "test-value-query-null.xqy"),
         )
 
     def test_word_query(self, ml_database):
@@ -303,10 +301,7 @@ class TestStructuredQueries:
                 options=["case-sensitive"],
                 weight=2,
             ),
-            "cts:element-attribute-word-query("
-            '(xs:QName("title"), xs:QName("label")), '
-            '(xs:QName("name"), xs:QName("alt")), '
-            '("blue", "green"), "case-sensitive", 2)',
+            render_test_resource(__file__, "test-word-query.xqy"),
         )
 
     def test_path_range_query(self, ml_database):
@@ -318,14 +313,14 @@ class TestStructuredQueries:
                 operator="GE",
                 index_type="xs:int",
             ),
-            'cts:path-range-query("/r:report/r:price", ">=", xs:int(3))',
+            render_test_resource(__file__, "test-path-range-query.xqy"),
         )
 
     def test_collection_constraint_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             CollectionConstraintQuery("category", ["blue", "green"]),
-            'cts:collection-query(("reports/blue", "reports/green"))',
+            render_test_resource(__file__, "test-collection-constraint-query.xqy"),
             options=(
                 '<constraint name="category">'
                 '<collection prefix="reports/"/></constraint>'
@@ -336,7 +331,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             ContainerConstraintQuery("section", TermQuery("blue")),
-            'cts:element-query(xs:QName("section"), cts:word-query("blue"))',
+            render_test_resource(__file__, "test-container-constraint-query.xqy"),
             options=(
                 '<constraint name="section"><container>'
                 '<element name="section" ns=""/></container></constraint>'
@@ -347,7 +342,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             ElementConstraintQuery("section", TermQuery("blue")),
-            'cts:element-query(xs:QName("section"), cts:word-query("blue"))',
+            render_test_resource(__file__, "test-element-constraint-query.xqy"),
             options=(
                 '<constraint name="section">'
                 '<element-query name="section" ns=""/></constraint>'
@@ -358,7 +353,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             PropertiesConstraintQuery("metadata", TermQuery("blue")),
-            'cts:properties-fragment-query(cts:word-query("blue"))',
+            render_test_resource(__file__, "test-properties-constraint-query.xqy"),
             options='<constraint name="metadata"><properties/></constraint>',
         )
 
@@ -366,7 +361,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             RangeConstraintQuery("price", 3, operator="GE", options=["cached"]),
-            'cts:element-range-query(xs:QName("price"), ">=", xs:int(3), "cached")',
+            render_test_resource(__file__, "test-range-constraint-query.xqy"),
             options=(
                 '<constraint name="price"><range type="xs:int" facet="false">'
                 '<element name="price" ns=""/></range></constraint>'
@@ -377,7 +372,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             WordConstraintQuery("title", ["blue", "green"], weight=2),
-            'cts:element-word-query(xs:QName("title"), ("blue", "green"), (), 2)',
+            render_test_resource(__file__, "test-word-constraint-query.xqy"),
             options=(
                 '<constraint name="title"><word>'
                 '<element name="title" ns=""/></word></constraint>'
@@ -388,7 +383,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             ValueConstraintQuery("status", ["blue", "green"], weight=2),
-            'cts:element-value-query(xs:QName("status"), ("blue", "green"), (), 2)',
+            render_test_resource(__file__, "test-value-text-constraint-query.xqy"),
             options=(
                 '<constraint name="status"><value>'
                 '<element name="status" ns=""/></value></constraint>'
@@ -399,7 +394,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             ValueConstraintQuery("active", False),
-            'cts:json-property-value-query("active", fn:false())',
+            render_test_resource(__file__, "test-value-boolean-constraint-query.xqy"),
             options=(
                 '<constraint name="active"><value type="boolean">'
                 "<json-property>active</json-property></value></constraint>"
@@ -410,7 +405,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             ValueConstraintQuery("count", 7),
-            'cts:json-property-value-query("count", xs:double(7))',
+            render_test_resource(__file__, "test-value-number-constraint-query.xqy"),
             options=(
                 '<constraint name="count"><value type="number">'
                 "<json-property>count</json-property></value></constraint>"
@@ -421,7 +416,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             ValueConstraintQuery("count"),
-            'cts:json-property-value-query("count", null-node {})',
+            render_test_resource(__file__, "test-value-null-constraint-query.xqy"),
             options=(
                 '<constraint name="count"><value type="null">'
                 "<json-property>count</json-property></value></constraint>"
@@ -437,8 +432,7 @@ class TestStructuredQueries:
                     WordConstraintQuery("label", "blue"),
                 ],
             ),
-            'cts:or-query((cts:element-word-query(xs:QName("title"), "blue"), '
-            'cts:element-word-query(xs:QName("label"), "blue")))',
+            render_test_resource(__file__, "test-alternative-word-constraints.xqy"),
             options=(
                 '<constraint name="title"><word>'
                 '<element name="title" ns=""/></word></constraint>'
@@ -449,24 +443,16 @@ class TestStructuredQueries:
 
     def test_custom_constraint_query(self, ml_database):
         ml, database = ml_database
-        module = (
-            'xquery version "1.0-ml"; '
-            'module namespace custom="urn:example:structured-custom"; '
-            'declare namespace search="http://marklogic.com/appservices/search"; '
-            "declare function custom:parse($query as element(), "
-            "$options as element(search:options)) as cts:query { "
-            "cts:word-query($query/search:text/string()) };"
-        )
+        module = render_test_resource(__file__, "test-custom-constraint-query.xqy")
         ml.eval.xquery(
-            "declare variable $module external; "
-            'xdmp:document-insert("/structured-custom.xqy", text {$module})',
+            render_test_resource(__file__, "test-custom-constraint-query-2.xqy"),
             variables={"module": module},
             database=database,
         )
         self._assert_native_query(
             ml_database,
             CustomConstraintQuery("custom", ["blue", "green"]),
-            'cts:word-query(("blue", "green"))',
+            render_test_resource(__file__, "test-custom-constraint-query-3.xqy"),
             options=(
                 '<constraint name="custom"><custom facet="false">'
                 '<parse apply="parse" ns="urn:example:structured-custom" '
@@ -484,8 +470,7 @@ class TestStructuredQueries:
                 options=["units=miles"],
                 weight=2,
             ),
-            'cts:element-geospatial-query(xs:QName("location"), '
-            'cts:point(10, 20), "units=miles", 2)',
+            render_test_resource(__file__, "test-geo-element-query.xqy"),
         )
 
     def test_geo_child_element_query(self, ml_database):
@@ -496,8 +481,7 @@ class TestStructuredQueries:
                 Point(10, 20),
                 parent=Element("place"),
             ),
-            'cts:element-child-geospatial-query(xs:QName("place"), '
-            'xs:QName("location"), cts:point(10, 20))',
+            render_test_resource(__file__, "test-geo-child-element-query.xqy"),
         )
 
     def test_geo_element_pair_query(self, ml_database):
@@ -509,8 +493,7 @@ class TestStructuredQueries:
                 Element("lon"),
                 Box(1, 2, 3, 4),
             ),
-            'cts:element-pair-geospatial-query(xs:QName("place"), '
-            'xs:QName("lat"), xs:QName("lon"), cts:box(1, 2, 3, 4))',
+            render_test_resource(__file__, "test-geo-element-pair-query.xqy"),
         )
 
     def test_geo_attribute_pair_query(self, ml_database):
@@ -522,8 +505,7 @@ class TestStructuredQueries:
                 Attribute("lon"),
                 Circle(5, Point(10, 20)),
             ),
-            'cts:element-attribute-pair-geospatial-query(xs:QName("place"), '
-            'xs:QName("lat"), xs:QName("lon"), cts:circle(5, cts:point(10, 20)))',
+            render_test_resource(__file__, "test-geo-attribute-pair-query.xqy"),
         )
 
     def test_geo_json_property_query(self, ml_database):
@@ -534,9 +516,7 @@ class TestStructuredQueries:
                 Polygon([Point(1, 2), Point(3, 4), Point(5, 6), Point(1, 2)]),
                 parent=JsonProperty("place"),
             ),
-            'cts:json-property-child-geospatial-query("place", "location", '
-            "cts:polygon((cts:point(1, 2), cts:point(3, 4), cts:point(5, 6), "
-            "cts:point(1, 2))))",
+            render_test_resource(__file__, "test-geo-json-property-query.xqy"),
         )
 
     def test_geo_json_property_pair_query(self, ml_database):
@@ -548,15 +528,14 @@ class TestStructuredQueries:
                 JsonProperty("lon"),
                 Point(10, 20),
             ),
-            'cts:json-property-pair-geospatial-query("place", "lat", "lon", '
-            "cts:point(10, 20))",
+            render_test_resource(__file__, "test-geo-json-property-pair-query.xqy"),
         )
 
     def test_period_compare_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             PeriodCompareQuery("system", "aln_equals", "valid"),
-            'cts:period-compare-query("system", "aln_equals", "valid")',
+            render_test_resource(__file__, "test-period-compare-query.xqy"),
         )
 
     def test_period_range_query(self, ml_database):
@@ -567,59 +546,56 @@ class TestStructuredQueries:
                 "aln_contains",
                 Period("2026-01-01T00:00:00Z", "2026-02-01T00:00:00Z"),
             ),
-            'cts:period-range-query("valid", "aln_contains", '
-            'cts:period(xs:dateTime("2026-01-01T00:00:00Z"), '
-            'xs:dateTime("2026-02-01T00:00:00Z")))',
+            render_test_resource(__file__, "test-period-range-query.xqy"),
         )
 
     def test_lsqt_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             LsqtQuery("reports-temporal", timestamp="1600-01-01T00:00:00Z", weight=2),
-            'cts:lsqt-query("reports-temporal", '
-            'xs:dateTime("1600-01-01T00:00:00Z"), (), 2)',
+            render_test_resource(__file__, "test-lsqt-query.xqy"),
         )
 
     def test_word_query_on_a_field(self, ml_database):
         self._assert_native_query(
             ml_database,
             WordQuery(Field("summary"), "blue"),
-            'cts:field-word-query("summary", "blue", "lang=en")',
+            render_test_resource(__file__, "test-word-query-on-a-field.xqy"),
         )
 
     def test_word_query_on_a_json_property(self, ml_database):
         self._assert_native_query(
             ml_database,
             WordQuery(JsonProperty("title"), "blue"),
-            'cts:json-property-word-query("title", "blue", "lang=en")',
+            render_test_resource(__file__, "test-word-query-on-a-json-property.xqy"),
         )
 
     def test_value_query_on_a_json_property(self, ml_database):
         self._assert_native_query(
             ml_database,
             ValueQuery(JsonProperty("title"), "blue"),
-            'cts:json-property-value-query("title", "blue", "lang=en")',
+            render_test_resource(__file__, "test-value-query-on-a-json-property.xqy"),
         )
 
     def test_range_query_on_a_field(self, ml_database):
         self._assert_native_query(
             ml_database,
             RangeQuery(Field("summary"), 3, operator="GE", index_type="xs:int"),
-            'cts:field-range-query("summary", ">=", xs:int(3))',
+            render_test_resource(__file__, "test-range-query-on-a-field.xqy"),
         )
 
     def test_range_query_on_a_json_property(self, ml_database):
         self._assert_native_query(
             ml_database,
             RangeQuery(JsonProperty("price"), 3, operator="GE", index_type="xs:int"),
-            'cts:json-property-range-query("price", ">=", xs:int(3))',
+            render_test_resource(__file__, "test-range-query-on-a-json-property.xqy"),
         )
 
     def test_geo_path_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             GeoPathQuery(PathIndex("/report/location"), Point(10, 20), weight=2),
-            'cts:path-geospatial-query("/report/location", cts:point(10, 20), (), 2)',
+            render_test_resource(__file__, "test-geo-path-query.xqy"),
         )
 
     def test_geo_region_path_query(self, ml_database):
@@ -631,16 +607,14 @@ class TestStructuredQueries:
                 operator="intersects",
                 coord="wgs84",
             ),
-            'cts:geospatial-region-query(cts:geospatial-region-path-reference('
-            '"/report/area", "coordinate-system=wgs84"), "intersects", '
-            "cts:box(1, 2, 3, 4))",
+            render_test_resource(__file__, "test-geo-region-path-query.xqy"),
         )
 
     def test_geospatial_constraint_query(self, ml_database):
         self._assert_native_query(
             ml_database,
             GeospatialConstraintQuery("loc", Point(10, 20)),
-            'cts:element-geospatial-query(xs:QName("location"), cts:point(10, 20))',
+            render_test_resource(__file__, "test-geospatial-constraint-query.xqy"),
             options=(
                 '<constraint name="loc"><geo-elem>'
                 '<element name="location" ns=""/></geo-elem></constraint>'
@@ -651,9 +625,7 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             GeoRegionConstraintQuery("area", Box(1, 2, 3, 4), operator="intersects"),
-            'cts:geospatial-region-query(cts:geospatial-region-path-reference('
-            '"/report/area", "coordinate-system=wgs84"), "intersects", '
-            "cts:box(1, 2, 3, 4))",
+            render_test_resource(__file__, "test-geo-region-constraint-query.xqy"),
             options=(
                 '<constraint name="area"><geo-region-path coord="wgs84">'
                 "<path-index>/report/area</path-index></geo-region-path>"
@@ -665,29 +637,14 @@ class TestStructuredQueries:
         self._assert_native_query(
             ml_database,
             QtextQuery("blue green"),
-            'cts:and-query((cts:word-query("blue", "lang=en"), '
-            'cts:word-query("green", "lang=en")))',
+            render_test_resource(__file__, "test-qtext-query.xqy"),
         )
 
     def test_operator_state(self, ml_database):
         ml, database = ml_database
         query = Query([TrueQuery(), OperatorState("nresults", "few")])
         result = ml.eval.xquery(
-            'import module namespace search="http://marklogic.com/appservices/search" '
-            'at "/MarkLogic/appservices/search/search.xqy"; '
-            "import module namespace csu="
-            '"http://marklogic.com/rest-api/config-query-util" '
-            'at "/MarkLogic/rest-api/lib/config-query-util.xqy"; '
-            "declare variable $query external; "
-            "declare variable $query_json external; "
-            "let $options := <search:options>"
-            "<search:page-length>10</search:page-length>"
-            '<search:operator name="nresults"><search:state name="few">'
-            "<search:page-length>2</search:page-length>"
-            "</search:state></search:operator></search:options> "
-            "for $structured in (xdmp:unquote($query)/*, "
-            "csu:json-to-xml(xdmp:unquote($query_json))) "
-            "return xs:int(search:resolve($structured, $options)/@page-length)",
+            render_test_resource(__file__, "test-operator-state.xqy"),
             variables={
                 "query": ElementTree.tostring(
                     query.serialize("xml"),
@@ -711,39 +668,7 @@ class TestStructuredQueries:
         ml, database = ml_database
         wrapper = query if isinstance(query, Query) else Query(query)
         xml = ElementTree.tostring(wrapper.serialize("xml"), encoding="unicode")
-        code = (
-            'import module namespace search="http://marklogic.com/appservices/search" '
-            'at "/MarkLogic/appservices/search/search.xqy"; '
-            "import module namespace csu="
-            '"http://marklogic.com/rest-api/config-query-util" '
-            'at "/MarkLogic/rest-api/lib/config-query-util.xqy"; '
-            'declare namespace r="urn:example:reports"; '
-            "declare variable $query external; "
-            "declare variable $query_json external; "
-            "declare variable $options external; "
-            "let $actual := search:resolve("
-            "xdmp:unquote($query)/*, "
-            "<search:options>"
-            "<search:return-results>false</search:return-results>"
-            "<search:return-facets>false</search:return-facets>"
-            "<search:return-query>true</search:return-query>"
-            "{xdmp:unquote($options)/*/*}"
-            "</search:options>)/search:query/* "
-            "let $actual_json := search:resolve("
-            "csu:json-to-xml(xdmp:unquote($query_json)), "
-            "<search:options>"
-            "<search:return-results>false</search:return-results>"
-            "<search:return-facets>false</search:return-facets>"
-            "<search:return-query>true</search:return-query>"
-            "{xdmp:unquote($options)/*/*}"
-            "</search:options>)/search:query/* "
-            f"let $expected := <container>{{{native}}}</container>/* "
-            "return if (deep-equal($actual, $expected) and "
-            "deep-equal($actual_json, $expected)) then fn:true() "
-            "else (<actual>{$actual}</actual>, "
-            "<actual-json>{$actual_json}</actual-json>, "
-            "<expected>{$expected}</expected>)"
-        )
+        code = render_test_resource(__file__, "assert-native-query.xqy", native=native)
         variables = {
             "query": xml,
             "query_json": json.dumps(wrapper.serialize()),
@@ -754,19 +679,7 @@ class TestStructuredQueries:
         }
         if modules_database:
             variables["code"] = code
-            code = (
-                "declare variable $code external; "
-                "declare variable $query external; "
-                "declare variable $query_json external; "
-                "declare variable $options external; "
-                "xdmp:eval($code, "
-                '(xs:QName("query"), $query, xs:QName("query_json"), $query_json, '
-                'xs:QName("options"), $options), '
-                '<options xmlns="xdmp:eval">'
-                "<database>{xdmp:database()}</database>"
-                "<modules>{xdmp:database()}</modules><root>/</root>"
-                "</options>)"
-            )
+            code = render_test_resource(__file__, "assert-native-query-2.xqy")
         result = ml.eval.xquery(
             code,
             variables=variables,
@@ -846,26 +759,15 @@ def _configure_indexes(ml: MLClient, database: str):
 def _create_temporal_axes(ml: MLClient, database: str):
     """Create the system and valid axes and an LSQT-enabled temporal collection."""
     ml.eval.xquery(
-        'import module namespace temporal="http://marklogic.com/xdmp/temporal" '
-        'at "/MarkLogic/temporal.xqy"; '
-        'temporal:axis-create("system", '
-        'cts:element-reference(xs:QName("systemStart")), '
-        'cts:element-reference(xs:QName("systemEnd"))), '
-        'temporal:axis-create("valid", '
-        'cts:element-reference(xs:QName("validStart")), '
-        'cts:element-reference(xs:QName("validEnd")))',
+        render_test_resource(__file__, "create-temporal-axes.xqy"),
         database=database,
     )
     ml.eval.xquery(
-        'import module namespace temporal="http://marklogic.com/xdmp/temporal" '
-        'at "/MarkLogic/temporal.xqy"; '
-        'temporal:collection-create("reports-temporal", "system", "valid")',
+        render_test_resource(__file__, "create-temporal-axes-2.xqy"),
         database=database,
     )
     # A new temporal collection is visible only after its own transaction.
     ml.eval.xquery(
-        'import module namespace temporal="http://marklogic.com/xdmp/temporal" '
-        'at "/MarkLogic/temporal.xqy"; '
-        'temporal:set-use-lsqt("reports-temporal", fn:true())',
+        render_test_resource(__file__, "create-temporal-axes-3.xqy"),
         database=database,
     )

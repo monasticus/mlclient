@@ -1,0 +1,8 @@
+{
+  "errorResponse": {
+    "statusCode": 400,
+    "status": "Bad Request",
+    "messageCode": "REST-INVALIDPARAM",
+    "message": "REST-INVALIDPARAM: (err:FOER0000) Invalid parameter: No values or tuples specification named: category"
+  }
+}

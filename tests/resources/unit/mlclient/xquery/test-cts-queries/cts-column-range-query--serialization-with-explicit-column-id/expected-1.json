@@ -1,0 +1,21 @@
+{
+  "tripleRangeQuery": {
+    "objectOperator": ">=",
+    "predicate": [
+      {
+        "column": "reports.items.price",
+        "columnID": "11548423394257569743"
+      }
+    ],
+    "object": [
+      {
+        "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+        "value": 2
+      }
+    ],
+    "options": [
+      "cached"
+    ],
+    "weight": 2
+  }
+}

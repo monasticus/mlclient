@@ -1,0 +1,1 @@
+cts:boost-query(cts:word-query("blue"), cts:word-query("green", (), 2))

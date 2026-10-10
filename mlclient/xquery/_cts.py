@@ -12,7 +12,7 @@ from __future__ import annotations
 import datetime
 
 from mlclient.xquery._xs import Xs
-from mlclient.xquery._cts_queries import (
+from mlclient.xquery._cts_query import (
     Box,
     Circle,
     Period,
@@ -82,8 +82,8 @@ from mlclient.xquery.expressions import (
     NodeInput,
     StringInput,
     XqyExpression,
-    _as_qname,
-    _namespace_map,
+    as_qname,
+    namespace_map,
     as_searchable_expression,
 )
 
@@ -1612,9 +1612,9 @@ class Cts:
         return FunctionCall(
             "cts:element-attribute-pair-geospatial-boxes",
             (
-                _as_qname(parent_element_names),
-                _as_qname(latitude_names),
-                _as_qname(longitude_names),
+                as_qname(parent_element_names),
+                as_qname(latitude_names),
+                as_qname(longitude_names),
             ),
             (
                 latitude_bounds,
@@ -1836,9 +1836,9 @@ class Cts:
         return FunctionCall(
             "cts:element-attribute-pair-geospatial-value-match",
             (
-                _as_qname(element_names),
-                _as_qname(latitude_names),
-                _as_qname(longitude_names),
+                as_qname(element_names),
+                as_qname(latitude_names),
+                as_qname(longitude_names),
                 pattern,
             ),
             (options, query, _double(quality_weight), forest_ids),
@@ -1951,9 +1951,9 @@ class Cts:
         return FunctionCall(
             "cts:element-attribute-pair-geospatial-values",
             (
-                _as_qname(element_names),
-                _as_qname(latitude_names),
-                _as_qname(longitude_names),
+                as_qname(element_names),
+                as_qname(latitude_names),
+                as_qname(longitude_names),
             ),
             (start, options, query, _double(quality_weight), forest_ids),
         )
@@ -2093,7 +2093,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-attribute-reference",
-            (_as_qname(element), _as_qname(attribute)),
+            (as_qname(element), as_qname(attribute)),
             (options,),
         )
 
@@ -2233,10 +2233,10 @@ class Cts:
         return FunctionCall(
             "cts:element-attribute-value-co-occurrences",
             (
-                _as_qname(element_name_1),
-                _as_qname(attribute_name_1),
-                _as_qname(element_name_2),
-                _as_qname(attribute_name_2),
+                as_qname(element_name_1),
+                as_qname(attribute_name_1),
+                as_qname(element_name_2),
+                as_qname(attribute_name_2),
             ),
             (options, query, _double(quality_weight), forest_ids),
         )
@@ -2387,18 +2387,18 @@ class Cts:
         return FunctionCall(
             "cts:element-attribute-value-geospatial-co-occurrences",
             (
-                _as_qname(element_name_1),
-                _as_qname(attribute_name_1),
-                _as_qname(geo_element_name),
+                as_qname(element_name_1),
+                as_qname(attribute_name_1),
+                as_qname(geo_element_name),
             ),
             (
                 (
-                    _as_qname(coord_child_name_1)
+                    as_qname(coord_child_name_1)
                     if coord_child_name_1 is not None
                     else None
                 ),
                 (
-                    _as_qname(coord_child_name_2)
+                    as_qname(coord_child_name_2)
                     if coord_child_name_2 is not None
                     else None
                 ),
@@ -2528,7 +2528,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-attribute-value-match",
-            (_as_qname(element_names), _as_qname(attribute_names), pattern),
+            (as_qname(element_names), as_qname(attribute_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
         )
 
@@ -2732,7 +2732,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-attribute-value-ranges",
-            (_as_qname(element_names), _as_qname(attribute_names)),
+            (as_qname(element_names), as_qname(attribute_names)),
             (bounds, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -2852,7 +2852,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-attribute-values",
-            (_as_qname(element_names), _as_qname(attribute_names)),
+            (as_qname(element_names), as_qname(attribute_names)),
             (start, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -2942,7 +2942,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-attribute-word-match",
-            (_as_qname(element_names), _as_qname(attribute_names), pattern),
+            (as_qname(element_names), as_qname(attribute_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
         )
 
@@ -3129,7 +3129,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-attribute-words",
-            (_as_qname(element_names), _as_qname(attribute_names)),
+            (as_qname(element_names), as_qname(attribute_names)),
             (start, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -3266,7 +3266,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-child-geospatial-boxes",
-            (_as_qname(parent_element_names), _as_qname(child_element_names)),
+            (as_qname(parent_element_names), as_qname(child_element_names)),
             (
                 latitude_bounds,
                 longitude_bounds,
@@ -3485,7 +3485,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-child-geospatial-value-match",
-            (_as_qname(element_names), _as_qname(child_names), pattern),
+            (as_qname(element_names), as_qname(child_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
         )
 
@@ -3596,7 +3596,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-child-geospatial-values",
-            (_as_qname(element_names), _as_qname(child_names)),
+            (as_qname(element_names), as_qname(child_names)),
             (start, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -3722,7 +3722,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-geospatial-boxes",
-            (_as_qname(element_names),),
+            (as_qname(element_names),),
             (
                 latitude_bounds,
                 longitude_bounds,
@@ -3921,7 +3921,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-geospatial-value-match",
-            (_as_qname(element_names), pattern),
+            (as_qname(element_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
         )
 
@@ -4027,7 +4027,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-geospatial-values",
-            (_as_qname(element_names),),
+            (as_qname(element_names),),
             (start, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -4161,9 +4161,9 @@ class Cts:
         return FunctionCall(
             "cts:element-pair-geospatial-boxes",
             (
-                _as_qname(parent_element_names),
-                _as_qname(latitude_names),
-                _as_qname(longitude_names),
+                as_qname(parent_element_names),
+                as_qname(latitude_names),
+                as_qname(longitude_names),
             ),
             (
                 latitude_bounds,
@@ -4385,9 +4385,9 @@ class Cts:
         return FunctionCall(
             "cts:element-pair-geospatial-value-match",
             (
-                _as_qname(element_names),
-                _as_qname(latitude_names),
-                _as_qname(longitude_names),
+                as_qname(element_names),
+                as_qname(latitude_names),
+                as_qname(longitude_names),
                 pattern,
             ),
             (options, query, _double(quality_weight), forest_ids),
@@ -4501,9 +4501,9 @@ class Cts:
         return FunctionCall(
             "cts:element-pair-geospatial-values",
             (
-                _as_qname(element_names),
-                _as_qname(latitude_names),
-                _as_qname(longitude_names),
+                as_qname(element_names),
+                as_qname(latitude_names),
+                as_qname(longitude_names),
             ),
             (start, options, query, _double(quality_weight), forest_ids),
         )
@@ -4669,7 +4669,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-reference",
-            (_as_qname(element),),
+            (as_qname(element),),
             (options,),
         )
 
@@ -4801,7 +4801,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-value-co-occurrences",
-            (_as_qname(element_name_1), _as_qname(element_name_2)),
+            (as_qname(element_name_1), as_qname(element_name_2)),
             (options, query, _double(quality_weight), forest_ids),
         )
 
@@ -4950,15 +4950,15 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-value-geospatial-co-occurrences",
-            (_as_qname(element_name_1), _as_qname(geo_element_name)),
+            (as_qname(element_name_1), as_qname(geo_element_name)),
             (
                 (
-                    _as_qname(coord_child_name_1)
+                    as_qname(coord_child_name_1)
                     if coord_child_name_1 is not None
                     else None
                 ),
                 (
-                    _as_qname(coord_child_name_2)
+                    as_qname(coord_child_name_2)
                     if coord_child_name_2 is not None
                     else None
                 ),
@@ -5084,7 +5084,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-value-match",
-            (_as_qname(element_names), pattern),
+            (as_qname(element_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
         )
 
@@ -5280,7 +5280,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-value-ranges",
-            (_as_qname(element_names),),
+            (as_qname(element_names),),
             (bounds, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -5398,7 +5398,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-values",
-            (_as_qname(element_names),),
+            (as_qname(element_names),),
             (start, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -5435,7 +5435,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-walk",
-            (node, _as_qname(element), expr),
+            (node, as_qname(element), expr),
         )
 
     @staticmethod
@@ -5521,7 +5521,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-word-match",
-            (_as_qname(element_names), pattern),
+            (as_qname(element_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
         )
 
@@ -5710,7 +5710,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:element-words",
-            (_as_qname(element_names),),
+            (as_qname(element_names),),
             (start, options, query, _double(quality_weight), forest_ids),
         )
 
@@ -7146,7 +7146,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:geospatial-attribute-pair-reference",
-            (_as_qname(element), _as_qname(lat), _as_qname(long)),
+            (as_qname(element), as_qname(lat), as_qname(long)),
             (options,),
         )
 
@@ -7452,14 +7452,14 @@ class Cts:
         return FunctionCall(
             "cts:geospatial-co-occurrences",
             (
-                _as_qname(geo_element_name_1),
-                _as_qname(child_1_name_1),
-                _as_qname(child_1_name_2),
-                _as_qname(geo_element_name_2),
+                as_qname(geo_element_name_1),
+                as_qname(child_1_name_1),
+                as_qname(child_1_name_2),
+                as_qname(geo_element_name_2),
             ),
             (
-                _as_qname(child_2_name_1) if child_2_name_1 is not None else None,
-                _as_qname(child_2_name_2) if child_2_name_2 is not None else None,
+                as_qname(child_2_name_1) if child_2_name_1 is not None else None,
+                as_qname(child_2_name_2) if child_2_name_2 is not None else None,
                 options,
                 query,
                 _double(quality_weight),
@@ -7513,7 +7513,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:geospatial-element-child-reference",
-            (_as_qname(element), _as_qname(child)),
+            (as_qname(element), as_qname(child)),
             (options,),
         )
 
@@ -7566,7 +7566,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:geospatial-element-pair-reference",
-            (_as_qname(element), _as_qname(lat), _as_qname(long)),
+            (as_qname(element), as_qname(lat), as_qname(long)),
             (options,),
         )
 
@@ -7613,7 +7613,7 @@ class Cts:
         """
         return FunctionCall(
             "cts:geospatial-element-reference",
-            (_as_qname(element),),
+            (as_qname(element),),
             (options,),
         )
 
@@ -7807,7 +7807,7 @@ class Cts:
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-path-reference
         """
-        bindings = _namespace_map(map)
+        bindings = namespace_map(map)
         return FunctionCall(
             "cts:geospatial-path-reference",
             (path_expression,),
@@ -7872,7 +7872,7 @@ class Cts:
         -----
         Native reference:
         """
-        namespaces = _namespace_map(namespaces)
+        namespaces = namespace_map(namespaces)
         return FunctionCall(
             "cts:geospatial-region-path-reference",
             (path_expression,),
@@ -9631,7 +9631,7 @@ class Cts:
         -----
         Native reference: https://docs.marklogic.com/cts:path-reference
         """
-        namespaces = _namespace_map(namespaces)
+        namespaces = namespace_map(namespaces)
         return FunctionCall(
             "cts:path-reference",
             (path_expression,),

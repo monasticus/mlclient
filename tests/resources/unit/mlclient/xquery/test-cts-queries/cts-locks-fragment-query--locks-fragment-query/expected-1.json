@@ -1,0 +1,11 @@
+{
+  "locksFragmentQuery": {
+    "query": {
+      "collectionQuery": {
+        "uris": [
+          "reports"
+        ]
+      }
+    }
+  }
+}

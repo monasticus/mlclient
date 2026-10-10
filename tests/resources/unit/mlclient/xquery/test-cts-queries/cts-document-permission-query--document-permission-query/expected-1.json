@@ -1,0 +1,6 @@
+{
+  "documentPermissionQuery": {
+    "role": "admin",
+    "capability": "read"
+  }
+}

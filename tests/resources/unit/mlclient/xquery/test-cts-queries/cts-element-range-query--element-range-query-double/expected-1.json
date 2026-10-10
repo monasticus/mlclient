@@ -1,0 +1,14 @@
+{
+  "elementRangeQuery": {
+    "element": [
+      "price"
+    ],
+    "operator": ">",
+    "value": [
+      {
+        "type": "double",
+        "val": "1.5"
+      }
+    ]
+  }
+}

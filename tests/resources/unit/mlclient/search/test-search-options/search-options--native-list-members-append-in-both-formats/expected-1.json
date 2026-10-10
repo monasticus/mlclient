@@ -1,0 +1,12 @@
+{
+  "options": {
+    "operator": [
+      {
+        "name": "sort"
+      },
+      {
+        "name": "page"
+      }
+    ]
+  }
+}

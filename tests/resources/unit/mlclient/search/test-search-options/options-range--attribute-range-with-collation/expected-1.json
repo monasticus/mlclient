@@ -1,0 +1,14 @@
+{
+  "range": {
+    "type": "xs:string",
+    "collation": "urn:collation",
+    "element": {
+      "name": "product",
+      "ns": ""
+    },
+    "attribute": {
+      "name": "category",
+      "ns": ""
+    }
+  }
+}

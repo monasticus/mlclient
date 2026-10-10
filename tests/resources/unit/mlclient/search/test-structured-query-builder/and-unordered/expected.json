@@ -1,0 +1,18 @@
+{
+  "and-query": {
+    "queries": [
+      {
+        "term-query": {
+          "text": [
+            "blue"
+          ]
+        }
+      },
+      {
+        "ordered": {
+          "_value": false
+        }
+      }
+    ]
+  }
+}

@@ -14,6 +14,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 from mlclient import _constants as constants, _utils as utils, exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 from mlclient.models.document_parts import Category
 
@@ -87,9 +88,9 @@ class _SearchCall(ApiCall):
             case-sensitive set, or a category is given outside a multi-document
             read, which MarkLogic rejects with REST-UNSUPPORTEDPARAM.
         """
-        utils.validate_supported(view, cls._SUPPORTED_VIEWS, "views")
-        utils.validate_supported(category, cls._SUPPORTED_CATEGORIES, "categories")
-        utils.validate_supported(data_format, cls._SUPPORTED_FORMATS, "formats")
+        call_utils.validate_supported(view, cls._SUPPORTED_VIEWS, "views")
+        call_utils.validate_supported(category, cls._SUPPORTED_CATEGORIES, "categories")
+        call_utils.validate_supported(data_format, cls._SUPPORTED_FORMATS, "formats")
         if category is not None and not multipart:
             msg = "category is supported only in a multi-document read (multipart=True)"
             raise exceptions.WrongParametersError(msg)
@@ -220,7 +221,7 @@ class SearchGetCall(_SearchCall):
             accept=self._accept_header(data_format, multipart),
         )
         self._params.update(
-            utils.query_params(
+            call_utils.query_params(
                 {
                     self._Q_PARAM: q,
                     self._STRUCTURED_QUERY_PARAM: structured_query,
@@ -337,7 +338,7 @@ class SearchPostCall(_SearchCall):
             matching content and/or metadata instead of only search results.
         """
         self._validate_params(view, category, data_format, multipart=multipart)
-        body, content_type = utils.request_body_with_content_type(
+        body, content_type = call_utils.request_body_with_content_type(
             body,
             "POST /v1/search",
         )
@@ -348,7 +349,7 @@ class SearchPostCall(_SearchCall):
             content_type=content_type,
         )
         self._params.update(
-            utils.query_params(
+            call_utils.query_params(
                 {
                     self._Q_PARAM: q,
                     self._START_PARAM: start,
@@ -434,9 +435,31 @@ class SearchDeleteCall(ApiCall):
             self._COLLECTION_PARAM: collection,
             self._DIRECTORY_PARAM: directory,
         }
+        self._validate_params(params, clear_database=clear_database)
+        super().__init__(method=constants.METHOD_DELETE)
+        self._params = {
+            name: value for name, value in params.items() if value is not None
+        }
+
+    @classmethod
+    def _validate_params(cls, params: dict, *, clear_database: bool):
+        """Reject invalid filters before checking the destructive request scope.
+
+        Parameters
+        ----------
+        params : dict
+            Database, transaction and deletion filter parameters.
+        clear_database : bool
+            Explicit confirmation of an unfiltered deletion.
+
+        Raises
+        ------
+        WrongParametersError
+            For blank parameters, non-string filters or an unconfirmed scope.
+        """
         for name, value in params.items():
             if (
-                name in {self._COLLECTION_PARAM, self._DIRECTORY_PARAM}
+                name in {cls._COLLECTION_PARAM, cls._DIRECTORY_PARAM}
                 and value is not None
                 and not isinstance(value, str)
             ):
@@ -445,11 +468,11 @@ class SearchDeleteCall(ApiCall):
             if isinstance(value, str) and not value.strip():
                 message = f"{name} must not be blank in DELETE /v1/search"
                 raise exceptions.WrongParametersError(message)
-        _validate_delete_scope(collection, directory, clear_database=clear_database)
-        super().__init__(method=constants.METHOD_DELETE)
-        self._params = {
-            name: value for name, value in params.items() if value is not None
-        }
+        _validate_delete_scope(
+            params[cls._COLLECTION_PARAM],
+            params[cls._DIRECTORY_PARAM],
+            clear_database=clear_database,
+        )
 
     @property
     def endpoint(

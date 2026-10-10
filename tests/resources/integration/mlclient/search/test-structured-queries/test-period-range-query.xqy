@@ -1,0 +1,1 @@
+cts:period-range-query("valid", "aln_contains", cts:period(xs:dateTime("2026-01-01T00:00:00Z"), xs:dateTime("2026-02-01T00:00:00Z")))

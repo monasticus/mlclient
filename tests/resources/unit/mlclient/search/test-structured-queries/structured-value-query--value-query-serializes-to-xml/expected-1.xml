@@ -1,0 +1,1 @@
+<expected xmlns="http://marklogic.com/appservices/search"><value-query type="boolean"><json-property>active</json-property><fragment-scope>documents</fragment-scope><text>true</text><term-option>exact</term-option><weight>2</weight></value-query></expected>

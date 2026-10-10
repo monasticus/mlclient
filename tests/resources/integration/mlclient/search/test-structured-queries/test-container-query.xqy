@@ -1,0 +1,1 @@
+cts:element-query(fn:QName("urn:example", "section"), cts:word-query("blue"))

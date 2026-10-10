@@ -1,0 +1,1 @@
+cts:json-property-range-query("price", ">=", xs:int(3))

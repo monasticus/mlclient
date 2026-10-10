@@ -1,0 +1,22 @@
+{
+  "or-query": {
+    "queries": [
+      {
+        "collection-query": {
+          "uri": [
+            "reports"
+          ]
+        }
+      },
+      {
+        "not-query": {
+          "term-query": {
+            "text": [
+              "blue"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

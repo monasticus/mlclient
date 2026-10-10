@@ -1,0 +1,1 @@
+cts:properties-fragment-query(cts:word-query("blue"))

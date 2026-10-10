@@ -1,0 +1,8 @@
+{
+  "document-query": {
+    "uri": [
+      "/reports/first.xml",
+      "/reports/second.json"
+    ]
+  }
+}

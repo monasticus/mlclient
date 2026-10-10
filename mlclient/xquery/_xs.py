@@ -7,7 +7,7 @@ or composed expressions to the requested XQuery type.
 
 from __future__ import annotations
 
-from mlclient.xquery.expressions import AtomicInput, NodeInput, XqyExpression, _as_expr
+from mlclient.xquery.expressions import AtomicInput, NodeInput, XqyExpression, as_expr
 
 
 class Xs:
@@ -43,7 +43,7 @@ class Xs:
         Native signature: xs:date($arg as xs:anyAtomicType?) as xs:date?
         Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
-        return _as_expr(value, cast="xs:date")
+        return as_expr(value, cast="xs:date")
 
     @staticmethod
     def date_time(value: AtomicInput) -> XqyExpression:
@@ -66,7 +66,7 @@ class Xs:
         Native signature: xs:dateTime($arg as xs:anyAtomicType?) as xs:dateTime?
         Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
-        return _as_expr(value, cast="xs:dateTime")
+        return as_expr(value, cast="xs:dateTime")
 
     @staticmethod
     def decimal(value: AtomicInput) -> XqyExpression:
@@ -89,7 +89,7 @@ class Xs:
         Native signature: xs:decimal($arg as xs:anyAtomicType?) as xs:decimal?
         Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
-        return _as_expr(value, cast="xs:decimal")
+        return as_expr(value, cast="xs:decimal")
 
     @staticmethod
     def double(value: AtomicInput) -> XqyExpression:
@@ -112,7 +112,7 @@ class Xs:
         Native signature: xs:double($arg as xs:anyAtomicType?) as xs:double?
         Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
-        return _as_expr(value, cast="xs:double")
+        return as_expr(value, cast="xs:double")
 
     @staticmethod
     def integer(value: AtomicInput) -> XqyExpression:
@@ -135,7 +135,7 @@ class Xs:
         Native signature: xs:integer($arg as xs:anyAtomicType?) as xs:integer?
         Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
-        return _as_expr(value, cast="xs:integer")
+        return as_expr(value, cast="xs:integer")
 
     @staticmethod
     def qname(lexical: str | NodeInput) -> XqyExpression:
@@ -156,7 +156,7 @@ class Xs:
         -----
         Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
-        return _as_expr(lexical, cast="xs:QName")
+        return as_expr(lexical, cast="xs:QName")
 
     @staticmethod
     def string(value: AtomicInput) -> XqyExpression:
@@ -179,4 +179,4 @@ class Xs:
         Native signature: xs:string($arg as xs:anyAtomicType?) as xs:string?
         Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
-        return _as_expr(value, cast="xs:string")
+        return as_expr(value, cast="xs:string")

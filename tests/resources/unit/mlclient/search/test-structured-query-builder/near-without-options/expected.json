@@ -1,0 +1,13 @@
+{
+  "near-query": {
+    "queries": [
+      {
+        "term-query": {
+          "text": [
+            "blue"
+          ]
+        }
+      }
+    ]
+  }
+}

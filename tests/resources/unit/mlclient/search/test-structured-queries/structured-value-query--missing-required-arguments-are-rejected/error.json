@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "ValueQuery.text is required"
+}

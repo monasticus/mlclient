@@ -443,7 +443,7 @@ def test_search_package_does_not_depend_on_xquery():
 
 def test_compiler_and_cts_queries_do_not_depend_on_function_builders():
     root = ROOT / "xquery"
-    for name in ("expressions.py", "_cts_queries.py"):
+    for name in ("expressions.py", "_cts_query.py"):
         imports = _mlclient_imports(root / name)
         assert imports <= {"mlclient.xquery.expressions", "mlclient.search.base"}, name
 

@@ -1,0 +1,1 @@
+<expected xmlns="http://marklogic.com/appservices/search"><near-query><term-query><text>blue</text></term-query><term-query><text>green</text></term-query><distance>3</distance><minimum-distance>1</minimum-distance><distance-weight>2</distance-weight><ordered>false</ordered></near-query></expected>

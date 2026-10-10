@@ -18,6 +18,7 @@ from typing import ClassVar
 from mlclient import _constants as constants
 from mlclient import _utils as utils
 from mlclient import exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
 
@@ -96,10 +97,9 @@ class GroupPropertiesGetCall(ApiCall):
         WrongParametersError
             If the format is not xml, json or html
         """
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
 
 
 class GroupPropertiesPutCall(ApiCall):

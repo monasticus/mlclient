@@ -1,0 +1,10 @@
+{
+  "pathGeospatialQuery": {
+    "pathExpression": [
+      "/item/origin"
+    ],
+    "region": [
+      "10,20"
+    ]
+  }
+}

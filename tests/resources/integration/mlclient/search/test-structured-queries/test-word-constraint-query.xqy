@@ -1,0 +1,1 @@
+cts:element-word-query(xs:QName("title"), ("blue", "green"), (), 2)

@@ -1,0 +1,1 @@
+<cts:element-word-query xmlns:cts="http://marklogic.com/cts" weight="2"><cts:element xmlns:q="urn:mlclient:cts-test">q:title</cts:element><cts:text>blue</cts:text><cts:text>red</cts:text><cts:option>case-insensitive</cts:option></cts:element-word-query>

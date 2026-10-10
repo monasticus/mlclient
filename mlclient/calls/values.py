@@ -15,6 +15,7 @@ from typing import ClassVar
 from urllib.parse import quote
 
 from mlclient import _constants as constants, _utils as utils, exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
 
@@ -59,25 +60,40 @@ class ValuesGetCall(ApiCall):
         options : str
             The query options for which to list available lexicon configurations.
         """
-        utils.validate_supported(
-            data_format,
-            self._SUPPORTED_FORMATS,
-            "formats",
-            required=True,
-        )
+        self._validate_params(data_format)
         super().__init__(
             method=constants.METHOD_GET,
             accept=utils.get_accept_header_for_format(data_format),
         )
-        self._params = {
-            name: value
-            for name, value in {
+        self._params = call_utils.query_params(
+            {
                 self._DATABASE_PARAM: database,
                 self._FORMAT_PARAM: data_format,
                 self._OPTIONS_PARAM: options,
-            }.items()
-            if value is not None
-        }
+            },
+            None,
+        )
+
+    @classmethod
+    def _validate_params(cls, data_format: str):
+        """Validate the values-list response format.
+
+        Parameters
+        ----------
+        data_format : str
+            Requested response format.
+
+        Raises
+        ------
+        WrongParametersError
+            If the format is missing or unsupported.
+        """
+        call_utils.validate_supported(
+            data_format,
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
+        )
 
     @property
     def endpoint(
@@ -187,15 +203,19 @@ class _ValueCall(ApiCall):
         if not name or not name.strip():
             msg = "No values name provided for /v1/values/{name}!"
             raise exceptions.WrongParametersError(msg)
-        utils.validate_supported(view, cls._SUPPORTED_VIEWS, "views")
-        utils.validate_supported(
+        call_utils.validate_supported(view, cls._SUPPORTED_VIEWS, "views")
+        call_utils.validate_supported(
             data_format,
             cls._SUPPORTED_FORMATS,
             "formats",
             required=True,
         )
-        utils.validate_supported(direction, cls._SUPPORTED_DIRECTIONS, "directions")
-        utils.validate_supported(frequency, cls._SUPPORTED_FREQUENCIES, "frequencies")
+        call_utils.validate_supported(
+            direction, cls._SUPPORTED_DIRECTIONS, "directions",
+        )
+        call_utils.validate_supported(
+            frequency, cls._SUPPORTED_FREQUENCIES, "frequencies",
+        )
 
 
 class ValueGetCall(_ValueCall):
@@ -308,7 +328,7 @@ class ValueGetCall(_ValueCall):
             accept=utils.get_accept_header_for_format(data_format),
         )
         self._params.update(
-            utils.query_params(
+            call_utils.query_params(
                 {
                     self._Q_PARAM: q,
                     self._STRUCTURED_QUERY_PARAM: structured_query,
@@ -440,7 +460,7 @@ class ValuePostCall(_ValueCall):
             The name of forest(s) to which results should be limited.
         """
         self._validate_params(name, view, data_format, direction, frequency)
-        body, content_type = utils.request_body_with_content_type(
+        body, content_type = call_utils.request_body_with_content_type(
             body,
             "POST /v1/values/{name}",
         )
@@ -452,7 +472,7 @@ class ValuePostCall(_ValueCall):
             content_type=content_type,
         )
         self._params.update(
-            utils.query_params(
+            call_utils.query_params(
                 {
                     self._Q_PARAM: q,
                     self._OPTIONS_PARAM: options,

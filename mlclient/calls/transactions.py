@@ -17,7 +17,7 @@ from typing import ClassVar
 
 from mlclient import _constants as constants
 from mlclient import _utils as utils
-from mlclient import exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
 
@@ -153,10 +153,9 @@ class TransactionGetCall(ApiCall):
         cls,
         data_format: str,
     ):
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
 
 
 class TransactionPostCall(ApiCall):
@@ -225,7 +224,6 @@ class TransactionPostCall(ApiCall):
         cls,
         result: str,
     ):
-        if result not in cls._SUPPORTED_RESULTS:
-            joined_supported_results = ", ".join(cls._SUPPORTED_RESULTS)
-            msg = f"The supported results are: {joined_supported_results}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [result], cls._SUPPORTED_RESULTS, "results", required=True,
+        )

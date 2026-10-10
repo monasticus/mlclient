@@ -1,0 +1,1 @@
+<search:range xmlns:search="http://marklogic.com/appservices/search" type="xs:decimal"><search:path-index xmlns:p="urn:products">/p:product/p:price</search:path-index></search:range>

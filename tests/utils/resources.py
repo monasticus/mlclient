@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import builtins
+import inspect
+import itertools
 import json
 import runpy
+import re
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
 from pathlib import Path
@@ -127,3 +130,88 @@ def _assert_error(action: Callable[[], object], expected: dict) -> None:
 def _read_json(path: Path) -> dict:
     with path.open() as file:
         return json.load(file)
+
+
+@dataclass(frozen=True)
+class QueryCase:
+    name: str
+    directory: Path
+    parameter_indices: tuple[int, ...]
+
+    def assert_matches(self, request=None) -> None:
+        namespace = runpy.run_path(
+            str(self.directory / "case.py"),
+        )
+        run = namespace["run"]
+        parameters = {}
+        marks = [
+            mark
+            for mark in getattr(run, "pytestmark", [])
+            if mark.name == "parametrize"
+        ]
+        for mark, index in zip(marks, self.parameter_indices, strict=True):
+            names = mark.args[0]
+            names = names.split(",") if isinstance(names, str) else names
+            selected = mark.args[1][index]
+            values = (
+                selected.values
+                if hasattr(selected, "marks") and hasattr(selected, "values")
+                else ((selected,) if len(names) == 1 else selected)
+            )
+            parameters.update(
+                zip((name.strip() for name in names), values, strict=True),
+            )
+        for name in inspect.signature(run).parameters:
+            if name not in parameters:
+                parameters[name] = request.getfixturevalue(name)
+        run(**parameters)
+
+
+def discover_query_cases(test_path: str) -> list[QueryCase]:
+    resources = Path(get_test_resources_path(test_path))
+    cases = []
+    for path in sorted(resources.iterdir()):
+        if not path.is_dir() or not (path / "case.py").is_file():
+            continue
+        namespace = runpy.run_path(str(path / "case.py"))
+        run = namespace.get("run")
+        if not callable(run):
+            message = f"{path}/case.py must define run()"
+            raise TypeError(message)
+        marks = [
+            mark
+            for mark in getattr(run, "pytestmark", [])
+            if mark.name == "parametrize"
+        ]
+        for indices in itertools.product(*(range(len(mark.args[1])) for mark in marks)):
+            suffix = "-".join(map(str, indices))
+            cases.append(
+                QueryCase(
+                    f"{path.name}-{suffix}" if suffix else path.name,
+                    path,
+                    indices,
+                ),
+            )
+    if not cases:
+        message = f"No query cases in {resources}"
+        raise ValueError(message)
+    return cases
+
+
+def render_test_resource(test_path: str, name: str, /, **fragments: str) -> str:
+    """Insert test-owned fragments, preserving XQuery braces and variables."""
+    source = read_test_resource_text(test_path, name)
+    placeholders = set(re.findall(r"@@(\w+)@@", source))
+    if placeholders != fragments.keys():
+        message = f"Expected fragments {sorted(placeholders)}, got {sorted(fragments)}"
+        raise ValueError(message)
+    return re.sub(r"@@(\w+)@@", lambda match: fragments[match[1]], source)
+
+
+def read_query_expectation(case_path: str, name: str):
+    path = Path(case_path).parent / name
+    return _read_json(path) if path.suffix == ".json" else path.read_text()
+
+
+def read_query_input(test_path: str, name: str):
+    return runpy.run_path(get_test_resource_path(test_path, name))["build"]()

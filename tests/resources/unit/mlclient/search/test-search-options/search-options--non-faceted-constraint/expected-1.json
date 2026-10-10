@@ -1,0 +1,17 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "price",
+        "range": {
+          "type": "xs:decimal",
+          "element": {
+            "name": "price",
+            "ns": ""
+          },
+          "facet": false
+        }
+      }
+    ]
+  }
+}

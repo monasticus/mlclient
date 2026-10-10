@@ -98,18 +98,39 @@ class Range(QueryComponent):
         dict or xml.etree.ElementTree.Element
             A range component, without conversion between XML and JSON.
         """
+        return self._json() if output_format == "json" else self._xml()
+
+    def _json(self) -> dict:
+        """Build the range index as native JSON.
+
+        Returns
+        -------
+        dict
+            Fresh range member including its target and optional attribute.
+        """
+        members = {"type": self.index_type}
+        if self.collation is not None:
+            members["collation"] = self.collation
+        members.update(self.target.to_json())
+        if self.attribute is not None:
+            members.update(self.attribute.to_json())
+        return {"range": members}
+
+    def _xml(self) -> XmlElement:
+        """Build the range index as native XML.
+
+        Returns
+        -------
+        XmlElement
+            Fresh range element with its target children in native order.
+        """
         attributes = {"type": self.index_type}
         if self.collation is not None:
             attributes["collation"] = self.collation
-        targets = [self.target]
-        if self.attribute is not None:
-            targets.append(self.attribute)
-        if output_format == "json":
-            for target in targets:
-                attributes.update(target.to_json())
-            return {"range": attributes}
         node = XmlElement(f"{{{SEARCH_NS_URI}}}range", attributes)
-        node.extend([target.to_xml() for target in targets])
+        node.append(self.target.to_xml())
+        if self.attribute is not None:
+            node.append(self.attribute.to_xml())
         return node
 
 
@@ -623,10 +644,28 @@ class SearchOptions(QueryComponent):
             A defensive copy with the options wrapper: repeatable members as
             JSON lists, the others as single values.
         """
-        if output_format == "xml":
-            node = XmlElement(f"{{{SEARCH_NS_URI}}}options")
-            node.extend([held.to_xml() for held in self._definitions])
-            return node
+        return self._json() if output_format == "json" else self._xml()
+
+    def _xml(self) -> XmlElement:
+        """Build the options wrapper and ordered native XML definitions.
+
+        Returns
+        -------
+        XmlElement
+            Fresh options tree.
+        """
+        node = XmlElement(f"{{{SEARCH_NS_URI}}}options")
+        node.extend([held.to_xml() for held in self._definitions])
+        return node
+
+    def _json(self) -> dict:
+        """Build native JSON with arrays for repeatable definitions.
+
+        Returns
+        -------
+        dict
+            Fresh options object.
+        """
         members: dict = {}
         for held in self._definitions:
             definition = held.to_json()[held.name]

@@ -1,0 +1,1 @@
+cts:not-query(cts:word-query("blue"))

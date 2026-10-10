@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Circle.center must be Point, got tuple"
+}

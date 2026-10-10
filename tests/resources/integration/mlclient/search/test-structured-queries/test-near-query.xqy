@@ -1,0 +1,1 @@
+cts:near-query((cts:word-query("blue"), cts:word-query("green")), 3, "minimum-distance=1", 2)

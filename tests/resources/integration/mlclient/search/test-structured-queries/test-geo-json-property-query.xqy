@@ -1,0 +1,1 @@
+cts:json-property-child-geospatial-query("place", "location", cts:polygon((cts:point(1, 2), cts:point(3, 4), cts:point(5, 6), cts:point(1, 2))))

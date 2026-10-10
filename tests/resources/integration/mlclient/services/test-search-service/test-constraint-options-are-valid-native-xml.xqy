@@ -1,0 +1,1 @@
+import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy"; declare variable $options external; fn:count(search:check-options(xdmp:unquote($options)/*, fn:true()))

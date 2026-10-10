@@ -1,0 +1,15 @@
+{
+  "elementWordQuery": {
+    "element": [
+      "{urn:mlclient:cts-test}title"
+    ],
+    "text": [
+      "blue",
+      "red"
+    ],
+    "options": [
+      "case-insensitive"
+    ],
+    "weight": 2.0
+  }
+}

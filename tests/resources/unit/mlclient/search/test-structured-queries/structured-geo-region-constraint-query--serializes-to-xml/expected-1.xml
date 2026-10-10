@@ -1,0 +1,1 @@
+<expected xmlns="http://marklogic.com/appservices/search"><geo-region-constraint-query><constraint-name>location</constraint-name><geospatial-operator>intersects</geospatial-operator><point><latitude>10</latitude><longitude>20</longitude></point><weight>2</weight></geo-region-constraint-query></expected>

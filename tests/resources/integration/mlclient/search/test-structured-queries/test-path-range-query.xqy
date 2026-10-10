@@ -1,0 +1,1 @@
+cts:path-range-query("/r:report/r:price", ">=", xs:int(3))

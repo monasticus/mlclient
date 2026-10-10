@@ -1,0 +1,15 @@
+{
+  "fieldValueQuery": {
+    "field": [
+      "price"
+    ],
+    "text": [
+      "1",
+      "2"
+    ],
+    "weight": 3,
+    "options": [
+      "exact"
+    ]
+  }
+}

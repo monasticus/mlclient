@@ -1,0 +1,17 @@
+{
+  "geo-json-property-query": {
+    "json-property": "location",
+    "parent-property": "place",
+    "fragment-scope": "properties",
+    "geo-option": [
+      "units=miles"
+    ],
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ],
+    "weight": 2
+  }
+}

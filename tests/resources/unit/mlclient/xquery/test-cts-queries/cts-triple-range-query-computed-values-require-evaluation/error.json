@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:triple-range-query: object: CTS value argument requires server evaluation, got fn:doc('/value.xml')."
+}

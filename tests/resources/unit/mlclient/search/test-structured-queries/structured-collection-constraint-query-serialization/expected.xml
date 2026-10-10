@@ -1,0 +1,1 @@
+<search:collection-constraint-query xmlns:search="http://marklogic.com/appservices/search"><search:constraint-name>category</search:constraint-name><search:uri>blue</search:uri><search:uri>green</search:uri></search:collection-constraint-query>

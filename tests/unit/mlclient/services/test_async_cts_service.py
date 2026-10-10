@@ -6,7 +6,7 @@ import pytest
 import respx
 
 from mlclient import AsyncMLClient
-from mlclient.functions.xqy import fn
+from mlclient.xquery import fn
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.services import AsyncCtsService
 from tests.utils import resources as resources_utils

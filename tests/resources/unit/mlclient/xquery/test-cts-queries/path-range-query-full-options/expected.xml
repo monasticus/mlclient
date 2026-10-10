@@ -1,0 +1,1 @@
+<cts:path-range-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="&gt;" weight="3"><cts:path-expression>/item/price</cts:path-expression><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:integer">1</cts:value><cts:option>cached</cts:option></cts:path-range-query>

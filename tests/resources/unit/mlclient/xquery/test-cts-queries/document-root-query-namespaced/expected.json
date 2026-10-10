@@ -1,0 +1,5 @@
+{
+  "documentRootQuery": {
+    "root": "{https://example.com/cts-test}root"
+  }
+}

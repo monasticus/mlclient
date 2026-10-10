@@ -1,0 +1,1 @@
+cts:document-query(("/reports/first.xml", "/reports/second.json"))

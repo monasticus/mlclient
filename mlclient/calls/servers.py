@@ -26,6 +26,7 @@ from typing import ClassVar
 from mlclient import _constants as constants
 from mlclient import _utils as utils
 from mlclient import exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
 
@@ -120,14 +121,12 @@ class ServersGetCall(ApiCall):
         data_format: str,
         view: str,
     ):
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
-        if view not in cls._SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
-            msg = f"The supported views are: {joined_supported_views}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
+        call_utils.validate_supported(
+            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+        )
 
 
 class ServersPostCall(ApiCall):
@@ -322,14 +321,12 @@ class ServerGetCall(ApiCall):
         data_format: str,
         view: str,
     ):
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
-        if view not in cls._SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
-            msg = f"The supported views are: {joined_supported_views}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
+        call_utils.validate_supported(
+            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+        )
 
 
 class ServerDeleteCall(ApiCall):
@@ -450,10 +447,9 @@ class ServerPropertiesGetCall(ApiCall):
         cls,
         data_format: str,
     ):
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
 
 
 class ServerPropertiesPutCall(ApiCall):

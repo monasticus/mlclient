@@ -1,0 +1,7 @@
+{
+  "v0": "{\"label\": \"blue\", \"nested\": [{\"count\": 2}]}",
+  "v1": "node()",
+  "v2": "auxiliary",
+  "v3": "auxiliary",
+  "v4": "fn:insert-before(xdmp:unquote($v0) ! node(), fn:string($v2), fn:string($v3))"
+}

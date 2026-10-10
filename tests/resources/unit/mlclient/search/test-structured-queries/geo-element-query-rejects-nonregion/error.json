@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Geospatial criteria must be Region instances."
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "range constraint index must be a Range"
+}

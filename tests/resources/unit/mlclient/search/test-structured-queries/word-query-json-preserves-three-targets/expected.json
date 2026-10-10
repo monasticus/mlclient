@@ -1,0 +1,21 @@
+{
+  "word-query": {
+    "element": [
+      {
+        "name": "title",
+        "ns": ""
+      },
+      {
+        "name": "label",
+        "ns": ""
+      },
+      {
+        "name": "body",
+        "ns": ""
+      }
+    ],
+    "text": [
+      "blue"
+    ]
+  }
+}

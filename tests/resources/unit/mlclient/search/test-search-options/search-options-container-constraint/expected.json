@@ -1,0 +1,15 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "place",
+        "container": {
+          "element": {
+            "name": "location",
+            "ns": ""
+          }
+        }
+      }
+    ]
+  }
+}

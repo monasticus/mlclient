@@ -146,6 +146,14 @@
   "range-element-index": [
     {
       "scalar-type": "string",
+      "namespace-uri": "",
+      "localname": "label",
+      "collation": "http://marklogic.com/collation/",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    },
+    {
+      "scalar-type": "string",
       "namespace-uri": "https://monasticus.com/mlclient/examples/cts-test",
       "localname": "region",
       "collation": "http://marklogic.com/collation/",

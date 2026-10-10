@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "QtextQuery.text must be str, got int"
+}

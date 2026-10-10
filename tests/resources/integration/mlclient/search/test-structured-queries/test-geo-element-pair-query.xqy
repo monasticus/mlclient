@@ -1,0 +1,1 @@
+cts:element-pair-geospatial-query(xs:QName("place"), xs:QName("lat"), xs:QName("lon"), cts:box(1, 2, 3, 4))

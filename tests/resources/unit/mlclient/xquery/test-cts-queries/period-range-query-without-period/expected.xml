@@ -1,0 +1,1 @@
+<cts:period-range-query xmlns:cts="http://marklogic.com/cts" operator="aln_before"><cts:axis>valid</cts:axis></cts:period-range-query>

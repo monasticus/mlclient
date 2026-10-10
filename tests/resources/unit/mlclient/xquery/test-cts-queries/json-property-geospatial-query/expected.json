@@ -1,0 +1,10 @@
+{
+  "jsonPropertyGeospatialQuery": {
+    "property": [
+      "origin"
+    ],
+    "region": [
+      "10,20"
+    ]
+  }
+}

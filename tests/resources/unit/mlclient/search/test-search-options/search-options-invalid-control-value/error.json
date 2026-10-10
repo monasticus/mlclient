@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "control value must be a string, number or boolean"
+}

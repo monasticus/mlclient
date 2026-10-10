@@ -1,0 +1,1 @@
+cts:document-fragment-query(cts:word-query("blue"))

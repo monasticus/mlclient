@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 from mlclient import _utils as utils
-from mlclient import exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
 
@@ -112,11 +112,9 @@ class HostsGetCall(ApiCall):
         WrongParametersError
             If the format or view is unsupported.
         """
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
-        if view not in cls._SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
-            msg = f"The supported views are: {joined_supported_views}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
+        call_utils.validate_supported(
+            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+        )

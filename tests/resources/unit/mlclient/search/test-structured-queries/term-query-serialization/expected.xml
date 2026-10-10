@@ -1,0 +1,1 @@
+<search:term-query xmlns:search="http://marklogic.com/appservices/search"><search:text>blue</search:text><search:text>green</search:text><search:weight>2</search:weight><search:term-option>case-sensitive</search:term-option><search:term-option>unstemmed</search:term-option></search:term-query>

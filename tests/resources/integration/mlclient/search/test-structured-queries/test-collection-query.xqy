@@ -1,0 +1,1 @@
+cts:collection-query(("reports", "notes"))

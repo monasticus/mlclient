@@ -1,0 +1,11 @@
+{
+  "propertiesFragmentQuery": {
+    "query": {
+      "collectionQuery": {
+        "uris": [
+          "reports"
+        ]
+      }
+    }
+  }
+}

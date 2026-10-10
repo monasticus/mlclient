@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "Attribute selectors require Element targets."
+}

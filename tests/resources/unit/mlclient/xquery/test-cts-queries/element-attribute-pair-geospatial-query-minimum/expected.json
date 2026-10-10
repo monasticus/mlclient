@@ -1,0 +1,16 @@
+{
+  "elementAttributePairGeospatialQuery": {
+    "element": [
+      "item"
+    ],
+    "latitudeAttribute": [
+      "lat"
+    ],
+    "longitudeAttribute": [
+      "lon"
+    ],
+    "region": [
+      "10,20"
+    ]
+  }
+}

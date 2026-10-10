@@ -1,0 +1,27 @@
+{
+  "search": {
+    "options": {
+      "tuples": [
+        {
+          "name": "price-day",
+          "range": [
+            {
+              "type": "xs:decimal",
+              "element": {
+                "ns": "",
+                "name": "price"
+              }
+            },
+            {
+              "type": "xs:date",
+              "element": {
+                "ns": "",
+                "name": "day"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

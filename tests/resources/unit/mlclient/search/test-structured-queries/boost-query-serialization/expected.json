@@ -1,0 +1,19 @@
+{
+  "boost-query": {
+    "matching-query": {
+      "term-query": {
+        "text": [
+          "blue"
+        ]
+      }
+    },
+    "boosting-query": {
+      "term-query": {
+        "text": [
+          "green"
+        ],
+        "weight": 2
+      }
+    }
+  }
+}

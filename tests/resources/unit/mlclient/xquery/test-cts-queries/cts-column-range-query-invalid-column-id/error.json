@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "CTS column ID must be an unsigned 64-bit integer."
+}

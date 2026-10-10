@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:directory-query: depth ['2'] must be '1' or 'infinity'"
+}

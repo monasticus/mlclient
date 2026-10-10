@@ -1,0 +1,1 @@
+cts:json-property-value-query("active", fn:false())

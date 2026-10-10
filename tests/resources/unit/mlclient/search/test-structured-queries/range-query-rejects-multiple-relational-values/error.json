@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "Multiple range values require EQ or NE."
+}

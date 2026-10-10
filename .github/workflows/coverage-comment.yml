@@ -1,10 +1,19 @@
 name: Create a coverage report
 
 on: [pull_request]
+permissions:
+  contents: read
+
 jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+
   comment:
+    needs: changes
+    if: needs.changes.outputs.unit == 'true'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
 
     steps:

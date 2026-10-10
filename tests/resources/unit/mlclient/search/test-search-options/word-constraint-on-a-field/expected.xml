@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="summary"><search:word><search:field name="summary" /></search:word></search:constraint></search:options>

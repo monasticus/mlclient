@@ -30,6 +30,7 @@ from typing import ClassVar
 from mlclient import _constants as constants
 from mlclient import _utils as utils
 from mlclient import exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
 
@@ -137,14 +138,12 @@ class ForestsGetCall(ApiCall):
         data_format: str,
         view: str,
     ):
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
-        if view not in cls._SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
-            msg = f"The supported views are: {joined_supported_views}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
+        call_utils.validate_supported(
+            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+        )
 
 
 class ForestsPostCall(ApiCall):
@@ -347,14 +346,12 @@ class ForestGetCall(ApiCall):
         data_format: str,
         view: str,
     ):
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
-        if view not in cls._SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
-            msg = f"The supported views are: {joined_supported_views}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
+        call_utils.validate_supported(
+            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+        )
 
 
 class ForestPostCall(ApiCall):
@@ -428,10 +425,9 @@ class ForestPostCall(ApiCall):
         if state is None:
             msg = "You must include the 'state' parameter within a body!"
             raise exceptions.WrongParametersError(msg)
-        if state not in cls._SUPPORTED_STATES:
-            joined_supported_states = ", ".join(cls._SUPPORTED_STATES)
-            msg = f"The supported states are: {joined_supported_states}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [state], cls._SUPPORTED_STATES, "states", required=True,
+        )
 
 
 class ForestDeleteCall(ApiCall):
@@ -501,10 +497,9 @@ class ForestDeleteCall(ApiCall):
         level: str,
         replicas: str,
     ):
-        if level not in cls._SUPPORTED_LEVELS:
-            joined_supported_levels = ", ".join(cls._SUPPORTED_LEVELS)
-            msg = f"The supported levels are: {joined_supported_levels}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [level], cls._SUPPORTED_LEVELS, "levels", required=True,
+        )
         if replicas and replicas not in cls._SUPPORTED_REPLICAS_OPTS:
             joined_supported_opts = ", ".join(cls._SUPPORTED_REPLICAS_OPTS)
             msg = f"The supported replicas options are: {joined_supported_opts}"
@@ -574,10 +569,9 @@ class ForestPropertiesGetCall(ApiCall):
         cls,
         data_format: str,
     ):
-        if data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
+        call_utils.validate_supported(
+            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+        )
 
 
 class ForestPropertiesPutCall(ApiCall):

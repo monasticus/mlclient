@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ElemTree
 import zlib
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 import httpx
@@ -3873,3 +3873,25 @@ def test_raise_for_status_preserves_structured_server_errors(
     )
     with pytest.raises(MarkLogicError, match=message):
         MLResponseParser.raise_for_status(response)
+
+
+@pytest.mark.parametrize(
+    ("lexical", "expected"),
+    [
+        (
+            "2026-01-01T10:00:00.5Z",
+            datetime(2026, 1, 1, 10, 0, 0, 500000, tzinfo=timezone.utc),
+        ),
+        (
+            "2026-01-01T10:00:00.12345+02:00",
+            datetime(2026, 1, 1, 10, 0, 0, 123450, tzinfo=timezone(timedelta(hours=2))),
+        ),
+        (
+            "2026-01-01T10:00:00.1234567Z",
+            datetime(2026, 1, 1, 10, 0, 0, 123456, tzinfo=timezone.utc),
+        ),
+        ("2026-01-01T10:00:00", datetime(2026, 1, 1, 10, 0, 0)),
+    ],
+)
+def test_parse_atomic_date_time_with_any_fraction_length(lexical, expected):
+    assert MLResponseParser.parse_atomic(lexical, "xs:dateTime") == expected

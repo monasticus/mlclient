@@ -13,7 +13,7 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.functions.xqy import LOCAL_NS_URI, fn
+from mlclient.xquery import LOCAL_NS_URI, fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -519,7 +519,7 @@ async def test_eval_with_bytes_output_type(svc):
 @respx.mock
 async def test_expression(svc):
     expression = fn.upper_case("value")
-    code, variables = expression.compile(namespaces={"p": "urn:test"})
+    code, variables = expression.compile(namespaces={"p": "https://example.com/test"})
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_param("database", "Documents")
@@ -532,7 +532,7 @@ async def test_expression(svc):
 
     result = await svc.expression(
         expression,
-        namespaces={"p": "urn:test"},
+        namespaces={"p": "https://example.com/test"},
         database="Documents",
         txid="transaction",
         timeout=2,

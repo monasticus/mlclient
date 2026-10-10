@@ -1,0 +1,25 @@
+{
+  "options": {
+    "tuples": [
+      {
+        "name": "prices",
+        "range": [
+          {
+            "type": "xs:decimal",
+            "element": {
+              "name": "price",
+              "ns": ""
+            }
+          },
+          {
+            "type": "xs:date",
+            "element": {
+              "name": "day",
+              "ns": ""
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

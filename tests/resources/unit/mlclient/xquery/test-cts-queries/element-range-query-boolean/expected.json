@@ -1,0 +1,14 @@
+{
+  "elementRangeQuery": {
+    "element": [
+      "flag"
+    ],
+    "operator": "=",
+    "value": [
+      {
+        "type": "boolean",
+        "val": "true"
+      }
+    ]
+  }
+}

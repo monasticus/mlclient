@@ -1,0 +1,10 @@
+{
+  "periodCompareQuery": {
+    "axis1": "system",
+    "operator": "aln_equals",
+    "axis2": "valid",
+    "options": [
+      "cached-incremental"
+    ]
+  }
+}

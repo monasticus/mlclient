@@ -3,10 +3,12 @@ from __future__ import annotations
 import builtins
 import json
 import runpy
+import re
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
+from xml.etree.ElementTree import tostring
 
 import pytest
 
@@ -127,3 +129,46 @@ def _assert_error(action: Callable[[], object], expected: dict) -> None:
 def _read_json(path: Path) -> dict:
     with path.open() as file:
         return json.load(file)
+
+
+@dataclass(frozen=True)
+class SerializationCase:
+    name: str
+    directory: Path
+
+    def assert_matches(self) -> None:
+        namespace = runpy.run_path(str(self.directory / "expression.py"))
+        run = namespace["run"]
+        error_path = self.directory / "error.json"
+        if error_path.is_file():
+            _assert_error(run, _read_json(error_path))
+            return
+
+        component = run()
+        expected_json = _read_json(self.directory / "expected.json")
+        expected_xml = (self.directory / "expected.xml").read_text().removesuffix("\n")
+        assert component.to_json() == expected_json
+        assert tostring(component.to_xml(), encoding="unicode") == expected_xml
+
+
+def discover_serialization_cases(test_path: str) -> list[SerializationCase]:
+    resources = Path(get_test_resources_path(test_path))
+    return [
+        SerializationCase(path.name, path)
+        for path in sorted(resources.iterdir())
+        if path.is_dir() and (path / "expression.py").is_file()
+    ]
+
+
+def render_test_resource(test_path: str, name: str, /, **fragments: str) -> str:
+    """Insert test-owned fragments, preserving XQuery braces and variables."""
+    source = read_test_resource_text(test_path, name)
+    placeholders = set(re.findall(r"@@(\w+)@@", source))
+    if placeholders != fragments.keys():
+        message = f"Expected fragments {sorted(placeholders)}, got {sorted(fragments)}"
+        raise ValueError(message)
+    return re.sub(r"@@(\w+)@@", lambda match: fragments[match[1]], source)
+
+
+def read_query_input(test_path: str, name: str):
+    return runpy.run_path(get_test_resource_path(test_path, name))["build"]()

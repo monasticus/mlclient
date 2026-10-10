@@ -1,0 +1,10 @@
+{
+  "word-query": {
+    "field": {
+      "name": "title"
+    },
+    "text": [
+      "blue"
+    ]
+  }
+}

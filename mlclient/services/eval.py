@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
-from mlclient.functions.xqy import XqyExpression
+from mlclient.xquery.expressions import XqyExpression
 from mlclient.models.results import ParsedValue
 from mlclient.responses import MLResponseParser
 

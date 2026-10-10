@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:similar-query: options: CTS similar options must be an XML cts:distinctive-terms options element."
+}

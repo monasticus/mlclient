@@ -1,0 +1,18 @@
+{
+  "notInQuery": {
+    "positiveQuery": {
+      "collectionQuery": {
+        "uris": [
+          "reports"
+        ]
+      }
+    },
+    "negativeQuery": {
+      "collectionQuery": {
+        "uris": [
+          "notes"
+        ]
+      }
+    }
+  }
+}

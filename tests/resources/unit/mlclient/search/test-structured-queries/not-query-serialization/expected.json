@@ -1,0 +1,9 @@
+{
+  "not-query": {
+    "term-query": {
+      "text": [
+        "blue"
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+from mlclient.xquery import cts
+
+
+def run():
+    return cts.and_not_query(
+        "positive-query", cts.collection_query("products"),
+    ).compile()

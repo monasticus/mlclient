@@ -1,0 +1,8 @@
+{
+  "periodRangeQuery": {
+    "axis": [
+      "valid"
+    ],
+    "operator": "aln_before"
+  }
+}

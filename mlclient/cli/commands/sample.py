@@ -12,7 +12,7 @@ from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
 from mlclient.cli.formatting import prettify
 from mlclient.exceptions import WrongParametersError
-from mlclient.functions.xqy import cts
+from mlclient.xquery import cts
 
 _MAX_SAMPLE_LIMIT = 100
 

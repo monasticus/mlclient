@@ -1,0 +1,1 @@
+import module namespace temporal="http://marklogic.com/xdmp/temporal" at "/MarkLogic/temporal.xqy"; temporal:set-use-lsqt("reports-temporal", fn:true())

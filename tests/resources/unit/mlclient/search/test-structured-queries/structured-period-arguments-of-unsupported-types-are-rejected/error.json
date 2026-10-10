@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Period.end must be datetime or str, got int"
+}

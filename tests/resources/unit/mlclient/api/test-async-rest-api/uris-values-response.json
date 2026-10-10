@@ -1,0 +1,12 @@
+{
+  "values-response": {
+    "name": "uris",
+    "type": "xs:string",
+    "distinct-value": [
+      {
+        "frequency": 1,
+        "_value": "/a.json"
+      }
+    ]
+  }
+}

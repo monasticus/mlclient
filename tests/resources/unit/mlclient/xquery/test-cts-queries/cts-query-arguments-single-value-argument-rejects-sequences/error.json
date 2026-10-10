@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:document-format-query: format: CTS argument requires exactly one value for local serialization."
+}

@@ -1,0 +1,1 @@
+<search:value-constraint-query xmlns:search="http://marklogic.com/appservices/search"><search:constraint-name>status</search:constraint-name></search:value-constraint-query>

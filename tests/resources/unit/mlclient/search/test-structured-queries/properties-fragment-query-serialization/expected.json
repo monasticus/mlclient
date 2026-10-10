@@ -1,0 +1,9 @@
+{
+  "properties-fragment-query": {
+    "term-query": {
+      "text": [
+        "blue"
+      ]
+    }
+  }
+}

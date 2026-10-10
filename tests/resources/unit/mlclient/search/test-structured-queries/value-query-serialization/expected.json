@@ -1,0 +1,14 @@
+{
+  "value-query": {
+    "type": "boolean",
+    "json-property": "active",
+    "fragment-scope": "documents",
+    "text": [
+      "true"
+    ],
+    "term-option": [
+      "exact"
+    ],
+    "weight": 2
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "GeoRegionPathQuery.operator 'bogus' is not a geospatial operator"
+}

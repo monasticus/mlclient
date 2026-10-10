@@ -1,0 +1,19 @@
+{
+  "geospatialRegionQuery": {
+    "geospatialRegionPathReference": [
+      {
+        "geospatialRegionPathReference": {
+          "pathExpression": "/report/region",
+          "coordinateSystem": "wgs84",
+          "geohashPrecision": "4",
+          "units": "km",
+          "invalidValues": "reject"
+        }
+      }
+    ],
+    "operation": "intersects",
+    "region": [
+      "[1, 2, 3, 4]"
+    ]
+  }
+}

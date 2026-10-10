@@ -1,6 +1,6 @@
 """Custom expressions for evaluator tests that need literal XQuery constructs."""
 
-from mlclient.functions.xqy import XqyExpression
+from mlclient.xquery import XqyExpression
 
 
 class StaticExpression(XqyExpression):

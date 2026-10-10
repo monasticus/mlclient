@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from tests.utils.resources import render_test_resource
+
 from decimal import Decimal
 
 import pytest
 
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import Cts, fn, xs
+from mlclient.xquery import Cts, fn, xs
 from mlclient.services import CtsService
 from tests.utils.expressions import StaticExpression
 
@@ -22,8 +24,7 @@ SEARCH_NODE = Cts.search(
 ).pos(1)
 TRAINING_NODES = [NODE, fn.doc("/cts-test/b.xml")]
 LABELS = StaticExpression(
-    '(<cts:label><cts:class name="alpha"/></cts:label>, '
-    '<cts:label><cts:class name="beta"/></cts:label>)',
+    render_test_resource(__file__, "query.xqy"),
 )
 CLASSIFIER = Cts.train(TRAINING_NODES, LABELS)
 DICTIONARY = Cts.entity_dictionary(Cts.entity("alpha", "alpha", "alpha", "label"))

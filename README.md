@@ -41,7 +41,7 @@ response = ml.rest.documents.get(uri="/example.json")
 response = ml.http.get("/v1/documents", params={"uri": "/example.json"})
 ```
 
-- Document models, metadata operations, eval and transactions for application code.
+- Services for documents, search, eval and transactions, with composable queries.
 - REST, Manage and Admin APIs with explicit routing and raw responses.
 - HTTP/HTTPS, TLS client certificates, Cloud and configurable authentication.
 - Runtime retry, timeout and pool limits; independent auxiliary connections.

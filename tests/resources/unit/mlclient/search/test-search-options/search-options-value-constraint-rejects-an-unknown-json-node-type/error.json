@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "value constraint node_type must be one of boolean, null, number, string, got 'int'"
+}

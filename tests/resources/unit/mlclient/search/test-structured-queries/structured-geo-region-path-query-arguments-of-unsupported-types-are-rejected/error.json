@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "GeoRegionPathQuery.path must be PathIndex, got str"
+}

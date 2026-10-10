@@ -1,26 +1,65 @@
 # XQuery API
 
-The singletons in `mlclient.functions.xqy` mirror native XQuery functions.
+The singletons in `mlclient.xquery` mirror native XQuery functions.
 They build composable expressions without making requests. Pass a complete
 expression to `ml.eval.expression()` to execute it in one request.
 
+Everything is imported from `mlclient.xquery`:
+
+| Kind | Names |
+| --- | --- |
+| Builders | `cts`, `fn`, `xdmp` and `xs` (and their `Cts`, `Fn`, `Xdmp`, `Xs` classes) |
+| Expression types | `XqyExpression`, `FunctionCall`, `ModuleFunctionCall`, `XqyCompilationContext`, `xpath()` |
+| CTS query types | `CtsQuery`, the concrete query classes returned by `cts` query constructors, the `Box`, `Circle`, `Point`, `Polygon` and `Period` values, and `CTS_NS_URI` |
+
+Build expressions with the builders; use the expression types only to
+type-check expressions, write custom ones or wrap an XPath with `xpath()`.
+
+A CTS query is one object for both execution routes: it compiles to XQuery for
+`ml.eval.expression()` and `CtsService`, and serializes locally to native JSON
+or XML for `ml.search`. Structured queries and search options, which only the
+REST Search API reads, live in `mlclient.search`, which does not depend on XQuery.
+
 ## CTS: search, lexicons and queries
 
-Start with the [search guide](search.md) when you want `SearchHit` objects with
-scores or `ValueHit` objects with frequencies. Use the `cts` **singleton** from
-`mlclient.functions.xqy` when you want native results or need to compose CTS
+Start with [CTS search with eval](search.md#cts-search-with-eval) when you want
+`SearchHit` objects with scores or `ValueHit` objects with frequencies. Use the
+`cts` **singleton** from
+`mlclient.xquery` when you want native results or need to compose CTS
 under another XQuery function. It is not a `CtsService` instance.
 
 ### Choose execution or composition
 
-The API is designed to use the name `cts` for the layer you need. Assign
-`CtsService(ml.rest)` to `cts` when executing queries through the service. When
-only building expressions, import the `cts` singleton from
-`mlclient.functions.xqy` instead. Query and reference constructors such as
-`word_query()` and `json_property_reference()` build expressions in either case;
-result-producing service methods execute immediately.
+The API is designed to use the name `cts` for the layer you need. Query and
+reference constructors such as `word_query()` and `json_property_reference()`
+build expressions in each of these three cases.
 
-When mixing execution with nested CTS expressions, keep `cts` assigned to the
+**Execute through the service.** Assign `CtsService(ml.rest)` to `cts`.
+Result-producing service methods execute immediately:
+
+```python
+from mlclient import MLClient
+from mlclient.services import CtsService
+
+with MLClient() as ml:
+    cts = CtsService(ml.rest)
+    hits = cts.search(query=cts.word_query("coffee"))
+```
+
+**Build an expression.** Import the `cts` singleton from `mlclient.xquery`.
+Even result-producing functions only build expressions; compilation sends no
+request:
+
+```python
+from mlclient.xquery import cts, fn
+
+expression = fn.count(cts.search(query=cts.word_query("coffee")))
+code, variables = expression.compile()
+```
+
+Pass `expression` to `ml.eval.expression(expression)` when you want to execute it.
+
+**Mix service execution with nested expressions.** Keep `cts` assigned to the
 service and import the `Cts` class for the nested operations. Its static methods
 only build expressions, even when the service method with the same name would
 execute a request.
@@ -32,7 +71,7 @@ but only the outer `frequency()` should initiate execution:
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import Cts
+from mlclient.xquery import Cts
 from mlclient.services import CtsService
 
 with MLClient() as ml:
@@ -52,11 +91,15 @@ native frequency in that request. `frequencies` contains one integer. Calling
 `cts.values(...)` here would execute a separate request and return Python
 `ValueHit` objects, not a composable XQuery expression.
 
+Query construction, shared JSON/XML serialization and CTS serialization limits
+are covered in [Structured and CTS queries](queries.md). CTS queries additionally
+compile for use with the evaluator and CTS service described below.
+
 ### Native results without scores or frequencies
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import cts
+from mlclient.xquery import cts
 
 with MLClient() as ml:
     documents = ml.eval.expression(
@@ -88,7 +131,7 @@ return expressions instead.
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import cts, fn, xdmp
+from mlclient.xquery import cts, fn, xdmp
 
 with MLClient() as ml:
     values = cts.values(cts.element_reference("price"))
@@ -127,6 +170,45 @@ slots: the expression defaults to `/` and the query to the empty sequence.
 `estimate` also permits omitting its query. Services keep these builder contracts
 and add execution options such as database, timeout and `pos`.
 
+### Pass Python XML and JSON nodes
+
+Functions accepting nodes also accept Python `dict`, `xml.etree.ElementTree.Element`
+and `ElementTree` objects. This works across `cts`, `fn`, `xs` and `xdmp` builders:
+
+```python
+from xml.etree.ElementTree import ElementTree, fromstring
+from mlclient import MLClient
+from mlclient.xquery import cts, fn, xs, xdmp
+
+price = fromstring("<price>42</price>")
+model = {"title": "Coffee brewing", "text": "Freshly ground coffee beans"}
+query = cts.similar_query(model)
+native_json = query.to_json()  # Local; no request.
+
+with MLClient() as ml:
+    name = ml.eval.expression(fn.local_name(price))  # "price"
+    amount = ml.eval.expression(xs.integer(price))  # 42 after atomization.
+    document = ml.eval.expression(fn.root(ElementTree(price)))
+    parsed = ml.eval.expression(xdmp.unquote(fromstring("<text>&lt;report/&gt;</text>")))
+```
+
+A `dict` represents a JSON object node, an `Element` an XML element, and an
+`ElementTree` an XML document. Lists and tuples remain XQuery sequences; a JSON
+array inside a dictionary remains an array. The builders snapshot mutable input,
+so editing the original object later does not change an existing expression.
+JSON objects must contain JSON-compatible values and string keys; non-finite
+numbers and circular containers are rejected when building the expression.
+
+XML/JSON content is bound as data and reconstructed on the server. Native type
+rules still apply: an element can supply an atomic value to an `xs` constructor,
+but this does not make every JSON object convertible to a number. Copied nodes
+also lack the original database identity and URI. Operations requiring indexed
+or searchable database nodes still need a database expression; `xdmp.exists()`
+continues to require a searchable expression.
+
+See [Similar queries](queries.md#similar-queries) for local serialization and
+XML model limitations.
+
 ### Selection and ordering
 
 Builders support `.pos(position)` and `.pos([start, end])`. Positions are
@@ -135,7 +217,7 @@ or `fn.last()`:
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import cts, fn
+from mlclient.xquery import cts, fn
 
 with MLClient() as ml:
     remaining = ml.eval.expression(
@@ -148,7 +230,7 @@ results. For value-ordered pages, configure a range index and specify ordering:
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import cts
+from mlclient.xquery import cts
 
 with MLClient() as ml:
     page = ml.eval.expression(
@@ -179,7 +261,7 @@ Pass prefixes once for the complete expression, including nested calls:
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import cts, fn
+from mlclient.xquery import cts, fn
 
 with MLClient() as ml:
     count = ml.eval.expression(
@@ -273,7 +355,7 @@ version restrictions still apply; unavailable functions raise `MarkLogicError`.
 | `cts.document_permission_query` | MarkLogic 11+ |
 | `cts.iri_reference` | MarkLogic 11+ |
 
-Consult the [`cts` reference][mlclient.functions.xqy.cts] and the
+Consult the [`cts` reference][mlclient.xquery.cts] and the
 [native reference](https://docs.marklogic.com/cts) for individual requirements.
 
 ## FN: compose standard functions
@@ -295,7 +377,8 @@ when a general-purpose function should operate on nodes selected by a path:
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import fn, xpath
+from mlclient.xquery import fn
+from mlclient.xquery import xpath
 
 with MLClient() as ml:
     one = ml.eval.expression(fn.count("/product"))  # 1: one string value
@@ -313,7 +396,7 @@ Higher-order functions take XQuery function expressions, not Python callables:
 
 ```python
 from mlclient import MLClient
-from mlclient.functions.xqy import fn
+from mlclient.xquery import fn
 
 with MLClient() as ml:
     upper = fn.function_lookup(
@@ -325,7 +408,7 @@ with MLClient() as ml:
 
 Other available namespaces include `xs` for typed values and `xdmp` for the
 supported MarkLogic-specific builders. See the
-[XQuery API reference](../../reference/mlclient/functions/xqy/index.md) for the actual
+[XQuery API reference](../../reference/mlclient/xquery/index.md) for the actual
 exported surface; availability of a namespace does not imply every native
 function has a builder.
 
@@ -333,7 +416,7 @@ function has a builder.
 
 For a deployed library module, define a namespace family such as `Label` with
 static methods returning public
-[ModuleFunctionCall][mlclient.functions.xqy.ModuleFunctionCall] expressions.
+[ModuleFunctionCall][mlclient.xquery.ModuleFunctionCall] expressions.
 Each method provides the function's local name, arguments, namespace URI and
 module path. No XQuery rendering or shared import registry is required.
 
@@ -343,7 +426,7 @@ the XQuery library, the `Label` family and `label` singleton, and composition wi
 handled internally; independent libraries do not compete for prolog prefixes.
 
 For expressions beyond module function calls, subclass the public
-[XqyExpression][mlclient.functions.xqy.XqyExpression] and
+[XqyExpression][mlclient.xquery.XqyExpression] and
 implement `render(ctx: XqyCompilationContext) -> str`. Bind runtime values with
 `ctx.bind(value, atomic_type)`; `compile()` returns XQuery source and bindings.
 Custom expressions compose with the same builders and evaluator as built-in ones.

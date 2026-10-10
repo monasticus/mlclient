@@ -1,0 +1,14 @@
+{
+  "fieldRangeQuery": {
+    "field": [
+      "price"
+    ],
+    "operator": "<=",
+    "value": [
+      {
+        "type": "decimal",
+        "val": "2"
+      }
+    ]
+  }
+}

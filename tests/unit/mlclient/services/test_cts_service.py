@@ -6,7 +6,7 @@ import pytest
 import respx
 
 from mlclient import MLClient
-from mlclient.functions.xqy import fn
+from mlclient.xquery import fn
 from mlclient.models import SearchHit, ValueHit
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.services import CtsService

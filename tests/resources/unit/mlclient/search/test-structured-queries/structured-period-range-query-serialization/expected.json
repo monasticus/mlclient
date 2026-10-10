@@ -1,0 +1,19 @@
+{
+  "period-range-query": {
+    "axis": [
+      "valid",
+      "system"
+    ],
+    "temporal-operator": "aln_contains",
+    "period": [
+      {
+        "period-start": "2024-01-01T00:00:00Z",
+        "period-end": "2025-01-01T00:00:00Z"
+      }
+    ],
+    "temporal-option": [
+      "cached"
+    ],
+    "weight": 2
+  }
+}

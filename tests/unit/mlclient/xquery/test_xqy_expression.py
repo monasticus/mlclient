@@ -1,11 +1,10 @@
-import sys
-import pytest
-from mlclient.xquery import Cts, XqyExpression
-from mlclient.xquery import fn
-from xml.etree.ElementTree import fromstring
-from xml.etree.ElementTree import ElementTree
 import json
-from mlclient.xquery import FunctionCall
+import sys
+from xml.etree.ElementTree import ElementTree, fromstring
+
+import pytest
+
+from mlclient.xquery import Cts, FunctionCall, XqyExpression, fn
 
 
 def test_abstract_expression_requires_render():
@@ -29,7 +28,7 @@ def test_expression_string_contains_complete_source():
 def test_circular_json_is_rejected():
     value = {}
     value["self"] = value
-    with pytest.raises(ValueError, match=r"^Circular reference detected$") as error:
+    with pytest.raises(ValueError, match=r"^Circular reference detected") as error:
         fn.data(value)
     assert str(error.value) == "Circular reference detected"
 
@@ -49,12 +48,14 @@ def test_element_tail_is_not_part_of_the_input_node():
         (
             {"value": float("nan")},
             ValueError,
-            "Out of range float values are not JSON compliant",
+            "Out of range float values are not JSON compliant"
+            + (": nan" if sys.version_info >= (3, 12) else ""),
         ),
         (
             {"value": float("inf")},
             ValueError,
-            "Out of range float values are not JSON compliant",
+            "Out of range float values are not JSON compliant"
+            + (": inf" if sys.version_info >= (3, 12) else ""),
         ),
         (
             {"value": object()},

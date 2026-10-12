@@ -4,5 +4,6 @@ from tests.utils.expressions import StaticExpression
 
 def run():
     return cts.distinctive_terms(
-        cts.search().pos(1), options=StaticExpression("map:map()"),
+        cts.search().pos(1),
+        options=StaticExpression("map:map()"),
     ).compile()

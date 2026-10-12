@@ -1,2 +1,2 @@
 @@prolog@@
-cts:query(xdmp:to-json(@@body@@)/node())
+xdmp:to-json(@@body@@)/node() => cts:query()

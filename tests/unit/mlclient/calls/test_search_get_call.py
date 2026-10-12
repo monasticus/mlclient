@@ -203,7 +203,9 @@ def test_fully_parametrized_call():
 
 def test_zero_and_empty_parameters_are_preserved():
     call = SearchGetCall(
-        q="", page_length=0, transform_params={"offset": 0, "unused": None},
+        q="",
+        page_length=0,
+        transform_params={"offset": 0, "unused": None},
     )
 
     assert call.params == {"q": "", "pageLength": 0, "trans:offset": 0}

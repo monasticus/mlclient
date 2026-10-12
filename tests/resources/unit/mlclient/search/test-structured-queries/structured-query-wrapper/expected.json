@@ -1,0 +1,20 @@
+{
+  "query": {
+    "queries": [
+      {
+        "term-query": {
+          "text": [
+            "blue"
+          ]
+        }
+      },
+      {
+        "collection-query": {
+          "uri": [
+            "reports"
+          ]
+        }
+      }
+    ]
+  }
+}

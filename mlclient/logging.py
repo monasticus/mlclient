@@ -131,7 +131,13 @@ class MLLogHandler(logging.Handler):
         self._environment = environment
         self._app_server = app_server
         self._client_kwargs = _client_kwargs(
-            host, port, protocol, username, password, auth, ssl,
+            host,
+            port,
+            protocol,
+            username,
+            password,
+            auth,
+            ssl,
         )
         self._queue: queue.SimpleQueue = queue.SimpleQueue()
         self._worker: threading.Thread | None = None

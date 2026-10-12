@@ -1,6 +1,7 @@
 """Arguments that CTS queries cannot serialize locally are rejected explicitly."""
 
 import datetime
+
 from mlclient.xquery import cts
 
 

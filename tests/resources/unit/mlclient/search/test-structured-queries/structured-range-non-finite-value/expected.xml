@@ -1,0 +1,1 @@
+<search:range-query xmlns:search="http://marklogic.com/appservices/search"><search:element name="price" ns="" /><search:value>NaN</search:value><search:range-operator>LT</search:range-operator></search:range-query>

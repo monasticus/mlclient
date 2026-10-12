@@ -5,7 +5,9 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 
-from mlclient import _constants as constants, _utils as utils, exceptions
+from mlclient import _constants as constants
+from mlclient import _utils as utils
+from mlclient import exceptions
 
 
 def validate_supported(
@@ -106,5 +108,3 @@ def request_body_with_content_type(
         msg = f"{endpoint} requires a JSON object or XML body"
         raise exceptions.WrongParametersError(msg)
     return body, content_type
-
-

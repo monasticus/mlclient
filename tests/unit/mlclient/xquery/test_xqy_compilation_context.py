@@ -1,6 +1,7 @@
-import pytest
 import re
 import sys
+
+import pytest
 
 from mlclient.xquery import XqyCompilationContext, fn
 

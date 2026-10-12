@@ -29,6 +29,7 @@ from xml.etree.ElementTree import (
 )
 from xml.parsers.expat import ExpatError
 
+from mlclient.search.base import SearchQuery
 from mlclient.xquery.expressions import (
     AtomicValue,
     FunctionCall,
@@ -41,7 +42,6 @@ from mlclient.xquery.expressions import (
     as_expr,
     as_qname,
 )
-from mlclient.search.base import SearchQuery
 
 CTS_NS_URI = "http://marklogic.com/cts"
 # ElementTree has no per-call prefix map; registering the prefix makes every
@@ -5507,8 +5507,7 @@ def _subquery(expression, output_format):
         expression = WordQuery(expression)
     if not isinstance(expression, CtsQuery):
         message = (
-            "CTS subquery requires server evaluation, got "
-            f"{_display(expression)}."
+            f"CTS subquery requires server evaluation, got {_display(expression)}."
         )
         raise TypeError(message)
     return expression.serialize(output_format)
@@ -5621,8 +5620,7 @@ def _strings(expression):
             continue
         if not isinstance(item, AtomicValue) or item.cast not in (None, "xs:string"):
             message = (
-                "CTS string argument requires server evaluation, got "
-                f"{_display(item)}."
+                f"CTS string argument requires server evaluation, got {_display(item)}."
             )
             raise TypeError(message)
         result.append(item.value)
@@ -5667,8 +5665,7 @@ def _number(expression):
             raise ValueError(message)
         return value
     message = (
-        "CTS numeric argument requires server evaluation, got "
-        f"{_display(expression)}."
+        f"CTS numeric argument requires server evaluation, got {_display(expression)}."
     )
     raise TypeError(message)
 
@@ -6274,7 +6271,6 @@ class _ColumnMember(_Member):
         )
 
 
-
 def _qname_nodes(root, tag, qnames):
     """Append one QName text child per name, declaring a prefix for a namespace.
 
@@ -6815,8 +6811,7 @@ def _atomic(expression):
         lexical = ("true" if value else "false") if isinstance(value, bool) else value
         return expression.cast or "xs:string", lexical
     message = (
-        "CTS value argument requires server evaluation, got "
-        f"{_display(expression)}."
+        f"CTS value argument requires server evaluation, got {_display(expression)}."
     )
     raise TypeError(message)
 
@@ -6862,8 +6857,7 @@ def _qname(expression):
         lexical = _single(_strings(expression.args[1]))
         return uri, lexical.rpartition(":")[2]
     message = (
-        "CTS QName argument requires server evaluation, got "
-        f"{_display(expression)}."
+        f"CTS QName argument requires server evaluation, got {_display(expression)}."
     )
     raise TypeError(message)
 
@@ -7043,11 +7037,13 @@ def _reference(expression):
             prefix = "parent-" if key == "parent" else ""
             members.extend(
                 [
-                    _TextMember("parentNamespaceURI" if prefix else "namespaceURI",
+                    _TextMember(
+                        "parentNamespaceURI" if prefix else "namespaceURI",
                         prefix + "namespace-uri",
                         uri,
                     ),
-                    _TextMember("parentLocalname" if prefix else "localname",
+                    _TextMember(
+                        "parentLocalname" if prefix else "localname",
                         prefix + "localname",
                         local,
                     ),
@@ -7285,9 +7281,10 @@ def _literal_node(expression):
     ValueError
         For invalid literal JSON or XML that is not well-formed.
     """
-    projected = (
-        isinstance(expression, ResultXPath) and expression.source in {"*", "node()"}
-    )
+    projected = isinstance(expression, ResultXPath) and expression.source in {
+        "*",
+        "node()",
+    }
     inner = expression.inner if projected else expression
     if (
         not isinstance(inner, FunctionCall)

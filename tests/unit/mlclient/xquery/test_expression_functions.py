@@ -1,5 +1,6 @@
-import pytest
 import re
+
+import pytest
 
 from mlclient.xquery import Cts, fn, namespace_bindings, xpath
 

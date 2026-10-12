@@ -1,5 +1,4 @@
-from mlclient.search.structured import JsonProperty
-from mlclient.search.structured import ValueQuery
+from mlclient.search.structured import JsonProperty, ValueQuery
 
 
 def run():

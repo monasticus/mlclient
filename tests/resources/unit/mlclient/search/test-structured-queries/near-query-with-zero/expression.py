@@ -1,5 +1,4 @@
-from mlclient.search.structured import TermQuery
-from mlclient.search.structured import NearQuery
+from mlclient.search.structured import NearQuery, TermQuery
 
 
 def run():

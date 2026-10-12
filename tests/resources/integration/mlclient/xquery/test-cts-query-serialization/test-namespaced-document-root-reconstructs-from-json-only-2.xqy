@@ -1,2 +1,2 @@
 @@prolog@@
-cts:query(<a>{@@body@@}</a>/*)
+<a>{@@body@@}</a>/node() => cts:query()

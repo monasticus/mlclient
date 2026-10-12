@@ -3,12 +3,12 @@ import pytest
 import respx
 
 from mlclient import AsyncMLClient
-from mlclient.exceptions import WrongParametersError
 from mlclient.calls import EvalCall
+from mlclient.exceptions import WrongParametersError
 from mlclient.models import DocumentsBodyPart
-from tests.utils import data as test_data, resources as resources_utils
+from tests.utils import data as test_data
+from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
-
 
 STRUCTURED_QUERY = resources_utils.read_test_resource_text(
     __file__,

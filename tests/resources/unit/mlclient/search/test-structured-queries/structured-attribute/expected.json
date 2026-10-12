@@ -1,0 +1,6 @@
+{
+  "attribute": {
+    "name": "status",
+    "ns": "https://example.com/example"
+  }
+}

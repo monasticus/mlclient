@@ -1,5 +1,4 @@
-from mlclient.search.structured import Field
-from mlclient.search.structured import WordQuery
+from mlclient.search.structured import Field, WordQuery
 
 
 def run():

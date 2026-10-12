@@ -1,31 +1,31 @@
 from __future__ import annotations
 
-from tests.utils.resources import render_test_resource
-
 from datetime import date
 from decimal import Decimal
-from xml.etree.ElementTree import Element as XmlElement, tostring
 from uuid import uuid4
+from xml.etree.ElementTree import Element as XmlElement
+from xml.etree.ElementTree import tostring
 
 import pytest
 
 from mlclient import _constants as constants
 from mlclient.calls import ApiCall
 from mlclient.exceptions import MarkLogicError
-from mlclient.xquery import cts, fn
 from mlclient.models import JSONDocument, TupleHit, ValueHit, XMLDocument
 from mlclient.search.options import Range, SearchOptions
 from mlclient.search.structured import (
+    SEARCH_NS_URI,
     Attribute,
     ContainerConstraintQuery,
     Element,
     Field,
     JsonProperty,
     PathIndex,
-    SEARCH_NS_URI,
     TermQuery,
     sq,
 )
+from mlclient.xquery import cts, fn
+from tests.utils.resources import render_test_resource
 
 pytestmark = pytest.mark.ml_access
 

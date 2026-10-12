@@ -80,7 +80,8 @@ carry the notice without logging for every document.
 ## Versioned publishing
 
 Only `.github/workflows/docs.yml` writes the production `gh-pages` branch.
-PRs run a strict build; `main` publishes `dev`. The release workflow calls this
+The `CI` workflow calls it when documentation checks are selected: PRs run a strict build,
+and `main` publishes `dev`. The release workflow calls this
 workflow after successful package publication: stable tags publish their version
 and update `latest`, while prerelease tags publish a numbered entry only.
 See [Releasing MLClient](releasing.md) for release checks and tag preparation.

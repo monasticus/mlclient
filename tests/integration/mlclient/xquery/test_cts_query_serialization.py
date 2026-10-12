@@ -5,16 +5,18 @@ Queries are compared through their native JSON form: XML QName prefixes may
 differ from the constructor's while naming the same QNames.
 """
 
-from tests.utils.resources import render_test_resource
 import datetime
 import json
 import os
 from decimal import Decimal
 from xml.etree.ElementTree import ElementTree, fromstring, tostring
+
 import pytest
+
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.xquery import FunctionCall, cts, fn, xdmp, xs
+from tests.utils.resources import render_test_resource
 
 pytestmark = pytest.mark.ml_access
 NS = "https://example.com/cts-test"
@@ -26,27 +28,43 @@ QUERIES = {
     "before": cts.before_query(16000000000),
     "element": cts.element_query(["a", fn.qname(NS, "t:b")], cts.word_query("x")),
     "element-word": cts.element_word_query(
-        fn.qname(NS, "title"), ["blue", "red"], options="case-insensitive", weight=2,
+        fn.qname(NS, "title"),
+        ["blue", "red"],
+        options="case-insensitive",
+        weight=2,
     ),
     "element-value": cts.element_value_query("title", "blue"),
     "element-value-any": cts.element_value_query("title"),
     "element-attribute-value": cts.element_attribute_value_query(
-        "item", "status", "ok", options="exact", weight=0.5,
+        "item",
+        "status",
+        "ok",
+        options="exact",
+        weight=0.5,
     ),
     "element-attribute-word": cts.element_attribute_word_query("item", "status", "ok"),
     "element-range-integer": cts.element_range_query(
-        "price", ">=", 10, options="min-occurs=1", weight=2,
+        "price",
+        ">=",
+        10,
+        options="min-occurs=1",
+        weight=2,
     ),
     "element-range-decimal": cts.element_range_query("price", "<", Decimal("1.5")),
     "element-range-double": cts.element_range_query("price", ">", xs.double(1.5)),
     "element-range-strings": cts.element_range_query("code", "=", ["a", "b"]),
     "element-range-date": cts.element_range_query(
-        "day", ">", datetime.date(2026, 1, 1),
+        "day",
+        ">",
+        datetime.date(2026, 1, 1),
     ),
     "element-range-date-time": cts.element_range_query("at", "<=", START),
     "element-range-boolean": cts.element_range_query("flag", "=", True),
     "element-attribute-range": cts.element_attribute_range_query(
-        "item", "amount", "!=", 3,
+        "item",
+        "amount",
+        "!=",
+        3,
     ),
     "field-value": cts.field_value_query("", ["1", "2"], weight=3),
     "field-range": cts.field_range_query("price", "<=", 2),
@@ -54,12 +72,16 @@ QUERIES = {
     "json-property-value-number": cts.json_property_value_query("count", 7),
     "json-property-value-boolean": cts.json_property_value_query("active", True),
     "json-property-value-mixed": cts.json_property_value_query(
-        ["a", "b"], ["x", 1.5, False],
+        ["a", "b"],
+        ["x", 1.5, False],
     ),
     "json-property-range": cts.json_property_range_query("price", ">", 10),
     "path-range": cts.path_range_query("/item/price", ">", 1),
     "element-geospatial-point": cts.element_geospatial_query(
-        "origin", POINT, options="coordinate-system=wgs84", weight=2,
+        "origin",
+        POINT,
+        options="coordinate-system=wgs84",
+        weight=2,
     ),
     "element-geospatial-regions": cts.element_geospatial_query(
         "origin",
@@ -72,27 +94,46 @@ QUERIES = {
         ],
     ),
     "element-child-geospatial": cts.element_child_geospatial_query(
-        "location", "point", POINT,
+        "location",
+        "point",
+        POINT,
     ),
     "element-pair-geospatial": cts.element_pair_geospatial_query(
-        "location", "lat", "lon", POINT,
+        "location",
+        "lat",
+        "lon",
+        POINT,
     ),
     "element-attribute-pair-geospatial": cts.element_attribute_pair_geospatial_query(
-        "item", "lat", "lon", POINT, weight=3,
+        "item",
+        "lat",
+        "lon",
+        POINT,
+        weight=3,
     ),
     "json-property-geospatial": cts.json_property_geospatial_query("origin", POINT),
     "json-property-child-geospatial": cts.json_property_child_geospatial_query(
-        "location", "point", POINT,
+        "location",
+        "point",
+        POINT,
     ),
     "json-property-pair-geospatial": cts.json_property_pair_geospatial_query(
-        "location", "lat", "lon", POINT,
+        "location",
+        "lat",
+        "lon",
+        POINT,
     ),
     "path-geospatial": cts.path_geospatial_query("/item/origin", POINT),
     "period-compare": cts.period_compare_query(
-        "system", "aln_equals", "valid", options="cached-incremental",
+        "system",
+        "aln_equals",
+        "valid",
+        options="cached-incremental",
     ),
     "period-range": cts.period_range_query(
-        ["valid", "system"], "aln_before", period=cts.period(START, END),
+        ["valid", "system"],
+        "aln_before",
+        period=cts.period(START, END),
     ),
     "lsqt": cts.lsqt_query("temporal", timestamp=START, options="cached", weight=2),
     "registered": cts.registered_query([1, 2], options="unfiltered", weight=2),
@@ -127,14 +168,17 @@ QUERIES = {
         weight=2,
     ),
     "reverse-json": cts.reverse_query(
-        xdmp.unquote('{"label":"blue","count":2}'), weight=2,
+        xdmp.unquote('{"label":"blue","count":2}'),
+        weight=2,
     ),
     "geo-box-fractional": cts.element_geospatial_query(
-        "location", cts.box(10.1, 20.2, 30.3, 40.4),
+        "location",
+        cts.box(10.1, 20.2, 30.3, 40.4),
     ),
     "not": cts.not_query(cts.word_query("blue")),
     "json-property-scope": cts.json_property_scope_query(
-        ["report", "summary"], cts.word_query("blue"),
+        ["report", "summary"],
+        cts.word_query("blue"),
     ),
     "properties-fragment": cts.properties_fragment_query(cts.word_query("blue")),
     "locks-fragment": cts.locks_fragment_query(cts.word_query("blue")),
@@ -147,7 +191,9 @@ QUERIES = {
         weight=2,
     ),
     "namespaced-attribute": cts.element_attribute_value_query(
-        fn.qname(NS, "t:item"), fn.qname(NS, "t:status"), "ok",
+        fn.qname(NS, "t:item"),
+        fn.qname(NS, "t:status"),
+        "ok",
     ),
     "composed-operators": (cts.word_query("blue") | cts.word_query("red"))
     & ~cts.collection_query("archive"),
@@ -213,7 +259,9 @@ class TestCtsQuerySerialization:
     def test_element_attribute_reference_reconstructs_from_xml_only(self, ml_client):
         query = cts.range_query(
             cts.element_attribute_reference(
-                "item", "amount", options=["type=int", "unchecked"],
+                "item",
+                "amount",
+                options=["type=int", "unchecked"],
             ),
             "=",
             2,
@@ -258,7 +306,7 @@ class TestCtsQuerySerialization:
             xdmp.unquote(
                 (
                     '<report xmlns:r="https://example.com/reports"><r:label>'
-                    'blue</r:label></report>'
+                    "blue</r:label></report>"
                 ),
             ).xpath("*"),
             weight=2,
@@ -271,8 +319,8 @@ class TestCtsQuerySerialization:
             options=xdmp.unquote(
                 (
                     '<options xmlns="cts:distinctive-terms"><max-terms>20</m'
-                    'ax-terms><score>logtf</score><min-val>1</min-val><min-w'
-                    'eight>2</min-weight><complete>true</complete></options>'
+                    "ax-terms><score>logtf</score><min-val>1</min-val><min-w"
+                    "eight>2</min-weight><complete>true</complete></options>"
                 ),
             ).xpath("*"),
             weight=2,
@@ -301,7 +349,7 @@ class TestCtsQuerySerialization:
             options=fromstring(
                 (
                     '<options xmlns="cts:distinctive-terms"><max-terms>20</m'
-                    'ax-terms></options>'
+                    "ax-terms></options>"
                 ),
             ),
         )
@@ -337,10 +385,7 @@ class TestCtsQuerySerialization:
         results = ml_client.eval.xquery(
             render_test_resource(
                 __file__,
-                (
-                    "test-similar-json-model-has-the-native-xml-reader-limit"
-                    "ation.xqy"
-                ),
+                ("test-similar-json-model-has-the-native-xml-reader-limitation.xqy"),
                 prolog=prolog,
                 body=body,
             ),
@@ -368,7 +413,11 @@ class TestCtsQuerySerialization:
         )
         result = ml_client.eval.xquery(
             render_test_resource(
-                __file__, "assert-model-nodes.xqy", prolog=prolog, body=body, kind=kind,
+                __file__,
+                "assert-model-nodes.xqy",
+                prolog=prolog,
+                body=body,
+                kind=kind,
             ),
             variables=variables,
         )
@@ -392,7 +441,10 @@ class TestCtsQuerySerialization:
         variables["serialized_json"] = json.dumps(query.to_json())
         (native, from_xml, from_json) = ml_client.eval.xquery(
             render_test_resource(
-                __file__, "assert-reconstructed.xqy", prolog=prolog, body=body,
+                __file__,
+                "assert-reconstructed.xqy",
+                prolog=prolog,
+                body=body,
             ),
             variables=variables,
         )
@@ -430,28 +482,33 @@ class TestCtsQuerySerialization:
         self.assert_reconstructed(
             ml_client,
             cts.word_query(
-                "blue", options=["unstemmed", "case-insensitive", "lang=fr"],
+                "blue",
+                options=["unstemmed", "case-insensitive", "lang=fr"],
             ),
         )
 
     def test_word_query_empty(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.word_query(None, options="lang=en", weight=1),
+            ml_client,
+            cts.word_query(None, options="lang=en", weight=1),
         )
 
     def test_word_query_out_of_range_weight(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.word_query("blue", options="lang=en", weight=100),
+            ml_client,
+            cts.word_query("blue", options="lang=en", weight=100),
         )
 
     def test_word_query_small_weight(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.word_query("blue", options="lang=en", weight=1e-05),
+            ml_client,
+            cts.word_query("blue", options="lang=en", weight=1e-05),
         )
 
     def test_word_query_scientific_weight(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.word_query("blue", options="lang=en", weight=1e-07),
+            ml_client,
+            cts.word_query("blue", options="lang=en", weight=1e-07),
         )
 
     def test_collection_query(self, ml_client):
@@ -482,7 +539,8 @@ class TestCtsQuerySerialization:
         self.assert_reconstructed(
             ml_client,
             cts.and_not_query(
-                cts.collection_query("reports"), cts.collection_query("notes"),
+                cts.collection_query("reports"),
+                cts.collection_query("notes"),
             ),
         )
 
@@ -490,7 +548,8 @@ class TestCtsQuerySerialization:
         self.assert_reconstructed(
             ml_client,
             cts.boost_query(
-                cts.collection_query("reports"), cts.collection_query("notes"),
+                cts.collection_query("reports"),
+                cts.collection_query("notes"),
             ),
         )
 
@@ -498,33 +557,39 @@ class TestCtsQuerySerialization:
         self.assert_reconstructed(
             ml_client,
             cts.not_in_query(
-                cts.collection_query("reports"), cts.collection_query("notes"),
+                cts.collection_query("reports"),
+                cts.collection_query("notes"),
             ),
         )
 
     def test_not_query(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.not_query(cts.collection_query("reports")),
+            ml_client,
+            cts.not_query(cts.collection_query("reports")),
         )
 
     def test_document_fragment_query(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.document_fragment_query(cts.collection_query("reports")),
+            ml_client,
+            cts.document_fragment_query(cts.collection_query("reports")),
         )
 
     def test_locks_fragment_query(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.locks_fragment_query(cts.collection_query("reports")),
+            ml_client,
+            cts.locks_fragment_query(cts.collection_query("reports")),
         )
 
     def test_properties_fragment_query(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.properties_fragment_query(cts.collection_query("reports")),
+            ml_client,
+            cts.properties_fragment_query(cts.collection_query("reports")),
         )
 
     def test_document_query(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.document_query(["/reports/a.xml", "/notes/b.json"]),
+            ml_client,
+            cts.document_query(["/reports/a.xml", "/notes/b.json"]),
         )
 
     def test_false_query(self, ml_client):
@@ -544,7 +609,8 @@ class TestCtsQuerySerialization:
 
     def test_directory_query(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.directory_query(["/reports/", "/notes/"], depth="infinity"),
+            ml_client,
+            cts.directory_query(["/reports/", "/notes/"], depth="infinity"),
         )
 
     def test_json_property_scope_query(self, ml_client):
@@ -566,7 +632,8 @@ class TestCtsQuerySerialization:
 
     def test_field_word_query_default_field(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.field_word_query("", "blue", options="lang=en", weight=2),
+            ml_client,
+            cts.field_word_query("", "blue", options="lang=en", weight=2),
         )
 
     def test_near_query(self, ml_client):
@@ -589,18 +656,21 @@ class TestCtsQuerySerialization:
     def test_near_query_large_distance(self, ml_client):
         with pytest.raises(MarkLogicError, match="XDMP-QUERYATTRVAL"):
             self.assert_reconstructed(
-                ml_client, cts.near_query([], distance=1000000000000),
+                ml_client,
+                cts.near_query([], distance=1000000000000),
             )
 
     def test_near_query_negative_minimum(self, ml_client):
         self.assert_reconstructed(
-            ml_client, cts.near_query([], options="minimum-distance=-2"),
+            ml_client,
+            cts.near_query([], options="minimum-distance=-2"),
         )
 
     def test_near_query_large_minimum(self, ml_client):
         with pytest.raises(MarkLogicError, match="XDMP-QUERYATTRVAL"):
             self.assert_reconstructed(
-                ml_client, cts.near_query([], options="minimum-distance=4294967296"),
+                ml_client,
+                cts.near_query([], options="minimum-distance=4294967296"),
             )
 
     def test_directory_query_defaults(self, ml_client):

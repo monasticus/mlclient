@@ -1,5 +1,4 @@
-from mlclient.search.structured import JsonProperty
-from mlclient.search.structured import WordQuery
+from mlclient.search.structured import JsonProperty, WordQuery
 
 
 def run():

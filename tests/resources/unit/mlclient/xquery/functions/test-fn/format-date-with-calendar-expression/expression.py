@@ -1,4 +1,5 @@
 from datetime import date
+
 from mlclient.xquery import cts, fn
 
 

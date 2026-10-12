@@ -10,13 +10,14 @@ from mlclient import MLClientManager
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
-from mlclient.xquery import cts
 from mlclient.services import EvalService
+from mlclient.xquery import cts
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 SEARCH_XQUERY = resources_utils.read_test_resource_text(
-    __file__, "search.xqy",
+    __file__,
+    "search.xqy",
 ).removesuffix("\n")
 
 

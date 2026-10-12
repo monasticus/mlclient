@@ -3,5 +3,6 @@ from mlclient.xquery import cts, fn
 
 def run():
     return fn.count(
-        cts.search().pos(1), maximum=fn.count(cts.search().pos(1)),
+        cts.search().pos(1),
+        maximum=fn.count(cts.search().pos(1)),
     ).compile()

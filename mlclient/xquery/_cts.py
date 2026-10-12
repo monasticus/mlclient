@@ -11,18 +11,14 @@ from __future__ import annotations
 
 import datetime
 
-from mlclient.xquery._xs import Xs
 from mlclient.xquery._cts_query import (
-    Box,
-    Circle,
-    Period,
-    Point,
-    Polygon,
     AfterQuery,
     AndNotQuery,
     AndQuery,
     BeforeQuery,
     BoostQuery,
+    Box,
+    Circle,
     CollectionQuery,
     ColumnRangeQuery,
     DirectoryQuery,
@@ -62,8 +58,11 @@ from mlclient.xquery._cts_query import (
     OrQuery,
     PathGeospatialQuery,
     PathRangeQuery,
+    Period,
     PeriodCompareQuery,
     PeriodRangeQuery,
+    Point,
+    Polygon,
     PropertiesFragmentQuery,
     RangeQuery,
     RegisteredQuery,
@@ -74,6 +73,7 @@ from mlclient.xquery._cts_query import (
     TrueQuery,
     WordQuery,
 )
+from mlclient.xquery._xs import Xs
 from mlclient.xquery.expressions import (
     AtomicInput,
     DatabaseRoot,
@@ -83,8 +83,8 @@ from mlclient.xquery.expressions import (
     StringInput,
     XqyExpression,
     as_qname,
-    namespace_map,
     as_searchable_expression,
+    namespace_map,
 )
 
 xs = Xs()

@@ -1,6 +1,6 @@
-from mlclient.search.structured import RangeQuery
 from datetime import datetime
-from mlclient.search.structured import Field
+
+from mlclient.search.structured import Field, RangeQuery
 
 
 def run():

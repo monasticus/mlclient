@@ -1,6 +1,6 @@
 from decimal import Decimal
-from mlclient.search.structured import RangeQuery
-from mlclient.search.structured import JsonProperty
+
+from mlclient.search.structured import JsonProperty, RangeQuery
 
 
 def run():

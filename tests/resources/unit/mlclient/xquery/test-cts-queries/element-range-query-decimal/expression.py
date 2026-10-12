@@ -1,6 +1,7 @@
 """Native ``cts:element-range-query`` serialization through the public CTS builder."""
 
 from decimal import Decimal
+
 from mlclient.xquery import cts
 
 

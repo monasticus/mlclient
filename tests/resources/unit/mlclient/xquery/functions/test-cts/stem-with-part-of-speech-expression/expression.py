@@ -3,5 +3,6 @@ from mlclient.xquery import cts, fn
 
 def run():
     return cts.stem(
-        "MarkLogic search", part_of_speech=fn.string(cts.search().pos(1)),
+        "MarkLogic search",
+        part_of_speech=fn.string(cts.search().pos(1)),
     ).compile()

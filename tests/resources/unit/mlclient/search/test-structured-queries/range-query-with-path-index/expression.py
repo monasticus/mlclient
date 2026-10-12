@@ -1,5 +1,4 @@
-from mlclient.search.structured import PathIndex
-from mlclient.search.structured import RangeQuery
+from mlclient.search.structured import PathIndex, RangeQuery
 
 
 def run():

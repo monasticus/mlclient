@@ -6,13 +6,12 @@ import pytest
 import respx
 
 from mlclient import MLClient
-from mlclient.xquery import fn
 from mlclient.models import SearchHit, ValueHit
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.services import CtsService
+from mlclient.xquery import fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
-
 
 METHODS = {
     name: method
@@ -80,7 +79,8 @@ def test_pos_range_requires_two_positions():
     with MLClient() as ml:
         cts = CtsService(ml.rest)
         with pytest.raises(
-            TypeError, match=re.escape("pos ranges must contain exactly two positions"),
+            TypeError,
+            match=re.escape("pos ranges must contain exactly two positions"),
         ) as error:
             cts.search(pos=[1])
     assert str(error.value) == "pos ranges must contain exactly two positions"
@@ -296,7 +296,8 @@ def test_native_operation_rejects_unsupported_output_type():
     with MLClient() as ml:
         cts = CtsService(ml.rest)
         with pytest.raises(
-            ValueError, match=re.escape("output_type must be None, str or bytes"),
+            ValueError,
+            match=re.escape("output_type must be None, str or bytes"),
         ) as error:
             cts.contains("coffee", cts.word_query("coffee"), output_type=int)
     assert str(error.value) == "output_type must be None, str or bytes"

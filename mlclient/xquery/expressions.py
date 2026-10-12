@@ -9,16 +9,16 @@ from __future__ import annotations
 
 import datetime
 import decimal
-import math
 import json
+import math
 import re
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from copy import copy
-from xml.dom import minidom
-from xml.etree.ElementTree import Element, ElementTree, tostring
 from dataclasses import dataclass
 from typing import TypeAlias, overload
+from xml.dom import minidom
+from xml.etree.ElementTree import Element, ElementTree, tostring
 
 # XML 1.0 NCName character ranges, excluding the QName separator ':'.
 _NAME_START = (

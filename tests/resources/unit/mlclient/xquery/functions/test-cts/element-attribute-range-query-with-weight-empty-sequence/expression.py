@@ -3,5 +3,9 @@ from mlclient.xquery import cts
 
 def run():
     return cts.element_attribute_range_query(
-        "item", "id", "=", "value", weight=None,
+        "item",
+        "id",
+        "=",
+        "value",
+        weight=None,
     ).compile()

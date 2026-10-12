@@ -1,5 +1,4 @@
-from mlclient.search.structured import Element
-from mlclient.search.structured import Attribute, ValueQuery
+from mlclient.search.structured import Attribute, Element, ValueQuery
 
 
 def run():

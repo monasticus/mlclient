@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "TermQuery.weight must be finite."
+}

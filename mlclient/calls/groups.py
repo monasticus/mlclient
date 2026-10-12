@@ -98,7 +98,10 @@ class GroupPropertiesGetCall(ApiCall):
             If the format is not xml, json or html
         """
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
 
 

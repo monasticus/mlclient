@@ -3,5 +3,8 @@ from mlclient.xquery import cts
 
 def run():
     return cts.element_attribute_word_match(
-        "item", "id", "prod*", quality_weight=None,
+        "item",
+        "id",
+        "prod*",
+        quality_weight=None,
     ).compile()

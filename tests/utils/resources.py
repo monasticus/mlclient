@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import builtins
 import json
-import runpy
 import re
+import runpy
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
 from pathlib import Path

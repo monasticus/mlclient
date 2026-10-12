@@ -1,0 +1,6 @@
+{
+  "field": {
+    "name": "body",
+    "collation": "http://marklogic.com/collation/"
+  }
+}

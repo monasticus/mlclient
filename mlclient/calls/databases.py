@@ -105,10 +105,16 @@ class DatabasesGetCall(ApiCall):
         view: str,
     ):
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
         call_utils.validate_supported(
-            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+            [view],
+            cls._SUPPORTED_VIEWS,
+            "views",
+            required=True,
         )
 
 
@@ -250,10 +256,16 @@ class DatabaseGetCall(ApiCall):
         view: str,
     ):
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
         call_utils.validate_supported(
-            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+            [view],
+            cls._SUPPORTED_VIEWS,
+            "views",
+            required=True,
         )
 
 
@@ -448,7 +460,10 @@ class DatabasePropertiesGetCall(ApiCall):
         data_format: str,
     ):
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
 
 

@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from tests.utils.resources import render_test_resource
-
 from decimal import Decimal
 
 import pytest
 
 from mlclient.exceptions import MarkLogicError
-from mlclient.xquery import Cts, fn, xs
 from mlclient.services import CtsService
+from mlclient.xquery import Cts, fn, xs
 from tests.utils.expressions import StaticExpression
+from tests.utils.resources import render_test_resource
 
 pytestmark = pytest.mark.ml_access
 

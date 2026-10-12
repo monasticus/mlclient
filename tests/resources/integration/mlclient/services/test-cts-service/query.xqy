@@ -1,1 +1,4 @@
-(<cts:label><cts:class name="alpha"/></cts:label>, <cts:label><cts:class name="beta"/></cts:label>)
+(
+    <cts:label><cts:class name="alpha"/></cts:label>,
+    <cts:label><cts:class name="beta"/></cts:label>
+)

@@ -6,10 +6,10 @@ Builders compose expressions; services execute through the common evaluator.
 from __future__ import annotations
 
 from mlclient.xquery.expressions import (
-    XqyExpression,
-    NodeInput,
     FunctionCall,
+    NodeInput,
     StringInput,
+    XqyExpression,
     as_searchable_expression,
 )
 
@@ -38,7 +38,6 @@ class Xdmp:
         Native reference: https://docs.marklogic.com/xdmp:exists
         """
         return FunctionCall("xdmp:exists", (as_searchable_expression(searchable),))
-
 
     @staticmethod
     def unquote(

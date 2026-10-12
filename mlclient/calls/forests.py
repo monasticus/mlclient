@@ -139,10 +139,16 @@ class ForestsGetCall(ApiCall):
         view: str,
     ):
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
         call_utils.validate_supported(
-            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+            [view],
+            cls._SUPPORTED_VIEWS,
+            "views",
+            required=True,
         )
 
 
@@ -347,10 +353,16 @@ class ForestGetCall(ApiCall):
         view: str,
     ):
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
         call_utils.validate_supported(
-            [view], cls._SUPPORTED_VIEWS, "views", required=True,
+            [view],
+            cls._SUPPORTED_VIEWS,
+            "views",
+            required=True,
         )
 
 
@@ -426,7 +438,10 @@ class ForestPostCall(ApiCall):
             msg = "You must include the 'state' parameter within a body!"
             raise exceptions.WrongParametersError(msg)
         call_utils.validate_supported(
-            [state], cls._SUPPORTED_STATES, "states", required=True,
+            [state],
+            cls._SUPPORTED_STATES,
+            "states",
+            required=True,
         )
 
 
@@ -498,7 +513,10 @@ class ForestDeleteCall(ApiCall):
         replicas: str,
     ):
         call_utils.validate_supported(
-            [level], cls._SUPPORTED_LEVELS, "levels", required=True,
+            [level],
+            cls._SUPPORTED_LEVELS,
+            "levels",
+            required=True,
         )
         if replicas and replicas not in cls._SUPPORTED_REPLICAS_OPTS:
             joined_supported_opts = ", ".join(cls._SUPPORTED_REPLICAS_OPTS)
@@ -570,7 +588,10 @@ class ForestPropertiesGetCall(ApiCall):
         data_format: str,
     ):
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
 
 

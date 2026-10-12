@@ -2,7 +2,6 @@ import pytest
 
 from mlclient.xquery import fn
 
-
 pytestmark = pytest.mark.ml_access
 
 

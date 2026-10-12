@@ -14,7 +14,9 @@ from __future__ import annotations
 from typing import ClassVar
 from urllib.parse import quote
 
-from mlclient import _constants as constants, _utils as utils, exceptions
+from mlclient import _constants as constants
+from mlclient import _utils as utils
+from mlclient import exceptions
 from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
@@ -211,10 +213,14 @@ class _ValueCall(ApiCall):
             required=True,
         )
         call_utils.validate_supported(
-            direction, cls._SUPPORTED_DIRECTIONS, "directions",
+            direction,
+            cls._SUPPORTED_DIRECTIONS,
+            "directions",
         )
         call_utils.validate_supported(
-            frequency, cls._SUPPORTED_FREQUENCIES, "frequencies",
+            frequency,
+            cls._SUPPORTED_FREQUENCIES,
+            "frequencies",
         )
 
 

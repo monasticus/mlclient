@@ -1,0 +1,10 @@
+{
+  "range-query": {
+    "element": {
+      "name": "price",
+      "ns": ""
+    },
+    "value": "NaN",
+    "range-operator": "LT"
+  }
+}

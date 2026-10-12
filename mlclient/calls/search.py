@@ -13,7 +13,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from mlclient import _constants as constants, _utils as utils, exceptions
+from mlclient import _constants as constants
+from mlclient import _utils as utils
+from mlclient import exceptions
 from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 from mlclient.models.document_parts import Category

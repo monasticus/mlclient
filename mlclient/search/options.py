@@ -7,7 +7,8 @@ from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Literal, get_args
-from xml.etree.ElementTree import Element as XmlElement, SubElement, tostring
+from xml.etree.ElementTree import Element as XmlElement
+from xml.etree.ElementTree import SubElement, tostring
 
 from mlclient.search.base import QueryComponent
 from mlclient.search.structured import (
@@ -751,7 +752,8 @@ class _Definition(QueryComponent):
             if isinstance(value, list):
                 continue
             node.set(
-                name, str(value).lower() if isinstance(value, bool) else str(value),
+                name,
+                str(value).lower() if isinstance(value, bool) else str(value),
             )
         if self.value is not ... and self.value is not None:
             node.text = (

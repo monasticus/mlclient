@@ -3,5 +3,8 @@ from mlclient.xquery import cts
 
 def run():
     return cts.field_word_query(
-        "description", "MarkLogic search", options="checked", weight=2.5,
+        "description",
+        "MarkLogic search",
+        options="checked",
+        weight=2.5,
     ).compile()

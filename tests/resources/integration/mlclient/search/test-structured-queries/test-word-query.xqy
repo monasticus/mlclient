@@ -1,1 +1,7 @@
-cts:element-attribute-word-query((xs:QName("title"), xs:QName("label")), (xs:QName("name"), xs:QName("alt")), ("blue", "green"), "case-sensitive", 2)
+cts:element-attribute-word-query(
+    (xs:QName("title"), xs:QName("label")),
+    (xs:QName("name"), xs:QName("alt")),
+    ("blue", "green"),
+    "case-sensitive",
+    2
+)

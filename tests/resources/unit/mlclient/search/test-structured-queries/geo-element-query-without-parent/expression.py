@@ -1,6 +1,4 @@
-from mlclient.search.structured import Point
-from mlclient.search.structured import Element
-from mlclient.search.structured import GeoElementQuery
+from mlclient.search.structured import Element, GeoElementQuery, Point
 
 
 def run():

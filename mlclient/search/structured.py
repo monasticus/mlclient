@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import MISSING, Field as DataclassField, dataclass, field, fields
+from dataclasses import MISSING
+from dataclasses import Field as DataclassField
+from dataclasses import dataclass, field, fields
 from datetime import date, datetime
 from decimal import Decimal
 from types import MappingProxyType
 from typing import ClassVar, Literal, TypeVar, get_args
-from xml.etree.ElementTree import Element as XmlElement, register_namespace
+from xml.etree.ElementTree import Element as XmlElement
+from xml.etree.ElementTree import register_namespace
 
 from mlclient.search.base import QueryComponent, SearchQuery
 
@@ -3823,16 +3826,19 @@ def _check_targets(
         If there is no target, the targets are of mixed kinds, or attributes
         accompany targets other than Element.
     """
-    allowed = (Element, JsonProperty, Field, PathIndex) if allow_path else (
-        Element,
-        JsonProperty,
-        Field,
+    allowed = (
+        (Element, JsonProperty, Field, PathIndex)
+        if allow_path
+        else (
+            Element,
+            JsonProperty,
+            Field,
+        )
     )
     targets = _sequence(target)
     if any(not isinstance(item, allowed) for item in targets):
-        message = (
-            "Targets must be Element, JsonProperty or Field instances"
-            + (", or PathIndex for ranges." if allow_path else ".")
+        message = "Targets must be Element, JsonProperty or Field instances" + (
+            ", or PathIndex for ranges." if allow_path else "."
         )
         raise TypeError(message)
     kinds = {type(item) for item in targets}

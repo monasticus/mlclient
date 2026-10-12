@@ -359,7 +359,8 @@ def test_masks_supported_secrets(flag, server):
 @pytest.mark.parametrize("flag", ["", "--secrets"])
 def test_masks_cloud_api_key(flag):
     _write_env(
-        "dev", {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
+        "dev",
+        {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
     )
 
     tester = _get_tester()

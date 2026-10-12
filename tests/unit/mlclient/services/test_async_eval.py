@@ -17,6 +17,7 @@ from mlclient.xquery import LOCAL_NS_URI, fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
+
 @pytest_asyncio.fixture
 async def svc():
     async with AsyncMLClient() as ml:
@@ -545,7 +546,8 @@ async def test_expression(svc):
 @pytest.mark.asyncio
 async def test_expression_rejects_non_expression(svc):
     with pytest.raises(
-        TypeError, match=r"^expression requires an XqyExpression$",
+        TypeError,
+        match=r"^expression requires an XqyExpression$",
     ) as error:
         await svc.expression("fn:true()")
 
@@ -555,7 +557,8 @@ async def test_expression_rejects_non_expression(svc):
 @pytest.mark.asyncio
 async def test_expression_rejects_output_type(svc):
     with pytest.raises(
-        ValueError, match=r"^output_type must be None, str or bytes$",
+        ValueError,
+        match=r"^output_type must be None, str or bytes$",
     ) as error:
         await svc.expression(fn.true(), output_type=int)
 

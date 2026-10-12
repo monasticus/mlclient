@@ -3,5 +3,8 @@ from mlclient.xquery import cts
 
 def run():
     return cts.element_attribute_value_match(
-        "item", "id", "prod*", query=cts.collection_query("products"),
+        "item",
+        "id",
+        "prod*",
+        query=cts.collection_query("products"),
     ).compile()

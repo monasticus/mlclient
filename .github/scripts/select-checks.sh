@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Read NUL-separated changed paths from stdin (git diff --name-only -z).
-# Emit unit/integration/lint/docs flags for the reusable changes workflow.
+# Emit unit/integration/lint/docs flags for the CI workflow.
 # Unknown build inputs enable every check; flags accumulate across paths.
 set -euo pipefail
 
@@ -16,9 +16,9 @@ while IFS= read -r -d '' path; do
       ;;
     mlclient/*)
       unit=true; integration=true; lint=true; docs=true ;;
-    tests/unit/*)
+    tests/unit/*|tests/resources/unit/*)
       unit=true; lint=true ;;
-    tests/integration/*)
+    tests/integration/*|tests/resources/integration/*)
       integration=true; lint=true ;;
     tests/*)
       unit=true; integration=true; lint=true ;;

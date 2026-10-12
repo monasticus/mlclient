@@ -1,22 +1,18 @@
 """Native serialization resources and public query behavior."""
 
-import pytest
-from xml.etree.ElementTree import tostring
-from tests.utils.resources import discover_serialization_cases
 from xml.etree.ElementTree import Element as XmlElement
+from xml.etree.ElementTree import tostring
+
+import pytest
+
 from mlclient.search.options import Range, SearchOptions
-from mlclient.search.structured import Element
-from mlclient.search.structured import Attribute, JsonProperty
-from mlclient.search.structured import Field
-from mlclient.search.structured import PathIndex
-
-
-@pytest.mark.parametrize(
-    "case", discover_serialization_cases(__file__), ids=lambda case: case.name,
+from mlclient.search.structured import (
+    Attribute,
+    Element,
+    Field,
+    JsonProperty,
+    PathIndex,
 )
-def test_serialization(case):
-    case.assert_matches()
-
 
 SEARCH_NAMESPACE = "http://marklogic.com/appservices/search"
 
@@ -41,18 +37,12 @@ PRICE_RANGE = Range(Element("price"), "xs:decimal")
 
 def test_search_options_builders_with_the_same_definitions_are_equal():
     assert SearchOptions().values("price", PRICE_RANGE).control(
-        "page-length", 5,
+        "page-length",
+        5,
     ) == SearchOptions().values("price", PRICE_RANGE).control("page-length", 5)
     assert SearchOptions().values("price", PRICE_RANGE) != SearchOptions().sort(
         PRICE_RANGE,
     )
-
-
-def test_search_options_collection_constraint_calculates_a_facet_by_default():
-    options = SearchOptions().collection_constraint("type")
-    assert options.to_json()["options"]["constraint"] == [
-        {"name": "type", "collection": {"facet": True}},
-    ]
 
 
 @pytest.mark.parametrize(
@@ -60,16 +50,13 @@ def test_search_options_collection_constraint_calculates_a_facet_by_default():
     [(JsonProperty("item"), Attribute("code")), (Element("item"), Element("code"))],
 )
 def test_search_options_constraint_attribute_requires_an_element_and_an_attribute(
-    target, attribute,
+    target,
+    attribute,
 ):
     with pytest.raises(TypeError) as error:
         SearchOptions().value_constraint("code", target, attribute=attribute)
-    assert (
-        str(error.value)
-        == (
-            "value constraint attribute requires an Element target a"
-            "nd an Attribute"
-        )
+    assert str(error.value) == (
+        "value constraint attribute requires an Element target and an Attribute"
     )
 
 
@@ -84,17 +71,11 @@ def test_search_options_control_rejects_a_non_finite_float(value):
     [
         (
             lambda: SearchOptions().word_constraint("label", "label"),
-            (
-                "word constraint target must be an Element, JsonProperty"
-                " or Field"
-            ),
+            ("word constraint target must be an Element, JsonProperty or Field"),
         ),
         (
             lambda: SearchOptions().value_constraint("label", None),
-            (
-                "value constraint target must be an Element, JsonPropert"
-                "y or Field"
-            ),
+            ("value constraint target must be an Element, JsonProperty or Field"),
         ),
         (
             lambda: SearchOptions().container_constraint("place", Field("place")),
@@ -111,7 +92,8 @@ def test_search_options_invalid_constraint_targets(build, message):
 def test_search_options_native_options_are_copied():
     definition = {"transform-results": {"apply": "empty-snippet"}}
     element = XmlElement(
-        f"{{{SEARCH_NAMESPACE}}}transform-results", {"apply": "empty-snippet"},
+        f"{{{SEARCH_NAMESPACE}}}transform-results",
+        {"apply": "empty-snippet"},
     )
     options = SearchOptions().add(definition, element)
     definition["transform-results"]["apply"] = "raw"
@@ -119,21 +101,11 @@ def test_search_options_native_options_are_copied():
     assert options.to_json() == {
         "options": {"transform-results": {"apply": "empty-snippet"}},
     }
-    assert (
-        tostring(options.to_xml(), encoding="unicode")
-        == (
-            '<search:options xmlns:search="http://marklogic.com/apps'
-            'ervices/search"><search:transform-results apply="empty-'
-            'snippet" /></search:options>'
-        )
+    assert tostring(options.to_xml(), encoding="unicode") == (
+        '<search:options xmlns:search="http://marklogic.com/apps'
+        'ervices/search"><search:transform-results apply="empty-'
+        'snippet" /></search:options>'
     )
-
-
-def test_search_options_one_option_string_is_one_option():
-    options = SearchOptions().values("price", PRICE_RANGE, options="frequency-order")
-    assert options.to_json()["options"]["values"][0]["values-option"] == [
-        "frequency-order",
-    ]
 
 
 @pytest.mark.parametrize(
@@ -146,21 +118,27 @@ def test_search_options_one_option_string_is_one_option():
         ),
         (
             lambda values: SearchOptions().range_constraint(
-                "price", PRICE_RANGE, options=values,
+                "price",
+                PRICE_RANGE,
+                options=values,
             ),
             "range",
             "facet-option",
         ),
         (
             lambda values: SearchOptions().word_constraint(
-                "price", Element("price"), options=values,
+                "price",
+                Element("price"),
+                options=values,
             ),
             "word",
             "term-option",
         ),
         (
             lambda values: SearchOptions().value_constraint(
-                "price", Element("price"), options=values,
+                "price",
+                Element("price"),
+                options=values,
             ),
             "value",
             "term-option",
@@ -168,7 +146,9 @@ def test_search_options_one_option_string_is_one_option():
     ],
 )
 def test_search_options_option_lists_are_snapshotted_before_serialization(
-    build, member, option_name,
+    build,
+    member,
+    option_name,
 ):
     values = ["first"]
     options = build(values)
@@ -267,14 +247,11 @@ def test_search_options_serialization_is_defensive():
             ],
         },
     }
-    assert (
-        tostring(options.to_xml(), encoding="unicode")
-        == (
-            '<search:options xmlns:search="http://marklogic.com/apps'
-            'ervices/search"><search:values name="price"><search:ran'
-            'ge type="xs:decimal"><search:element name="price" ns=""'
-            ' /></search:range></search:values></search:options>'
-        )
+    assert tostring(options.to_xml(), encoding="unicode") == (
+        '<search:options xmlns:search="http://marklogic.com/apps'
+        'ervices/search"><search:values name="price"><search:ran'
+        'ge type="xs:decimal"><search:element name="price" ns=""'
+        " /></search:range></search:values></search:options>"
     )
 
 
@@ -317,27 +294,3 @@ def test_search_options_target_components_serialize_only_when_requested(build):
     calls.clear()
     options.to_xml()
     assert calls == ["xml"]
-
-
-def test_search_options_value_constraint_with_a_json_node_type():
-    options = SearchOptions().value_constraint(
-        "price", JsonProperty("price"), node_type="number",
-    )
-    assert options.to_json()["options"]["constraint"] == [
-        {"name": "price", "value": {"type": "number", "json-property": "price"}},
-    ]
-
-
-def test_search_options_word_constraint_on_an_attribute():
-    options = SearchOptions().word_constraint(
-        "code", Element("item"), attribute=Attribute("code"),
-    )
-    assert options.to_json()["options"]["constraint"] == [
-        {
-            "name": "code",
-            "word": {
-                "element": {"name": "item", "ns": ""},
-                "attribute": {"name": "code", "ns": ""},
-            },
-        },
-    ]

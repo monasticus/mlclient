@@ -4,5 +4,6 @@ from tests.utils.expressions import StaticExpression
 
 def run():
     return cts.valid_extract_path(
-        "/p:item", map=StaticExpression("map:map()"),
+        "/p:item",
+        map=StaticExpression("map:map()"),
     ).compile()

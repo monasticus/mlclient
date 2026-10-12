@@ -3,5 +3,6 @@ from mlclient.xquery import cts, fn
 
 def run():
     return cts.field_word_match(
-        "field-names", fn.string(cts.search().pos(1)),
+        "field-names",
+        fn.string(cts.search().pos(1)),
     ).compile()

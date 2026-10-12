@@ -101,7 +101,9 @@ def test_builder_near_rejects_invalid_distance():
 
 
 @pytest.mark.parametrize(
-    "builder", [sq, StructuredQueryBuilder()], ids=["sq", "instance"],
+    "builder",
+    [sq, StructuredQueryBuilder()],
+    ids=["sq", "instance"],
 )
 @pytest.mark.parametrize(
     ("build", "expected"),
@@ -144,10 +146,14 @@ def test_builder_near_rejects_invalid_distance():
         ),
         pytest.param(
             lambda b: b.container(
-                Element("section"), TermQuery("blue"), fragment_scope="properties",
+                Element("section"),
+                TermQuery("blue"),
+                fragment_scope="properties",
             ),
             structured.ContainerQuery(
-                Element("section"), TermQuery("blue"), fragment_scope="properties",
+                Element("section"),
+                TermQuery("blue"),
+                fragment_scope="properties",
             ),
             id="container",
         ),
@@ -307,10 +313,16 @@ def test_builder_near_rejects_invalid_distance():
         ),
         pytest.param(
             lambda b: b.geo_region_constraint(
-                "location", structured.Point(1, 2), operator="intersects", weight=2,
+                "location",
+                structured.Point(1, 2),
+                operator="intersects",
+                weight=2,
             ),
             structured.GeoRegionConstraintQuery(
-                "location", structured.Point(1, 2), operator="intersects", weight=2,
+                "location",
+                structured.Point(1, 2),
+                operator="intersects",
+                weight=2,
             ),
             id="geo_region_constraint",
         ),
@@ -337,10 +349,14 @@ def test_builder_near_rejects_invalid_distance():
         ),
         pytest.param(
             lambda b: b.geospatial_constraint(
-                "location", structured.Point(1, 2), text="blue",
+                "location",
+                structured.Point(1, 2),
+                text="blue",
             ),
             structured.GeospatialConstraintQuery(
-                "location", structured.Point(1, 2), text="blue",
+                "location",
+                structured.Point(1, 2),
+                text="blue",
             ),
             id="geospatial_constraint",
         ),
@@ -356,10 +372,16 @@ def test_builder_near_rejects_invalid_distance():
         ),
         pytest.param(
             lambda b: b.lsqt(
-                "events", timestamp="2026-01-01T00:00:00Z", options="cached", weight=2,
+                "events",
+                timestamp="2026-01-01T00:00:00Z",
+                options="cached",
+                weight=2,
             ),
             structured.LsqtQuery(
-                "events", timestamp="2026-01-01T00:00:00Z", options="cached", weight=2,
+                "events",
+                timestamp="2026-01-01T00:00:00Z",
+                options="cached",
+                weight=2,
             ),
             id="lsqt",
         ),
@@ -369,7 +391,9 @@ def test_builder_near_rejects_invalid_distance():
             id="not_in",
         ),
         pytest.param(
-            lambda b: b.not_(TermQuery("blue")), NotQuery(TermQuery("blue")), id="not_",
+            lambda b: b.not_(TermQuery("blue")),
+            NotQuery(TermQuery("blue")),
+            id="not_",
         ),
         pytest.param(
             lambda b: b.operator_state("sort", "ascending"),
@@ -378,10 +402,12 @@ def test_builder_near_rejects_invalid_distance():
         ),
         pytest.param(
             lambda b: b.path_index(
-                "/i:item", namespaces={"i": "https://example.com/items"},
+                "/i:item",
+                namespaces={"i": "https://example.com/items"},
             ),
             structured.PathIndex(
-                "/i:item", namespaces={"i": "https://example.com/items"},
+                "/i:item",
+                namespaces={"i": "https://example.com/items"},
             ),
             id="path_index",
         ),
@@ -392,10 +418,16 @@ def test_builder_near_rejects_invalid_distance():
         ),
         pytest.param(
             lambda b: b.period_compare(
-                "valid", "aln_before", "system", options="cached",
+                "valid",
+                "aln_before",
+                "system",
+                options="cached",
             ),
             structured.PeriodCompareQuery(
-                "valid", "aln_before", "system", options="cached",
+                "valid",
+                "aln_before",
+                "system",
+                options="cached",
             ),
             id="period_compare",
         ),
@@ -452,7 +484,10 @@ def test_builder_near_rejects_invalid_distance():
         pytest.param(
             lambda b: b.range_constraint("price", 20, operator="GE", options="cached"),
             structured.RangeConstraintQuery(
-                "price", 20, operator="GE", options="cached",
+                "price",
+                20,
+                operator="GE",
+                options="cached",
             ),
             id="range_constraint",
         ),

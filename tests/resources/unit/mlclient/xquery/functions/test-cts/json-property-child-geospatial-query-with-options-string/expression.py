@@ -3,5 +3,8 @@ from mlclient.xquery import cts
 
 def run():
     return cts.json_property_child_geospatial_query(
-        "price", "price", cts.box(10, 10, 20, 20), options="checked",
+        "price",
+        "price",
+        cts.box(10, 10, 20, 20),
+        options="checked",
     ).compile()

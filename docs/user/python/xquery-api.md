@@ -377,8 +377,7 @@ when a general-purpose function should operate on nodes selected by a path:
 
 ```python
 from mlclient import MLClient
-from mlclient.xquery import fn
-from mlclient.xquery import xpath
+from mlclient.xquery import fn, xpath
 
 with MLClient() as ml:
     one = ml.eval.expression(fn.count("/product"))  # 1: one string value

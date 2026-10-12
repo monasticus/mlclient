@@ -3,5 +3,8 @@ from mlclient.xquery import cts
 
 def run():
     return cts.element_pair_geospatial_boxes(
-        "item", "latitude", "longitude", options=None,
+        "item",
+        "latitude",
+        "longitude",
+        options=None,
     ).compile()

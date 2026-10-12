@@ -3,5 +3,7 @@ from mlclient.xquery import cts
 
 def run():
     return cts.element_child_geospatial_values(
-        "item", "child-names", options=["checked"],
+        "item",
+        "child-names",
+        options=["checked"],
     ).compile()

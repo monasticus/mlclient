@@ -154,7 +154,10 @@ class TransactionGetCall(ApiCall):
         data_format: str,
     ):
         call_utils.validate_supported(
-            [data_format], cls._SUPPORTED_FORMATS, "formats", required=True,
+            [data_format],
+            cls._SUPPORTED_FORMATS,
+            "formats",
+            required=True,
         )
 
 
@@ -225,5 +228,8 @@ class TransactionPostCall(ApiCall):
         result: str,
     ):
         call_utils.validate_supported(
-            [result], cls._SUPPORTED_RESULTS, "results", required=True,
+            [result],
+            cls._SUPPORTED_RESULTS,
+            "results",
+            required=True,
         )

@@ -77,6 +77,28 @@ class DocumentsReader:
         return cls._parse_to_documents(documents_data)
 
     @classmethod
+    def parse_parts(
+        cls,
+        parts: list[tuple],
+        category: str | list[str] | None,
+    ) -> Iterator[Document]:
+        """Parse decoded multipart document parts, merging content and metadata.
+
+        Parameters
+        ----------
+        parts : list[tuple]
+            Document header/body pairs, excluding any search report part.
+        category : str | list[str] | None
+            Requested document categories.
+
+        Returns
+        -------
+        Iterator[Document]
+            Documents in part order; no documents when parts is empty.
+        """
+        return cls._parse_to_documents(cls._pre_format_documents(parts, category))
+
+    @classmethod
     def _parse_response(
         cls,
         resp: Response,

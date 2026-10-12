@@ -3,5 +3,7 @@ from mlclient.xquery import fn
 
 def run():
     return fn.compare(
-        "comparand1", "comparand2", collation="http://marklogic.com/collation/codepoint",
+        "comparand1",
+        "comparand2",
+        collation="http://marklogic.com/collation/codepoint",
     ).compile()

@@ -3,5 +3,6 @@ from mlclient.xquery import cts
 
 def run():
     return cts.values(
-        cts.element_reference("price"), query=cts.collection_query("products"),
+        cts.element_reference("price"),
+        query=cts.collection_query("products"),
     ).compile()

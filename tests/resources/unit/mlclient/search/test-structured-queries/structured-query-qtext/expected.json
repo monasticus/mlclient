@@ -1,0 +1,11 @@
+{
+  "query": {
+    "queries": [
+      {
+        "qtext": {
+          "_value": "blue AND green"
+        }
+      }
+    ]
+  }
+}

@@ -1,1 +1,6 @@
-cts:element-attribute-pair-geospatial-query(xs:QName("place"), xs:QName("lat"), xs:QName("lon"), cts:circle(5, cts:point(10, 20)))
+cts:element-attribute-pair-geospatial-query(
+    xs:QName("place"),
+    xs:QName("lat"),
+    xs:QName("lon"),
+    cts:circle(5, cts:point(10, 20))
+)

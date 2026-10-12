@@ -3,5 +3,9 @@ from mlclient.xquery import cts
 
 def run():
     return cts.element_pair_geospatial_value_match(
-        "item", "latitude", "longitude", "prod*", quality_weight=set(),
+        "item",
+        "latitude",
+        "longitude",
+        "prod*",
+        quality_weight=set(),
     )

@@ -17,6 +17,7 @@ from mlclient.xquery import LOCAL_NS_URI, fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
+
 @pytest.fixture(autouse=True)
 def ml() -> MLClient:
     return MLClient()
@@ -526,7 +527,8 @@ def test_expression(ml):
 
 def test_expression_rejects_non_expression(ml):
     with pytest.raises(
-        TypeError, match=r"^expression requires an XqyExpression$",
+        TypeError,
+        match=r"^expression requires an XqyExpression$",
     ) as error:
         ml.eval.expression("fn:true()")
 
@@ -535,7 +537,8 @@ def test_expression_rejects_non_expression(ml):
 
 def test_expression_rejects_output_type(ml):
     with pytest.raises(
-        ValueError, match=r"^output_type must be None, str or bytes$",
+        ValueError,
+        match=r"^output_type must be None, str or bytes$",
     ) as error:
         ml.eval.expression(fn.true(), output_type=int)
 

@@ -3,5 +3,6 @@ from mlclient.xquery import cts, fn
 
 def run():
     return cts.word_query(
-        "MarkLogic search", weight=fn.count(cts.search().pos(1)),
+        "MarkLogic search",
+        weight=fn.count(cts.search().pos(1)),
     ).compile()

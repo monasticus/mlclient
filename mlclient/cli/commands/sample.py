@@ -67,7 +67,9 @@ class SampleCommand(Command):
             default="1",
         ),
         option(
-            "json", "j", description="Sample JSON documents instead of XML documents",
+            "json",
+            "j",
+            description="Sample JSON documents instead of XML documents",
         ),
         option("no-pretty", description="Print sample content without pretty-printing"),
     ]

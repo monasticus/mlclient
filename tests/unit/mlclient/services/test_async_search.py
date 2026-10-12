@@ -8,12 +8,13 @@ import respx
 
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.services import SearchScope
-from mlclient.xquery import cts
 from mlclient.models import JSONDocument, SearchReport, TupleHit, ValueHit, XMLDocument
 from mlclient.search.options import Range, SearchOptions
 from mlclient.search.structured import Element, sq
-from tests.utils import data as test_data, resources as resources_utils
+from mlclient.services import SearchScope
+from mlclient.xquery import cts
+from tests.utils import data as test_data
+from tests.utils import resources as resources_utils
 from tests.utils.data import MetadataSpec
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -25,6 +26,53 @@ CTS_QUERY = cts.and_query(
 CTS_BODY = resources_utils.get_test_resource_json(__file__, "cts-body.json")
 CTS_XML = resources_utils.read_test_resource_text(__file__, "cts-query.xml")
 ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-response.json")
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@pytest.mark.asyncio
+@respx.mock
+async def test_documents_with_report(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        report, docs = await ml.search(collection="cts-test").documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+    assert route.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -70,7 +118,8 @@ async def test_documents_for_structured_query():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-for-structured-query-request.json",
+            __file__,
+            "documents-for-structured-query-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -95,7 +144,8 @@ async def test_documents_for_string_query():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-for-string-query-request.json",
+            __file__,
+            "documents-for-string-query-request.json",
         ),
     )
     route = ml_mocker.mock_post()
@@ -119,7 +169,8 @@ async def test_documents_without_query():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-without-query-request.json",
+            __file__,
+            "documents-without-query-request.json",
         ),
     )
     route = ml_mocker.mock_post()
@@ -145,7 +196,8 @@ async def test_documents_at_single_position():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-at-single-position-request.json",
+            __file__,
+            "documents-at-single-position-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -170,7 +222,8 @@ async def test_documents_in_position_range():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-in-position-range-request.json",
+            __file__,
+            "documents-in-position-range-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -201,7 +254,8 @@ async def test_documents_with_metadata():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-with-metadata-request.json",
+            __file__,
+            "documents-with-metadata-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -257,7 +311,8 @@ async def test_documents_without_matches():
     ml_mocker.with_empty_response_body()
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-without-matches-request.json",
+            __file__,
+            "documents-without-matches-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -266,6 +321,29 @@ async def test_documents_without_matches():
         docs = await ml.search.documents("zzz")
 
     assert docs == []
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_documents_with_report_error():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(ERROR_RESPONSE)
+    route = ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(MarkLogicError) as error:
+            await ml.search.documents_with_report("coffee")
+
+    assert str(error.value) == (
+        "[400 Bad Request] (REST-INVALIDPARAM) REST-INVALIDPARAM: Invalid parameter"
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -280,7 +358,8 @@ async def test_documents_error():
     ml_mocker.with_response_body(ERROR_RESPONSE)
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "documents-error-request.json",
+            __file__,
+            "documents-error-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -340,7 +419,8 @@ async def test_uris_of_single_match():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "uris-of-single-match-request.json",
+            __file__,
+            "uris-of-single-match-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -362,7 +442,8 @@ async def test_uris_without_matches():
     ml_mocker.with_empty_response_body()
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "uris-without-matches-request.json",
+            __file__,
+            "uris-without-matches-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -464,7 +545,8 @@ async def test_values_are_converted_from_their_type(atomic_type, lexical, expect
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "values-are-converted-from-their-type-request.json",
+            __file__,
+            "values-are-converted-from-their-type-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -491,7 +573,8 @@ async def test_values_without_matches():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "values-without-matches-request.json",
+            __file__,
+            "values-without-matches-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -515,7 +598,8 @@ async def test_values_reject_tuples():
     )
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "values-reject-tuples-request.json",
+            __file__,
+            "values-reject-tuples-request.json",
         ),
     )
     ml_mocker.mock_post()
@@ -647,7 +731,9 @@ async def test_aggregate_native_result(case, aggregate_path):
 
     async with AsyncMLClient() as ml:
         result = await ml.search(options=options).aggregate(
-            name, function, aggregate_path=aggregate_path,
+            name,
+            function,
+            aggregate_path=aggregate_path,
         )
 
     assert result == expected
@@ -690,7 +776,10 @@ async def test_plugin_aggregate_preserves_json_value(payload):
 
     async with AsyncMLClient() as ml:
         result = await ml.search.aggregate(
-            "category", "customAverage", "coffee", aggregate_path="/native/statistics",
+            "category",
+            "customAverage",
+            "coffee",
+            aggregate_path="/native/statistics",
         )
 
     assert result == payload.get("_value")
@@ -735,7 +824,6 @@ async def test_plugin_aggregate_preserves_native_map():
     }
     assert type(result) is dict
     assert route.call_count == 1
-
 
 
 @pytest.mark.asyncio
@@ -878,7 +966,8 @@ async def test_tuples_have_individual_types():
     ml_mocker.with_request_header("Accept", "application/xml")
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "tuples-have-individual-types-request.json",
+            __file__,
+            "tuples-have-individual-types-request.json",
         ),
     )
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -963,7 +1052,8 @@ async def test_report_retains_empty_native_report_and_timestamp():
     ml_mocker.with_response_body(payload)
     ml_mocker.with_request_body(
         resources_utils.get_test_resource_json(
-            __file__, "report-retains-empty-native-report-and-timestamp-request.json",
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
         ),
     )
     ml_mocker.mock_post()

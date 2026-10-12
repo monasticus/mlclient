@@ -7,6 +7,7 @@ without evaluating XQuery, and parses the responses into mlclient models.
 from __future__ import annotations
 
 import copy
+import json
 from dataclasses import dataclass, fields, replace
 from typing import TYPE_CHECKING, Literal
 from xml.etree import ElementTree
@@ -15,10 +16,10 @@ from mlclient import _constants as constants
 from mlclient._options import UNSET
 from mlclient.models.document_parts import Category, DocumentsDisposition
 from mlclient.models.results import ParsedValue, SearchReport, TupleHit, ValueHit
+from mlclient.responses import MLResponseParser
 from mlclient.search.base import SearchQuery
 from mlclient.search.options import SearchOptions
 from mlclient.search.structured import SEARCH_NS_URI
-from mlclient.responses import MLResponseParser
 from mlclient.services._documents_parsing import DocumentsReader, normalize_category
 
 if TYPE_CHECKING:
@@ -361,6 +362,81 @@ class SearchService:
             timeout=timeout,
         )
         return _parse_documents(resp, category)
+
+    def documents_with_report(
+        self,
+        query: SearchInput = None,
+        *,
+        pos: PositionInput = None,
+        category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        scope: SearchScope | None = None,
+        timeout=UNSET,
+    ) -> tuple[SearchReport, list[Document]]:
+        """Return a search report and matching documents in one request.
+
+        Sends POST /v1/search with multipart/mixed and view=all. The first part
+        is the search report; subsequent parts contain document data.
+
+        Parameters
+        ----------
+        query : SearchQuery | str | None, default None
+            A structured or CTS query, a string query, or None to match all.
+        pos : int | list[int] | tuple[int, int] | None, default None
+            A one-based position or an inclusive [start, end] range. None returns
+            the first page: the page-length of inline options, else 10.
+            Installed options' page-length does not apply to this read.
+        category : Category | str | list[Category | str] | None, default None
+            Document data to return: content (default) and/or metadata categories.
+        transform : str | None, default None
+            Installed REST transform applied to both the report and document content.
+            It must preserve the native search report structure.
+        transform_params : dict | None, default None
+            Named parameters passed to the installed transform.
+        scope : SearchScope | None, default None
+            Overrides the fields it sets on this service's scope for this request.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+
+        Returns
+        -------
+        tuple[SearchReport, list[Document]]
+            Report for the search page and its documents. With no matches,
+            returns the empty report and an empty document list.
+
+        Raises
+        ------
+        TypeError
+            If the query has an unsupported type or needs server evaluation, pos
+            is not an integer or a two-item range of integers, or scope is not a
+            SearchScope.
+        ValueError
+            If pos is not positive or not ordered, or a query value has no
+            local native form.
+        WrongParametersError
+            If a category is outside the supported set.
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error.
+        """
+        category = normalize_category(category)
+        params = _request_params(self._scope, query, pos, scope)
+        resp = self._rest.search.post(
+            **params,
+            category=category,
+            data_format="json",
+            transform=transform,
+            transform_params=transform_params,
+            multipart=True,
+            view="all",
+            timeout=timeout,
+        )
+        return _parse_documents_with_report(resp, category)
 
     def uris(
         self,
@@ -903,6 +979,81 @@ class AsyncSearchService:
             timeout=timeout,
         )
         return _parse_documents(resp, category)
+
+    async def documents_with_report(
+        self,
+        query: SearchInput = None,
+        *,
+        pos: PositionInput = None,
+        category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        scope: SearchScope | None = None,
+        timeout=UNSET,
+    ) -> tuple[SearchReport, list[Document]]:
+        """Return a search report and matching documents in one request.
+
+        Sends POST /v1/search with multipart/mixed and view=all. The first part
+        is the search report; subsequent parts contain document data.
+
+        Parameters
+        ----------
+        query : SearchQuery | str | None, default None
+            A structured or CTS query, a string query, or None to match all.
+        pos : int | list[int] | tuple[int, int] | None, default None
+            A one-based position or an inclusive [start, end] range. None returns
+            the first page: the page-length of inline options, else 10.
+            Installed options' page-length does not apply to this read.
+        category : Category | str | list[Category | str] | None, default None
+            Document data to return: content (default) and/or metadata categories.
+        transform : str | None, default None
+            Installed REST transform applied to both the report and document content.
+            It must preserve the native search report structure.
+        transform_params : dict | None, default None
+            Named parameters passed to the installed transform.
+        scope : SearchScope | None, default None
+            Overrides the fields it sets on this service's scope for this request.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+
+        Returns
+        -------
+        tuple[SearchReport, list[Document]]
+            Report for the search page and its documents. With no matches,
+            returns the empty report and an empty document list.
+
+        Raises
+        ------
+        TypeError
+            If the query has an unsupported type or needs server evaluation, pos
+            is not an integer or a two-item range of integers, or scope is not a
+            SearchScope.
+        ValueError
+            If pos is not positive or not ordered, or a query value has no
+            local native form.
+        WrongParametersError
+            If a category is outside the supported set.
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error.
+        """
+        category = normalize_category(category)
+        params = _request_params(self._scope, query, pos, scope)
+        resp = await self._rest.search.post(
+            **params,
+            category=category,
+            data_format="json",
+            transform=transform,
+            transform_params=transform_params,
+            multipart=True,
+            view="all",
+            timeout=timeout,
+        )
+        return _parse_documents_with_report(resp, category)
 
     async def uris(
         self,
@@ -1550,6 +1701,41 @@ def _parse_documents(
     return list(DocumentsReader.parse(resp, category))
 
 
+def _parse_documents_with_report(
+    resp: Response,
+    category: str | list[str] | None,
+) -> tuple[SearchReport, list[Document]]:
+    """Separate the first multipart report from subsequent document parts.
+
+    Parameters
+    ----------
+    resp : Response
+        Multipart /v1/search response requested with view=all.
+    category : str | list[str] | None
+        Requested document categories.
+
+    Returns
+    -------
+    tuple[SearchReport, list[Document]]
+        Report and documents in response order, including empty searches.
+
+    Raises
+    ------
+    MarkLogicError
+        If MarkLogic returned an error.
+    """
+    MLResponseParser.raise_for_status(resp)
+    parts = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+    if not isinstance(parts, list):
+        parts = [parts]
+    _, report_body = parts[0]
+    report = _report_from_payload(
+        json.loads(report_body),
+        resp.headers.get("ML-Effective-Timestamp"),
+    )
+    return report, list(DocumentsReader.parse_parts(parts[1:], category))
+
+
 def _parse_uris(resp: Response) -> list[str]:
     """Return the document URIs named by the parts of a multi-document read.
 
@@ -1695,7 +1881,8 @@ def _parse_aggregate(
             if aggregate_path:
                 return result["_value"]
             atomic_type = _aggregate_result_type(
-                function, payload.get("type", "xs:string"),
+                function,
+                payload.get("type", "xs:string"),
             )
             return MLResponseParser.parse_atomic(result["_value"], atomic_type)
     return None
@@ -1748,7 +1935,30 @@ def _parse_report(resp: Response) -> SearchReport:
         If the server returned an error.
     """
     MLResponseParser.raise_for_status(resp)
-    payload = resp.json()
+    return _report_from_payload(
+        resp.json(),
+        resp.headers.get("ML-Effective-Timestamp"),
+    )
+
+
+def _report_from_payload(
+    payload: dict,
+    effective_timestamp: str | None,
+) -> SearchReport:
+    """Create a report from native JSON and its response snapshot timestamp.
+
+    Parameters
+    ----------
+    payload : dict
+        Native search report JSON.
+    effective_timestamp : str | None
+        Snapshot timestamp returned in the HTTP response headers.
+
+    Returns
+    -------
+    SearchReport
+        Parsed sections and the complete native payload.
+    """
     return SearchReport(
         total=payload.get("total", 0),
         start=payload.get("start", 1),
@@ -1756,6 +1966,6 @@ def _parse_report(resp: Response) -> SearchReport:
         results=payload.get("results", []),
         facets=payload.get("facets", {}),
         metrics=payload.get("metrics", {}),
-        effective_timestamp=resp.headers.get("ML-Effective-Timestamp"),
+        effective_timestamp=effective_timestamp,
         response=payload,
     )

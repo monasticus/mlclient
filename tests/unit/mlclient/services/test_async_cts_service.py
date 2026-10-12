@@ -6,12 +6,11 @@ import pytest
 import respx
 
 from mlclient import AsyncMLClient
-from mlclient.xquery import fn
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.services import AsyncCtsService
+from mlclient.xquery import fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
-
 
 METHODS = {
     name: method
@@ -81,7 +80,8 @@ async def test_pos_range_requires_two_positions():
     async with AsyncMLClient() as ml:
         cts = AsyncCtsService(ml.rest)
         with pytest.raises(
-            TypeError, match=re.escape("pos ranges must contain exactly two positions"),
+            TypeError,
+            match=re.escape("pos ranges must contain exactly two positions"),
         ) as error:
             await cts.search(pos=[1])
     assert str(error.value) == "pos ranges must contain exactly two positions"
@@ -131,7 +131,8 @@ async def test_native_operation_rejects_unsupported_output_type():
     async with AsyncMLClient() as ml:
         cts = AsyncCtsService(ml.rest)
         with pytest.raises(
-            ValueError, match=re.escape("output_type must be None, str or bytes"),
+            ValueError,
+            match=re.escape("output_type must be None, str or bytes"),
         ) as error:
             await cts.contains(
                 "coffee",

@@ -1,19 +1,13 @@
 name: Update a code coverage badge
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+
 permissions:
   contents: read
 
 jobs:
-  changes:
-    uses: ./.github/workflows/changes.yml
-
   update-badge:
-    needs: changes
-    if: needs.changes.outputs.unit == 'true'
     permissions:
       contents: write
       pull-requests: write

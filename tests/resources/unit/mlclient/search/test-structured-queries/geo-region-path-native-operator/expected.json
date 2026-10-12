@@ -1,0 +1,14 @@
+{
+  "geo-region-path-query": {
+    "path-index": {
+      "text": "/region"
+    },
+    "geospatial-operator": "covered-by",
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ]
+  }
+}

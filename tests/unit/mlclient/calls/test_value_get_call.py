@@ -136,7 +136,10 @@ def test_fully_parametrized_call():
 
 def test_zero_and_empty_parameters_are_preserved():
     call = ValueGetCall(
-        name="price", q="", limit=0, transform_params={"offset": 0, "unused": None},
+        name="price",
+        q="",
+        limit=0,
+        transform_params={"offset": 0, "unused": None},
     )
 
     assert call.params == {"q": "", "format": "xml", "limit": 0, "trans:offset": 0}

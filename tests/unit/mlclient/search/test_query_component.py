@@ -2,9 +2,9 @@
 
 from xml.etree.ElementTree import tostring
 
-from mlclient.xquery import cts
 from mlclient.search import QueryComponent, SearchQuery
 from mlclient.search.structured import sq
+from mlclient.xquery import cts
 
 
 def test_structured_query_component():

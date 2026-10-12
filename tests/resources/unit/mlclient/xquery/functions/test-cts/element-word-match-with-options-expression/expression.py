@@ -3,5 +3,7 @@ from mlclient.xquery import cts, fn
 
 def run():
     return cts.element_word_match(
-        "item", "prod*", options=fn.string(cts.search().pos(1)),
+        "item",
+        "prod*",
+        options=fn.string(cts.search().pos(1)),
     ).compile()

@@ -79,14 +79,14 @@ from mlclient.xquery._xdmp import Xdmp
 from mlclient.xquery._xs import Xs
 from mlclient.xquery.expressions import (
     AtomicValue,
-    NodeInput,
-    PythonNode,
     DatabaseRoot,
     FunctionCall,
     Index,
     ModuleFunctionCall,
     NamespaceMap,
+    NodeInput,
     Path,
+    PythonNode,
     Range,
     ResultXPath,
     XqyCompilationContext,

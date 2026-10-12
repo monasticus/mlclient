@@ -222,12 +222,12 @@ with MLClient() as ml:
     prices = ml.search(options=options)
     total_price = prices.aggregate("price", "sum")
     average_price = prices.aggregate("price", "avg")
-    distinct_prices = prices.aggregate("price", "count")
+    price_count = prices.aggregate("price", "count")
 ```
 
 `count` returns an integer, decimal sums and averages retain `Decimal`, and
-statistical aggregates return floats. No result is `None` (for example, an
-average with no matching values). Supported built-ins include min, max, median,
+statistical aggregates return floats. An empty aggregate result is returned as
+`None` (for example, an average with no matching values). Supported built-ins include min, max, median,
 standard deviation, variance, correlation and covariance; binary statistics use
 tuples.
 For a native plugin already installed on MarkLogic, pass its function name and
@@ -245,7 +245,8 @@ retains its JSON type; the service does not infer the plugin result type from
 the lexicon. A missing value returns `None`. An omitted or empty path selects a
 built-in aggregate and preserves the conversions described above. Native scalar
 numbers may arrive as JSON strings without a result type annotation. Maps retain the REST `map.entry`
-structure. MarkLogic REST JSON can omit entries from multi-entry native maps;
+structure. In empirical tests on MarkLogic 10 and 12, REST JSON omitted entries
+from multi-entry native maps;
 use raw REST XML or `cts:aggregate` through eval when every entry is required.
 The async service accepts the same parameters.
 
@@ -292,6 +293,31 @@ Reuse the same criteria and `effective_timestamp` for a stable snapshot; the
 server must retain that point-in-time version. `view` selects all, results,
 facets or metadata. `report.response` retains the complete native JSON report,
 including any extra fields requested through query options.
+
+### Documents and report together
+
+`documents_with_report()` returns `tuple[SearchReport, list[Document]]` in that
+order, using one multipart request with `view=all`:
+
+```python
+with MLClient() as ml:
+    products = ml.search(collection="products", options=options)
+    report, documents = products.documents_with_report("coffee", pos=[1, 10])
+    print(report.total, report.facets)
+    for document in documents:
+        print(document.uri, document.content)
+```
+
+The report contains result entries for the requested page. Its estimated total
+and facets describe the matching search, not just the returned documents.
+When nothing matches, the method returns a report with no results and `[]`.
+Document categories, scope overrides and paging work as in `documents()`;
+`category=["content", "metadata"]` includes document metadata. The effective
+snapshot timestamp is available on the report. A REST transform applies to
+both report and documents and must preserve the native report structure.
+
+The async service accepts the same parameters and returns the same tuple:
+`report, documents = await products.documents_with_report("coffee")`.
 
 ## Scope: databases, filters and options
 

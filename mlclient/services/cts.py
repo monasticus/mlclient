@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from mlclient._options import UNSET
 from mlclient.models.results import SearchHit, ValueHit
+from mlclient.responses import MLResponseParser
 from mlclient.xquery import Cts
 from mlclient.xquery.expressions import (
     FloatInput,
@@ -18,9 +19,8 @@ from mlclient.xquery.expressions import (
     XqyCompilationContext,
     XqyExpression,
     namespace_bindings,
-    xpath as xpath_expression,
 )
-from mlclient.responses import MLResponseParser
+from mlclient.xquery.expressions import xpath as xpath_expression
 
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi

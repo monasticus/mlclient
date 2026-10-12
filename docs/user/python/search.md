@@ -243,8 +243,11 @@ with MLClient() as ml:
 A non-empty `aggregate_path` selects a plugin. Its first returned aggregate value
 retains its JSON type; the service does not infer the plugin result type from
 the lexicon. A missing value returns `None`. An omitted or empty path selects a
-built-in aggregate and preserves the conversions described above. The async
-service accepts the same parameters.
+built-in aggregate and preserves the conversions described above. Native scalar
+numbers may arrive as JSON strings without a result type annotation. Maps retain the REST `map.entry`
+structure. MarkLogic REST JSON can omit entries from multi-entry native maps;
+use raw REST XML or `cts:aggregate` through eval when every entry is required.
+The async service accepts the same parameters.
 
 ## Read co-occurrences
 

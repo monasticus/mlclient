@@ -1,0 +1,24 @@
+{
+  "values-response": {
+    "name": "amount",
+    "type": "xs:int",
+    "aggregate-result": [
+      {
+        "name": "variance",
+        "map": {
+          "entry": {
+            "key": "variance",
+            "value": {
+              "type": "xs:double",
+              "_value": 0.25
+            }
+          }
+        }
+      }
+    ],
+    "metrics": {
+      "aggregate-resolution-time": "PT0.000536S",
+      "total-time": "PT0.000995S"
+    }
+  }
+}

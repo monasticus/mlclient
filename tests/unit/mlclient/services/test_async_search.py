@@ -700,6 +700,46 @@ async def test_plugin_aggregate_preserves_json_value(payload):
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_plugin_aggregate_preserves_native_map():
+    payload = resources_utils.get_test_resource_json(
+        __file__,
+        "native-plugin-map-response.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/values/amount")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "variance")
+    ml_mocker.with_request_param("aggregatePath", "native/sampleplugin")
+    ml_mocker.with_request_body({"search": {}})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(payload)
+    route = ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        result = await ml.search.aggregate(
+            "amount",
+            "variance",
+            aggregate_path="native/sampleplugin",
+        )
+
+    assert result == {
+        "entry": {
+            "key": "variance",
+            "value": {
+                "type": "xs:double",
+                "_value": 0.25,
+            },
+        },
+    }
+    assert type(result) is dict
+    assert route.call_count == 1
+
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_aggregate_without_matches():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)

@@ -557,6 +557,7 @@ class SearchService:
             The first aggregate value, or None when no value is returned.
             Built-in results are converted to the function's native result type.
             Plugin values retain their JSON types without lexicon-based conversion.
+            Maps retain the REST map.entry structure.
 
         Raises
         ------
@@ -1098,6 +1099,7 @@ class AsyncSearchService:
             The first aggregate value, or None when no value is returned.
             Built-in results are converted to the function's native result type.
             Plugin values retain their JSON types without lexicon-based conversion.
+            Maps retain the REST map.entry structure.
 
         Raises
         ------
@@ -1687,6 +1689,8 @@ def _parse_aggregate(
     MLResponseParser.raise_for_status(resp)
     payload = resp.json()["values-response"]
     for result in payload.get("aggregate-result", []):
+        if aggregate_path and "map" in result:
+            return result["map"]
         if "_value" in result:
             if aggregate_path:
                 return result["_value"]

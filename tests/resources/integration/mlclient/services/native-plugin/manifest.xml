@@ -1,0 +1,6 @@
+<plugin xmlns="http://marklogic.com/extension/plugin">
+  <name>MLClient integration aggregates</name>
+  <id>mlclient-test-aggregates</id>
+  <version>1.0</version>
+  <native><path>libmlclient-test-aggregates.so</path></native>
+</plugin>

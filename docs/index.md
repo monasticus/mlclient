@@ -22,10 +22,10 @@ hosts, async usage and CLI setup.
 
 ## One library, several ways to work
 
-| Interface | Common tasks | Configuration and extensions |
-| --- | --- | --- |
-| Python | Services for documents, search, eval and transactions | Connection settings, raw API wrappers and custom endpoints |
-| CLI | `ml env init`, `ml eval`, `ml sample`, `ml logs`, `ml url` | Import Gradle settings, discover App Servers and select multiple connections |
+| Interface | Purpose |
+| --- | --- |
+| Python API | Connect to MarkLogic, administer servers and work with data from Python scripts, services and custom tools. |
+| CLI | Access connection, administration and development tools from the terminal or shell scripts. |
 
 [The Python guide](user/clients.md) helps choose between `ml.documents`,
 `ml.rest.documents` and `ml.http`. [The CLI guide](user/cli.md) gets a project

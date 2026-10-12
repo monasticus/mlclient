@@ -19,7 +19,9 @@ from tests.utils.ml_mockers import MLRespXMocker
 
 SEARCH_URL = "http://localhost:8000/v1/search"
 VALUES_URL = "http://localhost:8000/v1/values/category"
-CTS_QUERY = resources_utils.read_query_input(__file__, "cts-query.py")
+CTS_QUERY = cts.and_query(
+    [cts.collection_query("products"), cts.word_query("coffee")],
+)
 CTS_BODY = resources_utils.get_test_resource_json(__file__, "cts-body.json")
 CTS_XML = resources_utils.read_test_resource_text(__file__, "cts-query.xml")
 ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-response.json")
@@ -73,7 +75,7 @@ def test_documents_for_structured_query():
 
     with MLClient() as ml:
         docs = ml.search.documents(
-            resources_utils.read_query_input(__file__, "structured-query.py"),
+            sq.term("coffee"),
         )
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]

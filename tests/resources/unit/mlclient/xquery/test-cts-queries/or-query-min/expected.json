@@ -1,0 +1,13 @@
+{
+  "orQuery": {
+    "queries": [
+      {
+        "collectionQuery": {
+          "uris": [
+            "reports"
+          ]
+        }
+      }
+    ]
+  }
+}

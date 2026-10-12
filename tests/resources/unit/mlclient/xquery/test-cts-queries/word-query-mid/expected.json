@@ -1,0 +1,9 @@
+{
+  "wordQuery": {
+    "text": [
+      "blue",
+      "green"
+    ],
+    "weight": 2
+  }
+}

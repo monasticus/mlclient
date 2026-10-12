@@ -1,0 +1,11 @@
+{
+  "jsonPropertyValueQuery": {
+    "property": [
+      "label"
+    ],
+    "value": [
+      "gamma"
+    ],
+    "weight": 3
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "elementAttributeValueQuery": {
+    "element": [
+      "item"
+    ],
+    "attribute": [
+      "status"
+    ],
+    "text": [
+      "ok"
+    ],
+    "weight": 0.5
+  }
+}

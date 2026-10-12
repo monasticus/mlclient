@@ -296,13 +296,15 @@ def test_cts_direct_construction_direct_construction_matches_the_builder(
 
 
 def test_direct_query_rejects_an_unsupported_depth():
-    with pytest.raises(ValueError, match="directory depth must be '1' or 'infinity'"):
+    with pytest.raises(ValueError, match="directory depth") as error:
         DirectoryQuery("/a/", "2")
+    assert str(error.value) == "directory depth must be '1' or 'infinity': '2'"
 
 
 def test_direct_query_rejects_an_unsupported_operator():
-    with pytest.raises(ValueError, match="unsupported range operator: 'gt'"):
+    with pytest.raises(ValueError, match="unsupported range operator") as error:
         ElementRangeQuery("price", "gt", 10)
+    assert str(error.value) == "unsupported range operator: 'gt'"
 
 
 def test_directory_query():
@@ -827,36 +829,50 @@ def test_query_error_subclass_is_reported_with_its_context():
         ValueError, match=r"^cts:reverse-query: nodes: Expecting",
     ) as error:
         query.to_json()
+    assert str(error.value) == (
+        "cts:reverse-query: nodes: Expecting property name enclosed in double "
+        "quotes: line 1 column 2 (char 1)"
+    )
     argument_error = error.value.__cause__
     assert isinstance(argument_error.__cause__, json.JSONDecodeError)
 
 
 @pytest.mark.parametrize("method", ["to_json", "to_xml", "to_combined_query"])
 @pytest.mark.parametrize(
-    "value",
+    ("value", "representation"),
     [
-        xs.integer(1.9),
-        xs.date("2026-01-01"),
-        FunctionCall("xs:double", (1.5,)),
-        FunctionCall("xs:boolean", ("1",)),
-        FunctionCall("xs:boolean", ("0",)),
-        cts.uris(),
+        (xs.integer(1.9), "xs:integer(1.9)"),
+        (xs.date("2026-01-01"), "xs:date('2026-01-01')"),
+        (FunctionCall("xs:double", (1.5,)), "1.5"),
+        (FunctionCall("xs:boolean", ("1",)), "xs:boolean('1')"),
+        (FunctionCall("xs:boolean", ("0",)), "xs:boolean('0')"),
+        (cts.uris(), "cts:uris()"),
     ],
 )
-def test_query_function_values_compile_but_cannot_serialize(method, value):
+def test_query_function_values_compile_but_cannot_serialize(
+    method, value, representation,
+):
     query = cts.element_range_query("value", "=", value)
     (code, _) = query.compile()
     assert value.fn + "(" in code
-    with pytest.raises(TypeError, match="value argument requires server evaluation"):
+    with pytest.raises(TypeError) as error:
         getattr(query, method)()
+    assert str(error.value) == (
+        "cts:element-range-query: value: CTS value argument requires server "
+        f"evaluation, got {representation}."
+    )
 
 
 @pytest.mark.parametrize("method", ["to_json", "to_xml", "to_combined_query"])
 @pytest.mark.parametrize("value", ["1", "0"])
 def test_query_json_property_boolean_cast_requires_server_evaluation(method, value):
     query = cts.json_property_value_query("v", FunctionCall("xs:boolean", (value,)))
-    with pytest.raises(TypeError, match="value argument requires server evaluation"):
+    with pytest.raises(TypeError) as error:
         getattr(query, method)()
+    assert str(error.value) == (
+        "cts:json-property-value-query: value: CTS value argument requires server "
+        f"evaluation, got xs:boolean('{value}')."
+    )
 
 
 @pytest.mark.parametrize(

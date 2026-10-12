@@ -29,7 +29,10 @@ def test_builder_composes_range_and_term():
             AndQuery(
                 [
                     RangeQuery(
-                        Element("price"), 20, operator="GE", index_type="xs:int",
+                        Element("price"),
+                        20,
+                        operator="GE",
+                        index_type="xs:int",
                     ),
                     TermQuery("blue"),
                 ],
@@ -91,5 +94,6 @@ def test_builder_empty_composition(build, expected):
 
 
 def test_builder_near_rejects_invalid_distance():
-    with pytest.raises(TypeError, match=r"NearQuery.distance must be an integer"):
+    with pytest.raises(TypeError) as error:
         sq.near(sq.term("blue"), distance=1.5)
+    assert str(error.value) == "NearQuery.distance must be an integer, got float"

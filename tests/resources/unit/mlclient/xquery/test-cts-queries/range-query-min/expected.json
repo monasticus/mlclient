@@ -1,0 +1,24 @@
+{
+  "rangeQuery": {
+    "reference": [
+      {
+        "elementReference": {
+          "namespaceURI": "",
+          "localname": "price",
+          "scalarType": "int"
+        }
+      }
+    ],
+    "operator": ">=",
+    "value": [
+      {
+        "type": "decimal",
+        "val": "2"
+      },
+      {
+        "type": "decimal",
+        "val": "3"
+      }
+    ]
+  }
+}

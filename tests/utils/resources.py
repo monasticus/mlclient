@@ -168,7 +168,3 @@ def render_test_resource(test_path: str, name: str, /, **fragments: str) -> str:
         message = f"Expected fragments {sorted(placeholders)}, got {sorted(fragments)}"
         raise ValueError(message)
     return re.sub(r"@@(\w+)@@", lambda match: fragments[match[1]], source)
-
-
-def read_query_input(test_path: str, name: str):
-    return runpy.run_path(get_test_resource_path(test_path, name))["build"]()

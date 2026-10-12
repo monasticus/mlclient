@@ -12,10 +12,7 @@ def test_abstract_expression_requires_render():
     with pytest.raises(TypeError) as error:
         XqyExpression()
     expected_message = (
-        (
-            "Can't instantiate abstract class XqyExpression with abs"
-            "tract method render"
-        )
+        ("Can't instantiate abstract class XqyExpression with abstract method render")
         if sys.version_info < (3, 12)
         else (
             "Can't instantiate abstract class XqyExpression without "
@@ -32,8 +29,9 @@ def test_expression_string_contains_complete_source():
 def test_circular_json_is_rejected():
     value = {}
     value["self"] = value
-    with pytest.raises(ValueError, match="Circular"):
+    with pytest.raises(ValueError, match=r"^Circular reference detected$") as error:
         fn.data(value)
+    assert str(error.value) == "Circular reference detected"
 
 
 def test_element_tail_is_not_part_of_the_input_node():
@@ -44,30 +42,39 @@ def test_element_tail_is_not_part_of_the_input_node():
 
 
 @pytest.mark.parametrize(
-    ("value", "error"),
+    ("value", "error", "message"),
     [
-        ({1: "blue"}, TypeError),
-        ({"nested": [{2: "blue"}]}, TypeError),
-        ({"value": float("nan")}, ValueError),
-        ({"value": float("inf")}, ValueError),
-        ({"value": object()}, TypeError),
-        (ElementTree(), ValueError),
+        ({1: "blue"}, TypeError, "JSON object keys must be strings"),
+        ({"nested": [{2: "blue"}]}, TypeError, "JSON object keys must be strings"),
+        (
+            {"value": float("nan")},
+            ValueError,
+            "Out of range float values are not JSON compliant",
+        ),
+        (
+            {"value": float("inf")},
+            ValueError,
+            "Out of range float values are not JSON compliant",
+        ),
+        (
+            {"value": object()},
+            TypeError,
+            "Object of type object is not JSON serializable",
+        ),
+        (ElementTree(), ValueError, "an XML document must have a root element"),
     ],
 )
-def test_invalid_python_nodes_fail_when_built(value, error):
-    with pytest.raises(error):
+def test_invalid_python_nodes_fail_when_built(value, error, message):
+    with pytest.raises(error) as caught:
         fn.data(value)
+    assert str(caught.value) == message
 
 
 def test_nested_json_arrays_remain_arrays():
     (_code, variables) = fn.count([{"items": [1, None, True]}, {"items": []}]).compile()
     assert (
-        (
-            "fn:count((xdmp:unquote($v0) ! node(), xdmp:unquote($v2)"
-            " ! node()))"
-        )
-        in variables.values()
-    )
+        "fn:count((xdmp:unquote($v0) ! node(), xdmp:unquote($v2) ! node()))"
+    ) in variables.values()
     assert json.loads(variables["v0"]) == {"items": [1, None, True]}
     assert json.loads(variables["v2"]) == {"items": []}
     assert fn.count(({"items": []},)).compile()[1]["v0"] == '{"items": []}'

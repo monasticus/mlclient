@@ -1,0 +1,11 @@
+{
+  "elementGeospatialQuery": {
+    "element": [
+      "origin"
+    ],
+    "region": [
+      "10.5,-20.25"
+    ],
+    "weight": 2.0
+  }
+}

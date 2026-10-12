@@ -1,0 +1,12 @@
+{
+  "elementWordQuery": {
+    "element": [
+      "{https://example.com/cts-test}title"
+    ],
+    "text": [
+      "blue",
+      "red"
+    ],
+    "weight": 2.0
+  }
+}

@@ -212,7 +212,7 @@ Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
 
 ## Aggregate values
 
-`aggregate(name, function, query=None, ...)` applies a built-in aggregate to a
+`aggregate(name, function, query=None, ...)` applies an aggregate to a
 values or tuples definition. It returns the parsed result, not a `ValueHit`:
 
 ```python
@@ -230,8 +230,21 @@ statistical aggregates return floats. No result is `None` (for example, an
 average with no matching values). Supported built-ins include min, max, median,
 standard deviation, variance, correlation and covariance; binary statistics use
 tuples.
-Native-plugin aggregates remain available through `ml.rest.values`, including
-`aggregate_path`; REST does not advertise a plugin result's type.
+For a native plugin already installed on MarkLogic, pass its function name and
+library path:
+
+```python
+with MLClient() as ml:
+    result = ml.search(options=options).aggregate(
+        "price", "customAverage", aggregate_path="/native/statistics",
+    )
+```
+
+A non-empty `aggregate_path` selects a plugin. Its first returned aggregate value
+retains its JSON type; the service does not infer the plugin result type from
+the lexicon. A missing value returns `None`. An omitted or empty path selects a
+built-in aggregate and preserves the conversions described above. The async
+service accepts the same parameters.
 
 ## Read co-occurrences
 

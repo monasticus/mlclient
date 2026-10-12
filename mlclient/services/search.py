@@ -45,23 +45,6 @@ Frequency = Literal["item", "fragment"]
 ReportView = Literal["all", "results", "facets", "metadata"]
 """Search report sections."""
 
-AggregateFunction = Literal[
-    "avg",
-    "correlation",
-    "count",
-    "covariance",
-    "covariance-population",
-    "max",
-    "median",
-    "min",
-    "stddev",
-    "stddev-population",
-    "sum",
-    "variance",
-    "variance-population",
-]
-"""Built-in lexicon aggregate functions."""
-
 _RANGE_BOUND_COUNT = 2
 _DOUBLE_AGGREGATES = frozenset(
     {
@@ -519,9 +502,10 @@ class SearchService:
     def aggregate(
         self,
         name: str,
-        function: AggregateFunction,
+        function: str,
         query: SearchInput = None,
         *,
+        aggregate_path: str | None = None,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
@@ -529,7 +513,7 @@ class SearchService:
         scope: SearchScope | None = None,
         timeout=UNSET,
     ) -> ParsedValue | None:
-        """Apply a built-in aggregate to a values or tuples definition.
+        """Aggregate a values or tuples definition with a built-in or native plugin.
 
         Sends POST with named or inline options. The definition
         must exist in the scope's options or the server's default options.
@@ -539,12 +523,18 @@ class SearchService:
         name : str
             The name of a values or tuples definition in the query options.
         function : str
-            Built-in aggregate (sum, avg, count, min, max, median, stddev,
-            stddev-population, variance, variance-population, correlation,
-            covariance or covariance-population). Use ml.rest.values for plugins.
+            Aggregate function name. Built-ins include sum, avg, count, min,
+            max, median, stddev, stddev-population, variance,
+            variance-population, correlation,
+            covariance and covariance-population. For a native plugin function,
+            also supply aggregate_path.
         query : SearchQuery | str | None, default None
             Restrict the aggregated values to documents matching a structured,
             CTS or string query; None aggregates the whole lexicon.
+        aggregate_path : str | None, default None
+            Native plugin library path containing the aggregate function.
+            Omitted or empty selects a built-in function. The plugin must already
+            be installed on MarkLogic.
         direction : {'ascending', 'descending'} | None, default None
             Lexicon order deciding which values limit and pos select.
         frequency : {'item', 'fragment'} | None, default None
@@ -564,8 +554,9 @@ class SearchService:
         Returns
         -------
         ParsedValue | None
-            The result converted to the function's native result type, or
-            None when no values match.
+            The first aggregate value, or None when no value is returned.
+            Built-in results are converted to the function's native result type.
+            Plugin values retain their JSON types without lexicon-based conversion.
 
         Raises
         ------
@@ -591,12 +582,13 @@ class SearchService:
             data_format="json",
             view="aggregate",
             aggregate=function,
+            aggregate_path=aggregate_path,
             direction=direction,
             frequency=frequency,
             limit=limit,
             timeout=timeout,
         )
-        return _parse_aggregate(resp, function)
+        return _parse_aggregate(resp, function, aggregate_path)
 
     def tuples(
         self,
@@ -1051,9 +1043,10 @@ class AsyncSearchService:
     async def aggregate(
         self,
         name: str,
-        function: AggregateFunction,
+        function: str,
         query: SearchInput = None,
         *,
+        aggregate_path: str | None = None,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
@@ -1061,7 +1054,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         timeout=UNSET,
     ) -> ParsedValue | None:
-        """Apply a built-in aggregate to a values or tuples definition.
+        """Aggregate a values or tuples definition with a built-in or native plugin.
 
         Sends POST with named or inline options. The definition
         must exist in the scope's options or the server's default options.
@@ -1071,12 +1064,18 @@ class AsyncSearchService:
         name : str
             The name of a values or tuples definition in the query options.
         function : str
-            Built-in aggregate (sum, avg, count, min, max, median, stddev,
-            stddev-population, variance, variance-population, correlation,
-            covariance or covariance-population). Use ml.rest.values for plugins.
+            Aggregate function name. Built-ins include sum, avg, count, min,
+            max, median, stddev, stddev-population, variance,
+            variance-population, correlation,
+            covariance and covariance-population. For a native plugin function,
+            also supply aggregate_path.
         query : SearchQuery | str | None, default None
             Restrict the aggregated values to documents matching a structured,
             CTS or string query; None aggregates the whole lexicon.
+        aggregate_path : str | None, default None
+            Native plugin library path containing the aggregate function.
+            Omitted or empty selects a built-in function. The plugin must already
+            be installed on MarkLogic.
         direction : {'ascending', 'descending'} | None, default None
             Lexicon order deciding which values limit and pos select.
         frequency : {'item', 'fragment'} | None, default None
@@ -1096,8 +1095,9 @@ class AsyncSearchService:
         Returns
         -------
         ParsedValue | None
-            The result converted to the function's native result type, or
-            None when no values match.
+            The first aggregate value, or None when no value is returned.
+            Built-in results are converted to the function's native result type.
+            Plugin values retain their JSON types without lexicon-based conversion.
 
         Raises
         ------
@@ -1123,12 +1123,13 @@ class AsyncSearchService:
             data_format="json",
             view="aggregate",
             aggregate=function,
+            aggregate_path=aggregate_path,
             direction=direction,
             frequency=frequency,
             limit=limit,
             timeout=timeout,
         )
-        return _parse_aggregate(resp, function)
+        return _parse_aggregate(resp, function, aggregate_path)
 
     async def tuples(
         self,
@@ -1659,8 +1660,9 @@ def _parse_tuples(resp: Response) -> list[TupleHit]:
 def _parse_aggregate(
     resp: Response,
     function: str,
+    aggregate_path: str | None,
 ) -> ParsedValue | None:
-    """Parse a built-in aggregate result with the type of the function's result.
+    """Parse an aggregate value, retaining JSON types for native plugin results.
 
     Parameters
     ----------
@@ -1668,11 +1670,14 @@ def _parse_aggregate(
         Native JSON aggregate response.
     function : str
         Requested aggregate function.
+    aggregate_path : str | None
+        A non-empty native plugin path disables built-in type conversion.
 
     Returns
     -------
     ParsedValue | None
-        The typed result, or None when the lexicon holds no values to aggregate.
+        The first available value, converted for a built-in function or retained
+        as JSON for a plugin; None when no value is returned.
 
     Raises
     ------
@@ -1681,9 +1686,13 @@ def _parse_aggregate(
     """
     MLResponseParser.raise_for_status(resp)
     payload = resp.json()["values-response"]
-    atomic_type = _aggregate_result_type(function, payload.get("type", "xs:string"))
     for result in payload.get("aggregate-result", []):
         if "_value" in result:
+            if aggregate_path:
+                return result["_value"]
+            atomic_type = _aggregate_result_type(
+                function, payload.get("type", "xs:string"),
+            )
             return MLResponseParser.parse_atomic(result["_value"], atomic_type)
     return None
 

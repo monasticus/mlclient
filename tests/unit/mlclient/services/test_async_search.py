@@ -596,8 +596,9 @@ PRICE_OPTIONS = {
 }
 
 
+@pytest.mark.parametrize("aggregate_path", [None, ""])
 @pytest.mark.parametrize(
-    ("name", "scalar_type", "function", "lexical", "expected"),
+    "case",
     [
         ("price", "xs:decimal", "sum", "3.75", Decimal("3.75")),
         ("price", "xs:decimal", "avg", "1.875", Decimal("1.875")),
@@ -610,7 +611,8 @@ PRICE_OPTIONS = {
 )
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_native_result(name, scalar_type, function, lexical, expected):
+async def test_aggregate_native_result(case, aggregate_path):
+    name, scalar_type, function, lexical, expected = case
     options = {
         "values": [
             {
@@ -644,10 +646,56 @@ async def test_aggregate_native_result(name, scalar_type, function, lexical, exp
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        result = await ml.search(options=options).aggregate(name, function)
+        result = await ml.search(options=options).aggregate(
+            name, function, aggregate_path=aggregate_path,
+        )
 
     assert result == expected
     assert type(result) is type(expected)
+
+
+# Synthetic plugin results verify that lexicon types do not coerce plugin output.
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"name": "customAverage", "_value": 2.5},
+        {"name": "customAverage", "_value": "2.5"},
+        {"name": "customAverage", "_value": {"average": 2.5}},
+        {"name": "customAverage", "_value": [2, 3]},
+        {"name": "customAverage", "_value": None},
+        {"name": "customAverage"},
+    ],
+)
+@pytest.mark.asyncio
+@respx.mock
+async def test_plugin_aggregate_preserves_json_value(payload):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "customAverage")
+    ml_mocker.with_request_param("aggregatePath", "/native/statistics")
+    ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "type": "xs:int",
+                "aggregate-result": [payload],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        result = await ml.search.aggregate(
+            "category", "customAverage", "coffee", aggregate_path="/native/statistics",
+        )
+
+    assert result == payload.get("_value")
+    assert type(result) is type(payload.get("_value"))
+    assert route.call_count == 1
 
 
 @pytest.mark.asyncio

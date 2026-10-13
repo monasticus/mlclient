@@ -81,7 +81,7 @@ Import Gradle settings, check health and version, then open Query Console.
 
 ![Import dev settings, check health and MarkLogic 12 version, then open QConsole](docs/assets/gifs/gradle-health-version-url.gif)
 
-### More commands
+### More examples
 
 ```sh
 ml env init                               # Create and review project configuration
@@ -109,7 +109,7 @@ or port; `log-level -s/--server` selects an actual MarkLogic App Server name.
 `eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation.
 Use `--no-pretty` to keep the original formatting.
 
-Read the [CLI guide](https://monasticus.github.io/mlclient/latest/user/cli/).
+Read more in the [CLI guide](https://monasticus.github.io/mlclient/latest/user/cli/).
 
 ## Background and stability
 

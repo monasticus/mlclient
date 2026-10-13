@@ -31,15 +31,13 @@ hosts, async usage and CLI setup.
 `ml.rest.documents` and `ml.http`. [The CLI guide](user/cli.md) gets a project
 connected without writing Python. [Recipes](recipes.md) show metadata cleanup,
 concurrent evaluations and a custom application API.
-CLI `eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation;
-`--no-pretty` keeps the original formatting.
 
 ## From simple usage to application-specific control
 
 Use [environments](user/environments.md) to share connection settings across scripts and
 commands. Configure [authentication and TLS](user/python/connections.md), then
 add HTTP retry, timeout and pool limits where the application needs them.
-Manage, Admin and Health can have independent connection settings.
+Manage, Admin and your custom App Servers can have independent connection settings.
 
 For your own application routes, [extend the client](user/python/custom-api.md)
 with a Call, an API wrapper and a higher-level method. The

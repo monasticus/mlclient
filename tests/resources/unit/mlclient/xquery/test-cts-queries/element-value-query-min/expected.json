@@ -1,0 +1,10 @@
+{
+  "elementValueQuery": {
+    "element": [
+      "title"
+    ],
+    "text": [
+      "*"
+    ]
+  }
+}

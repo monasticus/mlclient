@@ -1,0 +1,14 @@
+{
+  "pathGeospatialQuery": {
+    "pathExpression": [
+      "/item/origin"
+    ],
+    "region": [
+      "10,20"
+    ],
+    "options": [
+      "coordinate-system=wgs84"
+    ],
+    "weight": 3
+  }
+}

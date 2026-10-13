@@ -1,0 +1,1 @@
+cts:json-property-value-query("count", xs:double(7))

@@ -1,0 +1,13 @@
+{
+  "geo-region-constraint-query": {
+    "constraint-name": "location",
+    "geospatial-operator": "intersects",
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ],
+    "weight": 2
+  }
+}

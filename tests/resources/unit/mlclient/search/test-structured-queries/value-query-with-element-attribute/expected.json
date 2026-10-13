@@ -1,0 +1,15 @@
+{
+  "value-query": {
+    "element": {
+      "name": "label",
+      "ns": ""
+    },
+    "attribute": {
+      "name": "color",
+      "ns": ""
+    },
+    "text": [
+      "blue"
+    ]
+  }
+}

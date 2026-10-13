@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:element-word-query: element: CTS QName argument requires server evaluation, got fn:node-name(fn:doc('/a.xml'))."
+}

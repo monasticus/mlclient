@@ -1,0 +1,18 @@
+{
+  "and-not-query": {
+    "positive-query": {
+      "term-query": {
+        "text": [
+          "blue"
+        ]
+      }
+    },
+    "negative-query": {
+      "term-query": {
+        "text": [
+          "green"
+        ]
+      }
+    }
+  }
+}

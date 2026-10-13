@@ -1,0 +1,19 @@
+xquery version "1.0-ml";
+declare variable $code external;
+declare variable $query external;
+declare variable $query_json external;
+declare variable $options external;
+
+xdmp:eval(
+    $code,
+    (
+        xs:QName("query"), $query,
+        xs:QName("query_json"), $query_json,
+        xs:QName("options"), $options
+    ),
+    <options xmlns="xdmp:eval">
+        <database>{xdmp:database()}</database>
+        <modules>{xdmp:database()}</modules>
+        <root>/</root>
+    </options>
+)

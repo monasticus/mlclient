@@ -1,0 +1,15 @@
+{
+  "elementQuery": {
+    "element": [
+      "a",
+      "{https://example.com/cts-test}b"
+    ],
+    "query": {
+      "wordQuery": {
+        "text": [
+          "x"
+        ]
+      }
+    }
+  }
+}

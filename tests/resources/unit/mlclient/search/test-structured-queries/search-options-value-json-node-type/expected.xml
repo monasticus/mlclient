@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="price"><search:value type="number"><search:json-property>price</search:json-property></search:value></search:constraint></search:options>

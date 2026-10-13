@@ -1,0 +1,7 @@
+from mlclient.xquery import fn
+
+
+def run():
+    node = {"label": "blue", "nested": [{"count": 2}]}
+    expression = fn.namespace_uri(node)
+    return expression.compile()

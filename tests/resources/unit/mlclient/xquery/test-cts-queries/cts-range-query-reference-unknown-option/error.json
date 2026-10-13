@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:range-query: reference: Unsupported local CTS reference option: unknown"
+}

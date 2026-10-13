@@ -1,0 +1,7 @@
+{
+  "v0": "auxiliary",
+  "v1": "auxiliary",
+  "v2": "<node0:report xmlns:node0=\"https://example.com/reports\">blue</node0:report>",
+  "v3": "*",
+  "v4": "fn:insert-before(fn:string($v0), fn:string($v1), xdmp:unquote($v2) ! *)"
+}

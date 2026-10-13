@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:element-geospatial-query: region: CTS point given as WKT text requires server evaluation."
+}

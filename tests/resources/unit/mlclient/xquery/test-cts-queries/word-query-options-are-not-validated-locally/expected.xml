@@ -1,0 +1,1 @@
+<cts:word-query xmlns:cts="http://marklogic.com/cts"><cts:text>blue</cts:text><cts:option>lang=eng</cts:option><cts:option>synonym</cts:option><cts:option>synonym</cts:option><cts:option>bogus</cts:option></cts:word-query>

@@ -1,0 +1,1 @@
+<cts:path-geospatial-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" weight="3"><cts:path-expression>/item/origin</cts:path-expression><cts:region xmlns:cts="http://marklogic.com/cts" xsi:type="cts:point">10,20</cts:region><cts:option>coordinate-system=wgs84</cts:option></cts:path-geospatial-query>

@@ -1,0 +1,6 @@
+{
+  "v0": "auxiliary",
+  "v1": "{\"label\": \"blue\", \"nested\": [{\"count\": 2}]}",
+  "v2": "node()",
+  "v3": "fn:deep-equal(fn:string($v0), xdmp:unquote($v1) ! node())"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Container queries require element or JSON property targets."
+}

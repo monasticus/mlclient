@@ -1,0 +1,1 @@
+cts:json-property-word-query("title", "blue", "lang=en")

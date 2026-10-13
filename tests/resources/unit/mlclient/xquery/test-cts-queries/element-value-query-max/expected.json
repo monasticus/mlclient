@@ -1,0 +1,14 @@
+{
+  "elementValueQuery": {
+    "element": [
+      "title"
+    ],
+    "text": [
+      "*"
+    ],
+    "options": [
+      "exact"
+    ],
+    "weight": 3
+  }
+}

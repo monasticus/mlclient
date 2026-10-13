@@ -1,0 +1,12 @@
+{
+  "wordQuery": {
+    "text": [
+      "blue"
+    ],
+    "options": [
+      "unstemmed",
+      "case-insensitive",
+      "lang=en"
+    ]
+  }
+}

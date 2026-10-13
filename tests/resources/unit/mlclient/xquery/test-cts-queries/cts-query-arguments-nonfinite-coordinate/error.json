@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:element-geospatial-query: region: CTS numbers must be finite for local serialization."
+}

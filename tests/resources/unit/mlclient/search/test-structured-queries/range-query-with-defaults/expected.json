@@ -1,0 +1,9 @@
+{
+  "range-query": {
+    "element": {
+      "name": "price",
+      "ns": ""
+    },
+    "value": "0"
+  }
+}

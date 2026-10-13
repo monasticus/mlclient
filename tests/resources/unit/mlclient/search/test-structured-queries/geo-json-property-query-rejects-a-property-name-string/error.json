@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Geospatial JSON property selectors must be JsonProperty instances."
+}

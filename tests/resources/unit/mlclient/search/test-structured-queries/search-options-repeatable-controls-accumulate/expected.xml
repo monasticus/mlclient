@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:search-option>unfiltered</search:search-option><search:search-option>score-simple</search:search-option></search:options>

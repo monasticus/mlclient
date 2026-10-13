@@ -1,0 +1,1 @@
+<cts:element-attribute-pair-geospatial-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><cts:element>item</cts:element><cts:latitude>lat</cts:latitude><cts:longitude>lon</cts:longitude><cts:region xmlns:cts="http://marklogic.com/cts" xsi:type="cts:point">10,20</cts:region></cts:element-attribute-pair-geospatial-query>

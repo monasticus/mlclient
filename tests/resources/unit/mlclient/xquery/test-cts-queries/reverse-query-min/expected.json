@@ -1,0 +1,7 @@
+{
+  "reverseQuery": {
+    "nodes": [
+      "<report xmlns:r=\"https://example.com/reports\" kind=\"r:blue\">blue</report>"
+    ]
+  }
+}

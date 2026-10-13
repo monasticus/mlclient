@@ -1,0 +1,1 @@
+cts:locks-fragment-query(cts:word-query("blue"))

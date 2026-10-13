@@ -1,0 +1,5 @@
+from mlclient.xquery import cts, fn
+
+
+def run():
+    return cts.circle(fn.count(cts.search().pos(1)), cts.point(10, 20)).compile()

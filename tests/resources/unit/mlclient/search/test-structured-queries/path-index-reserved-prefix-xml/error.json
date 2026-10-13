@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "PathIndex namespace prefixes must be non-empty and not search, xml or xmlns."
+}

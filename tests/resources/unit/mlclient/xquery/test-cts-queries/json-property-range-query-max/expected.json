@@ -1,0 +1,18 @@
+{
+  "jsonPropertyRangeQuery": {
+    "property": [
+      "price"
+    ],
+    "operator": ">",
+    "value": [
+      {
+        "type": "decimal",
+        "val": "10"
+      }
+    ],
+    "options": [
+      "cached"
+    ],
+    "weight": 3
+  }
+}

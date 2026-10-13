@@ -1,0 +1,1 @@
+<cts:boost-query xmlns:cts="http://marklogic.com/cts"><cts:matching-query><cts:collection-query><cts:uri>reports</cts:uri></cts:collection-query></cts:matching-query><cts:boosting-query><cts:collection-query><cts:uri>notes</cts:uri></cts:collection-query></cts:boosting-query></cts:boost-query>

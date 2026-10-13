@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:reverse-query: nodes: CTS literal XML with a DTD requires server evaluation."
+}

@@ -1,0 +1,7 @@
+{
+  "term-query": {
+    "text": [
+      "a < b & c"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "jsonPropertyScopeQuery": {
+    "property": [
+      "report",
+      "note"
+    ],
+    "query": {
+      "trueQuery": {}
+    }
+  }
+}

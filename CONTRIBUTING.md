@@ -34,6 +34,13 @@ Use a descriptive name such as `feature/262-documentation` or
 Use Python 3.11 and Poetry 2.2.0 to match the documentation build. Unit-test CI
 also covers Python 3.10, 3.12, 3.13 and 3.14; keep library code compatible with 3.10.
 
+The `CI` workflow selects checks once for each PR or push to `main`. Unit tests,
+documentation and lint run independently when selected. Coverage and integration
+follow successful unit tests; integration-only changes can run with unit tests
+skipped. Unit and integration resources select their respective suites, while
+shared test utilities select both. Coverage comments run on PRs, and coverage
+badge updates run on `main`. Release tags use the separate release workflow.
+
 ```sh
 poetry env use python3.11
 poetry install --with docs

@@ -1,0 +1,8 @@
+{
+  "documentQuery": {
+    "uris": [
+      "/reports/a.xml",
+      "/notes/b.json"
+    ]
+  }
+}

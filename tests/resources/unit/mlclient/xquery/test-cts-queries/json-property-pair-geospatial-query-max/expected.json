@@ -1,0 +1,20 @@
+{
+  "jsonPropertyPairGeospatialQuery": {
+    "property": [
+      "location"
+    ],
+    "latitude": [
+      "lat"
+    ],
+    "longitude": [
+      "lon"
+    ],
+    "region": [
+      "10,20"
+    ],
+    "options": [
+      "coordinate-system=wgs84"
+    ],
+    "weight": 3
+  }
+}

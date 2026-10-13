@@ -1,0 +1,1 @@
+<cts:triple-range-query xmlns:cts="http://marklogic.com/cts" object-operator="&gt;=" weight="2"><cts:predicate column="reports.items.price" columnID="11548423394257569743" /><cts:object datatype="http://www.w3.org/2001/XMLSchema#integer">2</cts:object><cts:option>cached</cts:option></cts:triple-range-query>

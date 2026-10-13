@@ -1,0 +1,1 @@
+<search:element-constraint-query xmlns:search="http://marklogic.com/appservices/search"><search:constraint-name>section</search:constraint-name><search:true-query /></search:element-constraint-query>

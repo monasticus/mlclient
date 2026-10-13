@@ -1,0 +1,1 @@
+cts:element-geospatial-query(xs:QName("location"), cts:point(10, 20))

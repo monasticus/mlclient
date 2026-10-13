@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="price"><search:range type="xs:decimal" facet="true"><search:element name="price" ns="" /><search:facet-option>limit=10</search:facet-option></search:range></search:constraint></search:options>

@@ -1,0 +1,10 @@
+{
+  "word-constraint-query": {
+    "constraint-name": "title",
+    "text": [
+      "blue",
+      "green"
+    ],
+    "weight": 2
+  }
+}

@@ -1,5 +1,0 @@
-from mlclient.functions.xqy import cts
-
-
-def run():
-    return cts.uris(forest_ids=set())

@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "add requires one search-namespace XML element per JSON definition; return-facets has 1 JSON and 0 XML definitions"
+}

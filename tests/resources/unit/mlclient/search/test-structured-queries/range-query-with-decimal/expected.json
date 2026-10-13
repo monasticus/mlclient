@@ -1,0 +1,6 @@
+{
+  "range-query": {
+    "json-property": "price",
+    "value": "2.50"
+  }
+}

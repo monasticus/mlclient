@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:element-word-query: element: Prefixed CTS QNames require compilation namespace bindings; use fn.qname(uri, name) for local serialization."
+}

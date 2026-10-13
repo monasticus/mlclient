@@ -1,0 +1,5 @@
+{
+  "v0": "{\"label\": \"blue\", \"nested\": [{\"count\": 2}]}",
+  "v1": "node()",
+  "v2": "fn:local-name(xdmp:unquote($v0) ! node())"
+}

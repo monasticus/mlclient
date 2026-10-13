@@ -1,9 +1,6 @@
 name: Test MLClient
 
 on:
-  push:
-    branches: [main, "feature/**"]
-  pull_request:
   workflow_call:
 
 permissions:

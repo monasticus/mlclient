@@ -1,0 +1,20 @@
+{
+  "geo-region-path-query": {
+    "coord": "wgs84",
+    "path-index": {
+      "text": "/place/region"
+    },
+    "geospatial-operator": "intersects",
+    "fragment-scope": "properties",
+    "geo-option": [
+      "units=miles"
+    ],
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ],
+    "weight": 2
+  }
+}

@@ -1,0 +1,8 @@
+<search:values-response
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="2">
+    <search:distinct-value xsi:type="xs:string"/>
+    <search:distinct-value xsi:type="xs:int">3</search:distinct-value>
+  </search:tuple>
+</search:values-response>

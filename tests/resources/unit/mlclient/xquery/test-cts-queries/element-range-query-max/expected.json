@@ -1,0 +1,18 @@
+{
+  "elementRangeQuery": {
+    "element": [
+      "price"
+    ],
+    "operator": ">=",
+    "value": [
+      {
+        "type": "decimal",
+        "val": "10"
+      }
+    ],
+    "options": [
+      "min-occurs=1"
+    ],
+    "weight": 2.0
+  }
+}

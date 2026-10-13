@@ -1,0 +1,13 @@
+{
+  "andQuery": {
+    "queries": [
+      {
+        "wordQuery": {
+          "text": [
+            "blue"
+          ]
+        }
+      }
+    ]
+  }
+}

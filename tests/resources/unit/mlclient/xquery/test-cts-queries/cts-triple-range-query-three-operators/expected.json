@@ -1,0 +1,25 @@
+{
+  "tripleRangeQuery": {
+    "subjectOperator": "!=",
+    "predicateOperator": "=",
+    "objectOperator": ">",
+    "subject": [
+      {
+        "datatype": "http://www.w3.org/2001/XMLSchema#string",
+        "value": "blue"
+      }
+    ],
+    "predicate": [
+      {
+        "datatype": "http://www.w3.org/2001/XMLSchema#string",
+        "value": "label"
+      }
+    ],
+    "object": [
+      {
+        "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+        "value": 2
+      }
+    ]
+  }
+}

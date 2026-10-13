@@ -1,0 +1,1 @@
+cts:json-property-pair-geospatial-query("place", "lat", "lon", cts:point(10, 20))

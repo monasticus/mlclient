@@ -1,0 +1,27 @@
+{
+  "geo-attr-pair-query": {
+    "parent": {
+      "name": "place",
+      "ns": ""
+    },
+    "lat": {
+      "name": "lat",
+      "ns": ""
+    },
+    "lon": {
+      "name": "lon",
+      "ns": ""
+    },
+    "fragment-scope": "properties",
+    "geo-option": [
+      "units=miles"
+    ],
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ],
+    "weight": 2
+  }
+}

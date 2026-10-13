@@ -1,0 +1,22 @@
+{
+  "range-query": {
+    "type": "xs:int",
+    "collation": "https://example.com/example",
+    "element": {
+      "name": "price",
+      "ns": ""
+    },
+    "attribute": {
+      "name": "amount",
+      "ns": ""
+    },
+    "fragment-scope": "documents",
+    "value": [
+      "3",
+      "4"
+    ],
+    "range-operator": "EQ",
+    "range-option": "cached",
+    "weight": 2
+  }
+}

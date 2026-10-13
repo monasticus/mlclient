@@ -1,0 +1,18 @@
+{
+  "boostQuery": {
+    "matchingQuery": {
+      "collectionQuery": {
+        "uris": [
+          "reports"
+        ]
+      }
+    },
+    "boostingQuery": {
+      "collectionQuery": {
+        "uris": [
+          "notes"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "JSON node type must be string, boolean, null, or number."
+}

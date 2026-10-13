@@ -1,0 +1,27 @@
+{
+  "tripleRangeQuery": {
+    "subject": [
+      "https://example.com/r"
+    ],
+    "predicate": [
+      "https://example.com/p"
+    ],
+    "object": [
+      {
+        "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+        "value": 2
+      },
+      {
+        "datatype": "http://www.w3.org/2001/XMLSchema#boolean",
+        "value": true
+      },
+      {
+        "datatype": "http://www.w3.org/2001/XMLSchema#string",
+        "value": "blue"
+      }
+    ],
+    "options": [
+      "cached"
+    ]
+  }
+}

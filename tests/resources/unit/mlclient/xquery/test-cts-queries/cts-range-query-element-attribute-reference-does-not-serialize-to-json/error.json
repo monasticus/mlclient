@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:range-query: reference: MarkLogic cannot read an element-attribute reference back from CTS JSON; serialize the query as XML or run it through eval"
+}

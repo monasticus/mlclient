@@ -1,0 +1,1 @@
+<cts:and-query xmlns:cts="http://marklogic.com/cts"><cts:collection-query><cts:uri>products</cts:uri></cts:collection-query><cts:word-query><cts:text>coffee</cts:text></cts:word-query></cts:and-query>

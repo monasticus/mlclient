@@ -784,7 +784,8 @@ def test_masks_supported_secrets(flag, server):
 @pytest.mark.parametrize("flag", ["", "--secrets"])
 def test_masks_cloud_api_key(flag):
     _write_env(
-        "dev", {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
+        "dev",
+        {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
     )
 
     tester = _get_tester()
@@ -915,7 +916,8 @@ def test_show_defaults_does_not_require_kerberos_tooling(mocker):
 
 def test_show_defaults_displays_cloud_gateway_defaults():
     _write_env(
-        "dev", {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
+        "dev",
+        {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
     )
 
     tester = _get_tester()

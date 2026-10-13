@@ -1,0 +1,1 @@
+<search:document-query xmlns:search="http://marklogic.com/appservices/search"><search:uri>/reports/first.xml</search:uri><search:uri>/reports/second.json</search:uri></search:document-query>

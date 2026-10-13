@@ -1,0 +1,12 @@
+{
+  "periodRangeQuery": {
+    "axis": [
+      "valid",
+      "system"
+    ],
+    "operator": "aln_before",
+    "options": [
+      "cached"
+    ]
+  }
+}

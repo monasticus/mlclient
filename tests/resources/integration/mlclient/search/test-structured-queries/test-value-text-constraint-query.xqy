@@ -1,0 +1,1 @@
+cts:element-value-query(xs:QName("status"), ("blue", "green"), (), 2)

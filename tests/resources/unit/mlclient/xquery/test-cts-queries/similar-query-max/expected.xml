@@ -1,0 +1,1 @@
+<cts:similar-query xmlns:cts="http://marklogic.com/cts" xmlns:ns1="cts:distinctive-terms" weight="2"><cts:node><report>blue</report></cts:node><ns1:options xmlns="cts:distinctive-terms"><ns1:max-terms>20</ns1:max-terms><ns1:score>logtf</ns1:score></ns1:options></cts:similar-query>

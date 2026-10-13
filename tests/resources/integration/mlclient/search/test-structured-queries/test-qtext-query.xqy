@@ -1,0 +1,1 @@
+cts:and-query((cts:word-query("blue", "lang=en"), cts:word-query("green", "lang=en")))

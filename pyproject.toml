@@ -149,12 +149,16 @@ max-complexity = 10
 "mlclient/services/cts.py" = [
     "A002", # allow native cts names: dict, id, map, object
 ]
-"mlclient/functions/xqy/_fn.py" = [
+"mlclient/xquery/_fn.py" = [
     "A002", # allow shadowing input to preserve native fn parameter names
 ]
-"mlclient/functions/xqy/_cts.py" = [
+"mlclient/xquery/_cts.py" = [
     "PLR0913", # allow many arguments as they mirror native cts function signatures
     "A002", # allow native cts names: dict, format, id, map, object, property, type
+]
+"mlclient/xquery/_cts_query.py" = [
+    "PLR0913", # allow many arguments as they mirror native cts function signatures
+    "A002", # allow native cts names: format
 ]
 "mlclient/ml_profile.py" = [
     "PLR6301" # allow for a non-static method as it is defined by the Pydantic lib

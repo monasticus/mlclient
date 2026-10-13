@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "TermQuery.text is required"
+}

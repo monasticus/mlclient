@@ -1,0 +1,23 @@
+{
+  "geo-elem-query": {
+    "element": {
+      "name": "location",
+      "ns": ""
+    },
+    "parent": {
+      "name": "place",
+      "ns": ""
+    },
+    "fragment-scope": "properties",
+    "geo-option": [
+      "units=miles"
+    ],
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ],
+    "weight": 2
+  }
+}

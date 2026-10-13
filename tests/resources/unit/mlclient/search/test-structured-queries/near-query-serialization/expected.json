@@ -1,0 +1,40 @@
+{
+  "near-query": {
+    "queries": [
+      {
+        "term-query": {
+          "text": [
+            "blue"
+          ]
+        }
+      },
+      {
+        "term-query": {
+          "text": [
+            "green"
+          ]
+        }
+      },
+      {
+        "distance": {
+          "_value": 3
+        }
+      },
+      {
+        "minimum-distance": {
+          "_value": 1
+        }
+      },
+      {
+        "distance-weight": {
+          "_value": 2
+        }
+      },
+      {
+        "ordered": {
+          "_value": false
+        }
+      }
+    ]
+  }
+}

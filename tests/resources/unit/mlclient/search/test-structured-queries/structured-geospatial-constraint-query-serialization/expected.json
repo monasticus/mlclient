@@ -1,0 +1,14 @@
+{
+  "geospatial-constraint-query": {
+    "constraint-name": "location",
+    "point": [
+      {
+        "latitude": 10,
+        "longitude": 20
+      }
+    ],
+    "text": [
+      "nearby"
+    ]
+  }
+}

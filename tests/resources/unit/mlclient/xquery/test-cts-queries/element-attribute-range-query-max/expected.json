@@ -1,0 +1,21 @@
+{
+  "elementAttributeRangeQuery": {
+    "element": [
+      "item"
+    ],
+    "attribute": [
+      "amount"
+    ],
+    "operator": "!=",
+    "value": [
+      {
+        "type": "decimal",
+        "val": "3"
+      }
+    ],
+    "options": [
+      "cached"
+    ],
+    "weight": 3
+  }
+}

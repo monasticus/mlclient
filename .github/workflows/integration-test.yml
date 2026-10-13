@@ -2,10 +2,7 @@ name: Test MLClient (INTEGRATION)
 
 on:
   workflow_call:
-  pull_request:
-  push:
-    branches:
-      - main
+
 permissions:
   contents: read
 

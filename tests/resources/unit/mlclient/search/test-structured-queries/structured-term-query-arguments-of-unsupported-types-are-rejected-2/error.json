@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "TermQuery.weight must be a number, got bool"
+}

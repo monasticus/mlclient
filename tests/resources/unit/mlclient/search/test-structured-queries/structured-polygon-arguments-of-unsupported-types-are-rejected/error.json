@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Polygon.points items must be Point, got tuple"
+}

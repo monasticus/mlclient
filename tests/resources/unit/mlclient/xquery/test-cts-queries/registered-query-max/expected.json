@@ -1,0 +1,12 @@
+{
+  "registeredQuery": {
+    "ids": [
+      "1",
+      "2"
+    ],
+    "options": [
+      "unfiltered"
+    ],
+    "weight": 2.0
+  }
+}

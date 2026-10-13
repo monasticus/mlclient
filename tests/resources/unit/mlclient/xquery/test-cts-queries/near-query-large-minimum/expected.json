@@ -1,0 +1,6 @@
+{
+  "nearQuery": {
+    "distance": 10,
+    "minimum-distance": 4294967295
+  }
+}

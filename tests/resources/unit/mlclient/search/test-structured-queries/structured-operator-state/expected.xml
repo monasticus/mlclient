@@ -1,0 +1,1 @@
+<search:operator-state xmlns:search="http://marklogic.com/appservices/search"><search:operator-name>sort</search:operator-name><search:state-name>relevance</search:state-name></search:operator-state>

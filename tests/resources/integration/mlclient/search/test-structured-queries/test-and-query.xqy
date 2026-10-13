@@ -1,0 +1,1 @@
+cts:and-query((cts:word-query("blue"), cts:word-query("green")), "ordered")

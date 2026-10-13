@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:range-query: reference: CTS reference namespace maps cannot be serialized natively; use EQNames in the path or destination database namespaces."
+}

@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "Range operator must be LT, LE, GT, GE, EQ, or NE."
+}

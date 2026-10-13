@@ -1,0 +1,16 @@
+{
+  "orQuery": {
+    "queries": [
+      {
+        "collectionQuery": {
+          "uris": [
+            "reports"
+          ]
+        }
+      }
+    ],
+    "options": [
+      "synonym"
+    ]
+  }
+}

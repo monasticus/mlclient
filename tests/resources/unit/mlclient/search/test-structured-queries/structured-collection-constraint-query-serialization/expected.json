@@ -1,0 +1,9 @@
+{
+  "collection-constraint-query": {
+    "constraint-name": "category",
+    "uri": [
+      "blue",
+      "green"
+    ]
+  }
+}

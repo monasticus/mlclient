@@ -1,0 +1,8 @@
+{
+  "path-index": {
+    "text": "/r:report/r:price",
+    "namespaces": {
+      "r": "https://example.com/example/reports"
+    }
+  }
+}

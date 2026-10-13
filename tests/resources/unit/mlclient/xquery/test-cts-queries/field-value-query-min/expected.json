@@ -1,0 +1,11 @@
+{
+  "fieldValueQuery": {
+    "field": [
+      "price"
+    ],
+    "text": [
+      "1",
+      "2"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "and-query": {
+    "queries": [
+      {
+        "term-query": {
+          "text": [
+            "blue"
+          ]
+        }
+      },
+      {
+        "term-query": {
+          "text": [
+            "green"
+          ]
+        }
+      },
+      {
+        "ordered": {
+          "_value": true
+        }
+      }
+    ]
+  }
+}

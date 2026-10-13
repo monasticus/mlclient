@@ -1,0 +1,5 @@
+cts:geospatial-region-query(
+    cts:geospatial-region-path-reference("/report/area", "coordinate-system=wgs84"),
+    "intersects",
+    cts:box(1, 2, 3, 4)
+)

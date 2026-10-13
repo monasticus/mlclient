@@ -1,0 +1,14 @@
+{
+  "elementGeospatialQuery": {
+    "element": [
+      "origin"
+    ],
+    "region": [
+      "10.5,-20.25"
+    ],
+    "options": [
+      "coordinate-system=wgs84"
+    ],
+    "weight": 2.0
+  }
+}

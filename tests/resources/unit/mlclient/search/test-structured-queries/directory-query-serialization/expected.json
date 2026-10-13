@@ -1,0 +1,9 @@
+{
+  "directory-query": {
+    "uri": [
+      "/reports/",
+      "/notes/"
+    ],
+    "infinite": false
+  }
+}

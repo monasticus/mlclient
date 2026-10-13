@@ -1,0 +1,1 @@
+cts:field-word-query("summary", "blue", "lang=en")

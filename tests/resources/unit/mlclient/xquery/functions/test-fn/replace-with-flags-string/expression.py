@@ -1,0 +1,5 @@
+from mlclient.xquery import fn
+
+
+def run():
+    return fn.replace("MarkLogic", "logic", "database", flags="i").compile()

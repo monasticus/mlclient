@@ -1,0 +1,1 @@
+<search:not-in-query xmlns:search="http://marklogic.com/appservices/search"><search:positive-query><search:term-query><search:text>blue</search:text></search:term-query></search:positive-query><search:negative-query><search:term-query><search:text>green</search:text></search:term-query></search:negative-query></search:not-in-query>

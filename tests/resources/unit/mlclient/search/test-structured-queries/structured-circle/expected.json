@@ -1,0 +1,13 @@
+{
+  "circle": [
+    {
+      "radius": 3,
+      "point": [
+        {
+          "latitude": 10,
+          "longitude": 20
+        }
+      ]
+    }
+  ]
+}

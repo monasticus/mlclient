@@ -1,0 +1,15 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "label",
+        "value": {
+          "json-property": "label",
+          "term-option": [
+            "case-sensitive"
+          ]
+        }
+      }
+    ]
+  }
+}

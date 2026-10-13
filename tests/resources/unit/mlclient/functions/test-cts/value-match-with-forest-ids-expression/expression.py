@@ -1,9 +1,0 @@
-from mlclient.functions.xqy import cts, fn
-
-
-def run():
-    return cts.value_match(
-        cts.element_reference("price"),
-        "prod*",
-        forest_ids=fn.count(cts.search().pos(1)),
-    ).compile()

@@ -1,11 +1,16 @@
 name: Update a code coverage badge
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+
+permissions:
+  contents: read
+
 jobs:
   update-badge:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
 
     steps:

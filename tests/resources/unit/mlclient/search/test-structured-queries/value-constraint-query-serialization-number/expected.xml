@@ -1,0 +1,1 @@
+<search:value-constraint-query xmlns:search="http://marklogic.com/appservices/search"><search:constraint-name>count</search:constraint-name><search:text>7</search:text></search:value-constraint-query>

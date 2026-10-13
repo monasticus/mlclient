@@ -1,0 +1,1 @@
+cts:path-geospatial-query("/report/location", cts:point(10, 20), (), 2)

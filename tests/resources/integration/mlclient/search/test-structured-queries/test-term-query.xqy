@@ -1,0 +1,1 @@
+cts:word-query(("blue", "green"), ("case-sensitive", "unstemmed"), 2)

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "range target must be an Element, Field, JsonProperty or PathIndex"
+}

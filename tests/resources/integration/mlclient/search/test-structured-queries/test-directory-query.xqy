@@ -1,0 +1,1 @@
+cts:directory-query(("/reports/", "/notes/"), "1")

@@ -1,0 +1,9 @@
+{
+  "directoryQuery": {
+    "uris": [
+      "/reports/",
+      "/notes/"
+    ],
+    "depth": "infinity"
+  }
+}

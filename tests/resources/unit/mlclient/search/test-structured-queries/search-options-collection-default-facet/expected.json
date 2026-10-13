@@ -1,0 +1,12 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "type",
+        "collection": {
+          "facet": true
+        }
+      }
+    ]
+  }
+}

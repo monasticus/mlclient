@@ -1,0 +1,14 @@
+{
+  "jsonPropertyValueQuery": {
+    "property": [
+      "a",
+      "b"
+    ],
+    "value": [
+      "x",
+      7,
+      1.5,
+      false
+    ]
+  }
+}

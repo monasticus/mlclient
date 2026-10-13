@@ -1,0 +1,19 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "label",
+        "word": {
+          "element": {
+            "name": "label",
+            "ns": "https://example.com/x"
+          },
+          "term-option": [
+            "case-insensitive",
+            "unstemmed"
+          ]
+        }
+      }
+    ]
+  }
+}

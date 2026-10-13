@@ -1,7 +1,0 @@
-from mlclient.functions.xqy import cts
-
-
-def run():
-    return cts.json_property_pair_geospatial_query(
-        "price", "price", "price", cts.box(10, 10, 20, 20), weight=2.5,
-    ).compile()

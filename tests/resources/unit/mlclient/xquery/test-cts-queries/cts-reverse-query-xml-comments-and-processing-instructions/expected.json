@@ -1,0 +1,7 @@
+{
+  "reverseQuery": {
+    "nodes": [
+      "<report><!--label--><?label blue?><label>blue</label></report>"
+    ]
+  }
+}

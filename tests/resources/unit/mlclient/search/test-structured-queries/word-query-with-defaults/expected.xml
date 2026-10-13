@@ -1,0 +1,1 @@
+<search:word-query xmlns:search="http://marklogic.com/appservices/search"><search:json-property>title</search:json-property><search:text>blue</search:text></search:word-query>

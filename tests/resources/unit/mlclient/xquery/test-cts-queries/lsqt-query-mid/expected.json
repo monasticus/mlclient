@@ -1,0 +1,8 @@
+{
+  "lsqtQuery": {
+    "temporalCollection": "temporal",
+    "options": [
+      "cached"
+    ]
+  }
+}

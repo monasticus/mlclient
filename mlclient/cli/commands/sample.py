@@ -12,7 +12,7 @@ from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
 from mlclient.cli.formatting import prettify
 from mlclient.exceptions import WrongParametersError
-from mlclient.functions.xqy import cts
+from mlclient.xquery import cts
 
 _MAX_SAMPLE_LIMIT = 100
 
@@ -67,7 +67,9 @@ class SampleCommand(Command):
             default="1",
         ),
         option(
-            "json", "j", description="Sample JSON documents instead of XML documents",
+            "json",
+            "j",
+            description="Sample JSON documents instead of XML documents",
         ),
         option("no-pretty", description="Print sample content without pretty-printing"),
     ]

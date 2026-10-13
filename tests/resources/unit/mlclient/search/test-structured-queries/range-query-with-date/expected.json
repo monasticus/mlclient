@@ -1,0 +1,9 @@
+{
+  "range-query": {
+    "element": {
+      "name": "date",
+      "ns": ""
+    },
+    "value": "2026-01-02"
+  }
+}

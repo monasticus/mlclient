@@ -1,0 +1,14 @@
+{
+  "elementRangeQuery": {
+    "element": [
+      "day"
+    ],
+    "operator": ">",
+    "value": [
+      {
+        "type": "date",
+        "val": "2026-01-01"
+      }
+    ]
+  }
+}

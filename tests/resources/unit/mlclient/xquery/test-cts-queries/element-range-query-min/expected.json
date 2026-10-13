@@ -1,0 +1,18 @@
+{
+  "elementRangeQuery": {
+    "element": [
+      "code"
+    ],
+    "operator": "=",
+    "value": [
+      {
+        "type": "string",
+        "val": "a"
+      },
+      {
+        "type": "string",
+        "val": "b"
+      }
+    ]
+  }
+}

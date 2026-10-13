@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:period-range-query: period: CTS period argument requires server evaluation, got fn:doc('/p.xml')."
+}

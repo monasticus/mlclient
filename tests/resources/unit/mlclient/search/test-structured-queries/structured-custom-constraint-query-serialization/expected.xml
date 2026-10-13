@@ -1,0 +1,1 @@
+<search:custom-constraint-query xmlns:search="http://marklogic.com/appservices/search"><search:constraint-name>custom</search:constraint-name><search:text>blue</search:text><search:text>green</search:text></search:custom-constraint-query>

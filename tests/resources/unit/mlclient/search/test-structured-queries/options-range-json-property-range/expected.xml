@@ -1,0 +1,1 @@
+<search:range xmlns:search="http://marklogic.com/appservices/search" type="xs:decimal"><search:json-property>price</search:json-property></search:range>

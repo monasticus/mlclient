@@ -1,0 +1,10 @@
+{
+  "reverseQuery": {
+    "nodes": [
+      {
+        "label": "blue",
+        "count": 2
+      }
+    ]
+  }
+}

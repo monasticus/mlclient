@@ -1,0 +1,1 @@
+<search:range-query xmlns:search="http://marklogic.com/appservices/search" type="xs:double"><search:element name="price" ns="" /><search:value>INF</search:value></search:range-query>

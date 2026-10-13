@@ -1,0 +1,1 @@
+cts:field-range-query("summary", ">=", xs:int(3))

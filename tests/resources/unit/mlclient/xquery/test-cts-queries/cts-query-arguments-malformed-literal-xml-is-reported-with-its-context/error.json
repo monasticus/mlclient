@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:reverse-query: nodes: CTS literal XML is not well-formed: mismatched tag: line 1, column 8"
+}

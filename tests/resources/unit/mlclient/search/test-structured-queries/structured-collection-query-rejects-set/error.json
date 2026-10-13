@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "CollectionQuery.uris must be a value or a sequence, got set"
+}

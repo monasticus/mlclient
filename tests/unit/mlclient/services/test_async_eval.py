@@ -13,9 +13,10 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.functions.xqy import LOCAL_NS_URI, fn
+from mlclient.xquery import LOCAL_NS_URI, fn
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
+
 
 @pytest_asyncio.fixture
 async def svc():
@@ -519,7 +520,7 @@ async def test_eval_with_bytes_output_type(svc):
 @respx.mock
 async def test_expression(svc):
     expression = fn.upper_case("value")
-    code, variables = expression.compile(namespaces={"p": "urn:test"})
+    code, variables = expression.compile(namespaces={"p": "https://example.com/test"})
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_param("database", "Documents")
@@ -532,7 +533,7 @@ async def test_expression(svc):
 
     result = await svc.expression(
         expression,
-        namespaces={"p": "urn:test"},
+        namespaces={"p": "https://example.com/test"},
         database="Documents",
         txid="transaction",
         timeout=2,
@@ -545,7 +546,8 @@ async def test_expression(svc):
 @pytest.mark.asyncio
 async def test_expression_rejects_non_expression(svc):
     with pytest.raises(
-        TypeError, match=r"^expression requires an XqyExpression$",
+        TypeError,
+        match=r"^expression requires an XqyExpression$",
     ) as error:
         await svc.expression("fn:true()")
 
@@ -555,7 +557,8 @@ async def test_expression_rejects_non_expression(svc):
 @pytest.mark.asyncio
 async def test_expression_rejects_output_type(svc):
     with pytest.raises(
-        ValueError, match=r"^output_type must be None, str or bytes$",
+        ValueError,
+        match=r"^output_type must be None, str or bytes$",
     ) as error:
         await svc.expression(fn.true(), output_type=int)
 

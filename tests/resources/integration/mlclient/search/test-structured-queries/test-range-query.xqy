@@ -1,0 +1,1 @@
+cts:element-range-query(xs:QName("price"), "=", (xs:int(3), xs:int(4)), ("cached"), 2)

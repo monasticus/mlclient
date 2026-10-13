@@ -1,0 +1,12 @@
+{
+  "similarQuery": {
+    "nodes": [
+      "<report>blue</report>"
+    ],
+    "options": {
+      "maxTerms": 20,
+      "score": "logtf"
+    },
+    "weight": 2
+  }
+}

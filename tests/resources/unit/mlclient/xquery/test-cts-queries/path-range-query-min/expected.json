@@ -1,0 +1,14 @@
+{
+  "pathRangeQuery": {
+    "pathExpression": [
+      "/item/price"
+    ],
+    "operator": ">",
+    "value": [
+      {
+        "type": "decimal",
+        "val": "1"
+      }
+    ]
+  }
+}

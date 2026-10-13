@@ -1,0 +1,13 @@
+{
+  "elementChildGeospatialQuery": {
+    "element": [
+      "location"
+    ],
+    "child": [
+      "point"
+    ],
+    "region": [
+      "10,20"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "similarQuery": {
+    "options": {
+      "minVal": 1,
+      "minWeight": 2,
+      "complete": true
+    }
+  }
+}

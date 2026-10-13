@@ -1,0 +1,26 @@
+{
+  "andQuery": {
+    "queries": [
+      {
+        "wordQuery": {
+          "text": [
+            "blue"
+          ],
+          "options": [
+            "lang=en"
+          ]
+        }
+      },
+      {
+        "collectionQuery": {
+          "uris": [
+            "reports"
+          ]
+        }
+      }
+    ],
+    "options": [
+      "ordered"
+    ]
+  }
+}

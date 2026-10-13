@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "TermQuery.text items must be str, got int"
+}

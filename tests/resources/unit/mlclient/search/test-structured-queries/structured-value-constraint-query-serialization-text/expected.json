@@ -1,0 +1,10 @@
+{
+  "value-constraint-query": {
+    "constraint-name": "status",
+    "text": [
+      "blue",
+      "green"
+    ],
+    "weight": 2
+  }
+}

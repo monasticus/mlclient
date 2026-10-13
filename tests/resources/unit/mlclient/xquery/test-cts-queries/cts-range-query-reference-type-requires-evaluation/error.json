@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:range-query: reference: CTS reference scalarType requires an explicit option or server evaluation."
+}

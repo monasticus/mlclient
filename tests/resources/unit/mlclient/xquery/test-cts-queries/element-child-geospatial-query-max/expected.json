@@ -1,0 +1,17 @@
+{
+  "elementChildGeospatialQuery": {
+    "element": [
+      "location"
+    ],
+    "child": [
+      "point"
+    ],
+    "region": [
+      "10,20"
+    ],
+    "options": [
+      "coordinate-system=wgs84"
+    ],
+    "weight": 3
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "options": {
+    "sort-order": [
+      {
+        "type": "xs:decimal",
+        "element": {
+          "name": "price",
+          "ns": ""
+        },
+        "direction": "descending"
+      }
+    ]
+  }
+}

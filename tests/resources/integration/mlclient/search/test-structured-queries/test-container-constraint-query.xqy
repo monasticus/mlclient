@@ -1,0 +1,1 @@
+cts:element-query(xs:QName("section"), cts:word-query("blue"))

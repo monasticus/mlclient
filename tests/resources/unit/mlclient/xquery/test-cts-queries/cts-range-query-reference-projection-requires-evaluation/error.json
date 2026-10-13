@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:range-query: reference: CTS reference argument requires server evaluation, got Index(inner=FunctionCall(fn='cts:element-reference', args=(FunctionCall(fn='xs:QName', args=(AtomicValue(value='price', cast=None),), optionals=()),), optionals=(AtomicValue(value='type=int', cast=None),)), position=1)."
+}

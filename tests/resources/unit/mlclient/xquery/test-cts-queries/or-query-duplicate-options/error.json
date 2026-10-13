@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "options ['synonym', 'synonym'] are not or-query options; use at most one of synonym"
+}

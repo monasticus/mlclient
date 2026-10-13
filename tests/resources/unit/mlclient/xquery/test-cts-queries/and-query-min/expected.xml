@@ -1,0 +1,1 @@
+<cts:and-query xmlns:cts="http://marklogic.com/cts"><cts:word-query><cts:text>blue</cts:text></cts:word-query></cts:and-query>

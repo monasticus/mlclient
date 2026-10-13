@@ -1,0 +1,9 @@
+{
+  "range-query": {
+    "path-index": {
+      "text": "/report/price"
+    },
+    "value": "2",
+    "range-operator": "LT"
+  }
+}

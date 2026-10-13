@@ -1,0 +1,1 @@
+cts:lsqt-query("reports-temporal", xs:dateTime("1600-01-01T00:00:00Z"), (), 2)

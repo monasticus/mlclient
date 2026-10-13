@@ -1,0 +1,8 @@
+{
+  "collectionQuery": {
+    "uris": [
+      "reports",
+      "notes"
+    ]
+  }
+}

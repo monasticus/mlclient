@@ -1,0 +1,6 @@
+cts:or-query(
+    (
+        cts:element-word-query(xs:QName("title"), "blue"),
+        cts:element-word-query(xs:QName("label"), "blue")
+    )
+)

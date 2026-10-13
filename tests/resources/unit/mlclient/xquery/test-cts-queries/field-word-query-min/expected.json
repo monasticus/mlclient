@@ -1,0 +1,10 @@
+{
+  "fieldWordQuery": {
+    "field": [
+      "title"
+    ],
+    "text": [
+      "blue"
+    ]
+  }
+}

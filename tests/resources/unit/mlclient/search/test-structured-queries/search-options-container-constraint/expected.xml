@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="place"><search:container><search:element name="location" ns="" /></search:container></search:constraint></search:options>

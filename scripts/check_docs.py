@@ -62,11 +62,13 @@ for info in pkgutil.iter_modules(mlclient.__path__, "mlclient."):
     assert hasattr(module, "__all__"), f"Missing public export contract: {info.name}"
     documented[info.name] = module
 
-# Language-specific function namespaces own their public builder exports.
-documented["mlclient.functions.xqy"] = importlib.import_module("mlclient.functions.xqy")
-documented["mlclient.services.diagnostics"] = importlib.import_module(
+# Nested namespaces own public exports of their own.
+for nested in (
+    "mlclient.search.structured",
+    "mlclient.search.options",
     "mlclient.services.diagnostics",
-)
+):
+    documented[nested] = importlib.import_module(nested)
 
 # Root exports must be reachable from the rendered navigation, not merely built.
 home = pages[site / "index.html"]

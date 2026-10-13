@@ -1,0 +1,13 @@
+{
+  "term-query": {
+    "text": [
+      "blue",
+      "green"
+    ],
+    "weight": 2,
+    "term-option": [
+      "case-sensitive",
+      "unstemmed"
+    ]
+  }
+}

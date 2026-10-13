@@ -1,0 +1,13 @@
+{
+  "wordQuery": {
+    "text": [
+      "blue"
+    ],
+    "options": [
+      "lang=eng",
+      "synonym",
+      "synonym",
+      "bogus"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+cts:or-query((cts:word-query("blue"), cts:word-query("green")))

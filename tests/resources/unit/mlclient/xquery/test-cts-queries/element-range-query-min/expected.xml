@@ -1,0 +1,1 @@
+<cts:element-range-query xmlns:cts="http://marklogic.com/cts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" operator="="><cts:element>code</cts:element><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">a</cts:value><cts:value xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">b</cts:value></cts:element-range-query>

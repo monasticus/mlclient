@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "Fragment scope must be documents or properties."
+}

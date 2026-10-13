@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "options ['minimum-distance=1', 'minimum-distance=2'] repeat ordering or minimum-distance"
+}

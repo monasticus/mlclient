@@ -1,0 +1,1 @@
+<search:value-query xmlns:search="http://marklogic.com/appservices/search"><search:element name="label" ns="" /><search:attribute name="color" ns="" /><search:text>blue</search:text></search:value-query>

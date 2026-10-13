@@ -18,11 +18,15 @@ if TYPE_CHECKING:
 
 from mlclient.api.documents import AsyncDocumentsApi, DocumentsApi
 from mlclient.api.eval import AsyncEvalApi, EvalApi
+from mlclient.api.search import AsyncSearchApi, SearchApi
 from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
+from mlclient.api.values import AsyncValuesApi, ValuesApi
 
 
 class RestApi:
-    """REST API group for /v1/* endpoints (eval, documents, transactions).
+    """REST API group for /v1/* endpoints.
+
+    Eval, documents, search, values and transactions.
 
     Requires a REST app server.
     """
@@ -87,6 +91,36 @@ class RestApi:
         return DocumentsApi(self._api)
 
     @cached_property
+    def search(self) -> SearchApi:
+        """Access search operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        SearchApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return SearchApi(self._api)
+
+    @cached_property
+    def values(self) -> ValuesApi:
+        """Access values operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        ValuesApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return ValuesApi(self._api)
+
+    @cached_property
     def transactions(self) -> TransactionsApi:
         """Access transactions operations through this API group's connection.
 
@@ -103,7 +137,10 @@ class RestApi:
 
 
 class AsyncRestApi:
-    """Async REST API group for /v1/* endpoints (eval, documents, transactions)."""
+    """Async REST API group for /v1/* endpoints.
+
+    Eval, documents, search, values and transactions.
+    """
 
     def __init__(self, api: AsyncApiClient):
         self._api = api
@@ -163,6 +200,36 @@ class AsyncRestApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return AsyncDocumentsApi(self._api)
+
+    @cached_property
+    def search(self) -> AsyncSearchApi:
+        """Access search operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        AsyncSearchApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return AsyncSearchApi(self._api)
+
+    @cached_property
+    def values(self) -> AsyncValuesApi:
+        """Access values operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        AsyncValuesApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return AsyncValuesApi(self._api)
 
     @cached_property
     def transactions(self) -> AsyncTransactionsApi:

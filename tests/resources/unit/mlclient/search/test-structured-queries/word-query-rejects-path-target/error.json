@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Targets must be Element, JsonProperty or Field instances."
+}

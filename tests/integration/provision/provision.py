@@ -210,7 +210,9 @@ def write_oauth_config(target_dir: Path, *, supported: bool) -> Path:
                 "role_claim": OAUTH_ROLE_CLAIM,
                 "username": OAUTH_USER,
                 "role": OAUTH_ROLE,
-            } if supported else {"supported": False},
+            }
+            if supported
+            else {"supported": False},
         ),
     )
     return path
@@ -474,7 +476,8 @@ class ManagementSession:
         )
         _expect(response, httpx.codes.OK)
         match = re.search(
-            r"(?m)^(\d+)\.(\d+)(?:[.-][\w.-]+)?\r?$", response.text,
+            r"(?m)^(\d+)\.(\d+)(?:[.-][\w.-]+)?\r?$",
+            response.text,
         )
         if match is None:
             msg = f"Could not parse MarkLogic version: {response.text[:200]}"

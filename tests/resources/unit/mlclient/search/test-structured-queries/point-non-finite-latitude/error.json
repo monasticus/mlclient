@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "Point.latitude must be finite."
+}

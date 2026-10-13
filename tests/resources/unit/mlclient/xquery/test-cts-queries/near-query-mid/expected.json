@@ -1,0 +1,17 @@
+{
+  "nearQuery": {
+    "queries": [
+      {
+        "trueQuery": {}
+      },
+      {
+        "falseQuery": {}
+      }
+    ],
+    "distance": 10,
+    "minimum-distance": 2,
+    "options": [
+      "ordered"
+    ]
+  }
+}

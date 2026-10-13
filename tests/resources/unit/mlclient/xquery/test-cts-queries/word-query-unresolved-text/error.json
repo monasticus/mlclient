@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:word-query: text: CTS string argument requires server evaluation, got fn:string('blue')."
+}

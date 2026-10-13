@@ -131,7 +131,7 @@ Python block as `custom_expression.py`:
 ```
 
 `Label.normalize()` only returns a
-[ModuleFunctionCall][mlclient.functions.xqy.ModuleFunctionCall]. The `label`
+[ModuleFunctionCall][mlclient.xquery.ModuleFunctionCall]. The `label`
 singleton builds expressions; it does not execute requests. Each method supplies
 the local function name, arguments, namespace URI and module path. Add further
 static methods to expose the rest of your library.
@@ -154,7 +154,7 @@ Use it directly or inside another expression:
 ```python
 from custom_expression import label
 from mlclient import MLClient
-from mlclient.functions.xqy import fn
+from mlclient.xquery import fn
 
 with MLClient() as ml:
     normalized = ml.eval.expression(label.normalize("  coffee   beans  "))

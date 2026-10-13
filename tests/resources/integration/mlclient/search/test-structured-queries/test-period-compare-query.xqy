@@ -1,0 +1,1 @@
+cts:period-compare-query("system", "aln_equals", "valid")

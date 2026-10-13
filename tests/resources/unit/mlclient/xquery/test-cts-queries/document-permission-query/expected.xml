@@ -1,0 +1,1 @@
+<cts:document-permission-query xmlns:cts="http://marklogic.com/cts" role="admin" capability="read" />

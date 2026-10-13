@@ -1,0 +1,1 @@
+<search:lsqt-query xmlns:search="http://marklogic.com/appservices/search"><search:temporal-collection>reports</search:temporal-collection><search:timestamp>2024-01-01T00:00:00Z</search:timestamp><search:weight>2</search:weight><search:temporal-option>cached-incremental</search:temporal-option></search:lsqt-query>

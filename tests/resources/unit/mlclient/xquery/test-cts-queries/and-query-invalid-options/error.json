@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "options ['bogus'] are not and-query options; use at most one of ordered, unordered"
+}

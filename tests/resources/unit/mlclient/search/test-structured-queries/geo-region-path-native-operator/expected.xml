@@ -1,0 +1,1 @@
+<search:geo-region-path-query xmlns:search="http://marklogic.com/appservices/search"><search:path-index>/region</search:path-index><search:geospatial-operator>covered-by</search:geospatial-operator><search:point><search:latitude>10</search:latitude><search:longitude>20</search:longitude></search:point></search:geo-region-path-query>

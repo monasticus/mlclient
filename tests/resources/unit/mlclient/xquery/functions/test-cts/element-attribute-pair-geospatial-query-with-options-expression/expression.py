@@ -1,0 +1,11 @@
+from mlclient.xquery import cts, fn
+
+
+def run():
+    return cts.element_attribute_pair_geospatial_query(
+        "item",
+        "id",
+        "id",
+        cts.box(10, 10, 20, 20),
+        options=fn.string(cts.search().pos(1)),
+    ).compile()

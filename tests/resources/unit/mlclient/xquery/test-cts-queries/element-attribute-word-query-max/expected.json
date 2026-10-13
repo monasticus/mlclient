@@ -1,0 +1,17 @@
+{
+  "elementAttributeWordQuery": {
+    "element": [
+      "item"
+    ],
+    "attribute": [
+      "status"
+    ],
+    "text": [
+      "ok"
+    ],
+    "options": [
+      "exact"
+    ],
+    "weight": 3
+  }
+}

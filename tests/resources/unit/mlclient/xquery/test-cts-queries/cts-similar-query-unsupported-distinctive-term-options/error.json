@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "cts:similar-query: options: Unsupported local CTS distinctive-term option: {cts:distinctive-terms}unknown"
+}

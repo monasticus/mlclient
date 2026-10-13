@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "cts:and-query: queries: cts:not-query: query: cts:word-query: text: CTS string argument requires server evaluation, got fn:string('x')."
+}

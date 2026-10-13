@@ -1,0 +1,9 @@
+{
+  "value-query": {
+    "type": "number",
+    "json-property": "count",
+    "text": [
+      "7"
+    ]
+  }
+}

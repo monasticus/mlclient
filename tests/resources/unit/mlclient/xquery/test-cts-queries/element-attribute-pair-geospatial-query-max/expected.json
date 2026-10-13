@@ -1,0 +1,20 @@
+{
+  "elementAttributePairGeospatialQuery": {
+    "element": [
+      "item"
+    ],
+    "latitudeAttribute": [
+      "lat"
+    ],
+    "longitudeAttribute": [
+      "lon"
+    ],
+    "region": [
+      "10,20"
+    ],
+    "weight": 3,
+    "options": [
+      "coordinate-system=wgs84"
+    ]
+  }
+}

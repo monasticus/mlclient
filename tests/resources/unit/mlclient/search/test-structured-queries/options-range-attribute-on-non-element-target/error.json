@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "range attribute requires an Element target and an Attribute"
+}

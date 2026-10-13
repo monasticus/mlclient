@@ -54,6 +54,35 @@ an ongoing goal.
 
 ## Use the CLI
 
+### Initialize and evaluate code
+
+Create a local environment, run XQuery, then get the current date and time
+with JavaScript.
+
+![Initialize an environment, evaluate XQuery and get the current date and time with JavaScript](docs/assets/gifs/env-init-eval.gif)
+
+### Send HTTP requests
+
+Read XML and JSON responses as returned by the server, then format them with `--pretty`.
+
+![Retrieve XML and Manage API JSON, then recall each command and add --pretty](docs/assets/gifs/http-pretty.gif)
+
+### Read logs across a cluster
+
+Select an application server by name, then merge filtered logs from three
+hosts using its port.
+These are server-generated logs from requests to a demo bookstore application.
+
+![Read application logs by name, then merge logs from three cluster nodes by port](docs/assets/gifs/cluster-logs.gif)
+
+### Check a server and open QConsole
+
+Import Gradle settings, check health and version, then open Query Console.
+
+![Import dev settings, check health and MarkLogic 12 version, then open QConsole](docs/assets/gifs/gradle-health-version-url.gif)
+
+### More commands
+
 ```sh
 ml env init                               # Create and review project configuration
 ml env show                               # Inspect environments

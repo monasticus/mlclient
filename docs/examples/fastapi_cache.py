@@ -7,6 +7,7 @@ from time import monotonic
 from fastapi import FastAPI, HTTPException, Request
 
 from mlclient import AsyncMLClient
+from mlclient.exceptions import MarkLogicError
 
 DOCUMENT_URI = "/products/coffee.json"
 CACHE_SECONDS = 5
@@ -31,14 +32,13 @@ async def product(request: Request):
     state = request.app.state
     async with state.refresh:
         if state.cache and monotonic() < state.cache["expires_at"]:
-            return {"cached": True, "product": state.cache["document"]}
-        response = await state.ml.rest.documents.get(DOCUMENT_URI)
-        if response.status_code == 404:
-            raise HTTPException(404, "Product not found")
-        response.raise_for_status()
-        document = response.json()
+            return {"cached": True, "product": state.cache["document"].content}
+        try:
+            document = await state.ml.documents.read(DOCUMENT_URI)
+        except MarkLogicError as error:
+            raise HTTPException(502, "Cannot read product from MarkLogic") from error
         state.cache = {
             "expires_at": monotonic() + CACHE_SECONDS,
             "document": document,
         }
-        return {"cached": False, "product": document}
+        return {"cached": False, "product": document.content}

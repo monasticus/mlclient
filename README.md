@@ -47,8 +47,8 @@ response = ml.http.get("/v1/documents", params={"uri": "/example.json"})
 - Runtime retry, timeout and pool limits; independent auxiliary connections.
 - Public extension points for your application's endpoints and services.
 
-See the [Python guide](https://monasticus.github.io/mlclient/latest/user/clients/)
-and [connection options](https://monasticus.github.io/mlclient/latest/user/python/connections/).
+See the [Python guide](https://monasticus.github.io/mlclient/latest/guides/clients/)
+and [connection options](https://monasticus.github.io/mlclient/latest/advanced/connections/).
 Supported wrappers are listed in the generated reference; full REST coverage is
 an ongoing goal.
 
@@ -109,7 +109,7 @@ or port; `log-level -s/--server` selects an actual MarkLogic App Server name.
 `eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation.
 Use `--no-pretty` to keep the original formatting.
 
-Read more in the [CLI guide](https://monasticus.github.io/mlclient/latest/user/cli/).
+Read more in the [CLI guide](https://monasticus.github.io/mlclient/latest/cli/).
 
 ## Background and stability
 
@@ -119,11 +119,11 @@ initially unaware of that project. After a break, I continued to offer another
 approach, particularly for async code, layered APIs and CLI workflows. If the
 requests-based MarkLogic client fits your needs, it is also worth considering.
 More background and future directions are in the
-[project notes](https://monasticus.github.io/mlclient/latest/about/).
+[project notes](https://monasticus.github.io/mlclient/latest/community/about/).
 
 Starting with 1.0.0, stable public APIs and CLI commands follow SemVer.
 `mlclient.jobs` remains explicitly experimental and may change in minor releases.
-See the [stability policy](https://monasticus.github.io/mlclient/latest/stability/)
+See the [stability policy](https://monasticus.github.io/mlclient/latest/community/stability/)
 and [release notes](https://github.com/monasticus/mlclient/releases).
 
 MLClient is independently maintained and licensed under MIT. Contributions are

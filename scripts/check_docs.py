@@ -34,7 +34,7 @@ class Page(HTMLParser):
 for name, command in MLCLIentApplication().all().items():
     if not type(command).__module__.startswith("mlclient."):
         continue
-    guide_path = Path("docs/user/cli", *name.split()).with_suffix(".md")
+    guide_path = Path("docs/cli", *name.split()).with_suffix(".md")
     guide_text = guide_path.read_text()
     assert "Description:\n" not in guide_text, f"Help dump in {guide_path}"
     for argument in command.definition.arguments:
@@ -119,7 +119,7 @@ model = (site / "reference/mlclient/env/MLEnvironment/index.html").read_text()
 for marker in ("Show JSON schema:", "_ensure_default_app_servers", '"properties"'):
     # Schema JSON may be HTML-escaped by syntax highlighting.
     assert marker in model or marker.replace('"', "&quot;") in model, marker
-guide = (site / "user/clients/index.html").read_text()
+guide = (site / "guides/clients/index.html").read_text()
 assert "<table>" in guide, "Authored Markdown tables must render as HTML tables"
 
 client = (site / "reference/mlclient/MLClient/index.html").read_text()

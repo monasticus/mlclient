@@ -1,0 +1,176 @@
+# Services
+
+The API tiers - `ml.rest`, `ml.manage`, `ml.admin` and `ml.http` - speak HTTP.
+You pass endpoint parameters and get back an httpx `Response`: a status code,
+headers and a body you read and interpret yourself.
+
+Services sit one level above. A service calls those tiers internally, then does
+the work you would otherwise repeat by hand - it applies sensible defaults,
+sends the request, checks the status, and parses the body into a Python value: a
+document model, a `dict`, a `datetime`. You work with results, not payloads.
+
+Reach for a service whenever one covers what you need. Drop to an API tier only
+for an endpoint no service wraps, or when you need the raw status and headers.
+See [Clients](../guides/clients.md) for the full tier map.
+
+## Client services
+
+Documents, evaluation, search and transactions are available directly on the
+client. Construct the CTS search service from `ml.rest`:
+
+| Service | Access | Guide |
+| --- | --- | --- |
+| Documents | `ml.documents` | [Documents](../guides/documents.md) |
+| Evaluate code | `ml.eval` | [Evaluate code](../guides/eval.md) |
+| Search | `ml.search` | [Search](../guides/search.md) |
+| Transactions | `ml.transaction()` | [Transactions](../guides/transactions.md) |
+| CTS search (eval) | `CtsService(ml.rest)` | [CTS search with eval](../guides/search.md#cts-search-with-eval) |
+
+```python
+from mlclient import MLClient
+
+with MLClient() as ml:
+    document = ml.documents.read("/example.json")
+    result = ml.eval.xquery("1 + 1")
+```
+
+Services come in two kinds, and the access syntax tells them apart:
+
+| Kind | Example | What it holds | Creating it |
+| --- | --- | --- | --- |
+| Scoped | `ml.documents`, `ml.eval` | An immutable [ServiceScope][mlclient.services.ServiceScope] with database and transaction defaults | Calling the service, no request |
+| Scoped | `ml.search`, `ml.search(database="catalog")` | An immutable [SearchScope][mlclient.services.SearchScope] applied to every call | Calling the service, no request |
+| Opened | `ml.transaction(database="catalog")` | Server-side state: an open transaction | A method that sends a request |
+
+`ml.documents(database="catalog")` and `ml.eval(database="catalog")` return
+scoped copies sharing the same connection. Existing per-operation `database=`
+and `txid=` arguments override their defaults; `None` clears an inherited value.
+Both also accept transaction settings via `ml.documents(**txn)` or `ml.eval(**txn)`.
+
+`ml.search` is itself a scoped service with an empty scope. Calling it returns a
+new, narrower service and never changes the original, so scoped services can be
+created freely and shared. Each operation can still override the scope for one
+request with `scope=SearchScope(...)`. See [Search](../guides/search.md#scope-databases-filters-and-options).
+
+`ml.transaction()` is a method instead: opening a transaction performs a
+request, so it returns a
+[TransactionService][mlclient.services.TransactionService] scoped
+to that transaction - a
+context manager that commits on a clean exit, rolls back on error, and unpacks
+with `**` into the operations it should cover, including a search scope:
+`ml.search(**txn)`. See [Transactions](../guides/transactions.md).
+
+## Use one API without the facade
+
+The individual layers can be used independently. If you only need Admin
+operations, compose [AdminApi][mlclient.api.AdminApi] with an
+[ApiClient][mlclient.clients.ApiClient] and a
+[HttpClient][mlclient.clients.HttpClient]:
+
+```python
+from mlclient.api import AdminApi
+from mlclient.clients import ApiClient, HttpClient
+
+with HttpClient(port=8001) as http:
+    admin = AdminApi(ApiClient(http))
+    response = admin.get_timestamp()
+    print(response.text)
+```
+
+`HttpClient` owns the connection; its context manager closes it. The API wrappers
+use that connection and do not select a port or create additional clients.
+`RestApi` and `ManageApi` compose in the same way, using their respective server
+configurations. Async code uses `AsyncHttpClient`, `AsyncApiClient` and the
+corresponding async wrapper, with `async with` and awaited operations.
+
+## Diagnostics
+
+Operational services live in `mlclient.services.diagnostics`: Logs, LogLevel
+and TraceEvents.
+
+Other services are not on the client facade. They cover narrower or more
+operational needs, so instead of a ready property you construct them yourself
+and pass the API tier handle they build on. They are the same layer - parsed
+Python output, defaults applied - just off the curated client surface.
+
+### Logs
+
+[LogsService][mlclient.services.diagnostics.LogsService] returns parsed log records
+through the Management API. Construct it from `ml.manage`:
+
+```python
+from mlclient import MLClient
+from mlclient.services.diagnostics import LogsService
+
+with MLClient() as ml:
+    logs = LogsService(ml.manage)
+    for record in logs.get(8002, "error"):
+        print(record)
+    files = logs.list()
+```
+
+The Management connection uses its own configuration, normally port 8002. `get`
+filters by app server, log type, time range and regex; `list` returns the
+available log files. Prefer a time range over refetching a whole file for large
+logs. Use the [logs command](../cli/logs.md) when you only need terminal output.
+
+### Log level
+
+[LogLevelService][mlclient.services.diagnostics.LogLevelService] reads or changes
+a group or App Server log level. It evaluates
+the Admin module through the REST server first and falls back to the Management
+API only when the connecting user lacks the eval privilege - so it needs both
+`ml.rest` and `ml.manage`:
+
+```python
+from mlclient import MLClient
+from mlclient.services.diagnostics import LogLevelService
+
+with MLClient() as ml:
+    levels = LogLevelService(ml.rest, ml.manage)
+    current = levels.get(group="Default", log_type="file")
+    levels.set(current, group="Default", log_type="file")
+```
+
+Omit `server` to target a group, or supply an App Server name for its file log
+level; App Servers have no system log level. Both `get` and `set` accept a
+keyword-only `timeout`. Use the [log-level command](../cli/log-level.md) for
+supported levels and the Management permissions each path needs.
+
+### Trace events
+
+[TraceEventsService][mlclient.services.diagnostics.TraceEventsService] reads and changes
+group diagnostics through the REST server's Admin-module evaluation:
+
+```python
+from mlclient import MLClient
+from mlclient.services.diagnostics import TraceEventsService
+
+with MLClient() as ml:
+    traces = TraceEventsService(ml.rest)
+    state = traces.get(group="Default")
+    print(state.activated, state.events)
+```
+
+The immutable [TraceEvents][mlclient.services.diagnostics.TraceEvents] result contains the
+master `activated` flag and an alphabetically sorted tuple of configured event
+names. `set_event("XDMP Deadlock", enabled=True)` adds an event without changing
+activation; `set_activated(value=True)` changes the master switch without changing
+event membership. Both return the state read after saving. Repeated additions and
+removals are idempotent.
+
+This service is synchronous and needs only `ml.rest`; it does not fall back to
+Manage. All three operations accept keyword-only `group` and `timeout`. A timeout
+override applies independently to the mutation and follow-up read, not to their
+total duration. Omitting it inherits the client timeout; `None` disables it.
+
+Recognized server errors raise `MarkLogicError`; other HTTP failures raise
+`httpx.HTTPStatusError`, and transport errors propagate. A failed read-back does
+not roll back a successful save. See [trace-events](../cli/trace-events.md) for
+permissions and the corresponding CLI workflow.
+
+## Building your own
+
+To wrap an endpoint no service covers, see
+[Custom application APIs](custom-api.md), which adds an endpoint wrapper to your
+own client without touching MLClient internals.

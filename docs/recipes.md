@@ -32,8 +32,8 @@ collection name is rejected before opening a transaction.
 
 A successful context-manager exit commits; an exception rolls back. For a large
 migration, use a deliberate batch size and checkpoint strategy rather than one
-unbounded transaction. See [document models](user/python/documents.md) and
-[transactions](user/python/transactions.md).
+unbounded transaction. See [document models](guides/documents.md) and
+[transactions](guides/transactions.md).
 
 ## Evaluate queries across databases concurrently
 
@@ -67,7 +67,7 @@ here. For a large list, process bounded batches - pool limits bound in-flight
 requests, not the number of scheduled tasks.
 
 To read several documents from the same database, prefer a
-[single bulk read](user/python/documents.md#read) with `ml.documents.read(uris)`.
+[single bulk read](guides/documents.md#read) with `ml.documents.read(uris)`.
 
 ## Cap concurrency across several hosts of one cluster
 
@@ -161,50 +161,14 @@ quotes or XQuery-looking input; it is never interpolated into executable source.
 The namespace and module path are fixed application code, not user input.
 To inspect the generated query without a connection, call
 `label.normalize("coffee").compile()` and inspect its source and variable mapping.
-See the [XQuery API guide](user/python/xquery-api.md#custom-xquery-expressions)
+See the [XQuery API guide](advanced/xquery-api.md#custom-xquery-expressions)
 for composition and native result conventions.
 
 ## Extend MLClient with custom APIs
 
 If scripts repeatedly compose the same raw HTTP calls, give the operation a
-name. The [custom API guide](user/python/custom-api.md) builds
+name. The [custom API guide](advanced/custom-api.md) builds
 `ml.rest.tasks.list()` for the raw response and `ml.tasks.open_titles()` for
 parsed Python on a shared connection, with sync and async versions. This keeps
 transport details out of application scripts while retaining access to the raw
 response when needed.
-
-## Cache an external API with FastAPI
-
-A small FastAPI app serves GitHub repository metadata and keeps the last successful
-response in MarkLogic. Both async clients live for the application's lifespan.
-Each request checks whether the source changed: the saved `ETag` is sent as
-`If-None-Match`. A `304 Not Modified` reuses the saved data; a `200` replaces it.
-If the source is unreachable or returns a server error, the app can return the
-last saved response marked `stale`.
-
-Save this as `cache_app.py`:
-
-```python
---8<-- "examples/fastapi_cache.py"
-```
-
-Install the example's optional dependencies and start one worker:
-
-```sh
-pip install mlclient fastapi uvicorn
-uvicorn cache_app:app --port 8080
-curl http://localhost:8080/repository
-```
-
-The Python client uses the standard local MarkLogic connection; configure it for
-your server before running. The connecting user needs REST read/write access. The example writes only
-`/cache/github/mlclient.json`; remove that document when done.
-
-The response's `cache` field is `updated`, `validated` or `stale`. An upstream
-client error does not serve stale data. If the source does not supply an ETag,
-the next request downloads its full response again. This checks changes to the
-external resource, not just changes to its cached copy in MarkLogic.
-
-See [GitHub conditional requests](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api#use-conditional-requests-if-appropriate)
-and [FastAPI lifespan](https://fastapi.tiangolo.com/advanced/events/) for the HTTP
-validation and application lifecycle used here.

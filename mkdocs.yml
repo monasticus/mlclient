@@ -74,55 +74,55 @@ nav:
   - Introduction: index.md
   - Quickstart: quickstart.md
   - Guides:
-      - Clients: user/clients.md
-      - Documents: user/python/documents.md
-      - Evaluate code: user/python/eval.md
-      - Search: user/python/search.md
-      - Transactions: user/python/transactions.md
-      - Environments: user/environments.md
-      - Async support: user/python/async.md
-      - Logging to MarkLogic: user/python/logging.md
+      - Clients: guides/clients.md
+      - Documents: guides/documents.md
+      - Evaluate code: guides/eval.md
+      - Search: guides/search.md
+      - Transactions: guides/transactions.md
+      - Environments: guides/environments.md
+      - Async support: guides/async.md
+      - Logging to MarkLogic: guides/logging.md
   - Advanced:
-      - Services: user/python/services.md
-      - XQuery API: user/python/xquery-api.md
-      - Structured and CTS queries: user/python/queries.md
-      - More on environments: user/python/more-on-environments.md
-      - Connections and authentication: user/python/connections.md
+      - Services: advanced/services.md
+      - XQuery API: advanced/xquery-api.md
+      - Structured and CTS queries: advanced/queries.md
+      - More on environments: advanced/more-on-environments.md
+      - Connections and authentication: advanced/connections.md
       - HTTP configuration:
-          - Overview: user/http-configuration.md
-          - Timeouts: user/python/timeouts.md
-          - Retries: user/python/retries.md
-          - Resource limits: user/python/limits.md
-      - Health and administration: user/python/health-and-administration.md
-      - Custom application APIs: user/python/custom-api.md
+          - Overview: advanced/http/index.md
+          - Timeouts: advanced/http/timeouts.md
+          - Retries: advanced/http/retries.md
+          - Resource limits: advanced/http/limits.md
+      - Health and administration: advanced/health-and-administration.md
+      - Custom application APIs: advanced/custom-api.md
   - CLI:
-      - Overview: user/cli.md
+      - Overview: cli/index.md
       - env:
-          - Overview: user/cli/env.md
-          - init: user/cli/env/init.md
-          - show: user/cli/env/show.md
-          - edit: user/cli/env/edit.md
-          - copy: user/cli/env/copy.md
-          - remove: user/cli/env/remove.md
-          - compare: user/cli/env/compare.md
-      - eval: user/cli/eval.md
-      - http: user/cli/http.md
-      - sample: user/cli/sample.md
-      - logs: user/cli/logs.md
-      - log-level: user/cli/log-level.md
-      - trace-events: user/cli/trace-events.md
-      - health: user/cli/health.md
-      - version: user/cli/version.md
-      - url: user/cli/url.md
+          - Overview: cli/env/index.md
+          - init: cli/env/init.md
+          - show: cli/env/show.md
+          - edit: cli/env/edit.md
+          - copy: cli/env/copy.md
+          - remove: cli/env/remove.md
+          - compare: cli/env/compare.md
+      - eval: cli/eval.md
+      - http: cli/http.md
+      - sample: cli/sample.md
+      - logs: cli/logs.md
+      - log-level: cli/log-level.md
+      - trace-events: cli/trace-events.md
+      - health: cli/health.md
+      - version: cli/version.md
+      - url: cli/url.md
   - Recipes: recipes.md
   - API reference: reference/
   - Community:
-      - Background: about.md
-      - Built with: built-with.md
-      - Stability: stability.md
-      - Contributing: contributing.md
-      - Writing documentation: documentation.md
-      - Release process: releasing.md
+      - Background: community/about.md
+      - Built with: community/built-with.md
+      - Stability: community/stability.md
+      - Contributing: community/contributing.md
+      - Writing documentation: community/documentation.md
+      - Release process: community/releasing.md
 
 extra:
   version:
@@ -131,6 +131,8 @@ extra:
     default: latest
 
 validation:
+  nav:
+    omitted_files: info
   links:
     not_found: warn
     anchors: warn

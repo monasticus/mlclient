@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from urllib.parse import parse_qs
 
 import httpx
 import pytest
@@ -543,3 +544,54 @@ def test_expression_rejects_output_type(ml):
         ml.eval.expression(fn.true(), output_type=int)
 
     assert str(error.value) == "output_type must be None, str or bytes"
+
+
+@pytest.mark.parametrize(
+    "operation",
+    ["xquery", "xqy", "javascript", "js", "file", "execute", "expression"],
+)
+@respx.mock
+def test_eval_entry_points_use_the_shared_scope(
+    operation, tmp_path,
+):
+    route = respx.post("http://localhost:8000/v1/eval").respond(200, content=b"")
+    file = tmp_path / "probe.xqy"
+    file.write_text("1")
+    with MLClient() as ml:
+        original = ml.eval(database="catalog", txid="tx-1")
+        narrowed = original(txid="tx-2")
+        assert route.call_count == 0
+        args = (
+            [fn.string_length("coffee")]
+            if operation == "expression"
+            else [str(file)]
+            if operation == "file"
+            else []
+            if operation == "execute"
+            else ["1"]
+        )
+        code = {"xq": "1"} if operation == "execute" else {}
+        scenarios = [
+            (narrowed, {}, "catalog", "tx-2"),
+            (original, {}, "catalog", "tx-1"),
+            (original, {"database": "archive"}, "archive", "tx-1"),
+            (original, {"database": None, "txid": None}, None, None),
+            (original(database=None, txid=None), {}, None, None),
+            (ml.eval, {}, None, None),
+        ]
+        for service, overrides, database, txid in scenarios:
+            getattr(service, operation)(*args, **code, **overrides)
+            params = route.calls.last.request.url.params
+            assert params.get("database") == database
+            assert params.get("txid") == txid
+
+
+
+@respx.mock
+def test_eval_scope_keeps_external_variables_separate():
+    route = respx.post("http://localhost:8000/v1/eval").respond(200, content=b"")
+    with MLClient() as ml:
+        ml.eval(database="catalog").xquery("$message", message="coffee")
+    params = parse_qs(route.calls.last.request.content.decode())
+    assert json.loads(params["vars"][0]) == {"message": "coffee"}
+    assert route.calls.last.request.url.params["database"] == "catalog"

@@ -171,7 +171,7 @@ MARKLOGIC_IMAGE=progressofficial/marklogic-db:10.0-11.1-ubi-2.2.4 \
   docker compose -f tests/integration/docker-compose.yaml up -d --build
 ```
 
-The [version matrix](https://github.com/monasticus/mlclient/blob/main/docs/stability.md#supported-and-tested-versions) lists the
+The [version matrix](https://github.com/monasticus/mlclient/blob/main/docs/community/stability.md#supported-and-tested-versions) lists the
 images used in CI. Rebuild the rig after changing its provisioning code or image;
 the provisioner replaces the OAuth configuration with the current server's support
 status, including an explicit unsupported status before MarkLogic 11.2.
@@ -266,9 +266,9 @@ guide with basic usage before advanced overrides.
 ## Documentation
 
 Authored documentation is Markdown in `docs/`. The main entry points are
-`docs/index.md`, `docs/quickstart.md`, `docs/user/environments.md`, the Python task guides
-under `docs/user/python/`, and the command
-pages under `docs/user/cli/`. Keep README examples aligned with Home. Register
+`docs/index.md`, `docs/quickstart.md`, `docs/guides/environments.md`, the Python task guides
+under `docs/guides/` and `docs/advanced/`, and the command
+pages under `docs/cli/`. Keep README examples aligned with Home. Register
 new guide pages in `mkdocs.yml`; API pages are generated from canonical public exports
 and NumPy docstrings, including Pydantic fields and schemas.
 
@@ -279,7 +279,7 @@ make docs-build
 
 `make docs-build` runs a strict MkDocs build and checks generated pages, links,
 anchors and representative API rendering. Do not commit `site/` or generated
-reference pages. See the [documentation contribution guide](https://github.com/monasticus/mlclient/blob/main/docs/documentation.md)
+reference pages. See the [documentation contribution guide](https://github.com/monasticus/mlclient/blob/main/docs/community/documentation.md)
 for build details and versioned publication.
 
 ## Pull requests, branches and releases
@@ -303,14 +303,14 @@ Releases are maintainer work. Version preparation opens a PR; tagging happens
 only after it is squash-merged into `main`. Numeric tags trigger reusable test,
 coverage and lint gates, artifact checks, OIDC PyPI publication and release notes.
 See the
-[release process](https://github.com/monasticus/mlclient/blob/main/docs/releasing.md)
+[release process](https://github.com/monasticus/mlclient/blob/main/docs/community/releasing.md)
 for the commands, publication checks and recovery procedures.
 
 From 1.0.0, stable APIs and CLI commands follow SemVer. The entire jobs package
 is experimental and can change in minor releases. Stable feature removal needs
 a major release, a prior working deprecation with `DeprecationWarning`, and
 migration guidance. See the
-[stability policy](https://github.com/monasticus/mlclient/blob/main/docs/stability.md).
+[stability policy](https://github.com/monasticus/mlclient/blob/main/docs/community/stability.md).
 
 ## License and third-party code
 

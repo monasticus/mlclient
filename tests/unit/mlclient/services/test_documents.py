@@ -13,6 +13,7 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.models import (
     BinaryDocument,
     Category,
+    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -2027,3 +2028,38 @@ def test_delete_many_uris_are_batched(ml):
     ml.documents.delete(uris)
 
     assert ml_mocker.router.calls.call_count > 1
+
+
+@pytest.mark.parametrize("operation", ["read", "read_stream", "write", "delete"])
+@respx.mock
+def test_document_operations_use_scope_and_per_request_overrides(
+    operation,
+):
+    route = respx.route(path="/v1/documents").respond(
+        200,
+        json={"name": "Coffee"},
+    )
+    with MLClient() as ml:
+        original = ml.documents(database="catalog", txid="tx-1")
+        narrowed = original(txid="tx-2")
+        assert route.call_count == 0
+        argument = (
+            Document.create("/product.json", {"name": "Coffee"})
+            if operation == "write"
+            else "/product.json"
+        )
+        scenarios = [
+            (narrowed, {}, "catalog", "tx-2"),
+            (original, {}, "catalog", "tx-1"),
+            (original, {"database": "archive"}, "archive", "tx-1"),
+            (original, {"database": None, "txid": None}, None, None),
+            (original(database=None, txid=None), {}, None, None),
+            (ml.documents, {}, None, None),
+        ]
+        for service, overrides, database, txid in scenarios:
+            result = getattr(service, operation)(argument, **overrides)
+            if operation == "read_stream":
+                result = list(result)
+            params = route.calls.last.request.url.params
+            assert params.get("database") == database
+            assert params.get("txid") == txid

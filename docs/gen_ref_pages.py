@@ -2,6 +2,8 @@
 
 import importlib
 import inspect
+import json
+import posixpath
 from pathlib import Path
 
 import mkdocs_gen_files
@@ -84,6 +86,23 @@ for namespace in namespaces:
 
 with mkdocs_gen_files.open("reference/SUMMARY.md", "w") as output:
     output.writelines(nav.build_literate_nav())
-with mkdocs_gen_files.open("contributing.md", "w") as output:
+with mkdocs_gen_files.open("community/contributing.md", "w") as output:
     output.write((root / "CONTRIBUTING.md").read_text())
-mkdocs_gen_files.set_edit_path("contributing.md", "../CONTRIBUTING.md")
+mkdocs_gen_files.set_edit_path("community/contributing.md", "../CONTRIBUTING.md")
+
+
+# Virtual redirect pages preserve published URLs without keeping the old tree.
+redirects = json.loads((root / "docs/redirects.json").read_text())
+for old, new in redirects.items():
+    old_url = old.removesuffix(".md").removesuffix("/index")
+    new_url = new.removesuffix(".md").removesuffix("/index")
+    target = posixpath.relpath(new_url, old_url) + "/"
+    link = posixpath.relpath(new, posixpath.dirname(old) or ".")
+    with mkdocs_gen_files.open(old, "w") as output:
+        output.write(
+            "<!-- mlclient-docs-redirect -->\n# Page moved\n\n"
+            f"[Open the current page]({link}).\n\n"
+            "<script>location.replace("
+            + json.dumps(target)
+            + " + location.search + location.hash);</script>\n"
+        )

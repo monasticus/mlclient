@@ -3,6 +3,7 @@
 from mlclient.services.cts import AsyncCtsService, CtsService
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
+from mlclient.services.scope import ServiceScope
 from mlclient.services.search import AsyncSearchService, SearchScope, SearchService
 from mlclient.services.transactions import (
     AsyncTransactionService,
@@ -22,6 +23,7 @@ __all__ = [
     "EvalService",
     "SearchScope",
     "SearchService",
+    "ServiceScope",
     "TransactionService",
     "async_open_transaction",
     "open_transaction",

@@ -20,16 +20,20 @@ asyncio.run(main())
 Inside an existing event loop, await your function instead of calling
 `asyncio.run()` again.
 
-## Reuse the client
+## Reuse one client for related operations
 
-Keep one client open for related operations so its connections can be reused.
-Exit the `async with` block to close all opened connections, including auxiliary
-Manage, Admin and Health connections.
+Create one client outside the loop so repeated requests share its connection
+pool. Close it after the whole batch:
 
 ```python
 async with AsyncMLClient() as ml:
-    documents = await ml.documents.read(["/first.json", "/second.json"])
+    for uri in ["/first.json", "/second.json"]:
+        document = await ml.documents.read(uri)
+        print(document.uri, document.content)
 ```
+
+For a bulk read alone, use `await ml.documents.read(uris)`. Keep one client open
+across requests in a long-running application and close it at shutdown.
 
 ## Run independent requests concurrently
 

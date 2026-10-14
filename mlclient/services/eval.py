@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
 from mlclient.models.results import ParsedValue
 from mlclient.responses import MLResponseParser
+from mlclient.services.scope import ServiceScope
 from mlclient.xquery.expressions import XqyExpression
 
 _XQUERY_FILE_EXT = ("xq", "xql", "xqm", "xqu", "xquery", "xqy")
@@ -33,23 +34,49 @@ _SUPPORTED_FILE_EXT = tuple(
 class EvalService:
     """Higher-level service for /v1/eval endpoint."""
 
-    def __init__(self, rest: RestApi):
-        """Create an evaluator using the provided REST transport.
+    def __init__(self, rest: RestApi, scope: ServiceScope | None = None):
+        """Create a service on the supplied REST connection.
 
         Parameters
         ----------
-        rest : RestApi | AsyncRestApi
-            REST transport used by this evaluator.
+        rest : RestApi
+            REST transport shared by this service and its scoped copies.
+        scope : ServiceScope | None, default None
+            Database and transaction defaults; None uses an empty scope.
         """
         self._rest = rest
+        self._scope = ServiceScope().overridden_by(scope)
+
+    def __call__(
+        self,
+        *,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
+    ) -> EvalService:
+        """Return a scoped copy without opening a connection or a transaction.
+
+        Parameters
+        ----------
+        database : str | None, default unset
+            Content database; unset inherits, None clears the inherited value.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits, None clears the inherited value.
+
+        Returns
+        -------
+        EvalService
+            A new service using the same REST transport and the merged scope.
+        """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        return EvalService(self._rest, scope)
 
     def expression(
         self,
         expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
     ) -> ParsedValue:
@@ -64,10 +91,12 @@ class EvalService:
             They become XQuery namespace declarations,
             shared by validation and execution. The empty prefix sets the default
             element namespace.
-        database : str | None, default None
-            Content database name or id.
-        txid : str | None, default None
-            Existing multi-statement transaction identifier.
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
         timeout : httpx.Timeout | float | None, default unset
@@ -97,12 +126,14 @@ class EvalService:
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"
             raise ValueError(message)
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        scoped_params = scope.request_params()
         code, variables = expr.compile(namespaces=namespaces)
         response = self._rest.eval.post(
             xquery=code,
             variables=variables,
-            database=database,
-            txid=txid,
+            database=scoped_params["database"],
+            txid=scoped_params["txid"],
             timeout=timeout,
         )
         MLResponseParser.raise_for_status(response)
@@ -113,8 +144,8 @@ class EvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -137,10 +168,12 @@ class EvalService:
             Raw XQuery code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -178,8 +211,8 @@ class EvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -202,10 +235,12 @@ class EvalService:
             Raw JavaScript code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -243,8 +278,8 @@ class EvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -267,10 +302,12 @@ class EvalService:
             Raw XQuery code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -308,8 +345,8 @@ class EvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -332,10 +369,12 @@ class EvalService:
             Raw JavaScript code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -373,8 +412,8 @@ class EvalService:
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -397,10 +436,12 @@ class EvalService:
             File path to the code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -440,8 +481,8 @@ class EvalService:
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -461,10 +502,12 @@ class EvalService:
             A raw JavaScript code to evaluate
         variables : dict | None, default None
             External variables to pass to the query during evaluation
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -507,21 +550,23 @@ class EvalService:
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
     ):
         """Execute eval and return parsed result."""
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        scoped_params = scope.request_params()
         _validate_params(file, xq, js)
         params = _get_eval_params(
             file=file,
             xq=xq,
             js=js,
             variables=variables,
-            database=database,
-            txid=txid,
+            database=scoped_params["database"],
+            txid=scoped_params["txid"],
             **kwargs,
         )
         resp = self._rest.eval.post(**params, timeout=timeout)
@@ -619,23 +664,49 @@ def _get_variables(
 class AsyncEvalService:
     """Async higher-level service for /v1/eval endpoint."""
 
-    def __init__(self, rest: AsyncRestApi):
-        """Create an evaluator using the provided REST transport.
+    def __init__(self, rest: AsyncRestApi, scope: ServiceScope | None = None):
+        """Create a service on the supplied REST connection.
 
         Parameters
         ----------
-        rest : RestApi | AsyncRestApi
-            REST transport used by this evaluator.
+        rest : AsyncRestApi
+            REST transport shared by this service and its scoped copies.
+        scope : ServiceScope | None, default None
+            Database and transaction defaults; None uses an empty scope.
         """
         self._rest = rest
+        self._scope = ServiceScope().overridden_by(scope)
+
+    def __call__(
+        self,
+        *,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
+    ) -> AsyncEvalService:
+        """Return a scoped copy without opening a connection or a transaction.
+
+        Parameters
+        ----------
+        database : str | None, default unset
+            Content database; unset inherits, None clears the inherited value.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits, None clears the inherited value.
+
+        Returns
+        -------
+        AsyncEvalService
+            A new service using the same REST transport and the merged scope.
+        """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        return AsyncEvalService(self._rest, scope)
 
     async def expression(
         self,
         expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
     ) -> ParsedValue:
@@ -650,10 +721,12 @@ class AsyncEvalService:
             They become XQuery namespace declarations,
             shared by validation and execution. The empty prefix sets the default
             element namespace.
-        database : str | None, default None
-            Content database name or id.
-        txid : str | None, default None
-            Existing multi-statement transaction identifier.
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
         timeout : httpx.Timeout | float | None, default unset
@@ -683,12 +756,14 @@ class AsyncEvalService:
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"
             raise ValueError(message)
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        scoped_params = scope.request_params()
         code, variables = expr.compile(namespaces=namespaces)
         response = await self._rest.eval.post(
             xquery=code,
             variables=variables,
-            database=database,
-            txid=txid,
+            database=scoped_params["database"],
+            txid=scoped_params["txid"],
             timeout=timeout,
         )
         MLResponseParser.raise_for_status(response)
@@ -699,8 +774,8 @@ class AsyncEvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -723,10 +798,12 @@ class AsyncEvalService:
             Raw XQuery code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -764,8 +841,8 @@ class AsyncEvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -788,10 +865,12 @@ class AsyncEvalService:
             Raw JavaScript code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -829,8 +908,8 @@ class AsyncEvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -853,10 +932,12 @@ class AsyncEvalService:
             Raw XQuery code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -894,8 +975,8 @@ class AsyncEvalService:
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -918,10 +999,12 @@ class AsyncEvalService:
             Raw JavaScript code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -959,8 +1042,8 @@ class AsyncEvalService:
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -983,10 +1066,12 @@ class AsyncEvalService:
             File path to the code to evaluate
         variables : dict | None, default None
             External variables
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -1026,8 +1111,8 @@ class AsyncEvalService:
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
@@ -1047,10 +1132,12 @@ class AsyncEvalService:
             A raw JavaScript code to evaluate
         variables : dict | None, default None
             External variables to pass to the query during evaluation
-        database : str | None, default None
-            Content database name or id
-        txid : str | None, default None
-            Transaction identifier
+        database : str | None, default unset
+            Content database name or id; unset inherits the service scope and
+            None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
@@ -1093,21 +1180,23 @@ class AsyncEvalService:
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         output_type: type | None = None,
         timeout=UNSET,
         **kwargs,
     ):
         """Execute eval and return parsed result."""
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        scoped_params = scope.request_params()
         _validate_params(file, xq, js)
         params = await _async_get_eval_params(
             file=file,
             xq=xq,
             js=js,
             variables=variables,
-            database=database,
-            txid=txid,
+            database=scoped_params["database"],
+            txid=scoped_params["txid"],
             **kwargs,
         )
         resp = await self._rest.eval.post(**params, timeout=timeout)

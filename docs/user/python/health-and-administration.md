@@ -23,8 +23,7 @@ The probe maps the response to a verdict:
 - `4xx` -\> raises [HTTPStatusError](https://www.python-httpx.org/exceptions/); a client error means the request was misdirected (for example, aimed at an authenticated server), not that the node is unhealthy
 
 By default, health checks use the client's host on port `7997`, without
-authentication or retries, and with a 5-second timeout. The timeout is the maximum
-wait for a response, not a delay before returning.
+authentication or retries, and with a 5-second timeout.
 
 Pass an [HTTPConfig][mlclient.http.HTTPConfig] as `health_config` to use a separate
 health connection. Its host, port, authentication and TLS settings are preserved.

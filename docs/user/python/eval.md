@@ -177,6 +177,23 @@ See the [XQuery API guide](xquery-api.md) for composing expressions and calling
 custom modules, and [EvalService.expression][mlclient.services.EvalService.expression]
 for the full signature.
 
+## Reuse database and transaction settings
+
+Call the service to create a scoped copy without sending a request:
+
+```python
+with MLClient() as ml:
+    catalog = ml.eval(database="catalog")
+    count = catalog.xquery("fn:count(fn:collection())")
+    default_database = catalog(database=None)
+```
+
+The shared [ServiceScope][mlclient.services.ServiceScope] holds `database` and
+`txid`. The original service is unchanged. Per-operation `database=` and `txid=`
+arguments override the scope; omitting them inherits it, and `None` clears a value.
+Use `ml.eval(**txn)` for a series of operations inside a transaction. Async
+services support the same scoping syntax.
+
 ## Within a transaction
 
 Pass a `txid` to run inside an open multi-statement transaction, or spread a

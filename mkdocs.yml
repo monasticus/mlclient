@@ -75,15 +75,13 @@ nav:
   - Quickstart: quickstart.md
   - Guides:
       - Clients: user/clients.md
-      - Environments: user/environments.md
       - Documents: user/python/documents.md
       - Evaluate code: user/python/eval.md
       - Search: user/python/search.md
       - Transactions: user/python/transactions.md
+      - Environments: user/environments.md
       - Async support: user/python/async.md
       - Logging to MarkLogic: user/python/logging.md
-      - Health and administration: user/python/health-and-administration.md
-      - Recipes: recipes.md
   - Advanced:
       - Services: user/python/services.md
       - XQuery API: user/python/xquery-api.md
@@ -96,6 +94,7 @@ nav:
           - Retries: user/python/retries.md
           - Resource limits: user/python/limits.md
       - Custom application APIs: user/python/custom-api.md
+      - Health and administration: user/python/health-and-administration.md
   - CLI:
       - Overview: user/cli.md
       - env:
@@ -115,6 +114,7 @@ nav:
       - health: user/cli/health.md
       - version: user/cli/version.md
       - url: user/cli/url.md
+  - Recipes: recipes.md
   - API reference: reference/
   - Community:
       - Background: about.md

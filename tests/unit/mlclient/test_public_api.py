@@ -192,6 +192,7 @@ EXPECTED_EXPORTS = {
         "DocumentsService",
         "EvalService",
         "SearchScope",
+        "ServiceScope",
         "SearchService",
         "TransactionService",
         "async_open_transaction",

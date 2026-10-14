@@ -18,6 +18,7 @@ from mlclient.models.document_parts import Category, DocumentsBodyPart
 from mlclient.models.documents import Document, Metadata, MetadataDocument
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.responses import MLResponseParser
+from mlclient.services.scope import ServiceScope
 from mlclient.services._documents_parsing import DocumentsReader, normalize_category
 
 _MAX_QUERY_BYTES = 48 * 1024
@@ -75,16 +76,49 @@ class DocumentsService:
     each port.
     """
 
-    def __init__(self, rest: RestApi):
+    def __init__(self, rest: RestApi, scope: ServiceScope | None = None):
+        """Create a service on the supplied REST connection.
+
+        Parameters
+        ----------
+        rest : RestApi
+            REST transport shared by this service and its scoped copies.
+        scope : ServiceScope | None, default None
+            Database and transaction defaults; None uses an empty scope.
+        """
         self._rest = rest
+        self._scope = ServiceScope().overridden_by(scope)
+
+    def __call__(
+        self,
+        *,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
+    ) -> DocumentsService:
+        """Return a scoped copy without opening a connection or a transaction.
+
+        Parameters
+        ----------
+        database : str | None, default unset
+            Content database; unset inherits, None clears the inherited value.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits, None clears the inherited value.
+
+        Returns
+        -------
+        DocumentsService
+            A new service using the same REST transport and the merged scope.
+        """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        return DocumentsService(self._rest, scope)
 
     def write(
         self,
         data: Document | Metadata | list[Document | Metadata],
         *,
-        database: str | None = None,
+        database: str | None = UNSET,
         temporal_collection: str | None = None,
-        txid: str | None = None,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
@@ -93,12 +127,13 @@ class DocumentsService:
         ----------
         data : Document | Metadata | list[Document | Metadata]
             One or more document or default metadata.
-        database : str | None, default None
-            Perform this operation on the named content database.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -119,12 +154,14 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
         body_parts = _DocumentsSender.parse(data)
         resp = self._rest.documents.post(
             body_parts,
-            database=database,
+            database=params["database"],
             temporal_collection=temporal_collection,
-            txid=txid,
+            txid=params["txid"],
             timeout=timeout,
         )
         MLResponseParser.raise_for_status(resp)
@@ -135,8 +172,8 @@ class DocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
@@ -150,10 +187,11 @@ class DocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
-        database : str | None, default None
-            Perform this operation on the named content database.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -188,8 +226,8 @@ class DocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
@@ -204,10 +242,11 @@ class DocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
-        database : str | None, default None
-            Perform this operation on the named content database.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -228,14 +267,16 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
         category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = self._rest.documents.get(
                 batch,
                 category=category,
-                database=database,
+                database=params["database"],
                 data_format="json",
-                txid=txid,
+                txid=params["txid"],
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
@@ -246,10 +287,10 @@ class DocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = None,
+        database: str | None = UNSET,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        txid: str | None = None,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
@@ -264,14 +305,15 @@ class DocumentsService:
             The URI of a document to delete.
         category : Category | str | list[Category | str] | None, default None
             The category of data to remove/reset.
-        database : str | None, default None
-            Perform this operation on the named content database.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
         wipe_temporal : bool | None, default None
             Remove all versions of a temporal document.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -287,15 +329,17 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
         category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = self._rest.documents.delete(
                 batch,
                 category=category,
-                database=database,
+                database=params["database"],
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,
-                txid=txid,
+                txid=params["txid"],
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
@@ -386,16 +430,49 @@ class _DocumentsSender:
 class AsyncDocumentsService:
     """Async higher-level service for /v1/documents CRUD operations."""
 
-    def __init__(self, rest: AsyncRestApi):
+    def __init__(self, rest: AsyncRestApi, scope: ServiceScope | None = None):
+        """Create a service on the supplied REST connection.
+
+        Parameters
+        ----------
+        rest : AsyncRestApi
+            REST transport shared by this service and its scoped copies.
+        scope : ServiceScope | None, default None
+            Database and transaction defaults; None uses an empty scope.
+        """
         self._rest = rest
+        self._scope = ServiceScope().overridden_by(scope)
+
+    def __call__(
+        self,
+        *,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
+    ) -> AsyncDocumentsService:
+        """Return a scoped copy without opening a connection or a transaction.
+
+        Parameters
+        ----------
+        database : str | None, default unset
+            Content database; unset inherits, None clears the inherited value.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits, None clears the inherited value.
+
+        Returns
+        -------
+        AsyncDocumentsService
+            A new service using the same REST transport and the merged scope.
+        """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        return AsyncDocumentsService(self._rest, scope)
 
     async def write(
         self,
         data: Document | Metadata | list[Document | Metadata],
         *,
-        database: str | None = None,
+        database: str | None = UNSET,
         temporal_collection: str | None = None,
-        txid: str | None = None,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
@@ -404,12 +481,13 @@ class AsyncDocumentsService:
         ----------
         data : Document | Metadata | list[Document | Metadata]
             One or more document or default metadata.
-        database : str | None, default None
-            Perform this operation on the named content database.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -430,12 +508,14 @@ class AsyncDocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
         body_parts = _DocumentsSender.parse(data)
         resp = await self._rest.documents.post(
             body_parts,
-            database=database,
+            database=params["database"],
             temporal_collection=temporal_collection,
-            txid=txid,
+            txid=params["txid"],
             timeout=timeout,
         )
         MLResponseParser.raise_for_status(resp)
@@ -446,8 +526,8 @@ class AsyncDocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
@@ -461,10 +541,11 @@ class AsyncDocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
-        database : str | None, default None
-            Perform this operation on the named content database.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -501,8 +582,8 @@ class AsyncDocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = None,
-        txid: str | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> AsyncIterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
@@ -517,10 +598,11 @@ class AsyncDocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
-        database : str | None, default None
-            Perform this operation on the named content database.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -541,14 +623,16 @@ class AsyncDocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
         category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = await self._rest.documents.get(
                 batch,
                 category=category,
-                database=database,
+                database=params["database"],
                 data_format="json",
-                txid=txid,
+                txid=params["txid"],
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
@@ -560,10 +644,10 @@ class AsyncDocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = None,
+        database: str | None = UNSET,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        txid: str | None = None,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
@@ -578,14 +662,15 @@ class AsyncDocumentsService:
             The URI of a document to delete.
         category : Category | str | list[Category | str] | None, default None
             The category of data to remove/reset.
-        database : str | None, default None
-            Perform this operation on the named content database.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
         wipe_temporal : bool | None, default None
             Remove all versions of a temporal document.
-        txid : str | None, default None
-            Perform this operation within the named multi-statement transaction.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -601,15 +686,17 @@ class AsyncDocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
         category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = await self._rest.documents.delete(
                 batch,
                 category=category,
-                database=database,
+                database=params["database"],
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,
-                txid=txid,
+                txid=params["txid"],
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)

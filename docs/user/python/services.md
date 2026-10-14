@@ -34,13 +34,18 @@ with MLClient() as ml:
     result = ml.eval.xquery("1 + 1")
 ```
 
-Services come in three kinds, and the access syntax tells them apart:
+Services come in two kinds, and the access syntax tells them apart:
 
 | Kind | Example | What it holds | Creating it |
 | --- | --- | --- | --- |
-| Stateless | `ml.documents`, `ml.eval` | Nothing; every call takes its own arguments | A property, no request |
+| Scoped | `ml.documents`, `ml.eval` | An immutable [ServiceScope][mlclient.services.ServiceScope] with database and transaction defaults | Calling the service, no request |
 | Scoped | `ml.search`, `ml.search(database="catalog")` | An immutable [SearchScope][mlclient.services.SearchScope] applied to every call | Calling the service, no request |
 | Opened | `ml.transaction(database="catalog")` | Server-side state: an open transaction | A method that sends a request |
+
+`ml.documents(database="catalog")` and `ml.eval(database="catalog")` return
+scoped copies sharing the same connection. Existing per-operation `database=`
+and `txid=` arguments override their defaults; `None` clears an inherited value.
+Both also accept transaction settings via `ml.documents(**txn)` or `ml.eval(**txn)`.
 
 `ml.search` is itself a scoped service with an empty scope. Calling it returns a
 new, narrower service and never changes the original, so scoped services can be

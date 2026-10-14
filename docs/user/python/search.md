@@ -61,86 +61,6 @@ same_query = cts.and_query(
 structured = sq.collection("products") & sq.term("coffee") & ~sq.term("decaf")
 ```
 
-## Build query options
-
-MLClient supports native MarkLogic query options. Pass an installed options name,
-an inline options dictionary, or the
-[SearchOptions][mlclient.search.options.SearchOptions] builder to `ml.search`.
-The builder exposes constraints, sort order, values definitions and other options
-as Python methods:
-
-```python
-from mlclient.search.options import Range, SearchOptions
-from mlclient.search.structured import Element
-
-price = Range(Element("price"), "xs:decimal")
-options = (
-    SearchOptions()
-    .values("price", price)
-    .range_constraint("price", price)
-    .sort(price, direction="descending")
-)
-
-with MLClient() as ml:
-    priced_products = ml.search(collection="products", options=options)
-    documents = priced_products.documents("price GT 10", pos=[1, 10])
-```
-
-Indexes must already exist in the target database; options do not create them.
-See [SearchOptions][mlclient.search.options.SearchOptions] for supported methods
-and [Range][mlclient.search.options.Range] for index targets.
-
-For inline dictionaries, pass the options members directly, without the outer
-`{"options": ...}` wrapper:
-
-```python
-with MLClient() as ml:
-    search = ml.search(options={"page-length": 20})
-    documents = search.documents("coffee")
-```
-
-## Scope: databases, filters and options
-
-Where a search runs and which options it uses is its
-[SearchScope][mlclient.services.SearchScope]: `database`, `txid`, `collection`,
-`directory`, `forest_name`, `options` and `timestamp`. Operations take only the
-arguments of the operation itself, so the scope is set in one of two ways:
-
-- **For a series of searches**, call the service: `ml.search(database="catalog",
-  collection="products")` returns a new service bound to that scope. It sends no
-  request and leaves `ml.search` unchanged; calling a scoped service narrows it
-  further.
-- **For one request**, pass `scope=SearchScope(...)` to an operation. It
-  overrides only the fields it sets.
-
-An omitted field is inherited; `None` clears an inherited value.
-
-```python
-from mlclient.services import SearchScope
-
-with MLClient() as ml:
-    catalog = ml.search(database="catalog", collection="products", options=options)
-    coffee = catalog.documents("coffee", pos=[1, 20])
-    archived = catalog.uris("coffee", scope=SearchScope(collection="archive"))
-    everywhere = catalog.uris("coffee", scope=SearchScope(collection=None))
-
-    with ml.transaction(database="catalog") as txn:
-        pending = ml.search(**txn).uris("coffee")
-```
-
-`documents()` and `report()` also accept `transform` and `transform_params`: an
-installed transform must preserve the native result contract of that operation.
-Every operation accepts `timeout`. MarkLogic errors, such as an unknown values
-name or a missing index, raise `MarkLogicError`.
-
-For anything the service does not wrap, call the endpoints directly through
-`ml.rest.search` (`get`, `post`, `delete`) and `ml.rest.values` (`get_list`,
-`get`, `post`). `ml.rest.search.delete()` removes the documents of a collection or
-directory; clearing a whole database requires `clear_database=True`. Those methods return raw `httpx.Response` objects and accept every
-documented parameter of these search/values endpoints, including combined-query
-POST bodies, native-plugin aggregates and all native response views. Calls/API
-leave raw response headers available, including the effective timestamp.
-
 ## Find documents
 
 `documents()` performs a multi-document read and returns
@@ -297,6 +217,86 @@ with MLClient() as ml:
 See [Find documents](#find-documents) and
 [Search reports](#search-reports-and-snapshot-pagination) for document categories,
 paging and report contents.
+
+## Build query options
+
+MLClient supports native MarkLogic query options. Pass an installed options name,
+an inline options dictionary, or the
+[SearchOptions][mlclient.search.options.SearchOptions] builder to `ml.search`.
+The builder exposes constraints, sort order, values definitions and other options
+as Python methods:
+
+```python
+from mlclient.search.options import Range, SearchOptions
+from mlclient.search.structured import Element
+
+price = Range(Element("price"), "xs:decimal")
+options = (
+    SearchOptions()
+    .values("price", price)
+    .range_constraint("price", price)
+    .sort(price, direction="descending")
+)
+
+with MLClient() as ml:
+    priced_products = ml.search(collection="products", options=options)
+    documents = priced_products.documents("price GT 10", pos=[1, 10])
+```
+
+Indexes must already exist in the target database; options do not create them.
+See [SearchOptions][mlclient.search.options.SearchOptions] for supported methods
+and [Range][mlclient.search.options.Range] for index targets.
+
+For inline dictionaries, pass the options members directly, without the outer
+`{"options": ...}` wrapper:
+
+```python
+with MLClient() as ml:
+    search = ml.search(options={"page-length": 20})
+    documents = search.documents("coffee")
+```
+
+## Scope: databases, filters and options
+
+Where a search runs and which options it uses is its
+[SearchScope][mlclient.services.SearchScope]: `database`, `txid`, `collection`,
+`directory`, `forest_name`, `options` and `timestamp`. Operations take only the
+arguments of the operation itself, so the scope is set in one of two ways:
+
+- **For a series of searches**, call the service: `ml.search(database="catalog",
+  collection="products")` returns a new service bound to that scope. It sends no
+  request and leaves `ml.search` unchanged; calling a scoped service narrows it
+  further.
+- **For one request**, pass `scope=SearchScope(...)` to an operation. It
+  overrides only the fields it sets.
+
+An omitted field is inherited; `None` clears an inherited value.
+
+```python
+from mlclient.services import SearchScope
+
+with MLClient() as ml:
+    catalog = ml.search(database="catalog", collection="products", options=options)
+    coffee = catalog.documents("coffee", pos=[1, 20])
+    archived = catalog.uris("coffee", scope=SearchScope(collection="archive"))
+    everywhere = catalog.uris("coffee", scope=SearchScope(collection=None))
+
+    with ml.transaction(database="catalog") as txn:
+        pending = ml.search(**txn).uris("coffee")
+```
+
+`documents()` and `report()` also accept `transform` and `transform_params`: an
+installed transform must preserve the native result contract of that operation.
+Every operation accepts `timeout`. MarkLogic errors, such as an unknown values
+name or a missing index, raise `MarkLogicError`.
+
+For anything the service does not wrap, call the endpoints directly through
+`ml.rest.search` (`get`, `post`, `delete`) and `ml.rest.values` (`get_list`,
+`get`, `post`). `ml.rest.search.delete()` removes the documents of a collection or
+directory; clearing a whole database requires `clear_database=True`. Those methods return raw `httpx.Response` objects and accept every
+documented parameter of these search/values endpoints, including combined-query
+POST bodies, native-plugin aggregates and all native response views. Calls/API
+leave raw response headers available, including the effective timestamp.
 
 ## Async search
 

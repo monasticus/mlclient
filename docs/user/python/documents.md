@@ -225,6 +225,23 @@ network streaming. Both methods split long URI lists into request batches.
 ...     doc = ml.documents.read("/doc-1.xml", database="Documents")
 ```
 
+## Reuse database and transaction settings
+
+Call the service to create a scoped copy without sending a request:
+
+```python
+with MLClient() as ml:
+    catalog = ml.documents(database="catalog")
+    document = catalog.read("/product.json")
+    default_database = catalog(database=None)
+```
+
+The shared [ServiceScope][mlclient.services.ServiceScope] holds `database` and
+`txid`. The original service is unchanged. Per-operation `database=` and `txid=`
+arguments override the scope; omitting them inherits it, and `None` clears a value.
+Use `ml.documents(**txn)` for a series of operations inside a transaction. Async
+services support the same scoping syntax.
+
 ## Write (create or update)
 
 `write` accepts one `Document`, one `Metadata` (default metadata for a batch),

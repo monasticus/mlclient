@@ -163,6 +163,10 @@ and so on - hand it to `ml.parser`:
 - [Services](python/services.md): the parsed higher-level layer, and the off-facade logs and log-level services.
 - [Health, versions and administration](python/health-and-administration.md): inspect the server, versions and restart waits.
 
+Check server readiness with `ml.healthcheck()` and read the server version with
+`ml.version`. See [Health and administration](python/health-and-administration.md)
+in Advanced for configuration and administrative operations.
+
 ## Configure and extend
 
 For credentials, TLS, Cloud and authentication choices, read

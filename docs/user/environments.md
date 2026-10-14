@@ -17,8 +17,15 @@ to match your server. `app-name` labels the application; `id` is the name you
 select the connection by, and `rest: true` makes it eligible as the default REST
 connection.
 
-[Download this example](environments/mlclient-local.yaml), or use
-[`ml env init`](cli/env/init.md) to create a file interactively.
+[Download this example](environments/mlclient-local.yaml), or create the basic
+local configuration and edit it to add your App Server:
+
+```sh
+ml env init local
+ml env edit local
+```
+
+See [`ml env init`](cli/env/init.md) and [`ml env edit`](cli/env/edit.md).
 
 ## Use it from Python
 
@@ -54,7 +61,6 @@ with manager.get_client("app-services") as ml:
 ```
 
 Use `get_async_client()` in async code; see [async support](python/async.md).
-Leaving the client context closes its opened connections.
 
 ## Use it from the CLI
 

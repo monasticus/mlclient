@@ -55,6 +55,29 @@ context manager that commits on a clean exit, rolls back on error, and unpacks
 with `**` into the operations it should cover, including a search scope:
 `ml.search(**txn)`. See [Transactions](transactions.md).
 
+## Use one API without the facade
+
+The individual layers can be used independently. If you only need Admin
+operations, compose [AdminApi][mlclient.api.AdminApi] with an
+[ApiClient][mlclient.clients.ApiClient] and a
+[HttpClient][mlclient.clients.HttpClient]:
+
+```python
+from mlclient.api import AdminApi
+from mlclient.clients import ApiClient, HttpClient
+
+with HttpClient(port=8001) as http:
+    admin = AdminApi(ApiClient(http))
+    response = admin.get_timestamp()
+    print(response.text)
+```
+
+`HttpClient` owns the connection; its context manager closes it. The API wrappers
+use that connection and do not select a port or create additional clients.
+`RestApi` and `ManageApi` compose in the same way, using their respective server
+configurations. Async code uses `AsyncHttpClient`, `AsyncApiClient` and the
+corresponding async wrapper, with `async with` and awaited operations.
+
 ## Diagnostics
 
 Operational services live in `mlclient.services.diagnostics`: Logs, LogLevel

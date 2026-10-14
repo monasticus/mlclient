@@ -201,9 +201,10 @@ True
 
 ### Stream a large URI list
 
-`read` materializes every document into a `dict`. `read_stream` yields each one
-as it arrives and transparently splits a long URI list into several requests
-(each staying under the httpx URL-length limit) - prefer it for large batches:
+For multiple URIs, `read` returns a `dict` keyed by URI. `read_stream` returns an
+iterator: process each `Document` without first collecting all document models.
+Each HTTP response is buffered before its documents are yielded; this is not
+network streaming. Both methods split long URI lists into request batches.
 
 ```python
 >>> from mlclient import MLClientManager

@@ -13,9 +13,11 @@ The methods:
 | `javascript` (`js`) | a raw JavaScript string                   |
 | `file`            | a file, language detected from its suffix  |
 | `execute`         | general-purpose dispatch over `xq`/`js`/`file` |
+| `expression`      | an expression built with the XQuery API     |
 
-Every method accepts `variables`, a `database`, a `txid` to run inside a
-[transaction](transactions.md), and `output_type` to skip parsing.
+These methods accept a `database`, a `txid` to run inside a
+[transaction](transactions.md), and `output_type` to skip parsing. Raw code
+methods also accept `variables`; expressions bind their arguments automatically.
 
 ## Evaluate a string
 
@@ -158,6 +160,22 @@ b'2024-02-22T12:24:53.677793Z'
 >>> result
 'Documents'
 ```
+
+## Evaluate an XQuery expression
+
+`expression()` evaluates a builder expression and parses its result:
+
+```python
+from mlclient.xquery import fn
+
+with MLClient() as ml:
+    length = ml.eval.expression(fn.string_length("coffee"))
+    print(length)  # 6
+```
+
+See the [XQuery API guide](xquery-api.md) for composing expressions and calling
+custom modules, and [EvalService.expression][mlclient.services.EvalService.expression]
+for the full signature.
 
 ## Within a transaction
 

@@ -61,263 +61,43 @@ same_query = cts.and_query(
 structured = sq.collection("products") & sq.term("coffee") & ~sq.term("decaf")
 ```
 
-Operators combine queries of one vocabulary; mixing a CTS and a structured query
-raises `TypeError`. The `repr` of a CTS query shows the arguments it was built
-with, such as `WordQuery(text='coffee', weight=2)`.
-
-The service serializes queries locally and sends them as JSON in the
-`structuredQuery` parameter. A query argument that needs server evaluation, such
-as a function call in a CTS value (including an `xs.*` cast of a literal),
-raises `TypeError` before any request is made. Pass a ready-to-use Python literal
-or evaluate the expression explicitly through `ml.eval` first.
-See [which CTS queries serialize](queries.md#local-cts-serialization-and-limitations);
-for elements in a namespace pass `fn.qname(uri, name)` rather than a prefixed name.
-With inline options the service builds a
-[combined query](https://docs.marklogic.com/REST/POST/v1/search) and uses POST;
-without inline options it keeps the GET request. Serialization never requires eval.
-For lexicon requests with inline options, the service carries CTS criteria in
-the native `additional-query` option as serialized XML. On the tested versions,
-MarkLogic otherwise ignores a combined query's `ctsquery` on `/values`. Existing
-additional queries are retained and AND'd with the supplied criteria; `/search`
-keeps native CTS JSON.
-
 ## Build query options
 
-[SearchOptions][mlclient.search.options.SearchOptions] is a fluent builder.
-It captures definition data and builds only the requested representation when
-`to_json()`, `to_xml()` or `serialize()` is called. Passing it to a search service
-serializes it when preparing the request. Building options alone creates neither
-a JSON options document nor an XML tree. Mutable inputs are copied so later
-changes do not affect existing definitions.
-
-Use existing structured-query targets to identify indexes:
+MLClient supports native MarkLogic query options. Pass an installed options name,
+an inline options dictionary, or the
+[SearchOptions][mlclient.search.options.SearchOptions] builder to `ml.search`.
+The builder exposes constraints, sort order, values definitions and other options
+as Python methods:
 
 ```python
 from mlclient.search.options import Range, SearchOptions
-from mlclient.search.structured import Element, JsonProperty
+from mlclient.search.structured import Element
 
 price = Range(Element("price"), "xs:decimal")
 options = (
     SearchOptions()
     .values("price", price)
-    .range_constraint("price", price, options=["limit=10"])
+    .range_constraint("price", price)
     .sort(price, direction="descending")
-    .control("return-metrics", True)
 )
 
 with MLClient() as ml:
-    products = ml.search(options=options)
-    documents = products.documents("coffee", pos=[1, 10])
-    report = products.report("price GT 10")
-
-# Use JsonProperty for a JSON property index, not Element.
-json_price = Range(JsonProperty("price"), "xs:decimal")
-```
-
-Named constraints let string and constraint queries refer to a target by name:
-`range_constraint` and `collection_constraint` (both calculate a facet unless
-`facet=False`; the collection one takes an optional URI prefix),
-`word_constraint` and `value_constraint` on an `Element` (optionally narrowed to
-one of its attributes with `attribute=`), `JsonProperty` or `Field`, and
-`container_constraint` on an `Element` or `JsonProperty`. A value constraint's
-`node_type=` (`"number"`, `"boolean"`, `"null"`, default `"string"`) selects
-which JSON values it matches:
-
-```python
-options = (
-    SearchOptions()
-    .word_constraint("title", Element("title"))
-    .collection_constraint("type", prefix="products/")
-)
-
-with MLClient() as ml:
-    uris = ml.search(options=options).uris("title:coffee type:beans")
+    priced_products = ml.search(collection="products", options=options)
+    documents = priced_products.documents("price GT 10", pos=[1, 10])
 ```
 
 Indexes must already exist in the target database; options do not create them.
-`Range` also supports `Field`, `PathIndex` and an `Attribute` of an `Element`.
-For URI or collection lexicons use `.values("uris", "uri")` or
-`.values("collections", "collection")`; the database lexicon must be enabled.
+See [SearchOptions][mlclient.search.options.SearchOptions] for supported methods
+and [Range][mlclient.search.options.Range] for index targets.
 
-The builder is mutable and chainable; serialization returns independent
-representations, and two builders with the same definitions compare equal. To add an
-option without a convenience method, use
-`.add(native_json_members, *native_xml_children)`: every JSON definition needs
-one search-namespace XML element of the same name, otherwise `ValueError` is
-raised instead of silently dropping the option from one format. For JSON-only
-service requests, `options={...}` also accepts native options members directly,
-without the outer `{"options": ...}` wrapper.
-
-## Find documents
-
-`documents()` performs a multi-document read and returns
-[Document][mlclient.models.Document] models in search result order: `XMLDocument`,
-`JSONDocument`, `TextDocument` or `BinaryDocument`. MarkLogic sends only the
-documents - no search report, snippets or facets - and an empty list means
-nothing matched.
+For inline dictionaries, pass the options members directly, without the outer
+`{"options": ...}` wrapper:
 
 ```python
 with MLClient() as ml:
-    first_page = ml.search.documents("coffee", pos=[1, 10])
-    with_collections = ml.search.documents(
-        "coffee",
-        pos=1,
-        category=["content", "collections"],
-    )
-    print(with_collections[0].metadata.collections())
+    search = ml.search(options={"page-length": 20})
+    documents = search.documents("coffee")
 ```
-
-`pos` takes a one-based position or an inclusive `[start, end]` range. Without
-`pos` you get the first page only: the `page-length` of inline options, else
-**10**. A multi-document read ignores the `page-length` of installed options, so
-pass `pos` with them. Pass a range to read more, for example `pos=[1, 1000]`. `CtsService` differs here: without `pos` it returns every match. `category`
-accepts the same values as [document reads](documents.md); include `content` to
-keep the document content.
-
-## Get URIs
-
-`uris()` returns the URIs of matching documents as strings, in the same order and
-with the same paging as `documents()` - the first 10 without `pos`:
-
-```python
-with MLClient() as ml:
-    uris = ml.search.uris(cts.collection_query("products"), pos=[1, 100])
-```
-
-The service requests the smallest metadata category for each match and reads the
-URI from each part's header, so no document content crosses the network.
-
-## Read lexicon values
-
-`values()` reads a values definition from named or inline query options and returns
-[ValueHit][mlclient.models.ValueHit] objects. Each value is converted from the type
-MarkLogic reports, such as `Decimal` for `xs:decimal` or `date` for `xs:date`.
-
-```python
-with MLClient() as ml:
-    products = ml.search(options="product-options")
-    prices = products.values("price", cts.collection_query("products"), pos=[1, 20])
-    for hit in prices:
-        print(hit.value, hit.frequency)
-```
-
-The `product-options` options must define a `values` entry named `price` backed
-by a range index. Unlike documents and URIs, without `pos` every selected value is
-returned, as `/v1/values` does. `direction`
-chooses ascending or descending order; `frequency="item"` counts occurrences,
-while `frequency="fragment"` counts matching fragments. `limit` caps the lexicon
-subset **before** `pos` selects a page; `limit=0` returns no values.
-
-Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
-
-## Aggregate values
-
-`aggregate(name, function, query=None, ...)` applies an aggregate to a
-values or tuples definition. It returns the parsed result, not a `ValueHit`:
-
-```python
-options = SearchOptions().values("price", Range(Element("price"), "xs:decimal"))
-
-with MLClient() as ml:
-    prices = ml.search(options=options)
-    total_price = prices.aggregate("price", "sum")
-    average_price = prices.aggregate("price", "avg")
-    price_count = prices.aggregate("price", "count")
-```
-
-`count` returns an integer, decimal sums and averages retain `Decimal`, and
-statistical aggregates return floats. An empty aggregate result is returned as
-`None` (for example, an average with no matching values). Supported built-ins include min, max, median,
-standard deviation, variance, correlation and covariance; binary statistics use
-tuples.
-For a native plugin already installed on MarkLogic, pass its function name and
-library path:
-
-```python
-with MLClient() as ml:
-    result = ml.search(options=options).aggregate(
-        "price", "customAverage", aggregate_path="/native/statistics",
-    )
-```
-
-A non-empty `aggregate_path` selects a plugin. Its first returned aggregate value
-retains its JSON type; the service does not infer the plugin result type from
-the lexicon. A missing value returns `None`. An omitted or empty path selects a
-built-in aggregate and preserves the conversions described above. Native scalar
-numbers may arrive as JSON strings without a result type annotation. Maps retain the REST `map.entry`
-structure. In empirical tests on MarkLogic 10 and 12, REST JSON omitted entries
-from multi-entry native maps;
-use raw REST XML or `cts:aggregate` through eval when every entry is required.
-The async service accepts the same parameters.
-
-## Read co-occurrences
-
-```python
-options = SearchOptions().tuples(
-    "price-day",
-    Range(Element("price"), "xs:decimal"),
-    Range(Element("day"), "xs:date"),
-)
-
-with MLClient() as ml:
-    for hit in ml.search(options=options).tuples("price-day"):
-        price, day = hit.values
-        print(price, day, hit.frequency)
-```
-
-[TupleHit][mlclient.models.TupleHit] preserves index order and converts each
-component using its own XML Schema type. The service requests XML responses:
-MarkLogic rounds decimal tuple values in JSON, whereas XML retains their exact
-lexical values. Query and inline options are still sent as JSON. Direction,
-frequency, limit and positional paging have the same semantics as `values()`.
-
-## Search reports and snapshot pagination
-
-`report()` returns a [SearchReport][mlclient.models.SearchReport], containing
-native JSON result entries (including URI, score and snippets), facets, metrics
-and the estimated total. These snippets are **not** whole `Document` objects;
-use `documents()` to read actual content.
-
-```python
-with MLClient() as ml:
-    products = ml.search(options=options)
-    first = products.report("coffee", pos=[1, 10])
-    for result in first.results:
-        print(result["uri"], result["score"])
-    print(first.total, first.facets, first.metrics)
-    snapshot = products(timestamp=first.effective_timestamp)
-    next_page = snapshot.report("coffee", pos=[11, 20])
-```
-
-Reuse the same criteria and `effective_timestamp` for a stable snapshot; the
-server must retain that point-in-time version. `view` selects all, results,
-facets or metadata. `report.response` retains the complete native JSON report,
-including any extra fields requested through query options.
-
-### Documents and report together
-
-`documents_with_report()` returns `tuple[SearchReport, list[Document]]` in that
-order, using one multipart request with `view=all`:
-
-```python
-with MLClient() as ml:
-    products = ml.search(collection="products", options=options)
-    report, documents = products.documents_with_report("coffee", pos=[1, 10])
-    print(report.total, report.facets)
-    for document in documents:
-        print(document.uri, document.content)
-```
-
-The report contains result entries for the requested page. Its estimated total
-and facets describe the matching search, not just the returned documents.
-When nothing matches, the method returns a report with no results and `[]`.
-Document categories, scope overrides and paging work as in `documents()`;
-`category=["content", "metadata"]` includes document metadata. The effective
-snapshot timestamp is available on the report. A REST transform applies to
-both report and documents and must preserve the native report structure.
-
-The async service accepts the same parameters and returns the same tuple:
-`report, documents = await products.documents_with_report("coffee")`.
 
 ## Scope: databases, filters and options
 
@@ -360,6 +140,163 @@ directory; clearing a whole database requires `clear_database=True`. Those metho
 documented parameter of these search/values endpoints, including combined-query
 POST bodies, native-plugin aggregates and all native response views. Calls/API
 leave raw response headers available, including the effective timestamp.
+
+## Find documents
+
+`documents()` performs a multi-document read and returns
+[Document][mlclient.models.Document] models in search result order: `XMLDocument`,
+`JSONDocument`, `TextDocument` or `BinaryDocument`. MarkLogic sends only the
+documents - no search report, snippets or facets - and an empty list means
+nothing matched.
+
+```python
+with MLClient() as ml:
+    first_page = ml.search.documents("coffee", pos=[1, 10])
+    with_collections = ml.search.documents(
+        "coffee",
+        pos=1,
+        category=["content", "collections"],
+    )
+    print(with_collections[0].metadata.collections())
+```
+
+`pos` takes a one-based position or an inclusive `[start, end]` range. Without
+`pos` you get the first page only: the `page-length` of inline options, else
+**10**. A multi-document read ignores the `page-length` of installed options, so
+pass `pos` with them. Pass a range to read more, for example `pos=[1, 1000]`. `category`
+accepts the same values as [document reads](documents.md); include `content` to
+keep the document content.
+
+## Get URIs
+
+`uris()` returns the URIs of matching documents as strings, in the same order and
+with the same paging as `documents()` - the first 10 without `pos`:
+
+```python
+with MLClient() as ml:
+    uris = ml.search.uris(cts.collection_query("products"), pos=[1, 100])
+```
+
+The service requests the smallest metadata category for each match and reads the
+URI from each part's header, so no document content crosses the network.
+
+## Read lexicon values
+
+`values()` reads a values definition from named or inline query options and returns
+[ValueHit][mlclient.models.ValueHit] objects. Each value is converted from the type
+MarkLogic reports, such as `Decimal` for `xs:decimal` or `date` for `xs:date`.
+
+```python
+with MLClient() as ml:
+    products = ml.search(options="product-options")
+    prices = products.values("price", cts.collection_query("products"), pos=[1, 20])
+    for hit in prices:
+        print(hit.value, hit.frequency)
+```
+
+The `product-options` options must define a `values` entry named `price` backed
+by a range index. Unlike documents and URIs, without `pos` every selected value is
+returned, as `/v1/values` does. `direction`
+chooses ascending or descending order; `frequency="item"` counts occurrences,
+while `frequency="fragment"` counts matching fragments. `limit` caps the lexicon
+subset **before** `pos` selects a page.
+
+Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
+
+## Aggregate values
+
+`aggregate(name, function, query=None, ...)` applies an aggregate to a
+values or tuples definition. It returns the parsed result, not a `ValueHit`:
+
+```python
+options = SearchOptions().values("price", Range(Element("price"), "xs:decimal"))
+
+with MLClient() as ml:
+    prices = ml.search(options=options)
+    total_price = prices.aggregate("price", "sum")
+    average_price = prices.aggregate("price", "avg")
+    price_count = prices.aggregate("price", "count")
+```
+
+`count` returns an integer, decimal sums and averages retain `Decimal`, and
+statistical aggregates return floats. An empty aggregate result is returned as
+`None` (for example, an average with no matching values). Supported built-ins include min, max, median,
+standard deviation, variance, correlation and covariance; binary statistics use
+tuples.
+For a native plugin already installed on MarkLogic, pass its function name and
+library path:
+
+```python
+with MLClient() as ml:
+    result = ml.search(options=options).aggregate(
+        "price", "customAverage", aggregate_path="/native/statistics",
+    )
+```
+
+A non-empty `aggregate_path` selects a plugin. Its first returned aggregate value
+retains its JSON type; the service does not infer the plugin result type from
+the lexicon. A missing value returns `None`.
+## Read co-occurrences
+
+```python
+options = SearchOptions().tuples(
+    "price-day",
+    Range(Element("price"), "xs:decimal"),
+    Range(Element("day"), "xs:date"),
+)
+
+with MLClient() as ml:
+    for hit in ml.search(options=options).tuples("price-day"):
+        price, day = hit.values
+        print(price, day, hit.frequency)
+```
+
+[TupleHit][mlclient.models.TupleHit] preserves index order and converts each
+component using its own XML Schema type. The service requests XML responses:
+MarkLogic rounds decimal tuple values in JSON, whereas XML retains their exact
+lexical values. Query and inline options are still sent as JSON. Direction,
+frequency, limit and positional paging have the same semantics as `values()`.
+
+## Search reports and snapshot pagination
+
+`report()` returns a [SearchReport][mlclient.models.SearchReport], containing
+native JSON result entries (including URI, score and snippets), facets, metrics
+and the estimated total. These snippets are **not** whole `Document` objects;
+use `documents()` or `documents_with_report()` to read actual content.
+
+```python
+with MLClient() as ml:
+    products = ml.search(options=options)
+    first = products.report("coffee", pos=[1, 10])
+    for result in first.results:
+        print(result["uri"], result["score"])
+    print(first.total, first.facets, first.metrics)
+    snapshot = products(timestamp=first.effective_timestamp)
+    next_page = snapshot.report("coffee", pos=[11, 20])
+```
+
+Reuse the same criteria and `effective_timestamp` for a stable snapshot; the
+server must retain that point-in-time version. `view` selects all, results,
+facets or metadata. `report.response` retains the complete native JSON report,
+including any extra fields requested through query options.
+
+### Documents and report together
+
+`documents_with_report()` returns `tuple[SearchReport, list[Document]]` in that
+order, using one multipart request with `view=all`:
+
+```python
+with MLClient() as ml:
+    products = ml.search(collection="products", options=options)
+    report, documents = products.documents_with_report("coffee", pos=[1, 10])
+    print(report.total, report.facets)
+    for document in documents:
+        print(document.uri, document.content)
+```
+
+See [Find documents](#find-documents) and
+[Search reports](#search-reports-and-snapshot-pagination) for document categories,
+paging and report contents.
 
 ## Async search
 
@@ -433,6 +370,7 @@ with MLClient() as ml:
         print(hits[0].content)
 ```
 
+Without `pos`, CTS search returns every match; REST search returns its first page.
 A selected position returns a one-item list; a missing position returns `[]`.
 A two-item list or tuple selects an inclusive range.
 Use an explicit ordering option when your application needs stable page ordering;

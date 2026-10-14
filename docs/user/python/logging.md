@@ -123,6 +123,31 @@ logger.info("deploy finished")
     forward it like any other level. If your application already defines its own
     `FINE` level or `fine` method, be aware of the clash.
 
+## A logger that sends only to MarkLogic
+
+Use a separate named logger, attach only `MLLogHandler`, and set
+`propagate=False` so root console and file handlers do not receive its records:
+
+```python
+import logging
+from mlclient.logging import MLLogHandler
+
+logger = logging.getLogger("marklogic_only")
+logger.setLevel(logging.INFO)
+logger.propagate = False
+handler = MLLogHandler(environment="local")
+handler.setFormatter(logging.Formatter("%(name)s - %(message)s"))
+logger.addHandler(handler)
+try:
+    logger.info("deploy finished")
+finally:
+    logger.removeHandler(handler)
+    handler.close()
+```
+
+Configure the logger once at application startup and close its handler at
+shutdown; `close()` drains queued records before stopping the worker.
+
 ## See also
 
 - [Evaluate code](eval.md) - the `xdmp:log` call runs through `ml.eval`.

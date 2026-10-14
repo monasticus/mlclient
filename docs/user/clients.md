@@ -4,39 +4,7 @@ Start with [the quickstart](../quickstart.md) to connect and evaluate a query.
 Use a context manager so connections close even when an operation fails.
 Choose `MLClient` for synchronous scripts or `AsyncMLClient` inside async code.
 These clients are facades combining services and several APIs. You can also
-[use a single API directly](#use-one-api-without-the-facade).
-
-## Imports
-
-Import the main clients from `mlclient`:
-
-```python
-from mlclient import MLClient, AsyncMLClient
-```
-
-Additional types are grouped by purpose:
-
-| Module | Examples |
-| --- | --- |
-| `mlclient.env` | `MLEnvironment`, `MLServerConfig` |
-| `mlclient.http` | `HTTPConfig`, `UNSET`, retry and timeout defaults |
-| `mlclient.auth` | `AuthConfig`, `OAuthBearerAuth` |
-| `mlclient.connection` | `SSLConfig`, `CloudConfig` |
-| `mlclient.models` | `Document`, `Metadata`, `Category`, `MarkLogicVersion` |
-| `mlclient.clients` | `HttpClient`, `ApiClient` and their async counterparts |
-| `mlclient.api` | `RestApi`, `DocumentsApi` and other endpoint wrappers |
-| `mlclient.calls` | `ApiCall`, `EvalCall` and other request objects |
-| `mlclient.services` | `DocumentsService`, `TransactionService`, `SearchService`, `SearchScope` |
-| `mlclient.search` | Structured queries (`mlclient.search.structured`) and search options (`mlclient.search.options`) |
-| `mlclient.xquery` | The `cts`, `fn`, `xdmp`, `xs` builders, CTS query types and XQuery expressions |
-| `mlclient.responses` | `MLResponseParser` |
-| `mlclient.io` | `DocumentsLoader`, `DocumentsWriter` |
-| `mlclient.exceptions` | `MarkLogicError`, `ConfigError` |
-
-The [API reference](../reference/mlclient/index.md) shows the import for every
-public class and function. Modules starting with `_` contain internal code.
-Use `httpx.Timeout`, `httpx.Limits`, and `httpx_retries.Retry` directly when
-customizing the corresponding HTTP settings.
+[use a single API directly](python/services.md#use-one-api-without-the-facade).
 
 ## Entry points at a glance
 
@@ -57,7 +25,7 @@ each axis.
 
 `ml.transaction()` is a method, not a property: opening a transaction performs a
 request, so it returns a service scoped to that transaction rather than a shared
-one. See [Transactions](#transactions).
+one. See [Transactions](python/transactions.md).
 
 ## Abstraction: parsed, response, or raw
 
@@ -139,29 +107,6 @@ parameters as keyword arguments; the
 ...     timestamp = ml.admin.get_timestamp()
 ```
 
-## Use one API without the facade
-
-The individual layers can be used independently. If you only need Admin
-operations, compose [AdminApi][mlclient.api.AdminApi] with an
-[ApiClient][mlclient.clients.ApiClient] and a
-[HttpClient][mlclient.clients.HttpClient]:
-
-```python
-from mlclient.api import AdminApi
-from mlclient.clients import ApiClient, HttpClient
-
-with HttpClient(port=8001) as http:
-    admin = AdminApi(ApiClient(http))
-    response = admin.get_timestamp()
-    print(response.text)
-```
-
-`HttpClient` owns the connection; its context manager closes it. The API wrappers
-use that connection and do not select a port or create additional clients.
-`RestApi` and `ManageApi` compose in the same way, using their respective server
-configurations. Async code uses `AsyncHttpClient`, `AsyncApiClient` and the
-corresponding async wrapper, with `async with` and awaited operations.
-
 ## Send a raw request (`ml.http`)
 
 `ml.http` sends arbitrary requests on the primary connection. Strings and bytes
@@ -191,43 +136,6 @@ submitted as form data otherwise. Header names are case-insensitive.
 
 `ml.http` also has `put`, `delete` and a general `request` method with the same
 body handling.
-
-## Transactions
-
-Group several operations so they commit or roll back together.
-`ml.transaction()` returns a context manager that commits on a clean exit and
-rolls back if the block raises; spread it with `**` into each operation to run
-that operation inside the transaction:
-
-```python
->>> from mlclient import MLClient
->>> from mlclient.models import Document
-
->>> doc = Document.create("/doc-1.xml", "<root>data</root>")
->>> with MLClient() as ml:
-...     with ml.transaction() as txn:
-...         ml.documents.write(doc, **txn)
-...         ml.eval.xquery('xdmp:document-insert("/doc-2.xml", <root/>)', **txn)
-```
-
-See the [transactions guide](python/transactions.md) for rollback, reading the
-id and status, manual commit, and what `**txn` unpacks to.
-
-To drive the lifecycle through the raw wrapper instead, `ml.rest.transactions`
-gives full control - create it, take the id from the `Location` header, thread
-it through each call, then commit or roll back:
-
-```python
->>> with MLClient() as ml:
-...     location = ml.rest.transactions.create().headers["Location"]
-...     txid = location.rsplit("/", 1)[-1]
-...     try:
-...         ml.documents.write(doc, txid=txid)
-...         ml.rest.transactions.post(txid, result="commit")
-...     except Exception:
-...         ml.rest.transactions.post(txid, result="rollback")
-...         raise
-```
 
 ## Parse a response
 

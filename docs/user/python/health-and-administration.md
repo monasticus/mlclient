@@ -22,9 +22,15 @@ The probe maps the response to a verdict:
 - `5xx` -\> `False` (server up but not ready)
 - `4xx` -\> raises [HTTPStatusError](https://www.python-httpx.org/exceptions/); a client error means the request was misdirected (for example, aimed at an authenticated server), not that the node is unhealthy
 
-By default, health checks use a configuration derived from the primary configuration, overriding the port to `7997`, authentication to none, retry to `NO_RETRY_STRATEGY` and timeout to `_HEALTH_TIMEOUT` (5 seconds) - the health probe uses `_HEALTH_TIMEOUT` regardless of the primary client's timeout. These defaults also apply when the primary already targets `7997`; an identical effective configuration reuses its session. Cloud connections retain their gateway port and Cloud authentication, while health requests still default to no retries. [healthcheck][mlclient.MLClient.healthcheck] accepts a keyword-only `timeout` to override the probe's default for a single call.
+By default, health checks use the client's host on port `7997`, without
+authentication or retries, and with a 5-second timeout. The timeout is the maximum
+wait for a response, not a delay before returning.
 
-Pass a resolved [HTTPConfig][mlclient.http.HTTPConfig] as `health_config` to supply the health connection explicitly. Its host, port, authentication and TLS settings are preserved. Retry and timeout resolve independently: when `retry` was omitted, health requests use `NO_RETRY_STRATEGY`, and when `timeout` was omitted they use `_HEALTH_TIMEOUT`; an explicitly supplied strategy or timeout is preserved, including `None` (which disables every HTTP timeout). `HTTPConfig.clone()` retains whether each was explicitly configured; `has_explicit_retry` and `has_explicit_timeout` expose that distinction without changing the normal defaults for other requests.
+Pass an [HTTPConfig][mlclient.http.HTTPConfig] as `health_config` to use a separate
+health connection. Its host, port, authentication and TLS settings are preserved.
+Retry and timeout default independently to no retries and 5 seconds; explicit
+values are preserved, including `timeout=None` to disable timeouts.
+
 
 ```python
 >>> from mlclient import MLClient
@@ -80,7 +86,6 @@ On [AsyncMLClient][mlclient.AsyncMLClient] the version is an awaitable method ra
 (12, 0, 1, None)
 ```
 
-Numeric components have no universal major/minor/patch/hotfix labels because MarkLogic's versioning scheme changed between releases. Textual suffixes are preserved by `str(version)` and excluded from `parts`. An invalid eval version raises `ValueError`.
 
 ## Wait for a restart
 

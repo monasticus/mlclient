@@ -54,6 +54,20 @@ The [documents guide](user/python/documents.md) covers XML, JSON, text, binary
 content and metadata. Use [transactions](user/python/transactions.md) to group
 related changes into one commit or rollback.
 
+## Search documents, URIs and values
+
+Search with `ml.search` and choose the result you need:
+
+```python
+with MLClient() as ml:
+    documents = ml.search.documents("coffee", pos=[1, 10])
+    uris = ml.search.uris("coffee", pos=[1, 10])
+```
+
+Use `ml.search(options="product-options").values("price", "coffee")` to read
+lexicon values from an installed options definition. The [search guide](user/python/search.md)
+shows query builders, options and reports.
+
 ## Use REST, Manage, Admin and raw HTTP
 
 The same client exposes MarkLogic's API tiers alongside higher-level services

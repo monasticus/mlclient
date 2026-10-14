@@ -2,7 +2,6 @@
 
 Start with a test database and credentials allowed to perform the operations
 shown. These recipes use stable document, client and XQuery APIs.
-Experimental jobs are not required.
 
 ## Replace a collection without rewriting content
 
@@ -101,15 +100,6 @@ print(names)
 caps evaluations in flight across all hosts at once; raise `max_in_flight` to
 allow more overlap, or lower it to spare a loaded cluster.
 
-## Put a custom application API behind one method
-
-If scripts repeatedly compose the same raw HTTP calls, give the operation a
-name. The [custom API guide](user/python/custom-api.md) builds
-`ml.rest.tasks.list()` for the raw response and `ml.tasks.open_titles()` for
-parsed Python on a shared connection, with sync and async versions. This keeps
-transport details out of application scripts while retaining access to the raw
-response when needed.
-
 ## Call a custom XQuery module
 
 Suppose your application keeps label normalization in a server-side library.
@@ -173,3 +163,12 @@ To inspect the generated query without a connection, call
 `label.normalize("coffee").compile()` and inspect its source and variable mapping.
 See the [XQuery API guide](user/python/xquery-api.md#custom-xquery-expressions)
 for composition and native result conventions.
+
+## Extend MLClient with custom APIs
+
+If scripts repeatedly compose the same raw HTTP calls, give the operation a
+name. The [custom API guide](user/python/custom-api.md) builds
+`ml.rest.tasks.list()` for the raw response and `ml.tasks.open_titles()` for
+parsed Python on a shared connection, with sync and async versions. This keeps
+transport details out of application scripts while retaining access to the raw
+response when needed.

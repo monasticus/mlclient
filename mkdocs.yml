@@ -93,8 +93,8 @@ nav:
           - Timeouts: user/python/timeouts.md
           - Retries: user/python/retries.md
           - Resource limits: user/python/limits.md
-      - Custom application APIs: user/python/custom-api.md
       - Health and administration: user/python/health-and-administration.md
+      - Custom application APIs: user/python/custom-api.md
   - CLI:
       - Overview: user/cli.md
       - env:

@@ -214,6 +214,20 @@ connections derive from and share the primary session.
 
 `connect()` and entering a context open only the primary HTTP session. Auxiliary sessions open on their first request, not when accessing an API property. `disconnect()` and context exit close every opened session. Cached API objects can be reused after reconnecting. Outside a connected client's lifecycle, requests use short-lived sessions.
 
+When startup and shutdown are managed separately, control the lifecycle explicitly.
+Inside an async function:
+
+```python
+from mlclient import AsyncMLClient
+
+ml = AsyncMLClient()
+await ml.connect()
+try:
+    result = await ml.eval.xquery("1 + 1")
+finally:
+    await ml.disconnect()
+```
+
 An auxiliary API reuses the primary session when its complete configuration matches, including injected configurations on custom ports. Matching includes host, connection mode, credentials, authentication, retry strategy, pool limits and timeout. Custom auth handlers and retry strategies must be the same object. Explicit limits and effective timeouts are compared by value, so independently constructed settings with equal components can share a session. Unset limits continue to defer to HTTPX defaults. Timeout and limits properties return copies. Change settings with `config.clone(timeout=..., limits=...)`; mutating a returned object does not change the configuration, its clones, presets or an already-open session.
 
 ### Manage or Admin on a different host or credentials

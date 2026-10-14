@@ -18,22 +18,9 @@ asyncio.run(main())
 ```
 
 Inside an existing event loop, await your function instead of calling
-`asyncio.run()` again.
-
-## Reuse one client for related operations
-
-Create one client outside the loop so repeated requests share its connection
-pool. Close it after the whole batch:
-
-```python
-async with AsyncMLClient() as ml:
-    for uri in ["/first.json", "/second.json"]:
-        document = await ml.documents.read(uri)
-        print(document.uri, document.content)
-```
-
-For a bulk read alone, use `await ml.documents.read(uris)`. Keep one client open
-across requests in a long-running application and close it at shutdown.
+`asyncio.run()` again. Reuse one client for related requests and close it at
+shutdown. When a context manager does not fit your application lifecycle, use
+`await ml.disconnect()` in a `finally` block; see [client lifecycle](connections.md#api-tiers-on-separate-connections).
 
 ## Run independent requests concurrently
 
@@ -50,7 +37,7 @@ async with AsyncMLClient() as ml:
 
 For more databases, bound concurrency as shown in the
 [concurrent eval recipe](../../recipes.md#evaluate-queries-across-databases-concurrently).
-For multiple documents in one database, use the bulk read shown above.
+For multiple documents in one database, use `await ml.documents.read(uris)`.
 [Pool limits](limits.md) control active connections, not how many tasks you create.
 
 ## Use an environment

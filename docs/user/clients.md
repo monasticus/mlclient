@@ -159,13 +159,10 @@ and so on - hand it to `ml.parser`:
 
 - [Documents](python/documents.md): content types, metadata, reading, writing and deletion.
 - [Evaluate code](python/eval.md): XQuery, JavaScript and external variables.
+- [Search](python/search.md): documents, URIs, lexicon values and reports.
 - [Transactions](python/transactions.md): commit or roll back related operations.
 - [Services](python/services.md): the parsed higher-level layer, and the off-facade logs and log-level services.
 - [Health, versions and administration](python/health-and-administration.md): inspect the server, versions and restart waits.
-
-Check server readiness with `ml.healthcheck()` and read the server version with
-`ml.version`. See [Health and administration](python/health-and-administration.md)
-in Advanced for configuration and administrative operations.
 
 ## Configure and extend
 

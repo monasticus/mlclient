@@ -1,4 +1,4 @@
-# Built with
+# Acknowledgements
 
 MLClient uses these open-source tools for its library, CLI and development
 workflow. Thanks to their maintainers and contributors.

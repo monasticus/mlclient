@@ -172,3 +172,46 @@ name. The [custom API guide](advanced/custom-api.md) builds
 parsed Python on a shared connection, with sync and async versions. This keeps
 transport details out of application scripts while retaining access to the raw
 response when needed.
+
+## Cache a MarkLogic document in FastAPI
+
+This application serves `/products/coffee.json` through `GET /product`. It keeps
+one async MarkLogic client open for the application's lifespan and caches the
+JSON response in memory for five seconds. A cache hit sends no request to
+MarkLogic. After the entry expires, the next request reads the current document.
+The lock makes concurrent misses share one refresh.
+
+Save this as `cache_app.py`:
+
+```python
+--8<-- "examples/fastapi_cache.py"
+```
+
+Create the source document on your development server:
+
+```python
+from mlclient import MLClient
+from mlclient.models import Document
+
+with MLClient() as ml:
+    ml.documents.write(Document.create("/products/coffee.json", {"name": "Coffee", "price": 12}))
+```
+
+Install the example's optional dependencies and run one worker:
+
+```sh
+pip install mlclient fastapi uvicorn
+uvicorn cache_app:app --port 8080
+curl http://localhost:8080/product
+```
+
+The first response has `cached: false`; another call within five seconds has
+`cached: true`. Edit the source document in MarkLogic and call again after the
+entry expires to see its updated content. The `AsyncMLClient` uses the standard
+local connection; adjust it for your development server.
+
+This example uses time-based invalidation, so it can return the previous value
+until expiry. It does not detect writes immediately. Each worker would have its
+own cache; use one worker for this example. Only successful reads are cached;
+a missing document returns 404. Use a disposable source document and delete it
+when finished.

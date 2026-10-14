@@ -36,9 +36,10 @@
   "user/cli/env/remove.md": "cli/env/remove.md",
   "user/cli/env/init.md": "cli/env/init.md",
   "about.md": "community/about.md",
-  "built-with.md": "community/built-with.md",
+  "built-with.md": "acknowledgements.md",
   "stability.md": "community/stability.md",
   "documentation.md": "community/documentation.md",
   "releasing.md": "community/releasing.md",
-  "contributing.md": "community/contributing.md"
+  "contributing.md": "community/contributing.md",
+  "community/built-with.md": "acknowledgements.md"
 }

@@ -118,11 +118,11 @@ nav:
   - API reference: reference/
   - Community:
       - Background: community/about.md
-      - Built with: community/built-with.md
       - Stability: community/stability.md
       - Contributing: community/contributing.md
       - Writing documentation: community/documentation.md
       - Release process: community/releasing.md
+  - Acknowledgements: acknowledgements.md
 
 extra:
   version:

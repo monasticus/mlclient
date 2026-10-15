@@ -18,7 +18,7 @@ Set TypingSpeed 50ms
 
 Hide
 Set TypingSpeed 1ms
-Type `unset NO_COLOR; export VISUAL="vi -u NONE -N -i NONE"; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; printf 'app-name: bookstore\nprotocol: http\nhost: dev.example.com\nusername: reader\npassword: demo-password\nauth: digest\napp-servers:\n  - id: app-services\n    port: 8000\n    rest: true\n' > .mlclient/mlclient-dev.yaml; clear`
+Type `unset NO_COLOR; export VISUAL="vi"; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; printf 'app-name: bookstore\nprotocol: http\nhost: dev.example.com\nusername: reader\npassword: demo-password\nauth: digest\napp-servers:\n  - id: app-services\n    port: 8000\n    rest: true\n' > .mlclient/mlclient-dev.yaml; clear`
 Enter
 Wait
 Sleep 500ms

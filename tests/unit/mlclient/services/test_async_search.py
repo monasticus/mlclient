@@ -58,7 +58,7 @@ async def test_documents_with_report_without_scope(case):
     route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(collection="cts-test").documents_with_report(
+        report, docs = await ml.search(collection="cts-test").documents_with_report(
             "" if case == "matches" else "missing-value",
             pos=[1, 2],
         )
@@ -109,7 +109,7 @@ async def test_documents_with_report_with_scope_kwargs(case):
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(collection="cts-test").documents_with_report(
+        report, docs = await ml.search(collection="cts-test").documents_with_report(
             "" if case == "matches" else "missing-value",
             pos=[1, 2],
             database="request-db",
@@ -160,7 +160,7 @@ async def test_documents_with_report_inherits_service_scope(case):
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(
+        report, docs = await ml.search(
             database="service-db",
             txid="service-tx",
             collection="cts-test",
@@ -213,7 +213,7 @@ async def test_documents_with_report_scope_kwargs_override_service_scope(case):
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(
+        report, docs = await ml.search(
             database="service-db",
             txid="service-tx",
             collection="cts-test",
@@ -267,7 +267,7 @@ async def test_documents_with_report_scope_kwargs_clear_service_database(case):
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(
+        report, docs = await ml.search(
             database="service-db",
             txid="service-tx",
             collection="cts-test",
@@ -320,7 +320,7 @@ async def test_documents_with_report_scope_kwargs_clear_service_transaction(case
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(
+        report, docs = await ml.search(
             database="service-db",
             txid="service-tx",
             collection="cts-test",
@@ -374,7 +374,7 @@ async def test_documents_with_report_operation_scope_overrides_service_scope(cas
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(
+        report, docs = await ml.search(
             database="service-db",
             txid="service-tx",
             collection="cts-test",
@@ -428,7 +428,7 @@ async def test_documents_with_report_scope_kwargs_override_operation_scope(case)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(
+        report, docs = await ml.search(
             database="service-db",
             txid="service-tx",
             collection="cts-test",
@@ -485,7 +485,7 @@ async def test_documents_with_report_with_transaction_scope_kwargs(case):
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(collection="cts-test").documents_with_report(
+        report, docs = await ml.search(collection="cts-test").documents_with_report(
             "" if case == "matches" else "missing-value",
             pos=[1, 2],
             **txn,
@@ -536,7 +536,7 @@ async def test_documents_with_report_transaction_scope_inherits_service_database
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        (report, docs) = await ml.search(
+        report, docs = await ml.search(
             database="service-db",
             collection="cts-test",
         ).documents_with_report(

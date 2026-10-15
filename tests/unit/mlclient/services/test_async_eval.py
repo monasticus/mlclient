@@ -1314,7 +1314,7 @@ async def test_execute_scope_kwargs_clear_service_transaction():
 @respx.mock
 async def test_expression_without_scope():
     expression = fn.string_length("coffee")
-    (code, variables) = expression.compile()
+    code, variables = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1333,7 +1333,7 @@ async def test_expression_without_scope():
 @respx.mock
 async def test_expression_with_scope_kwargs():
     expression = fn.string_length("coffee")
-    (code, variables) = expression.compile()
+    code, variables = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1358,7 +1358,7 @@ async def test_expression_with_scope_kwargs():
 @respx.mock
 async def test_expression_inherits_service_scope():
     expression = fn.string_length("coffee")
-    (code, variables) = expression.compile()
+    code, variables = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1381,7 +1381,7 @@ async def test_expression_inherits_service_scope():
 @respx.mock
 async def test_expression_scope_kwargs_override_service_scope():
     expression = fn.string_length("coffee")
-    (code, variables) = expression.compile()
+    code, variables = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1406,7 +1406,7 @@ async def test_expression_scope_kwargs_override_service_scope():
 @respx.mock
 async def test_expression_scope_kwargs_clear_service_database():
     expression = fn.string_length("coffee")
-    (code, variables) = expression.compile()
+    code, variables = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1429,7 +1429,7 @@ async def test_expression_scope_kwargs_clear_service_database():
 @respx.mock
 async def test_expression_scope_kwargs_clear_service_transaction():
     expression = fn.string_length("coffee")
-    (code, variables) = expression.compile()
+    code, variables = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")

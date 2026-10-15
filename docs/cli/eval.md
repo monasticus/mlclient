@@ -1,5 +1,7 @@
 # eval
 
+![Query evaluation demonstration](../assets/gifs/eval.gif)
+
 Run XQuery or server-side JavaScript and print the result.
 XML and JSON results are formatted with two-space indentation by default.
 An existing XML declaration is preserved verbatim; none is added when absent.

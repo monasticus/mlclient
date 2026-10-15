@@ -41,14 +41,6 @@ Type `ml log-level debug`
 Enter
 Wait
 Sleep 1200ms
-Hide
-Set TypingSpeed 1ms
-Type `clear`
-Enter
-Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
 Type `ml log-level config`
 Enter
 Wait
@@ -57,14 +49,6 @@ Type `ml log-level info`
 Enter
 Wait
 Sleep 1200ms
-Type `ml log-level notice`
-Enter
-Wait
-Sleep 1200ms
-Type `ml log-level warning`
-Enter
-Wait
-Sleep 1200ms
 Hide
 Set TypingSpeed 1ms
 Type `clear`
@@ -73,6 +57,14 @@ Wait
 Sleep 500ms
 Set TypingSpeed 50ms
 Show
+Type `ml log-level notice`
+Enter
+Wait
+Sleep 1200ms
+Type `ml log-level warning`
+Enter
+Wait
+Sleep 1200ms
 Type `ml log-level error`
 Enter
 Wait

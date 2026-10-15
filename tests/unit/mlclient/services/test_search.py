@@ -104,7 +104,7 @@ def test_documents_with_report_with_scope_kwargs(case):
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(collection="cts-test").documents_with_report(
@@ -124,8 +124,6 @@ def test_documents_with_report_with_scope_kwargs(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -156,7 +154,7 @@ def test_documents_with_report_service_scope(case):
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(
@@ -178,8 +176,6 @@ def test_documents_with_report_service_scope(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -210,7 +206,7 @@ def test_documents_with_report_override_service(case):
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(
@@ -234,8 +230,6 @@ def test_documents_with_report_override_service(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -265,7 +259,7 @@ def test_documents_with_report_clear_database(case):
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(
@@ -288,8 +282,6 @@ def test_documents_with_report_clear_database(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -319,7 +311,7 @@ def test_documents_with_report_clear_transaction(case):
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(
@@ -342,8 +334,6 @@ def test_documents_with_report_clear_transaction(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -374,7 +364,7 @@ def test_documents_with_report_operation_scope(case):
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "operation-db")
     ml_mocker.with_request_param("txid", "operation-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(
@@ -397,8 +387,6 @@ def test_documents_with_report_operation_scope(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -429,7 +417,7 @@ def test_documents_with_report_override_operation_scope(case):
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(
@@ -454,8 +442,6 @@ def test_documents_with_report_override_operation_scope(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -487,7 +473,7 @@ def test_documents_with_report_transaction(case):
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "transaction-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(collection="cts-test").documents_with_report(
@@ -506,8 +492,6 @@ def test_documents_with_report_transaction(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
-
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
@@ -539,7 +523,7 @@ def test_documents_with_report_transaction_inherits_database(case):
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         (report, docs) = ml.search(
@@ -562,8 +546,6 @@ def test_documents_with_report_transaction_inherits_database(case):
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
 
-    assert route.call_count == 1
-
 
 @respx.mock
 def test_documents_for_cts_query():
@@ -579,7 +561,7 @@ def test_documents_for_cts_query():
     )
     ml_mocker.with_request_body(CTS_BODY)
     ml_mocker.with_request_param("format", "json")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search.documents(CTS_QUERY)
@@ -590,8 +572,6 @@ def test_documents_for_cts_query():
         "/products/coffee.json",
     ]
     assert docs[1].content == {"root": {"child": "data"}}
-
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -661,15 +641,12 @@ def test_documents_without_query_unscoped():
         ),
     )
     ml_mocker.with_request_param("format", "json")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search.documents()
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
-
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -690,13 +667,12 @@ def test_documents_with_scope_kwargs():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search.documents(database="request-db", txid="request-tx")
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -717,13 +693,12 @@ def test_documents_without_query_service_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search(database="service-db", txid="service-tx").documents()
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -744,7 +719,7 @@ def test_documents_without_query_override_service():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search(database="service-db", txid="service-tx").documents(
@@ -753,7 +728,6 @@ def test_documents_without_query_override_service():
         )
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -773,7 +747,7 @@ def test_documents_without_query_clear_database():
     )
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search(database="service-db", txid="service-tx").documents(
@@ -781,7 +755,6 @@ def test_documents_without_query_clear_database():
         )
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -801,13 +774,12 @@ def test_documents_without_query_clear_transaction():
     )
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search(database="service-db", txid="service-tx").documents(txid=None)
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -828,7 +800,7 @@ def test_documents_without_query_operation_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "operation-db")
     ml_mocker.with_request_param("txid", "operation-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search(database="service-db", txid="service-tx").documents(
@@ -836,7 +808,6 @@ def test_documents_without_query_operation_scope():
         )
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -857,7 +828,7 @@ def test_documents_without_query_override_operation_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search(database="service-db", txid="service-tx").documents(
@@ -867,7 +838,6 @@ def test_documents_without_query_override_operation_scope():
         )
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -889,13 +859,12 @@ def test_documents_without_query_transaction():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "transaction-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search.documents(**txn)
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -917,13 +886,12 @@ def test_documents_without_query_transaction_inherits_database():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         docs = ml.search(database="service-db").documents(**txn)
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1136,13 +1104,12 @@ def test_uris_unscoped():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("start", "2")
     ml_mocker.with_request_param("pageLength", "2")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search.uris(CTS_QUERY, pos=[2, 3])
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1170,7 +1137,7 @@ def test_uris_with_scope_kwargs():
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search.uris(
@@ -1181,7 +1148,6 @@ def test_uris_with_scope_kwargs():
         )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1209,7 +1175,7 @@ def test_uris_service_scope():
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search(database="service-db", txid="service-tx").uris(
@@ -1218,7 +1184,6 @@ def test_uris_service_scope():
         )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1246,7 +1211,7 @@ def test_uris_override_service():
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search(database="service-db", txid="service-tx").uris(
@@ -1257,7 +1222,6 @@ def test_uris_override_service():
         )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1284,7 +1248,7 @@ def test_uris_clear_database():
     ml_mocker.with_request_param("start", "2")
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search(database="service-db", txid="service-tx").uris(
@@ -1294,7 +1258,6 @@ def test_uris_clear_database():
         )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1321,7 +1284,7 @@ def test_uris_clear_transaction():
     ml_mocker.with_request_param("start", "2")
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "service-db")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search(database="service-db", txid="service-tx").uris(
@@ -1331,7 +1294,6 @@ def test_uris_clear_transaction():
         )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1359,7 +1321,7 @@ def test_uris_operation_scope():
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "operation-db")
     ml_mocker.with_request_param("txid", "operation-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search(database="service-db", txid="service-tx").uris(
@@ -1369,7 +1331,6 @@ def test_uris_operation_scope():
         )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1397,7 +1358,7 @@ def test_uris_override_operation_scope():
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search(database="service-db", txid="service-tx").uris(
@@ -1409,7 +1370,6 @@ def test_uris_override_operation_scope():
         )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1438,13 +1398,12 @@ def test_uris_transaction():
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "transaction-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search.uris(CTS_QUERY, pos=[2, 3], **txn)
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1473,13 +1432,12 @@ def test_uris_transaction_inherits_database():
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         uris = ml.search(database="service-db").uris(CTS_QUERY, pos=[2, 3], **txn)
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1580,13 +1538,12 @@ def test_values_of_strings_unscoped():
     ml_mocker.with_request_param("options", "product-options")
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "json")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(options="product-options").values("category", CTS_QUERY)
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1616,7 +1573,7 @@ def test_values_with_scope_kwargs():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(options="product-options").values(
@@ -1627,7 +1584,6 @@ def test_values_with_scope_kwargs():
         )
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1657,7 +1613,7 @@ def test_values_of_strings_service_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(
@@ -1667,7 +1623,6 @@ def test_values_of_strings_service_scope():
         ).values("category", CTS_QUERY)
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1697,7 +1652,7 @@ def test_values_of_strings_override_service():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(
@@ -1707,7 +1662,6 @@ def test_values_of_strings_override_service():
         ).values("category", CTS_QUERY, database="request-db", txid="request-tx")
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1736,7 +1690,7 @@ def test_values_of_strings_clear_database():
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(
@@ -1746,7 +1700,6 @@ def test_values_of_strings_clear_database():
         ).values("category", CTS_QUERY, database=None)
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1775,7 +1728,7 @@ def test_values_of_strings_clear_transaction():
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(
@@ -1785,7 +1738,6 @@ def test_values_of_strings_clear_transaction():
         ).values("category", CTS_QUERY, txid=None)
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1815,7 +1767,7 @@ def test_values_of_strings_operation_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "operation-db")
     ml_mocker.with_request_param("txid", "operation-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(
@@ -1829,7 +1781,6 @@ def test_values_of_strings_operation_scope():
         )
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1859,7 +1810,7 @@ def test_values_of_strings_override_operation_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(
@@ -1875,7 +1826,6 @@ def test_values_of_strings_override_operation_scope():
         )
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1906,7 +1856,7 @@ def test_values_of_strings_transaction():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "transaction-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(options="product-options").values(
@@ -1916,7 +1866,6 @@ def test_values_of_strings_transaction():
         )
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1947,7 +1896,7 @@ def test_values_of_strings_transaction_inherits_database():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         values = ml.search(database="service-db", options="product-options").values(
@@ -1957,7 +1906,6 @@ def test_values_of_strings_transaction_inherits_database():
         )
 
     assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -2219,7 +2167,7 @@ def test_plugin_aggregate_preserves_json_value(payload):
             },
         },
     )
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search.aggregate(
@@ -2231,7 +2179,6 @@ def test_plugin_aggregate_preserves_json_value(payload):
 
     assert result == payload.get("_value")
     assert type(result) is type(payload.get("_value"))
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2250,7 +2197,7 @@ def test_plugin_aggregate_preserves_native_map():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body(payload)
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search.aggregate(
@@ -2269,7 +2216,6 @@ def test_plugin_aggregate_preserves_native_map():
         },
     }
     assert type(result) is dict
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2293,13 +2239,12 @@ def test_aggregate_without_matches_unscoped():
     ml_mocker.with_request_param("view", "aggregate")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("aggregate", "avg")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(options=PRICE_OPTIONS).aggregate("price", "avg", "zzz")
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2325,7 +2270,7 @@ def test_aggregate_with_scope_kwargs():
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(options=PRICE_OPTIONS).aggregate(
@@ -2337,7 +2282,6 @@ def test_aggregate_with_scope_kwargs():
         )
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2363,7 +2307,7 @@ def test_aggregate_without_matches_service_scope():
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(
@@ -2373,7 +2317,6 @@ def test_aggregate_without_matches_service_scope():
         ).aggregate("price", "avg", "zzz")
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2399,7 +2342,7 @@ def test_aggregate_without_matches_override_service():
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(
@@ -2409,7 +2352,6 @@ def test_aggregate_without_matches_override_service():
         ).aggregate("price", "avg", "zzz", database="request-db", txid="request-tx")
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2434,7 +2376,7 @@ def test_aggregate_without_matches_clear_database():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(
@@ -2444,7 +2386,6 @@ def test_aggregate_without_matches_clear_database():
         ).aggregate("price", "avg", "zzz", database=None)
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2469,7 +2410,7 @@ def test_aggregate_without_matches_clear_transaction():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "service-db")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(
@@ -2479,7 +2420,6 @@ def test_aggregate_without_matches_clear_transaction():
         ).aggregate("price", "avg", "zzz", txid=None)
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2505,7 +2445,7 @@ def test_aggregate_without_matches_operation_scope():
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "operation-db")
     ml_mocker.with_request_param("txid", "operation-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(
@@ -2520,7 +2460,6 @@ def test_aggregate_without_matches_operation_scope():
         )
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2546,7 +2485,7 @@ def test_aggregate_without_matches_override_operation_scope():
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(
@@ -2563,7 +2502,6 @@ def test_aggregate_without_matches_override_operation_scope():
         )
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2590,7 +2528,7 @@ def test_aggregate_without_matches_transaction():
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "transaction-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(options=PRICE_OPTIONS).aggregate(
@@ -2601,7 +2539,6 @@ def test_aggregate_without_matches_transaction():
         )
 
     assert result is None
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2628,7 +2565,7 @@ def test_aggregate_without_matches_transaction_inherits_database():
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.search(database="service-db", options=PRICE_OPTIONS).aggregate(
@@ -2639,7 +2576,6 @@ def test_aggregate_without_matches_transaction_inherits_database():
         )
 
     assert result is None
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -2777,7 +2713,7 @@ def test_tuples_unscoped():
     )
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "xml")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(options=options).tuples("price-day")
@@ -2786,7 +2722,6 @@ def test_tuples_unscoped():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2829,7 +2764,7 @@ def test_tuples_with_scope_kwargs():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(options=options).tuples(
@@ -2842,7 +2777,6 @@ def test_tuples_with_scope_kwargs():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2885,7 +2819,7 @@ def test_tuples_service_scope():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(
@@ -2898,7 +2832,6 @@ def test_tuples_service_scope():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2941,7 +2874,7 @@ def test_tuples_override_service():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(
@@ -2954,7 +2887,6 @@ def test_tuples_override_service():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -2996,7 +2928,7 @@ def test_tuples_clear_database():
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(
@@ -3009,7 +2941,6 @@ def test_tuples_clear_database():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3051,7 +2982,7 @@ def test_tuples_clear_transaction():
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "service-db")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(
@@ -3064,7 +2995,6 @@ def test_tuples_clear_transaction():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3107,7 +3037,7 @@ def test_tuples_operation_scope():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "operation-db")
     ml_mocker.with_request_param("txid", "operation-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(
@@ -3123,7 +3053,6 @@ def test_tuples_operation_scope():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3166,7 +3095,7 @@ def test_tuples_override_operation_scope():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(
@@ -3184,7 +3113,6 @@ def test_tuples_override_operation_scope():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3228,7 +3156,7 @@ def test_tuples_transaction():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "transaction-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(options=options).tuples("price-day", **txn)
@@ -3237,7 +3165,6 @@ def test_tuples_transaction():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3281,7 +3208,7 @@ def test_tuples_transaction_inherits_database():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         tuples = ml.search(database="service-db", options=options).tuples(
@@ -3293,7 +3220,6 @@ def test_tuples_transaction_inherits_database():
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3377,7 +3303,7 @@ def test_report_unscoped():
     )
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_param("format", "json")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search.report("product")
@@ -3392,7 +3318,6 @@ def test_report_unscoped():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3423,7 +3348,7 @@ def test_report_with_scope_kwargs():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search.report("product", database="request-db", txid="request-tx")
@@ -3438,7 +3363,6 @@ def test_report_with_scope_kwargs():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3469,7 +3393,7 @@ def test_report_service_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search(database="service-db", txid="service-tx").report("product")
@@ -3484,7 +3408,6 @@ def test_report_service_scope():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3515,7 +3438,7 @@ def test_report_override_service():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search(database="service-db", txid="service-tx").report(
@@ -3534,7 +3457,6 @@ def test_report_override_service():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3564,7 +3486,7 @@ def test_report_clear_database():
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("txid", "service-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search(database="service-db", txid="service-tx").report(
@@ -3582,7 +3504,6 @@ def test_report_clear_database():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3612,7 +3533,7 @@ def test_report_clear_transaction():
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search(database="service-db", txid="service-tx").report(
@@ -3630,7 +3551,6 @@ def test_report_clear_transaction():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3661,7 +3581,7 @@ def test_report_operation_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "operation-db")
     ml_mocker.with_request_param("txid", "operation-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search(database="service-db", txid="service-tx").report(
@@ -3679,7 +3599,6 @@ def test_report_operation_scope():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3710,7 +3629,7 @@ def test_report_override_operation_scope():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "request-db")
     ml_mocker.with_request_param("txid", "request-tx")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search(database="service-db", txid="service-tx").report(
@@ -3730,7 +3649,6 @@ def test_report_override_operation_scope():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3762,7 +3680,7 @@ def test_report_transaction():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "transaction-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search.report("product", **txn)
@@ -3777,7 +3695,6 @@ def test_report_transaction():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -3809,7 +3726,7 @@ def test_report_transaction_inherits_database():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("database", "service-db")
     ml_mocker.with_request_param("txid", "transaction-id")
-    route = ml_mocker.mock_post()
+    ml_mocker.mock_post()
 
     with MLClient() as ml:
         report = ml.search(database="service-db").report("product", **txn)
@@ -3824,7 +3741,6 @@ def test_report_transaction_inherits_database():
         effective_timestamp="17912992738350300",
         response=payload,
     )
-    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(

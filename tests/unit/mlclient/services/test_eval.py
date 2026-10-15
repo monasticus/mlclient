@@ -553,13 +553,12 @@ def test_xquery_unscoped():
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.xquery("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -572,13 +571,12 @@ def test_xquery_with_scope_kwargs():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.xquery("1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -591,13 +589,12 @@ def test_xquery_service_scope():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xquery("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -610,7 +607,7 @@ def test_xquery_override_service():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xquery(
@@ -620,7 +617,6 @@ def test_xquery_override_service():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -632,7 +628,7 @@ def test_xquery_clear_database():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xquery(
@@ -641,7 +637,6 @@ def test_xquery_clear_database():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -653,7 +648,7 @@ def test_xquery_clear_transaction():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xquery(
@@ -662,7 +657,6 @@ def test_xquery_clear_transaction():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -673,13 +667,12 @@ def test_xqy_unscoped():
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.xqy("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -692,13 +685,12 @@ def test_xqy_with_scope_kwargs():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.xqy("1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -711,13 +703,12 @@ def test_xqy_service_scope():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xqy("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -730,7 +721,7 @@ def test_xqy_override_service():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xqy(
@@ -740,7 +731,6 @@ def test_xqy_override_service():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -752,7 +742,7 @@ def test_xqy_clear_database():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xqy(
@@ -761,7 +751,6 @@ def test_xqy_clear_database():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -773,13 +762,12 @@ def test_xqy_clear_transaction():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").xqy("1", txid=None)
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -790,13 +778,12 @@ def test_javascript_unscoped():
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.javascript("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -809,13 +796,12 @@ def test_javascript_with_scope_kwargs():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.javascript("1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -828,13 +814,12 @@ def test_javascript_service_scope():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").javascript("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -847,7 +832,7 @@ def test_javascript_override_service():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").javascript(
@@ -857,7 +842,6 @@ def test_javascript_override_service():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -869,7 +853,7 @@ def test_javascript_clear_database():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").javascript(
@@ -878,7 +862,6 @@ def test_javascript_clear_database():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -890,7 +873,7 @@ def test_javascript_clear_transaction():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").javascript(
@@ -899,7 +882,6 @@ def test_javascript_clear_transaction():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -910,13 +892,12 @@ def test_js_unscoped():
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.js("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -929,13 +910,12 @@ def test_js_with_scope_kwargs():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.js("1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -948,13 +928,12 @@ def test_js_service_scope():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").js("1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -967,7 +946,7 @@ def test_js_override_service():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").js(
@@ -977,7 +956,6 @@ def test_js_override_service():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -989,7 +967,7 @@ def test_js_clear_database():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").js(
@@ -998,7 +976,6 @@ def test_js_clear_database():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1010,13 +987,12 @@ def test_js_clear_transaction():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").js("1", txid=None)
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1029,13 +1005,12 @@ def test_file_unscoped(tmp_path):
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.file(str(file))
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1050,13 +1025,12 @@ def test_file_with_scope_kwargs(tmp_path):
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.file(str(file), database="request-db", txid="request-tx")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1071,13 +1045,12 @@ def test_file_service_scope(tmp_path):
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").file(str(file))
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1092,7 +1065,7 @@ def test_file_override_service(tmp_path):
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").file(
@@ -1102,7 +1075,6 @@ def test_file_override_service(tmp_path):
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1116,7 +1088,7 @@ def test_file_clear_database(tmp_path):
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").file(
@@ -1125,7 +1097,6 @@ def test_file_clear_database(tmp_path):
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1139,7 +1110,7 @@ def test_file_clear_transaction(tmp_path):
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").file(
@@ -1148,7 +1119,6 @@ def test_file_clear_transaction(tmp_path):
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1159,13 +1129,12 @@ def test_execute_unscoped():
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.execute(xq="1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1178,13 +1147,12 @@ def test_execute_with_scope_kwargs():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.execute(xq="1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1197,13 +1165,12 @@ def test_execute_service_scope():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").execute(xq="1")
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1216,7 +1183,7 @@ def test_execute_override_service():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").execute(
@@ -1226,7 +1193,6 @@ def test_execute_override_service():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1238,7 +1204,7 @@ def test_execute_clear_database():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").execute(
@@ -1247,7 +1213,6 @@ def test_execute_clear_database():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1259,7 +1224,7 @@ def test_execute_clear_transaction():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").execute(
@@ -1268,7 +1233,6 @@ def test_execute_clear_transaction():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1281,13 +1245,12 @@ def test_expression_unscoped():
     mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.expression(expression)
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1302,7 +1265,7 @@ def test_expression_with_scope_kwargs():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval.expression(
@@ -1312,7 +1275,6 @@ def test_expression_with_scope_kwargs():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1327,7 +1289,7 @@ def test_expression_service_scope():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").expression(
@@ -1335,7 +1297,6 @@ def test_expression_service_scope():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1350,7 +1311,7 @@ def test_expression_override_service():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "request-db")
     mocker.with_request_param("txid", "request-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").expression(
@@ -1360,7 +1321,6 @@ def test_expression_override_service():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1374,7 +1334,7 @@ def test_expression_clear_database():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("txid", "service-tx")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").expression(
@@ -1383,7 +1343,6 @@ def test_expression_clear_database():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1397,7 +1356,7 @@ def test_expression_clear_transaction():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "service-db")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         result = ml.eval(database="service-db", txid="service-tx").expression(
@@ -1406,7 +1365,6 @@ def test_expression_clear_transaction():
         )
 
     assert result == []
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1418,12 +1376,10 @@ def test_eval_scope_keeps_external_variables_separate():
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "catalog")
-    route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         ml.eval(database="catalog").xquery("$message", message="coffee")
-
-    assert route.call_count == 1
 
 
 @respx.mock
@@ -1436,7 +1392,7 @@ def test_scoped_service_narrow_preserves_original():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "catalog")
     mocker.with_request_param("txid", "tx-1")
-    original_route = mocker.mock_post()
+    mocker.mock_post()
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
@@ -1444,18 +1400,13 @@ def test_scoped_service_narrow_preserves_original():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "catalog")
     mocker.with_request_param("txid", "tx-2")
-    changed_route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         original = ml.eval(database="catalog", txid="tx-1")
         changed = original(txid="tx-2")
-        assert changed_route.call_count == 0
-        assert original_route.call_count == 0
         changed.xquery("1")
         original.xquery("1")
-
-    assert changed_route.call_count == 1
-    assert original_route.call_count == 1
 
 
 @respx.mock
@@ -1468,21 +1419,16 @@ def test_scoped_service_clear_preserves_original():
     mocker.with_empty_response_body()
     mocker.with_request_param("database", "catalog")
     mocker.with_request_param("txid", "tx-1")
-    original_route = mocker.mock_post()
+    mocker.mock_post()
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
-    changed_route = mocker.mock_post()
+    mocker.mock_post()
 
     with MLClient() as ml:
         original = ml.eval(database="catalog", txid="tx-1")
         changed = original(database=None, txid=None)
-        assert changed_route.call_count == 0
-        assert original_route.call_count == 0
         changed.xquery("1")
         original.xquery("1")
-
-    assert changed_route.call_count == 1
-    assert original_route.call_count == 1

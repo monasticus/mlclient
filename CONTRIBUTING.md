@@ -39,7 +39,8 @@ documentation and lint run independently when selected. Coverage and integration
 follow successful unit tests; integration-only changes can run with unit tests
 skipped. Unit and integration resources select their respective suites, while
 shared test utilities select both. Coverage comments run on PRs, and coverage
-badge updates run on `main`. Release tags use the separate release workflow.
+badge updates open a README pull request after successful checks on `main`.
+Release tags use the separate release workflow.
 
 ```sh
 poetry env use python3.11
@@ -80,6 +81,8 @@ Export a public symbol from one canonical namespace using `__all__`. Main
 clients and the manager belong to `mlclient`; transport clients to
 `mlclient.clients`; settings to `mlclient.http`, `mlclient.auth`,
 `mlclient.connection`, or `mlclient.env`; domain models to `mlclient.models`.
+Structured query builders belong to `mlclient.search`, composable XQuery
+expressions to `mlclient.xquery`, and service scopes to `mlclient.services`.
 The API reference reads these exports, so update the import contract tests and
 examples whenever the public surface changes. Internal helpers use `_` names
 and retain docstrings explaining their parameters, behavior, and exceptions.
@@ -138,6 +141,9 @@ also test distinct requirements that happen to share a line.
 ```sh
 # During development, select the affected module or test.
 poetry run pytest tests/unit/mlclient/cli/commands/test_log_level_command.py -q
+
+# Before committing, format and review the resulting diff.
+make format
 
 # Before submitting a code change.
 poetry run pytest tests/unit --cov=mlclient --cov-report=term-missing
@@ -300,8 +306,8 @@ explanation. CI currently tests Python 3.10–3.14; this does not establish supp
 for every Python or MarkLogic version.
 
 Releases are maintainer work. Version preparation opens a PR; tagging happens
-only after it is squash-merged into `main`. Numeric tags trigger reusable test,
-coverage and lint gates, artifact checks, OIDC PyPI publication and release notes.
+only after it is squash-merged into `main`. Numeric tags trigger reusable test and lint gates, artifact checks, OIDC PyPI
+publication and release notes.
 See the
 [release process](https://github.com/monasticus/mlclient/blob/main/docs/community/releasing.md)
 for the commands, publication checks and recovery procedures.

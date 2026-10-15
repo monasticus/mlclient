@@ -29,8 +29,7 @@ working examples rather than requiring every application to use every layer.
 
 Broader REST endpoint coverage is a direction, not a claim of completeness today.
 The CLI may also grow project-management workflows as another option alongside
-tools such as [ml-gradle](https://github.com/marklogic/ml-gradle). It does not
-currently replace ml-gradle's deployment functionality.
+tools such as [ml-gradle](https://github.com/marklogic/ml-gradle).
 
 More useful tools and approaches can make MarkLogic easier to adopt; users
 should be able to choose the workflow that fits their application.

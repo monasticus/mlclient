@@ -1450,7 +1450,7 @@ async def test_expression_scope_kwargs_clear_service_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_narrowing_service_scope_preserves_original_scope():
+async def test_overriding_scope_on_service_copy_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1470,15 +1470,15 @@ async def test_narrowing_service_scope_preserves_original_scope():
     mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        original = ml.eval(database="catalog", txid="tx-1")
-        changed = original(txid="tx-2")
-        await changed.xquery("1")
-        await original.xquery("1")
+        original_service = ml.eval(database="catalog", txid="tx-1")
+        overridden_scope_service = original_service(txid="tx-2")
+        await overridden_scope_service.xquery("1")
+        await original_service.xquery("1")
 
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_clearing_service_scope_preserves_original_scope():
+async def test_clearing_scope_on_service_copy_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1496,7 +1496,7 @@ async def test_clearing_service_scope_preserves_original_scope():
     mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        original = ml.eval(database="catalog", txid="tx-1")
-        changed = original(database=None, txid=None)
-        await changed.xquery("1")
-        await original.xquery("1")
+        original_service = ml.eval(database="catalog", txid="tx-1")
+        cleared_scope_service = original_service(database=None, txid=None)
+        await cleared_scope_service.xquery("1")
+        await original_service.xquery("1")

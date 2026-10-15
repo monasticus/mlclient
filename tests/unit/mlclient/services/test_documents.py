@@ -2447,7 +2447,7 @@ def test_delete_scope_kwargs_clear_service_transaction():
 
 
 @respx.mock
-def test_narrowing_service_scope_preserves_original_scope():
+def test_overriding_scope_on_service_copy_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2465,14 +2465,14 @@ def test_narrowing_service_scope_preserves_original_scope():
     mocker.mock_delete()
 
     with MLClient() as ml:
-        original = ml.documents(database="catalog", txid="tx-1")
-        changed = original(txid="tx-2")
-        changed.delete("/some/dir/doc1.xml")
-        original.delete("/some/dir/doc1.xml")
+        original_service = ml.documents(database="catalog", txid="tx-1")
+        overridden_scope_service = original_service(txid="tx-2")
+        overridden_scope_service.delete("/some/dir/doc1.xml")
+        original_service.delete("/some/dir/doc1.xml")
 
 
 @respx.mock
-def test_clearing_service_scope_preserves_original_scope():
+def test_clearing_scope_on_service_copy_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2488,7 +2488,7 @@ def test_clearing_service_scope_preserves_original_scope():
     mocker.mock_delete()
 
     with MLClient() as ml:
-        original = ml.documents(database="catalog", txid="tx-1")
-        changed = original(database=None, txid=None)
-        changed.delete("/some/dir/doc1.xml")
-        original.delete("/some/dir/doc1.xml")
+        original_service = ml.documents(database="catalog", txid="tx-1")
+        cleared_scope_service = original_service(database=None, txid=None)
+        cleared_scope_service.delete("/some/dir/doc1.xml")
+        original_service.delete("/some/dir/doc1.xml")

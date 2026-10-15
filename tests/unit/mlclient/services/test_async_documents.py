@@ -36,7 +36,10 @@ DOC_BODY_PARTS = [
 
 ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 
-ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
+ml_mocker = MLRespXMocker(
+    router_base_url="http://localhost:8000/v1/documents",
+    strict_params=False,
+)
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
 ml_mocker.with_delete_side_effect(

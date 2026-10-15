@@ -569,7 +569,7 @@ async def test_expression_rejects_output_type(svc):
 @pytest.mark.asyncio
 @respx.mock
 async def test_xquery_unscoped():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
@@ -581,69 +581,60 @@ async def test_xquery_unscoped():
         result = await ml.eval.xquery("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xquery_keywords():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval.xquery("1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xquery_service_scope():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval(database="service-db", txid="service-tx").xquery("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "service-db",
-        "txid": "service-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xquery_override_service():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -654,23 +645,19 @@ async def test_xquery_override_service():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xquery_clear_database():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -680,20 +667,19 @@ async def test_xquery_clear_database():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xquery_clear_transaction():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -703,14 +689,13 @@ async def test_xquery_clear_transaction():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xqy_unscoped():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
@@ -722,69 +707,60 @@ async def test_xqy_unscoped():
         result = await ml.eval.xqy("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xqy_keywords():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval.xqy("1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xqy_service_scope():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval(database="service-db", txid="service-tx").xqy("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "service-db",
-        "txid": "service-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xqy_override_service():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -795,23 +771,19 @@ async def test_xqy_override_service():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xqy_clear_database():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -821,20 +793,19 @@ async def test_xqy_clear_database():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_xqy_clear_transaction():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -844,14 +815,13 @@ async def test_xqy_clear_transaction():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_javascript_unscoped():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
@@ -863,21 +833,20 @@ async def test_javascript_unscoped():
         result = await ml.eval.javascript("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_javascript_keywords():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -888,48 +857,40 @@ async def test_javascript_keywords():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_javascript_service_scope():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval(database="service-db", txid="service-tx").javascript("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "service-db",
-        "txid": "service-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_javascript_override_service():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -940,23 +901,19 @@ async def test_javascript_override_service():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_javascript_clear_database():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -966,20 +923,19 @@ async def test_javascript_clear_database():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_javascript_clear_transaction():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -989,14 +945,13 @@ async def test_javascript_clear_transaction():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_js_unscoped():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
@@ -1008,69 +963,60 @@ async def test_js_unscoped():
         result = await ml.eval.js("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_js_keywords():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval.js("1", database="request-db", txid="request-tx")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_js_service_scope():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval(database="service-db", txid="service-tx").js("1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "service-db",
-        "txid": "service-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_js_override_service():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1081,23 +1027,19 @@ async def test_js_override_service():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_js_clear_database():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1107,20 +1049,19 @@ async def test_js_clear_database():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_js_clear_transaction():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"javascript": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1130,7 +1071,6 @@ async def test_js_clear_transaction():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
     assert route.call_count == 1
 
 
@@ -1139,7 +1079,7 @@ async def test_js_clear_transaction():
 async def test_file_unscoped(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
@@ -1151,7 +1091,6 @@ async def test_file_unscoped(tmp_path):
         result = await ml.eval.file(str(file))
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
@@ -1160,14 +1099,14 @@ async def test_file_unscoped(tmp_path):
 async def test_file_keywords(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1178,10 +1117,6 @@ async def test_file_keywords(tmp_path):
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
@@ -1190,24 +1125,20 @@ async def test_file_keywords(tmp_path):
 async def test_file_service_scope(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval(database="service-db", txid="service-tx").file(str(file))
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "service-db",
-        "txid": "service-tx",
-    }
     assert route.call_count == 1
 
 
@@ -1216,14 +1147,14 @@ async def test_file_service_scope(tmp_path):
 async def test_file_override_service(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1234,10 +1165,6 @@ async def test_file_override_service(tmp_path):
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
@@ -1246,13 +1173,13 @@ async def test_file_override_service(tmp_path):
 async def test_file_clear_database(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1262,7 +1189,6 @@ async def test_file_clear_database(tmp_path):
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
     assert route.call_count == 1
 
 
@@ -1271,13 +1197,13 @@ async def test_file_clear_database(tmp_path):
 async def test_file_clear_transaction(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1287,14 +1213,13 @@ async def test_file_clear_transaction(tmp_path):
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_execute_unscoped():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
@@ -1306,21 +1231,20 @@ async def test_execute_unscoped():
         result = await ml.eval.execute(xq="1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_execute_keywords():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1331,48 +1255,40 @@ async def test_execute_keywords():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_execute_service_scope():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         result = await ml.eval(database="service-db", txid="service-tx").execute(xq="1")
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "service-db",
-        "txid": "service-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_execute_override_service():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1383,23 +1299,19 @@ async def test_execute_override_service():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_execute_clear_database():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1409,20 +1321,19 @@ async def test_execute_clear_database():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_execute_clear_transaction():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1432,7 +1343,6 @@ async def test_execute_clear_transaction():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
     assert route.call_count == 1
 
 
@@ -1441,7 +1351,7 @@ async def test_execute_clear_transaction():
 async def test_expression_unscoped():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
@@ -1453,7 +1363,6 @@ async def test_expression_unscoped():
         result = await ml.eval.expression(expression)
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
@@ -1462,14 +1371,14 @@ async def test_expression_unscoped():
 async def test_expression_keywords():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1480,10 +1389,6 @@ async def test_expression_keywords():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
@@ -1492,14 +1397,14 @@ async def test_expression_keywords():
 async def test_expression_service_scope():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1508,10 +1413,6 @@ async def test_expression_service_scope():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "service-db",
-        "txid": "service-tx",
-    }
     assert route.call_count == 1
 
 
@@ -1520,14 +1421,14 @@ async def test_expression_service_scope():
 async def test_expression_override_service():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "request-db")
-    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1538,10 +1439,6 @@ async def test_expression_override_service():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {
-        "database": "request-db",
-        "txid": "request-tx",
-    }
     assert route.call_count == 1
 
 
@@ -1550,13 +1447,13 @@ async def test_expression_override_service():
 async def test_expression_clear_database():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("txid", "service-tx")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1566,7 +1463,6 @@ async def test_expression_clear_database():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
     assert route.call_count == 1
 
 
@@ -1575,13 +1471,13 @@ async def test_expression_clear_database():
 async def test_expression_clear_transaction():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "service-db")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
     route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1591,29 +1487,28 @@ async def test_expression_clear_transaction():
         )
 
     assert result == []
-    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_scoped_service_narrow_preserves_original():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
     mocker.with_request_param("database", "catalog")
     mocker.with_request_param("txid", "tx-1")
-    mocker.with_response_code(200)
-    mocker.with_empty_response_body()
     original_route = mocker.mock_post()
     mocker.with_url("http://localhost:8000/v1/eval")
-    mocker.with_request_param("database", "catalog")
-    mocker.with_request_param("txid", "tx-2")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-2")
     changed_route = mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -1624,14 +1519,6 @@ async def test_scoped_service_narrow_preserves_original():
         await changed.xquery("1")
         await original.xquery("1")
 
-    assert dict(changed_route.calls.last.request.url.params) == {
-        "database": "catalog",
-        "txid": "tx-2",
-    }
-    assert dict(original_route.calls.last.request.url.params) == {
-        "database": "catalog",
-        "txid": "tx-1",
-    }
     assert changed_route.call_count == 1
     assert original_route.call_count == 1
 
@@ -1639,14 +1526,14 @@ async def test_scoped_service_narrow_preserves_original():
 @pytest.mark.asyncio
 @respx.mock
 async def test_scoped_service_clear_preserves_original():
-    mocker = MLRespXMocker(use_router=False)
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
     mocker.with_request_body({"xquery": "1"})
-    mocker.with_request_param("database", "catalog")
-    mocker.with_request_param("txid", "tx-1")
     mocker.with_response_code(200)
     mocker.with_empty_response_body()
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
     original_route = mocker.mock_post()
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1663,10 +1550,5 @@ async def test_scoped_service_clear_preserves_original():
         await changed.xquery("1")
         await original.xquery("1")
 
-    assert dict(changed_route.calls.last.request.url.params) == {}
-    assert dict(original_route.calls.last.request.url.params) == {
-        "database": "catalog",
-        "txid": "tx-1",
-    }
     assert changed_route.call_count == 1
     assert original_route.call_count == 1

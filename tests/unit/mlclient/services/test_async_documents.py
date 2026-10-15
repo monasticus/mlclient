@@ -736,7 +736,7 @@ def test_documents_sender_metadata_document_with_metadata_object():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_unscoped():
+async def test_read_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -774,7 +774,7 @@ async def test_read_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_service_scope():
+async def test_read_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -792,7 +792,7 @@ async def test_read_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_override_service():
+async def test_read_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -814,7 +814,7 @@ async def test_read_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_clear_database():
+async def test_read_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -831,7 +831,7 @@ async def test_read_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_clear_transaction():
+async def test_read_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -848,7 +848,7 @@ async def test_read_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_stream_unscoped():
+async def test_read_stream_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -889,7 +889,7 @@ async def test_read_stream_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_stream_service_scope():
+async def test_read_stream_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -907,7 +907,7 @@ async def test_read_stream_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_stream_override_service():
+async def test_read_stream_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -932,7 +932,7 @@ async def test_read_stream_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_stream_clear_database():
+async def test_read_stream_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -952,7 +952,7 @@ async def test_read_stream_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_stream_clear_transaction():
+async def test_read_stream_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -971,7 +971,7 @@ async def test_read_stream_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_write_unscoped():
+async def test_write_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
@@ -1007,7 +1007,7 @@ async def test_write_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_write_service_scope():
+async def test_write_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "service-db")
@@ -1025,7 +1025,7 @@ async def test_write_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_write_override_service():
+async def test_write_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "request-db")
@@ -1045,7 +1045,7 @@ async def test_write_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_write_clear_database():
+async def test_write_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("txid", "service-tx")
@@ -1063,7 +1063,7 @@ async def test_write_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_write_clear_transaction():
+async def test_write_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "service-db")
@@ -1081,7 +1081,7 @@ async def test_write_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_delete_unscoped():
+async def test_delete_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -1117,7 +1117,7 @@ async def test_delete_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_delete_service_scope():
+async def test_delete_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -1134,7 +1134,7 @@ async def test_delete_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_delete_override_service():
+async def test_delete_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -1155,7 +1155,7 @@ async def test_delete_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_delete_clear_database():
+async def test_delete_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -1171,7 +1171,7 @@ async def test_delete_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_delete_clear_transaction():
+async def test_delete_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -1187,7 +1187,7 @@ async def test_delete_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_scoped_service_narrow_preserves_original():
+async def test_narrowing_service_scope_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -1213,7 +1213,7 @@ async def test_scoped_service_narrow_preserves_original():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_scoped_service_clear_preserves_original():
+async def test_clearing_service_scope_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)

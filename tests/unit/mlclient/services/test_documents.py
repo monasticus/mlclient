@@ -2035,7 +2035,7 @@ def test_delete_many_uris_are_batched(ml):
 
 
 @respx.mock
-def test_read_unscoped():
+def test_read_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2071,7 +2071,7 @@ def test_read_with_scope_kwargs():
 
 
 @respx.mock
-def test_read_service_scope():
+def test_read_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2088,7 +2088,7 @@ def test_read_service_scope():
 
 
 @respx.mock
-def test_read_override_service():
+def test_read_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2109,7 +2109,7 @@ def test_read_override_service():
 
 
 @respx.mock
-def test_read_clear_database():
+def test_read_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2125,7 +2125,7 @@ def test_read_clear_database():
 
 
 @respx.mock
-def test_read_clear_transaction():
+def test_read_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2141,7 +2141,7 @@ def test_read_clear_transaction():
 
 
 @respx.mock
-def test_read_stream_unscoped():
+def test_read_stream_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2179,7 +2179,7 @@ def test_read_stream_with_scope_kwargs():
 
 
 @respx.mock
-def test_read_stream_service_scope():
+def test_read_stream_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2196,7 +2196,7 @@ def test_read_stream_service_scope():
 
 
 @respx.mock
-def test_read_stream_override_service():
+def test_read_stream_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2219,7 +2219,7 @@ def test_read_stream_override_service():
 
 
 @respx.mock
-def test_read_stream_clear_database():
+def test_read_stream_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2235,7 +2235,7 @@ def test_read_stream_clear_database():
 
 
 @respx.mock
-def test_read_stream_clear_transaction():
+def test_read_stream_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2251,7 +2251,7 @@ def test_read_stream_clear_transaction():
 
 
 @respx.mock
-def test_write_unscoped():
+def test_write_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
@@ -2285,7 +2285,7 @@ def test_write_with_scope_kwargs():
 
 
 @respx.mock
-def test_write_service_scope():
+def test_write_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "service-db")
@@ -2302,7 +2302,7 @@ def test_write_service_scope():
 
 
 @respx.mock
-def test_write_override_service():
+def test_write_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "request-db")
@@ -2321,7 +2321,7 @@ def test_write_override_service():
 
 
 @respx.mock
-def test_write_clear_database():
+def test_write_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("txid", "service-tx")
@@ -2338,7 +2338,7 @@ def test_write_clear_database():
 
 
 @respx.mock
-def test_write_clear_transaction():
+def test_write_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "service-db")
@@ -2355,7 +2355,7 @@ def test_write_clear_transaction():
 
 
 @respx.mock
-def test_delete_unscoped():
+def test_delete_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2385,7 +2385,7 @@ def test_delete_with_scope_kwargs():
 
 
 @respx.mock
-def test_delete_service_scope():
+def test_delete_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2401,7 +2401,7 @@ def test_delete_service_scope():
 
 
 @respx.mock
-def test_delete_override_service():
+def test_delete_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2417,7 +2417,7 @@ def test_delete_override_service():
 
 
 @respx.mock
-def test_delete_clear_database():
+def test_delete_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2432,7 +2432,7 @@ def test_delete_clear_database():
 
 
 @respx.mock
-def test_delete_clear_transaction():
+def test_delete_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2447,7 +2447,7 @@ def test_delete_clear_transaction():
 
 
 @respx.mock
-def test_scoped_service_narrow_preserves_original():
+def test_narrowing_service_scope_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)
@@ -2472,7 +2472,7 @@ def test_scoped_service_narrow_preserves_original():
 
 
 @respx.mock
-def test_scoped_service_clear_preserves_original():
+def test_clearing_service_scope_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)

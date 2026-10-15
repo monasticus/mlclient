@@ -30,7 +30,7 @@ ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-respons
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_unscoped(case):
+def test_documents_with_report_without_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -128,7 +128,7 @@ def test_documents_with_report_with_scope_kwargs(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_service_scope(case):
+def test_documents_with_report_inherits_service_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -180,7 +180,7 @@ def test_documents_with_report_service_scope(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_override_service(case):
+def test_documents_with_report_scope_kwargs_override_service_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -234,7 +234,7 @@ def test_documents_with_report_override_service(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_clear_database(case):
+def test_documents_with_report_scope_kwargs_clear_service_database(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -286,7 +286,7 @@ def test_documents_with_report_clear_database(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_clear_transaction(case):
+def test_documents_with_report_scope_kwargs_clear_service_transaction(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -338,7 +338,7 @@ def test_documents_with_report_clear_transaction(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_operation_scope(case):
+def test_documents_with_report_operation_scope_overrides_service_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -391,7 +391,7 @@ def test_documents_with_report_operation_scope(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_override_operation_scope(case):
+def test_documents_with_report_scope_kwargs_override_operation_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -446,7 +446,7 @@ def test_documents_with_report_override_operation_scope(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_transaction(case):
+def test_documents_with_report_with_transaction_scope_kwargs(case):
     txn = TransactionService(None, "transaction-id", "transaction-db")
     body = resources_utils.read_test_resource_bytes(
         __file__,
@@ -496,7 +496,7 @@ def test_documents_with_report_transaction(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_transaction_inherits_database(case):
+def test_documents_with_report_transaction_scope_inherits_service_database(case):
     txn = TransactionService(None, "transaction-id", None)
     body = resources_utils.read_test_resource_bytes(
         __file__,
@@ -626,7 +626,7 @@ def test_documents_for_string_query():
 
 
 @respx.mock
-def test_documents_without_query_unscoped():
+def test_documents_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -676,7 +676,7 @@ def test_documents_with_scope_kwargs():
 
 
 @respx.mock
-def test_documents_without_query_service_scope():
+def test_documents_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -702,7 +702,7 @@ def test_documents_without_query_service_scope():
 
 
 @respx.mock
-def test_documents_without_query_override_service():
+def test_documents_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -731,7 +731,7 @@ def test_documents_without_query_override_service():
 
 
 @respx.mock
-def test_documents_without_query_clear_database():
+def test_documents_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -758,7 +758,7 @@ def test_documents_without_query_clear_database():
 
 
 @respx.mock
-def test_documents_without_query_clear_transaction():
+def test_documents_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -783,7 +783,7 @@ def test_documents_without_query_clear_transaction():
 
 
 @respx.mock
-def test_documents_without_query_operation_scope():
+def test_documents_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -811,7 +811,7 @@ def test_documents_without_query_operation_scope():
 
 
 @respx.mock
-def test_documents_without_query_override_operation_scope():
+def test_documents_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -841,7 +841,7 @@ def test_documents_without_query_override_operation_scope():
 
 
 @respx.mock
-def test_documents_without_query_transaction():
+def test_documents_with_transaction_scope_kwargs():
     txn = TransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -868,7 +868,7 @@ def test_documents_without_query_transaction():
 
 
 @respx.mock
-def test_documents_without_query_transaction_inherits_database():
+def test_documents_transaction_scope_inherits_service_database():
     txn = TransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -1082,7 +1082,7 @@ def test_documents_error():
 
 
 @respx.mock
-def test_uris_unscoped():
+def test_uris_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1151,7 +1151,7 @@ def test_uris_with_scope_kwargs():
 
 
 @respx.mock
-def test_uris_service_scope():
+def test_uris_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1187,7 +1187,7 @@ def test_uris_service_scope():
 
 
 @respx.mock
-def test_uris_override_service():
+def test_uris_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1225,7 +1225,7 @@ def test_uris_override_service():
 
 
 @respx.mock
-def test_uris_clear_database():
+def test_uris_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1261,7 +1261,7 @@ def test_uris_clear_database():
 
 
 @respx.mock
-def test_uris_clear_transaction():
+def test_uris_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1297,7 +1297,7 @@ def test_uris_clear_transaction():
 
 
 @respx.mock
-def test_uris_operation_scope():
+def test_uris_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1334,7 +1334,7 @@ def test_uris_operation_scope():
 
 
 @respx.mock
-def test_uris_override_operation_scope():
+def test_uris_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1373,7 +1373,7 @@ def test_uris_override_operation_scope():
 
 
 @respx.mock
-def test_uris_transaction():
+def test_uris_with_transaction_scope_kwargs():
     txn = TransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -1407,7 +1407,7 @@ def test_uris_transaction():
 
 
 @respx.mock
-def test_uris_transaction_inherits_database():
+def test_uris_transaction_scope_inherits_service_database():
     txn = TransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -1514,7 +1514,7 @@ def test_uris_error():
 
 
 @respx.mock
-def test_values_of_strings_unscoped():
+def test_values_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1587,7 +1587,7 @@ def test_values_with_scope_kwargs():
 
 
 @respx.mock
-def test_values_of_strings_service_scope():
+def test_values_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1626,7 +1626,7 @@ def test_values_of_strings_service_scope():
 
 
 @respx.mock
-def test_values_of_strings_override_service():
+def test_values_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1665,7 +1665,7 @@ def test_values_of_strings_override_service():
 
 
 @respx.mock
-def test_values_of_strings_clear_database():
+def test_values_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1703,7 +1703,7 @@ def test_values_of_strings_clear_database():
 
 
 @respx.mock
-def test_values_of_strings_clear_transaction():
+def test_values_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1741,7 +1741,7 @@ def test_values_of_strings_clear_transaction():
 
 
 @respx.mock
-def test_values_of_strings_operation_scope():
+def test_values_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1784,7 +1784,7 @@ def test_values_of_strings_operation_scope():
 
 
 @respx.mock
-def test_values_of_strings_override_operation_scope():
+def test_values_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1829,7 +1829,7 @@ def test_values_of_strings_override_operation_scope():
 
 
 @respx.mock
-def test_values_of_strings_transaction():
+def test_values_with_transaction_scope_kwargs():
     txn = TransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -1869,7 +1869,7 @@ def test_values_of_strings_transaction():
 
 
 @respx.mock
-def test_values_of_strings_transaction_inherits_database():
+def test_values_transaction_scope_inherits_service_database():
     txn = TransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -2219,7 +2219,7 @@ def test_plugin_aggregate_preserves_native_map():
 
 
 @respx.mock
-def test_aggregate_without_matches_unscoped():
+def test_aggregate_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2285,7 +2285,7 @@ def test_aggregate_with_scope_kwargs():
 
 
 @respx.mock
-def test_aggregate_without_matches_service_scope():
+def test_aggregate_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2320,7 +2320,7 @@ def test_aggregate_without_matches_service_scope():
 
 
 @respx.mock
-def test_aggregate_without_matches_override_service():
+def test_aggregate_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2355,7 +2355,7 @@ def test_aggregate_without_matches_override_service():
 
 
 @respx.mock
-def test_aggregate_without_matches_clear_database():
+def test_aggregate_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2389,7 +2389,7 @@ def test_aggregate_without_matches_clear_database():
 
 
 @respx.mock
-def test_aggregate_without_matches_clear_transaction():
+def test_aggregate_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2423,7 +2423,7 @@ def test_aggregate_without_matches_clear_transaction():
 
 
 @respx.mock
-def test_aggregate_without_matches_operation_scope():
+def test_aggregate_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2463,7 +2463,7 @@ def test_aggregate_without_matches_operation_scope():
 
 
 @respx.mock
-def test_aggregate_without_matches_override_operation_scope():
+def test_aggregate_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2505,7 +2505,7 @@ def test_aggregate_without_matches_override_operation_scope():
 
 
 @respx.mock
-def test_aggregate_without_matches_transaction():
+def test_aggregate_with_transaction_scope_kwargs():
     txn = TransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -2542,7 +2542,7 @@ def test_aggregate_without_matches_transaction():
 
 
 @respx.mock
-def test_aggregate_without_matches_transaction_inherits_database():
+def test_aggregate_transaction_scope_inherits_service_database():
     txn = TransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -2676,7 +2676,7 @@ def test_invalid_query_is_rejected_for_get_and_combined_queries(options):
 
 
 @respx.mock
-def test_tuples_unscoped():
+def test_tuples_without_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2780,7 +2780,7 @@ def test_tuples_with_scope_kwargs():
 
 
 @respx.mock
-def test_tuples_service_scope():
+def test_tuples_inherits_service_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2835,7 +2835,7 @@ def test_tuples_service_scope():
 
 
 @respx.mock
-def test_tuples_override_service():
+def test_tuples_scope_kwargs_override_service_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2890,7 +2890,7 @@ def test_tuples_override_service():
 
 
 @respx.mock
-def test_tuples_clear_database():
+def test_tuples_scope_kwargs_clear_service_database():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2944,7 +2944,7 @@ def test_tuples_clear_database():
 
 
 @respx.mock
-def test_tuples_clear_transaction():
+def test_tuples_scope_kwargs_clear_service_transaction():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2998,7 +2998,7 @@ def test_tuples_clear_transaction():
 
 
 @respx.mock
-def test_tuples_operation_scope():
+def test_tuples_operation_scope_overrides_service_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3056,7 +3056,7 @@ def test_tuples_operation_scope():
 
 
 @respx.mock
-def test_tuples_override_operation_scope():
+def test_tuples_scope_kwargs_override_operation_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3116,7 +3116,7 @@ def test_tuples_override_operation_scope():
 
 
 @respx.mock
-def test_tuples_transaction():
+def test_tuples_with_transaction_scope_kwargs():
     txn = TransactionService(None, "transaction-id", "transaction-db")
     options = SearchOptions().tuples(
         "price-day",
@@ -3168,7 +3168,7 @@ def test_tuples_transaction():
 
 
 @respx.mock
-def test_tuples_transaction_inherits_database():
+def test_tuples_transaction_scope_inherits_service_database():
     txn = TransactionService(None, "transaction-id", None)
     options = SearchOptions().tuples(
         "price-day",
@@ -3278,7 +3278,7 @@ def test_tuples_reject_values_definition():
 
 
 @respx.mock
-def test_report_unscoped():
+def test_report_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3366,7 +3366,7 @@ def test_report_with_scope_kwargs():
 
 
 @respx.mock
-def test_report_service_scope():
+def test_report_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3411,7 +3411,7 @@ def test_report_service_scope():
 
 
 @respx.mock
-def test_report_override_service():
+def test_report_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3460,7 +3460,7 @@ def test_report_override_service():
 
 
 @respx.mock
-def test_report_clear_database():
+def test_report_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3507,7 +3507,7 @@ def test_report_clear_database():
 
 
 @respx.mock
-def test_report_clear_transaction():
+def test_report_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3554,7 +3554,7 @@ def test_report_clear_transaction():
 
 
 @respx.mock
-def test_report_operation_scope():
+def test_report_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3602,7 +3602,7 @@ def test_report_operation_scope():
 
 
 @respx.mock
-def test_report_override_operation_scope():
+def test_report_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3652,7 +3652,7 @@ def test_report_override_operation_scope():
 
 
 @respx.mock
-def test_report_transaction():
+def test_report_with_transaction_scope_kwargs():
     txn = TransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -3698,7 +3698,7 @@ def test_report_transaction():
 
 
 @respx.mock
-def test_report_transaction_inherits_database():
+def test_report_transaction_scope_inherits_service_database():
     txn = TransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)

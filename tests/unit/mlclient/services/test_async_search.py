@@ -31,7 +31,7 @@ ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-respons
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_unscoped(case):
+async def test_documents_with_report_without_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -131,7 +131,7 @@ async def test_documents_with_report_with_scope_kwargs(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_service_scope(case):
+async def test_documents_with_report_inherits_service_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -184,7 +184,7 @@ async def test_documents_with_report_service_scope(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_override_service(case):
+async def test_documents_with_report_scope_kwargs_override_service_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -239,7 +239,7 @@ async def test_documents_with_report_override_service(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_clear_database(case):
+async def test_documents_with_report_scope_kwargs_clear_service_database(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -292,7 +292,7 @@ async def test_documents_with_report_clear_database(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_clear_transaction(case):
+async def test_documents_with_report_scope_kwargs_clear_service_transaction(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -345,7 +345,7 @@ async def test_documents_with_report_clear_transaction(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_operation_scope(case):
+async def test_documents_with_report_operation_scope_overrides_service_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -399,7 +399,7 @@ async def test_documents_with_report_operation_scope(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_override_operation_scope(case):
+async def test_documents_with_report_scope_kwargs_override_operation_scope(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -455,7 +455,7 @@ async def test_documents_with_report_override_operation_scope(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_transaction(case):
+async def test_documents_with_report_with_transaction_scope_kwargs(case):
     txn = AsyncTransactionService(None, "transaction-id", "transaction-db")
     body = resources_utils.read_test_resource_bytes(
         __file__,
@@ -506,7 +506,7 @@ async def test_documents_with_report_transaction(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_transaction_inherits_database(case):
+async def test_documents_with_report_transaction_scope_inherits_service_database(case):
     txn = AsyncTransactionService(None, "transaction-id", None)
     body = resources_utils.read_test_resource_bytes(
         __file__,
@@ -640,7 +640,7 @@ async def test_documents_for_string_query():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_unscoped():
+async def test_documents_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -692,7 +692,7 @@ async def test_documents_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_service_scope():
+async def test_documents_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -719,7 +719,7 @@ async def test_documents_without_query_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_override_service():
+async def test_documents_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -749,7 +749,7 @@ async def test_documents_without_query_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_clear_database():
+async def test_documents_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -777,7 +777,7 @@ async def test_documents_without_query_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_clear_transaction():
+async def test_documents_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -805,7 +805,7 @@ async def test_documents_without_query_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_operation_scope():
+async def test_documents_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -834,7 +834,7 @@ async def test_documents_without_query_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_override_operation_scope():
+async def test_documents_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -865,7 +865,7 @@ async def test_documents_without_query_override_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_transaction():
+async def test_documents_with_transaction_scope_kwargs():
     txn = AsyncTransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -893,7 +893,7 @@ async def test_documents_without_query_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_transaction_inherits_database():
+async def test_documents_transaction_scope_inherits_service_database():
     txn = AsyncTransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -1116,7 +1116,7 @@ async def test_documents_error():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_unscoped():
+async def test_uris_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1187,7 +1187,7 @@ async def test_uris_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_service_scope():
+async def test_uris_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1224,7 +1224,7 @@ async def test_uris_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_override_service():
+async def test_uris_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1263,7 +1263,7 @@ async def test_uris_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_clear_database():
+async def test_uris_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1300,7 +1300,7 @@ async def test_uris_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_clear_transaction():
+async def test_uris_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1337,7 +1337,7 @@ async def test_uris_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_operation_scope():
+async def test_uris_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1375,7 +1375,7 @@ async def test_uris_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_override_operation_scope():
+async def test_uris_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1415,7 +1415,7 @@ async def test_uris_override_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_transaction():
+async def test_uris_with_transaction_scope_kwargs():
     txn = AsyncTransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -1450,7 +1450,7 @@ async def test_uris_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_transaction_inherits_database():
+async def test_uris_transaction_scope_inherits_service_database():
     txn = AsyncTransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -1562,7 +1562,7 @@ async def test_uris_error():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_unscoped():
+async def test_values_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1639,7 +1639,7 @@ async def test_values_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_service_scope():
+async def test_values_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1680,7 +1680,7 @@ async def test_values_of_strings_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_override_service():
+async def test_values_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1726,7 +1726,7 @@ async def test_values_of_strings_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_clear_database():
+async def test_values_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1766,7 +1766,7 @@ async def test_values_of_strings_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_clear_transaction():
+async def test_values_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1806,7 +1806,7 @@ async def test_values_of_strings_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_operation_scope():
+async def test_values_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1851,7 +1851,7 @@ async def test_values_of_strings_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_override_operation_scope():
+async def test_values_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -1898,7 +1898,7 @@ async def test_values_of_strings_override_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_transaction():
+async def test_values_with_transaction_scope_kwargs():
     txn = AsyncTransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -1936,7 +1936,7 @@ async def test_values_of_strings_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_transaction_inherits_database():
+async def test_values_transaction_scope_inherits_service_database():
     txn = AsyncTransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -2294,7 +2294,7 @@ async def test_plugin_aggregate_preserves_native_map():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_unscoped():
+async def test_aggregate_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2362,7 +2362,7 @@ async def test_aggregate_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_service_scope():
+async def test_aggregate_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2398,7 +2398,7 @@ async def test_aggregate_without_matches_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_override_service():
+async def test_aggregate_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2434,7 +2434,7 @@ async def test_aggregate_without_matches_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_clear_database():
+async def test_aggregate_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2469,7 +2469,7 @@ async def test_aggregate_without_matches_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_clear_transaction():
+async def test_aggregate_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2504,7 +2504,7 @@ async def test_aggregate_without_matches_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_operation_scope():
+async def test_aggregate_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2545,7 +2545,7 @@ async def test_aggregate_without_matches_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_override_operation_scope():
+async def test_aggregate_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2588,7 +2588,7 @@ async def test_aggregate_without_matches_override_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_transaction():
+async def test_aggregate_with_transaction_scope_kwargs():
     txn = AsyncTransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -2626,7 +2626,7 @@ async def test_aggregate_without_matches_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_transaction_inherits_database():
+async def test_aggregate_transaction_scope_inherits_service_database():
     txn = AsyncTransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
@@ -2754,7 +2754,7 @@ async def test_invalid_options():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_unscoped():
+async def test_tuples_without_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2860,7 +2860,7 @@ async def test_tuples_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_service_scope():
+async def test_tuples_inherits_service_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2916,7 +2916,7 @@ async def test_tuples_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_override_service():
+async def test_tuples_scope_kwargs_override_service_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -2972,7 +2972,7 @@ async def test_tuples_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_clear_database():
+async def test_tuples_scope_kwargs_clear_service_database():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3027,7 +3027,7 @@ async def test_tuples_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_clear_transaction():
+async def test_tuples_scope_kwargs_clear_service_transaction():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3082,7 +3082,7 @@ async def test_tuples_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_operation_scope():
+async def test_tuples_operation_scope_overrides_service_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3141,7 +3141,7 @@ async def test_tuples_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_override_operation_scope():
+async def test_tuples_scope_kwargs_override_operation_scope():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3202,7 +3202,7 @@ async def test_tuples_override_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_transaction():
+async def test_tuples_with_transaction_scope_kwargs():
     txn = AsyncTransactionService(None, "transaction-id", "transaction-db")
     options = SearchOptions().tuples(
         "price-day",
@@ -3255,7 +3255,7 @@ async def test_tuples_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_transaction_inherits_database():
+async def test_tuples_transaction_scope_inherits_service_database():
     txn = AsyncTransactionService(None, "transaction-id", None)
     options = SearchOptions().tuples(
         "price-day",
@@ -3344,7 +3344,7 @@ async def test_tuples_reject_values_definition():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_unscoped():
+async def test_report_without_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3438,7 +3438,7 @@ async def test_report_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_service_scope():
+async def test_report_inherits_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3486,7 +3486,7 @@ async def test_report_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_override_service():
+async def test_report_scope_kwargs_override_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3536,7 +3536,7 @@ async def test_report_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_clear_database():
+async def test_report_scope_kwargs_clear_service_database():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3584,7 +3584,7 @@ async def test_report_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_clear_transaction():
+async def test_report_scope_kwargs_clear_service_transaction():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3632,7 +3632,7 @@ async def test_report_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_operation_scope():
+async def test_report_operation_scope_overrides_service_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3681,7 +3681,7 @@ async def test_report_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_override_operation_scope():
+async def test_report_scope_kwargs_override_operation_scope():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -3732,7 +3732,7 @@ async def test_report_override_operation_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_transaction():
+async def test_report_with_transaction_scope_kwargs():
     txn = AsyncTransactionService(None, "transaction-id", "transaction-db")
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
@@ -3779,7 +3779,7 @@ async def test_report_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_transaction_inherits_database():
+async def test_report_transaction_scope_inherits_service_database():
     txn = AsyncTransactionService(None, "transaction-id", None)
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)

@@ -568,7 +568,7 @@ async def test_expression_rejects_output_type(svc):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xquery_unscoped():
+async def test_xquery_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -604,7 +604,7 @@ async def test_xquery_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xquery_service_scope():
+async def test_xquery_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -623,7 +623,7 @@ async def test_xquery_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xquery_override_service():
+async def test_xquery_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -646,7 +646,7 @@ async def test_xquery_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xquery_clear_database():
+async def test_xquery_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -667,7 +667,7 @@ async def test_xquery_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xquery_clear_transaction():
+async def test_xquery_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -688,7 +688,7 @@ async def test_xquery_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xqy_unscoped():
+async def test_xqy_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -724,7 +724,7 @@ async def test_xqy_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xqy_service_scope():
+async def test_xqy_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -743,7 +743,7 @@ async def test_xqy_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xqy_override_service():
+async def test_xqy_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -766,7 +766,7 @@ async def test_xqy_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xqy_clear_database():
+async def test_xqy_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -787,7 +787,7 @@ async def test_xqy_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_xqy_clear_transaction():
+async def test_xqy_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -808,7 +808,7 @@ async def test_xqy_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_javascript_unscoped():
+async def test_javascript_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -848,7 +848,7 @@ async def test_javascript_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_javascript_service_scope():
+async def test_javascript_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -867,7 +867,7 @@ async def test_javascript_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_javascript_override_service():
+async def test_javascript_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -890,7 +890,7 @@ async def test_javascript_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_javascript_clear_database():
+async def test_javascript_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -911,7 +911,7 @@ async def test_javascript_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_javascript_clear_transaction():
+async def test_javascript_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -932,7 +932,7 @@ async def test_javascript_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_js_unscoped():
+async def test_js_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -968,7 +968,7 @@ async def test_js_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_js_service_scope():
+async def test_js_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -987,7 +987,7 @@ async def test_js_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_js_override_service():
+async def test_js_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1010,7 +1010,7 @@ async def test_js_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_js_clear_database():
+async def test_js_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1031,7 +1031,7 @@ async def test_js_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_js_clear_transaction():
+async def test_js_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1052,7 +1052,7 @@ async def test_js_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_file_unscoped(tmp_path):
+async def test_file_without_scope(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1096,7 +1096,7 @@ async def test_file_with_scope_kwargs(tmp_path):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_file_service_scope(tmp_path):
+async def test_file_inherits_service_scope(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1117,7 +1117,7 @@ async def test_file_service_scope(tmp_path):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_file_override_service(tmp_path):
+async def test_file_scope_kwargs_override_service_scope(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1142,7 +1142,7 @@ async def test_file_override_service(tmp_path):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_file_clear_database(tmp_path):
+async def test_file_scope_kwargs_clear_service_database(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1165,7 +1165,7 @@ async def test_file_clear_database(tmp_path):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_file_clear_transaction(tmp_path):
+async def test_file_scope_kwargs_clear_service_transaction(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1188,7 +1188,7 @@ async def test_file_clear_transaction(tmp_path):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_execute_unscoped():
+async def test_execute_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1228,7 +1228,7 @@ async def test_execute_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_execute_service_scope():
+async def test_execute_inherits_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1247,7 +1247,7 @@ async def test_execute_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_execute_override_service():
+async def test_execute_scope_kwargs_override_service_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1270,7 +1270,7 @@ async def test_execute_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_execute_clear_database():
+async def test_execute_scope_kwargs_clear_service_database():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1291,7 +1291,7 @@ async def test_execute_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_execute_clear_transaction():
+async def test_execute_scope_kwargs_clear_service_transaction():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1312,7 +1312,7 @@ async def test_execute_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_expression_unscoped():
+async def test_expression_without_scope():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1356,7 +1356,7 @@ async def test_expression_with_scope_kwargs():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_expression_service_scope():
+async def test_expression_inherits_service_scope():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1379,7 +1379,7 @@ async def test_expression_service_scope():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_expression_override_service():
+async def test_expression_scope_kwargs_override_service_scope():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1404,7 +1404,7 @@ async def test_expression_override_service():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_expression_clear_database():
+async def test_expression_scope_kwargs_clear_service_database():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1427,7 +1427,7 @@ async def test_expression_clear_database():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_expression_clear_transaction():
+async def test_expression_scope_kwargs_clear_service_transaction():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1450,7 +1450,7 @@ async def test_expression_clear_transaction():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_scoped_service_narrow_preserves_original():
+async def test_narrowing_service_scope_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1478,7 +1478,7 @@ async def test_scoped_service_narrow_preserves_original():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_scoped_service_clear_preserves_original():
+async def test_clearing_service_scope_preserves_original_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")

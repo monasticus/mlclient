@@ -13,6 +13,7 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.models import (
     BinaryDocument,
     Category,
+    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -2050,7 +2051,7 @@ def test_read_unscoped():
 
 
 @respx.mock
-def test_read_keywords():
+def test_read_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2162,7 +2163,7 @@ def test_read_stream_unscoped():
 
 
 @respx.mock
-def test_read_stream_keywords():
+def test_read_stream_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -2270,10 +2271,7 @@ def test_write_unscoped():
     with MLClient() as ml:
         documents = ml.documents
         result = documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
         )
 
     assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
@@ -2281,7 +2279,7 @@ def test_write_unscoped():
 
 
 @respx.mock
-def test_write_keywords():
+def test_write_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "request-db")
@@ -2291,10 +2289,7 @@ def test_write_keywords():
     with MLClient() as ml:
         documents = ml.documents
         result = documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             database="request-db",
             txid="request-tx",
         )
@@ -2314,10 +2309,7 @@ def test_write_service_scope():
     with MLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
         )
 
     assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
@@ -2335,10 +2327,7 @@ def test_write_override_service():
     with MLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             database="request-db",
             txid="request-tx",
         )
@@ -2357,10 +2346,7 @@ def test_write_clear_database():
     with MLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             database=None,
         )
 
@@ -2378,10 +2364,7 @@ def test_write_clear_transaction():
     with MLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             txid=None,
         )
 
@@ -2406,7 +2389,7 @@ def test_delete_unscoped():
 
 
 @respx.mock
-def test_delete_keywords():
+def test_delete_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)

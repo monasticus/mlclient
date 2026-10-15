@@ -80,7 +80,7 @@ async def test_documents_with_report_unscoped(case):
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report_keywords(case):
+async def test_documents_with_report_with_scope_kwargs(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -688,7 +688,7 @@ async def test_documents_without_query_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query_keywords():
+async def test_documents_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1182,7 +1182,7 @@ async def test_uris_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris_keywords():
+async def test_uris_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1641,7 +1641,7 @@ async def test_values_of_strings_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings_keywords():
+async def test_values_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2380,7 +2380,7 @@ async def test_aggregate_without_matches_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches_keywords():
+async def test_aggregate_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2870,7 +2870,7 @@ async def test_tuples_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_keywords():
+async def test_tuples_with_scope_kwargs():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3464,7 +3464,7 @@ async def test_report_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_keywords():
+async def test_report_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")

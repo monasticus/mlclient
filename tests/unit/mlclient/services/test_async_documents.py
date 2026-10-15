@@ -13,6 +13,7 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.models import (
     BinaryDocument,
     Category,
+    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -752,7 +753,7 @@ async def test_read_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_keywords():
+async def test_read_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -870,7 +871,7 @@ async def test_read_stream_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_stream_keywords():
+async def test_read_stream_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -990,10 +991,7 @@ async def test_write_unscoped():
     async with AsyncMLClient() as ml:
         documents = ml.documents
         result = await documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
         )
 
     assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
@@ -1002,7 +1000,7 @@ async def test_write_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_write_keywords():
+async def test_write_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("database", "request-db")
@@ -1012,10 +1010,7 @@ async def test_write_keywords():
     async with AsyncMLClient() as ml:
         documents = ml.documents
         result = await documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             database="request-db",
             txid="request-tx",
         )
@@ -1036,10 +1031,7 @@ async def test_write_service_scope():
     async with AsyncMLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = await documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
         )
 
     assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
@@ -1058,10 +1050,7 @@ async def test_write_override_service():
     async with AsyncMLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = await documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             database="request-db",
             txid="request-tx",
         )
@@ -1081,10 +1070,7 @@ async def test_write_clear_database():
     async with AsyncMLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = await documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             database=None,
         )
 
@@ -1103,10 +1089,7 @@ async def test_write_clear_transaction():
     async with AsyncMLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         result = await documents.write(
-            XMLDocument(
-                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
-                "/some/dir/doc1.xml",
-            ),
+            Document.create("/some/dir/doc1.xml", "<root/>"),
             txid=None,
         )
 
@@ -1133,7 +1116,7 @@ async def test_delete_unscoped():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_delete_keywords():
+async def test_delete_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_code(204)

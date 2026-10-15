@@ -563,7 +563,7 @@ def test_xquery_unscoped():
 
 
 @respx.mock
-def test_xquery_keywords():
+def test_xquery_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -683,7 +683,7 @@ def test_xqy_unscoped():
 
 
 @respx.mock
-def test_xqy_keywords():
+def test_xqy_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -800,7 +800,7 @@ def test_javascript_unscoped():
 
 
 @respx.mock
-def test_javascript_keywords():
+def test_javascript_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -920,7 +920,7 @@ def test_js_unscoped():
 
 
 @respx.mock
-def test_js_keywords():
+def test_js_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1039,7 +1039,7 @@ def test_file_unscoped(tmp_path):
 
 
 @respx.mock
-def test_file_keywords(tmp_path):
+def test_file_with_scope_kwargs(tmp_path):
     file = tmp_path / "probe.xqy"
     file.write_text("1")
     mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -1169,7 +1169,7 @@ def test_execute_unscoped():
 
 
 @respx.mock
-def test_execute_keywords():
+def test_execute_with_scope_kwargs():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/eval")
     mocker.with_request_content_type("application/x-www-form-urlencoded")
@@ -1291,7 +1291,7 @@ def test_expression_unscoped():
 
 
 @respx.mock
-def test_expression_keywords():
+def test_expression_with_scope_kwargs():
     expression = fn.string_length("coffee")
     (code, variables) = expression.compile()
     mocker = MLRespXMocker(use_router=False, strict_params=True)

@@ -78,7 +78,7 @@ def test_documents_with_report_unscoped(case):
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report_keywords(case):
+def test_documents_with_report_with_scope_kwargs(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -673,7 +673,7 @@ def test_documents_without_query_unscoped():
 
 
 @respx.mock
-def test_documents_without_query_keywords():
+def test_documents_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1146,7 +1146,7 @@ def test_uris_unscoped():
 
 
 @respx.mock
-def test_uris_keywords():
+def test_uris_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1590,7 +1590,7 @@ def test_values_of_strings_unscoped():
 
 
 @respx.mock
-def test_values_of_strings_keywords():
+def test_values_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2303,7 +2303,7 @@ def test_aggregate_without_matches_unscoped():
 
 
 @respx.mock
-def test_aggregate_without_matches_keywords():
+def test_aggregate_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2790,7 +2790,7 @@ def test_tuples_unscoped():
 
 
 @respx.mock
-def test_tuples_keywords():
+def test_tuples_with_scope_kwargs():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -3396,7 +3396,7 @@ def test_report_unscoped():
 
 
 @respx.mock
-def test_report_keywords():
+def test_report_with_scope_kwargs():
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "application/json")

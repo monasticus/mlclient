@@ -1,5 +1,7 @@
 # logs
 
+![Logs demonstration](../assets/gifs/logs.gif)
+
 Read MarkLogic log entries or list available log files.
 
 ```sh

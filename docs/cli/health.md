@@ -1,5 +1,7 @@
 # health
 
+![Health demonstration](../assets/gifs/health.gif)
+
 Check whether the environment's HealthCheck server is healthy.
 
 ```sh

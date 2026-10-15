@@ -1,5 +1,7 @@
 # log-level
 
+![Log level demonstration](../assets/gifs/log-level.gif)
+
 Show or change a group or App Server log level.
 
 ```sh

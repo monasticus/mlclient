@@ -33,7 +33,7 @@ Sleep 2s
 
 Hide
 Set TypingSpeed 1ms
-Type `rm .mlclient/mlclient-qa.yaml; clear`
+Type `rm .mlclient/mlclient-qa.yaml; printf '\033[1A\033[2K\r'`
 Enter
 Wait
 Sleep 500ms

@@ -1,5 +1,7 @@
 # url
 
+![Url demonstration](../assets/gifs/url.gif)
+
 Print MarkLogic browser URLs for an environment.
 
 ```sh

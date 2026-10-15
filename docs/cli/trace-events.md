@@ -1,5 +1,7 @@
 # trace-events
 
+![Trace events demonstration](../assets/gifs/trace-events.gif)
+
 Show or change a group's diagnostic trace events: the master "Trace Events
 Activated" switch and the set of enabled trace events shown on the Admin
 Interface Diagnostics page.

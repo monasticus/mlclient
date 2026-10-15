@@ -1,5 +1,7 @@
 # version
 
+![Version demonstration](../assets/gifs/version.gif)
+
 Print the complete MarkLogic Server version.
 
 ```sh

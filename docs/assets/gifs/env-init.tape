@@ -52,36 +52,36 @@ Set TypingSpeed 50ms
 Show
 
 Type "ml env init"
-Sleep 700ms
+Sleep 1200ms
 Enter
 Wait+Screen /Environment name:/
-Sleep 2s
+Sleep 1700ms
 Type "qa"
-Sleep 1s
+Sleep 1100ms
 Enter
 Wait+Screen /Source/
-Sleep 2500ms
+Sleep 1900ms
 Type "2"
-Sleep 1s
+Sleep 1400ms
 Enter
 Wait+Screen /Protocol/
-Sleep 2500ms
+Sleep 1800ms
 Enter
 Wait+Screen /Host/
-Sleep 2s
+Sleep 1300ms
 Enter
 Wait+Screen /Port/
-Sleep 2s
+Sleep 1600ms
 Type "18002"
-Sleep 1s
+Sleep 1100ms
 Enter
 Wait+Screen /Username/
 Sleep 2s
 Enter
 Wait+Screen /Password/
-Sleep 2s
+Sleep 1500ms
 Enter
-Sleep 2500ms
+Sleep 1800ms
 Enter
 Wait
 Sleep 4s

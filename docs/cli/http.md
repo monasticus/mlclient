@@ -1,5 +1,7 @@
 # http
 
+![Http demonstration](../assets/gifs/http.gif)
+
 Send an HTTP request and print its decoded response body without reformatting
 by default. Use `--pretty` to format JSON and XML with two-space indentation.
 Unlike `http`, `eval` and `sample` format results by default and offer `--no-pretty`

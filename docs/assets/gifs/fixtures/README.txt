@@ -35,3 +35,15 @@ After recording, restore the saved trace configuration and log levels. Delete
 the vhs-health App Server and its temporary filesystem directory. Delete only
 the vhs-bookstore REST instance and its modules database (include=modules),
 never the shared Documents database. Restore the original container state.
+
+Sample and HTTP recordings
+
+Create a separate REST instance named vhs-docs-demo on MarkLogic 12 port 8008,
+with its own vhs-docs-demo content database. The sample and http tapes discover
+the mlclient_cts_query_12 container address and connect directly to that port.
+They seed their own XML/JSON documents and delete them when the shell exits.
+The sample tape expects this content database to be otherwise empty so its
+three whole-document JSON samples contain only the demonstration customers.
+After recording, delete this REST instance with include=content&include=modules;
+these databases belong exclusively to this demo, unlike the shared Documents
+database used by the diagnostic recordings above.

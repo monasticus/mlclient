@@ -1,5 +1,7 @@
 # sample
 
+![Sample demonstration](../assets/gifs/sample.gif)
+
 Inspect a few XML or JSON documents or nodes without writing a query.
 By default, print one XML result from the selected connection's content database.
 Use `--json` (`-j`) for JSON, a path to select specific content, and `--limit` to

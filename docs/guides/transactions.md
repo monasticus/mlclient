@@ -1,6 +1,6 @@
 # Transactions
 
-A multi-statement transaction groups several document or eval operations so they commit or roll back as a unit. Open one with `ml.transaction()`; the returned `TransactionService` is a context manager that commits on a clean exit and rolls back if the block raises.
+A multi-statement transaction groups several document, eval or search operations so they commit or roll back as a unit. Open one with `ml.transaction()`; the returned `TransactionService` is a context manager that commits on a clean exit and rolls back if the block raises.
 
 Spread it with `**` into any content operation to run that operation inside the transaction - it unpacks to `txid` (and `database`, when the transaction was opened against one).
 

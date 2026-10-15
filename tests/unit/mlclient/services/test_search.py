@@ -11,7 +11,7 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.models import JSONDocument, SearchReport, TupleHit, ValueHit, XMLDocument
 from mlclient.search.options import Range, SearchOptions
 from mlclient.search.structured import Element, sq
-from mlclient.services import SearchScope
+from mlclient.services import SearchScope, TransactionService
 from mlclient.xquery import cts
 from tests.utils import data as test_data
 from tests.utils import resources as resources_utils
@@ -1279,3 +1279,122 @@ def test_inline_cts_query_rejects_invalid_additional_query():
         str(error.value)
         == "additional-query must be an XML string or a list of XML strings"
     )
+
+
+def scope_operation_route(operation):
+    path = (
+        "/v1/values/category"
+        if operation in {"values", "tuples", "aggregate"}
+        else "/v1/search"
+    )
+    route = respx.post(path=path)
+    if operation == "documents_with_report":
+        return route.respond(
+            200,
+            headers=resources_utils.get_test_resource_json(
+                __file__, "documents-report-empty-headers.json",
+            ),
+            content=resources_utils.read_test_resource_bytes(
+                __file__, "documents-report-empty.bin",
+            ),
+        )
+    if operation == "tuples":
+        return route.respond(
+            200,
+            text='<values-response xmlns="http://marklogic.com/appservices/search"/>',
+        )
+    if operation in {"values", "aggregate"}:
+        return route.respond(200, json={"values-response": {}})
+    if operation == "report":
+        return route.respond(200, json={"total": 0, "results": []})
+    return route.respond(200, content=b"")
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        "documents",
+        "documents_with_report",
+        "uris",
+        "values",
+        "aggregate",
+        "tuples",
+        "report",
+    ],
+)
+@pytest.mark.parametrize(
+    ("overrides", "database", "txid"),
+    [
+        ({}, "operation-db", "operation-tx"),
+        ({"database": "direct-db"}, "direct-db", "operation-tx"),
+        ({"txid": "direct-tx"}, "operation-db", "direct-tx"),
+        ({"database": None}, None, "operation-tx"),
+        ({"txid": None}, "operation-db", None),
+        ({"database": None, "txid": None}, None, None),
+    ],
+)
+@respx.mock
+def test_basic_scope_keywords_override_operation_and_service_scopes(
+    operation, overrides, database, txid,
+):
+    route = scope_operation_route(operation)
+    with MLClient() as ml:
+        search = ml.search(
+            database="service-db", txid="service-tx", collection="products",
+        )
+        args = (
+            ["category", "count"]
+            if operation == "aggregate"
+            else ["category"]
+            if operation in {"values", "tuples"}
+            else []
+        )
+        getattr(search, operation)(
+            *args,
+            scope=SearchScope(
+                database="operation-db", txid="operation-tx", collection="archive",
+            ),
+            **overrides,
+        )
+        first = route.calls.last.request.url.params
+        assert first.get("database") == database
+        assert first.get("txid") == txid
+        assert first["collection"] == "archive"
+        getattr(search, operation)(*args)
+        second = route.calls.last.request.url.params
+        assert second["database"] == "service-db"
+        assert second["txid"] == "service-tx"
+        assert second["collection"] == "products"
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        "documents",
+        "documents_with_report",
+        "uris",
+        "values",
+        "aggregate",
+        "tuples",
+        "report",
+    ],
+)
+@pytest.mark.parametrize("database", [None, "transaction-db"])
+@respx.mock
+def test_operations_unpack_transaction_context(operation, database):
+    route = scope_operation_route(operation)
+    transaction = TransactionService(None, "transaction-id", database)
+    with MLClient() as ml:
+        search = ml.search(database="service-db", collection="products")
+        args = (
+            ["category", "count"]
+            if operation == "aggregate"
+            else ["category"]
+            if operation in {"values", "tuples"}
+            else []
+        )
+        getattr(search, operation)(*args, **transaction)
+    params = route.calls.last.request.url.params
+    assert params["txid"] == "transaction-id"
+    assert params["database"] == (database or "service-db")
+    assert params["collection"] == "products"

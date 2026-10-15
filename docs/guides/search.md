@@ -260,15 +260,21 @@ with MLClient() as ml:
 
 Where a search runs and which options it uses is its
 [SearchScope][mlclient.services.SearchScope]: `database`, `txid`, `collection`,
-`directory`, `forest_name`, `options` and `timestamp`. Operations take only the
-arguments of the operation itself, so the scope is set in one of two ways:
+`directory`, `forest_name`, `options` and `timestamp`. Set it for a series
+of searches or override it for one request:
 
 - **For a series of searches**, call the service: `ml.search(database="catalog",
   collection="products")` returns a new service bound to that scope. It sends no
   request and leaves `ml.search` unchanged; calling a scoped service narrows it
   further.
-- **For one request**, pass `scope=SearchScope(...)` to an operation. It
-  overrides only the fields it sets.
+- **For one request**, use `database=` and `txid=` as keyword arguments when
+  you only need these basic scope parameters. This also supports `**txn`.
+  For more settings, pass `scope=SearchScope(...)`.
+
+At service level all scope settings are keyword arguments, as in
+`ml.search(database="catalog", collection="products", options=options)`.
+On an operation, direct `database=` and `txid=` override `scope=`, which in turn
+overrides the service's defaults.
 
 An omitted field is inherited; `None` clears an inherited value.
 
@@ -282,7 +288,7 @@ with MLClient() as ml:
     everywhere = catalog.uris("coffee", scope=SearchScope(collection=None))
 
     with ml.transaction(database="catalog") as txn:
-        pending = ml.search(**txn).uris("coffee")
+        pending = catalog.uris("coffee", **txn)
 ```
 
 `documents()` and `report()` also accept `transform` and `transform_params`: an

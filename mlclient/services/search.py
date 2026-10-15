@@ -159,6 +159,8 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
@@ -183,6 +185,10 @@ class SearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -211,7 +217,9 @@ class SearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             category=category,
@@ -232,6 +240,8 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
@@ -256,6 +266,10 @@ class SearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -285,7 +299,9 @@ class SearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             category=category,
@@ -304,6 +320,8 @@ class SearchService:
         *,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
@@ -322,6 +340,10 @@ class SearchService:
             Installed options' page-length does not apply to this read.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -347,7 +369,9 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             category=Category.QUALITY.value,
@@ -367,6 +391,8 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
@@ -393,6 +419,10 @@ class SearchService:
             None returns every value, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -422,7 +452,9 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+        )
         resp = self._rest.values.post(
             name,
             **params,
@@ -447,6 +479,8 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
@@ -482,6 +516,10 @@ class SearchService:
             aggregate. None aggregates every value.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -512,7 +550,9 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+        )
         resp = self._rest.values.post(
             name,
             **params,
@@ -537,6 +577,8 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
@@ -564,6 +606,10 @@ class SearchService:
             None returns every tuple, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -593,7 +639,9 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+        )
         resp = self._rest.values.post(
             name,
             **params,
@@ -615,6 +663,8 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
@@ -637,6 +687,10 @@ class SearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -665,7 +719,9 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             view=view,
@@ -776,6 +832,8 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
@@ -800,6 +858,10 @@ class AsyncSearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -828,7 +890,9 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             category=category,
@@ -849,6 +913,8 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
@@ -873,6 +939,10 @@ class AsyncSearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -902,7 +972,9 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             category=category,
@@ -921,6 +993,8 @@ class AsyncSearchService:
         *,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
@@ -939,6 +1013,10 @@ class AsyncSearchService:
             Installed options' page-length does not apply to this read.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -964,7 +1042,9 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             category=Category.QUALITY.value,
@@ -984,6 +1064,8 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
@@ -1010,6 +1092,10 @@ class AsyncSearchService:
             None returns every value, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1039,7 +1125,9 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+        )
         resp = await self._rest.values.post(
             name,
             **params,
@@ -1064,6 +1152,8 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
@@ -1099,6 +1189,10 @@ class AsyncSearchService:
             aggregate. None aggregates every value.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1129,7 +1223,9 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+        )
         resp = await self._rest.values.post(
             name,
             **params,
@@ -1154,6 +1250,8 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
@@ -1181,6 +1279,10 @@ class AsyncSearchService:
             None returns every tuple, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1210,7 +1312,9 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+        )
         resp = await self._rest.values.post(
             name,
             **params,
@@ -1232,6 +1336,8 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
@@ -1254,6 +1360,10 @@ class AsyncSearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1282,7 +1392,9 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope, query, pos, scope, database=database, txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             view=view,
@@ -1301,6 +1413,8 @@ def _request_params(
     scope: SearchScope | None,
     *,
     lexicon: bool = False,
+    database: str | None = UNSET,
+    txid: str | None = UNSET,
 ) -> dict:
     """Build the combined-query POST arguments with their scope and paging.
 
@@ -1319,6 +1433,10 @@ def _request_params(
         Per-request overrides of the service scope.
     lexicon : bool, default False
         Whether the request reads a lexicon through /v1/values.
+    database : str | None, default unset
+        Overrides the merged scopes' database; None clears it.
+    txid : str | None, default unset
+        Overrides the merged scopes' transaction; None clears it.
 
     Returns
     -------
@@ -1332,7 +1450,9 @@ def _request_params(
     ValueError
         If pos is invalid.
     """
-    effective = service_scope.overridden_by(scope)
+    effective = service_scope.overridden_by(scope).overridden_by(
+        SearchScope(database=database, txid=txid),
+    )
     body, params = _criteria(query, effective.options, lexicon=lexicon)
     params.update(effective.request_params())
     if pos is None and not lexicon:

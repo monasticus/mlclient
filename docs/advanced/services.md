@@ -49,16 +49,17 @@ Both also accept transaction settings via `ml.documents(**txn)` or `ml.eval(**tx
 
 `ml.search` is itself a scoped service with an empty scope. Calling it returns a
 new, narrower service and never changes the original, so scoped services can be
-created freely and shared. Each operation can still override the scope for one
-request with `scope=SearchScope(...)`. See [Search](../guides/search.md#scope-databases-filters-and-options).
+created freely and shared. For one request, basic `database` and `txid` overrides
+are also keyword arguments, so `**txn` works directly on operations. Use `scope=SearchScope(...)` for the
+additional search settings. See [Search](../guides/search.md#scope-databases-filters-and-options).
 
 `ml.transaction()` is a method instead: opening a transaction performs a
 request, so it returns a
 [TransactionService][mlclient.services.TransactionService] scoped
 to that transaction - a
 context manager that commits on a clean exit, rolls back on error, and unpacks
-with `**` into the operations it should cover, including a search scope:
-`ml.search(**txn)`. See [Transactions](../guides/transactions.md).
+with `**` into the operations it should cover, such as
+`ml.search.uris(**txn)`. See [Transactions](../guides/transactions.md).
 
 ## Use one API without the facade
 

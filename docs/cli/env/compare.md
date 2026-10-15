@@ -1,5 +1,7 @@
 # env compare
 
+![Compare two named environments, then all three environments](../../assets/gifs/env-compare.gif)
+
 Compare settings across environments side by side.
 
 ```sh

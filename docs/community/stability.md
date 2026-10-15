@@ -74,5 +74,4 @@ pip install --pre mlclient
 
 Normal installation selects stable releases when available. A candidate is for
 validation before a stable release; consult its release notes before upgrading.
-See [GitHub Releases](https://github.com/monasticus/mlclient/releases) for changes,
-and the [release process](releasing.md) for maintainer instructions.
+See [GitHub Releases](https://github.com/monasticus/mlclient/releases) for changes.

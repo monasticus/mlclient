@@ -305,12 +305,10 @@ that every existing interface is frozen, or that a breaking change needs no
 explanation. CI currently tests Python 3.10–3.14; this does not establish support
 for every Python or MarkLogic version.
 
-Releases are maintainer work. Version preparation opens a PR; tagging happens
-only after it is squash-merged into `main`. Numeric tags trigger reusable test and lint gates, artifact checks, OIDC PyPI
-publication and release notes.
-See the
-[release process](https://github.com/monasticus/mlclient/blob/main/docs/community/releasing.md)
-for the commands, publication checks and recovery procedures.
+The project maintainer prepares and publishes releases after reviewed changes
+are merged into `main`. Contributors submit changes through pull requests.
+Published versions and their changes are listed in
+[GitHub Releases](https://github.com/monasticus/mlclient/releases).
 
 From 1.0.0, stable APIs and CLI commands follow SemVer. The entire jobs package
 is experimental and can change in minor releases. Stable feature removal needs

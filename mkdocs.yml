@@ -119,9 +119,9 @@ nav:
   - Community:
       - Background: community/about.md
       - Stability: community/stability.md
-      - Contributing: community/contributing.md
-      - Writing documentation: community/documentation.md
-      - Release process: community/releasing.md
+      - Contributing:
+          - Overview: community/contributing.md
+          - Writing documentation: community/documentation.md
   - Acknowledgements: acknowledgements.md
 
 extra:

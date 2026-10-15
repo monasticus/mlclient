@@ -84,12 +84,6 @@ The `CI` workflow calls it when documentation checks are selected: PRs run a str
 and `main` publishes `dev`. The release workflow calls this
 workflow after successful package publication: stable tags publish their version
 and update `latest`, while prerelease tags publish a numbered entry only.
-See [Releasing MLClient](releasing.md) for release checks and tag preparation.
 
-`make docs-deploy-dev` requests a CI run from `main` using authenticated GitHub
-CLI. It does not push local docs. A failed release documentation job can be
-retried through the release workflow. Republishing an older stable tag also
-moves `latest`; do this only when intentionally changing the default release.
-
-When changing documentation dependencies or deployment configuration, also
-check a local versioned preview with `mike serve` to verify the version selector.
+The project maintainer handles production publishing. Documentation contributors
+submit a pull request; CI checks its build before it is merged.

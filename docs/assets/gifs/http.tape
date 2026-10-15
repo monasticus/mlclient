@@ -27,7 +27,7 @@ Set TypingSpeed 50ms
 Show
 Hide
 Set TypingSpeed 1ms
-Type `trap 'ml http delete /v1/documents uri=/doc1.json >/dev/null; ml http delete /v1/documents uri=/doc2.json >/dev/null; rm -rf "$demo_dir"' EXIT`
+Type `trap 'ml http delete /v1/documents uri=/doc1.json >/dev/null; ml http delete /v1/documents uri=/doc2.json >/dev/null; ml http delete /v1/documents uri=/doc3.json >/dev/null; rm -rf "$demo_dir"' EXIT`
 Enter
 Wait
 Sleep 500ms
@@ -43,7 +43,7 @@ Set TypingSpeed 50ms
 Show
 Hide
 Set TypingSpeed 1ms
-Type `clear`
+Type `printf '%s\n' '{"order":1001,"status":"paid"}' > order.json; clear`
 Enter
 Wait
 Sleep 500ms
@@ -66,6 +66,45 @@ Enter
 Wait
 Sleep 3s
 Type `ml http delete /v1/documents uri=/doc2.json --include`
+Enter
+Wait
+Sleep 4s
+
+Hide
+Set TypingSpeed 1ms
+Type `clear`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Type "cat order.json"
+Enter
+Wait
+Sleep 2s
+Type `ml http put /v1/documents uri=/doc3.json -b @order.json \`
+Enter
+Type "  Content-Type:application/json"
+Enter
+Wait
+Sleep 2s
+Type "ml http get /v1/documents uri=/doc3.json --pretty"
+Enter
+Wait
+Sleep 3s
+Hide
+Set TypingSpeed 1ms
+Type `clear`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Type "ml http get /manage/v2/users/nobody/properties -c 8002 format=json"
+Enter
+Wait
+Sleep 3s
+Type "ml http get /manage/v2/users/nobody/properties -c manage format=json --pretty"
 Enter
 Wait
 Sleep 4s

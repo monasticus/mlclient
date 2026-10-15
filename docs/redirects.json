@@ -39,7 +39,8 @@
   "built-with.md": "acknowledgements.md",
   "stability.md": "community/stability.md",
   "documentation.md": "community/documentation.md",
-  "releasing.md": "community/releasing.md",
+  "releasing.md": "community/contributing.md",
   "contributing.md": "community/contributing.md",
-  "community/built-with.md": "acknowledgements.md"
+  "community/built-with.md": "acknowledgements.md",
+  "community/releasing.md": "community/contributing.md"
 }

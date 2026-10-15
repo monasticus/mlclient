@@ -11,7 +11,7 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.models import JSONDocument, SearchReport, TupleHit, ValueHit, XMLDocument
 from mlclient.search.options import Range, SearchOptions
 from mlclient.search.structured import Element, sq
-from mlclient.services import SearchScope, AsyncTransactionService
+from mlclient.services import AsyncTransactionService, SearchScope
 from mlclient.xquery import cts
 from tests.utils import data as test_data
 from tests.utils import resources as resources_utils
@@ -31,7 +31,8 @@ ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-respons
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_with_report(case):
+async def test_documents_with_report(case, scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -50,6 +51,8 @@ async def test_documents_with_report(case):
     ml_mocker.with_request_body(
         {"search": {"qtext": "" if case == "matches" else "missing-value"}},
     )
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type(headers["content-type"])
     ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
@@ -57,9 +60,12 @@ async def test_documents_with_report(case):
     route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        report, docs = await ml.search(collection="cts-test").documents_with_report(
+        report, docs = await ml.search(**service_defaults)(
+            collection="cts-test",
+        ).documents_with_report(
             "" if case == "matches" else "missing-value",
             pos=[1, 2],
+            **overrides,
         )
 
     assert isinstance(report, SearchReport)
@@ -72,6 +78,18 @@ async def test_documents_with_report(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {
+            "start": "1",
+            "pageLength": "2",
+            "collection": "cts-test",
+            "view": "all",
+            "format": "json",
+        }
+        | scope_params
+    )
     assert route.call_count == 1
 
 
@@ -159,10 +177,13 @@ async def test_documents_for_string_query():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_documents_without_query():
+async def test_documents_without_query(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
@@ -176,10 +197,14 @@ async def test_documents_without_query():
     route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        docs = await ml.search.documents()
+        docs = await ml.search(**service_defaults).documents(**overrides)
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert dict(route.calls.last.request.url.params) == {"format": "json"}
+
+    assert (
+        dict(route.calls.last.request.url.params) == {"format": "json"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -373,7 +398,8 @@ async def test_documents_error():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_uris():
+async def test_uris(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_param("category", "quality")
@@ -381,6 +407,8 @@ async def test_uris():
     ml_mocker.with_request_param("start", "2")
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.doc_metadata_body_part(
@@ -395,12 +423,23 @@ async def test_uris():
         ),
     )
     ml_mocker.with_request_body(CTS_BODY)
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        uris = await ml.search.uris(CTS_QUERY, pos=[2, 3])
+        uris = await ml.search(**service_defaults).uris(
+            CTS_QUERY,
+            pos=[2, 3],
+            **overrides,
+        )
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"category": "quality", "format": "json", "start": "2", "pageLength": "2"}
+        | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -479,13 +518,16 @@ async def test_uris_error():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_values_of_strings():
+async def test_values_of_strings(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_param("options", "product-options")
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(
@@ -503,16 +545,23 @@ async def test_values_of_strings():
     ml_mocker.with_request_body(
         {"search": {"options": {"additional-query": [CTS_XML]}}},
     )
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        products = ml.search(options="product-options")
-        values = await products.values("category", CTS_QUERY)
+        products = ml.search(**service_defaults)(options="product-options")
+        values = await products.values("category", CTS_QUERY, **overrides)
 
     assert values == [
         ValueHit("drinks", frequency=2),
         ValueHit("food", frequency=1),
     ]
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"options": "product-options", "view": "values", "format": "json"}
+        | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -828,13 +877,16 @@ async def test_plugin_aggregate_preserves_native_map():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_aggregate_without_matches():
+async def test_aggregate_without_matches(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "aggregate")
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
@@ -848,12 +900,23 @@ async def test_aggregate_without_matches():
             },
         },
     )
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        result = await ml.search(options=PRICE_OPTIONS).aggregate("price", "avg", "zzz")
+        result = await ml.search(**service_defaults)(options=PRICE_OPTIONS).aggregate(
+            "price",
+            "avg",
+            "zzz",
+            **overrides,
+        )
 
     assert result is None
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"view": "aggregate", "format": "json", "aggregate": "avg"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -949,7 +1012,8 @@ async def test_invalid_options():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_tuples_have_individual_types():
+async def test_tuples_have_individual_types(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -960,6 +1024,8 @@ async def test_tuples_have_individual_types():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
@@ -985,15 +1051,24 @@ async def test_tuples_have_individual_types():
     <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
   </search:tuple>
 </search:values-response>""")
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        tuples = await ml.search(options=options).tuples("price-day")
+        tuples = await ml.search(**service_defaults)(options=options).tuples(
+            "price-day",
+            **overrides,
+        )
 
     assert tuples == [
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"view": "values", "format": "xml"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -1031,12 +1106,15 @@ async def test_tuples_reject_values_definition():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_report_retains_empty_native_report_and_timestamp():
+async def test_report_retains_empty_native_report_and_timestamp(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
@@ -1056,10 +1134,10 @@ async def test_report_retains_empty_native_report_and_timestamp():
             "report-retains-empty-native-report-and-timestamp-request.json",
         ),
     )
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        report = await ml.search.report("product")
+        report = await ml.search(**service_defaults).report("product", **overrides)
 
     assert report == SearchReport(
         total=0,
@@ -1071,6 +1149,12 @@ async def test_report_retains_empty_native_report_and_timestamp():
         effective_timestamp="17912992738350300",
         response=payload,
     )
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"view": "all", "format": "json"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -1295,122 +1379,86 @@ async def test_inline_cts_query_rejects_invalid_additional_query():
     )
 
 
-def scope_operation_route(operation):
-    path = (
-        "/v1/values/category"
-        if operation in {"values", "tuples", "aggregate"}
-        else "/v1/search"
-    )
-    route = respx.post(path=path)
-    if operation == "documents_with_report":
-        return route.respond(
-            200,
-            headers=resources_utils.get_test_resource_json(
-                __file__, "documents-report-empty-headers.json",
+@pytest.fixture(
+    params=[
+        pytest.param(({}, {}, {}), id="unscoped"),
+        pytest.param(
+            (
+                {},
+                {"database": "request-db", "txid": "request-tx"},
+                {"database": "request-db", "txid": "request-tx"},
             ),
-            content=resources_utils.read_test_resource_bytes(
-                __file__, "documents-report-empty.bin",
+            id="keywords",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {},
+                {"database": "service-db", "txid": "service-tx"},
             ),
-        )
-    if operation == "tuples":
-        return route.respond(
-            200,
-            text='<values-response xmlns="http://marklogic.com/appservices/search"/>',
-        )
-    if operation in {"values", "aggregate"}:
-        return route.respond(200, json={"values-response": {}})
-    if operation == "report":
-        return route.respond(200, json={"total": 0, "results": []})
-    return route.respond(200, content=b"")
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "operation",
-    [
-        "documents",
-        "documents_with_report",
-        "uris",
-        "values",
-        "aggregate",
-        "tuples",
-        "report",
+            id="service-scope",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"database": "request-db", "txid": "request-tx"},
+                {"database": "request-db", "txid": "request-tx"},
+            ),
+            id="override-service",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"database": None},
+                {"txid": "service-tx"},
+            ),
+            id="clear-database",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"txid": None},
+                {"database": "service-db"},
+            ),
+            id="clear-transaction",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"scope": SearchScope(database="operation-db", txid="operation-tx")},
+                {"database": "operation-db", "txid": "operation-tx"},
+            ),
+            id="operation-scope",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {
+                    "scope": SearchScope(database="operation-db", txid="operation-tx"),
+                    "database": "request-db",
+                    "txid": "request-tx",
+                },
+                {"database": "request-db", "txid": "request-tx"},
+            ),
+            id="override-operation-scope",
+        ),
+        pytest.param(
+            (
+                {},
+                AsyncTransactionService(None, "transaction-id", "transaction-db"),
+                {"database": "transaction-db", "txid": "transaction-id"},
+            ),
+            id="transaction",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db"},
+                AsyncTransactionService(None, "transaction-id", None),
+                {"database": "service-db", "txid": "transaction-id"},
+            ),
+            id="transaction-inherits-database",
+        ),
     ],
 )
-@pytest.mark.parametrize(
-    ("overrides", "database", "txid"),
-    [
-        ({}, "operation-db", "operation-tx"),
-        ({"database": "direct-db"}, "direct-db", "operation-tx"),
-        ({"txid": "direct-tx"}, "operation-db", "direct-tx"),
-        ({"database": None}, None, "operation-tx"),
-        ({"txid": None}, "operation-db", None),
-        ({"database": None, "txid": None}, None, None),
-    ],
-)
-@respx.mock
-async def test_basic_scope_keywords_override_operation_and_service_scopes(
-    operation, overrides, database, txid,
-):
-    route = scope_operation_route(operation)
-    async with AsyncMLClient() as ml:
-        search = ml.search(
-            database="service-db", txid="service-tx", collection="products",
-        )
-        args = (
-            ["category", "count"]
-            if operation == "aggregate"
-            else ["category"]
-            if operation in {"values", "tuples"}
-            else []
-        )
-        await getattr(search, operation)(
-            *args,
-            scope=SearchScope(
-                database="operation-db", txid="operation-tx", collection="archive",
-            ),
-            **overrides,
-        )
-        first = route.calls.last.request.url.params
-        assert first.get("database") == database
-        assert first.get("txid") == txid
-        assert first["collection"] == "archive"
-        await getattr(search, operation)(*args)
-        second = route.calls.last.request.url.params
-        assert second["database"] == "service-db"
-        assert second["txid"] == "service-tx"
-        assert second["collection"] == "products"
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "operation",
-    [
-        "documents",
-        "documents_with_report",
-        "uris",
-        "values",
-        "aggregate",
-        "tuples",
-        "report",
-    ],
-)
-@pytest.mark.parametrize("database", [None, "transaction-db"])
-@respx.mock
-async def test_operations_unpack_transaction_context(operation, database):
-    route = scope_operation_route(operation)
-    transaction = AsyncTransactionService(None, "transaction-id", database)
-    async with AsyncMLClient() as ml:
-        search = ml.search(database="service-db", collection="products")
-        args = (
-            ["category", "count"]
-            if operation == "aggregate"
-            else ["category"]
-            if operation in {"values", "tuples"}
-            else []
-        )
-        await getattr(search, operation)(*args, **transaction)
-    params = route.calls.last.request.url.params
-    assert params["txid"] == "transaction-id"
-    assert params["database"] == (database or "service-db")
-    assert params["collection"] == "products"
+def scope_parameters(request):
+    return request.param

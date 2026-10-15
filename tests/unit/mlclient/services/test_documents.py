@@ -13,7 +13,6 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.models import (
     BinaryDocument,
     Category,
-    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -2030,36 +2029,178 @@ def test_delete_many_uris_are_batched(ml):
     assert ml_mocker.router.calls.call_count > 1
 
 
-@pytest.mark.parametrize("operation", ["read", "read_stream", "write", "delete"])
 @respx.mock
-def test_document_operations_use_scope_and_per_request_overrides(
-    operation,
-):
-    route = respx.route(path="/v1/documents").respond(
-        200,
-        json={"name": "Coffee"},
+def test_read_with_scope_parameters(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", scope_params.get("database"))
+    mocker.with_request_param("txid", scope_params.get("txid"))
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+    with MLClient() as ml:
+        documents = ml.documents(**service_defaults)
+        result = documents.read("/some/dir/doc1.xml", **overrides)
+    assert result.uri == "/some/dir/doc1.xml"
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"uri": "/some/dir/doc1.xml", "format": "json"} | scope_params
     )
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_read_stream_with_scope_parameters(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", scope_params.get("database"))
+    mocker.with_request_param("txid", scope_params.get("txid"))
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+    with MLClient() as ml:
+        documents = ml.documents(**service_defaults)
+        result = list(documents.read_stream("/some/dir/doc1.xml", **overrides))
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"uri": "/some/dir/doc1.xml", "format": "json"} | scope_params
+    )
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_write_with_scope_parameters(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", scope_params.get("database"))
+    mocker.with_request_param("txid", scope_params.get("txid"))
+    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+    with MLClient() as ml:
+        documents = ml.documents(**service_defaults)
+        result = documents.write(
+            XMLDocument(
+                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
+                "/some/dir/doc1.xml",
+            ),
+            **overrides,
+        )
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == scope_params
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_delete_with_scope_parameters(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", scope_params.get("database"))
+    mocker.with_request_param("txid", scope_params.get("txid"))
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+    with MLClient() as ml:
+        documents = ml.documents(**service_defaults)
+        documents.delete("/some/dir/doc1.xml", **overrides)
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"uri": "/some/dir/doc1.xml"} | scope_params
+    )
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize(
+    ("overrides", "scope_params"),
+    [
+        ({"txid": "tx-2"}, {"database": "catalog", "txid": "tx-2"}),
+        ({"database": None, "txid": None}, {}),
+    ],
+    ids=["narrow", "clear"],
+)
+@respx.mock
+def test_scoped_service_preserves_original(overrides, scope_params):
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    original_route = mocker.mock_delete()
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", scope_params.get("database"))
+    mocker.with_request_param("txid", scope_params.get("txid"))
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    changed_route = mocker.mock_delete()
     with MLClient() as ml:
         original = ml.documents(database="catalog", txid="tx-1")
-        narrowed = original(txid="tx-2")
-        assert route.call_count == 0
-        argument = (
-            Document.create("/product.json", {"name": "Coffee"})
-            if operation == "write"
-            else "/product.json"
-        )
-        scenarios = [
-            (narrowed, {}, "catalog", "tx-2"),
-            (original, {}, "catalog", "tx-1"),
-            (original, {"database": "archive"}, "archive", "tx-1"),
-            (original, {"database": None, "txid": None}, None, None),
-            (original(database=None, txid=None), {}, None, None),
-            (ml.documents, {}, None, None),
-        ]
-        for service, overrides, database, txid in scenarios:
-            result = getattr(service, operation)(argument, **overrides)
-            if operation == "read_stream":
-                result = list(result)
-            params = route.calls.last.request.url.params
-            assert params.get("database") == database
-            assert params.get("txid") == txid
+        changed = original(**overrides)
+        assert changed_route.call_count == 0
+        assert original_route.call_count == 0
+        changed.delete("/some/dir/doc1.xml")
+        original.delete("/some/dir/doc1.xml")
+    assert (
+        dict(changed_route.calls.last.request.url.params)
+        == {"uri": "/some/dir/doc1.xml"} | scope_params
+    )
+    assert dict(original_route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+    } | {"database": "catalog", "txid": "tx-1"}
+    assert changed_route.call_count == 1
+    assert original_route.call_count == 1
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(({}, {}, {}), id="unscoped"),
+        pytest.param(
+            (
+                {},
+                {"database": "request-db", "txid": "request-tx"},
+                {"database": "request-db", "txid": "request-tx"},
+            ),
+            id="keywords",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {},
+                {"database": "service-db", "txid": "service-tx"},
+            ),
+            id="service-scope",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"database": "request-db", "txid": "request-tx"},
+                {"database": "request-db", "txid": "request-tx"},
+            ),
+            id="override-service",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"database": None},
+                {"txid": "service-tx"},
+            ),
+            id="clear-database",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"txid": None},
+                {"database": "service-db"},
+            ),
+            id="clear-transaction",
+        ),
+    ],
+)
+def scope_parameters(request):
+    return request.param

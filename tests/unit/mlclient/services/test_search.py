@@ -30,7 +30,8 @@ ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-respons
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report(case):
+def test_documents_with_report(case, scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -49,6 +50,8 @@ def test_documents_with_report(case):
     ml_mocker.with_request_body(
         {"search": {"qtext": "" if case == "matches" else "missing-value"}},
     )
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type(headers["content-type"])
     ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
@@ -56,9 +59,12 @@ def test_documents_with_report(case):
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        report, docs = ml.search(collection="cts-test").documents_with_report(
+        report, docs = ml.search(**service_defaults)(
+            collection="cts-test",
+        ).documents_with_report(
             "" if case == "matches" else "missing-value",
             pos=[1, 2],
+            **overrides,
         )
 
     assert isinstance(report, SearchReport)
@@ -71,6 +77,18 @@ def test_documents_with_report(case):
     if case == "matches":
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {
+            "start": "1",
+            "pageLength": "2",
+            "collection": "cts-test",
+            "view": "all",
+            "format": "json",
+        }
+        | scope_params
+    )
     assert route.call_count == 1
 
 
@@ -154,10 +172,13 @@ def test_documents_for_string_query():
 
 
 @respx.mock
-def test_documents_without_query():
+def test_documents_without_query(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
@@ -171,10 +192,14 @@ def test_documents_without_query():
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        docs = ml.search.documents()
+        docs = ml.search(**service_defaults).documents(**overrides)
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
-    assert dict(route.calls.last.request.url.params) == {"format": "json"}
+
+    assert (
+        dict(route.calls.last.request.url.params) == {"format": "json"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @respx.mock
@@ -358,7 +383,8 @@ def test_documents_error():
 
 
 @respx.mock
-def test_uris():
+def test_uris(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_param("category", "quality")
@@ -366,6 +392,8 @@ def test_uris():
     ml_mocker.with_request_param("start", "2")
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.doc_metadata_body_part(
@@ -380,12 +408,19 @@ def test_uris():
         ),
     )
     ml_mocker.with_request_body(CTS_BODY)
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        uris = ml.search.uris(CTS_QUERY, pos=[2, 3])
+        uris = ml.search(**service_defaults).uris(CTS_QUERY, pos=[2, 3], **overrides)
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"category": "quality", "format": "json", "start": "2", "pageLength": "2"}
+        | scope_params
+    )
+    assert route.call_count == 1
 
 
 @respx.mock
@@ -459,13 +494,16 @@ def test_uris_error():
 
 
 @respx.mock
-def test_values_of_strings():
+def test_values_of_strings(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_param("options", "product-options")
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(
@@ -483,15 +521,26 @@ def test_values_of_strings():
     ml_mocker.with_request_body(
         {"search": {"options": {"additional-query": [CTS_XML]}}},
     )
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        values = ml.search(options="product-options").values("category", CTS_QUERY)
+        values = ml.search(**service_defaults)(options="product-options").values(
+            "category",
+            CTS_QUERY,
+            **overrides,
+        )
 
     assert values == [
         ValueHit("drinks", frequency=2),
         ValueHit("food", frequency=1),
     ]
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"options": "product-options", "view": "values", "format": "json"}
+        | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -796,13 +845,16 @@ def test_plugin_aggregate_preserves_native_map():
 
 
 @respx.mock
-def test_aggregate_without_matches():
+def test_aggregate_without_matches(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "aggregate")
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
@@ -816,12 +868,23 @@ def test_aggregate_without_matches():
             },
         },
     )
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        result = ml.search(options=PRICE_OPTIONS).aggregate("price", "avg", "zzz")
+        result = ml.search(**service_defaults)(options=PRICE_OPTIONS).aggregate(
+            "price",
+            "avg",
+            "zzz",
+            **overrides,
+        )
 
     assert result is None
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"view": "aggregate", "format": "json", "aggregate": "avg"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -920,7 +983,8 @@ def test_invalid_query_is_rejected_for_get_and_combined_queries(options):
 
 
 @respx.mock
-def test_tuples_have_individual_types():
+def test_tuples_have_individual_types(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -931,6 +995,8 @@ def test_tuples_have_individual_types():
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
@@ -956,15 +1022,24 @@ def test_tuples_have_individual_types():
     <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
   </search:tuple>
 </search:values-response>""")
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        tuples = ml.search(options=options).tuples("price-day")
+        tuples = ml.search(**service_defaults)(options=options).tuples(
+            "price-day",
+            **overrides,
+        )
 
     assert tuples == [
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"view": "values", "format": "xml"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @respx.mock
@@ -1021,12 +1096,15 @@ def test_tuples_reject_values_definition():
 
 
 @respx.mock
-def test_report_retains_empty_native_report_and_timestamp():
+def test_report_retains_empty_native_report_and_timestamp(scope_parameters):
+    service_defaults, overrides, scope_params = scope_parameters
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", scope_params.get("database"))
+    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
@@ -1046,10 +1124,10 @@ def test_report_retains_empty_native_report_and_timestamp():
             "report-retains-empty-native-report-and-timestamp-request.json",
         ),
     )
-    ml_mocker.mock_post()
+    route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        report = ml.search.report("product")
+        report = ml.search(**service_defaults).report("product", **overrides)
 
     assert report == SearchReport(
         total=0,
@@ -1061,6 +1139,12 @@ def test_report_retains_empty_native_report_and_timestamp():
         effective_timestamp="17912992738350300",
         response=payload,
     )
+
+    assert (
+        dict(route.calls.last.request.url.params)
+        == {"view": "all", "format": "json"} | scope_params
+    )
+    assert route.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -1281,120 +1365,86 @@ def test_inline_cts_query_rejects_invalid_additional_query():
     )
 
 
-def scope_operation_route(operation):
-    path = (
-        "/v1/values/category"
-        if operation in {"values", "tuples", "aggregate"}
-        else "/v1/search"
-    )
-    route = respx.post(path=path)
-    if operation == "documents_with_report":
-        return route.respond(
-            200,
-            headers=resources_utils.get_test_resource_json(
-                __file__, "documents-report-empty-headers.json",
+@pytest.fixture(
+    params=[
+        pytest.param(({}, {}, {}), id="unscoped"),
+        pytest.param(
+            (
+                {},
+                {"database": "request-db", "txid": "request-tx"},
+                {"database": "request-db", "txid": "request-tx"},
             ),
-            content=resources_utils.read_test_resource_bytes(
-                __file__, "documents-report-empty.bin",
+            id="keywords",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {},
+                {"database": "service-db", "txid": "service-tx"},
             ),
-        )
-    if operation == "tuples":
-        return route.respond(
-            200,
-            text='<values-response xmlns="http://marklogic.com/appservices/search"/>',
-        )
-    if operation in {"values", "aggregate"}:
-        return route.respond(200, json={"values-response": {}})
-    if operation == "report":
-        return route.respond(200, json={"total": 0, "results": []})
-    return route.respond(200, content=b"")
-
-
-@pytest.mark.parametrize(
-    "operation",
-    [
-        "documents",
-        "documents_with_report",
-        "uris",
-        "values",
-        "aggregate",
-        "tuples",
-        "report",
+            id="service-scope",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"database": "request-db", "txid": "request-tx"},
+                {"database": "request-db", "txid": "request-tx"},
+            ),
+            id="override-service",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"database": None},
+                {"txid": "service-tx"},
+            ),
+            id="clear-database",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"txid": None},
+                {"database": "service-db"},
+            ),
+            id="clear-transaction",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {"scope": SearchScope(database="operation-db", txid="operation-tx")},
+                {"database": "operation-db", "txid": "operation-tx"},
+            ),
+            id="operation-scope",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db", "txid": "service-tx"},
+                {
+                    "scope": SearchScope(database="operation-db", txid="operation-tx"),
+                    "database": "request-db",
+                    "txid": "request-tx",
+                },
+                {"database": "request-db", "txid": "request-tx"},
+            ),
+            id="override-operation-scope",
+        ),
+        pytest.param(
+            (
+                {},
+                TransactionService(None, "transaction-id", "transaction-db"),
+                {"database": "transaction-db", "txid": "transaction-id"},
+            ),
+            id="transaction",
+        ),
+        pytest.param(
+            (
+                {"database": "service-db"},
+                TransactionService(None, "transaction-id", None),
+                {"database": "service-db", "txid": "transaction-id"},
+            ),
+            id="transaction-inherits-database",
+        ),
     ],
 )
-@pytest.mark.parametrize(
-    ("overrides", "database", "txid"),
-    [
-        ({}, "operation-db", "operation-tx"),
-        ({"database": "direct-db"}, "direct-db", "operation-tx"),
-        ({"txid": "direct-tx"}, "operation-db", "direct-tx"),
-        ({"database": None}, None, "operation-tx"),
-        ({"txid": None}, "operation-db", None),
-        ({"database": None, "txid": None}, None, None),
-    ],
-)
-@respx.mock
-def test_basic_scope_keywords_override_operation_and_service_scopes(
-    operation, overrides, database, txid,
-):
-    route = scope_operation_route(operation)
-    with MLClient() as ml:
-        search = ml.search(
-            database="service-db", txid="service-tx", collection="products",
-        )
-        args = (
-            ["category", "count"]
-            if operation == "aggregate"
-            else ["category"]
-            if operation in {"values", "tuples"}
-            else []
-        )
-        getattr(search, operation)(
-            *args,
-            scope=SearchScope(
-                database="operation-db", txid="operation-tx", collection="archive",
-            ),
-            **overrides,
-        )
-        first = route.calls.last.request.url.params
-        assert first.get("database") == database
-        assert first.get("txid") == txid
-        assert first["collection"] == "archive"
-        getattr(search, operation)(*args)
-        second = route.calls.last.request.url.params
-        assert second["database"] == "service-db"
-        assert second["txid"] == "service-tx"
-        assert second["collection"] == "products"
-
-
-@pytest.mark.parametrize(
-    "operation",
-    [
-        "documents",
-        "documents_with_report",
-        "uris",
-        "values",
-        "aggregate",
-        "tuples",
-        "report",
-    ],
-)
-@pytest.mark.parametrize("database", [None, "transaction-db"])
-@respx.mock
-def test_operations_unpack_transaction_context(operation, database):
-    route = scope_operation_route(operation)
-    transaction = TransactionService(None, "transaction-id", database)
-    with MLClient() as ml:
-        search = ml.search(database="service-db", collection="products")
-        args = (
-            ["category", "count"]
-            if operation == "aggregate"
-            else ["category"]
-            if operation in {"values", "tuples"}
-            else []
-        )
-        getattr(search, operation)(*args, **transaction)
-    params = route.calls.last.request.url.params
-    assert params["txid"] == "transaction-id"
-    assert params["database"] == (database or "service-db")
-    assert params["collection"] == "products"
+def scope_parameters(request):
+    return request.param

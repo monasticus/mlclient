@@ -81,7 +81,8 @@ def test_request_params_preserves_unset_scope():
 def test_scope_is_immutable():
     scope = ServiceScope(database="catalog")
     with pytest.raises(
-        FrozenInstanceError, match="cannot assign to field 'database'",
+        FrozenInstanceError,
+        match="cannot assign to field 'database'",
     ) as raised:
         scope.database = "another"
     assert str(raised.value) == "cannot assign to field 'database'"

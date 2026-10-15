@@ -218,7 +218,12 @@ class SearchService:
         """
         category = normalize_category(category)
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = self._rest.search.post(
             **params,
@@ -300,7 +305,12 @@ class SearchService:
         """
         category = normalize_category(category)
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = self._rest.search.post(
             **params,
@@ -370,7 +380,12 @@ class SearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = self._rest.search.post(
             **params,
@@ -453,7 +468,13 @@ class SearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
         )
         resp = self._rest.values.post(
             name,
@@ -551,7 +572,13 @@ class SearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
         )
         resp = self._rest.values.post(
             name,
@@ -640,7 +667,13 @@ class SearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
         )
         resp = self._rest.values.post(
             name,
@@ -720,7 +753,12 @@ class SearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = self._rest.search.post(
             **params,
@@ -891,7 +929,12 @@ class AsyncSearchService:
         """
         category = normalize_category(category)
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = await self._rest.search.post(
             **params,
@@ -973,7 +1016,12 @@ class AsyncSearchService:
         """
         category = normalize_category(category)
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = await self._rest.search.post(
             **params,
@@ -1043,7 +1091,12 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = await self._rest.search.post(
             **params,
@@ -1126,7 +1179,13 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
         )
         resp = await self._rest.values.post(
             name,
@@ -1224,7 +1283,13 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
         )
         resp = await self._rest.values.post(
             name,
@@ -1313,7 +1378,13 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid, lexicon=True,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
         )
         resp = await self._rest.values.post(
             name,
@@ -1393,7 +1464,12 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         params = _request_params(
-            self._scope, query, pos, scope, database=database, txid=txid,
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
         )
         resp = await self._rest.search.post(
             **params,

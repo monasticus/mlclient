@@ -18,8 +18,8 @@ from mlclient.models.document_parts import Category, DocumentsBodyPart
 from mlclient.models.documents import Document, Metadata, MetadataDocument
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.responses import MLResponseParser
-from mlclient.services.scope import ServiceScope
 from mlclient.services._documents_parsing import DocumentsReader, normalize_category
+from mlclient.services.scope import ServiceScope
 
 _MAX_QUERY_BYTES = 48 * 1024
 """Soft limit on the total size of ``uri=...`` query parameters per request.

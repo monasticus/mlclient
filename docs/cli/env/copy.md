@@ -1,5 +1,7 @@
 # env copy
 
+![Environment copy demonstration](../../assets/gifs/env-copy.gif)
+
 Clone an environment configuration under a new name.
 
 ```sh

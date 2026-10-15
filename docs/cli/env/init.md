@@ -1,5 +1,7 @@
 # env init
 
+![Environment init demonstration](../../assets/gifs/env-init.gif)
+
 Create a project environment from a template, ml-gradle properties or a running
 MarkLogic host.
 

@@ -1,5 +1,7 @@
 # env edit
 
+![Environment edit demonstration](../../assets/gifs/env-edit.gif)
+
 Open an environment configuration file in your own editor.
 
 ```sh

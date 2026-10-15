@@ -1,5 +1,7 @@
 # env remove
 
+![Environment remove demonstration](../../assets/gifs/env-remove.gif)
+
 Delete an environment configuration file.
 
 ```sh

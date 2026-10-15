@@ -1,5 +1,7 @@
 # env show
 
+![Environment show demonstration](../../assets/gifs/env-show.gif)
+
 List environments, inspect their settings or copy one value.
 
 ```sh

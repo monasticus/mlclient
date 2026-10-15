@@ -8,7 +8,7 @@ Set Theme "Gruvbox Light"
 Set FontFamily "JetBrains Mono"
 Set FontSize 16
 Set Padding 30
-Set BorderRadius 10
+Set BorderRadius 0
 Set Margin 0
 Set LetterSpacing 1
 Set LineHeight 1.2

@@ -46,6 +46,7 @@ ml_mocker.with_delete_side_effect(
 
 @pytest_asyncio.fixture
 async def svc():
+
     async with AsyncMLClient() as ml:
         yield ml.documents
 
@@ -730,109 +731,609 @@ def test_documents_sender_metadata_document_with_metadata_object():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_with_scope_parameters(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+async def test_read_unscoped():
     mocker = MLRespXMocker(use_router=False)
     mocker.with_url("http://localhost:8000/v1/documents")
-    mocker.with_request_param("database", scope_params.get("database"))
-    mocker.with_request_param("txid", scope_params.get("txid"))
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
     mocker.with_request_param("format", "json")
     route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
     async with AsyncMLClient() as ml:
-        documents = ml.documents(**service_defaults)
-        result = await documents.read("/some/dir/doc1.xml", **overrides)
+        documents = ml.documents
+        result = await documents.read("/some/dir/doc1.xml")
+
     assert result.uri == "/some/dir/doc1.xml"
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"uri": "/some/dir/doc1.xml", "format": "json"} | scope_params
-    )
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_read_stream_with_scope_parameters(
-    scope_parameters,
-):
-    service_defaults, overrides, scope_params = scope_parameters
+async def test_read_keywords():
     mocker = MLRespXMocker(use_router=False)
     mocker.with_url("http://localhost:8000/v1/documents")
-    mocker.with_request_param("database", scope_params.get("database"))
-    mocker.with_request_param("txid", scope_params.get("txid"))
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
     mocker.with_request_param("format", "json")
     route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
     async with AsyncMLClient() as ml:
-        documents = ml.documents(**service_defaults)
+        documents = ml.documents
+        result = await documents.read(
+            "/some/dir/doc1.xml",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result.uri == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_service_scope():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.read("/some/dir/doc1.xml")
+
+    assert result.uri == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_override_service():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.read(
+            "/some/dir/doc1.xml",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result.uri == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_clear_database():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.read("/some/dir/doc1.xml", database=None)
+
+    assert result.uri == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_clear_transaction():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.read("/some/dir/doc1.xml", txid=None)
+
+    assert result.uri == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_stream_unscoped():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents
+        result = [doc async for doc in documents.read_stream("/some/dir/doc1.xml")]
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_stream_keywords():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents
         result = [
             doc
-            async for doc in documents.read_stream("/some/dir/doc1.xml", **overrides)
+            async for doc in documents.read_stream(
+                "/some/dir/doc1.xml",
+                database="request-db",
+                txid="request-tx",
+            )
         ]
+
     assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"uri": "/some/dir/doc1.xml", "format": "json"} | scope_params
-    )
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_write_with_scope_parameters(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+async def test_read_stream_service_scope():
     mocker = MLRespXMocker(use_router=False)
     mocker.with_url("http://localhost:8000/v1/documents")
-    mocker.with_request_param("database", scope_params.get("database"))
-    mocker.with_request_param("txid", scope_params.get("txid"))
-    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
     async with AsyncMLClient() as ml:
-        documents = ml.documents(**service_defaults)
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = [doc async for doc in documents.read_stream("/some/dir/doc1.xml")]
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_stream_override_service():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = [
+            doc
+            async for doc in documents.read_stream(
+                "/some/dir/doc1.xml",
+                database="request-db",
+                txid="request-tx",
+            )
+        ]
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_stream_clear_database():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = [
+            doc
+            async for doc in documents.read_stream("/some/dir/doc1.xml", database=None)
+        ]
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_stream_clear_transaction():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    route = mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = [
+            doc async for doc in documents.read_stream("/some/dir/doc1.xml", txid=None)
+        ]
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "format": "json",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_write_unscoped():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents
         result = await documents.write(
             XMLDocument(
                 ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
                 "/some/dir/doc1.xml",
             ),
-            **overrides,
         )
+
     assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
-    assert dict(route.calls.last.request.url.params) == scope_params
+    assert dict(route.calls.last.request.url.params) == {}
     assert route.call_count == 1
 
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_delete_with_scope_parameters(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+async def test_write_keywords():
     mocker = MLRespXMocker(use_router=False)
     mocker.with_url("http://localhost:8000/v1/documents")
-    mocker.with_request_param("database", scope_params.get("database"))
-    mocker.with_request_param("txid", scope_params.get("txid"))
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents
+        result = await documents.write(
+            XMLDocument(
+                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
+                "/some/dir/doc1.xml",
+            ),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_write_service_scope():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.write(
+            XMLDocument(
+                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
+                "/some/dir/doc1.xml",
+            ),
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_write_override_service():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.write(
+            XMLDocument(
+                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
+                "/some/dir/doc1.xml",
+            ),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_write_clear_database():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "service-tx")
+    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.write(
+            XMLDocument(
+                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
+                "/some/dir/doc1.xml",
+            ),
+            database=None,
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {"txid": "service-tx"}
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_write_clear_transaction():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    route = mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = await documents.write(
+            XMLDocument(
+                ElemTree.ElementTree(ElemTree.fromstring("<root/>")),
+                "/some/dir/doc1.xml",
+            ),
+            txid=None,
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+    assert dict(route.calls.last.request.url.params) == {"database": "service-db"}
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_unscoped():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
     mocker.with_response_code(204)
     mocker.with_empty_response_body()
     route = mocker.mock_delete()
+
     async with AsyncMLClient() as ml:
-        documents = ml.documents(**service_defaults)
-        await documents.delete("/some/dir/doc1.xml", **overrides)
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"uri": "/some/dir/doc1.xml"} | scope_params
-    )
+        documents = ml.documents
+        await documents.delete("/some/dir/doc1.xml")
+
+    assert dict(route.calls.last.request.url.params) == {"uri": "/some/dir/doc1.xml"}
     assert route.call_count == 1
 
 
-@pytest.mark.parametrize(
-    ("overrides", "scope_params"),
-    [
-        ({"txid": "tx-2"}, {"database": "catalog", "txid": "tx-2"}),
-        ({"database": None, "txid": None}, {}),
-    ],
-    ids=["narrow", "clear"],
-)
 @pytest.mark.asyncio
 @respx.mock
-async def test_scoped_service_preserves_original(overrides, scope_params):
+async def test_delete_keywords():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents
+        await documents.delete(
+            "/some/dir/doc1.xml",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_service_scope():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        await documents.delete("/some/dir/doc1.xml")
+
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_override_service():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        await documents.delete(
+            "/some/dir/doc1.xml",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_clear_database():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        await documents.delete("/some/dir/doc1.xml", database=None)
+
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_clear_transaction():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        await documents.delete("/some/dir/doc1.xml", txid=None)
+
+    assert dict(route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_scoped_service_narrow_preserves_original():
     mocker = MLRespXMocker(use_router=False)
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
@@ -842,74 +1343,67 @@ async def test_scoped_service_preserves_original(overrides, scope_params):
     mocker.with_empty_response_body()
     original_route = mocker.mock_delete()
     mocker.with_url("http://localhost:8000/v1/documents")
-    mocker.with_request_param("database", scope_params.get("database"))
-    mocker.with_request_param("txid", scope_params.get("txid"))
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-2")
     mocker.with_request_param("uri", "/some/dir/doc1.xml")
     mocker.with_response_code(204)
     mocker.with_empty_response_body()
     changed_route = mocker.mock_delete()
+
     async with AsyncMLClient() as ml:
         original = ml.documents(database="catalog", txid="tx-1")
-        changed = original(**overrides)
+        changed = original(txid="tx-2")
         assert changed_route.call_count == 0
         assert original_route.call_count == 0
         await changed.delete("/some/dir/doc1.xml")
         await original.delete("/some/dir/doc1.xml")
-    assert (
-        dict(changed_route.calls.last.request.url.params)
-        == {"uri": "/some/dir/doc1.xml"} | scope_params
-    )
+
+    assert dict(changed_route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "database": "catalog",
+        "txid": "tx-2",
+    }
     assert dict(original_route.calls.last.request.url.params) == {
         "uri": "/some/dir/doc1.xml",
-    } | {"database": "catalog", "txid": "tx-1"}
+        "database": "catalog",
+        "txid": "tx-1",
+    }
     assert changed_route.call_count == 1
     assert original_route.call_count == 1
 
 
-@pytest.fixture(
-    params=[
-        pytest.param(({}, {}, {}), id="unscoped"),
-        pytest.param(
-            (
-                {},
-                {"database": "request-db", "txid": "request-tx"},
-                {"database": "request-db", "txid": "request-tx"},
-            ),
-            id="keywords",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {},
-                {"database": "service-db", "txid": "service-tx"},
-            ),
-            id="service-scope",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {"database": "request-db", "txid": "request-tx"},
-                {"database": "request-db", "txid": "request-tx"},
-            ),
-            id="override-service",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {"database": None},
-                {"txid": "service-tx"},
-            ),
-            id="clear-database",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {"txid": None},
-                {"database": "service-db"},
-            ),
-            id="clear-transaction",
-        ),
-    ],
-)
-def scope_parameters(request):
-    return request.param
+@pytest.mark.asyncio
+@respx.mock
+async def test_scoped_service_clear_preserves_original():
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    original_route = mocker.mock_delete()
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    changed_route = mocker.mock_delete()
+
+    async with AsyncMLClient() as ml:
+        original = ml.documents(database="catalog", txid="tx-1")
+        changed = original(database=None, txid=None)
+        assert changed_route.call_count == 0
+        assert original_route.call_count == 0
+        await changed.delete("/some/dir/doc1.xml")
+        await original.delete("/some/dir/doc1.xml")
+
+    assert dict(changed_route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+    }
+    assert dict(original_route.calls.last.request.url.params) == {
+        "uri": "/some/dir/doc1.xml",
+        "database": "catalog",
+        "txid": "tx-1",
+    }
+    assert changed_route.call_count == 1
+    assert original_route.call_count == 1

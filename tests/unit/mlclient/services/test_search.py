@@ -30,8 +30,7 @@ ERROR_RESPONSE = resources_utils.get_test_resource_json(__file__, "error-respons
 
 @pytest.mark.parametrize("case", ["matches", "empty"])
 @respx.mock
-def test_documents_with_report(case, scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+def test_documents_with_report_unscoped(case):
     body = resources_utils.read_test_resource_bytes(
         __file__,
         f"documents-report-{case}.bin",
@@ -50,8 +49,6 @@ def test_documents_with_report(case, scope_parameters):
     ml_mocker.with_request_body(
         {"search": {"qtext": "" if case == "matches" else "missing-value"}},
     )
-    ml_mocker.with_request_param("database", scope_params.get("database"))
-    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type(headers["content-type"])
     ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
@@ -59,12 +56,9 @@ def test_documents_with_report(case, scope_parameters):
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        report, docs = ml.search(**service_defaults)(
-            collection="cts-test",
-        ).documents_with_report(
+        (report, docs) = ml.search(collection="cts-test").documents_with_report(
             "" if case == "matches" else "missing-value",
             pos=[1, 2],
-            **overrides,
         )
 
     assert isinstance(report, SearchReport)
@@ -78,17 +72,572 @@ def test_documents_with_report(case, scope_parameters):
         assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
         assert docs[1].content == {"active": True, "label": "gamma"}
 
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {
-            "start": "1",
-            "pageLength": "2",
-            "collection": "cts-test",
-            "view": "all",
-            "format": "json",
-        }
-        | scope_params
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_keywords(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
     )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(collection="cts-test").documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_service_scope(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(
+            database="service-db",
+            txid="service-tx",
+            collection="cts-test",
+        ).documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_override_service(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(
+            database="service-db",
+            txid="service-tx",
+            collection="cts-test",
+        ).documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_clear_database(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(
+            database="service-db",
+            txid="service-tx",
+            collection="cts-test",
+        ).documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            database=None,
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_clear_transaction(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(
+            database="service-db",
+            txid="service-tx",
+            collection="cts-test",
+        ).documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            txid=None,
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_operation_scope(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "operation-db")
+    ml_mocker.with_request_param("txid", "operation-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(
+            database="service-db",
+            txid="service-tx",
+            collection="cts-test",
+        ).documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "operation-db",
+        "txid": "operation-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_override_operation_scope(case):
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(
+            database="service-db",
+            txid="service-tx",
+            collection="cts-test",
+        ).documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_transaction(case):
+    txn = TransactionService(None, "transaction-id", "transaction-db")
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "transaction-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(collection="cts-test").documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            **txn,
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "transaction-db",
+        "txid": "transaction-id",
+    }
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("case", ["matches", "empty"])
+@respx.mock
+def test_documents_with_report_transaction_inherits_database(case):
+    txn = TransactionService(None, "transaction-id", None)
+    body = resources_utils.read_test_resource_bytes(
+        __file__,
+        f"documents-report-{case}.bin",
+    )
+    headers = resources_utils.get_test_resource_json(
+        __file__,
+        f"documents-report-{case}-headers.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_param("start", 1)
+    ml_mocker.with_request_param("pageLength", 2)
+    ml_mocker.with_request_param("collection", "cts-test")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(
+        {"search": {"qtext": "" if case == "matches" else "missing-value"}},
+    )
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(headers["content-type"])
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "123")
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        (report, docs) = ml.search(
+            database="service-db",
+            collection="cts-test",
+        ).documents_with_report(
+            "" if case == "matches" else "missing-value",
+            pos=[1, 2],
+            **txn,
+        )
+
+    assert isinstance(report, SearchReport)
+    assert report.total == (3 if case == "matches" else 0)
+    assert report.start == 1
+    assert report.page_length == 2
+    assert report.effective_timestamp == "123"
+    assert [doc.uri for doc in docs] == [item["uri"] for item in report.results]
+    assert len(docs) == (2 if case == "matches" else 0)
+    if case == "matches":
+        assert [type(doc) for doc in docs] == [XMLDocument, JSONDocument]
+        assert docs[1].content == {"active": True, "label": "gamma"}
+
+    assert dict(route.calls.last.request.url.params) == {
+        "start": "1",
+        "pageLength": "2",
+        "collection": "cts-test",
+        "view": "all",
+        "format": "json",
+        "database": "service-db",
+        "txid": "transaction-id",
+    }
     assert route.call_count == 1
 
 
@@ -172,13 +721,10 @@ def test_documents_for_string_query():
 
 
 @respx.mock
-def test_documents_without_query(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+def test_documents_without_query_unscoped():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_header("Accept", "multipart/mixed")
-    ml_mocker.with_request_param("database", scope_params.get("database"))
-    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.json_doc_body_part("/products/coffee.json"),
@@ -192,13 +738,298 @@ def test_documents_without_query(scope_parameters):
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        docs = ml.search(**service_defaults).documents(**overrides)
+        docs = ml.search.documents()
 
     assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {"format": "json"}
+    assert route.call_count == 1
 
-    assert (
-        dict(route.calls.last.request.url.params) == {"format": "json"} | scope_params
+
+@respx.mock
+def test_documents_without_query_keywords():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
     )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search.documents(database="request-db", txid="request-tx")
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_service_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search(database="service-db", txid="service-tx").documents()
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_override_service():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search(database="service-db", txid="service-tx").documents(
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_clear_database():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search(database="service-db", txid="service-tx").documents(
+            database=None,
+        )
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_clear_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search(database="service-db", txid="service-tx").documents(txid=None)
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "operation-db")
+    ml_mocker.with_request_param("txid", "operation-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search(database="service-db", txid="service-tx").documents(
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+        )
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "operation-db",
+        "txid": "operation-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_override_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search(database="service-db", txid="service-tx").documents(
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_transaction():
+    txn = TransactionService(None, "transaction-id", "transaction-db")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "transaction-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search.documents(**txn)
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "transaction-db",
+        "txid": "transaction-id",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_documents_without_query_transaction_inherits_database():
+    txn = TransactionService(None, "transaction-id", None)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.json_doc_body_part("/products/coffee.json"),
+    )
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "documents-without-query-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        docs = ml.search(database="service-db").documents(**txn)
+
+    assert [doc.uri for doc in docs] == ["/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "format": "json",
+        "database": "service-db",
+        "txid": "transaction-id",
+    }
     assert route.call_count == 1
 
 
@@ -383,8 +1214,7 @@ def test_documents_error():
 
 
 @respx.mock
-def test_uris(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+def test_uris_unscoped():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_param("category", "quality")
@@ -392,8 +1222,6 @@ def test_uris(scope_parameters):
     ml_mocker.with_request_param("start", "2")
     ml_mocker.with_request_param("pageLength", "2")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
-    ml_mocker.with_request_param("database", scope_params.get("database"))
-    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
         test_data.doc_metadata_body_part(
@@ -411,15 +1239,422 @@ def test_uris(scope_parameters):
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        uris = ml.search(**service_defaults).uris(CTS_QUERY, pos=[2, 3], **overrides)
+        uris = ml.search.uris(CTS_QUERY, pos=[2, 3])
 
     assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+    }
+    assert route.call_count == 1
 
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"category": "quality", "format": "json", "start": "2", "pageLength": "2"}
-        | scope_params
+
+@respx.mock
+def test_uris_keywords():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
     )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search.uris(
+            CTS_QUERY,
+            pos=[2, 3],
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_service_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search(database="service-db", txid="service-tx").uris(
+            CTS_QUERY,
+            pos=[2, 3],
+        )
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_override_service():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search(database="service-db", txid="service-tx").uris(
+            CTS_QUERY,
+            pos=[2, 3],
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_clear_database():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search(database="service-db", txid="service-tx").uris(
+            CTS_QUERY,
+            pos=[2, 3],
+            database=None,
+        )
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_clear_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search(database="service-db", txid="service-tx").uris(
+            CTS_QUERY,
+            pos=[2, 3],
+            txid=None,
+        )
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "operation-db")
+    ml_mocker.with_request_param("txid", "operation-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search(database="service-db", txid="service-tx").uris(
+            CTS_QUERY,
+            pos=[2, 3],
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+        )
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "operation-db",
+        "txid": "operation-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_override_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search(database="service-db", txid="service-tx").uris(
+            CTS_QUERY,
+            pos=[2, 3],
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_transaction():
+    txn = TransactionService(None, "transaction-id", "transaction-db")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "transaction-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search.uris(CTS_QUERY, pos=[2, 3], **txn)
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "transaction-db",
+        "txid": "transaction-id",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_uris_transaction_inherits_database():
+    txn = TransactionService(None, "transaction-id", None)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("category", "quality")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("start", "2")
+    ml_mocker.with_request_param("pageLength", "2")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.xml",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_response_documents_body_part(
+        test_data.doc_metadata_body_part(
+            "/products/coffee.json",
+            MetadataSpec(quality=0),
+        ),
+    )
+    ml_mocker.with_request_body(CTS_BODY)
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        uris = ml.search(database="service-db").uris(CTS_QUERY, pos=[2, 3], **txn)
+
+    assert uris == ["/products/coffee.xml", "/products/coffee.json"]
+    assert dict(route.calls.last.request.url.params) == {
+        "category": "quality",
+        "format": "json",
+        "start": "2",
+        "pageLength": "2",
+        "database": "service-db",
+        "txid": "transaction-id",
+    }
     assert route.call_count == 1
 
 
@@ -494,16 +1729,13 @@ def test_uris_error():
 
 
 @respx.mock
-def test_values_of_strings(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+def test_values_of_strings_unscoped():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_param("options", "product-options")
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("Accept", "application/json")
-    ml_mocker.with_request_param("database", scope_params.get("database"))
-    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_body(
@@ -524,22 +1756,446 @@ def test_values_of_strings(scope_parameters):
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        values = ml.search(**service_defaults)(options="product-options").values(
+        values = ml.search(options="product-options").values("category", CTS_QUERY)
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_keywords():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(options="product-options").values(
             "category",
             CTS_QUERY,
-            **overrides,
+            database="request-db",
+            txid="request-tx",
         )
 
-    assert values == [
-        ValueHit("drinks", frequency=2),
-        ValueHit("food", frequency=1),
-    ]
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
 
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"options": "product-options", "view": "values", "format": "json"}
-        | scope_params
+
+@respx.mock
+def test_values_of_strings_service_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
     )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options="product-options",
+        ).values("category", CTS_QUERY)
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_override_service():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options="product-options",
+        ).values("category", CTS_QUERY, database="request-db", txid="request-tx")
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_clear_database():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options="product-options",
+        ).values("category", CTS_QUERY, database=None)
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_clear_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options="product-options",
+        ).values("category", CTS_QUERY, txid=None)
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "operation-db")
+    ml_mocker.with_request_param("txid", "operation-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options="product-options",
+        ).values(
+            "category",
+            CTS_QUERY,
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+        )
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "operation-db",
+        "txid": "operation-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_override_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options="product-options",
+        ).values(
+            "category",
+            CTS_QUERY,
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_transaction():
+    txn = TransactionService(None, "transaction-id", "transaction-db")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "transaction-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(options="product-options").values(
+            "category",
+            CTS_QUERY,
+            **txn,
+        )
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "transaction-db",
+        "txid": "transaction-id",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_values_of_strings_transaction_inherits_database():
+    txn = TransactionService(None, "transaction-id", None)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("options", "product-options")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "category",
+                "type": "xs:string",
+                "distinct-value": [
+                    {"frequency": 2, "_value": "drinks"},
+                    {"frequency": 1, "_value": "food"},
+                ],
+            },
+        },
+    )
+    ml_mocker.with_request_body(
+        {"search": {"options": {"additional-query": [CTS_XML]}}},
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        values = ml.search(database="service-db", options="product-options").values(
+            "category",
+            CTS_QUERY,
+            **txn,
+        )
+
+    assert values == [ValueHit("drinks", frequency=2), ValueHit("food", frequency=1)]
+    assert dict(route.calls.last.request.url.params) == {
+        "options": "product-options",
+        "view": "values",
+        "format": "json",
+        "database": "service-db",
+        "txid": "transaction-id",
+    }
     assert route.call_count == 1
 
 
@@ -672,6 +2328,7 @@ def test_values_error():
 )
 @respx.mock
 def test_invalid_pos_is_rejected_before_request(pos, error_type, message):
+
     with MLClient() as ml, pytest.raises(error_type) as error:
         ml.search.documents("coffee", pos=pos)
 
@@ -680,6 +2337,7 @@ def test_invalid_pos_is_rejected_before_request(pos, error_type, message):
 
 @respx.mock
 def test_invalid_query_is_rejected_before_request():
+
     with MLClient() as ml, pytest.raises(TypeError) as error:
         ml.search.uris({"q": "coffee"})
 
@@ -845,16 +2503,13 @@ def test_plugin_aggregate_preserves_native_map():
 
 
 @respx.mock
-def test_aggregate_without_matches(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+def test_aggregate_without_matches_unscoped():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "aggregate")
     ml_mocker.with_request_param("aggregate", "avg")
     ml_mocker.with_request_header("Accept", "application/json")
-    ml_mocker.with_request_param("database", scope_params.get("database"))
-    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price")
@@ -871,19 +2526,415 @@ def test_aggregate_without_matches(scope_parameters):
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        result = ml.search(**service_defaults)(options=PRICE_OPTIONS).aggregate(
+        result = ml.search(options=PRICE_OPTIONS).aggregate("price", "avg", "zzz")
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_keywords():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(options=PRICE_OPTIONS).aggregate(
             "price",
             "avg",
             "zzz",
-            **overrides,
+            database="request-db",
+            txid="request-tx",
         )
 
     assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
 
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"view": "aggregate", "format": "json", "aggregate": "avg"} | scope_params
+
+@respx.mock
+def test_aggregate_without_matches_service_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
     )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=PRICE_OPTIONS,
+        ).aggregate("price", "avg", "zzz")
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_override_service():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=PRICE_OPTIONS,
+        ).aggregate("price", "avg", "zzz", database="request-db", txid="request-tx")
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_clear_database():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=PRICE_OPTIONS,
+        ).aggregate("price", "avg", "zzz", database=None)
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_clear_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=PRICE_OPTIONS,
+        ).aggregate("price", "avg", "zzz", txid=None)
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "operation-db")
+    ml_mocker.with_request_param("txid", "operation-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=PRICE_OPTIONS,
+        ).aggregate(
+            "price",
+            "avg",
+            "zzz",
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+        )
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "operation-db",
+        "txid": "operation-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_override_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=PRICE_OPTIONS,
+        ).aggregate(
+            "price",
+            "avg",
+            "zzz",
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_transaction():
+    txn = TransactionService(None, "transaction-id", "transaction-db")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "transaction-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(options=PRICE_OPTIONS).aggregate(
+            "price",
+            "avg",
+            "zzz",
+            **txn,
+        )
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "transaction-db",
+        "txid": "transaction-id",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_aggregate_without_matches_transaction_inherits_database():
+    txn = TransactionService(None, "transaction-id", None)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "aggregate")
+    ml_mocker.with_request_param("aggregate", "avg")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price")
+    ml_mocker.with_request_body({"search": {"options": PRICE_OPTIONS, "qtext": "zzz"}})
+    ml_mocker.with_response_body(
+        {
+            "values-response": {
+                "name": "price",
+                "type": "xs:decimal",
+                "aggregate-result": [{"name": "avg"}],
+            },
+        },
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.search(database="service-db", options=PRICE_OPTIONS).aggregate(
+            "price",
+            "avg",
+            "zzz",
+            **txn,
+        )
+
+    assert result is None
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "aggregate",
+        "format": "json",
+        "aggregate": "avg",
+        "database": "service-db",
+        "txid": "transaction-id",
+    }
     assert route.call_count == 1
 
 
@@ -966,6 +3017,7 @@ def test_values_with_options_builder_and_controls():
 
 
 def test_invalid_options():
+
     with MLClient() as ml, pytest.raises(TypeError) as error:
         ml.search(options=123).values("price")
 
@@ -976,6 +3028,7 @@ def test_invalid_options():
 
 @pytest.mark.parametrize("options", [None, "product-options", PRICE_OPTIONS])
 def test_invalid_query_is_rejected_for_get_and_combined_queries(options):
+
     with MLClient() as ml, pytest.raises(TypeError) as error:
         ml.search(options=options).uris(42)
 
@@ -983,8 +3036,7 @@ def test_invalid_query_is_rejected_for_get_and_combined_queries(options):
 
 
 @respx.mock
-def test_tuples_have_individual_types(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+def test_tuples_unscoped():
     options = SearchOptions().tuples(
         "price-day",
         Range(Element("price"), "xs:decimal"),
@@ -995,8 +3047,6 @@ def test_tuples_have_individual_types(scope_parameters):
     ml_mocker.with_request_param("format", "xml")
     ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_header("Accept", "application/json")
-    ml_mocker.with_request_param("database", scope_params.get("database"))
-    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
@@ -1008,8 +3058,8 @@ def test_tuples_have_individual_types(scope_parameters):
         ),
     )
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
-    # ML10 XML capture; timing metrics omitted.
-    ml_mocker.with_response_body("""<search:values-response name="price-day"
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:search="http://marklogic.com/appservices/search">
@@ -1021,24 +3071,580 @@ def test_tuples_have_individual_types(scope_parameters):
     <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
     <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
   </search:tuple>
-</search:values-response>""")
+</search:values-response>""",
+    )
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        tuples = ml.search(**service_defaults)(options=options).tuples(
+        tuples = ml.search(options=options).tuples("price-day")
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_keywords():
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(options=options).tuples(
             "price-day",
-            **overrides,
+            database="request-db",
+            txid="request-tx",
         )
 
     assert tuples == [
         TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
         TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
     ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
 
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"view": "values", "format": "xml"} | scope_params
+
+@respx.mock
+def test_tuples_service_scope():
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
     )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=options,
+        ).tuples("price-day")
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_override_service():
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=options,
+        ).tuples("price-day", database="request-db", txid="request-tx")
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_clear_database():
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=options,
+        ).tuples("price-day", database=None)
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_clear_transaction():
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=options,
+        ).tuples("price-day", txid=None)
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_operation_scope():
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "operation-db")
+    ml_mocker.with_request_param("txid", "operation-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=options,
+        ).tuples(
+            "price-day",
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+        )
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "operation-db",
+        "txid": "operation-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_override_operation_scope():
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(
+            database="service-db",
+            txid="service-tx",
+            options=options,
+        ).tuples(
+            "price-day",
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_transaction():
+    txn = TransactionService(None, "transaction-id", "transaction-db")
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "transaction-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(options=options).tuples("price-day", **txn)
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "transaction-db",
+        "txid": "transaction-id",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_tuples_transaction_inherits_database():
+    txn = TransactionService(None, "transaction-id", None)
+    options = SearchOptions().tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_url("http://localhost:8000/v1/values/price-day")
+    ml_mocker.with_request_header("Accept", "application/xml")
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "tuples-have-individual-types-request.json",
+        ),
+    )
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_body(
+        """<search:values-response name="price-day"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:search="http://marklogic.com/appservices/search">
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">1.25</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-01</search:distinct-value>
+  </search:tuple>
+  <search:tuple frequency="1">
+    <search:distinct-value xsi:type="xs:decimal">2.5</search:distinct-value>
+    <search:distinct-value xsi:type="xs:date">2026-01-02</search:distinct-value>
+  </search:tuple>
+</search:values-response>""",
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        tuples = ml.search(database="service-db", options=options).tuples(
+            "price-day",
+            **txn,
+        )
+
+    assert tuples == [
+        TupleHit((Decimal("1.25"), date(2026, 1, 1)), frequency=1),
+        TupleHit((Decimal("2.5"), date(2026, 1, 2)), frequency=1),
+    ]
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "values",
+        "format": "xml",
+        "database": "service-db",
+        "txid": "transaction-id",
+    }
     assert route.call_count == 1
 
 
@@ -1096,15 +3702,12 @@ def test_tuples_reject_values_definition():
 
 
 @respx.mock
-def test_report_retains_empty_native_report_and_timestamp(scope_parameters):
-    service_defaults, overrides, scope_params = scope_parameters
+def test_report_unscoped():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_header("Accept", "application/json")
-    ml_mocker.with_request_param("database", scope_params.get("database"))
-    ml_mocker.with_request_param("txid", scope_params.get("txid"))
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
@@ -1127,7 +3730,7 @@ def test_report_retains_empty_native_report_and_timestamp(scope_parameters):
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        report = ml.search(**service_defaults).report("product", **overrides)
+        report = ml.search.report("product")
 
     assert report == SearchReport(
         total=0,
@@ -1139,11 +3742,494 @@ def test_report_retains_empty_native_report_and_timestamp(scope_parameters):
         effective_timestamp="17912992738350300",
         response=payload,
     )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+    }
+    assert route.call_count == 1
 
-    assert (
-        dict(route.calls.last.request.url.params)
-        == {"view": "all", "format": "json"} | scope_params
+
+@respx.mock
+def test_report_keywords():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
     )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search.report("product", database="request-db", txid="request-tx")
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_service_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search(database="service-db", txid="service-tx").report("product")
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "service-db",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_override_service():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search(database="service-db", txid="service-tx").report(
+            "product",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_clear_database():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("txid", "service-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search(database="service-db", txid="service-tx").report(
+            "product",
+            database=None,
+        )
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "txid": "service-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_clear_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search(database="service-db", txid="service-tx").report(
+            "product",
+            txid=None,
+        )
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "service-db",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "operation-db")
+    ml_mocker.with_request_param("txid", "operation-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search(database="service-db", txid="service-tx").report(
+            "product",
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+        )
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "operation-db",
+        "txid": "operation-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_override_operation_scope():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "request-db")
+    ml_mocker.with_request_param("txid", "request-tx")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search(database="service-db", txid="service-tx").report(
+            "product",
+            scope=SearchScope(database="operation-db", txid="operation-tx"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "request-db",
+        "txid": "request-tx",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_transaction():
+    txn = TransactionService(None, "transaction-id", "transaction-db")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "transaction-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search.report("product", **txn)
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "transaction-db",
+        "txid": "transaction-id",
+    }
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_report_transaction_inherits_database():
+    txn = TransactionService(None, "transaction-id", None)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "all")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_param("database", "service-db")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17912992738350300")
+    payload = {
+        "snippet-format": "snippet",
+        "total": 0,
+        "start": 1,
+        "page-length": 10,
+        "results": [],
+        "qtext": "product",
+        "metrics": {"query-resolution-time": "PT0.001417S", "total-time": "PT0.00169S"},
+    }
+    ml_mocker.with_response_body(payload)
+    ml_mocker.with_request_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "report-retains-empty-native-report-and-timestamp-request.json",
+        ),
+    )
+    route = ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        report = ml.search(database="service-db").report("product", **txn)
+
+    assert report == SearchReport(
+        total=0,
+        start=1,
+        page_length=10,
+        results=[],
+        facets={},
+        metrics=payload["metrics"],
+        effective_timestamp="17912992738350300",
+        response=payload,
+    )
+    assert dict(route.calls.last.request.url.params) == {
+        "view": "all",
+        "format": "json",
+        "database": "service-db",
+        "txid": "transaction-id",
+    }
     assert route.call_count == 1
 
 
@@ -1353,6 +4439,7 @@ def test_inline_cts_query_preserves_existing_additional_query(additional):
 
 
 def test_inline_cts_query_rejects_invalid_additional_query():
+
     with MLClient() as ml, pytest.raises(TypeError) as error:
         ml.search(options={"additional-query": 1}).values(
             "price",
@@ -1363,88 +4450,3 @@ def test_inline_cts_query_rejects_invalid_additional_query():
         str(error.value)
         == "additional-query must be an XML string or a list of XML strings"
     )
-
-
-@pytest.fixture(
-    params=[
-        pytest.param(({}, {}, {}), id="unscoped"),
-        pytest.param(
-            (
-                {},
-                {"database": "request-db", "txid": "request-tx"},
-                {"database": "request-db", "txid": "request-tx"},
-            ),
-            id="keywords",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {},
-                {"database": "service-db", "txid": "service-tx"},
-            ),
-            id="service-scope",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {"database": "request-db", "txid": "request-tx"},
-                {"database": "request-db", "txid": "request-tx"},
-            ),
-            id="override-service",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {"database": None},
-                {"txid": "service-tx"},
-            ),
-            id="clear-database",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {"txid": None},
-                {"database": "service-db"},
-            ),
-            id="clear-transaction",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {"scope": SearchScope(database="operation-db", txid="operation-tx")},
-                {"database": "operation-db", "txid": "operation-tx"},
-            ),
-            id="operation-scope",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db", "txid": "service-tx"},
-                {
-                    "scope": SearchScope(database="operation-db", txid="operation-tx"),
-                    "database": "request-db",
-                    "txid": "request-tx",
-                },
-                {"database": "request-db", "txid": "request-tx"},
-            ),
-            id="override-operation-scope",
-        ),
-        pytest.param(
-            (
-                {},
-                TransactionService(None, "transaction-id", "transaction-db"),
-                {"database": "transaction-db", "txid": "transaction-id"},
-            ),
-            id="transaction",
-        ),
-        pytest.param(
-            (
-                {"database": "service-db"},
-                TransactionService(None, "transaction-id", None),
-                {"database": "service-db", "txid": "transaction-id"},
-            ),
-            id="transaction-inherits-database",
-        ),
-    ],
-)
-def scope_parameters(request):
-    return request.param

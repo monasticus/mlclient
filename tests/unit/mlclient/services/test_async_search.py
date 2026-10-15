@@ -610,6 +610,7 @@ async def test_documents_for_cts_query():
 async def test_documents_for_structured_query():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
@@ -636,6 +637,7 @@ async def test_documents_for_structured_query():
 async def test_documents_for_string_query():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_documents_body_part(
@@ -954,6 +956,7 @@ async def test_documents_without_query_transaction_inherits_database():
 async def test_documents_at_single_position():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("start", "3")
     ml_mocker.with_request_param("pageLength", "1")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -980,6 +983,7 @@ async def test_documents_at_single_position():
 async def test_documents_in_position_range():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("start", "11")
     ml_mocker.with_request_param("pageLength", "10")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1006,6 +1010,7 @@ async def test_documents_in_position_range():
 async def test_documents_with_metadata():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("category", "content")
     ml_mocker.with_request_param("category", "collections")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
@@ -1040,6 +1045,7 @@ async def test_documents_with_metadata():
 async def test_documents_forwards_options_database_and_transaction():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("options", "product-options")
     ml_mocker.with_request_param("database", "Documents")
     ml_mocker.with_request_param("txid", "12345")
@@ -1072,6 +1078,7 @@ async def test_documents_forwards_options_database_and_transaction():
 async def test_documents_without_matches():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_header("vnd.marklogic.result-estimate", "0")
@@ -1095,6 +1102,7 @@ async def test_documents_without_matches():
 async def test_documents_with_report_error():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "all")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_request_body({"search": {"qtext": "coffee"}})
@@ -1118,6 +1126,7 @@ async def test_documents_with_report_error():
 async def test_documents_error():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_code(400)
@@ -1522,6 +1531,7 @@ async def test_uris_transaction_inherits_database():
 async def test_uris_of_single_match():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("category", "quality")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_response_code(200)
@@ -1550,6 +1560,7 @@ async def test_uris_of_single_match():
 async def test_uris_without_matches():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("category", "quality")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_response_code(200)
@@ -1573,6 +1584,7 @@ async def test_uris_without_matches():
 async def test_uris_error():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(SEARCH_URL)
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("category", "quality")
     ml_mocker.with_request_header("Accept", "multipart/mixed")
     ml_mocker.with_response_code(200)
@@ -2028,6 +2040,8 @@ async def test_values_of_strings_transaction_inherits_database():
 async def test_values_are_converted_from_their_type(atomic_type, lexical, expected):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("start", "1")
     ml_mocker.with_request_param("pageLength", "1")
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2061,6 +2075,8 @@ async def test_values_are_converted_from_their_type(atomic_type, lexical, expect
 async def test_values_without_matches():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_param("database", "Documents")
     ml_mocker.with_request_param("txid", "12345")
     ml_mocker.with_request_header("Accept", "application/json")
@@ -2088,6 +2104,8 @@ async def test_values_without_matches():
 async def test_values_reject_tuples():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_header("Accept", "application/json")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -2116,6 +2134,8 @@ async def test_values_reject_tuples():
 async def test_values_error():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
     ml_mocker.with_request_header("Accept", "application/json")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -2210,6 +2230,7 @@ async def test_aggregate_native_result(case, aggregate_path):
     }
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
+    ml_mocker.with_request_param("aggregatePath", aggregate_path)
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "aggregate")
     ml_mocker.with_request_param("aggregate", function)

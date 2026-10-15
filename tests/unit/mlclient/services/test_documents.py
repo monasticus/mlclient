@@ -1177,6 +1177,7 @@ def test_read_forwards_txid(ml):
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("txid", "txn-123")
+    mocker.with_request_param("format", "json")
     mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 
     ml.documents.read(uri, txid="txn-123")

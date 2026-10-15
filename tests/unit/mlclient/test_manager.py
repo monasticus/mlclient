@@ -251,6 +251,8 @@ def test_get_client_wires_env_manage_admin_and_health_servers():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://localhost:9001/admin/v1/timestamp")
@@ -292,6 +294,8 @@ async def test_get_async_client_wires_env_manage_admin_and_health_servers():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://localhost:9001/admin/v1/timestamp")
@@ -322,6 +326,8 @@ def test_health_shares_session_and_preserves_other_endpoints(mocker):
     ml_mocker.with_url("https://localhost:8002/manage/v2/databases")
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
     manager = MLClientManager("test")
 
@@ -408,6 +414,8 @@ async def test_async_health_shares_session_and_preserves_other_endpoints(mocker)
     ml_mocker.with_url("https://localhost:8002/manage/v2/databases")
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
     manager = MLClientManager("test")
 

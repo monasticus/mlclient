@@ -16,6 +16,8 @@ async def test_custom_call():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:

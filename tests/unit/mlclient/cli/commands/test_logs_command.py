@@ -838,7 +838,7 @@ def test_command_logs_all_hosts_warns_when_unfiltered_across_hosts():
 
 @respx.mock
 def test_command_logs_all_hosts_no_warning_when_filtered():
-    _mock_two_node_error_logs()
+    _mock_two_node_error_logs(regex="node")
 
     tester = _get_tester("logs")
     tester.execute("-e test-cluster --all-hosts --regex node")
@@ -1007,9 +1007,10 @@ def test_command_logs_all_hosts_cancels_reads_before_disconnect(mocker):
     assert "<log-level>" not in tester.io.fetch_output()
 
 
-def _mock_two_node_error_logs():
+def _mock_two_node_error_logs(regex: str | None = None):
     hosts_mocker = MLRespXMocker(use_router=False)
     hosts_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/hosts")
+    hosts_mocker.with_request_param("view", "default")
     hosts_mocker.with_request_param("format", "json")
     hosts_mocker.with_response_code(200)
     hosts_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -1024,6 +1025,7 @@ def _mock_two_node_error_logs():
             ("2023-09-01T00:00:00Z", "info", "node1 message A"),
             ("2023-09-01T00:00:02Z", "warning", "node1 message B"),
         ],
+        regex=regex,
     )
     _mock_host_error_logs(
         "ml_cluster_node2",
@@ -1031,18 +1033,21 @@ def _mock_two_node_error_logs():
             ("2023-09-01T00:00:01Z", "info", "node2 message A"),
             ("2023-09-01T00:00:03Z", "error", "node2 message B"),
         ],
+        regex=regex,
     )
 
 
 def _mock_host_error_logs(
     host: str,
     logs: list[tuple],
+    regex: str | None = None,
 ):
     mocker = MLRespXMocker(use_router=False)
     mocker.with_url(f"http://ml_cluster_node1:8002{ENDPOINT}")
     mocker.with_request_param("format", "json")
     mocker.with_request_param("filename", "ErrorLog.txt")
     mocker.with_request_param("host", host)
+    mocker.with_request_param("regex", regex)
     mocker.with_response_code(200)
     mocker.with_response_content_type("application/json; charset=UTF-8")
     mocker.with_response_body(mocker.error_logs_body(logs))

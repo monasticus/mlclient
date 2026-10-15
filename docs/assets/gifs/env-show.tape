@@ -5,7 +5,7 @@ Require ml
 
 Set Shell "bash"
 Set Width 800
-Set Height 500
+Set Height 580
 Set Theme "Gruvbox Light"
 Set FontFamily "JetBrains Mono"
 Set FontSize 16
@@ -19,7 +19,7 @@ Set TypingSpeed 50ms
 
 Hide
 Set TypingSpeed 1ms
-Type `unset NO_COLOR WAYLAND_DISPLAY; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; printf 'app-name: bookstore\nprotocol: http\nhost: localhost\nusername: reader\npassword: demo-password\nauth: digest\n' > .mlclient/mlclient-local.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-dev.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-qa.yaml; clear`
+Type `unset NO_COLOR WAYLAND_DISPLAY; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; printf 'app-name: bookstore\nprotocol: http\nhost: localhost\nusername: reader\npassword: demo-password\nauth: digest\napp-servers:\n  - id: app-services\n    port: 8000\n    rest: true\n  - id: bookstore\n    port: 8010\n    rest: true\n' > .mlclient/mlclient-local.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-dev.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-qa.yaml; clear`
 Enter
 Wait
 Sleep 500ms

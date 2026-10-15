@@ -59,12 +59,20 @@ Type "qa"
 Enter
 Wait+Screen /Source/
 Sleep 1s
-Type "1"
+Type "2"
 Enter
-Wait+Screen /Gradle environment name/
-Sleep 1s
-Type "dev"
+Wait+Screen /Protocol/
+Enter
+Wait+Screen /Host/
+Enter
+Wait+Screen /Port/
+Type "18002"
+Enter
+Wait+Screen /Username/
+Enter
+Wait+Screen /Password/
+Enter
+Sleep 500ms
 Enter
 Wait
-Wait+Screen /mlclient-qa.yaml/
 Sleep 4s

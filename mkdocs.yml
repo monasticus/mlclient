@@ -11,6 +11,8 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  logo: assets/branding/wordmark-white.svg
+  favicon: assets/branding/favicon.svg
   features:
     - navigation.indexes
     - navigation.top
@@ -29,6 +31,9 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+
+extra_css:
+  - assets/stylesheets/branding.css
 
 plugins:
   - search

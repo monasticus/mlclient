@@ -46,7 +46,7 @@ response = ml.rest.documents.get(uri="/example.json")
 response = ml.http.get("/v1/documents", params={"uri": "/example.json"})
 ```
 
-- Services for documents, search, eval and transactions, with composable queries.
+- Services for documents, search, eval, invoke and transactions, with composable queries.
 - REST, Manage and Admin APIs with explicit routing and raw responses.
 - HTTP/HTTPS, TLS client certificates, Cloud and configurable authentication.
 - Runtime retry, timeout and pool limits; independent auxiliary connections.
@@ -96,6 +96,7 @@ ml env edit dev                           # Edit it locally
 ml env compare local dev                  # Compare inherited settings
 ml env remove dev                         # Remove it after confirmation
 ml eval -x '"Hello World!"'               # Evaluate code
+ml invoke /ext/report.xqy                 # Invoke an installed module
 ml http get /v1/documents uri=/doc.json   # Send a raw request
 ml sample order                           # Inspect sample XML content
 ml logs -s 8002                           # Read a server's logs
@@ -111,7 +112,7 @@ You can import an ml-gradle configuration or discover App Servers from a host.
 Store multiple connections in one environment and select one with
 `-c/--connection` where supported. `logs -s/--server` selects logs by identifier
 or port; `log-level -s/--server` selects an actual MarkLogic App Server name.
-`eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation.
+`eval`, `invoke`, `http` and `sample` pretty-print XML and JSON with two-space indentation.
 Use `--no-pretty` to keep the original formatting.
 
 Read more in the [CLI guide](https://monasticus.github.io/mlclient/latest/cli/).

@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 from mlclient.api.documents import AsyncDocumentsApi, DocumentsApi
 from mlclient.api.eval import AsyncEvalApi, EvalApi
+from mlclient.api.invoke import AsyncInvokeApi, InvokeApi
 from mlclient.api.search import AsyncSearchApi, SearchApi
 from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
 from mlclient.api.values import AsyncValuesApi, ValuesApi
@@ -26,7 +27,7 @@ from mlclient.api.values import AsyncValuesApi, ValuesApi
 class RestApi:
     """REST API group for /v1/* endpoints.
 
-    Eval, documents, search, values and transactions.
+    Eval, invoke, documents, search, values and transactions.
 
     Requires a REST app server.
     """
@@ -74,6 +75,21 @@ class RestApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return EvalApi(self._api)
+
+    @cached_property
+    def invoke(self) -> InvokeApi:
+        """Access invoke operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        InvokeApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return InvokeApi(self._api)
 
     @cached_property
     def documents(self) -> DocumentsApi:
@@ -139,7 +155,7 @@ class RestApi:
 class AsyncRestApi:
     """Async REST API group for /v1/* endpoints.
 
-    Eval, documents, search, values and transactions.
+    Eval, invoke, documents, search, values and transactions.
     """
 
     def __init__(self, api: AsyncApiClient):
@@ -185,6 +201,21 @@ class AsyncRestApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return AsyncEvalApi(self._api)
+
+    @cached_property
+    def invoke(self) -> AsyncInvokeApi:
+        """Access invoke operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        AsyncInvokeApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return AsyncInvokeApi(self._api)
 
     @cached_property
     def documents(self) -> AsyncDocumentsApi:

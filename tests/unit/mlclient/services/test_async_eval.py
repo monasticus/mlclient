@@ -312,6 +312,34 @@ async def test_eval_variables_explicit_with_kwargs(svc):
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_eval_variables_explicit_with_kwargs_keeps_caller_variables(svc):
+    code = (
+        "declare variable $INTEGER1 external; "
+        "declare variable $INTEGER2 external; "
+        "$INTEGER1 + $INTEGER2"
+    )
+
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
+        {
+            "xquery": code,
+            "vars": '{"INTEGER1": 1, "INTEGER2": 2}',
+        },
+    )
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("integer", "3")
+    ml_mocker.mock_post()
+    variables = {"INTEGER1": 1}
+
+    await svc.xquery(code, variables=variables, INTEGER2=2)
+
+    assert variables == {"INTEGER1": 1}
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_eval_variables_using_namespace(svc):
     code = "declare variable $local:VARIABLE as xs:string external; $local:VARIABLE"
 

@@ -63,6 +63,36 @@ def test_eval(xquery):
 
 
 @respx.mock
+def test_invoke():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/invoke")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
+        {
+            "module": "/ext/mlclient/words.xqy",
+            "vars": '{"word1": "hello", "word2": "world"}',
+        },
+    )
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "hello")
+    ml_mocker.with_response_body_part("string", "world")
+    ml_mocker.with_response_body_part("string", "hello world")
+    ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        resp = ml.rest.invoke.post(
+            "/ext/mlclient/words.xqy",
+            variables={"word1": "hello", "word2": "world"},
+            database="Documents",
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.headers["Content-Type"].startswith("multipart/mixed")
+    assert "hello world" in resp.text
+
+
+@respx.mock
 def test_get_documents():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,

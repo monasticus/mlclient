@@ -1,12 +1,14 @@
 <div class="mlclient-home-logo">
-  <img src="assets/branding/wordmark-black.svg#only-light" alt="MLClient logo" width="200">
-  <img src="assets/branding/wordmark-white.svg#only-dark" alt="MLClient logo" width="200">
+  <img src="assets/branding/wordmark-black.svg#only-light" alt="MLClient logo" width="260">
+  <img src="assets/branding/wordmark-white.svg#only-dark" alt="MLClient logo" width="260">
 </div>
 
 # MLClient
 
-A Python client and CLI for MarkLogic Server. Start with a query or a document
-operation, then choose how much control your application needs.
+Python client and CLI for MarkLogic Server.
+
+Start with a query or a document operation, then choose how much control your
+application needs.
 
 ## Start here
 

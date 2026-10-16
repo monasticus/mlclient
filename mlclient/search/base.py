@@ -3,8 +3,61 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Literal
+from copy import deepcopy
+from typing import TYPE_CHECKING, Literal
 from xml.etree.ElementTree import Element
+
+if TYPE_CHECKING:
+    from mlclient.search.options import SearchOptions
+
+
+def build_combined_query(
+    search: dict,
+    *,
+    options: dict | SearchOptions | None = None,
+    qtext: str | None = None,
+) -> dict:
+    """Combine native search criteria with inline options and a string query.
+
+    Parameters
+    ----------
+    search : dict
+        Native inner search members, such as query or ctsquery.
+    options : dict | SearchOptions | None, default None
+        Inline options members without an options wrapper, or their builder.
+    qtext : str | None, default None
+        Additional string query, AND-related to the native search criteria.
+
+    Returns
+    -------
+    dict
+        Independent JSON combined query, including copies of mutable inputs.
+
+    Raises
+    ------
+    TypeError
+        If options are not inline members or a SearchOptions builder, or qtext
+        is neither a string nor None.
+    """
+    # Options import structured queries, so resolve their type after module loading.
+    from mlclient.search.options import SearchOptions  # noqa: PLC0415
+
+    if isinstance(options, SearchOptions):
+        options = options.to_json()["options"]
+    if options is not None and (not isinstance(options, dict) or "options" in options):
+        message = (
+            "options must be inline members without an options wrapper or SearchOptions"
+        )
+        raise TypeError(message)
+    if qtext is not None and not isinstance(qtext, str):
+        message = "qtext must be a string or None"
+        raise TypeError(message)
+    search = deepcopy(search)
+    if options is not None:
+        search["options"] = deepcopy(options)
+    if qtext is not None:
+        search["qtext"] = qtext
+    return {"search": search}
 
 
 class QueryComponent(ABC):
@@ -100,20 +153,33 @@ class SearchQuery(QueryComponent):
     """
 
     @abstractmethod
-    def to_combined_query(self) -> dict:
+    def to_combined_query(
+        self,
+        *,
+        options: dict | SearchOptions | None = None,
+        qtext: str | None = None,
+    ) -> dict:
         """Wrap this query in a JSON combined query.
+
+        Parameters
+        ----------
+        options : dict | SearchOptions | None, default None
+            Inline options members without an options wrapper, or their builder.
+        qtext : str | None, default None
+            Additional string query, AND-related to this query.
 
         Returns
         -------
         dict
             A fresh ``{"search": {...}}`` dictionary holding this query under
-            the member the Search API expects for its vocabulary. Callers may
-            add ``qtext`` or ``options`` members to the inner dictionary.
+            the member the Search API expects for its vocabulary, with optional
+            inline options and qtext. Accepted by ml.search operations.
 
         Raises
         ------
         ValueError
             For invalid query values.
         TypeError
-            For arguments requiring server evaluation.
+            For arguments requiring server evaluation or unsupported options
+            or qtext types.
         """

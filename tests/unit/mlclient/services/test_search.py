@@ -2058,7 +2058,7 @@ def test_invalid_query_is_rejected_before_request():
     with MLClient() as ml, pytest.raises(TypeError) as error:
         ml.search.uris({"q": "coffee"})
 
-    assert str(error.value) == "query must be a SearchQuery, a string query or None"
+    assert str(error.value) == "combined query must contain only a search dictionary"
 
 
 # ML12 captures for prices 1.25/2.5 and dates 2026-01-01/2026-01-02.
@@ -2672,7 +2672,10 @@ def test_invalid_query_is_rejected_for_get_and_combined_queries(options):
     with MLClient() as ml, pytest.raises(TypeError) as error:
         ml.search(options=options).uris(42)
 
-    assert str(error.value) == "query must be a SearchQuery, a string query or None"
+    assert str(error.value) == (
+        "query must be a SearchQuery, a combined query dictionary, "
+        "a string query or None"
+    )
 
 
 @respx.mock

@@ -25,6 +25,7 @@ Every operation accepts the same query argument:
 | --- | --- |
 | A CTS query from the `cts` builder of [`mlclient.xquery`][mlclient.xquery] | Serialized CTS JSON, `{"ctsquery": ...}` |
 | A structured query from [`mlclient.search.structured`][mlclient.search.structured] | Serialized structured JSON, `{"query": ...}` |
+| A JSON combined-query dictionary, `{"search": {...}}` | Combined query including inline options and/or `qtext` |
 | A string, such as `"coffee AND tea"` | Search API string query (`q`) |
 | `None` (default) | No query; matches every document |
 
@@ -259,6 +260,27 @@ with MLClient() as ml:
     search = ml.search(options={"page-length": 20})
     documents = search.documents("coffee")
 ```
+
+### Combine a query, options and text
+
+Call `to_combined_query(options=..., qtext=...)` on a structured or CTS query
+and pass the result to a search operation:
+
+```python
+combined = sq.collection("products").to_combined_query(
+    options={"page-length": 20},
+    qtext="coffee",
+)
+
+with MLClient() as ml:
+    documents = ml.search.documents(combined)
+```
+
+The collection filter and text query are AND-related. Options in the combined
+query override matching service options; options in a per-operation scope
+override both. Other inline option members are retained.
+See [Combined queries](../advanced/queries.md#combined-queries-with-options-and-text)
+for builders, merging rules and the raw CTS limitation on lexicon operations.
 
 ## Scope: databases, filters and options
 

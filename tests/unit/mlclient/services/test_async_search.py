@@ -2129,7 +2129,7 @@ async def test_invalid_query_is_rejected_before_request():
         with pytest.raises(TypeError) as error:
             await ml.search.uris({"q": "coffee"})
 
-    assert str(error.value) == "query must be a SearchQuery, a string query or None"
+    assert str(error.value) == "combined query must contain only a search dictionary"
 
 
 # ML12 captures for prices 1.25/2.5 and dates 2026-01-01/2026-01-02.

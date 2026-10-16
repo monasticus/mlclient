@@ -55,11 +55,53 @@ with MLClient() as ml:
     cts_documents = ml.search.documents(native)
 ```
 
-For lower-level requests, `to_combined_query()` produces `{"search": {...}}`,
-placing structured queries under `query` (wrapped in [`Query`][mlclient.search.structured.Query] when needed) and
-CTS queries under `ctsquery`. Add `qtext` or `options` to the inner dictionary
-and pass it as the body of `ml.rest.search.post()` or `ml.rest.values.post()`.
-MarkLogic accepts combined queries only in POST requests.
+### Combined queries with options and text
+
+Both structured and CTS queries accept `options=` and `qtext=` in
+`to_combined_query()`. Options are inline members as a dictionary, without an
+outer `options` wrapper, or a [SearchOptions][mlclient.search.options.SearchOptions]
+builder. `qtext` is an additional Search API string query; MarkLogic ANDs it
+with the structured or CTS query.
+
+```python
+from mlclient.search.options import SearchOptions
+from mlclient.search.structured import Element, sq
+
+options = SearchOptions().word_constraint("title", Element("title"))
+combined = sq.collection("reports").to_combined_query(
+    options=options,
+    qtext="title:coffee",
+)
+
+with MLClient() as ml:
+    documents = ml.search.documents(combined)
+```
+
+`to_combined_query()` returns a fresh `{"search": {...}}` dictionary. Structured
+queries go under `query` (wrapped in [Query][mlclient.search.structured.Query]
+when needed), CTS queries under `ctsquery`, and `options` and `qtext` alongside
+them inside `search`. Mutating the result does not change the query or supplied
+options. Omitted or `None` settings are left out; explicit empty dictionaries
+and empty strings are retained.
+
+`ml.search` accepts this JSON combined query directly. Inline scope options
+supply defaults; options in the combined query override matching members,
+and options in the operation's `scope=SearchScope(...)` override both.
+Each option member is replaced as a whole, including lists of constraints.
+An operation scope with `options=None` clears all inline and installed options.
+An installed options name replaces the selected name and travels in the URL;
+MarkLogic merges its server-side definitions with the combined query's inline
+options. Naming installed options does not replace inline members locally.
+
+For lower-level requests, pass the same dictionary as the body of
+`ml.rest.search.post()` or `ml.rest.values.post()`. MarkLogic accepts combined
+queries only in POST requests.
+
+For lexicon operations (`values`, `tuples`, `aggregate`), a raw combined query
+containing `ctsquery` is rejected: ML10/ML12 ignore that filter on `/v1/values`.
+Pass a CTS query object with service options instead, so the service can send
+the required `additional-query` XML. Combined structured queries work on both
+search and lexicon endpoints.
 
 ## Structured queries
 

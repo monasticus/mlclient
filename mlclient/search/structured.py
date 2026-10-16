@@ -10,11 +10,14 @@ from dataclasses import dataclass, field, fields
 from datetime import date, datetime
 from decimal import Decimal
 from types import MappingProxyType
-from typing import ClassVar, Literal, TypeVar, get_args
+from typing import TYPE_CHECKING, ClassVar, Literal, TypeVar, get_args
 from xml.etree.ElementTree import Element as XmlElement
 from xml.etree.ElementTree import register_namespace
 
-from mlclient.search.base import QueryComponent, SearchQuery
+from mlclient.search.base import QueryComponent, SearchQuery, build_combined_query
+
+if TYPE_CHECKING:
+    from mlclient.search.options import SearchOptions
 
 SEARCH_NS_URI = "http://marklogic.com/appservices/search"
 """Namespace URI for structured queries and Search API options."""
@@ -228,18 +231,35 @@ class StructuredQuery(SearchQuery, _Validated):
         """
         return NotQuery(self)
 
-    def to_combined_query(self) -> dict:
+    def to_combined_query(
+        self,
+        *,
+        options: dict | SearchOptions | None = None,
+        qtext: str | None = None,
+    ) -> dict:
         """Wrap this structured query in a JSON combined query.
+
+        Parameters
+        ----------
+        options : dict | SearchOptions | None, default None
+            Inline options members without an options wrapper, or their builder.
+        qtext : str | None, default None
+            Additional string query, AND-related to this query.
 
         Returns
         -------
         dict
             ``{"search": {"query": ...}}``. A subquery other than Query is
-            wrapped in a Query first, as the Search API requires.
+            wrapped in a Query first, as the Search API requires. Optional
+            inline options and qtext are included in the search member.
 
+        Raises
+        ------
+        TypeError
+            If options or qtext have unsupported types.
         """
         query = self if isinstance(self, Query) else Query(self)
-        return {"search": query.to_json()}
+        return build_combined_query(query.to_json(), options=options, qtext=qtext)
 
 
 class QueryTarget(QueryComponent, _Validated):

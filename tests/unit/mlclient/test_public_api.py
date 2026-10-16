@@ -446,7 +446,11 @@ def test_compiler_and_cts_queries_do_not_depend_on_function_builders():
     root = ROOT / "xquery"
     for name in ("expressions.py", "_cts_query.py"):
         imports = _mlclient_imports(root / name)
-        assert imports <= {"mlclient.xquery.expressions", "mlclient.search.base"}, name
+        allowed = {"mlclient.xquery.expressions", "mlclient.search.base"}
+        if name == "_cts_query.py":
+            # The combined-query options parameter names this public input type.
+            allowed.add("mlclient.search.options")
+        assert imports <= allowed, name
 
 
 @pytest.mark.parametrize(

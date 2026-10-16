@@ -8,6 +8,7 @@ from xml.etree.ElementTree import tostring
 
 import pytest
 
+from mlclient import AsyncMLClient
 from mlclient import _constants as constants
 from mlclient.calls import ApiCall
 from mlclient.exceptions import MarkLogicError
@@ -114,6 +115,64 @@ def values_options(indexed_database):
 
 
 class TestSearchService:
+    @pytest.mark.parametrize(
+        "query",
+        [sq.document(URIS[0]), cts.document_query(URIS[0])],
+        ids=["structured", "cts"],
+    )
+    @pytest.mark.parametrize(
+        ("qtext", "expected"),
+        [("label:alpha", [URIS[0]]), ("label:beta", [])],
+        ids=["both-match", "text-matches-another-document"],
+    )
+    def test_combined_query_ands_text_with_native_criteria(
+        self,
+        indexed_database,
+        query,
+        qtext,
+        expected,
+    ):
+        ml, database, _ = indexed_database
+        options = SearchOptions().word_constraint("label", Element("label", NS))
+        combined = query.to_combined_query(options=options, qtext=qtext)
+
+        documents = ml.search(database=database).documents(combined)
+
+        assert [document.uri for document in documents] == expected
+
+    def test_combined_structured_query_filters_values(self, indexed_database):
+        ml, database, _ = indexed_database
+        options = (
+            SearchOptions()
+            .word_constraint("label", Element("label", NS))
+            .values("uris", "uri")
+        )
+        combined = sq.collection("cts-test").to_combined_query(
+            options=options,
+            qtext="label:alpha",
+        )
+
+        values = ml.search(database=database).values("uris", combined)
+
+        assert [hit.value for hit in values] == [URIS[0]]
+
+    @pytest.mark.asyncio
+    async def test_async_combined_query_ands_text_with_cts_criteria(
+        self,
+        indexed_database,
+    ):
+        _, database, port = indexed_database
+        options = SearchOptions().word_constraint("label", Element("label", NS))
+        combined = cts.document_query(URIS[0]).to_combined_query(
+            options=options,
+            qtext="label:beta",
+        )
+
+        async with AsyncMLClient(port=port) as ml:
+            documents = await ml.search(database=database).documents(combined)
+
+        assert documents == []
+
     def test_json_property_values_options(self, indexed_database):
         ml, database, _ = indexed_database
         options = SearchOptions().values(

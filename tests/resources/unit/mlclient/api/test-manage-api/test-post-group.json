@@ -1,0 +1,1 @@
+{"errorResponse":{"statusCode":"400", "status":"Bad Request", "messageCode":"MANAGE-PRECONDITIONFAILED", "message":"MANAGE-PRECONDITIONFAILED: (err:FOER0000) Precondition not met: Cannot restart group, there are no hosts in group"}}

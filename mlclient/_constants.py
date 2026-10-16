@@ -21,6 +21,7 @@ HEADER_MULTIPART_MIXED = "multipart/mixed"
 HEADER_XML = "application/xml"
 HEADER_JSON = "application/json"
 HEADER_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded"
+HEADER_ZIP = "application/zip"
 HEADER_HTML = "text/html"
 HEADER_PLAIN_TEXT = "text/plain"
 

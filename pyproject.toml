@@ -74,6 +74,7 @@ deepdiff = "^8.6.2"
 pyjwt = "^2.13.0"
 cryptography = "^50.0.0"
 packaging = ">=24,<27"
+testcontainers = "^4.15.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -98,7 +99,8 @@ poetry-bumpversion = "==0.3.3"
 pythonpath = ["."]
 addopts = ["--strict-markers", "--benchmark-autosave"]
 markers = [
-    "ml_access" # marks tests requiring an ML access
+    "ml_access", # marks tests requiring an ML access
+    "ml_cluster" # marks tests starting their own MarkLogic hosts in Docker
 ]
 
 [tool.coverage.report]

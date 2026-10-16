@@ -8,8 +8,15 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from docker.errors import DockerException
+from testcontainers.core.container import DockerContainer
+from testcontainers.core.network import Network
+from testcontainers.core.wait_strategies import HttpWaitStrategy
 
 CERTS_DIR_ENV = "MLCLIENT_IT_CERTS_DIR"
+MARKLOGIC_IMAGE_ENV = "MARKLOGIC_IMAGE"
+DEFAULT_MARKLOGIC_IMAGE = "progressofficial/marklogic-db:12.1.0-ubi-2.3.0"
+CLUSTER_NODE_NAMES = ("node-a.mlclient.test", "node-b.mlclient.test")
 DEFAULT_CERTS_DIR = "tests/integration/.certs"
 OAUTH_CONFIG_FILE = "oauth.json"
 KERBEROS_CONFIG_FILE = "kerberos.json"
@@ -95,3 +102,44 @@ def kerberos_ticket(kerberos_config: dict):
                 os.environ.pop(key, None)
             else:
                 os.environ[key] = value
+
+
+@pytest.fixture(scope="class")
+def uninitialized_marklogic_nodes():
+    """Start two uninitialized MarkLogic hosts on a private Docker network.
+
+    Each host's name is a fully qualified alias on that network: MarkLogic
+    names a host by its canonical hostname, and cluster members must resolve
+    each other by it. The image is the one the provisioned test server runs
+    (MARKLOGIC_IMAGE), so no other image is pulled. Skips when Docker is
+    unavailable.
+    """
+    image = os.environ.get(MARKLOGIC_IMAGE_ENV, DEFAULT_MARKLOGIC_IMAGE)
+    try:
+        network = Network().create()
+    except DockerException as error:
+        _missing_prerequisite(f"Docker is unavailable: {error}")
+    nodes = [_marklogic_node(image, network, name) for name in CLUSTER_NODE_NAMES]
+    try:
+        for node in nodes:
+            node.start()
+        yield nodes
+    finally:
+        for node in nodes:
+            node.stop()
+        network.remove()
+
+
+def _marklogic_node(image: str, network: Network, name: str) -> DockerContainer:
+    return (
+        DockerContainer(image)
+        .with_kwargs(hostname=name)
+        .with_network(network)
+        .with_network_aliases(name)
+        .with_exposed_ports(8000, 8001, 8002)
+        .waiting_for(
+            HttpWaitStrategy(8001, "/admin/v1/timestamp")
+            .for_status_code(200)
+            .with_startup_timeout(180),
+        )
+    )

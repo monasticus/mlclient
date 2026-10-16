@@ -60,7 +60,7 @@ def test_command_eval_basic():
     tester.execute(f"-e test {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -86,7 +86,7 @@ def test_command_eval_custom_rest_server():
     tester.execute(f"-e test -c manage {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") == "manage"
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -117,7 +117,7 @@ def test_command_eval_with_vars():
     tester.execute(f"-e test {file_path} --var VARIABLE_1=X --var VARIABLE_2=Y")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert tester.command.option("var") == ["VARIABLE_1=X", "VARIABLE_2=Y"]
     assert tester.command.option("xquery") is False
@@ -160,7 +160,7 @@ def test_command_eval_xquery_flag():
     tester.execute(f"-e test -x '{code}'")
 
     assert tester.command.argument("code") == code
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is True
@@ -185,7 +185,7 @@ def test_command_eval_javascript_flag():
     tester.execute(f"-e test -j '{code}'")
 
     assert tester.command.argument("code") == code
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -223,7 +223,7 @@ def test_command_eval_custom_database():
     tester.execute(f"-e test -d custom-db {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -250,7 +250,7 @@ def test_command_eval_custom_txid():
     tester.execute(f"-e test -t transaction-id {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -289,7 +289,7 @@ def test_command_eval_output():
     command_output = tester.io.fetch_output()
 
     assert tester.command.argument("code") == code
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("xquery") is True
 
     expected_output_lines = [

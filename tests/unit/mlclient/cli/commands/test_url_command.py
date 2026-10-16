@@ -66,7 +66,7 @@ def test_no_target_defaults_to_local_environment():
     tester = _get_tester()
     tester.execute("")
 
-    assert tester.command.option("environment") == "local"
+    assert tester.command.option("environment") == ["local"]
 
 
 def test_no_target_with_open_is_rejected():

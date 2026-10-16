@@ -63,7 +63,7 @@ def test_command_http_get_writes_response_body():
     assert tester.command.argument("method") == "GET"
     assert tester.command.argument("endpoint") == "/manage/v2/hosts"
     assert tester.command.argument("params") == []
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert command_output == '{"host-default-list": {}}\n'
 

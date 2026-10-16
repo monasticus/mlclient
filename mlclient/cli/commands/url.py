@@ -18,6 +18,7 @@ from cleo.io.inputs.option import Option
 from cleo.ui.table import Table
 
 from mlclient.cli.clipboard import copy_to_clipboard
+from mlclient.cli.commands._multi_env_common import selected_environments
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 
@@ -39,7 +40,8 @@ class UrlCommand(Command):
     URLs. With a target it prints that one URL and copies it to the clipboard;
     with ``--open`` it prints the URL and opens it in the default browser
     instead of copying. A target that is not a known alias is treated as an App
-    Server id.
+    Server id. With several environments the table has a URL column per
+    environment; a target copies all of its URLs, one per line, or opens each.
 
     Usage:
       url [options] [--] [<target>]
@@ -51,7 +53,8 @@ class UrlCommand(Command):
 
     Options:
       -e, --environment=ENVIRONMENT
-            The ML Client environment name [default: "local"]
+            The ML Client environment name; repeat it to show several
+            environments (multiple values allowed) [default: ["local"]]
           --open
             Open the URL in the default browser instead of copying it
     """
@@ -69,9 +72,11 @@ class UrlCommand(Command):
         option(
             "environment",
             "e",
-            description="The ML Client environment name",
+            description="The ML Client environment name; repeat it to show "
+            "several environments",
             flag=False,
-            default="local",
+            multiple=True,
+            default=["local"],
         ),
         option(
             "open",
@@ -81,28 +86,27 @@ class UrlCommand(Command):
 
     def handle(self) -> int:
         """Execute the command."""
-        env_name = self.option("environment")
-        env = MLEnvironment.load(env_name)
+        envs = {name: MLEnvironment.load(name) for name in selected_environments(self)}
         target = self.argument("target")
         if not target:
-            return self._print_basics(env, env_name)
-        return self._print_target(env, env_name, target)
+            return self._print_basics(envs)
+        return self._print_target(envs, target)
 
-    def _print_basics(self, env: MLEnvironment, env_name: str) -> int:
+    def _print_basics(self, envs: dict[str, MLEnvironment]) -> int:
         """Render the QConsole, Admin UI and Monitoring Dashboard URLs."""
         if self.option("open"):
             msg = "Specify a target to open in the browser."
             raise WrongParametersError(msg)
-        self._render(env_name, [_resolve(env, target) for target in _BASIC_TARGETS])
+        self._render(list(envs), [_resolve(envs, target) for target in _BASIC_TARGETS])
         return 0
 
-    def _print_target(self, env: MLEnvironment, env_name: str, target: str) -> int:
-        """Render one labelled URL, then open it in the browser or copy it."""
-        label, url = _resolve(env, target)
-        self._render(env_name, [(label, url)])
+    def _print_target(self, envs: dict[str, MLEnvironment], target: str) -> int:
+        """Render one labelled row of URLs, then open them or copy them."""
+        label, urls = _resolve(envs, target)
+        self._render(list(envs), [(label, urls)])
         if self.option("open"):
-            return self._open(url)
-        self._copy(url)
+            return max([self._open(url) for url in urls])
+        self._copy("\n".join(urls))
         return 0
 
     def _open(self, url: str) -> int:
@@ -120,20 +124,25 @@ class UrlCommand(Command):
         )
         return 1
 
-    def _render(self, env_name: str, rows: list[tuple[str, str]]) -> None:
-        """Render label/URL rows in a titled box.
+    def _render(self, env_names: list[str], rows: list[tuple[str, list[str]]]) -> None:
+        """Render label/URL rows in a box, one URL column per environment.
 
-        cleo draws the box's top border only for a header row, so the header is
-        required; without it the top border degrades to a row separator.
+        A single environment names the box and heads its column "URL"; several
+        head their columns with the environment names. cleo draws the box's top
+        border only for a header row, so the header is required; without it the
+        top border degrades to a row separator.
         """
         table = Table(self.io, style="box")
-        table.set_headers(["Interface", "URL"])
-        table.set_header_title(f" {Formatter.escape(env_name)} ")
-        for label, url in rows:
+        if len(env_names) == 1:
+            table.set_headers(["Interface", "URL"])
+            table.set_header_title(f" {Formatter.escape(env_names[0])} ")
+        else:
+            table.set_headers(["Interface", *map(Formatter.escape, env_names)])
+        for label, urls in rows:
             table.add_row(
                 [
                     f"<fg=cyan;options=bold>{Formatter.escape(label)}</>",
-                    f"<info>{Formatter.escape(url)}</info>",
+                    *(f"<info>{Formatter.escape(url)}</info>" for url in urls),
                 ],
             )
         table.render()
@@ -152,9 +161,11 @@ class UrlCommand(Command):
         self.line("Copied to clipboard.", style="fg=green;options=italic")
 
 
-def _resolve(env: MLEnvironment, target: str) -> tuple[str, str]:
-    """Resolve a target to its display label and protocol://host:port URL."""
+def _resolve(envs: dict[str, MLEnvironment], target: str) -> tuple[str, list[str]]:
+    """Resolve a target to its display label and each protocol://host:port URL."""
     label, app_server_id, path = _TARGETS.get(target, (target, target, ""))
-    config = env.provide_config_dict(app_server_id)
-    url = f"{config['protocol']}://{config['host']}:{config['port']}{path}"
-    return label, url
+    urls = []
+    for env in envs.values():
+        config = env.provide_config_dict(app_server_id)
+        urls.append(f"{config['protocol']}://{config['host']}:{config['port']}{path}")
+    return label, urls

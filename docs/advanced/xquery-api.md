@@ -360,10 +360,10 @@ Consult the [`cts` reference][mlclient.xquery.cts] and the
 
 ## FN: compose standard functions
 
-`fn` mirrors all 148 functions in the MarkLogic function reference, including
-functions restricted to XSLT or legacy `0.9-ml`. Expressions compile as `1.0-ml`;
-a builder does not remove native restrictions. For example, `fn.last()` belongs
-inside a predicate and XSLT grouping functions need an XSLT context.
+`fn` builds native function calls for XQuery `1.0-ml`. Legacy `0.9-ml`
+functions unavailable in this dialect and functions requiring an XSLT context
+are excluded. Native XQuery context requirements still apply: for example,
+use `fn.last()` inside a predicate.
 
 Names use snake case (`fn.function_lookup`, `fn.date_time`, `fn.qname`). Python
 keywords have a trailing underscore, as in `fn.not_`. Omitting an optional

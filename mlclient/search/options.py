@@ -25,6 +25,7 @@ __all__ = [
     "CollectionConstraint",
     "ContainerConstraint",
     "Control",
+    "NativeOption",
     "NativeOptions",
     "PageLength",
     "Range",
@@ -168,6 +169,17 @@ class SearchOption(QueryComponent):
         """Create a concrete option from its typed parameters."""
         raise NotImplementedError
 
+    @property
+    def option_name(self) -> str:
+        """Return the native top-level member this option defines.
+
+        Returns
+        -------
+        str
+            Search API member name, such as constraint or page-length.
+        """
+        return self._definition.name
+
     def _serialize(self, output_format: Literal["json", "xml"]) -> dict | XmlElement:
         """Serialize this option without converting through the other format.
 
@@ -194,13 +206,20 @@ class SearchOptions(QueryComponent):
         Typed option components or reusable groups, in serialization order.
         Repeatable members accumulate; the last non-repeatable member wins.
 
+    Attributes
+    ----------
+    components : tuple[SearchOption, ...]
+        Ordered immutable components after flattening groups and replacing
+        non-repeatable members. Components expose their native option_name
+        and independent JSON/XML serialization.
+
     Raises
     ------
     TypeError
         If a component is neither a SearchOption nor a SearchOptions group.
     """
 
-    _definitions: tuple[_Definition, ...]
+    components: tuple[SearchOption, ...]
 
     def __init__(self, *options: SearchOption | SearchOptions):
         """Snapshot option composition while retaining immutable components.
@@ -215,25 +234,26 @@ class SearchOptions(QueryComponent):
         TypeError
             If a component has an unsupported type.
         """
-        definitions = []
-        # Composition shares the private snapshots owned by these co-located models.
+        components = []
         for option in options:
             if isinstance(option, SearchOptions):
-                additions = option._definitions  # noqa: SLF001
+                additions = option.components
             elif isinstance(option, SearchOption):
-                additions = (option._definition,)  # noqa: SLF001
+                additions = (option,)
             else:
                 message = (
                     "options components must be SearchOption or SearchOptions instances"
                 )
                 raise TypeError(message)
-            for definition in additions:
-                if not definition.repeatable:
-                    definitions = [
-                        held for held in definitions if held.name != definition.name
+            for component in additions:
+                if component.option_name not in _REPEATABLE_MEMBERS:
+                    components = [
+                        held
+                        for held in components
+                        if held.option_name != component.option_name
                     ]
-                definitions.append(definition)
-        object.__setattr__(self, "_definitions", tuple(definitions))
+                components.append(component)
+        object.__setattr__(self, "components", tuple(components))
 
     def __eq__(self, other: object) -> bool:
         """Compare options by their independent native representations.
@@ -262,7 +282,7 @@ class SearchOptions(QueryComponent):
         str
             For example ``SearchOptions(values, page-length)``.
         """
-        names = ", ".join(definition.name for definition in self._definitions)
+        names = ", ".join(component.option_name for component in self.components)
         return f"SearchOptions({names})"
 
     def _serialize(self, output_format: Literal["json", "xml"]) -> dict | XmlElement:
@@ -290,7 +310,7 @@ class SearchOptions(QueryComponent):
             Fresh options tree.
         """
         node = XmlElement(f"{{{SEARCH_NS_URI}}}options")
-        node.extend([held.to_xml() for held in self._definitions])
+        node.extend(component.to_xml() for component in self.components)
         return node
 
     def _json(self) -> dict:
@@ -302,12 +322,13 @@ class SearchOptions(QueryComponent):
             Fresh options object.
         """
         members: dict = {}
-        for held in self._definitions:
-            definition = held.to_json()[held.name]
-            if held.repeatable:
-                members.setdefault(held.name, []).append(definition)
+        for component in self.components:
+            name = component.option_name
+            definition = component.to_json()[name]
+            if name in _REPEATABLE_MEMBERS:
+                members.setdefault(name, []).append(definition)
             else:
-                members[held.name] = definition
+                members[name] = definition
         return {"options": members}
 
     __hash__ = None
@@ -752,6 +773,63 @@ class Control(SearchOption):
         object.__setattr__(self, "_definition", _Definition(name, value=value))
 
 
+@dataclass(frozen=True, init=False, eq=False)
+class NativeOption(SearchOption):
+    """Preserve one caller-supplied option in its independent native formats.
+
+    Parameters
+    ----------
+    definition : dict
+        One JSON option definition, keyed by its native member name.
+    element : xml.etree.ElementTree.Element
+        Matching XML element in the Search API namespace.
+
+    Raises
+    ------
+    ValueError
+        If the native names, namespace or definition counts do not match.
+    """
+
+    def __init__(self, definition: dict, element: XmlElement):
+        """Snapshot the JSON value and corresponding XML element.
+
+        Parameters
+        ----------
+        definition : dict
+            One named native JSON option.
+        element : xml.etree.ElementTree.Element
+            The same option in native XML.
+
+        Raises
+        ------
+        ValueError
+            If JSON and XML do not describe exactly one same-named option.
+        """
+        (matched,) = _pair_native_definitions(definition, (element,))
+        object.__setattr__(self, "_definition", matched)
+
+    def __eq__(self, other: object) -> bool:
+        """Compare native options using both independent formats.
+
+        Parameters
+        ----------
+        other : object
+            Another object.
+
+        Returns
+        -------
+        bool
+            True for equal native JSON and XML; False for other objects.
+        """
+        if not isinstance(other, NativeOption):
+            return NotImplemented
+        return self.to_json() == other.to_json() and tostring(
+            self.to_xml(),
+        ) == tostring(other.to_xml())
+
+    __hash__ = None
+
+
 @dataclass(frozen=True, init=False, eq=False, repr=False)
 class NativeOptions(SearchOptions):
     """Supply native JSON and XML for options without a typed constructor.
@@ -784,10 +862,12 @@ class NativeOptions(SearchOptions):
         ValueError
             If native names, namespaces or definition counts do not match.
         """
-        object.__setattr__(
-            self,
-            "_definitions",
-            tuple(_pair_native_definitions(definition, elements)),
+        matched = _pair_native_definitions(definition, elements)
+        super().__init__(
+            *(
+                NativeOption({member.name: member.native[0]}, member.native[1])
+                for member in matched
+            ),
         )
 
 
@@ -990,17 +1070,6 @@ class _Definition(QueryComponent):
                 else:
                     members[name] = value
         return {self.name: members}
-
-    @property
-    def repeatable(self) -> bool:
-        """Whether definitions of this name accumulate rather than replace.
-
-        Returns
-        -------
-        bool
-            True for the members native JSON holds in an array.
-        """
-        return self.name in _REPEATABLE_MEMBERS
 
 
 def _pair_native_definitions(

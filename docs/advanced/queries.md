@@ -124,11 +124,10 @@ MarkLogic merges its server-side definitions with the combined query's inline
 options. Naming installed options does not replace inline members locally.
 
 For lower-level requests, pass the same dictionary as the body of
-`ml.rest.search.post()` or `ml.rest.values.post()`. MarkLogic accepts combined
-queries only in POST requests.
+`ml.rest.search.post()` or `ml.rest.values.post()`.
 
 For lexicon operations (`values`, `tuples`, `aggregate`), raw CTS JSON, standalone or inside a combined query,
-is rejected: ML10/ML12 ignore that filter on `/v1/values`.
+is rejected: `/v1/values` ignores that filter.
 Pass a CTS query object with service options instead, so the service can send
 the required `additional-query` XML. Combined structured queries work on both
 search and lexicon endpoints.

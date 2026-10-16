@@ -103,9 +103,22 @@ def test_combined_query_copies_inline_options(query):
                 "or SearchOptions"
             ),
         ),
+        (
+            {"options": sq.term("blue")},
+            (
+                "options must be inline members without an options wrapper "
+                "or SearchOptions"
+            ),
+        ),
         ({"qtext": 1}, "qtext must be a string or None"),
     ],
-    ids=["invalid-options", "installed-name", "wrapped-options", "invalid-qtext"],
+    ids=[
+        "invalid-options",
+        "installed-name",
+        "wrapped-options",
+        "query-as-options",
+        "invalid-qtext",
+    ],
 )
 def test_combined_query_rejects_invalid_options_and_qtext(query, kwargs, message):
     with pytest.raises(TypeError) as error:

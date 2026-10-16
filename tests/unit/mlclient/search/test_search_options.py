@@ -7,6 +7,7 @@ from xml.etree.ElementTree import tostring
 import pytest
 
 from mlclient.search.options import (
+    NativeOption,
     PageLength,
     Range,
     ReturnFacets,
@@ -387,3 +388,17 @@ def test_option_classes_and_factories_build_equivalent_native_components():
     assert tostring(built.to_xml(), encoding="unicode").endswith(
         "<search:return-facets>true</search:return-facets></search:options>",
     )
+
+
+def test_native_option_equality_compares_json_and_xml_independently():
+    element = XmlElement(f"{{{SEARCH_NAMESPACE}}}return-metrics")
+    element.text = "false"
+    original = NativeOption({"return-metrics": False}, element)
+    equivalent = NativeOption({"return-metrics": False}, element)
+    element.text = "true"
+    different_xml = NativeOption({"return-metrics": False}, element)
+
+    assert original == equivalent
+    assert original != different_xml
+    assert original != {"return-metrics": False}
+    assert original.to_xml().text == "false"

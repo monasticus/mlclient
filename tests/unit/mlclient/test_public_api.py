@@ -27,6 +27,7 @@ EXPECTED_EXPORTS = {
         "CollectionConstraint",
         "ContainerConstraint",
         "Control",
+        "NativeOption",
         "NativeOptions",
         "PageLength",
         "Range",

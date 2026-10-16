@@ -39,15 +39,15 @@ def build_combined_query(
         If options are not inline members or a SearchOptions composition, or qtext
         is neither a string nor None.
     """
-    # Options import structured queries, so resolve their type after module loading.
-    from mlclient.search.options import SearchOptions  # noqa: PLC0415
-
-    if isinstance(options, SearchOptions):
-        options = options.to_json()["options"]
+    message = (
+        "options must be inline members without an options wrapper or SearchOptions"
+    )
+    if isinstance(options, QueryComponent):
+        serialized = options.to_json()
+        if set(serialized) != {"options"}:
+            raise TypeError(message)
+        options = serialized["options"]
     if options is not None and (not isinstance(options, dict) or "options" in options):
-        message = (
-            "options must be inline members without an options wrapper or SearchOptions"
-        )
         raise TypeError(message)
     if qtext is not None and not isinstance(qtext, str):
         message = "qtext must be a string or None"

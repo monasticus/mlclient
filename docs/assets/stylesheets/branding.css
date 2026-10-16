@@ -1,3 +1,7 @@
+.mlclient-home-logo {
+  text-align: center;
+}
+
 [data-md-color-scheme="default"] img[src$="#only-dark"],
 [data-md-color-scheme="slate"] img[src$="#only-light"] {
   display: none;

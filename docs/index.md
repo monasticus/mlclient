@@ -1,5 +1,7 @@
-<img src="assets/branding/wordmark-black.svg#only-light" alt="MLClient logo" width="160">
-<img src="assets/branding/wordmark-white.svg#only-dark" alt="MLClient logo" width="160">
+<div class="mlclient-home-logo">
+  <img src="assets/branding/wordmark-black.svg#only-light" alt="MLClient logo" width="200">
+  <img src="assets/branding/wordmark-white.svg#only-dark" alt="MLClient logo" width="200">
+</div>
 
 # MLClient
 

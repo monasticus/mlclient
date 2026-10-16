@@ -376,6 +376,114 @@ def test_put_server_properties():
 
 
 @respx.mock
+def test_get_groups():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-groups.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/groups")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.manage.groups.get_list(data_format="json")
+
+    groups = resp.json()["group-default-list"]["list-items"]["list-item"]
+    assert resp.status_code == httpx.codes.OK
+    assert [group["nameref"] for group in groups] == ["Default"]
+
+
+@respx.mock
+def test_post_groups():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/groups")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"group-name": "custom-group"})
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_header("Location", "/manage/v2/groups/custom-group")
+    ml_mocker.with_response_code(201)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        resp = ml.manage.groups.create({"group-name": "custom-group"})
+
+    assert resp.status_code == httpx.codes.CREATED
+    assert resp.headers["Location"] == "/manage/v2/groups/custom-group"
+
+
+@respx.mock
+def test_get_group():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-group.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/groups/Default")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.manage.groups.get("Default", data_format="json")
+
+    expected_uri = "/manage/v2/groups/Default?view=default"
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["group-default"]["meta"]["uri"] == expected_uri
+
+
+@respx.mock
+def test_post_group():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-post-group.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/groups/custom-group")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"operation": "restart-group"})
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        resp = ml.manage.groups.post(
+            "custom-group",
+            {"operation": "restart-group"},
+        )
+
+    assert resp.status_code == httpx.codes.BAD_REQUEST
+    assert resp.json()["errorResponse"]["message"] == (
+        "MANAGE-PRECONDITIONFAILED: (err:FOER0000) Precondition not met: "
+        "Cannot restart group, there are no hosts in group"
+    )
+
+
+@respx.mock
+def test_delete_group():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/groups/custom-group")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
+
+    with MLClient() as ml:
+        resp = ml.manage.groups.delete("custom-group")
+
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert not resp.text
+
+
+@respx.mock
 def test_get_group_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
@@ -956,3 +1064,102 @@ def test_get_hosts_returns_raw_error_response():
         response = ml.manage.hosts.get_list()
     assert response.status_code == 403
     assert response.json() == {"errorResponse": {"message": "Forbidden"}}
+
+
+@respx.mock
+def test_get_host():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-host.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts/ml-host.example.com")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.manage.hosts.get("ml-host.example.com", data_format="json")
+
+    expected_uri = "/manage/v2/hosts/ml-host.example.com?view=default"
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["host-default"]["meta"]["uri"] == expected_uri
+
+
+@respx.mock
+def test_post_host():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-post-host.xml",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts/ml-host.example.com")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"state": "restart", "failover": "true"})
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_header("Location", "/admin/v1/timestamp")
+    ml_mocker.with_response_code(202)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        resp = ml.manage.hosts.post(
+            "ml-host.example.com",
+            {"state": "restart", "failover": "true"},
+        )
+
+    assert resp.status_code == httpx.codes.ACCEPTED
+    assert resp.headers["Location"] == "/admin/v1/timestamp"
+    assert "<uriref>/admin/v1/timestamp</uriref>" in resp.text
+
+
+@respx.mock
+def test_get_host_properties():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-host-properties.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
+        "http://localhost:8002/manage/v2/hosts/ml-host.example.com/properties",
+    )
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.manage.hosts.get_properties(
+            "ml-host.example.com",
+            data_format="json",
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["host-name"] == "ml-host.example.com"
+    assert resp.json()["group"] == "Default"
+
+
+@respx.mock
+def test_put_host_properties():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
+        "http://localhost:8002/manage/v2/hosts/ml-host.example.com/properties",
+    )
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"zone": "zone-a"})
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_put()
+
+    with MLClient() as ml:
+        resp = ml.manage.hosts.put_properties(
+            "ml-host.example.com",
+            {"zone": "zone-a"},
+        )
+
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert not resp.text

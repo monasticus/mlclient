@@ -18,7 +18,12 @@ from cleo.io.outputs.output import Type
 from httpx import Headers, Response
 
 from mlclient._manager import MLClientManager
-from mlclient.cli.connection import get_client
+from mlclient.cli.commands._multi_env_common import (
+    UnsuccessfulAnswerError,
+    selected_environments,
+    time_in_environments,
+)
+from mlclient.cli.connection import get_async_client, get_client
 from mlclient.cli.formatting import prettify
 from mlclient.clients.http import HttpClient
 from mlclient.exceptions import WrongParametersError
@@ -26,6 +31,11 @@ from mlclient.exceptions import WrongParametersError
 
 class HttpCommand(Command):
     """Sends a raw HTTP request to any REST endpoint.
+
+    With several environments the request is sent to all of them at once and a
+    table with one column per environment shows each output and how long the
+    request took. An error response is shown as a failure, and the command
+    exits with 1 if any environment failed.
 
     Usage:
       http [options] [--] <method> <endpoint> [<params>...]
@@ -40,7 +50,8 @@ class HttpCommand(Command):
 
     Options:
       -e, --environment=ENVIRONMENT
-            The ML Client environment name [default: "local"]
+            The ML Client environment name; repeat it to send the request to several
+            environments (multiple values allowed) [default: ["local"]]
       -c, --connection=CONNECTION
             Connection identifier from the environment or TCP port
       -b, --body=BODY
@@ -73,9 +84,11 @@ class HttpCommand(Command):
         option(
             "environment",
             "e",
-            description="The ML Client environment name",
+            description="The ML Client environment name; repeat it to send the "
+            "request to several environments",
             flag=False,
-            default="local",
+            multiple=True,
+            default=["local"],
         ),
         option(
             "connection",
@@ -115,23 +128,60 @@ class HttpCommand(Command):
         query = parse_qs(endpoint.query, keep_blank_values=True)
         for key, values in params.items():
             query.setdefault(key, []).extend(values)
-        body = _read_body(self.option("body"))
+        request = {
+            "method": method,
+            "endpoint": "/" + endpoint.path.lstrip("/"),
+            "body": _read_body(self.option("body")),
+            "params": query or None,
+            "headers": headers or None,
+        }
 
-        mgr = MLClientManager(self.option("environment"))
+        environments = selected_environments(self)
+        if len(environments) > 1:
+            return self._request_in_environments(environments, request)
+        mgr = MLClientManager(environments[0])
         with get_client(mgr, self.option("connection")) as ml:
-            response = ml.http.request(
-                method,
-                "/" + endpoint.path.lstrip("/"),
-                body,
-                params=query or None,
-                headers=headers or None,
-            )
+            response = ml.http.request(**request)
             output = self._render(method, response)
 
         self._io.write(output, new_line=True, type=Type.RAW)
         if response.is_error:
             response.raise_for_status()
         return 0
+
+    def _request_in_environments(
+        self,
+        environments: list[str],
+        request: dict,
+    ) -> int:
+        """Send the request to every environment at once and show the outputs.
+
+        Parameters
+        ----------
+        environments : list[str]
+            Environment names, one table column each, in the given order.
+        request : dict
+            Keyword arguments for the HTTP client's request method.
+
+        Returns
+        -------
+        int
+            0 when every environment answered with success, 1 when any failed.
+        """
+        connection = self.option("connection")
+
+        async def send(environment: str) -> Response:
+            manager = MLClientManager(environment)
+            async with get_async_client(manager, connection) as ml:
+                response = await ml.http.request(**request)
+            if response.is_error:
+                raise UnsuccessfulAnswerError(self._render(request["method"], response))
+            return response
+
+        def describe(response: Response) -> str:
+            return self._render(request["method"], response)
+
+        return time_in_environments(self, environments, send, describe)
 
     def _render(
         self,

@@ -11,11 +11,10 @@ from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
-from cleo.io.outputs.output import Type
 
 from mlclient._manager import MLClientManager
+from mlclient.cli.commands._execution_common import parse_variables, write_results
 from mlclient.cli.connection import get_client
-from mlclient.cli.formatting import prettify
 from mlclient.exceptions import WrongParametersError
 
 
@@ -110,15 +109,7 @@ class EvalCommand(Command):
         """Execute the command."""
         eval_params = self._get_eval_params()
         results = self._call_eval(eval_params)
-        if not self.option("no-pretty"):
-            results = (
-                [prettify(item) for item in results]
-                if isinstance(results, list)
-                else prettify(results)
-            )
-
-        self._io.write("\n")
-        self._io.write(results, new_line=True, type=Type.RAW)
+        write_results(self, results)
         return 0
 
     def _get_eval_params(self):
@@ -146,10 +137,7 @@ class EvalCommand(Command):
         if not xq_flag and not js_flag:
             params["file"] = code
         if len(variables) > 0:
-            params["variables"] = {
-                key_value.split("=")[0]: key_value.split("=")[1]
-                for key_value in variables
-            }
+            params["variables"] = parse_variables(variables)
 
         return params
 

@@ -82,6 +82,7 @@ nav:
       - Clients: guides/clients.md
       - Documents: guides/documents.md
       - Evaluate code: guides/eval.md
+      - Invoke modules: guides/invoke.md
       - Search: guides/search.md
       - Transactions: guides/transactions.md
       - Environments: guides/environments.md
@@ -111,6 +112,7 @@ nav:
           - remove: cli/env/remove.md
           - compare: cli/env/compare.md
       - eval: cli/eval.md
+      - invoke: cli/invoke.md
       - http: cli/http.md
       - sample: cli/sample.md
       - logs: cli/logs.md

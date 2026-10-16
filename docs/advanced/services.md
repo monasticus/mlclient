@@ -15,13 +15,14 @@ See [Clients](../guides/clients.md) for the full tier map.
 
 ## Client services
 
-Documents, evaluation, search and transactions are available directly on the
+Documents, evaluation, module invocation, search and transactions are available directly on the
 client. Construct the CTS search service from `ml.rest`:
 
 | Service | Access | Guide |
 | --- | --- | --- |
 | Documents | `ml.documents` | [Documents](../guides/documents.md) |
 | Evaluate code | `ml.eval` | [Evaluate code](../guides/eval.md) |
+| Invoke modules | `ml.invoke` | [Invoke modules](../guides/invoke.md) |
 | Search | `ml.search` | [Search](../guides/search.md) |
 | Transactions | `ml.transaction()` | [Transactions](../guides/transactions.md) |
 | CTS search (eval) | `CtsService(ml.rest)` | [CTS search with eval](../guides/search.md#cts-search-with-eval) |
@@ -38,14 +39,14 @@ Services come in two kinds, and the access syntax tells them apart:
 
 | Kind | Example | What it holds | Creating it |
 | --- | --- | --- | --- |
-| Scoped | `ml.documents`, `ml.eval` | An immutable [ServiceScope][mlclient.services.ServiceScope] with database and transaction defaults | Calling the service, no request |
+| Scoped | `ml.documents`, `ml.eval`, `ml.invoke` | An immutable [ServiceScope][mlclient.services.ServiceScope] with database and transaction defaults | Calling the service, no request |
 | Scoped | `ml.search`, `ml.search(database="catalog")` | An immutable [SearchScope][mlclient.services.SearchScope] applied to every call | Calling the service, no request |
 | Opened | `ml.transaction(database="catalog")` | Server-side state: an open transaction | A method that sends a request |
 
-`ml.documents(database="catalog")` and `ml.eval(database="catalog")` return
-scoped copies sharing the same connection. Existing per-operation `database=`
+`ml.documents(database="catalog")`, `ml.eval(database="catalog")` and
+`ml.invoke(database="catalog")` return scoped copies sharing the same connection. Existing per-operation `database=`
 and `txid=` arguments override their defaults; `None` clears an inherited value.
-Both also accept transaction settings via `ml.documents(**txn)` or `ml.eval(**txn)`.
+All three also accept transaction settings, as in `ml.documents(**txn)`.
 
 `ml.search` is itself a scoped service with an empty scope. Calling it returns a
 new, narrower service and never changes the original, so scoped services can be

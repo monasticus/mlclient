@@ -32,6 +32,7 @@ from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
 from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
+from mlclient.cli.commands.invoke import InvokeCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
 from mlclient.cli.commands.sample import SampleCommand
@@ -55,6 +56,7 @@ class MLCLIentApplication(Application):
         self.set_display_name(self._DISPLAY_NAME)
         self.add(LogsCommand())
         self.add(EvalCommand())
+        self.add(InvokeCommand())
         self.add(HttpCommand())
         self.add(SampleCommand())
         self.add(EnvInitCommand())

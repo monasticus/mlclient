@@ -17,6 +17,7 @@ from mlclient.calls.documents import (
     DocumentsPostCall,
 )
 from mlclient.calls.eval import EvalCall
+from mlclient.calls.invoke import InvokeCall
 from mlclient.calls.forests import (
     ForestDeleteCall,
     ForestGetCall,
@@ -86,6 +87,7 @@ __all__ = [
     "GroupPropertiesGetCall",
     "GroupPropertiesPutCall",
     "HostsGetCall",
+    "InvokeCall",
     "LogsCall",
     "RoleDeleteCall",
     "RoleGetCall",

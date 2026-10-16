@@ -69,7 +69,7 @@ class ServiceScope:
 
 
 OptionsInput = str | dict | SearchOptions | None
-"""Installed options name, native inline options members, or an options builder."""
+"""Installed options name, native inline options members, or an options composition."""
 
 
 @dataclass(frozen=True)
@@ -94,7 +94,7 @@ class SearchScope:
     forest_name : str | list[str] | None, default unset
         Restrict matches to these database forests.
     options : str | dict | SearchOptions | None, default unset
-        Installed options name, or inline options members or builder sent in
+        Installed options name, or inline options members or composition sent in
         the combined query. Inline options do not install configuration; a
         dict is copied, so later changes to it do not affect the scope.
     timestamp : str | None, default unset

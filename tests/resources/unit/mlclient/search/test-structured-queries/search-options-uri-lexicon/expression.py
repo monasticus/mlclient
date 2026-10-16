@@ -1,7 +1,7 @@
 """Independent native JSON/XML representations of Search API options."""
 
-from mlclient.search.options import SearchOptions
+from mlclient.search.options import opt
 
 
 def run():
-    return SearchOptions().values("uris", "uri")
+    return opt.options(opt.values("uris", "uri"))

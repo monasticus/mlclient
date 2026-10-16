@@ -242,7 +242,7 @@ class StructuredQuery(SearchQuery, _Validated):
         Parameters
         ----------
         options : dict | SearchOptions | None, default None
-            Inline options members without an options wrapper, or their builder.
+            Inline option members without a wrapper, or a SearchOptions composition.
         qtext : str | None, default None
             Additional string query, AND-related to this query.
 

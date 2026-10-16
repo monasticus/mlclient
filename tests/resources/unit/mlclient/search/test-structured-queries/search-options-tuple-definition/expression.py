@@ -1,10 +1,10 @@
 """Independent native JSON/XML representations of Search API options."""
 
-from mlclient.search.options import Range, SearchOptions
+from mlclient.search.options import Range, opt
 from mlclient.search.structured import Element
 
 PRICE = Range(Element("price"), "xs:decimal")
 
 
 def run():
-    return SearchOptions().tuples("prices", PRICE, Range(Element("day"), "xs:date"))
+    return opt.options(opt.tuples("prices", PRICE, Range(Element("day"), "xs:date")))

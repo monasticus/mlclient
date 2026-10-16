@@ -1,11 +1,10 @@
 """Independent native JSON/XML representations of Search API options."""
 
-from mlclient.search.options import SearchOptions
+from mlclient.search.options import opt
 
 
 def run():
-    return (
-        SearchOptions()
-        .control("search-option", "unfiltered")
-        .control("search-option", "score-simple")
+    return opt.options(
+        opt.control("search-option", "unfiltered"),
+        opt.control("search-option", "score-simple"),
     )

@@ -24,7 +24,7 @@ def build_combined_query(
     search : dict
         Native inner search members, such as query or ctsquery.
     options : dict | SearchOptions | None, default None
-        Inline options members without an options wrapper, or their builder.
+        Inline option members without a wrapper, or a SearchOptions composition.
     qtext : str | None, default None
         Additional string query, AND-related to the native search criteria.
 
@@ -36,7 +36,7 @@ def build_combined_query(
     Raises
     ------
     TypeError
-        If options are not inline members or a SearchOptions builder, or qtext
+        If options are not inline members or a SearchOptions composition, or qtext
         is neither a string nor None.
     """
     # Options import structured queries, so resolve their type after module loading.
@@ -164,7 +164,7 @@ class SearchQuery(QueryComponent):
         Parameters
         ----------
         options : dict | SearchOptions | None, default None
-            Inline options members without an options wrapper, or their builder.
+            Inline option members without a wrapper, or a SearchOptions composition.
         qtext : str | None, default None
             Additional string query, AND-related to this query.
 

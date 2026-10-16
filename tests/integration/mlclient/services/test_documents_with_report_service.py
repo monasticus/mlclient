@@ -4,7 +4,7 @@ import pytest
 
 from mlclient import AsyncMLClient
 from mlclient.models import JSONDocument, XMLDocument
-from mlclient.search.options import Range, SearchOptions
+from mlclient.search.options import Range, opt
 from mlclient.search.structured import Element
 
 pytestmark = pytest.mark.ml_access
@@ -34,9 +34,8 @@ class TestDocumentsWithReport:
 
     def test_report_total_and_facets_cover_more_than_the_page(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().range_constraint(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.range_constraint("price", Range(Element("price", NS), "xs:decimal")),
         )
         report, documents = ml.search(
             database=database,

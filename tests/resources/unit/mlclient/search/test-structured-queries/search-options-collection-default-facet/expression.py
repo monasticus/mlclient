@@ -1,5 +1,5 @@
-from mlclient.search.options import SearchOptions
+from mlclient.search.options import opt
 
 
 def run():
-    return SearchOptions().collection_constraint("type")
+    return opt.options(opt.collection_constraint("type"))

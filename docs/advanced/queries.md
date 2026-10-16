@@ -24,14 +24,16 @@ from mlclient.search.structured import sq
 from mlclient.xquery import cts
 
 structured = sq.query(sq.and_(sq.collection("reports"), sq.term("blue")))
-native = cts.and_query([
-    cts.collection_query("reports"),
-    cts.word_query("blue"),
-])
+native = cts.and_query(
+    [
+        cts.collection_query("reports"),
+        cts.word_query("blue"),
+    ]
+)
 
 for query in (structured, native):
-    json_query = query.serialize()       # Same as serialize("json") or to_json().
-    xml_query = query.serialize("xml")   # Same as to_xml(); an ElementTree element.
+    json_query = query.serialize()  # Same as serialize("json") or to_json().
+    xml_query = query.serialize("xml")  # Same as to_xml(); an ElementTree element.
     xml_text = tostring(xml_query, encoding="unicode")
     combined = query.to_combined_query()
 ```
@@ -65,12 +67,16 @@ same service and operation scopes as for Python objects.
 
 ```python
 with MLClient() as ml:
-    structured_documents = ml.search.documents({
-        "query": {"term-query": {"text": "coffee"}},
-    })
-    cts_documents = ml.search.documents({
-        "ctsquery": {"wordQuery": {"text": "coffee"}},
-    })
+    structured_documents = ml.search.documents(
+        {
+            "query": {"term-query": {"text": "coffee"}},
+        }
+    )
+    cts_documents = ml.search.documents(
+        {
+            "ctsquery": {"wordQuery": {"text": "coffee"}},
+        }
+    )
 ```
 
 Use [sq][mlclient.search.structured.StructuredQueryBuilder] or
@@ -84,14 +90,14 @@ source. See the lexicon restriction below for raw CTS JSON.
 Both structured and CTS queries accept `options=` and `qtext=` in
 `to_combined_query()`. Options are inline members as a dictionary, without an
 outer `options` wrapper, or a [SearchOptions][mlclient.search.options.SearchOptions]
-builder. `qtext` is an additional Search API string query; MarkLogic ANDs it
+composition built with [opt][mlclient.search.options.SearchOptionsBuilder]. `qtext` is an additional Search API string query; MarkLogic ANDs it
 with the structured or CTS query.
 
 ```python
-from mlclient.search.options import SearchOptions
+from mlclient.search.options import opt
 from mlclient.search.structured import Element, sq
 
-options = SearchOptions().word_constraint("title", Element("title"))
+options = opt.options(opt.word_constraint("title", Element("title")))
 combined = sq.collection("reports").to_combined_query(
     options=options,
     qtext="title:coffee",
@@ -181,10 +187,12 @@ from mlclient.search.structured import (
 )
 
 query = Query(
-    AndQuery([
-        CollectionQuery("reports"),
-        WordQuery(Element("title"), "annual", options=["case-insensitive"]),
-    ])
+    AndQuery(
+        [
+            CollectionQuery("reports"),
+            WordQuery(Element("title"), "annual", options=["case-insensitive"]),
+        ]
+    )
 )
 xml = tostring(query.serialize("xml"), encoding="unicode")
 ```
@@ -235,7 +243,9 @@ from mlclient.search.structured import Element, PathIndex, RangeQuery
 
 price = RangeQuery(Element("price"), 20, operator="GE", index_type="xs:decimal")
 path = RangeQuery(
-    PathIndex("/r:report/r:price", namespaces={"r": "https://example.com/example/reports"}),
+    PathIndex(
+        "/r:report/r:price", namespaces={"r": "https://example.com/example/reports"}
+    ),
     20,
     operator="GE",
     index_type="xs:decimal",
@@ -263,10 +273,12 @@ from mlclient.search.structured import (
 )
 
 query = Query(
-    AndQuery([
-        RangeConstraintQuery("price", 20, operator="GE"),
-        WordConstraintQuery("title", "blue"),
-    ])
+    AndQuery(
+        [
+            RangeConstraintQuery("price", 20, operator="GE"),
+            WordConstraintQuery("title", "blue"),
+        ]
+    )
 )
 xml = query.serialize("xml")
 ```
@@ -277,21 +289,21 @@ them:
 
 ```python
 from mlclient import MLClient
-from mlclient.search.options import Range, SearchOptions
+from mlclient.search.options import Range, opt
 from mlclient.search.structured import Element
 
-options = (
-    SearchOptions()
-    .range_constraint("price", Range(Element("price"), "xs:decimal"), facet=False)
-    .word_constraint("title", Element("title"))
+options = opt.options(
+    opt.range_constraint("price", Range(Element("price"), "xs:decimal"), facet=False),
+    opt.word_constraint("title", Element("title")),
 )
 
 with MLClient() as ml:
     documents = ml.search(options=options).documents(query)
 ```
 
-[`SearchOptions`][mlclient.search.options.SearchOptions] builds range, word, value, collection and container
-constraints; define other kinds with `add()`.
+Use [opt][mlclient.search.options.SearchOptionsBuilder] to compose range, word,
+value, collection and container options. For other native option kinds, use
+`opt.native(...)` with matching JSON and XML; see [Search options](#search-options).
 
 Collection, container, properties, custom, value, word, and range constraint
 builders are supported. A custom constraint delegates to its configured
@@ -316,6 +328,72 @@ including `geo_element`, `geo_path`, `period_range`, and `period_compare`.
 For the complete native syntax and semantics, see the official
 [structured-query reference](https://docs.progress.com/bundle/marklogic-server-use-search-12/page/topics/structured-query.html).
 
+## Search options
+
+Build options by nesting immutable components, just as `sq` composes query
+objects. The [opt][mlclient.search.options.SearchOptionsBuilder] factories use
+the signatures of their corresponding classes. For example,
+`opt.word_constraint(...)` constructs a
+[WordConstraint][mlclient.search.options.WordConstraint], and
+`opt.options(...)` constructs [SearchOptions][mlclient.search.options.SearchOptions].
+Use [Range][mlclient.search.options.Range] or `opt.range(...)` for an index target.
+
+```python
+from mlclient.search.options import opt
+from mlclient.search.structured import sq
+
+base = opt.options(
+    opt.word_constraint("title", sq.element("title")),
+    opt.page_length(10),
+)
+custom = opt.options(base, opt.page_length(20), opt.return_facets(False))
+
+# base still requests 10 results; custom requests 20.
+with MLClient() as ml:
+    documents = ml.search(options=custom).documents("title:coffee")
+```
+
+Each group keeps its components in order. Repeatable options, such as
+constraints, values, tuples and sort keys, accumulate. A later non-repeatable
+option, such as page length, replaces an earlier one. Neither composition nor
+serialization changes the original group. JSON and XML are built independently
+and returned as fresh representations.
+
+The class API is equivalent and has the same typed parameters:
+
+```python
+from mlclient.search.options import PageLength, SearchOptions, WordConstraint
+from mlclient.search.structured import Element
+
+options = SearchOptions(
+    WordConstraint("title", Element("title")),
+    PageLength(20),
+)
+```
+
+[opt.page_length][mlclient.search.options.PageLength] requires a positive integer;
+[opt.return_facets][mlclient.search.options.ReturnFacets] requires a boolean.
+Use [opt.control][mlclient.search.options.Control] for other native scalar
+options, such as `opt.control("quality-weight", 0.5)`.
+
+For an option without a typed constructor, [opt.native][mlclient.search.options.NativeOptions]
+accepts the same option in both native formats. Its result is an immutable group
+that can be nested in `opt.options(...)`; neither format is inferred from the other:
+
+```python
+from xml.etree.ElementTree import Element
+
+from mlclient.search.options import opt
+from mlclient.search.structured import SEARCH_NS_URI
+
+metrics = Element(f"{{{SEARCH_NS_URI}}}return-metrics")
+metrics.text = "false"
+options = opt.options(
+    opt.page_length(20),
+    opt.native({"return-metrics": False}, metrics),
+)
+```
+
 ## CTS queries
 
 CTS query constructors return concrete subclasses of [`CtsQuery`][mlclient.xquery.CtsQuery], exported by
@@ -331,10 +409,12 @@ to native CTS JSON or XML:
 ```python
 from mlclient.xquery import cts
 
-query = cts.and_query([
-    cts.collection_query("reports"),
-    cts.word_query("blue", options=["lang=en", "unstemmed"]),
-])
+query = cts.and_query(
+    [
+        cts.collection_query("reports"),
+        cts.word_query("blue", options=["lang=en", "unstemmed"]),
+    ]
+)
 json_query = query.serialize()
 xml_query = query.serialize("xml")
 code, variables = query.compile()
@@ -355,10 +435,12 @@ from mlclient import MLClient
 from mlclient.services import CtsService
 from mlclient.xquery import cts
 
-query = cts.and_query([
-    cts.collection_query("reports"),
-    cts.word_query("blue"),
-])
+query = cts.and_query(
+    [
+        cts.collection_query("reports"),
+        cts.word_query("blue"),
+    ]
+)
 code, variables = query.compile()
 
 with MLClient() as ml:

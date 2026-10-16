@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from abc import abstractmethod
 from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -20,7 +21,25 @@ from mlclient.search.structured import (
     PathIndex,
 )
 
-__all__ = ["Range", "SearchOptions"]
+__all__ = [
+    "CollectionConstraint",
+    "ContainerConstraint",
+    "Control",
+    "NativeOptions",
+    "PageLength",
+    "Range",
+    "RangeConstraint",
+    "ReturnFacets",
+    "SearchOption",
+    "SearchOptions",
+    "SearchOptionsBuilder",
+    "SortOrder",
+    "Tuples",
+    "ValueConstraint",
+    "Values",
+    "WordConstraint",
+    "opt",
+]
 
 # MarkLogic's REST options converter holds these members in JSON arrays
 # ($csu:array-element-names in /MarkLogic/rest-api/lib/config-query-util.xqy).
@@ -135,22 +154,89 @@ class Range(QueryComponent):
         return node
 
 
-class SearchOptions(QueryComponent):
-    """Fluent builder for inline or persistent Search API options.
+class SearchOption(QueryComponent):
+    """One immutable, typed Search API option.
 
-    Each method adds one definition to this builder and returns it. Every
-    definition keeps its input data and components. Only the requested format
-    is built when serialize(), to_json() or to_xml() is called. Serialization
-    produces independent representations. Options describe indexes; they never
-    create them.
+    Concrete options serialize independently to native JSON members or an XML
+    element. Compose them with SearchOptions or opt.options; they perform no I/O.
     """
 
+    _definition: _Definition
+
+    @abstractmethod
     def __init__(self):
-        """Create an empty options builder without server interaction."""
-        self._definitions: list[_Definition] = []
+        """Create a concrete option from its typed parameters."""
+        raise NotImplementedError
+
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | XmlElement:
+        """Serialize this option without converting through the other format.
+
+        Parameters
+        ----------
+        output_format : {'json', 'xml'}
+            Requested native vocabulary.
+
+        Returns
+        -------
+        dict or xml.etree.ElementTree.Element
+            Independent native representation of this option.
+        """
+        return self._definition.serialize(output_format)
+
+
+@dataclass(frozen=True, init=False, eq=False, repr=False)
+class SearchOptions(QueryComponent):
+    """Compose immutable Search API options without configuring the server.
+
+    Parameters
+    ----------
+    *options : SearchOption | SearchOptions
+        Typed option components or reusable groups, in serialization order.
+        Repeatable members accumulate; the last non-repeatable member wins.
+
+    Raises
+    ------
+    TypeError
+        If a component is neither a SearchOption nor a SearchOptions group.
+    """
+
+    _definitions: tuple[_Definition, ...]
+
+    def __init__(self, *options: SearchOption | SearchOptions):
+        """Snapshot option composition while retaining immutable components.
+
+        Parameters
+        ----------
+        *options : SearchOption | SearchOptions
+            Individual options or reusable option groups.
+
+        Raises
+        ------
+        TypeError
+            If a component has an unsupported type.
+        """
+        definitions = []
+        # Composition shares the private snapshots owned by these co-located models.
+        for option in options:
+            if isinstance(option, SearchOptions):
+                additions = option._definitions  # noqa: SLF001
+            elif isinstance(option, SearchOption):
+                additions = (option._definition,)  # noqa: SLF001
+            else:
+                message = (
+                    "options components must be SearchOption or SearchOptions instances"
+                )
+                raise TypeError(message)
+            for definition in additions:
+                if not definition.repeatable:
+                    definitions = [
+                        held for held in definitions if held.name != definition.name
+                    ]
+                definitions.append(definition)
+        object.__setattr__(self, "_definitions", tuple(definitions))
 
     def __eq__(self, other: object) -> bool:
-        """Compare builders by the options they serialize to.
+        """Compare options by their independent native representations.
 
         Parameters
         ----------
@@ -168,8 +254,6 @@ class SearchOptions(QueryComponent):
             self.to_xml(),
         ) == tostring(other.to_xml())
 
-    __hash__ = None
-
     def __repr__(self) -> str:
         """Name the native definitions in insertion order.
 
@@ -180,456 +264,6 @@ class SearchOptions(QueryComponent):
         """
         names = ", ".join(definition.name for definition in self._definitions)
         return f"SearchOptions({names})"
-
-    def values(
-        self,
-        name: str,
-        index: Range | Literal["uri", "collection"],
-        *,
-        options: str | Sequence[str] | None = None,
-    ) -> SearchOptions:
-        """Define a named range, URI or collection lexicon.
-
-        Parameters
-        ----------
-        name : str
-            Values definition name passed to SearchService.values or aggregate.
-        index : Range | {'uri', 'collection'}
-            Existing range index or enabled database lexicon.
-        options : str | Sequence[str] | None, default None
-            Native values-option strings, such as frequency-order.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        TypeError
-            For an unsupported index specification.
-        """
-        if not isinstance(index, Range) and index not in ("uri", "collection"):
-            message = "values index must be a Range, uri or collection"
-            raise TypeError(message)
-        target = index if isinstance(index, Range) else _Definition(index, value=None)
-        return self._append(
-            _Definition(
-                "values",
-                {"name": name, **_option_members("values-option", options)},
-                (target,),
-            ),
-        )
-
-    def tuples(self, name: str, *indexes: Range) -> SearchOptions:
-        """Define co-occurring values from two or more existing range indexes.
-
-        Parameters
-        ----------
-        name : str
-            Tuples definition name passed to SearchService.tuples or aggregate.
-        *indexes : Range
-            Two or more range indexes in tuple component order.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        ValueError
-            If fewer than two indexes are supplied.
-        TypeError
-            If an index is not a Range.
-        """
-        if len(indexes) < _MIN_TUPLE_INDEXES:
-            message = "tuples requires at least two range indexes"
-            raise ValueError(message)
-        if any(not isinstance(index, Range) for index in indexes):
-            message = "tuples indexes must be Range instances"
-            raise TypeError(message)
-        return self._append(_Definition("tuples", {"name": name}, indexes))
-
-    def range_constraint(
-        self,
-        name: str,
-        index: Range,
-        *,
-        facet: bool = True,
-        options: str | Sequence[str] | None = None,
-    ) -> SearchOptions:
-        """Define a named range constraint and optional facet.
-
-        Parameters
-        ----------
-        name : str
-            Constraint name used by string queries and returned facets.
-        index : Range
-            Existing range index.
-        facet : bool, default True
-            Whether to calculate a facet.
-        options : str | Sequence[str] | None, default None
-            Native facet-option strings, such as limit=10.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        TypeError
-            If index is not a Range.
-        """
-        if not isinstance(index, Range):
-            message = "range constraint index must be a Range"
-            raise TypeError(message)
-        return self._append(
-            _Definition(
-                "constraint",
-                {"name": name},
-                (
-                    _Definition(
-                        "range",
-                        {"facet": facet, **_option_members("facet-option", options)},
-                        index=index,
-                    ),
-                ),
-            ),
-        )
-
-    def word_constraint(
-        self,
-        name: str,
-        target: Element | JsonProperty | Field,
-        *,
-        attribute: Attribute | None = None,
-        options: str | Sequence[str] | None = None,
-    ) -> SearchOptions:
-        """Define a named word constraint on an element, JSON property or field.
-
-        String queries use it as ``name:word``; WordConstraintQuery names it.
-
-        Parameters
-        ----------
-        name : str
-            Constraint name.
-        target : Element | JsonProperty | Field
-            The element, JSON property or field whose words are matched.
-        attribute : Attribute | None, default None
-            Attribute of an Element target whose words are matched instead.
-        options : str | Sequence[str] | None, default None
-            Native term-option strings, such as case-insensitive.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        TypeError
-            If target is not an Element, JsonProperty or Field, or attribute is
-            not an Attribute of an Element target.
-        """
-        term = _term_target("word", target, attribute)
-        return self._term_constraint("word", name, term, options)
-
-    def value_constraint(
-        self,
-        name: str,
-        target: Element | JsonProperty | Field,
-        *,
-        attribute: Attribute | None = None,
-        node_type: _JsonNodeType | None = None,
-        options: str | Sequence[str] | None = None,
-    ) -> SearchOptions:
-        """Define a named value constraint on an element, JSON property or field.
-
-        String queries use it as ``name:value``; ValueConstraintQuery names it.
-
-        Parameters
-        ----------
-        name : str
-            Constraint name.
-        target : Element | JsonProperty | Field
-            The element, JSON property or field whose whole value is matched.
-        attribute : Attribute | None, default None
-            Attribute of an Element target whose value is matched instead.
-        node_type : {'string', 'boolean', 'null', 'number'} | None, default None
-            JSON node type of the matched values; None matches strings, as
-            MarkLogic does. Only JSON content has these node types.
-        options : str | Sequence[str] | None, default None
-            Native term-option strings, such as case-insensitive.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        TypeError
-            If target is not an Element, JsonProperty or Field, or attribute is
-            not an Attribute of an Element target.
-        ValueError
-            If node_type is not a JSON node type.
-        """
-        if node_type is not None and node_type not in _JSON_NODE_TYPES:
-            message = (
-                f"value constraint node_type must be one of "
-                f"{', '.join(sorted(_JSON_NODE_TYPES))}, got {node_type!r}"
-            )
-            raise ValueError(message)
-        term = _term_target("value", target, attribute)
-        return self._term_constraint("value", name, term, options, node_type=node_type)
-
-    def collection_constraint(
-        self,
-        name: str,
-        *,
-        prefix: str | None = None,
-        facet: bool = True,
-    ) -> SearchOptions:
-        """Define a named collection constraint and optional facet.
-
-        String queries use it as ``name:collection``, matched after the prefix.
-
-        Parameters
-        ----------
-        name : str
-            Constraint name.
-        prefix : str | None, default None
-            Collection URI prefix the constraint values are appended to.
-        facet : bool, default True
-            Whether to calculate a facet, which needs the collection lexicon;
-            MarkLogic also calculates it by default.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-        """
-        attributes = {"facet": facet}
-        if prefix is not None:
-            attributes["prefix"] = prefix
-        return self._append(
-            _Definition(
-                "constraint",
-                {"name": name},
-                (_Definition("collection", attributes),),
-            ),
-        )
-
-    def container_constraint(
-        self,
-        name: str,
-        target: Element | JsonProperty,
-    ) -> SearchOptions:
-        """Define a named container constraint on an element or JSON property.
-
-        ContainerConstraintQuery names it to match a query within the container.
-
-        Parameters
-        ----------
-        name : str
-            Constraint name.
-        target : Element | JsonProperty
-            The containing element or JSON property.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        TypeError
-            If target is not an Element or JsonProperty.
-        """
-        if not isinstance(target, (Element, JsonProperty)):
-            message = "container constraint target must be an Element or JsonProperty"
-            raise TypeError(message)
-        return self._append(
-            _Definition(
-                "constraint",
-                {"name": name},
-                (_Definition("container", children=(target,)),),
-            ),
-        )
-
-    def sort(
-        self,
-        index: Range,
-        *,
-        direction: Literal["ascending", "descending"] = "ascending",
-    ) -> SearchOptions:
-        """Append a range-index sort key; keys apply in insertion order.
-
-        Parameters
-        ----------
-        index : Range
-            Existing range index.
-        direction : {'ascending', 'descending'}, default 'ascending'
-            Sort direction.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        TypeError
-            If index is not a Range.
-        ValueError
-            If direction is unsupported.
-        """
-        if not isinstance(index, Range):
-            message = "sort index must be a Range"
-            raise TypeError(message)
-        if direction not in ("ascending", "descending"):
-            message = "sort direction must be ascending or descending"
-            raise ValueError(message)
-        return self._append(
-            _Definition(
-                "sort-order",
-                {"direction": direction},
-                index=index,
-            ),
-        )
-
-    def control(self, name: str, value: str | int | float | bool) -> SearchOptions:
-        """Set a scalar top-level option such as page-length or return-facets.
-
-        A repeatable option such as search-option accumulates; any other
-        replaces an earlier value.
-
-        Parameters
-        ----------
-        name : str
-            Native Search API scalar option name, including hyphens.
-        value : str | int | float | bool
-            Native scalar value. Complex options belong in add instead.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-
-        Raises
-        ------
-        TypeError
-            If value is not a string, number or boolean.
-        ValueError
-            If a float value is not finite.
-        """
-        if not isinstance(value, (str, int, float, bool)):
-            message = "control value must be a string, number or boolean"
-            raise TypeError(message)
-        if isinstance(value, float) and not math.isfinite(value):
-            message = "control value must be finite"
-            raise ValueError(message)
-        return self._append(_Definition(name, value=value))
-
-    def add(self, definition: dict, *elements: XmlElement) -> SearchOptions:
-        """Add native options members that have no convenience method.
-
-        Supply every member in both native forms: each JSON definition needs
-        one search-namespace XML element with the member's name, because
-        neither representation is converted through the other.
-
-        Parameters
-        ----------
-        definition : dict
-            Native JSON options members, without the outer options wrapper. A
-            list member holds one definition per item and appends to earlier
-            definitions; any other member is one definition that replaces an
-            earlier one of the same name.
-        *elements : xml.etree.ElementTree.Element
-            The same definitions as search-namespace XML children, matched to
-            JSON items by name and order. Serialization follows the JSON order.
-
-        Returns
-        -------
-        SearchOptions
-            This builder, holding defensive copies of the definitions.
-
-        Raises
-        ------
-        ValueError
-            If an element is outside the search namespace, or a member does not
-            have exactly as many XML elements as JSON definitions.
-        """
-        for added in _pair_native_definitions(definition, elements):
-            self._append(added)
-        return self
-
-    def _term_constraint(
-        self,
-        kind: Literal["word", "value"],
-        name: str,
-        term: tuple[QueryComponent, ...],
-        options: str | Sequence[str] | None,
-        *,
-        node_type: _JsonNodeType | None = None,
-    ) -> SearchOptions:
-        """Add a word or value constraint with its term options.
-
-        Parameters
-        ----------
-        kind : {'word', 'value'}
-            Native constraint kind.
-        name : str
-            Constraint name.
-        term : tuple[QueryComponent, ...]
-            Validated target components, without serialization.
-        options : str | Sequence[str] | None
-            Native term-option strings.
-        node_type : str | None, optional
-            JSON value node type; None keeps the native default.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-        """
-        attributes = {} if node_type is None else {"type": node_type}
-        attributes.update(_option_members("term-option", options))
-        return self._append(
-            _Definition(
-                "constraint",
-                {"name": name},
-                (
-                    _Definition(
-                        kind,
-                        attributes,
-                        term,
-                    ),
-                ),
-            ),
-        )
-
-    def _append(self, definition: _Definition) -> SearchOptions:
-        """Add one definition, replacing an earlier non-repeatable namesake.
-
-        Parameters
-        ----------
-        definition : _Definition
-            Input data and components for one native definition.
-
-        Returns
-        -------
-        SearchOptions
-            This builder.
-        """
-        if not definition.repeatable:
-            self._definitions = [
-                held for held in self._definitions if held.name != definition.name
-            ]
-        self._definitions.append(definition)
-        return self
 
     def _serialize(self, output_format: Literal["json", "xml"]) -> dict | XmlElement:
         """Build the selected native options representation from the definitions.
@@ -676,6 +310,575 @@ class SearchOptions(QueryComponent):
                 members[held.name] = definition
         return {"options": members}
 
+    __hash__ = None
+
+
+@dataclass(frozen=True, init=False)
+class Values(SearchOption):
+    """Define a named range, URI or collection lexicon."""
+
+    name: str
+    index: Range | Literal["uri", "collection"]
+    options: str | Sequence[str] | None
+
+    def __init__(
+        self,
+        name: str,
+        index: Range | Literal["uri", "collection"],
+        *,
+        options: str | Sequence[str] | None = None,
+    ):
+        """Define a named range, URI or collection lexicon.
+
+        Parameters
+        ----------
+        name : str
+            Values definition name passed to SearchService.values or aggregate.
+        index : Range | {'uri', 'collection'}
+            Existing range index or enabled database lexicon.
+        options : str | Sequence[str] | None, default None
+            Native values-option strings, such as frequency-order.
+
+        Raises
+        ------
+        TypeError
+            For an unsupported index specification.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "index", index)
+        object.__setattr__(
+            self,
+            "options",
+            options if options is None or isinstance(options, str) else tuple(options),
+        )
+        if not isinstance(index, Range) and index not in ("uri", "collection"):
+            message = "values index must be a Range, uri or collection"
+            raise TypeError(message)
+        target = index if isinstance(index, Range) else _Definition(index, value=None)
+        object.__setattr__(
+            self,
+            "_definition",
+            _Definition(
+                "values",
+                {"name": name, **_option_members("values-option", options)},
+                (target,),
+            ),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class Tuples(SearchOption):
+    """Define co-occurring values from two or more existing range indexes."""
+
+    name: str
+    indexes: tuple[Range, ...]
+
+    def __init__(self, name: str, *indexes: Range):
+        """Define co-occurring values from two or more existing range indexes.
+
+        Parameters
+        ----------
+        name : str
+            Tuples definition name passed to SearchService.tuples or aggregate.
+        *indexes : Range
+            Two or more range indexes in tuple component order.
+
+        Raises
+        ------
+        ValueError
+            If fewer than two indexes are supplied.
+        TypeError
+            If an index is not a Range.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "indexes", indexes)
+        if len(indexes) < _MIN_TUPLE_INDEXES:
+            message = "tuples requires at least two range indexes"
+            raise ValueError(message)
+        if any(not isinstance(index, Range) for index in indexes):
+            message = "tuples indexes must be Range instances"
+            raise TypeError(message)
+        object.__setattr__(
+            self,
+            "_definition",
+            _Definition("tuples", {"name": name}, indexes),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class RangeConstraint(SearchOption):
+    """Define a named range constraint and optional facet."""
+
+    name: str
+    index: Range
+    facet: bool
+    options: str | Sequence[str] | None
+
+    def __init__(
+        self,
+        name: str,
+        index: Range,
+        *,
+        facet: bool = True,
+        options: str | Sequence[str] | None = None,
+    ):
+        """Define a named range constraint and optional facet.
+
+        Parameters
+        ----------
+        name : str
+            Constraint name used by string queries and returned facets.
+        index : Range
+            Existing range index.
+        facet : bool, default True
+            Whether to calculate a facet.
+        options : str | Sequence[str] | None, default None
+            Native facet-option strings, such as limit=10.
+
+        Raises
+        ------
+        TypeError
+            If index is not a Range.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "index", index)
+        object.__setattr__(self, "facet", facet)
+        object.__setattr__(
+            self,
+            "options",
+            options if options is None or isinstance(options, str) else tuple(options),
+        )
+        if not isinstance(index, Range):
+            message = "range constraint index must be a Range"
+            raise TypeError(message)
+        object.__setattr__(
+            self,
+            "_definition",
+            _Definition(
+                "constraint",
+                {"name": name},
+                (
+                    _Definition(
+                        "range",
+                        {"facet": facet, **_option_members("facet-option", options)},
+                        index=index,
+                    ),
+                ),
+            ),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class WordConstraint(SearchOption):
+    """Define a named word constraint on an element, JSON property or field."""
+
+    name: str
+    target: Element | JsonProperty | Field
+    attribute: Attribute | None
+    options: str | Sequence[str] | None
+
+    def __init__(
+        self,
+        name: str,
+        target: Element | JsonProperty | Field,
+        *,
+        attribute: Attribute | None = None,
+        options: str | Sequence[str] | None = None,
+    ):
+        """Define a named word constraint on an element, JSON property or field.
+
+        String queries use it as ``name:word``; WordConstraintQuery names it.
+
+        Parameters
+        ----------
+        name : str
+            Constraint name.
+        target : Element | JsonProperty | Field
+            The element, JSON property or field whose words are matched.
+        attribute : Attribute | None, default None
+            Attribute of an Element target whose words are matched instead.
+        options : str | Sequence[str] | None, default None
+            Native term-option strings, such as case-insensitive.
+
+        Raises
+        ------
+        TypeError
+            If target is not an Element, JsonProperty or Field, or attribute is
+            not an Attribute of an Element target.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "target", target)
+        object.__setattr__(self, "attribute", attribute)
+        object.__setattr__(
+            self,
+            "options",
+            options if options is None or isinstance(options, str) else tuple(options),
+        )
+        term = _term_target("word", target, attribute)
+        object.__setattr__(
+            self,
+            "_definition",
+            _term_constraint("word", name, term, options),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class ValueConstraint(SearchOption):
+    """Define a named value constraint on an element, JSON property or field."""
+
+    name: str
+    target: Element | JsonProperty | Field
+    attribute: Attribute | None
+    node_type: _JsonNodeType | None
+    options: str | Sequence[str] | None
+
+    def __init__(
+        self,
+        name: str,
+        target: Element | JsonProperty | Field,
+        *,
+        attribute: Attribute | None = None,
+        node_type: _JsonNodeType | None = None,
+        options: str | Sequence[str] | None = None,
+    ):
+        """Define a named value constraint on an element, JSON property or field.
+
+        String queries use it as ``name:value``; ValueConstraintQuery names it.
+
+        Parameters
+        ----------
+        name : str
+            Constraint name.
+        target : Element | JsonProperty | Field
+            The element, JSON property or field whose whole value is matched.
+        attribute : Attribute | None, default None
+            Attribute of an Element target whose value is matched instead.
+        node_type : {'string', 'boolean', 'null', 'number'} | None, default None
+            JSON node type of the matched values; None matches strings, as
+            MarkLogic does. Only JSON content has these node types.
+        options : str | Sequence[str] | None, default None
+            Native term-option strings, such as case-insensitive.
+
+        Raises
+        ------
+        TypeError
+            If target is not an Element, JsonProperty or Field, or attribute is
+            not an Attribute of an Element target.
+        ValueError
+            If node_type is not a JSON node type.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "target", target)
+        object.__setattr__(self, "attribute", attribute)
+        object.__setattr__(self, "node_type", node_type)
+        object.__setattr__(
+            self,
+            "options",
+            options if options is None or isinstance(options, str) else tuple(options),
+        )
+        if node_type is not None and node_type not in _JSON_NODE_TYPES:
+            message = (
+                "value constraint node_type must be one of "
+                f"{', '.join(sorted(_JSON_NODE_TYPES))}, got {node_type!r}"
+            )
+            raise ValueError(message)
+        term = _term_target("value", target, attribute)
+        object.__setattr__(
+            self,
+            "_definition",
+            _term_constraint("value", name, term, options, node_type=node_type),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class CollectionConstraint(SearchOption):
+    """Define a named collection constraint and optional facet."""
+
+    name: str
+    prefix: str | None
+    facet: bool
+
+    def __init__(self, name: str, *, prefix: str | None = None, facet: bool = True):
+        """Define a named collection constraint and optional facet.
+
+        String queries use it as ``name:collection``, matched after the prefix.
+
+        Parameters
+        ----------
+        name : str
+            Constraint name.
+        prefix : str | None, default None
+            Collection URI prefix the constraint values are appended to.
+        facet : bool, default True
+            Whether to calculate a facet, which needs the collection lexicon;
+            MarkLogic also calculates it by default.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "prefix", prefix)
+        object.__setattr__(self, "facet", facet)
+        attributes = {"facet": facet}
+        if prefix is not None:
+            attributes["prefix"] = prefix
+        object.__setattr__(
+            self,
+            "_definition",
+            _Definition(
+                "constraint",
+                {"name": name},
+                (_Definition("collection", attributes),),
+            ),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class ContainerConstraint(SearchOption):
+    """Define a named container constraint on an element or JSON property."""
+
+    name: str
+    target: Element | JsonProperty
+
+    def __init__(self, name: str, target: Element | JsonProperty):
+        """Define a named container constraint on an element or JSON property.
+
+        ContainerConstraintQuery names it to match a query within the container.
+
+        Parameters
+        ----------
+        name : str
+            Constraint name.
+        target : Element | JsonProperty
+            The containing element or JSON property.
+
+        Raises
+        ------
+        TypeError
+            If target is not an Element or JsonProperty.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "target", target)
+        if not isinstance(target, (Element, JsonProperty)):
+            message = "container constraint target must be an Element or JsonProperty"
+            raise TypeError(message)
+        object.__setattr__(
+            self,
+            "_definition",
+            _Definition(
+                "constraint",
+                {"name": name},
+                (_Definition("container", children=(target,)),),
+            ),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class SortOrder(SearchOption):
+    """Append a range-index sort key; keys apply in insertion order."""
+
+    index: Range
+    direction: Literal["ascending", "descending"]
+
+    def __init__(
+        self,
+        index: Range,
+        *,
+        direction: Literal["ascending", "descending"] = "ascending",
+    ):
+        """Append a range-index sort key; keys apply in insertion order.
+
+        Parameters
+        ----------
+        index : Range
+            Existing range index.
+        direction : {'ascending', 'descending'}, default 'ascending'
+            Sort direction.
+
+        Raises
+        ------
+        TypeError
+            If index is not a Range.
+        ValueError
+            If direction is unsupported.
+        """
+        object.__setattr__(self, "index", index)
+        object.__setattr__(self, "direction", direction)
+        if not isinstance(index, Range):
+            message = "sort index must be a Range"
+            raise TypeError(message)
+        if direction not in ("ascending", "descending"):
+            message = "sort direction must be ascending or descending"
+            raise ValueError(message)
+        object.__setattr__(
+            self,
+            "_definition",
+            _Definition("sort-order", {"direction": direction}, index=index),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class Control(SearchOption):
+    """Set a scalar top-level option such as page-length or return-facets."""
+
+    name: str
+    value: str | int | float | bool
+
+    def __init__(self, name: str, value: str | int | float | bool):
+        """Set a scalar top-level option such as page-length or return-facets.
+
+        A repeatable option such as search-option accumulates; any other
+        replaces an earlier value.
+
+        Parameters
+        ----------
+        name : str
+            Native Search API scalar option name, including hyphens.
+        value : str | int | float | bool
+            Native scalar value. Complex options belong in add instead.
+
+        Raises
+        ------
+        TypeError
+            If value is not a string, number or boolean.
+        ValueError
+            If a float value is not finite.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "value", value)
+        if not isinstance(value, (str, int, float, bool)):
+            message = "control value must be a string, number or boolean"
+            raise TypeError(message)
+        if isinstance(value, float) and (not math.isfinite(value)):
+            message = "control value must be finite"
+            raise ValueError(message)
+        object.__setattr__(self, "_definition", _Definition(name, value=value))
+
+
+@dataclass(frozen=True, init=False, eq=False, repr=False)
+class NativeOptions(SearchOptions):
+    """Supply native JSON and XML for options without a typed constructor.
+
+    Parameters
+    ----------
+    definition : dict
+        Native options members, without an options wrapper.
+    *elements : xml.etree.ElementTree.Element
+        Matching search-namespace XML elements, one per JSON definition.
+
+    Raises
+    ------
+    ValueError
+        If the native definitions do not have matching names and counts.
+    """
+
+    def __init__(self, definition: dict, *elements: XmlElement):
+        """Snapshot independent native forms for reuse in option compositions.
+
+        Parameters
+        ----------
+        definition : dict
+            JSON options members.
+        *elements : xml.etree.ElementTree.Element
+            Corresponding XML children in the Search API namespace.
+
+        Raises
+        ------
+        ValueError
+            If native names, namespaces or definition counts do not match.
+        """
+        object.__setattr__(
+            self,
+            "_definitions",
+            tuple(_pair_native_definitions(definition, elements)),
+        )
+
+
+@dataclass(frozen=True, init=False)
+class PageLength(SearchOption):
+    """Set the positive number of search results per page."""
+
+    value: int
+
+    def __init__(self, value: int):
+        """Create a typed page-length option.
+
+        Parameters
+        ----------
+        value : int
+            Positive number of results.
+
+        Raises
+        ------
+        TypeError
+            If value is not an integer, or is a boolean.
+        ValueError
+            If value is not positive.
+        """
+        if type(value) is not int:
+            message = "page length must be an integer"
+            raise TypeError(message)
+        if value <= 0:
+            message = "page length must be positive"
+            raise ValueError(message)
+        object.__setattr__(self, "value", value)
+        object.__setattr__(self, "_definition", _Definition("page-length", value=value))
+
+
+@dataclass(frozen=True, init=False)
+class ReturnFacets(SearchOption):
+    """Choose whether the search report includes facets."""
+
+    value: bool
+
+    def __init__(self, value: bool):
+        """Create a typed return-facets option.
+
+        Parameters
+        ----------
+        value : bool
+            Whether to include facets.
+
+        Raises
+        ------
+        TypeError
+            If value is not a boolean.
+        """
+        if not isinstance(value, bool):
+            message = "return facets must be a boolean"
+            raise TypeError(message)
+        object.__setattr__(self, "value", value)
+        object.__setattr__(
+            self,
+            "_definition",
+            _Definition("return-facets", value=value),
+        )
+
+
+class SearchOptionsBuilder:
+    """Construct immutable options with typed signatures and no mutable state.
+
+    Each factory has the signature of its corresponding option class. Nest
+    components in options(), which accepts individual options and reusable
+    groups. Range and selector objects describe existing database indexes.
+    """
+
+    options = SearchOptions
+    range = Range
+    values = Values
+    tuples = Tuples
+    range_constraint = RangeConstraint
+    word_constraint = WordConstraint
+    value_constraint = ValueConstraint
+    collection_constraint = CollectionConstraint
+    container_constraint = ContainerConstraint
+    sort = SortOrder
+    control = Control
+    native = NativeOptions
+    page_length = PageLength
+    return_facets = ReturnFacets
+
+
+opt = SearchOptionsBuilder()
+"""Stateless search-options factories, equivalent to SearchOptionsBuilder()."""
+
 
 @dataclass(frozen=True)
 class _Definition(QueryComponent):
@@ -695,7 +898,7 @@ class _Definition(QueryComponent):
     value : object
         Scalar member value; Ellipsis denotes a member with attributes/children.
     native : tuple[object, XmlElement] | None
-        Caller-supplied native forms from add(); no format conversion is performed.
+        Caller-supplied NativeOptions forms; no format conversion is performed.
     """
 
     name: str
@@ -830,7 +1033,8 @@ def _pair_native_definitions(
         namespace, local_name = _split_clark_name(element.tag)
         if namespace != SEARCH_NS_URI:
             message = (
-                f"add requires XML elements in the {SEARCH_NS_URI} namespace; "
+                "native options require XML elements in the "
+                f"{SEARCH_NS_URI} namespace; "
                 f"got {element.tag}"
             )
             raise ValueError(message)
@@ -843,7 +1047,7 @@ def _pair_native_definitions(
         xml_count = len(xml_by_name.get(name, []))
         if json_count != xml_count:
             message = (
-                "add requires one search-namespace XML element per JSON "
+                "native options require one search-namespace XML element per JSON "
                 f"definition; {name} has {json_count} JSON and {xml_count} XML "
                 "definitions"
             )
@@ -970,3 +1174,40 @@ def _strings(values: str | Sequence[str]) -> list[str]:
         A fresh list of the options.
     """
     return [values] if isinstance(values, str) else list(values)
+
+
+def _term_constraint(
+    kind: Literal["word", "value"],
+    name: str,
+    term: tuple[QueryComponent, ...],
+    options: str | Sequence[str] | None,
+    *,
+    node_type: _JsonNodeType | None = None,
+) -> _Definition:
+    """Describe a word or value constraint with its term options.
+
+    Parameters
+    ----------
+    kind : {'word', 'value'}
+        Native constraint kind.
+    name : str
+        Constraint name.
+    term : tuple[QueryComponent, ...]
+        Validated target components, without serialization.
+    options : str | Sequence[str] | None
+        Native term-option strings.
+    node_type : str | None, optional
+        JSON value node type; None keeps the native default.
+
+    Returns
+    -------
+    _Definition
+        Immutable native constraint definition.
+    """
+    attributes = {} if node_type is None else {"type": node_type}
+    attributes.update(_option_members("term-option", options))
+    return _Definition(
+        "constraint",
+        {"name": name},
+        (_Definition(kind, attributes, term),),
+    )

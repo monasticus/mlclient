@@ -58,12 +58,14 @@ with MLClient() as ml:
     by_cts = ml.search.documents(
         {"ctsquery": {"wordQuery": {"text": "coffee"}}},
     )
-    by_combined = ml.search.documents({
-        "search": {
-            "query": {"term-query": {"text": "coffee"}},
-            "options": {"page-length": 20},
-        },
-    })
+    by_combined = ml.search.documents(
+        {
+            "search": {
+                "query": {"term-query": {"text": "coffee"}},
+                "options": {"page-length": 20},
+            },
+        }
+    )
 ```
 
 For query construction, see [Structured and CTS queries](../advanced/queries.md),
@@ -75,7 +77,8 @@ operators build one flat query, so the following are equivalent:
 
 ```python
 coffee_not_decaf = (
-    cts.collection_query("products") & cts.word_query("coffee")
+    cts.collection_query("products")
+    & cts.word_query("coffee")
     & ~cts.word_query("decaf")
 )
 same_query = cts.and_query(
@@ -156,7 +159,7 @@ Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
 values or tuples definition. It returns the parsed result, not a [`ValueHit`][mlclient.models.ValueHit]:
 
 ```python
-options = SearchOptions().values("price", Range(Element("price"), "xs:decimal"))
+options = opt.options(opt.values("price", Range(Element("price"), "xs:decimal")))
 
 with MLClient() as ml:
     prices = ml.search(options=options)
@@ -176,7 +179,9 @@ library path:
 ```python
 with MLClient() as ml:
     result = ml.search(options=options).aggregate(
-        "price", "customAverage", aggregate_path="/native/statistics",
+        "price",
+        "customAverage",
+        aggregate_path="/native/statistics",
     )
 ```
 
@@ -186,10 +191,12 @@ the lexicon. A missing value returns `None`.
 ## Read co-occurrences
 
 ```python
-options = SearchOptions().tuples(
-    "price-day",
-    Range(Element("price"), "xs:decimal"),
-    Range(Element("day"), "xs:date"),
+options = opt.options(
+    opt.tuples(
+        "price-day",
+        Range(Element("price"), "xs:decimal"),
+        Range(Element("day"), "xs:date"),
+    )
 )
 
 with MLClient() as ml:
@@ -247,22 +254,23 @@ paging and report contents.
 
 ## Build query options
 
-MLClient supports native MarkLogic query options. Pass an installed options name,
-an inline options dictionary, or the
-[SearchOptions][mlclient.search.options.SearchOptions] builder to `ml.search`.
-The builder exposes constraints, sort order, values definitions and other options
-as Python methods:
+Pass an installed options name, an inline dictionary, or an immutable
+[SearchOptions][mlclient.search.options.SearchOptions] composition to `ml.search`.
+The stateless [opt][mlclient.search.options.SearchOptionsBuilder] factories work
+like [sq][mlclient.search.structured.StructuredQueryBuilder]: nest typed
+components in `opt.options(...)`.
 
 ```python
-from mlclient.search.options import Range, SearchOptions
-from mlclient.search.structured import Element
+from mlclient.search.options import opt
+from mlclient.search.structured import sq
 
-price = Range(Element("price"), "xs:decimal")
-options = (
-    SearchOptions()
-    .values("price", price)
-    .range_constraint("price", price)
-    .sort(price, direction="descending")
+price = opt.range(sq.element("price"), "xs:decimal")
+options = opt.options(
+    opt.values("price", price),
+    opt.range_constraint("price", price),
+    opt.sort(price, direction="descending"),
+    opt.page_length(20),
+    opt.return_facets(False),
 )
 
 with MLClient() as ml:
@@ -270,9 +278,13 @@ with MLClient() as ml:
     documents = priced_products.documents("price GT 10", pos=[1, 10])
 ```
 
+Components and groups are immutable and reusable. Each factory has a typed
+constructor signature, so editors suggest its parameters. `opt.options` creates
+a complete options object; it never changes a component or another group.
 Indexes must already exist in the target database; options do not create them.
-See [SearchOptions][mlclient.search.options.SearchOptions] for supported methods
-and [Range][mlclient.search.options.Range] for index targets.
+See [Search options](../advanced/queries.md#search-options) for reuse, direct
+classes and native definitions, and the
+[factory reference][mlclient.search.options.SearchOptionsBuilder] for all constructors.
 
 For inline dictionaries, pass the options members directly, without the outer
 `{"options": ...}` wrapper:

@@ -1,0 +1,6 @@
+{
+  "constraint": {
+    "name": "title",
+    "word": {"element": {"name": "title", "ns": ""}}
+  }
+}

@@ -7,7 +7,7 @@ import pytest
 import respx
 
 from mlclient import AsyncMLClient, MLClient
-from mlclient.search.options import SearchOptions
+from mlclient.search.options import opt
 from mlclient.search.structured import Element, sq
 from mlclient.services import SearchScope
 from mlclient.xquery import cts
@@ -33,7 +33,7 @@ from mlclient.xquery import cts
             {"options": {"page-length": 5}, "qtext": "coffee"},
         ),
         (
-            {"options": SearchOptions().word_constraint("title", Element("title"))},
+            {"options": opt.options(opt.word_constraint("title", Element("title")))},
             {
                 "options": {
                     "constraint": [
@@ -233,7 +233,7 @@ def test_values_sends_combined_structured_query():
     [
         ({"page-length": 2}, {"page-length": 2, "return-facets": False}, None, "2"),
         (
-            SearchOptions().word_constraint("title", Element("title")),
+            opt.options(opt.word_constraint("title", Element("title"))),
             {
                 "page-length": 3,
                 "return-facets": False,

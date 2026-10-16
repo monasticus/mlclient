@@ -124,7 +124,7 @@ class SearchService:
         forest_name : str | list[str] | None, default unset
             Restrict matches to these database forests.
         options : str | dict | SearchOptions | None, default unset
-            Installed options name, or inline options members or builder.
+            Installed options name, or inline options members or composition.
         timestamp : str | None, default unset
             Effective timestamp from an earlier response, for snapshot
             pagination.
@@ -844,7 +844,7 @@ class AsyncSearchService:
         forest_name : str | list[str] | None, default unset
             Restrict matches to these database forests.
         options : str | dict | SearchOptions | None, default unset
-            Installed options name, or inline options members or builder.
+            Installed options name, or inline options members or composition.
         timestamp : str | None, default unset
             Effective timestamp from an earlier response, for snapshot
             pagination.
@@ -1578,7 +1578,7 @@ def _criteria(
     query : SearchQuery | dict | str | None
         Search criteria, serialized locally.
     options : str | dict | SearchOptions | None
-        Installed name, inline options members or builder, or unset.
+        Installed name, inline options members or composition, or unset.
     lexicon : bool, default False
         Use additional-query for inline CTS restrictions: ML10/ML12 ignore
         the combined body's ctsquery member on the values endpoint.

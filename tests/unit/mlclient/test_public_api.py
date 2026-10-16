@@ -23,7 +23,25 @@ def test_module_entrypoint_works_outside_checkout(tmp_path):
 
 
 EXPECTED_EXPORTS = {
-    "mlclient.search.options": ["Range", "SearchOptions"],
+    "mlclient.search.options": [
+        "CollectionConstraint",
+        "ContainerConstraint",
+        "Control",
+        "NativeOptions",
+        "PageLength",
+        "Range",
+        "RangeConstraint",
+        "ReturnFacets",
+        "SearchOption",
+        "SearchOptions",
+        "SearchOptionsBuilder",
+        "SortOrder",
+        "Tuples",
+        "ValueConstraint",
+        "Values",
+        "WordConstraint",
+        "opt",
+    ],
     "mlclient": ["MLClient", "AsyncMLClient", "MLClientManager", "__version__"],
     "mlclient.clients": [
         "HttpClient",

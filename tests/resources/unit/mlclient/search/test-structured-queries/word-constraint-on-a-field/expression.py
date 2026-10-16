@@ -1,6 +1,6 @@
-from mlclient.search.options import SearchOptions
+from mlclient.search.options import opt
 from mlclient.search.structured import Field
 
 
 def run():
-    return SearchOptions().word_constraint("summary", Field("summary"))
+    return opt.options(opt.word_constraint("summary", Field("summary")))

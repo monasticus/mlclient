@@ -2,8 +2,8 @@
 
 from xml.etree.ElementTree import Element as XmlElement
 
-from mlclient.search.options import SearchOptions
+from mlclient.search.options import opt
 
 
 def run():
-    return SearchOptions().add({"page-length": 5}, XmlElement("page-length"))
+    return opt.options(opt.native({"page-length": 5}, XmlElement("page-length")))

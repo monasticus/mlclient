@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from mlclient.models.documents import Document
 
 SearchInput = SearchQuery | dict | str | None
-"""A structured/CTS query, JSON combined query, string query, or None for all."""
+"""A query object, structured/CTS/combined JSON, text query, or None for all."""
 
 PositionInput = int | list[int] | tuple[int, int] | None
 """A one-based position or an inclusive two-position range."""
@@ -66,10 +66,11 @@ class SearchService:
 
     Queries are sent as JSON: structured queries as ``{"query": ...}``, CTS
     queries as ``{"ctsquery": ...}``, a string as a Search API string query.
-    JSON combined queries are accepted directly; their inline options override
-    matching service defaults; per-operation scope options override both.
-    Raw combined CTS queries cannot filter
-    lexicon operations; pass a CTS query object to those operations instead.
+    Structured, CTS and combined JSON dictionaries are accepted directly.
+    Combined-query options override matching service defaults; per-operation
+    scope options override both.
+    Raw CTS JSON cannot filter lexicon operations; pass a CTS query object
+    to those operations instead.
     No XQuery is evaluated, so the REST user needs only the rest-reader role;
     a scope naming another database also needs the xdmp-eval-in privilege.
 
@@ -177,8 +178,8 @@ class SearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -263,8 +264,8 @@ class SearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -350,8 +351,8 @@ class SearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -716,8 +717,8 @@ class SearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the options' page-length, 10 by default.
@@ -785,10 +786,11 @@ class AsyncSearchService:
 
     Queries are sent as JSON: structured queries as ``{"query": ...}``, CTS
     queries as ``{"ctsquery": ...}``, a string as a Search API string query.
-    JSON combined queries are accepted directly; their inline options override
-    matching service defaults; per-operation scope options override both.
-    Raw combined CTS queries cannot filter
-    lexicon operations; pass a CTS query object to those operations instead.
+    Structured, CTS and combined JSON dictionaries are accepted directly.
+    Combined-query options override matching service defaults; per-operation
+    scope options override both.
+    Raw CTS JSON cannot filter lexicon operations; pass a CTS query object
+    to those operations instead.
     No XQuery is evaluated, so the REST user needs only the rest-reader role;
     a scope naming another database also needs the xdmp-eval-in privilege.
 
@@ -896,8 +898,8 @@ class AsyncSearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -982,8 +984,8 @@ class AsyncSearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -1069,8 +1071,8 @@ class AsyncSearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -1435,8 +1437,8 @@ class AsyncSearchService:
         Parameters
         ----------
         query : SearchQuery | dict | str | None, default None
-            A structured or CTS query, JSON combined query, string query, or None
-            to match all.
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the options' page-length, 10 by default.
@@ -1618,7 +1620,7 @@ def _criteria(
     if lexicon and "ctsquery" in search:
         if not isinstance(query, SearchQuery):
             message = (
-                "raw combined CTS queries cannot filter lexicon operations; "
+                "raw CTS JSON cannot filter lexicon operations; "
                 "pass a CTS query object instead"
             )
             raise TypeError(message)
@@ -1649,25 +1651,31 @@ def _combined_search(
     Raises
     ------
     TypeError
-        If the query has an unsupported type or combined-query shape.
+        If the query has an unsupported type or JSON query shape.
     """
     if query is None:
         return _with_options({}, options)
     if isinstance(query, str):
         return _with_options({"qtext": query}, options)
     if isinstance(query, dict):
-        if set(query) != {"search"} or not isinstance(query["search"], dict):
-            message = "combined query must contain only a search dictionary"
+        if (
+            len(query) != 1
+            or not query.keys() <= {"search", "query", "ctsquery"}
+            or not isinstance(next(iter(query.values())), dict)
+        ):
+            message = (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            )
             raise TypeError(message)
-        search = deepcopy(query["search"])
+        search = deepcopy(query.get("search", query))
         if "options" in search and not isinstance(search["options"], dict):
             message = "combined query options must be a dictionary"
             raise TypeError(message)
         return _with_options(search, options)
     if not isinstance(query, SearchQuery):
         message = (
-            "query must be a SearchQuery, a combined query dictionary, "
-            "a string query or None"
+            "query must be a SearchQuery, a query dictionary, a string query or None"
         )
         raise TypeError(message)
     search = query.to_combined_query()["search"]

@@ -23,11 +23,14 @@ Every operation accepts the same query argument:
 
 | Query | Sent as |
 | --- | --- |
-| A CTS query from the `cts` builder of [`mlclient.xquery`][mlclient.xquery] | Serialized CTS JSON, `{"ctsquery": ...}` |
-| A structured query from [`mlclient.search.structured`][mlclient.search.structured] | Serialized structured JSON, `{"query": ...}` |
+| A CTS query from [`cts`][mlclient.xquery.Cts], or a JSON dictionary `{"ctsquery": {...}}` | Serialized CTS JSON, `{"ctsquery": ...}` |
+| A structured query from [`sq`][mlclient.search.structured.StructuredQueryBuilder] or its classes, or a JSON dictionary `{"query": {...}}` | Serialized structured JSON, `{"query": ...}` |
 | A JSON combined-query dictionary, `{"search": {...}}` | Combined query including inline options and/or `qtext` |
-| A string, such as `"coffee AND tea"` | Search API string query (`q`) |
+| A string, such as `"coffee AND tea"` | Search API string query (`qtext`) |
 | `None` (default) | No query; matches every document |
+
+For lexicon operations (`values`, `tuples`, `aggregate`), use a CTS query object
+instead of raw CTS JSON; see the [lexicon restriction](../advanced/queries.md#combined-queries-with-options-and-text).
 
 ```python
 from mlclient import MLClient
@@ -42,6 +45,25 @@ with MLClient() as ml:
         sq.and_(sq.collection("products"), sq.term("coffee")),
     )
     by_text = ml.search.documents("coffee AND tea")
+```
+
+You can also supply native JSON as a Python dictionary, using the same scope
+settings as for query objects. A JSON-encoded string remains a text query:
+
+```python
+with MLClient() as ml:
+    by_structure = ml.search.documents(
+        {"query": {"term-query": {"text": "coffee"}}},
+    )
+    by_cts = ml.search.documents(
+        {"ctsquery": {"wordQuery": {"text": "coffee"}}},
+    )
+    by_combined = ml.search.documents({
+        "search": {
+            "query": {"term-query": {"text": "coffee"}},
+            "options": {"page-length": 20},
+        },
+    })
 ```
 
 For query construction, see [Structured and CTS queries](../advanced/queries.md),
@@ -280,7 +302,7 @@ The collection filter and text query are AND-related. Options in the combined
 query override matching service options; options in a per-operation scope
 override both. Other inline option members are retained.
 See [Combined queries](../advanced/queries.md#combined-queries-with-options-and-text)
-for builders, merging rules and the raw CTS limitation on lexicon operations.
+for builders, merging rules and the raw CTS JSON limitation on lexicon operations.
 
 ## Scope: databases, filters and options
 

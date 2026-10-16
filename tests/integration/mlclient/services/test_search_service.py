@@ -117,6 +117,27 @@ def values_options(indexed_database):
 class TestSearchService:
     @pytest.mark.parametrize(
         "query",
+        [
+            sq.term("alpha"),
+            cts.word_query("alpha"),
+            {"query": {"term-query": {"text": "alpha"}}},
+            {"ctsquery": {"wordQuery": {"text": "alpha"}}},
+        ],
+        ids=["structured-object", "cts-object", "structured-json", "cts-json"],
+    )
+    def test_raw_json_and_python_query_objects_return_same_documents(
+        self,
+        indexed_database,
+        query,
+    ):
+        ml, database, _ = indexed_database
+
+        documents = ml.search(database=database, collection="cts-test").documents(query)
+
+        assert [document.uri for document in documents] == [URIS[0]]
+
+    @pytest.mark.parametrize(
+        "query",
         [sq.document(URIS[0]), cts.document_query(URIS[0])],
         ids=["structured", "cts"],
     )

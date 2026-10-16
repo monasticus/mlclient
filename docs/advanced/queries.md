@@ -55,6 +55,30 @@ with MLClient() as ml:
     cts_documents = ml.search.documents(native)
 ```
 
+### Native JSON or Python query objects
+
+`ml.search` accepts structured, CTS and combined JSON dictionaries as well as
+our Python query objects. Keep the native root member: `query` for structured
+JSON, `ctsquery` for CTS JSON, or `search` for a combined query. The service
+wraps standalone structured or CTS JSON in a combined request and applies the
+same service and operation scopes as for Python objects.
+
+```python
+with MLClient() as ml:
+    structured_documents = ml.search.documents({
+        "query": {"term-query": {"text": "coffee"}},
+    })
+    cts_documents = ml.search.documents({
+        "ctsquery": {"wordQuery": {"text": "coffee"}},
+    })
+```
+
+Use [sq][mlclient.search.structured.StructuredQueryBuilder] or
+[cts][mlclient.xquery.Cts] when you want Python constructors and local
+validation; use dictionaries when you already have native JSON. Both are sent
+as `application/json`. Strings remain Search API text queries, not JSON or XML
+source. See the lexicon restriction below for raw CTS JSON.
+
 ### Combined queries with options and text
 
 Both structured and CTS queries accept `options=` and `qtext=` in
@@ -97,8 +121,8 @@ For lower-level requests, pass the same dictionary as the body of
 `ml.rest.search.post()` or `ml.rest.values.post()`. MarkLogic accepts combined
 queries only in POST requests.
 
-For lexicon operations (`values`, `tuples`, `aggregate`), a raw combined query
-containing `ctsquery` is rejected: ML10/ML12 ignore that filter on `/v1/values`.
+For lexicon operations (`values`, `tuples`, `aggregate`), raw CTS JSON, standalone or inside a combined query,
+is rejected: ML10/ML12 ignore that filter on `/v1/values`.
 Pass a CTS query object with service options instead, so the service can send
 the required `additional-query` XML. Combined structured queries work on both
 search and lexicon endpoints.

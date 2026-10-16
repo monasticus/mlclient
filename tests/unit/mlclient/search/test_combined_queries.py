@@ -159,18 +159,33 @@ async def test_async_search_sends_combined_query_with_installed_options():
 @pytest.mark.parametrize(
     ("query", "message"),
     [
-        ({"query": {}}, "combined query must contain only a search dictionary"),
-        ({"search": []}, "combined query must contain only a search dictionary"),
+        (
+            {"unsupported": {}},
+            (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            ),
+        ),
+        (
+            {"search": []},
+            (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            ),
+        ),
         (
             {"search": {}, "qtext": "coffee"},
-            "combined query must contain only a search dictionary",
+            (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            ),
         ),
         (
             {"search": {"options": "catalog"}},
             "combined query options must be a dictionary",
         ),
     ],
-    ids=["unwrapped-query", "non-dict-search", "outer-qtext", "non-dict-options"],
+    ids=["unknown-root", "non-dict-search", "outer-qtext", "non-dict-options"],
 )
 def test_search_rejects_invalid_combined_query(query, message):
     with MLClient() as ml, pytest.raises(TypeError) as error:
@@ -178,13 +193,19 @@ def test_search_rejects_invalid_combined_query(query, message):
     assert str(error.value) == message
 
 
-def test_values_rejects_raw_combined_cts_query():
-    combined = cts.word_query("blue").to_combined_query(qtext="coffee")
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"ctsquery": {"wordQuery": {"text": "blue"}}},
+        cts.word_query("blue").to_combined_query(qtext="coffee"),
+    ],
+    ids=["cts-json", "combined-json"],
+)
+def test_values_rejects_raw_cts_json(query):
     with MLClient() as ml, pytest.raises(TypeError) as error:
-        ml.search.values("price", combined)
+        ml.search.values("price", query)
     assert str(error.value) == (
-        "raw combined CTS queries cannot filter lexicon operations; "
-        "pass a CTS query object instead"
+        "raw CTS JSON cannot filter lexicon operations; pass a CTS query object instead"
     )
 
 
@@ -259,3 +280,62 @@ def test_request_scope_options_override_combined_query_and_service(
         )
 
     assert documents == []
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"query": {"term-query": {"text": "blue"}}},
+        {"ctsquery": {"wordQuery": {"text": "blue"}}},
+    ],
+    ids=["structured-json", "cts-json"],
+)
+@respx.mock
+def test_search_accepts_raw_query_json_with_scope_options(query):
+    before = deepcopy(query)
+    expected = {"search": {**query, "options": {"page-length": 5}}}
+    respx.post(
+        "http://localhost:8000/v1/search",
+        params={"format": "json", "pageLength": "5"},
+        headers={"Content-Type": "application/json", "Accept": "multipart/mixed"},
+        json=expected,
+    ).mock(return_value=httpx.Response(200))
+
+    with MLClient() as ml:
+        documents = ml.search(options={"page-length": 5}).documents(query)
+
+    assert documents == []
+    assert query == before
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"query": {"term-query": {"text": "blue"}}},
+        {"ctsquery": {"wordQuery": {"text": "blue"}}},
+    ],
+    ids=["structured-json", "cts-json"],
+)
+@respx.mock
+async def test_async_search_accepts_raw_query_json(query):
+    respx.post(
+        "http://localhost:8000/v1/search",
+        params={"format": "json"},
+        headers={"Content-Type": "application/json", "Accept": "multipart/mixed"},
+        json={"search": query},
+    ).mock(return_value=httpx.Response(200))
+
+    async with AsyncMLClient() as ml:
+        documents = await ml.search.documents(query)
+
+    assert documents == []
+
+
+@pytest.mark.parametrize("query", [{"query": []}, {"ctsquery": []}, {}])
+def test_search_rejects_invalid_raw_query_json(query):
+    with MLClient() as ml, pytest.raises(TypeError) as error:
+        ml.search.documents(query)
+    assert str(error.value) == (
+        "query dictionary must contain exactly one search, query or ctsquery dictionary"
+    )

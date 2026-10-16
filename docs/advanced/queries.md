@@ -338,6 +338,33 @@ the signatures of their corresponding classes. For example,
 `opt.options(...)` constructs [SearchOptions][mlclient.search.options.SearchOptions].
 Use [Range][mlclient.search.options.Range] or `opt.range(...)` for an index target.
 
+Selectors such as [sq.element][mlclient.search.structured.Element],
+[sq.json_property][mlclient.search.structured.JsonProperty] and
+[sq.field][mlclient.search.structured.Field] also describe targets in search
+options. Although they come from the structured-query namespace, options built
+with them work with structured queries, CTS queries and text queries alike.
+For example, a CTS collection filter can be combined with a text constraint
+whose target is defined by `sq.element()`:
+
+```python
+from mlclient import MLClient
+from mlclient.search.options import opt
+from mlclient.search.structured import sq
+from mlclient.xquery import cts
+
+options = opt.options(opt.word_constraint("title", sq.element("title")))
+combined = cts.collection_query("reports").to_combined_query(
+    options=options,
+    qtext="title:coffee",
+)
+
+with MLClient() as ml:
+    documents = ml.search.documents(combined)
+```
+
+CTS index references and CTS query constructors are not option target selectors;
+use `sq` selectors or their corresponding classes when defining these options.
+
 ```python
 from mlclient.search.options import opt
 from mlclient.search.structured import sq

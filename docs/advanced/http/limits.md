@@ -11,7 +11,7 @@ with MLClient(limits=20) as ml:
 
 An int is shorthand for the concurrency cap: `limits=20` means
 `max_connections=20`, leaving the other pool settings at their httpx defaults.
-Use `httpx.Limits` to set them independently:
+Use [`httpx.Limits`](https://www.python-httpx.org/advanced/resource-limits/) to set them independently:
 
 ```python
 import httpx
@@ -50,6 +50,6 @@ use separate transports, each with its own pool. Configurations can share a
 session only when their effective connection settings are compatible, including
 pool limits and timeout values.
 
-Changing an `httpx.Limits` object after creating a client does not reconfigure
+Changing an [`httpx.Limits`](https://www.python-httpx.org/advanced/resource-limits/) object after creating a client does not reconfigure
 that client's pool. Supply the desired limits when creating the client or use
 `HTTPConfig.clone(limits=...)` to prepare a new configuration.

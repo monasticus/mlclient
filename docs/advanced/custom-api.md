@@ -41,7 +41,8 @@ with AppClient(port=8100) as ml:
     print(ml.tasks.open_titles(timeout=5))    # parsed list of titles
 ```
 
-`ml.rest.tasks.list()` gives you the status code, headers and body to handle
+`ml.rest.tasks.list()` returns an [`httpx.Response`](https://www.python-httpx.org/api/#response)
+with the status code, headers and body to handle
 yourself - the same contract as `ml.rest.eval` or `ml.rest.documents`.
 `ml.tasks.open_titles()` sits above it, doing the parsing and error handling for
 you. Reach for the service by default; drop to `ml.rest.tasks` when you need the

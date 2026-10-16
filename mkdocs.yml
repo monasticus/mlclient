@@ -2,6 +2,9 @@ strict: true
 exclude_docs: |
   gen_ref_pages.py
   griffe_extensions.py
+  httpx_links.py
+hooks:
+  - docs/httpx_links.py
 site_name: MLClient
 site_description: A Python client for MarkLogic Server — three API layers, async, CLI included.
 site_url: https://monasticus.github.io/mlclient/

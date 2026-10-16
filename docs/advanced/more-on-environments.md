@@ -31,18 +31,13 @@ Each `app-servers` entry supports these keys:
 | `port` | Integer port | Connection default: 8000, or 443 for Cloud |
 | `rest` | Whether the connection is a default REST candidate | `false` |
 | `protocol` | `http` or `https` | Inherit root |
-| `username`, `password` | Credentials | Inherit root |
+| `username` | Username for credential-based authentication | Inherit root |
+| `password` | Password for credential-based authentication | Inherit root |
 | `auth` | Method name, authentication mapping, or `null` | Inherit root |
 | `ssl` | TLS mapping | Inherit root |
 
 Use distinct identifiers. An identifier is a local connection label, not
-necessarily the App Server's name in MarkLogic. Root `host` applies to every
-entry; use Python overrides when a connection needs another host.
-
-The environment models currently ignore unknown keys. Only the fields listed
-here affect configuration; putting `timeout`, `retry` or `limits` in YAML does
-not configure HTTP behavior. Values are parsed when loading the environment;
-connection/authentication combinations are validated when resolving a connection.
+necessarily the App Server's name in MarkLogic.
 
 ## Root defaults and server overrides
 
@@ -53,7 +48,8 @@ override the fields listed below:
 | --- | --- | --- | --- |
 | `host` | Yes | No | Use a Python override for a server on another host |
 | `protocol` | Yes | Yes | A non-null server value replaces the root value |
-| `username`, `password` | Yes | Yes | Non-null server values replace root credentials |
+| `username` | Yes | Yes | A non-null server value replaces the root username |
+| `password` | Yes | Yes | A non-null server value replaces the root password |
 | `auth` | Yes | Yes | An explicit server value replaces the root method |
 | `ssl` | Yes | Yes | Explicit server fields merge into root SSL settings |
 | `cloud` | Yes | No | Configures the environment's Cloud gateway |
@@ -95,10 +91,10 @@ entry; declaring a new `id` adds a connection.
 
 | Identifier | Default port | Purpose |
 | --- | --- | --- |
-| `app-services` | 8000 | Default REST App Server |
-| `manage` | 8002 | Management API |
-| `admin` | 8001 | Admin API |
 | `health` | 7997 | HealthCheck, without HTTP authentication |
+| `app-services` | 8000 | Default REST App Server |
+| `admin` | 8001 | Admin API |
+| `manage` | 8002 | Management API |
 
 A replacement entry uses the normal field defaults: include `rest: true` when
 replacing a connection that should remain eligible for default REST selection.
@@ -191,7 +187,7 @@ auth:
 
 An `auth` mapping replaces the inherited authentication configuration as a whole;
 its fields are not merged. Kerberos requires the optional dependencies and an
-available ticket cache. Python clients additionally accept custom `httpx.Auth`
+available ticket cache. Python clients additionally accept custom [`httpx.Auth`](https://www.python-httpx.org/advanced/authentication/#custom-authentication-schemes)
 objects, which cannot be represented in YAML. See
 [authentication methods](connections.md#authentication-methods) and
 [valid and rejected combinations](connections.md#valid-and-rejected-combinations).
@@ -219,6 +215,7 @@ Cloud uses HTTPS, port 443 and API-key authentication. API tiers share the gatew
 and route through `base-path`. In environment YAML, explicitly replace the
 on-premises ports of the predefined Manage, Admin and Health entries with 443;
 the default `app-services` entry already resolves to the Cloud port.
+
 | Cloud key | Value | Default |
 | --- | --- | --- |
 | `api-key` | Gateway API key | Required |

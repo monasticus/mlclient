@@ -10,7 +10,7 @@ with MLClient(timeout=10) as ml:
 ```
 
 A number sets all four HTTP timeout components to that many seconds. Use
-`httpx.Timeout` to configure them independently:
+[`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) to configure them independently:
 
 ```python
 import httpx
@@ -69,7 +69,7 @@ replacing the previous one:
 3. The client-factory call's timeout.
 4. The individual request's timeout.
 
-At every level, omit the argument to inherit; pass a number or `httpx.Timeout`
+At every level, omit the argument to inherit; pass a number or [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration)
 to replace it, or `None` to disable it. Timeout components are not merged.
 
 ## Server execution limits and total duration

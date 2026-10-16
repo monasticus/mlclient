@@ -166,7 +166,7 @@ override applies independently to the mutation and follow-up read, not to their
 total duration. Omitting it inherits the client timeout; `None` disables it.
 
 Recognized server errors raise [`MarkLogicError`][mlclient.exceptions.MarkLogicError]; other HTTP failures raise
-`httpx.HTTPStatusError`, and transport errors propagate. A failed read-back does
+[`httpx.HTTPStatusError`](https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError), and transport errors propagate. A failed read-back does
 not roll back a successful save. See [trace-events](../cli/trace-events.md) for
 permissions and the corresponding CLI workflow.
 

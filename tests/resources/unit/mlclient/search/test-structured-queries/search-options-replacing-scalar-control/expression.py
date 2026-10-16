@@ -1,7 +1,0 @@
-"""Independent native JSON/XML representations of Search API options."""
-
-from mlclient.search.options import opt
-
-
-def run():
-    return opt.options(opt.control("page-length", 10), opt.control("page-length", 20))

@@ -20,7 +20,7 @@ The probe maps the response to a verdict:
 
 - `2xx` -\> `True` (healthy)
 - `5xx` -\> `False` (server up but not ready)
-- `4xx` -\> raises [HTTPStatusError](https://www.python-httpx.org/exceptions/); a client error means the request was misdirected (for example, aimed at an authenticated server), not that the node is unhealthy
+- `4xx` -\> raises [`httpx.HTTPStatusError`](https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError); a client error means the request was misdirected (for example, aimed at an authenticated server), not that the node is unhealthy
 
 By default, health checks use the client's host on port `7997`, without
 authentication or retries, and with a 5-second timeout.

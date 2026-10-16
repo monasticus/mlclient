@@ -53,7 +53,7 @@ def test_command_version_prints_complete_version(version):
 
     assert status == 0
     assert tester.io.fetch_output() == f"{version}\n"
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
 
 
@@ -69,7 +69,7 @@ def test_command_version_defaults_to_local_environment():
     status = tester.execute("")
 
     assert status == 0
-    assert tester.command.option("environment") == "local"
+    assert tester.command.option("environment") == ["local"]
     assert tester.io.fetch_output() == "12.0.1\n"
 
 

@@ -2,3 +2,9 @@
 [data-md-color-scheme="slate"] img[src$="#only-light"] {
   display: none;
 }
+
+@media screen and (min-width: 76.25em) {
+  .md-header__topic:first-child {
+    visibility: hidden;
+  }
+}

@@ -1,8 +1,7 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/branding/wordmark-white.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/assets/branding/wordmark-black.svg">
-  <img alt="MLClient logo" src="docs/assets/branding/wordmark-black.svg" width="200">
-</picture>
+<p align="center">
+  <a href="#gh-light-mode-only"><img alt="MLClient logo" src="docs/assets/branding/wordmark-black.svg" width="200"></a>
+  <a href="#gh-dark-mode-only"><img alt="MLClient logo" src="docs/assets/branding/wordmark-white.svg" width="200"></a>
+</p>
 
 [![License](https://img.shields.io/github/license/monasticus/mlclient?label=License&style=plastic)](https://github.com/monasticus/mlclient/blob/main/LICENSE)
 [![Version](https://img.shields.io/pypi/v/mlclient?color=blue&label=PyPI&style=plastic)](https://pypi.org/project/mlclient/)

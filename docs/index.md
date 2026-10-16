@@ -1,7 +1,7 @@
-# MLClient
-
 <img src="assets/branding/wordmark-black.svg#only-light" alt="MLClient logo" width="160">
 <img src="assets/branding/wordmark-white.svg#only-dark" alt="MLClient logo" width="160">
+
+# MLClient
 
 A Python client and CLI for MarkLogic Server. Start with a query or a document
 operation, then choose how much control your application needs.

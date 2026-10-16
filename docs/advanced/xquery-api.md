@@ -1,32 +1,32 @@
 # XQuery API
 
-The singletons in `mlclient.xquery` mirror native XQuery functions.
+The singletons in [`mlclient.xquery`][mlclient.xquery] mirror native XQuery functions.
 They build composable expressions without making requests. Pass a complete
 expression to `ml.eval.expression()` to execute it in one request.
 
-Everything is imported from `mlclient.xquery`:
+Everything is imported from [`mlclient.xquery`][mlclient.xquery]:
 
 | Kind | Names |
 | --- | --- |
-| Builders | `cts`, `fn`, `xdmp` and `xs` (and their `Cts`, `Fn`, `Xdmp`, `Xs` classes) |
-| Expression types | `XqyExpression`, `FunctionCall`, `ModuleFunctionCall`, `XqyCompilationContext`, `xpath()` |
-| CTS query types | `CtsQuery`, the concrete query classes returned by `cts` query constructors, the `Box`, `Circle`, `Point`, `Polygon` and `Period` values, and `CTS_NS_URI` |
+| Builders | `cts`, `fn`, `xdmp` and `xs` (and their [`Cts`][mlclient.xquery.Cts], [`Fn`][mlclient.xquery.Fn], [`Xdmp`][mlclient.xquery.Xdmp], [`Xs`][mlclient.xquery.Xs] classes) |
+| Expression types | [`XqyExpression`][mlclient.xquery.XqyExpression], [`FunctionCall`][mlclient.xquery.FunctionCall], [`ModuleFunctionCall`][mlclient.xquery.ModuleFunctionCall], [`XqyCompilationContext`][mlclient.xquery.XqyCompilationContext], `xpath()` |
+| CTS query types | [`CtsQuery`][mlclient.xquery.CtsQuery], the concrete query classes returned by `cts` query constructors, the [`Box`][mlclient.xquery.Box], [`Circle`][mlclient.xquery.Circle], [`Point`][mlclient.xquery.Point], [`Polygon`][mlclient.xquery.Polygon] and [`Period`][mlclient.xquery.Period] values, and `CTS_NS_URI` |
 
 Build expressions with the builders; use the expression types only to
 type-check expressions, write custom ones or wrap an XPath with `xpath()`.
 
 A CTS query is one object for both execution routes: it compiles to XQuery for
-`ml.eval.expression()` and `CtsService`, and serializes locally to native JSON
+`ml.eval.expression()` and [`CtsService`][mlclient.services.CtsService], and serializes locally to native JSON
 or XML for `ml.search`. Structured queries and search options, which only the
-REST Search API reads, live in `mlclient.search`, which does not depend on XQuery.
+REST Search API reads, live in [`mlclient.search`][mlclient.search], which does not depend on XQuery.
 
 ## CTS: search, lexicons and queries
 
 Start with [CTS search with eval](../guides/search.md#cts-search-with-eval) when you want
-`SearchHit` objects with scores or `ValueHit` objects with frequencies. Use the
+[`SearchHit`][mlclient.models.SearchHit] objects with scores or [`ValueHit`][mlclient.models.ValueHit] objects with frequencies. Use the
 `cts` **singleton** from
-`mlclient.xquery` when you want native results or need to compose CTS
-under another XQuery function. It is not a `CtsService` instance.
+[`mlclient.xquery`][mlclient.xquery] when you want native results or need to compose CTS
+under another XQuery function. It is not a [`CtsService`][mlclient.services.CtsService] instance.
 
 ### Choose execution or composition
 
@@ -46,7 +46,7 @@ with MLClient() as ml:
     hits = cts.search(query=cts.word_query("coffee"))
 ```
 
-**Build an expression.** Import the `cts` singleton from `mlclient.xquery`.
+**Build an expression.** Import the `cts` singleton from [`mlclient.xquery`][mlclient.xquery].
 Even result-producing functions only build expressions; compilation sends no
 request:
 
@@ -60,7 +60,7 @@ code, variables = expression.compile()
 Pass `expression` to `ml.eval.expression(expression)` when you want to execute it.
 
 **Mix service execution with nested expressions.** Keep `cts` assigned to the
-service and import the `Cts` class for the nested operations. Its static methods
+service and import the [`Cts`][mlclient.xquery.Cts] class for the nested operations. Its static methods
 only build expressions, even when the service method with the same name would
 execute a request.
 
@@ -89,7 +89,7 @@ with MLClient() as ml:
 one request, and MarkLogic selects the most frequent category and reads its
 native frequency in that request. `frequencies` contains one integer. Calling
 `cts.values(...)` here would execute a separate request and return Python
-`ValueHit` objects, not a composable XQuery expression.
+[`ValueHit`][mlclient.models.ValueHit] objects, not a composable XQuery expression.
 
 Query construction, shared JSON/XML serialization and CTS serialization limits
 are covered in [Structured and CTS queries](queries.md). CTS queries additionally
@@ -110,8 +110,8 @@ with MLClient() as ml:
     )
 ```
 
-The first call returns parsed nodes directly, not `SearchHit` objects. The
-second returns indexed values directly, not `ValueHit` objects; it requires a
+The first call returns parsed nodes directly, not [`SearchHit`][mlclient.models.SearchHit] objects. The
+second returns indexed values directly, not [`ValueHit`][mlclient.models.ValueHit] objects; it requires a
 range index on `category`. Neither expression adds `cts:score` or `cts:frequency`
 to the query. There are no alternating content/measure parts to decode yourself.
 The CTS service adds those calls and pairs their results internally, in the
@@ -346,7 +346,7 @@ expression, map output is rejected on the server with `MLCLIENT-LEXICON-MAP`.
 ### MarkLogic versions
 
 Builders expose the same functions regardless of the connected server. Native
-version restrictions still apply; unavailable functions raise `MarkLogicError`.
+version restrictions still apply; unavailable functions raise [`MarkLogicError`][mlclient.exceptions.MarkLogicError].
 
 | Function | Requires |
 | --- | --- |

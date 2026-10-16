@@ -4,17 +4,17 @@ Choose a query vocabulary, then use the same API to serialize and search:
 
 | | Structured queries | CTS queries |
 | --- | --- | --- |
-| Builder | `sq` from `mlclient.search.structured` | `cts` from `mlclient.xquery` |
+| Builder | [`sq`][mlclient.search.structured.StructuredQueryBuilder] from [`mlclient.search.structured`][mlclient.search.structured] | [`cts`][mlclient.xquery.Cts] from [`mlclient.xquery`][mlclient.xquery] |
 | Native format | Search API structured JSON/XML | CTS JSON/XML |
 | Local serialization | `serialize()`, `to_json()`, `to_xml()` | `serialize()`, `to_json()`, `to_xml()` |
 | Combined query | `to_combined_query()` under `query` | `to_combined_query()` under `ctsquery` |
 | REST execution | `ml.search` | `ml.search` |
-| XQuery compilation and execution | Not supported | `compile()`, `ml.eval.expression()`, `CtsService` |
+| XQuery compilation and execution | Not supported | `compile()`, `ml.eval.expression()`, [`CtsService`][mlclient.services.CtsService] |
 
 ## Shared serialization API
 
-Both families implement `mlclient.search.QueryComponent` and
-`mlclient.search.SearchQuery`. The API is shared; their native wire formats
+Both families implement [`QueryComponent`][mlclient.search.QueryComponent] and
+[`SearchQuery`][mlclient.search.SearchQuery]. The API is shared; their native wire formats
 remain distinct. Build equivalent queries with either vocabulary:
 
 ```python
@@ -56,21 +56,21 @@ with MLClient() as ml:
 ```
 
 For lower-level requests, `to_combined_query()` produces `{"search": {...}}`,
-placing structured queries under `query` (wrapped in `Query` when needed) and
+placing structured queries under `query` (wrapped in [`Query`][mlclient.search.structured.Query] when needed) and
 CTS queries under `ctsquery`. Add `qtext` or `options` to the inner dictionary
 and pass it as the body of `ml.rest.search.post()` or `ml.rest.values.post()`.
 MarkLogic accepts combined queries only in POST requests.
 
 ## Structured queries
 
-Build Search API queries with `sq` or classes from `mlclient.search.structured`.
-Wrap subqueries in `Query` when passing them directly to the Search API.
+Build Search API queries with [`sq`][mlclient.search.structured.StructuredQueryBuilder] or classes from [`mlclient.search.structured`][mlclient.search.structured].
+Wrap subqueries in [`Query`][mlclient.search.structured.Query] when passing them directly to the Search API.
 
 ### Builder
 
-The stateless `sq` builder uses short factory names. Python keywords have a
+The stateless [`sq` builder][mlclient.search.structured.StructuredQueryBuilder] uses short factory names. Python keywords have a
 trailing underscore: `and_`, `or_`, and `not_`. Query classes retain their full
-names, such as `AndQuery` and `RangeQuery`.
+names, such as [`AndQuery`][mlclient.search.structured.AndQuery] and [`RangeQuery`][mlclient.search.structured.RangeQuery].
 
 ```python
 from mlclient.search.structured import sq
@@ -85,7 +85,7 @@ json_query = query.serialize()
 xml_query = query.serialize("xml")
 ```
 
-Use `StructuredQueryBuilder()` to create another builder. Leaf factories accept
+Use [`StructuredQueryBuilder()`][mlclient.search.structured.StructuredQueryBuilder] to create another builder. Leaf factories accept
 the same parameters as the corresponding classes; composition factories
 `query`, `and_`, `or_`, and `near` accept positional subqueries.
 
@@ -129,8 +129,8 @@ affect the query's meaning; the namespace URI identifies the Search API elements
 
 ### XML and JSON document targets
 
-Use `Element` for XML elements, optionally with an `Attribute` selector;
-`JsonProperty` for JSON properties; or `Field` for configured database fields.
+Use [`Element`][mlclient.search.structured.Element] for XML elements, optionally with an [`Attribute`][mlclient.search.structured.Attribute] selector;
+[`JsonProperty`][mlclient.search.structured.JsonProperty] for JSON properties; or [`Field`][mlclient.search.structured.Field] for configured database fields.
 The query's XML format does not restrict it to XML documents. Do not mix
 target kinds in one query.
 
@@ -148,15 +148,15 @@ explicitly for numbers, booleans, or null values. Word queries only match text.
 
 ### Composition and scope
 
-Use `AndQuery`, `OrQuery`, `AndNotQuery`, `NotQuery`, `NotInQuery`,
-`NearQuery`, and `BoostQuery` to compose subqueries. `TrueQuery` matches all
-fragments; `FalseQuery` matches none. `TermQuery` searches the current scope,
-whereas `WordQuery` and `ValueQuery` select a specific location.
+Use [`AndQuery`][mlclient.search.structured.AndQuery], [`OrQuery`][mlclient.search.structured.OrQuery], [`AndNotQuery`][mlclient.search.structured.AndNotQuery], [`NotQuery`][mlclient.search.structured.NotQuery], [`NotInQuery`][mlclient.search.structured.NotInQuery],
+[`NearQuery`][mlclient.search.structured.NearQuery], and [`BoostQuery`][mlclient.search.structured.BoostQuery] to compose subqueries. [`TrueQuery`][mlclient.search.structured.TrueQuery] matches all
+fragments; [`FalseQuery`][mlclient.search.structured.FalseQuery] matches none. [`TermQuery`][mlclient.search.structured.TermQuery] searches the current scope,
+whereas [`WordQuery`][mlclient.search.structured.WordQuery] and [`ValueQuery`][mlclient.search.structured.ValueQuery] select a specific location.
 
-Use `CollectionQuery`, `DirectoryQuery`, and `DocumentQuery` to restrict
-document selection. `ContainerQuery` applies a subquery inside an XML element
-or JSON property. `DocumentFragmentQuery`, `PropertiesFragmentQuery`, and
-`LocksFragmentQuery` select the fragment kind.
+Use [`CollectionQuery`][mlclient.search.structured.CollectionQuery], [`DirectoryQuery`][mlclient.search.structured.DirectoryQuery], and [`DocumentQuery`][mlclient.search.structured.DocumentQuery] to restrict
+document selection. [`ContainerQuery`][mlclient.search.structured.ContainerQuery] applies a subquery inside an XML element
+or JSON property. [`DocumentFragmentQuery`][mlclient.search.structured.DocumentFragmentQuery], [`PropertiesFragmentQuery`][mlclient.search.structured.PropertiesFragmentQuery], and
+[`LocksFragmentQuery`][mlclient.search.structured.LocksFragmentQuery] select the fragment kind.
 
 Optional parameters set to `None` are omitted, leaving MarkLogic's defaults
 intact. Explicit `False` and zero values are retained. Directory URIs must end
@@ -224,23 +224,23 @@ with MLClient() as ml:
     documents = ml.search(options=options).documents(query)
 ```
 
-`SearchOptions` builds range, word, value, collection and container
+[`SearchOptions`][mlclient.search.options.SearchOptions] builds range, word, value, collection and container
 constraints; define other kinds with `add()`.
 
 Collection, container, properties, custom, value, word, and range constraint
 builders are supported. A custom constraint delegates to its configured
-server-side parser. `ElementConstraintQuery` represents MarkLogic's deprecated
-element constraint syntax; prefer `ContainerConstraintQuery` for new queries.
-`OperatorState` selects a named operator state in the supplied options.
+server-side parser. [`ElementConstraintQuery`][mlclient.search.structured.ElementConstraintQuery] represents MarkLogic's deprecated
+element constraint syntax; prefer [`ContainerConstraintQuery`][mlclient.search.structured.ContainerConstraintQuery] for new queries.
+[`OperatorState`][mlclient.search.structured.OperatorState] selects a named operator state in the supplied options.
 
-`ValueConstraintQuery` writes values as XML `text` children. For JSON property
+[`ValueConstraintQuery`][mlclient.search.structured.ValueConstraintQuery] writes values as XML `text` children. For JSON property
 constraints, configure `<value type="number">`, `type="boolean"`, or
 `type="null"` in options. Numbers and booleans are serialized using their XML
 lexical forms. For null, omit the values and configure `type="null"`.
 The local builder does not resolve or validate named constraint definitions.
 
 Each constraint query accepts one non-empty constraint name. To match either
-of two named constraints, combine separate builders with `OrQuery`. Although
+of two named constraints, combine separate builders with [`OrQuery`][mlclient.search.structured.OrQuery]. Although
 the native documentation describes repeated constraint names, on the tested
 versions MarkLogic resolves them as a singleton and rejects multiple names.
 
@@ -252,9 +252,9 @@ For the complete native syntax and semantics, see the official
 
 ## CTS queries
 
-CTS query constructors return concrete subclasses of `CtsQuery`, exported by
-`mlclient.xquery` like the structured vocabulary is by
-`mlclient.search.structured`: logical,
+CTS query constructors return concrete subclasses of [`CtsQuery`][mlclient.xquery.CtsQuery], exported by
+[`mlclient.xquery`][mlclient.xquery] like the structured vocabulary is by
+[`mlclient.search.structured`][mlclient.search.structured]: logical,
 selector, fragment and scope queries, word, value and range queries on text,
 elements, attributes, fields, JSON properties and paths, geospatial queries,
 temporal (`period_compare_query`, `period_range_query`, `lsqt_query`),
@@ -275,8 +275,8 @@ code, variables = query.compile()
 ```
 
 CTS JSON is **not** Search API structured JSON; its member names and
-representation follow native CTS serialization. `CtsQuery` additionally
-implements `XqyExpression`, so the same query also compiles to XQuery.
+representation follow native CTS serialization. [`CtsQuery`][mlclient.xquery.CtsQuery] additionally
+implements [`XqyExpression`][mlclient.xquery.XqyExpression], so the same query also compiles to XQuery.
 
 ### Compile and execute CTS queries
 
@@ -301,7 +301,7 @@ with MLClient() as ml:
 ```
 
 Each execution makes a separate request. Structured queries do not implement
-`compile()` and cannot be passed to XQuery evaluation or `CtsService`.
+`compile()` and cannot be passed to XQuery evaluation or [`CtsService`][mlclient.services.CtsService].
 See [XQuery API](xquery-api.md#choose-execution-or-composition) for composing
 CTS under other functions.
 
@@ -336,7 +336,7 @@ serializable when they are literals or these builders:
 Atomic value arguments must be ready-to-use Python literals. Local serialization
 preserves their types, including `xsi:type` in range-query XML and datatype
 attributes for RDF literals. It does not evaluate function calls in these values,
-including `xs.*` casts represented as `FunctionCall` and `cts.uris()`:
+including `xs.*` casts represented as [`FunctionCall`][mlclient.xquery.FunctionCall] and `cts.uris()`:
 `to_json()`, `to_xml()` and
 `to_combined_query()` raise `TypeError`. Such queries still compile to XQuery
 and can be evaluated explicitly on the server. Use `1` instead of
@@ -356,11 +356,11 @@ element-attribute reference back from its own JSON form, so `to_json()` raises
 `TypeError` for it and `ml.search`, which sends JSON, cannot run it; use
 `to_xml()` or run the query through eval.
 
-All 54 query constructors return concrete `CtsQuery` subclasses, including
+All 54 query constructors return concrete [`CtsQuery`][mlclient.xquery.CtsQuery] subclasses, including
 `range_query`, `geospatial_region_query`, `column_range_query`,
 `triple_range_query`, `reverse_query` and `similar_query`. Pass a serializable
 CTS query to [`ml.search`](../guides/search.md) to run it without evaluating XQuery.
-`cts.parse()` and `cts.query()` instead return `RuntimeQuery`: their concrete
+`cts.parse()` and `cts.query()` instead return [`RuntimeQuery`][mlclient.xquery.RuntimeQuery]: their concrete
 native query depends on server evaluation. They compose and compile normally,
 but local JSON/XML serialization raises `TypeError`, including when nested in
 another query. Evaluate them explicitly with `ml.eval.expression()` when needed.
@@ -412,7 +412,7 @@ with MLClient() as ml:
 ```
 
 This adds a server request before serialization. For a one-off search, it is
-usually simpler to execute the column query directly through `CtsService` or
+usually simpler to execute the column query directly through [`CtsService`][mlclient.services.CtsService] or
 `ml.eval.expression()` (using an unfiltered `cts.search` or `cts.uris`) and let
 MarkLogic resolve the column. Explicit IDs remain available when you need to
 build or reuse a serialized REST query.
@@ -449,9 +449,9 @@ Choose the execution route according to the model:
 | --- | --- |
 | Literal JSON | `to_json()` or `ml.search`, which sends JSON. |
 | Literal XML | Either `to_json()` or `to_xml()` preserves the model. |
-| An expression such as `fn.doc("/example.json")` | Execute through `ml.eval.expression()` or `CtsService`; local serialization raises `TypeError`. |
+| An expression such as `fn.doc("/example.json")` | Execute through `ml.eval.expression()` or [`CtsService`][mlclient.services.CtsService]; local serialization raises `TypeError`. |
 
-Direct execution through eval or `CtsService` also avoids the XML round-trip for
+Direct execution through eval or [`CtsService`][mlclient.services.CtsService] also avoids the XML round-trip for
 a JSON model. We have no verified workaround that preserves a JSON model when
 the query is sent as XML.
 
@@ -497,7 +497,7 @@ instructions and namespace declarations present in the text. Two special cases
 require care:
 
 - **XML with a DTD:** local serialization raises `TypeError`. Execute the query
-  through `ml.eval.expression()` or `CtsService` so MarkLogic parses the document.
+  through `ml.eval.expression()` or [`CtsService`][mlclient.services.CtsService] so MarkLogic parses the document.
 - **Literal XML using prefixes such as `ns0`:** JSON serialization works, but XML
   serialization raises `TypeError` because ElementTree reserves those prefixes.
   Use another prefix or execute the query directly. This restriction does not

@@ -37,7 +37,7 @@ Configure one of two mutually exclusive connection modes:
 | `ssl` (`verify`, `cert_file`, `key_file`, `key_password`) | connection details | Enable TLS; any value forces HTTPS. |
 
 Passing an `environment` together with any connection detail raises
-`WrongParametersError`.
+[`WrongParametersError`][mlclient.exceptions.WrongParametersError].
 
 The forwarded message should omit the date and the level: give the handler a
 formatter such as `"%(name)s - %(message)s"`, since MarkLogic adds the timestamp
@@ -125,7 +125,7 @@ logger.info("deploy finished")
 
 ## A logger that sends only to MarkLogic
 
-Use a separate named logger, attach only `MLLogHandler`, and set
+Use a separate named logger, attach only [`MLLogHandler`][mlclient.logging.MLLogHandler], and set
 `propagate=False` so root console and file handlers do not receive its records:
 
 ```python

@@ -2,7 +2,7 @@
 
 Start with [the quickstart](../quickstart.md) to connect and evaluate a query.
 Use a context manager so connections close even when an operation fails.
-Choose `MLClient` for synchronous scripts or `AsyncMLClient` inside async code.
+Choose [`MLClient`][mlclient.MLClient] for synchronous scripts or [`AsyncMLClient`][mlclient.AsyncMLClient] inside async code.
 These clients are facades combining services and several APIs. You can also
 [use a single API directly](../advanced/services.md#use-one-api-without-the-facade).
 
@@ -17,11 +17,11 @@ each axis.
 | `ml.documents`, `ml.eval` | Parsed values and models   | REST (main)         | You want Python values without handling HTTP yourself |
 | `ml.search`               | Parsed documents, URIs, lexicon values and reports | REST (main) | You search with structured, CTS or string queries without eval privileges |
 | `ml.transaction()`        | Transaction context manager | REST (main)        | You group operations to commit or roll back together |
-| `ml.rest`                 | `httpx.Response`           | REST (main)         | Named `/v1/*` operations where you read the response |
-| `ml.manage`               | `httpx.Response`           | Manage (8002)       | Management API (`/manage/v2/*`) operations |
-| `ml.admin`                | `httpx.Response`           | Admin (8001)        | Admin API (`/admin/v1/*`) operations |
-| `ml.http`                 | `httpx.Response`           | Main port, any path | An endpoint without a wrapper, or a custom route |
-| `ml.parser`               | Parses a `httpx.Response`  | -                   | You have a response and want the value a service would give |
+| `ml.rest`                 | [`httpx.Response`](https://www.python-httpx.org/api/#response)           | REST (main)         | Named `/v1/*` operations where you read the response |
+| `ml.manage`               | [`httpx.Response`](https://www.python-httpx.org/api/#response)           | Manage (8002)       | Management API (`/manage/v2/*`) operations |
+| `ml.admin`                | [`httpx.Response`](https://www.python-httpx.org/api/#response)           | Admin (8001)        | Admin API (`/admin/v1/*`) operations |
+| `ml.http`                 | [`httpx.Response`](https://www.python-httpx.org/api/#response)           | Main port, any path | An endpoint without a wrapper, or a custom route |
+| `ml.parser`               | Parses a [`httpx.Response`](https://www.python-httpx.org/api/#response)  | -                   | You have a response and want the value a service would give |
 
 `ml.transaction()` is a method, not a property: opening a transaction performs a
 request, so it returns a service scoped to that transaction rather than a shared
@@ -35,7 +35,7 @@ the task; you can mix them in one application.
 - **Services** (`ml.documents`, `ml.eval`, `ml.search`) parse the response into
   Python values and document models.
 - **Wrappers** (`ml.rest`, `ml.manage`, `ml.admin`) build the request for a named
-  endpoint and return the raw `httpx.Response`.
+  endpoint and return the raw [`httpx.Response`](https://www.python-httpx.org/api/#response).
 - **Raw HTTP** (`ml.http`) sends an arbitrary request on the primary connection.
 
 The three read the same document three different ways:
@@ -49,7 +49,7 @@ with MLClient() as ml:  # Local development defaults; configure your credentials
     http_response = ml.http.get("/v1/documents", params={"uri": "/example.json"})
 ```
 
-`rest_response` and `http_response` are both `httpx.Response` objects, each
+`rest_response` and `http_response` are both [`httpx.Response`](https://www.python-httpx.org/api/#response) objects, each
 from a separate request. The wrapper builds the request for you. Only `ml.documents.read` parses the body into a
 model. Reach for a service by default, drop to a wrapper or `ml.http` when you
 need the raw response, and [parse it back](#parse-a-response) when you want the
@@ -93,7 +93,7 @@ For session lifecycle and overriding Manage or Admin connection settings, see [C
 
 ## Call a wrapper (REST, Manage, Admin)
 
-Each wrapper exposes a named method per endpoint and returns an `httpx.Response`,
+Each wrapper exposes a named method per endpoint and returns an [`httpx.Response`](https://www.python-httpx.org/api/#response),
 so you read status codes, headers and bodies yourself. Methods take endpoint
 parameters as keyword arguments; the
 [API reference](../reference/mlclient/index.md) lists each resource's signature.
@@ -139,7 +139,7 @@ body handling.
 
 ## Parse a response
 
-Any wrapper or `ml.http` returns an `httpx.Response`. To get the parsed Python
+Any wrapper or `ml.http` returns an [`httpx.Response`](https://www.python-httpx.org/api/#response). To get the parsed Python
 value a service would give - a `dict` for JSON, a `datetime` for `xs:dateTime`,
 and so on - hand it to `ml.parser`:
 
@@ -176,5 +176,5 @@ and manager factories, read [Environments](environments.md). For transport optio
 adds it to your own client without touching MLClient internals.
 
 The [API reference](../reference/mlclient/index.md) contains complete signatures
-and docstrings. The `mlclient.jobs` package remains experimental; use document
+and docstrings. The [`mlclient.jobs`][mlclient.jobs] package remains experimental; use document
 services for operations covered by the [stability contract](../community/stability.md).

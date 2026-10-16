@@ -62,7 +62,7 @@ The recognized suffixes are:
 | XQuery     | `.xq`, `.xql`, `.xqm`, `.xqu`, `.xquery`, `.xqy` |
 | JavaScript | `.js`, `.sjs`                                |
 
-Any other suffix raises `UnsupportedFileExtensionError`.
+Any other suffix raises [`UnsupportedFileExtensionError`][mlclient.exceptions.UnsupportedFileExtensionError].
 
 ## Pass variables
 
@@ -197,7 +197,7 @@ services support the same scoping syntax.
 ## Within a transaction
 
 Pass a `txid` to run inside an open multi-statement transaction, or spread a
-`TransactionService` with `**` to carry both the `txid` and its database. See
+[`TransactionService`][mlclient.services.TransactionService] with `**` to carry both the `txid` and its database. See
 [Transactions](transactions.md) for the full lifecycle.
 
 ```python

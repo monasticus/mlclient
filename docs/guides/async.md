@@ -1,7 +1,7 @@
 # Async support
 
-Use `AsyncMLClient` in asynchronous applications. Its configuration matches
-`MLClient`; request operations are awaited.
+Use [`AsyncMLClient`][mlclient.AsyncMLClient] in asynchronous applications. Its configuration matches
+[`MLClient`][mlclient.MLClient]; request operations are awaited.
 
 ```python
 import asyncio
@@ -65,4 +65,4 @@ calling out:
 See [transactions](transactions.md) and the generated
 [AsyncMLClient reference][mlclient.AsyncMLClient]
 for complete signatures. Check the reference when choosing a service: the
-standalone `LogLevelService` currently has a synchronous interface.
+standalone [`LogLevelService`][mlclient.services.diagnostics.LogLevelService] currently has a synchronous interface.

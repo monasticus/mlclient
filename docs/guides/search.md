@@ -23,8 +23,8 @@ Every operation accepts the same query argument:
 
 | Query | Sent as |
 | --- | --- |
-| A CTS query from the `cts` builder of `mlclient.xquery` | Serialized CTS JSON, `{"ctsquery": ...}` |
-| A structured query from `mlclient.search.structured` | Serialized structured JSON, `{"query": ...}` |
+| A CTS query from the `cts` builder of [`mlclient.xquery`][mlclient.xquery] | Serialized CTS JSON, `{"ctsquery": ...}` |
+| A structured query from [`mlclient.search.structured`][mlclient.search.structured] | Serialized structured JSON, `{"query": ...}` |
 | A string, such as `"coffee AND tea"` | Search API string query (`q`) |
 | `None` (default) | No query; matches every document |
 
@@ -42,6 +42,10 @@ with MLClient() as ml:
     )
     by_text = ml.search.documents("coffee AND tea")
 ```
+
+For query construction, see [Structured and CTS queries](../advanced/queries.md),
+including the [structured builder](../advanced/queries.md#builder) and
+[CTS constructors](../advanced/queries.md#cts-queries).
 
 Both vocabularies compose with `&` (and), `|` (or) and `~` (not). Chained
 operators build one flat query, so the following are equivalent:
@@ -64,8 +68,8 @@ structured = sq.collection("products") & sq.term("coffee") & ~sq.term("decaf")
 ## Find documents
 
 `documents()` performs a multi-document read and returns
-[Document][mlclient.models.Document] models in search result order: `XMLDocument`,
-`JSONDocument`, `TextDocument` or `BinaryDocument`. MarkLogic sends only the
+[Document][mlclient.models.Document] models in search result order: [`XMLDocument`][mlclient.models.XMLDocument],
+[`JSONDocument`][mlclient.models.JSONDocument], [`TextDocument`][mlclient.models.TextDocument] or [`BinaryDocument`][mlclient.models.BinaryDocument]. MarkLogic sends only the
 documents - no search report, snippets or facets - and an empty list means
 nothing matched.
 
@@ -126,7 +130,7 @@ Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
 ## Aggregate values
 
 `aggregate(name, function, query=None, ...)` applies an aggregate to a
-values or tuples definition. It returns the parsed result, not a `ValueHit`:
+values or tuples definition. It returns the parsed result, not a [`ValueHit`][mlclient.models.ValueHit]:
 
 ```python
 options = SearchOptions().values("price", Range(Element("price"), "xs:decimal"))
@@ -181,7 +185,7 @@ frequency, limit and positional paging have the same semantics as `values()`.
 
 `report()` returns a [SearchReport][mlclient.models.SearchReport], containing
 native JSON result entries (including URI, score and snippets), facets, metrics
-and the estimated total. These snippets are **not** whole `Document` objects;
+and the estimated total. These snippets are **not** whole [`Document`][mlclient.models.Document] objects;
 use `documents()` or `documents_with_report()` to read actual content.
 
 ```python
@@ -294,12 +298,12 @@ with MLClient() as ml:
 `documents()` and `report()` also accept `transform` and `transform_params`: an
 installed transform must preserve the native result contract of that operation.
 Every operation accepts `timeout`. MarkLogic errors, such as an unknown values
-name or a missing index, raise `MarkLogicError`.
+name or a missing index, raise [`MarkLogicError`][mlclient.exceptions.MarkLogicError].
 
 For anything the service does not wrap, call the endpoints directly through
 `ml.rest.search` (`get`, `post`, `delete`) and `ml.rest.values` (`get_list`,
 `get`, `post`). `ml.rest.search.delete()` removes the documents of a collection or
-directory; clearing a whole database requires `clear_database=True`. Those methods return raw `httpx.Response` objects and accept every
+directory; clearing a whole database requires `clear_database=True`. Those methods return raw [`httpx.Response`](https://www.python-httpx.org/api/#response) objects and accept every
 documented parameter of these search/values endpoints, including combined-query
 POST bodies, native-plugin aggregates and all native response views. Calls/API
 leave raw response headers available, including the effective timestamp.
@@ -317,9 +321,9 @@ async def find_products():
 
 ## CTS search with eval
 
-`CtsService` mirrors native `cts:` functions and runs them through `/v1/eval`.
+[`CtsService`][mlclient.services.CtsService] mirrors native `cts:` functions and runs them through `/v1/eval`.
 It is more flexible than `ml.search` - every search, lexicon and aggregate
-function, scored `SearchHit` results, subtree search and composition with other
+function, scored [`SearchHit`][mlclient.models.SearchHit] results, subtree search and composition with other
 XQuery builders - but each call evaluates generated XQuery, so the REST user
 needs eval privileges.
 
@@ -456,7 +460,7 @@ the selected range size.
 
 Both server paths use MarkLogic's restricted, searchable/extraction XPath syntax,
 not arbitrary XQuery or Python's XPath subset. Invalid paths raise
-`MarkLogicError` with code `MLCLIENT-INVALID-PATH`; empty paths are rejected
+[`MarkLogicError`][mlclient.exceptions.MarkLogicError] with code `MLCLIENT-INVALID-PATH`; empty paths are rejected
 locally. For example, `/fn:string()` is not an extraction path. Native search
 can nevertheless return text and JSON scalar nodes as well as XML/JSON trees.
 See [namespace bindings](../advanced/xquery-api.md#namespaces-and-path-validation) for prefixes.
@@ -524,7 +528,7 @@ with MLClient() as ml:
 
 This example requires a range index on the JSON property `category`.
 `field_values("price")` similarly requires a range field index named `price`.
-Missing indexes are reported as `MarkLogicError`.
+Missing indexes are reported as [`MarkLogicError`][mlclient.exceptions.MarkLogicError].
 
 Individual lexicon results are [ValueHit][mlclient.models.ValueHit] objects:
 `value` holds the parsed value, such as `str`, `Decimal` or `date`, and

@@ -72,7 +72,7 @@ A client certificate implies HTTPS, so the protocol is inferred. MarkLogic Cloud
 
 ## Authentication methods
 
-The `auth` parameter accepts a string shortcut, an [AuthConfig][mlclient.auth.AuthConfig] for methods that need more than a username and password, a custom [Auth](https://www.python-httpx.org/advanced/authentication/), or `None` for application-level auth. Credentials always come from `username` / `password` -- never from `AuthConfig`.
+The `auth` parameter accepts a string shortcut, an [AuthConfig][mlclient.auth.AuthConfig] for methods that need more than a username and password, a custom [Auth](https://www.python-httpx.org/advanced/authentication/), or `None` for application-level auth. Credentials always come from `username` / `password` -- never from [`AuthConfig`][mlclient.auth.AuthConfig].
 
 | `auth` value | Method | Credentials | Server availability |
 |----|----|----|----|
@@ -94,7 +94,7 @@ differ; see the OAuth changes in the [MarkLogic 11 release notes](https://docs.m
 MLClient only sends the supplied Bearer token; it does not configure external
 security, acquire OAuth tokens, or maintain a server-version compatibility gate.
 
-`"certificate"` and `"kerberos"` are accepted as plain strings because they need no extra data: certificate identity comes from the `ssl` client cert, and Kerberos defaults to the `HTTP` service on the request host. Use `AuthConfig` only to override the Kerberos SPN (`service` / `hostname`), or for OAuth, which has no default token.
+`"certificate"` and `"kerberos"` are accepted as plain strings because they need no extra data: certificate identity comes from the `ssl` client cert, and Kerberos defaults to the `HTTP` service on the request host. Use [`AuthConfig`][mlclient.auth.AuthConfig] only to override the Kerberos SPN (`service` / `hostname`), or for OAuth, which has no default token.
 
 With mutual TLS, `auth` defaults to `"certificate"`, so it need not be set explicitly. Kerberos relies on the optional `pyspnego` dependency (`pip install mlclient[kerberos]`); the import is verified at client creation so a missing dependency fails early.
 

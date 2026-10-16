@@ -10,7 +10,7 @@ if you want to create clients from a named environment.
 `retry`, `limits` and `timeout` are HTTP client options, **not environment settings**: none can be configured in the environment YAML. `limits` caps the connection pool - `max_connections` acts as a semaphore over concurrent requests - and `timeout` bounds each request. You set them at three levels, each overriding the one before it:
 
 - **Manager** - a default for every client the manager creates, across all servers including Health.
-- **Client** - on `MLClient` or `HTTPConfig` when creating a client directly, or as an override to a manager factory (`get_client`, `get_config`, ...) for the selected server.
+- **Client** - on [`MLClient`][mlclient.MLClient] or [`HTTPConfig`][mlclient.http.HTTPConfig] when creating a client directly, or as an override to a manager factory (`get_client`, `get_config`, ...) for the selected server.
 - **Request** - `timeout` on an individual operation, bounding just that call. `retry` and `limits` resolve at the client, so they have no per-request form.
 
 There is no YAML value beneath these levels. Set the manager defaults on construction and its factories:
@@ -56,7 +56,7 @@ The same selection and override rules apply to `get_async_client()`, `get_http_c
 ...     response = http.head("/")
 ```
 
-Use `get_config()` to obtain a resolved `HTTPConfig` without creating a client or opening a session:
+Use `get_config()` to obtain a resolved [`HTTPConfig`][mlclient.http.HTTPConfig] without creating a client or opening a session:
 
 ```python
 >>> config = mgr.get_config("content", port=9100, retry=NO_RETRY_STRATEGY)

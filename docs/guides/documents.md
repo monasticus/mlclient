@@ -3,15 +3,15 @@
 `ml.documents` is the higher-level
 [DocumentsService][mlclient.services.DocumentsService] for
 `/v1/documents`. It exposes three operations - `read`, `write` (create or update)
-and `delete` - that work with typed `Document` models instead of raw multipart
+and `delete` - that work with typed [`Document`][mlclient.models.Document] models instead of raw multipart
 bodies.
 
 Every operation accepts one URI or many, an optional `database`, and a `txid`
 to run inside a [transaction](transactions.md). `read` and `write` also carry
 metadata; `write` and `delete` also handle temporal collections.
 
-Before the operations, two models are worth knowing: `Document` (what `read`
-returns and `write` accepts) and `Metadata`.
+Before the operations, two models are worth knowing: [`Document`][mlclient.models.Document] (what `read`
+returns and `write` accepts) and [`Metadata`][mlclient.models.Metadata].
 
 ## The `Document` model
 
@@ -21,11 +21,11 @@ A document is one of five typed subclasses, chosen by content:
 
 | Subclass          | Content type                    | `content_string` | `content_bytes` |
 |-------------------|---------------------------------|:----------------:|:---------------:|
-| `XMLDocument`     | `ElementTree` / `str` / `bytes` | yes              | yes             |
-| `JSONDocument`    | `dict` / `str` / `bytes`        | yes              | yes             |
-| `TextDocument`    | `str` / `bytes`                 | yes              | yes             |
-| `BinaryDocument`  | `bytes`                         | `None`           | yes             |
-| `MetadataDocument`| none (metadata only)            | `None`           | `None`          |
+| [`XMLDocument`][mlclient.models.XMLDocument]     | `ElementTree` / `str` / `bytes` | yes              | yes             |
+| [`JSONDocument`][mlclient.models.JSONDocument]    | `dict` / `str` / `bytes`        | yes              | yes             |
+| [`TextDocument`][mlclient.models.TextDocument]    | `str` / `bytes`                 | yes              | yes             |
+| [`BinaryDocument`][mlclient.models.BinaryDocument]  | `bytes`                         | `None`           | yes             |
+| [`MetadataDocument`][mlclient.models.MetadataDocument]| none (metadata only)            | `None`           | `None`          |
 
 ### Building a document
 
@@ -50,7 +50,7 @@ extension would mislead the inference (`.log` text, `.dat` binary):
 'TextDocument'
 ```
 
-`Document.metadata_update` builds a `MetadataDocument` for a metadata-only
+`Document.metadata_update` builds a [`MetadataDocument`][mlclient.models.MetadataDocument] for a metadata-only
 change - see [Update only the metadata](#update-only-the-metadata).
 
 ### Inspecting a document
@@ -77,7 +77,7 @@ subclass (`dict` for JSON, `ElementTree` for XML); `content_string` and
 
 ## The `Metadata` model
 
-`Metadata` holds the five categories MarkLogic keeps beside a document:
+[`Metadata`][mlclient.models.Metadata] holds the five categories MarkLogic keeps beside a document:
 `collections`, `permissions`, `properties`, `quality` and `metadata_values`.
 
 ### Structured metadata
@@ -103,12 +103,12 @@ format is auto-detected and parsing is deferred until a field is read:
 ['some-collection']
 ```
 
-`Document.create(..., metadata=...)` accepts a `Metadata`, or the raw `bytes` /
+`Document.create(..., metadata=...)` accepts a [`Metadata`][mlclient.models.Metadata], or the raw `bytes` /
 `str` payload directly - see [Write with raw metadata](#write-with-raw-metadata).
 
 ## Read
 
-`read` returns a single `Document` for a string URI, or a `dict` keyed by URI
+`read` returns a single [`Document`][mlclient.models.Document] for a string URI, or a `dict` keyed by URI
 for a collection of URIs.
 
 ### Read a single document
@@ -160,7 +160,7 @@ b'<root><child>data</child></root>'
 
 ### Read with metadata
 
-Pass `category` to fetch metadata. The values are `Category` enum members (or
+Pass `category` to fetch metadata. The values are [`Category`][mlclient.models.Category] enum members (or
 their string equivalents). `[Category.CONTENT, Category.METADATA]` returns the
 content document with its `.metadata` populated:
 
@@ -182,7 +182,7 @@ content document with its `.metadata` populated:
 
 ### Read metadata only
 
-Dropping `Category.CONTENT` returns a `MetadataDocument` - no content body, just
+Dropping `Category.CONTENT` returns a [`MetadataDocument`][mlclient.models.MetadataDocument] - no content body, just
 the requested metadata categories:
 
 ```python
@@ -202,7 +202,7 @@ True
 ### Stream a large URI list
 
 For multiple URIs, `read` returns a `dict` keyed by URI. `read_stream` returns an
-iterator: process each `Document` without first collecting all document models.
+iterator: process each [`Document`][mlclient.models.Document] without first collecting all document models.
 Each HTTP response is buffered before its documents are yielded; this is not
 network streaming. Both methods split long URI lists into request batches.
 
@@ -244,7 +244,7 @@ services support the same scoping syntax.
 
 ## Write (create or update)
 
-`write` accepts one `Document`, one `Metadata` (default metadata for a batch),
+`write` accepts one [`Document`][mlclient.models.Document], one [`Metadata`][mlclient.models.Metadata] (default metadata for a batch),
 or a list mixing both.
 
 ### Write content
@@ -259,7 +259,7 @@ or a list mixing both.
 
 ### Write content with metadata
 
-Attach a `Metadata` to the document and both parts are written together:
+Attach a [`Metadata`][mlclient.models.Metadata] to the document and both parts are written together:
 
 ```python
 >>> from mlclient.models import Document, Metadata
@@ -277,7 +277,7 @@ Attach a `Metadata` to the document and both parts are written together:
 ### Write with raw metadata
 
 `metadata` also accepts a raw JSON/XML payload as `bytes` or `str`, skipping the
-`Metadata` model entirely:
+[`Metadata`][mlclient.models.Metadata] model entirely:
 
 ```python
 >>> doc = Document.create(
@@ -291,7 +291,7 @@ Attach a `Metadata` to the document and both parts are written together:
 
 ### Update only the metadata
 
-`Document.metadata_update` builds a `MetadataDocument` that rewrites a
+`Document.metadata_update` builds a [`MetadataDocument`][mlclient.models.MetadataDocument] that rewrites a
 document's metadata without touching its content body:
 
 ```python
@@ -315,7 +315,7 @@ For a read-modify-write that preserves the other categories, see the
 
 ### Write with default metadata for a batch
 
-A bare `Metadata` in the list is default metadata: it applies to every document
+A bare [`Metadata`][mlclient.models.Metadata] in the list is default metadata: it applies to every document
 after it that carries none of its own.
 
 ```python
@@ -411,7 +411,7 @@ versions remain queryable:
 
 `read`, `write` and `delete` accept a `txid` to run inside an open
 multi-statement transaction. Pass the id explicitly, or spread a
-`TransactionService` with `**` to carry both the `txid` and its database. See
+[`TransactionService`][mlclient.services.TransactionService] with `**` to carry both the `txid` and its database. See
 [Transactions](transactions.md) for the full lifecycle.
 
 ```python

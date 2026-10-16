@@ -15,7 +15,7 @@ are needed.
 
 1. `TasksGetCall` describes the path, query and accepted response type.
 2. `TasksApi` exposes a named method returning the raw response.
-3. `AppRestApi` subclasses `RestApi`, adding `tasks` beside the built-in
+3. `AppRestApi` subclasses [`RestApi`][mlclient.api.RestApi], adding `tasks` beside the built-in
    `eval`, `documents` and `transactions` - so `ml.rest.tasks` joins them.
 4. `TasksService` calls `rest.tasks`, checks the status and parses the body -
    it builds on the API tier, just as the built-in `ml.eval` service builds on

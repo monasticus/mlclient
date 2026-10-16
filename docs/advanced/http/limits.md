@@ -22,7 +22,7 @@ with MLClient(limits=limits) as ml:
     result = ml.eval.xquery('"Hello World!"')
 ```
 
-The same option is accepted by `AsyncMLClient`, `HTTPConfig` and
+The same option is accepted by [`AsyncMLClient`][mlclient.AsyncMLClient], [`HTTPConfig`][mlclient.http.HTTPConfig] and
 [manager factories](index.md). It is configured in Python, not environment YAML.
 
 ## Pool settings

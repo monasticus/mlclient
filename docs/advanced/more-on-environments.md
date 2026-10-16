@@ -285,7 +285,7 @@ manager.config = env
 
 This changes the manager's in-memory configuration, not the YAML file or clients
 already created. The manager constructor still loads a named environment; use
-`MLEnvironment` and explicit client configurations for a file-free setup.
+[`MLEnvironment`][mlclient.env.MLEnvironment] and explicit client configurations for a file-free setup.
 
 ## Override settings in Python
 
@@ -343,7 +343,7 @@ arguments for `HTTPConfig.resolve`, including default ports and merged SSL
 settings. The mapping and its nested models are independent copies. It preserves
 explicit `auth=None` and does not need Kerberos tooling
 or local certificate files. The mapping contains unmasked credentials and model
-objects such as `SSLConfig`; it is not a redacted display or a YAML serialization.
+objects such as [`SSLConfig`][mlclient.connection.SSLConfig]; it is not a redacted display or a YAML serialization.
 Transport/authentication compatibility is checked by `provide_config()`.
 
 `provide_config()` resolves one server's YAML configuration. To also apply
@@ -351,5 +351,5 @@ manager/factory overrides and server-kind HTTP defaults without opening a
 connection, use `manager.get_config("app-services", timeout=10)`.
 
 Pass a resolved configuration to `MLClient(config=config)` when building a client
-directly. Use `MLClientManager` when auxiliary APIs should also use the environment's
+directly. Use [`MLClientManager`][mlclient.MLClientManager] when auxiliary APIs should also use the environment's
 Manage, Admin and Health settings.

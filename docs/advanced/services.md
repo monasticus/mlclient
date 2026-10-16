@@ -1,7 +1,7 @@
 # Services
 
 The API tiers - `ml.rest`, `ml.manage`, `ml.admin` and `ml.http` - speak HTTP.
-You pass endpoint parameters and get back an httpx `Response`: a status code,
+You pass endpoint parameters and get back an [`httpx.Response`](https://www.python-httpx.org/api/#response): a status code,
 headers and a body you read and interpret yourself.
 
 Services sit one level above. A service calls those tiers internally, then does
@@ -78,15 +78,15 @@ with HttpClient(port=8001) as http:
     print(response.text)
 ```
 
-`HttpClient` owns the connection; its context manager closes it. The API wrappers
+[`HttpClient`][mlclient.clients.HttpClient] owns the connection; its context manager closes it. The API wrappers
 use that connection and do not select a port or create additional clients.
-`RestApi` and `ManageApi` compose in the same way, using their respective server
-configurations. Async code uses `AsyncHttpClient`, `AsyncApiClient` and the
+[`RestApi`][mlclient.api.RestApi] and [`ManageApi`][mlclient.api.ManageApi] compose in the same way, using their respective server
+configurations. Async code uses [`AsyncHttpClient`][mlclient.clients.AsyncHttpClient], [`AsyncApiClient`][mlclient.clients.AsyncApiClient] and the
 corresponding async wrapper, with `async with` and awaited operations.
 
 ## Diagnostics
 
-Operational services live in `mlclient.services.diagnostics`: Logs, LogLevel
+Operational services live in [`mlclient.services.diagnostics`][mlclient.services.diagnostics]: Logs, LogLevel
 and TraceEvents.
 
 Other services are not on the client facade. They cover narrower or more
@@ -165,7 +165,7 @@ Manage. All three operations accept keyword-only `group` and `timeout`. A timeou
 override applies independently to the mutation and follow-up read, not to their
 total duration. Omitting it inherits the client timeout; `None` disables it.
 
-Recognized server errors raise `MarkLogicError`; other HTTP failures raise
+Recognized server errors raise [`MarkLogicError`][mlclient.exceptions.MarkLogicError]; other HTTP failures raise
 `httpx.HTTPStatusError`, and transport errors propagate. A failed read-back does
 not roll back a successful save. See [trace-events](../cli/trace-events.md) for
 permissions and the corresponding CLI workflow.

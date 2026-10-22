@@ -58,6 +58,17 @@ class TestHealthCheckEndpoint:
 
         assert exc.value.response.status_code == httpx.codes.UNAUTHORIZED
 
+    @pytest.mark.ml_access
+    def test_cluster_healthcheck_reports_every_host_healthy(
+        self,
+        ml_client: MLClient,
+    ):
+        health = ml_client.cluster_healthcheck()
+
+        assert health.healthy is True
+        assert health.hosts
+        assert all(health.hosts.values())
+
 
 class TestTransactionsEndpoint:
     @pytest.mark.ml_access

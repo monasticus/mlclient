@@ -40,6 +40,27 @@ Pass a resolved [HTTPConfig][mlclient.http.HTTPConfig] as `health_config` to sup
 True
 ```
 
+## Cluster health
+
+[healthcheck][mlclient.MLClient.healthcheck] probes only the host that the connection reaches - behind a load balancer, any one of them. [cluster_healthcheck][mlclient.MLClient.cluster_healthcheck] reports every host of the cluster and returns a [ClusterHealth][mlclient.models.ClusterHealth]: `healthy` is the cluster verdict and `hosts` maps each MarkLogic host name to its own verdict. Its truth value is `healthy`.
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     health = ml.cluster_healthcheck()
+>>> health.healthy
+True
+>>> health.hosts
+{'ip-10-0-0-14.ec2.internal': True, 'ip-10-0-0-91.ec2.internal': True}
+>>> if not health:
+...     print("cluster degraded")
+```
+
+The probes run inside the cluster: an evaluated query sends `GET /` to port `7997` of every host, so internal host names that do not resolve outside the cluster are probed too. A host that does not answer `200 OK` within two seconds is reported unhealthy. Hosts are probed one after another, so a cluster with unhealthy hosts takes up to two seconds per such host. The query needs the eval privilege and the privilege to send HTTP requests (`xdmp:http-get`).
+
+When the eval fails with a [MarkLogicError][mlclient.exceptions.MarkLogicError] - typically because the user lacks the eval privilege - and the server is MarkLogic 11 or later, the Management API health check (`/manage/v2?view=healthcheck`, manage privilege) is read instead. It reports the cluster as seen from the single host that answered, without a per-host breakdown, so `hosts` is `None`. The cluster counts as healthy when it is not starting, restarting or shutting down, has a quorum, and reports every app server, background process and database healthy. On older servers the eval error is re-raised; when the Management API answers with an error status, [HTTPStatusError](https://www.python-httpx.org/exceptions/) is raised.
+
 ## Server version
 
 [version][mlclient.MLClient.version] returns an immutable [MarkLogicVersion][mlclient.models.MarkLogicVersion], resolved from `xdmp:version()` and cached after the first access. `str(version)` preserves the complete server version. `parts` is always a four-element tuple of numeric components in their original order, padded with `None` for missing components. Unpacking yields those same four values.

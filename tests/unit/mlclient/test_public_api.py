@@ -77,6 +77,7 @@ EXPECTED_EXPORTS = {
         "DocumentType",
         "JSONDocument",
         "MarkLogicVersion",
+        "ClusterHealth",
         "Metadata",
         "MetadataDocument",
         "Mimetype",

@@ -74,7 +74,7 @@ def time_in_environments(
     environments: list[str],
     request: Callable[[str], Awaitable[Answer]],
     describe: Callable[[Answer], str] = str,
-    answer_style: str | None = None,
+    highlight: Callable[[str], str] | None = None,
 ) -> int:
     """Send a request to every environment at once and show the answers.
 
@@ -90,15 +90,18 @@ def time_in_environments(
         failure.
     describe : Callable[[Answer], str]
         Turns an answer into the plain text shown in the table.
-    answer_style : str | None
-        The cleo style of successful answers; None leaves them unstyled.
+    highlight : Callable[[str], str] | None
+        Turns each escaped output line, an answer or an error, into cleo markup;
+        None leaves answers unstyled and shows errors in their own style.
 
     Returns
     -------
     int
         0 when every environment answered successfully, 1 when any failed.
     """
-    runs = [EnvironmentRun(environment) for environment in environments]
+    runs = [
+        EnvironmentRun(environment, highlight=highlight) for environment in environments
+    ]
     section = command.io.output.section()
 
     def refresh(waited: float) -> None:
@@ -106,7 +109,7 @@ def time_in_environments(
             _render(section, runs, waited, fit_screen=True)
 
     started = time.perf_counter()
-    asyncio.run(run_all(runs, request, describe, refresh, answer_style))
+    asyncio.run(run_all(runs, request, describe, refresh))
     _render(section, runs, time.perf_counter() - started, fit_screen=False)
     return 1 if any(run.error is not None for run in runs) else 0
 
@@ -117,7 +120,8 @@ class EnvironmentRun:
 
     ``elapsed`` stays None while the request runs. Once finished, ``output``
     holds the described answer, or the error message when ``error`` is set,
-    and ``style`` the cleo style to show it with.
+    and ``style`` the cleo style to show it with. ``highlight``, when set,
+    marks up each output line instead of ``style``.
     """
 
     environment: str
@@ -125,6 +129,7 @@ class EnvironmentRun:
     output: str = ""
     error: Exception | None = None
     style: str | None = None
+    highlight: Callable[[str], str] | None = None
 
     def duration(
         self,
@@ -190,10 +195,12 @@ class EnvironmentRun:
         Returns
         -------
         str
-            The answer or the error message, in the run's style.
+            The answer or the error message, highlighted or in the run's style.
         """
         cell_lines = [Formatter.escape(line) for line in lines]
-        if self.style is not None:
+        if self.highlight is not None:
+            cell_lines = [self.highlight(line) for line in cell_lines]
+        elif self.style is not None:
             cell_lines = [f"<{self.style}>{line}</>" for line in cell_lines]
         if hidden_lines:
             cell_lines.append(f"<comment>... {hidden_lines} more lines</comment>")
@@ -205,7 +212,6 @@ async def run_all(
     request: Callable[[str], Awaitable[Any]],
     describe: Callable[[Any], str],
     refresh: Callable[[float], None],
-    answer_style: str | None = None,
 ) -> None:
     """Send the request to every environment at once.
 
@@ -220,12 +226,10 @@ async def run_all(
     refresh : Callable[[float], None]
         Called with the seconds waited so far, every tenth of a second until all
         runs finish.
-    answer_style : str | None
-        The cleo style of successful answers; None leaves them unstyled.
     """
     started = time.perf_counter()
     all_finished = asyncio.gather(
-        *(_run(run, request, describe, answer_style) for run in runs),
+        *(_run(run, request, describe) for run in runs),
     )
     while not all_finished.done():
         refresh(time.perf_counter() - started)
@@ -237,7 +241,6 @@ async def _run(
     run: EnvironmentRun,
     request: Callable[[str], Awaitable[Any]],
     describe: Callable[[Any], str],
-    answer_style: str | None,
 ) -> None:
     """Send the request to one environment and record the outcome and duration.
 
@@ -249,8 +252,6 @@ async def _run(
         Sends the request to the named environment.
     describe : Callable[[Any], str]
         Turns an answer into the plain text of the run output.
-    answer_style : str | None
-        The cleo style of a successful answer.
     """
     started = time.perf_counter()
     try:
@@ -264,7 +265,6 @@ async def _run(
     else:
         run.elapsed = time.perf_counter() - started
         run.output = output
-        run.style = answer_style
 
 
 def _render(

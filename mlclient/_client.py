@@ -7,6 +7,7 @@ using a layered composition architecture:
     - .manage   -> ManageApi / AsyncManageApi (/manage/v2/*, port 8002 by default)
     - .admin    -> AdminApi / AsyncAdminApi (/admin/v1/* on port 8001)
     - .healthcheck() -> HEAD / on the HealthCheck server (port 7997)
+    - .cluster_healthcheck() -> health of every host in the cluster
     - .parser   -> MLResponseParser
     - .documents, .eval, .invoke, .search -> higher-level services
     - .transaction() -> open a scoped transaction (context manager)
@@ -40,6 +41,7 @@ from mlclient.connection import (
 )
 from mlclient.exceptions import MarkLogicError
 from mlclient.http import DEFAULT_HEALTH_TIMEOUT, NO_RETRY_STRATEGY, HTTPConfig
+from mlclient.models.health import ClusterHealth
 from mlclient.models.version import MarkLogicVersion
 from mlclient.responses import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
@@ -55,6 +57,34 @@ from mlclient.services.transactions import (
 
 logger = logging.getLogger(__name__)
 
+_CLUSTER_STATUS_MIN_MAJOR_VERSION = 11
+_CLUSTER_HOST_PROBE_TIMEOUT_SECONDS = 2
+
+# The host running the eval probes itself through localhost: its configured
+# host name does not always resolve on itself (e.g. in a Docker container).
+_CLUSTER_HEALTH_XQUERY = f"""
+xquery version "1.0-ml";
+
+declare variable $port as xs:integer external;
+
+map:new(
+    for $host in xdmp:hosts()
+    let $address :=
+        if ($host eq xdmp:host()) then "localhost"
+        else xdmp:host-name($host)
+    return map:entry(xdmp:host-name($host), (
+        try {{
+            xdmp:http-get(
+                "http://" || $address || ":" || $port || "/",
+                <options xmlns="xdmp:http">
+                    <timeout>{_CLUSTER_HOST_PROBE_TIMEOUT_SECONDS}</timeout>
+                </options>
+            )[1]/*:code = 200
+        }} catch ($e) {{ fn:false() }}
+    ))
+)
+"""
+
 
 class MLClient:
     """Main entry point for MarkLogic interaction.
@@ -66,6 +96,7 @@ class MLClient:
     - ``ml.manage.databases.get_list()`` -- mid-level Management API (``/manage/v2/*``)
     - ``ml.admin.get_timestamp()`` -- mid-level Admin API (``/admin/v1/*``)
     - ``ml.healthcheck()`` -- HEAD ``/`` on the HealthCheck server (port 7997)
+    - ``ml.cluster_healthcheck()`` -- health of every host in the cluster
     - ``ml.rest.call(SomeApiCall())`` -- advanced: custom Call objects
     - ``ml.parser.parse(resp)`` -- manual parsing of raw responses
     - ``ml.documents.read("/doc.json")`` -- higher-level, parsed results
@@ -353,6 +384,52 @@ class MLClient:
         """
         return _healthy_or_raise(self._health_http.head("/", timeout=timeout))
 
+    def cluster_healthcheck(self) -> ClusterHealth:
+        """Report whether every host of the cluster is healthy.
+
+        Evaluates XQuery that sends GET / to the HealthCheck server (port 7997)
+        of each host from inside the cluster, so host names that resolve only
+        there are probed too. A host that does not answer 200 within two
+        seconds is unhealthy. It needs the eval and HTTP privileges.
+
+        When the eval fails with a MarkLogic error (e.g. a missing privilege)
+        and the server is MarkLogic 11 or later, the Management API health
+        check (``/manage/v2?view=healthcheck``, manage privilege) is read
+        instead. It reports the cluster as seen from a single host, so the
+        result carries no per-host breakdown.
+
+        Returns
+        -------
+        ClusterHealth
+            The cluster verdict; ``hosts`` is None when it comes from the
+            Management API
+
+        Raises
+        ------
+        MarkLogicError
+            If the eval fails on a server older than MarkLogic 11
+        httpx.HTTPStatusError
+            If the Management API health check answers with an error status
+        RequestError
+            If a request fails at the HTTP transport level
+        """
+        try:
+            hosts = self.eval.xquery(
+                _CLUSTER_HEALTH_XQUERY,
+                variables={"port": MARKLOGIC_HEALTHCHECK_PORT},
+            )
+        except MarkLogicError:
+            if self.version.parts[0] < _CLUSTER_STATUS_MIN_MAJOR_VERSION:
+                raise
+            return _cluster_health_from_status(self._get_cluster_status())
+        return ClusterHealth(healthy=all(hosts.values()), hosts=hosts)
+
+    def _get_cluster_status(self) -> Response:
+        return self._manage_http.get(
+            "/manage/v2",
+            params={"view": "healthcheck", "format": "json"},
+        )
+
     @property
     def parser(self) -> type[MLResponseParser]:
         """Parse raw MarkLogic HTTP responses explicitly.
@@ -638,6 +715,7 @@ class AsyncMLClient:
     - ``ml.manage.databases.get_list()`` -- mid-level Management API
     - ``ml.admin.get_timestamp()`` -- mid-level Admin API (``/admin/v1/*``)
     - ``ml.healthcheck()`` -- HEAD ``/`` on the HealthCheck server (port 7997)
+    - ``ml.cluster_healthcheck()`` -- health of every host in the cluster
     - ``ml.rest.call(SomeApiCall())`` -- advanced: custom Call objects
     - ``ml.parser.parse(resp)`` -- manual parsing of raw responses
     - ``ml.documents.read("/doc.json")`` -- higher-level, parsed results
@@ -871,6 +949,52 @@ class AsyncMLClient:
             than an unhealthy server
         """
         return _healthy_or_raise(await self._health_http.head("/", timeout=timeout))
+
+    async def cluster_healthcheck(self) -> ClusterHealth:
+        """Report whether every host of the cluster is healthy.
+
+        Evaluates XQuery that sends GET / to the HealthCheck server (port 7997)
+        of each host from inside the cluster, so host names that resolve only
+        there are probed too. A host that does not answer 200 within two
+        seconds is unhealthy. It needs the eval and HTTP privileges.
+
+        When the eval fails with a MarkLogic error (e.g. a missing privilege)
+        and the server is MarkLogic 11 or later, the Management API health
+        check (``/manage/v2?view=healthcheck``, manage privilege) is read
+        instead. It reports the cluster as seen from a single host, so the
+        result carries no per-host breakdown.
+
+        Returns
+        -------
+        ClusterHealth
+            The cluster verdict; ``hosts`` is None when it comes from the
+            Management API
+
+        Raises
+        ------
+        MarkLogicError
+            If the eval fails on a server older than MarkLogic 11
+        httpx.HTTPStatusError
+            If the Management API health check answers with an error status
+        RequestError
+            If a request fails at the HTTP transport level
+        """
+        try:
+            hosts = await self.eval.xquery(
+                _CLUSTER_HEALTH_XQUERY,
+                variables={"port": MARKLOGIC_HEALTHCHECK_PORT},
+            )
+        except MarkLogicError:
+            if (await self.version()).parts[0] < _CLUSTER_STATUS_MIN_MAJOR_VERSION:
+                raise
+            return _cluster_health_from_status(await self._get_cluster_status())
+        return ClusterHealth(healthy=all(hosts.values()), hosts=hosts)
+
+    async def _get_cluster_status(self) -> Response:
+        return await self._manage_http.get(
+            "/manage/v2",
+            params={"view": "healthcheck", "format": "json"},
+        )
 
     @property
     def parser(self) -> type[MLResponseParser]:
@@ -1161,6 +1285,30 @@ def _admin_config_version(server_config: str) -> str | None:
         If the response is not well-formed XML
     """
     return ElementTree.fromstring(server_config).findtext("{*}version")
+
+
+def _cluster_health_from_status(response: Response) -> ClusterHealth:
+    """Turn a Management API health check response into a cluster verdict.
+
+    The cluster is healthy when it is not starting, restarting or shutting
+    down, has a quorum, and reports every server, background process and
+    database healthy. Database entries carry ``healthy`` as a string.
+    """
+    response.raise_for_status()
+    status = response.json()
+    components = (
+        status["serverHealthStatus"]
+        + status["backgroundHealthStatus"]
+        + status["databaseHealthStatus"]
+    )
+    healthy = (
+        status["quorumExists"]
+        and not status["serverInitializing"]
+        and not status["serverRestarting"]
+        and not status["serverShutdown"]
+        and all(component["healthy"] in (True, "true") for component in components)
+    )
+    return ClusterHealth(healthy=healthy, hosts=None)
 
 
 def _healthy_or_raise(response: Response) -> bool:

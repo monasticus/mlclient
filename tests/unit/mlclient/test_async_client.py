@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from urllib.parse import parse_qs
+
 import httpx
 import pytest
 import respx
@@ -14,8 +17,16 @@ from mlclient.clients import http as http_client_module
 from mlclient.connection import CloudConfig
 from mlclient.exceptions import MarkLogicError
 from mlclient.http import DEFAULT_RETRY_STRATEGY, HTTPConfig
+from mlclient.models import ClusterHealth
 from mlclient.responses import MLResponseParser
 from mlclient.services import AsyncDocumentsService, AsyncEvalService
+from tests.utils.cluster_health_mocks import (
+    mock_cluster_eval,
+    mock_cluster_status,
+    mock_forbidden_eval,
+    mock_manage_version,
+    unhealthy_cluster_statuses,
+)
 from tests.utils.ml_mockers import MLRespXMocker
 
 
@@ -707,6 +718,97 @@ async def test_healthcheck_cloud_uses_no_retry_and_preserves_gateway(injected):
         assert await ml.healthcheck() is False
 
     assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_reports_every_host_from_eval():
+    hosts = {"host-1.internal": True, "host-2.internal": True}
+    mock_cluster_eval(hosts)
+
+    async with AsyncMLClient() as ml:
+        health = await ml.cluster_healthcheck()
+
+    assert health == ClusterHealth(healthy=True, hosts=hosts)
+    assert health
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_is_unhealthy_when_any_host_is_down():
+    hosts = {"host-1.internal": True, "host-2.internal": False}
+    mock_cluster_eval(hosts)
+
+    async with AsyncMLClient() as ml:
+        health = await ml.cluster_healthcheck()
+
+    assert health == ClusterHealth(healthy=False, hosts=hosts)
+    assert not health
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_sends_healthcheck_port_to_eval():
+    route = mock_cluster_eval({"host-1.internal": True})
+
+    async with AsyncMLClient() as ml:
+        await ml.cluster_healthcheck()
+
+    request_body = parse_qs(route.calls.last.request.content.decode())
+    assert json.loads(request_body["vars"][0]) == {"port": 7997}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_falls_back_to_manage_status_without_eval_privilege():
+    mock_forbidden_eval()
+    mock_manage_version("11.0.0")
+    mock_cluster_status()
+
+    async with AsyncMLClient() as ml:
+        health = await ml.cluster_healthcheck()
+
+    assert health == ClusterHealth(healthy=True, hosts=None)
+
+
+@pytest.mark.parametrize("status", unhealthy_cluster_statuses())
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_reads_unhealthy_manage_status(status):
+    mock_forbidden_eval()
+    mock_manage_version("12.1.0")
+    mock_cluster_status(status)
+
+    async with AsyncMLClient() as ml:
+        health = await ml.cluster_healthcheck()
+
+    assert health == ClusterHealth(healthy=False, hosts=None)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_reraises_eval_error_before_marklogic_11():
+    mock_forbidden_eval()
+    mock_manage_version("10.0-9.5")
+    status_route = mock_cluster_status()
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(MarkLogicError):
+            await ml.cluster_healthcheck()
+
+    assert status_route.call_count == 0
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_raises_when_manage_status_is_forbidden_too():
+    mock_forbidden_eval()
+    mock_manage_version("12.1.0")
+    mock_cluster_status(status_code=403)
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(httpx.HTTPStatusError):
+            await ml.cluster_healthcheck()
 
 
 @pytest.mark.asyncio

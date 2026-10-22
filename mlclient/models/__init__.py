@@ -18,6 +18,7 @@ from .documents import (
     TextDocument,
     XMLDocument,
 )
+from .health import ClusterHealth
 from .mimetypes import Mimetypes
 from .results import ParsedValue, SearchHit, SearchReport, TupleHit, ValueHit
 from .types import DocumentType, LogType, Mimetype
@@ -26,6 +27,7 @@ from .version import MarkLogicVersion
 __all__ = [
     "BinaryDocument",
     "Category",
+    "ClusterHealth",
     "Document",
     "DocumentType",
     "DocumentsBodyPart",

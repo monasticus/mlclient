@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import re
 import time
 from collections import deque
 from contextlib import AsyncExitStack
@@ -40,6 +41,7 @@ if TYPE_CHECKING:
     from cleo.io.outputs.output import Output
 
     from mlclient._client import AsyncMLClient
+    from mlclient.models import ClusterHealth
 
 _HEALTHY = "HEALTHY"
 _UNHEALTHY = "UNHEALTHY"
@@ -50,11 +52,16 @@ _STATUS_STYLES = {
     _UNHEALTHY: "fg=red;options=bold",
     _UNREACHABLE: "fg=yellow;options=bold",
 }
+_STATUS_LINE = re.compile(rf"({_HEALTHY}|{_UNHEALTHY}|{_UNREACHABLE})(?: (.+))?")
+
+_HOST_COUNT_STYLE = "fg=cyan"
+_OVERALL = "(overall)"
 
 _TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
 _TIMESTAMP_WIDTH = len("2000-01-01 00:00:00")
 # Wide enough for the longest status and a duration below 1000 seconds.
 _WATCH_CELL_WIDTH = len(f"{_UNREACHABLE} 999.999 s")
+_CLUSTER_WATCH_CELL_WIDTH = len(f"{_UNHEALTHY} {_OVERALL} 999.999 s")
 
 _DEFAULT_INTERVAL_SECONDS = 5
 _MIN_INTERVAL_SECONDS = 1
@@ -86,6 +93,15 @@ class HealthCommand(Command):
     and the check duration; --overwrite repaints the table in place, keeping the
     last --lines rows.
 
+    With --cluster every host of the cluster is checked from inside it through
+    the environment's REST server, and the status is followed by the number of
+    healthy hosts out of all, e.g. HEALTHY 12/12. Unhealthy hosts are listed
+    below it, sorted by name with numbers ordered by value; with -v every host
+    is. With --watch the unhealthy hosts follow the status on its line, and in a
+    table of several environments only the host count is shown. When the
+    cluster reports no per-host health (a user without the eval privilege on
+    MarkLogic 11 or later), the count is replaced by (overall).
+
     Usage:
       health [options]
 
@@ -101,6 +117,8 @@ class HealthCommand(Command):
             Repaint poll output in place instead of scrolling
       -l, --lines=LINES
             Statuses to keep on screen in --overwrite mode [default: 3]
+      -c, --cluster
+            Check every host of the cluster instead of the HealthCheck server
     """
 
     name: str = "health"
@@ -141,6 +159,12 @@ class HealthCommand(Command):
             flag=False,
             default=str(_DEFAULT_LINES),
         ),
+        option(
+            "cluster",
+            "c",
+            description="Check every host of the cluster instead of the HealthCheck "
+            "server",
+        ),
     ]
 
     def handle(
@@ -148,22 +172,48 @@ class HealthCommand(Command):
     ) -> int:
         """Execute the command."""
         environments = selected_environments(self)
+        cluster = self.option("cluster")
         if len(environments) > 1:
             if self.option("watch"):
                 return self._watch_all(environments)
             return time_in_environments(
                 self,
                 environments,
-                _check_health,
-                answer_style=_STATUS_STYLES[_HEALTHY],
+                functools.partial(_check_health, cluster=cluster),
+                highlight=_highlight,
             )
         manager = MLClientManager(environments[0])
-        with manager.get_client("health") as ml:
+        with manager.get_client(_app_server_id(cluster)) as ml:
             if self.option("watch"):
                 return self._watch(ml)
+            if cluster:
+                return self._report_cluster(ml.cluster_healthcheck())
             healthy = ml.healthcheck()
         self.line(_format_status(healthy))
         return 0 if healthy else 1
+
+    def _report_cluster(
+        self,
+        health: ClusterHealth,
+    ) -> int:
+        """Print the cluster status, then its hosts sorted by name.
+
+        Parameters
+        ----------
+        health : ClusterHealth
+            The checked cluster.
+
+        Returns
+        -------
+        int
+            0 when the cluster is healthy, 1 otherwise.
+        """
+        self.line(_highlight(_cluster_status(health)))
+        hosts = health.hosts or {}
+        for name in sorted(hosts, key=_host_name_order):
+            if not hosts[name] or self.io.is_verbose():
+                self.line(_host_line(name, healthy=hosts[name]))
+        return 0 if health else 1
 
     def _watch(self, ml: MLClient) -> int:
         """Poll until interrupted, continuing through transport failures."""
@@ -175,15 +225,28 @@ class HealthCommand(Command):
         render = self._renderer()
         try:
             while True:
-                try:
-                    healthy = ml.healthcheck()
-                except TransportError:
-                    healthy = None
+                status = self._poll(ml)
                 now = datetime.now().strftime(_TIMESTAMP_FORMAT)
-                render(f"{now} {_format_status(healthy)}")
+                render(f"{now} {status}")
                 time.sleep(interval)
         except KeyboardInterrupt:
             return 0
+
+    def _poll(self, ml: MLClient) -> str:
+        """Check the environment once, an unreachable one included.
+
+        Returns
+        -------
+        str
+            The coloured status, followed by the unhealthy hosts of a cluster.
+        """
+        try:
+            if self.option("cluster"):
+                return _cluster_watch_status(ml.cluster_healthcheck())
+            healthy = ml.healthcheck()
+        except TransportError:
+            healthy = None
+        return _format_status(healthy)
 
     def _watch_all(
         self,
@@ -211,9 +274,13 @@ class HealthCommand(Command):
             kept_rows = self._bounded_option("lines", _MIN_LINES, _MAX_LINES)
             if not self.io.output.is_decorated():
                 kept_rows = None
-        table = _WatchTable(self.io.output, environments, kept_rows)
+        cluster = self.option("cluster")
+        cell_width = _CLUSTER_WATCH_CELL_WIDTH if cluster else _WATCH_CELL_WIDTH
+        table = _WatchTable(self.io.output, environments, kept_rows, cell_width)
         try:
-            asyncio.run(_poll_until_interrupted(environments, interval, table))
+            asyncio.run(
+                _poll_until_interrupted(environments, interval, table, cluster=cluster),
+            )
         except KeyboardInterrupt:
             table.close()
         return 0
@@ -262,28 +329,31 @@ class HealthCommand(Command):
         return value
 
 
-async def _check_health(environment: str) -> str:
-    """Check one environment's HealthCheck server.
+async def _check_health(environment: str, *, cluster: bool) -> str:
+    """Check one environment's HealthCheck server or every host of its cluster.
 
     Parameters
     ----------
     environment : str
         The environment name.
+    cluster : bool
+        Whether to check every host of the cluster.
 
     Returns
     -------
     str
-        HEALTHY when the server answers with success.
+        The HEALTHY status, followed by the host count of a cluster.
 
     Raises
     ------
     UnsuccessfulAnswerError
-        If the server answers with a failure code or cannot be reached.
+        If the server or the cluster is unhealthy or cannot be reached.
     """
-    async with MLClientManager(environment).get_async_client("health") as ml:
-        status = await _poll(ml)
-    if status != _HEALTHY:
-        raise UnsuccessfulAnswerError(status, _STATUS_STYLES[status])
+    manager = MLClientManager(environment)
+    async with manager.get_async_client(_app_server_id(cluster)) as ml:
+        status = await _poll(ml, cluster=cluster)
+    if not _is_healthy(status):
+        raise UnsuccessfulAnswerError(status)
     return status
 
 
@@ -291,6 +361,8 @@ async def _poll_until_interrupted(
     environments: list[str],
     interval: int,
     table: _WatchTable,
+    *,
+    cluster: bool,
 ) -> None:
     """Check every environment at once, again and again, adding table rows.
 
@@ -302,17 +374,19 @@ async def _poll_until_interrupted(
         Seconds between the end of a poll and the start of the next one.
     table : _WatchTable
         The table showing the polls.
+    cluster : bool
+        Whether to check every host of each cluster.
     """
     async with AsyncExitStack() as stack:
         clients = {
             environment: await stack.enter_async_context(
-                MLClientManager(environment).get_async_client("health"),
+                MLClientManager(environment).get_async_client(_app_server_id(cluster)),
             )
             for environment in environments
         }
 
         async def poll(environment: str) -> str:
-            return await _poll(clients[environment])
+            return await _poll(clients[environment], cluster=cluster)
 
         while True:
             started_at = datetime.now().strftime(_TIMESTAMP_FORMAT)
@@ -324,20 +398,25 @@ async def _poll_until_interrupted(
             await asyncio.sleep(interval)
 
 
-async def _poll(ml: AsyncMLClient) -> str:
-    """Check a HealthCheck server, an unreachable one included.
+async def _poll(ml: AsyncMLClient, *, cluster: bool) -> str:
+    """Check a HealthCheck server or a cluster, an unreachable one included.
 
     Parameters
     ----------
     ml : AsyncMLClient
         A client of the environment to check.
+    cluster : bool
+        Whether to check every host of the cluster.
 
     Returns
     -------
     str
-        HEALTHY, UNHEALTHY or UNREACHABLE.
+        HEALTHY, UNHEALTHY or UNREACHABLE, followed by the host count of a
+        reachable cluster.
     """
     try:
+        if cluster:
+            return _cluster_status(await ml.cluster_healthcheck())
         healthy = await ml.healthcheck()
     except TransportError:
         healthy = None
@@ -361,6 +440,8 @@ class _WatchTable:
         Environment names, one column each after the time column.
     kept_rows : int | None
         How many rows to repaint in place, None to print each row once.
+    cell_width : int
+        Minimum width of an environment column.
     """
 
     def __init__(
@@ -368,10 +449,12 @@ class _WatchTable:
         output: Output,
         environments: list[str],
         kept_rows: int | None,
+        cell_width: int,
     ):
         self._output = output
         self._environments = environments
         self._kept_rows = kept_rows
+        self._cell_width = cell_width
         self._finished_rows: deque[list[str]] = deque(
             maxlen=0 if kept_rows is None else kept_rows - 1,
         )
@@ -396,7 +479,7 @@ class _WatchTable:
             Seconds since the poll started.
         """
         if self._output.is_decorated():
-            self._draw(_watch_row(started_at, runs, waited))
+            self._draw(_watch_row(started_at, runs, waited, self._cell_width))
 
     def finish(
         self,
@@ -412,7 +495,7 @@ class _WatchTable:
         runs : list[EnvironmentRun]
             The poll's finished runs, one per environment.
         """
-        row = _watch_row(started_at, runs, 0)
+        row = _watch_row(started_at, runs, 0, self._cell_width)
         self._draw(row, finished=True)
         self._finished_rows.append(row)
 
@@ -492,7 +575,7 @@ class _WatchTable:
         table.set_column_widths(
             [
                 _TIMESTAMP_WIDTH,
-                *(max(len(name), _WATCH_CELL_WIDTH) for name in self._environments),
+                *(max(len(name), self._cell_width) for name in self._environments),
             ],
         )
         table.render()
@@ -503,6 +586,7 @@ def _watch_row(
     started_at: str,
     runs: list[EnvironmentRun],
     waited: float,
+    cell_width: int,
 ) -> list[str]:
     """Describe a poll as watch table cells.
 
@@ -514,18 +598,21 @@ def _watch_row(
         The poll's runs, one per environment.
     waited : float
         Seconds since the poll started.
+    cell_width : int
+        Width of an environment cell.
 
     Returns
     -------
     list[str]
         The start time followed by one cell per environment.
     """
-    return [started_at, *(_watch_cell(run, waited) for run in runs)]
+    return [started_at, *(_watch_cell(run, waited, cell_width) for run in runs)]
 
 
 def _watch_cell(
     run: EnvironmentRun,
     waited: float,
+    width: int,
 ) -> str:
     """Describe a run as a watch table cell: its status, then its duration.
 
@@ -535,6 +622,8 @@ def _watch_cell(
         The run to describe.
     waited : float
         Seconds since the poll started, shown while the run is running.
+    width : int
+        Width of the cell the duration is aligned to the right edge of.
 
     Returns
     -------
@@ -543,18 +632,62 @@ def _watch_cell(
     """
     duration, duration_style = run.duration(waited)
     status = "" if run.elapsed is None else run.output
-    gap = max(_WATCH_CELL_WIDTH - len(status) - len(duration), 1)
-    coloured_status = ""
-    if status:
-        style = _STATUS_STYLES.get(status, "error")
-        coloured_status = f"<{style}>{Formatter.escape(status)}</>"
+    gap = max(width - len(status) - len(duration), 1)
+    coloured_status = _highlight(Formatter.escape(status)) if status else ""
     return f"{coloured_status}{' ' * gap}<{duration_style}>{duration}</>"
+
+
+def _app_server_id(cluster: bool) -> str | None:
+    """Select the HealthCheck server, or the REST server that checks a cluster."""
+    return None if cluster else "health"
+
+
+def _cluster_watch_status(health: ClusterHealth) -> str:
+    """Colour a cluster status and append the unhealthy hosts, sorted by name."""
+    status = _highlight(_cluster_status(health))
+    hosts = health.hosts or {}
+    unhealthy = [
+        Formatter.escape(name)
+        for name in sorted(hosts, key=_host_name_order)
+        if not hosts[name]
+    ]
+    if not unhealthy:
+        return status
+    return f"{status} down: {', '.join(unhealthy)}"
+
+
+def _cluster_status(health: ClusterHealth) -> str:
+    """Name a cluster verdict followed by its healthy hosts out of all."""
+    return f"{_status(health.healthy)} {_host_count(health)}"
+
+
+def _host_count(health: ClusterHealth) -> str:
+    """Count the healthy hosts out of all, or mark a verdict without hosts."""
+    if health.hosts is None:
+        return _OVERALL
+    return f"{sum(health.hosts.values())}/{len(health.hosts)}"
+
+
+def _host_name_order(name: str) -> list[str | int]:
+    """Sort key ordering the numbers in host names by value, e.g. ip-10-0-0-5 first."""
+    return [int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name)]
+
+
+def _host_line(name: str, *, healthy: bool) -> str:
+    """Describe a host as an indented line: its coloured status, then its name."""
+    status = _status(healthy)
+    padding = " " * (len(_UNHEALTHY) - len(status))
+    return f"  {_highlight(status)}{padding}  {Formatter.escape(name)}"
+
+
+def _is_healthy(status: str) -> bool:
+    """Tell whether a status, possibly followed by a host count, is HEALTHY."""
+    return status.partition(" ")[0] == _HEALTHY
 
 
 def _format_status(healthy: bool | None) -> str:
     """Colour a health verdict or an unreachable server."""
-    status = _status(healthy)
-    return f"<{_STATUS_STYLES[status]}>{status}</>"
+    return _highlight(_status(healthy))
 
 
 def _status(healthy: bool | None) -> str:
@@ -562,6 +695,22 @@ def _status(healthy: bool | None) -> str:
     if healthy is None:
         return _UNREACHABLE
     return _HEALTHY if healthy else _UNHEALTHY
+
+
+def _highlight(text: str) -> str:
+    """Mark up an escaped status line, any other text as an error.
+
+    The status takes its own colour and the host count after it, if any, the
+    host count colour.
+    """
+    match = _STATUS_LINE.fullmatch(text)
+    if match is None:
+        return f"<error>{text}</>"
+    status, host_count = match.groups()
+    coloured_status = f"<{_STATUS_STYLES[status]}>{status}</>"
+    if host_count is None:
+        return coloured_status
+    return f"{coloured_status} <{_HOST_COUNT_STYLE}>{host_count}</>"
 
 
 def _out_of_range_message(

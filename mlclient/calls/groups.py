@@ -21,13 +21,10 @@ It exports 7 classes:
 
 from __future__ import annotations
 
-import json
-import re
 from typing import ClassVar
 
 from mlclient import _constants as constants
 from mlclient import _utils as utils
-from mlclient import exceptions
 from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 
@@ -497,10 +494,10 @@ class GroupPropertiesPutCall(ApiCall):
         body : str | dict
             Group properties in XML or JSON format.
         """
-        self._validate_params(body)
-        content_type = utils.get_content_type_header_for_data(body)
-        if content_type == constants.HEADER_JSON and isinstance(body, str):
-            body = json.loads(body)
+        body, content_type = call_utils.request_body_with_content_type(
+            body,
+            "PUT /manage/v2/groups/{id|name}/properties",
+        )
         super().__init__(method="PUT", content_type=content_type, body=body)
         self._group = group
 
@@ -516,27 +513,3 @@ class GroupPropertiesPutCall(ApiCall):
             A Group Properties call endpoint
         """
         return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._group)
-
-    @classmethod
-    def _validate_params(
-        cls,
-        body: str | dict,
-    ):
-        """Reject missing or blank property documents.
-
-        Parameters
-        ----------
-        body : str | dict
-            Property document to send
-
-        Raises
-        ------
-        WrongParametersError
-            If no request body was provided
-        """
-        if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
-            msg = (
-                "No request body provided for "
-                "PUT /manage/v2/groups/{id|name}/properties!"
-            )
-            raise exceptions.WrongParametersError(msg)

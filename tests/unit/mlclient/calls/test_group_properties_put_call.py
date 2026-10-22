@@ -92,3 +92,16 @@ def test_xml_body():
     )
     call = GroupPropertiesPutCall(group="Default", body=body)
     assert call.body == body
+
+
+@pytest.mark.parametrize("body", ["[]", "[1]", "true", "1", "null", '"value"'])
+def test_validation_rejects_json_without_properties_object(body):
+    with pytest.raises(
+        exceptions.WrongParametersError,
+        match="requires a JSON object",
+    ) as error:
+        GroupPropertiesPutCall(group="Default", body=body)
+
+    assert str(error.value) == (
+        "PUT /manage/v2/groups/{id|name}/properties requires a JSON object or XML body"
+    )

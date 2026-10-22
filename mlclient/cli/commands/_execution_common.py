@@ -37,13 +37,17 @@ def parse_variables(
     Raises
     ------
     WrongParametersError
-        If an option has no ``=`` separating a name from its value.
+        If an option has no ``=`` separating a name from its value, or its
+        name is empty or whitespace only.
     """
     variables = {}
     for option in options:
         name, separator, value = option.partition("=")
         if not separator:
             msg = f"A variable must be passed as name=value, got: {option}"
+            raise WrongParametersError(msg)
+        if not name.strip():
+            msg = "A variable name cannot be empty."
             raise WrongParametersError(msg)
         variables[name] = value
     return variables

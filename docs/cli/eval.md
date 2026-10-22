@@ -42,7 +42,8 @@ Treat `code` as inline JavaScript. Cannot be combined with `--xquery`.
 ### `--var`
 
 Bind an external variable using `name=value`. Repeat the option for several
-variables. Only the first `=` separates the name, so a value may contain `=`.
+variables. Names cannot be empty or whitespace only. Values may be empty;
+only the first `=` separates the name, so a value may contain `=`.
 Values are supplied as strings; convert them in your query as needed.
 For an XQuery variable in a namespace, use its expanded name:
 

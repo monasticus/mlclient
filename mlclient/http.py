@@ -344,7 +344,7 @@ class HTTPConfig:
     def with_health_defaults(self) -> HTTPConfig:
         """Fill unspecified retry and timeout settings for a HealthCheck client.
 
-        Retry defaults to NO_RETRY_STRATEGY and timeout to _HEALTH_TIMEOUT.
+        Retry defaults to NO_RETRY_STRATEGY and timeout to five seconds.
         Each setting is resolved independently. Explicit values, including
         timeout=None, are preserved; host, auth, TLS and limits are unchanged.
 

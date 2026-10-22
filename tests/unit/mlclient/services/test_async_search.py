@@ -4067,3 +4067,53 @@ async def test_inline_cts_query_rejects_invalid_additional_query():
         str(error.value)
         == "additional-query must be an XML string or a list of XML strings"
     )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_async_search_sends_combined_query_with_installed_options():
+    combined = sq.term("blue").to_combined_query(
+        options={"page-length": 3},
+        qtext="coffee",
+    )
+    ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("pageLength", "3")
+    ml_mocker.with_request_param("options", "catalog")
+    ml_mocker.with_request_header("Content-Type", "application/json")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(combined)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+    async with AsyncMLClient() as ml:
+        result = await ml.search(options="catalog").documents(combined)
+    assert result == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"query": {"term-query": {"text": "blue"}}},
+        {"ctsquery": {"wordQuery": {"text": "blue"}}},
+    ],
+    ids=["structured-json", "cts-json"],
+)
+@respx.mock
+async def test_async_search_accepts_raw_query_json(query):
+    ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Content-Type", "application/json")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body({"search": query})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        documents = await ml.search.documents(query)
+
+    assert documents == []

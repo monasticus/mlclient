@@ -5,7 +5,7 @@ from xml.etree.ElementTree import Element as XmlElement
 import pytest
 
 from mlclient.search import options
-from mlclient.search.options import Range, SearchOptionsBuilder, opt
+from mlclient.search.options import Range, opt
 from mlclient.search.structured import Attribute, Element, JsonProperty
 
 PRICE_RANGE = Range(Element("price"), "xs:decimal")
@@ -14,11 +14,6 @@ NATIVE_ELEMENT = XmlElement(f"{{{SEARCH_NAMESPACE}}}return-metrics")
 NATIVE_ELEMENT.text = "false"
 
 
-@pytest.mark.parametrize(
-    "builder",
-    [opt, SearchOptionsBuilder()],
-    ids=["opt", "instance"],
-)
 @pytest.mark.parametrize(
     ("build", "expected"),
     [
@@ -191,8 +186,8 @@ NATIVE_ELEMENT.text = "false"
         ),
     ],
 )
-def test_builder_factories_preserve_constructor_arguments(builder, build, expected):
-    assert build(builder) == expected
+def test_builder_factories_preserve_constructor_arguments(build, expected):
+    assert build(opt) == expected
 
 
 def test_builder_composes_reusable_option_groups():

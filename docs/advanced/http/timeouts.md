@@ -53,8 +53,8 @@ setting. An override does not change later calls.
 | REST, Manage, Admin | 5 s | 60 s | 60 s | 5 s |
 | Health | 5 s | 5 s | 5 s | 5 s |
 
-A directly created [`MLClient`][mlclient.MLClient] derives Health with `_HEALTH_TIMEOUT`, independently
-of the primary timeout. An explicit `health_config` timeout or request override
+A directly created [`MLClient`][mlclient.MLClient] uses a five-second timeout for each Health
+component, independently of the primary timeout. An explicit `health_config` timeout or request override
 changes it. A manager's explicit timeout applies to every server, including
 Health.
 

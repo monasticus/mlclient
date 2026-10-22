@@ -34,6 +34,7 @@ instead of raw CTS JSON; see the [lexicon restriction](../advanced/queries.md#co
 
 ```python
 from mlclient import MLClient
+from mlclient.search.options import opt
 from mlclient.xquery import cts
 from mlclient.search.structured import sq
 
@@ -159,7 +160,7 @@ Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
 values or tuples definition. It returns the parsed result, not a [`ValueHit`][mlclient.models.ValueHit]:
 
 ```python
-options = opt.options(opt.values("price", Range(Element("price"), "xs:decimal")))
+options = opt.options(opt.values("price", opt.range(sq.element("price"), "xs:decimal")))
 
 with MLClient() as ml:
     prices = ml.search(options=options)
@@ -194,8 +195,8 @@ the lexicon. A missing value returns `None`.
 options = opt.options(
     opt.tuples(
         "price-day",
-        Range(Element("price"), "xs:decimal"),
-        Range(Element("day"), "xs:date"),
+        opt.range(sq.element("price"), "xs:decimal"),
+        opt.range(sq.element("day"), "xs:date"),
     )
 )
 
@@ -298,11 +299,13 @@ with MLClient() as ml:
 ### Combine a query, options and text
 
 Call `to_combined_query(options=..., qtext=...)` on a structured or CTS query
-and pass the result to a search operation:
+and pass the result to a search operation. `options` accepts either an inline
+dictionary or a [SearchOptions][mlclient.search.options.SearchOptions] object
+built with `opt.options(...)`:
 
 ```python
 combined = sq.collection("products").to_combined_query(
-    options={"page-length": 20},
+    options=opt.options(opt.page_length(20)),
     qtext="coffee",
 )
 

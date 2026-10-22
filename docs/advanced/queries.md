@@ -107,7 +107,10 @@ with MLClient() as ml:
     documents = ml.search.documents(combined)
 ```
 
-`to_combined_query()` returns a fresh `{"search": {...}}` dictionary. Structured
+`to_combined_query(options=..., qtext=...)` accepts an inline options dictionary
+or a [SearchOptions][mlclient.search.options.SearchOptions] object, including the
+result of `opt.options(...)`, for both structured and CTS queries.
+It returns a fresh `{"search": {...}}` dictionary. Structured
 queries go under `query` (wrapped in [Query][mlclient.search.structured.Query]
 when needed), CTS queries under `ctsquery`, and `options` and `qtext` alongside
 them inside `search`. Mutating the result does not change the query or supplied

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import date
 from decimal import Decimal
 
@@ -3983,4 +3984,203 @@ def test_inline_cts_query_rejects_invalid_additional_query():
     assert (
         str(error.value)
         == "additional-query must be an XML string or a list of XML strings"
+    )
+
+
+@pytest.mark.parametrize(
+    "query",
+    [sq.term("blue"), cts.word_query("blue")],
+    ids=["structured", "cts"],
+)
+@respx.mock
+def test_search_sends_combined_query_with_scope_defaults(query):
+    combined = query.to_combined_query(options={"page-length": 3}, qtext="coffee")
+    expected = deepcopy(combined)
+    expected["search"]["options"]["return-facets"] = False
+    before = deepcopy(combined)
+    ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("pageLength", "3")
+    ml_mocker.with_request_header("Content-Type", "application/json")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(expected)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+    with MLClient() as ml:
+        result = ml.search(
+            options={"page-length": 8, "return-facets": False},
+        ).documents(combined)
+    assert result == []
+    assert combined == before
+
+
+@pytest.mark.parametrize(
+    ("query", "message"),
+    [
+        (
+            {"unsupported": {}},
+            (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            ),
+        ),
+        (
+            {"search": []},
+            (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            ),
+        ),
+        (
+            {"search": {}, "qtext": "coffee"},
+            (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            ),
+        ),
+        (
+            {"search": {"options": "catalog"}},
+            "combined query options must be a dictionary",
+        ),
+    ],
+    ids=["unknown-root", "non-dict-search", "outer-qtext", "non-dict-options"],
+)
+def test_search_rejects_invalid_combined_query(query, message):
+    with MLClient() as ml, pytest.raises(TypeError) as error:
+        ml.search.documents(query)
+    assert str(error.value) == message
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"ctsquery": {"wordQuery": {"text": "blue"}}},
+        cts.word_query("blue").to_combined_query(qtext="coffee"),
+    ],
+    ids=["cts-json", "combined-json"],
+)
+def test_values_rejects_raw_cts_json(query):
+    with MLClient() as ml, pytest.raises(TypeError) as error:
+        ml.search.values("price", query)
+    assert str(error.value) == (
+        "raw CTS JSON cannot filter lexicon operations; pass a CTS query object instead"
+    )
+
+
+@respx.mock
+def test_values_sends_combined_structured_query():
+    options = {"values": [{"name": "uris", "uri": {}}]}
+    combined = sq.term("blue").to_combined_query(options=options, qtext="coffee")
+    ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
+    ml_mocker.with_url("http://localhost:8000/v1/values/uris")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "values")
+    ml_mocker.with_request_header("Content-Type", "application/json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_request_body(combined)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(
+        {"values-response": {"name": "uris", "type": "xs:string"}},
+    )
+    ml_mocker.mock_post()
+    with MLClient() as ml:
+        assert ml.search.values("uris", combined) == []
+
+
+@pytest.mark.parametrize(
+    ("override", "expected_options", "url_options", "page_length"),
+    [
+        ({"page-length": 2}, {"page-length": 2, "return-facets": False}, None, "2"),
+        (
+            opt.options(opt.word_constraint("title", Element("title"))),
+            {
+                "page-length": 3,
+                "return-facets": False,
+                "constraint": [
+                    {"name": "title", "word": {"element": {"name": "title", "ns": ""}}},
+                ],
+            },
+            None,
+            "3",
+        ),
+        (None, None, None, None),
+        ("request-options", {"page-length": 3}, "request-options", "3"),
+    ],
+    ids=["inline", "builder", "clear", "installed"],
+)
+@respx.mock
+def test_request_scope_options_override_combined_query_and_service(
+    override,
+    expected_options,
+    url_options,
+    page_length,
+):
+    combined = sq.term("blue").to_combined_query(options={"page-length": 3})
+    expected = {"search": {"query": {"queries": [{"term-query": {"text": ["blue"]}}]}}}
+    if expected_options is not None:
+        expected["search"]["options"] = expected_options
+    params = {"format": "json"}
+    if page_length is not None:
+        params["pageLength"] = page_length
+    if url_options is not None:
+        params["options"] = url_options
+    ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    for name, value in params.items():
+        ml_mocker.with_request_param(name, value)
+    ml_mocker.with_request_body(expected)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        documents = ml.search(
+            options={"page-length": 8, "return-facets": False},
+        ).documents(
+            combined,
+            scope=SearchScope(options=override),
+        )
+
+    assert documents == []
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"query": {"term-query": {"text": "blue"}}},
+        {"ctsquery": {"wordQuery": {"text": "blue"}}},
+    ],
+    ids=["structured-json", "cts-json"],
+)
+@respx.mock
+def test_search_accepts_raw_query_json_with_scope_options(query):
+    before = deepcopy(query)
+    expected = {"search": {**query, "options": {"page-length": 5}}}
+    ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
+    ml_mocker.with_url("http://localhost:8000/v1/search")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("pageLength", "5")
+    ml_mocker.with_request_header("Content-Type", "application/json")
+    ml_mocker.with_request_header("Accept", "multipart/mixed")
+    ml_mocker.with_request_body(expected)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        documents = ml.search(options={"page-length": 5}).documents(query)
+
+    assert documents == []
+    assert query == before
+
+
+@pytest.mark.parametrize("query", [{"query": []}, {"ctsquery": []}, {}])
+def test_search_rejects_invalid_raw_query_json(query):
+    with MLClient() as ml, pytest.raises(TypeError) as error:
+        ml.search.documents(query)
+    assert str(error.value) == (
+        "query dictionary must contain exactly one search, query or ctsquery dictionary"
     )

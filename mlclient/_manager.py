@@ -124,7 +124,7 @@ class MLClientManager:
         restores the selected server's default, overriding a manager strategy.
 
         Retry and timeout resolve independently. Without an explicit timeout,
-        health uses _HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        health uses a five-second timeout and other servers use DEFAULT_TIMEOUT. A
         manager timeout applies to every server including health; timeout=None
         at any level disables every HTTP timeout, while timeout=UNSET in this
         call inherits the manager value rather than clearing it.
@@ -185,7 +185,7 @@ class MLClientManager:
         restores the selected server's default, overriding a manager strategy.
 
         Retry and timeout resolve independently. Without an explicit timeout,
-        health uses _HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        health uses a five-second timeout and other servers use DEFAULT_TIMEOUT. A
         manager timeout applies to every server including health; timeout=None
         at any level disables every HTTP timeout, while timeout=UNSET in this
         call inherits the manager value rather than clearing it.
@@ -248,7 +248,7 @@ class MLClientManager:
         restores the selected server's default, overriding a manager strategy.
 
         Retry and timeout resolve independently. Without an explicit timeout,
-        health uses _HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        health uses a five-second timeout and other servers use DEFAULT_TIMEOUT. A
         manager timeout applies to every server including health; timeout=None
         at any level disables every HTTP timeout, while timeout=UNSET in this
         call inherits the manager value rather than clearing it.
@@ -309,7 +309,7 @@ class MLClientManager:
         restores the selected server's default, overriding a manager strategy.
 
         Retry and timeout resolve independently. Without an explicit timeout,
-        health uses _HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        health uses a five-second timeout and other servers use DEFAULT_TIMEOUT. A
         manager timeout applies to every server including health; timeout=None
         at any level disables every HTTP timeout, while timeout=UNSET in this
         call inherits the manager value rather than clearing it.
@@ -363,7 +363,7 @@ class MLClientManager:
         restores the selected server's default, overriding a manager strategy.
 
         Retry and timeout resolve independently. Without an explicit timeout,
-        health uses _HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        health uses a five-second timeout and other servers use DEFAULT_TIMEOUT. A
         manager timeout applies to every server including health; timeout=None
         at any level disables every HTTP timeout, while timeout=UNSET in this
         call inherits the manager value rather than clearing it.
@@ -423,7 +423,7 @@ class MLClientManager:
         restores the selected server's default, overriding a manager strategy.
 
         Retry and timeout resolve independently. Without an explicit timeout,
-        health uses _HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        health uses a five-second timeout and other servers use DEFAULT_TIMEOUT. A
         manager timeout applies to every server including health; timeout=None
         at any level disables every HTTP timeout, while timeout=UNSET in this
         call inherits the manager value rather than clearing it.

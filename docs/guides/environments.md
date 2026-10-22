@@ -51,16 +51,42 @@ with manager.get_client() as ml:
     print(ml.eval.xquery('"Hello World!"'))
 ```
 
+### Choose a client
+
+Reuse the manager to create clients for different tasks. Each factory call creates
+a separate client; leaving its `with` block closes that client, and the manager
+remains available for later calls.
+
+| Factory | Returns | Use it for |
+| --- | --- | --- |
+| [`get_client()`][mlclient.MLClientManager.get_client] | [`MLClient`][mlclient.MLClient] | Services and API wrappers; omit the identifier for the first REST connection |
+| [`get_async_client()`][mlclient.MLClientManager.get_async_client] | [`AsyncMLClient`][mlclient.AsyncMLClient] | The same operations with `await`; also defaults to the first REST connection |
+| [`get_http_client(id)`][mlclient.MLClientManager.get_http_client] | [`HttpClient`][mlclient.clients.HttpClient] | Raw HTTP requests to one connection |
+| [`get_async_http_client(id)`][mlclient.MLClientManager.get_async_http_client] | [`AsyncHttpClient`][mlclient.clients.AsyncHttpClient] | Raw HTTP requests with `await` |
+| [`get_config(id)`][mlclient.MLClientManager.get_config] | [`HTTPConfig`][mlclient.http.HTTPConfig] | Resolve settings without creating a client or opening a connection |
+
 The predefined `app-services`, `manage`, `admin` and `health` connections are
-always available even when the file does not list them, so you can select one by
-id without declaring it:
+always available, even when the YAML file does not list them. For example,
+use the same manager for a raw Manage request and an async search:
 
 ```python
-with manager.get_client("app-services") as ml:
-    print(ml.eval.xquery('"Hello World!"'))
+with manager.get_http_client("manage") as http:
+    response = http.get("/manage/v2/databases", params={"format": "json"})
+    response.raise_for_status()
+
+async def find_documents():
+    async with manager.get_async_client() as ml:
+        return await ml.search.documents("coffee")
 ```
 
-Use `get_async_client()` in async code; see [async support](async.md).
+For configuration alone:
+
+```python
+config = manager.get_config("content")
+```
+
+See [async support](async.md) for running async code and
+[more on environments](../advanced/more-on-environments.md) for configuration overrides.
 
 ## Use it from the CLI
 

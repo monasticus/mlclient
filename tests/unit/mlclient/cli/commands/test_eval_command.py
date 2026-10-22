@@ -347,3 +347,15 @@ def _get_tester(
     app = MLCLIentApplication()
     command = app.find(command_name)
     return CommandTester(command)
+
+
+@pytest.mark.parametrize("variable", ["=value", "   =value"])
+@respx.mock
+def test_command_eval_rejects_blank_variable_names_before_request(variable):
+    tester = _get_tester("eval")
+
+    with pytest.raises(WrongParametersError, match="name cannot be empty") as error:
+        tester.execute(f"-x 1 --var '{variable}'")
+
+    assert str(error.value) == "A variable name cannot be empty."
+    assert not respx.calls

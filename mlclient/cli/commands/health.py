@@ -373,7 +373,7 @@ class _WatchTable:
         self._environments = environments
         self._kept_rows = kept_rows
         self._finished_rows: deque[list[str]] = deque(
-            maxlen=None if kept_rows is None else kept_rows - 1,
+            maxlen=0 if kept_rows is None else kept_rows - 1,
         )
         self._section = output.section()
         self._header_printed = False

@@ -230,6 +230,7 @@ async def run_all(
     while not all_finished.done():
         refresh(time.perf_counter() - started)
         await asyncio.wait([all_finished], timeout=_REFRESH_INTERVAL_SECONDS)
+    await all_finished
 
 
 async def _run(
@@ -254,6 +255,7 @@ async def _run(
     started = time.perf_counter()
     try:
         answer = await request(run.environment)
+        output = describe(answer)
     except Exception as error:
         run.elapsed = time.perf_counter() - started
         run.error = error
@@ -261,7 +263,7 @@ async def _run(
         run.style = getattr(error, "style", _ERROR_STYLE)
     else:
         run.elapsed = time.perf_counter() - started
-        run.output = describe(answer)
+        run.output = output
         run.style = answer_style
 
 

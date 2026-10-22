@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import asyncio
 import errno
+import os
 from pathlib import Path
 
 import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, Response
 
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
@@ -448,3 +450,77 @@ def _get_tester():
     app = MLCLIentApplication()
     command = app.find("http")
     return CommandTester(command)
+
+
+@respx.mock
+def test_command_http_multi_environment_records_formatting_failure(mocker):
+    route = respx.get("http://localhost:8002/manage/v2/hosts").respond(200)
+    tester = _get_tester()
+    mocker.patch.object(
+        tester.command,
+        "_render",
+        side_effect=[ValueError("Cannot format response"), "peer response"],
+    )
+
+    assert tester.execute("-e first -e second GET /manage/v2/hosts") == 1
+    output = tester.io.fetch_output()
+    assert "Cannot format response" in output
+    assert "peer response" in output
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_command_http_multi_environment_deduplicates_and_preserves_literal_output():
+    route = respx.get("http://localhost:8002/manage/v2/hosts").respond(
+        200,
+        text="<info>literal</info>",
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second -e first GET /manage/v2/hosts") == 0
+    output = tester.io.fetch_output()
+    assert output.count("<info>literal</info>") == 2
+    assert "first" in output
+    assert "second" in output
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_command_http_multi_environment_reports_http_errors_on_numeric_connection():
+    route = respx.get("http://localhost:8100/manage/v2/hosts").respond(
+        400,
+        text="temporarily unavailable",
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second -c 8100 GET /manage/v2/hosts") == 1
+    assert tester.io.fetch_output().count("temporarily unavailable") == 2
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_command_http_multi_environment_keeps_full_final_output(mocker):
+    mocker.patch(
+        "mlclient.cli.commands._multi_env_common.shutil.get_terminal_size",
+        return_value=os.terminal_size((120, 12)),
+    )
+    delays = iter([0, 0.15])
+    body = "\n".join([*(f"line {index}" for index in range(20)), "final line"])
+
+    async def respond(_request):
+        await asyncio.sleep(next(delays))
+        return Response(200, text=body)
+
+    respx.get("http://localhost:8002/manage/v2/hosts").mock(side_effect=respond)
+    tester = _get_tester()
+
+    assert (
+        tester.execute(
+            "-e first -e second GET /manage/v2/hosts",
+            decorated=True,
+        )
+        == 0
+    )
+    output = tester.io.fetch_output()
+    assert "more lines" in output
+    assert "final line" in output

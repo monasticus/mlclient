@@ -7,9 +7,11 @@ import pytest
 import respx
 from cleo.io.outputs.output import Verbosity
 from cleo.testers.command_tester import CommandTester
+from httpx import ConnectError
 
 from mlclient import AsyncMLClient, MLClient
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands import health
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from mlclient.models import ClusterHealth
@@ -556,3 +558,71 @@ def _get_tester() -> CommandTester:
     app = MLCLIentApplication()
     command = app.find("health")
     return CommandTester(command)
+
+
+@pytest.mark.parametrize("overwrite", [False, True])
+@pytest.mark.parametrize("decorated", [False, True])
+@respx.mock
+def test_command_health_multi_environment_watch_retains_only_repainted_rows(
+    mocker,
+    overwrite,
+    decorated,
+):
+    respx.head(HEALTH_URL).respond(200)
+    mocker.patch.object(health.asyncio, "sleep", side_effect=[None, KeyboardInterrupt])
+    retained_rows = []
+    finish = health._WatchTable.finish
+
+    def record_history(table, started_at, runs):
+        finish(table, started_at, runs)
+        retained_rows.append(len(table._finished_rows))
+
+    mocker.patch.object(health._WatchTable, "finish", record_history)
+    tester = _get_tester()
+    options = " --overwrite --lines 2" if overwrite else ""
+
+    assert (
+        tester.execute(
+            f"-e first -e second --watch{options}",
+            decorated=decorated,
+        )
+        == 0
+    )
+    assert retained_rows == ([1, 1] if overwrite and decorated else [0, 0])
+    output = tester.io.fetch_output()
+    assert "first" in output
+    assert "second" in output
+    assert "HEALTHY" in output
+
+
+@pytest.mark.parametrize("status_code", [200, 503])
+@respx.mock
+def test_command_health_multi_environment_reports_each_verdict(status_code):
+    respx.head(HEALTH_URL).respond(status_code)
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second") == (0 if status_code == 200 else 1)
+    status = "HEALTHY" if status_code == 200 else "UNHEALTHY"
+    assert tester.io.fetch_output().count(status) == 2
+
+
+@respx.mock
+def test_command_health_multi_environment_reports_unreachable():
+    respx.head(HEALTH_URL).mock(side_effect=ConnectError("server unreachable"))
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second") == 1
+    assert tester.io.fetch_output().count("UNREACHABLE") == 2
+
+
+@respx.mock
+def test_command_health_multi_environment_escapes_configuration_error(mocker):
+    mocker.patch(
+        "mlclient.env.MLEnvironment.load",
+        side_effect=WrongParametersError("Missing environment <info>demo</info>"),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second") == 1
+    assert tester.io.fetch_output().count("<info>demo</info>") == 2
+    assert not respx.calls

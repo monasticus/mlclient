@@ -329,3 +329,20 @@ def _get_tester(
     app = MLCLIentApplication()
     command = app.find(command_name)
     return CommandTester(command)
+
+
+@respx.mock
+def test_command_eval_runs_in_each_selected_environment():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "hello")
+    route = ml_mocker.mock_post()
+    tester = _get_tester("eval")
+
+    assert tester.execute("-e first -e second -x 1") == 0
+    output = tester.io.fetch_output()
+    assert "first" in output
+    assert "second" in output
+    assert output.count("hello") == 2
+    assert route.call_count == 2

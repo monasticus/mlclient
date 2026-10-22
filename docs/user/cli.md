@@ -60,6 +60,19 @@ A connection selector chooses where the request is sent; an operation target
 chooses what the server acts on. The distinction is explained below and on each
 command page.
 
+## Compare environments
+
+Repeat `-e` with `eval`, `http`, `sample`, `health`, `version` or `url`:
+
+```sh
+ml health -e dev -e test
+ml version -e dev -e test
+```
+
+Request commands run concurrently and show a result column per environment.
+Any failed environment gives exit status 1; successful peers remain visible.
+Explicit names replace `local` and repeated names are used once.
+
 ## Find a command
 
 | Task | Command |

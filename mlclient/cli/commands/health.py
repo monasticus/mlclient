@@ -456,7 +456,7 @@ class _WatchTable:
         self._kept_rows = kept_rows
         self._cell_width = cell_width
         self._finished_rows: deque[list[str]] = deque(
-            maxlen=None if kept_rows is None else kept_rows - 1,
+            maxlen=0 if kept_rows is None else kept_rows - 1,
         )
         self._section = output.section()
         self._header_printed = False

@@ -184,3 +184,16 @@ def test_output_escapes_environment_markup(
     assert "<error>host</error>:8001" in output
     assert "\x1b[31m" not in output
     clipboard_process.assert_called_once()
+
+
+def test_multi_environment_target_copies_every_url_once(mocker):
+    copy = mocker.patch("mlclient.cli.commands.url.copy_to_clipboard")
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second -e first qc") == 0
+    copy.assert_called_once_with(
+        "https://ml.example.com:8000/qconsole\nhttps://ml.example.com:8000/qconsole",
+    )
+    output = tester.io.fetch_output()
+    assert "first" in output
+    assert "second" in output

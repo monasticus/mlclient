@@ -613,3 +613,16 @@ def test_command_health_multi_environment_reports_unreachable():
 
     assert tester.execute("-e first -e second") == 1
     assert tester.io.fetch_output().count("UNREACHABLE") == 2
+
+
+@respx.mock
+def test_command_health_multi_environment_escapes_configuration_error(mocker):
+    mocker.patch(
+        "mlclient.env.MLEnvironment.load",
+        side_effect=WrongParametersError("Missing environment <info>demo</info>"),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second") == 1
+    assert tester.io.fetch_output().count("<info>demo</info>") == 2
+    assert not respx.calls

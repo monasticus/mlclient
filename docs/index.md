@@ -38,6 +38,11 @@ hosts, async usage and CLI setup.
 `ml.rest.documents` and `ml.http`. [The CLI guide](cli/index.md) gets a project
 connected without writing Python. [Recipes](recipes.md) show metadata cleanup,
 concurrent evaluations and a custom application API.
+Repeat `-e` to compare environments with `eval`, `http`, `sample`, `health`,
+`version` or `url`, for example `ml health -e dev -e test`.
+
+CLI `eval`, `invoke`, `http` and `sample` pretty-print XML and JSON with two-space indentation;
+`--no-pretty` keeps the original formatting.
 
 ## From simple usage to application-specific control
 

@@ -301,3 +301,20 @@ def test_command_sample_empty_path():
 
 def _get_tester() -> CommandTester:
     return CommandTester(MLCLIentApplication().find("sample"))
+
+
+@respx.mock
+def test_command_sample_runs_in_each_selected_environment():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8100/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", "<order/>")
+    route = ml_mocker.mock_post()
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second order") == 0
+    output = tester.io.fetch_output()
+    assert "first" in output
+    assert "second" in output
+    assert output.count("<order/>") == 2
+    assert route.call_count == 2

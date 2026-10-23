@@ -35,7 +35,8 @@ class TestDocumentsWithReport:
         ml, database, _ = indexed_database
         options = opt.options(
             opt.range_constraint(
-                "price", opt.range_(sq.element("price", NS), "xs:decimal"),
+                "price",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
             ),
         )
         report, documents = ml.search(

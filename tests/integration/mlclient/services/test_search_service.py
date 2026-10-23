@@ -455,7 +455,8 @@ class TestSearchService:
         ml, database, _ = indexed_database
         options = opt.options(
             opt.range_constraint(
-                "price", opt.range_(sq.element("price", NS), "xs:decimal"),
+                "price",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
             ),
         )
 
@@ -559,7 +560,9 @@ class TestSearchService:
         ml, database, _ = indexed_database
         as_boolean = opt.options(
             opt.value_constraint(
-                "active", sq.json_property("active"), node_type="boolean",
+                "active",
+                sq.json_property("active"),
+                node_type="boolean",
             ),
         )
         as_string = opt.options(
@@ -606,7 +609,8 @@ class TestSearchService:
         ml, database, _ = indexed_database
         options = opt.options(
             opt.range_constraint(
-                "price", opt.range_(sq.element("price", NS), "xs:decimal"),
+                "price",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
             ),
             opt.word_constraint("label", sq.element("label", NS), options="unstemmed"),
             opt.value_constraint("name", sq.json_property("label")),

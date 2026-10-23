@@ -1,0 +1,25 @@
+{
+  "options": {
+    "transform-results": {
+      "apply": "snippet",
+      "preferred-matches": {
+        "element": [
+          {
+            "ns": "",
+            "name": "title"
+          },
+          {
+            "ns": "",
+            "name": "summary"
+          }
+        ],
+        "json-property": [
+          "title"
+        ]
+      },
+      "per-match-tokens": 12,
+      "max-matches": 2,
+      "max-snippet-chars": 100
+    }
+  }
+}

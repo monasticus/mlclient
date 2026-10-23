@@ -1,0 +1,38 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "title",
+        "word": {
+          "element": {
+            "name": "title",
+            "ns": ""
+          },
+          "fragment-scope": "properties",
+          "weight": 0.5,
+          "term-option": [
+            "case-insensitive"
+          ]
+        },
+        "annotation": [
+          "Title"
+        ]
+      },
+      {
+        "name": "active",
+        "value": {
+          "type": "boolean",
+          "json-property": "active",
+          "fragment-scope": "documents",
+          "weight": 0,
+          "term-option": [
+            "exact"
+          ]
+        },
+        "annotation": [
+          "Active"
+        ]
+      }
+    ]
+  }
+}

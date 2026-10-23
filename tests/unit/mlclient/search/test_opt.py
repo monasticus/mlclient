@@ -1,6 +1,7 @@
 """Options constructor aliases compose immutable model components."""
 
 from xml.etree.ElementTree import Element as XmlElement
+from xml.etree.ElementTree import tostring
 
 import pytest
 
@@ -210,3 +211,137 @@ def test_opt_rejects_invalid_page_length():
     with pytest.raises(ValueError, match="page length must be positive") as error:
         opt.page_length(0)
     assert str(error.value) == "page length must be positive"
+
+
+@pytest.mark.parametrize(
+    ("alias", "model"),
+    [
+        (opt.additional_query, options.AdditionalQuery),
+        (opt.aggregate, options.Aggregate),
+        (opt.anchor, options.Anchor),
+        (opt.annotation, options.Annotation),
+        (opt.bucket, options.Bucket),
+        (opt.callback, options.Callback),
+        (opt.collection, options.Collection),
+        (opt.collection_constraint, options.CollectionConstraint),
+        (opt.computed_bucket, options.ComputedBucket),
+        (opt.concurrency_level, options.ConcurrencyLevel),
+        (opt.constraint_value, options.ConstraintValue),
+        (opt.container_constraint, options.ContainerConstraint),
+        (opt.control, options.Control),
+        (opt.custom_constraint, options.CustomConstraint),
+        (opt.debug, options.Debug),
+        (opt.default_suggestion_source, options.DefaultSuggestionSource),
+        (opt.element_query_constraint, options.ElementQueryConstraint),
+        (opt.extract_document_data, options.ExtractDocumentData),
+        (opt.extract_metadata, options.ExtractMetadata),
+        (opt.forest, options.Forest),
+        (opt.fragment_scope, options.FragmentScope),
+        (opt.geo_attribute_pair, options.GeoAttributePair),
+        (opt.geo_constraint, options.GeoConstraint),
+        (opt.geo_element, options.GeoElement),
+        (opt.geo_element_pair, options.GeoElementPair),
+        (opt.geo_json_property, options.GeoJsonProperty),
+        (opt.geo_json_property_pair, options.GeoJsonPropertyPair),
+        (opt.geo_path, options.GeoPath),
+        (opt.geo_region_path, options.GeoRegionPath),
+        (opt.grammar, options.Grammar),
+        (opt.heatmap, options.Heatmap),
+        (opt.implicit, options.Implicit),
+        (opt.joiner, options.Joiner),
+        (opt.metadata_qname, options.MetadataQName),
+        (opt.native, options.NativeOptions),
+        (opt.native_option, options.NativeOption),
+        (opt.operator, options.Operator),
+        (opt.operator_state, options.OperatorState),
+        (opt.options, options.SearchOptions),
+        (opt.page_length, options.PageLength),
+        (opt.preferred_matches, options.PreferredMatches),
+        (opt.properties_constraint, options.PropertiesConstraint),
+        (opt.quality_weight, options.QualityWeight),
+        (opt.range_, options.Range),
+        (opt.range_constraint, options.RangeConstraint),
+        (opt.result_decorator, options.ResultDecorator),
+        (opt.return_aggregates, options.ReturnAggregates),
+        (opt.return_constraints, options.ReturnConstraints),
+        (opt.return_facets, options.ReturnFacets),
+        (opt.return_frequencies, options.ReturnFrequencies),
+        (opt.return_metrics, options.ReturnMetrics),
+        (opt.return_plan, options.ReturnPlan),
+        (opt.return_qtext, options.ReturnQtext),
+        (opt.return_query, options.ReturnQuery),
+        (opt.return_results, options.ReturnResults),
+        (opt.return_similar, options.ReturnSimilar),
+        (opt.return_values, options.ReturnValues),
+        (opt.search_option, options.SearchOptionString),
+        (opt.searchable_expression, options.SearchableExpression),
+        (opt.sort, options.SortOrder),
+        (opt.starter, options.Starter),
+        (opt.suggestion_source, options.SuggestionSource),
+        (opt.term, options.Term),
+        (opt.term_default, options.TermDefault),
+        (opt.transform_results, options.TransformResults),
+        (opt.tuples, options.Tuples),
+        (opt.value, options.Value),
+        (opt.value_constraint, options.ValueConstraint),
+        (opt.values, options.Values),
+        (opt.word, options.Word),
+        (opt.word_constraint, options.WordConstraint),
+        (opt.word_lexicon, options.WordLexicon),
+    ],
+)
+def test_constructor_alias_is_the_model(alias, model):
+    assert alias is model
+
+
+def test_nested_constructor_aliases_define_facets_snippets_and_operator_states():
+    actual = opt.options(
+        opt.range_constraint(
+            "price",
+            opt.range_(
+                JsonProperty("price"),
+                "xs:decimal",
+                buckets=[opt.bucket("low", "Under ten", lt="10")],
+            ),
+        ),
+        opt.transform_results(
+            preferred_matches=opt.preferred_matches([JsonProperty("title")]),
+            max_matches=2,
+        ),
+        opt.operator(
+            "sort",
+            [
+                opt.operator_state(
+                    "relevance",
+                    opt.options(opt.sort("score", direction="descending")),
+                ),
+            ],
+        ),
+    )
+    expected = options.SearchOptions(
+        options.RangeConstraint(
+            "price",
+            options.Range(
+                JsonProperty("price"),
+                "xs:decimal",
+                buckets=[options.Bucket("low", "Under ten", lt="10")],
+            ),
+        ),
+        options.TransformResults(
+            preferred_matches=options.PreferredMatches([JsonProperty("title")]),
+            max_matches=2,
+        ),
+        options.Operator(
+            "sort",
+            [
+                options.OperatorState(
+                    "relevance",
+                    options.SearchOptions(
+                        options.SortOrder("score", direction="descending"),
+                    ),
+                ),
+            ],
+        ),
+    )
+    assert actual.to_json() == expected.to_json()
+    assert tostring(actual.to_xml()) == tostring(expected.to_xml())

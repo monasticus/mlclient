@@ -1,4 +1,4 @@
 {
   "type": "TypeError",
-  "message": "tuples indexes must be Range instances"
+  "message": "tuples indexes must be Range, geospatial, Collection, uri or collection definitions"
 }

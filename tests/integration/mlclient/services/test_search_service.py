@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import date
 from decimal import Decimal
 from uuid import uuid4
@@ -796,3 +797,236 @@ class TestSearchService:
 
         with pytest.raises(MarkLogicError, match="REST-INVALIDPARAM"):
             ml.search(database=database, options=values_options).values("missing")
+
+
+class TestExtendedSearchOptions:
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_additional_query_and_typed_controls(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.additional_query(cts.document_query(URIS[0])),
+            opt.concurrency_level(2),
+            opt.quality_weight(0),
+            opt.fragment_scope("documents"),
+            opt.search_option("filtered"),
+            opt.return_query(True),
+            opt.return_qtext(True),
+            opt.return_metrics(False),
+            opt.return_facets(False),
+            opt.transform_results("empty-snippet"),
+        )
+        report = _options_report(ml, database, options, "alpha OR beta", output_format)
+        assert report["total"] == 1
+        assert [result["uri"] for result in report["results"]] == [URIS[0]]
+        assert report["qtext"] == "alpha OR beta"
+        assert "query" in report
+        assert "metrics" not in report
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_fixed_bucket_facets(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.range_constraint(
+                "price",
+                opt.range_(
+                    sq.element("price", NS),
+                    "xs:decimal",
+                    buckets=[
+                        opt.bucket("low", "Under two", lt="2"),
+                        opt.bucket("high", "Two or more", ge="2"),
+                    ],
+                ),
+                annotation="Price bands",
+            ),
+            opt.return_constraints(True),
+        )
+        report = _options_report(ml, database, options, "alpha OR beta", output_format)
+        assert report["total"] == 2
+        assert report["facets"]["price"]["facetValues"] == [
+            {"name": "low", "value": "Under two", "count": 1},
+            {"name": "high", "value": "Two or more", "count": 1},
+        ]
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_operator_state_changes_sort_order(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.operator(
+                "sort",
+                [
+                    opt.operator_state(
+                        "price",
+                        opt.options(
+                            opt.sort(
+                                opt.range_(sq.element("price", NS), "xs:decimal"),
+                                direction="descending",
+                            ),
+                            opt.page_length(1),
+                        ),
+                    ),
+                ],
+            ),
+        )
+        report = _options_report(
+            ml,
+            database,
+            options,
+            "(alpha OR beta) sort:price",
+            output_format,
+        )
+        assert report["total"] == 2
+        assert [result["uri"] for result in report["results"]] == [URIS[1]]
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_default_term_targets_xml_values(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.term(
+                opt.term_default(opt.value(sq.element("label", NS))),
+                empty="no-results",
+            ),
+        )
+        report = _options_report(ml, database, options, "alpha", output_format)
+        assert [result["uri"] for result in report["results"]] == [URIS[0]]
+        assert (
+            _options_report(ml, database, options, "gamma", output_format)["total"] == 0
+        )
+
+    @pytest.mark.parametrize(
+        "index",
+        [
+            opt.geo_element(sq.element("location", NS), sq.element("point", NS)),
+            opt.geo_element_pair(
+                sq.element("location", NS),
+                sq.element("lat", NS),
+                sq.element("lon", NS),
+            ),
+            opt.geo_attribute_pair(
+                sq.element("item", NS),
+                sq.attribute("lat"),
+                sq.attribute("lon"),
+            ),
+        ],
+        ids=["element", "element-pair", "attribute-pair"],
+    )
+    def test_named_geospatial_constraints(self, indexed_database, index):
+        ml, database, _ = indexed_database
+        options = opt.options(opt.geo_constraint("place", index))
+        documents = ml.search(database=database, options=options).documents(
+            sq.geospatial_constraint("place", sq.box(5, 15, 15, 25)),
+        )
+        assert [document.uri for document in documents] == [URIS[0]]
+
+    def test_mixed_tuple_indexes_preserve_component_order(self, indexed_database):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.tuples(
+                "uri-price",
+                "uri",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+            ),
+        )
+        result = ml.search(database=database, options=options).tuples(
+            "uri-price",
+            cts.collection_query("cts-test"),
+        )
+        assert result == [
+            TupleHit((URIS[0], Decimal("1.25")), frequency=1),
+            TupleHit((URIS[1], Decimal("2.5")), frequency=1),
+        ]
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    @pytest.mark.parametrize(
+        ("implicit", "expected"),
+        [(cts.and_query([]), False), (cts.or_query([]), True)],
+        ids=["and", "or"],
+    )
+    def test_implicit_grammar_operator_controls_term_combination(
+        self,
+        indexed_database,
+        output_format,
+        implicit,
+        expected,
+    ):
+        ml, database, _ = indexed_database
+        options = opt.options(opt.grammar(implicit=opt.implicit(implicit)))
+        body = (
+            json.dumps(options.to_json())
+            if output_format == "json"
+            else tostring(options.to_xml(), encoding="unicode")
+        )
+        result = ml.eval.xquery(
+            render_test_resource(__file__, "option-query-matches-alpha.xqy"),
+            variables={"options": body, "qtext": "alpha beta"},
+            database=database,
+        )
+        assert result is expected
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_empty_term_behavior_in_native_parser(
+        self,
+        indexed_database,
+        output_format,
+    ):
+        ml, database, _ = indexed_database
+        options = opt.options(opt.term(empty="no-results"))
+        body = (
+            json.dumps(options.to_json())
+            if output_format == "json"
+            else tostring(options.to_xml(), encoding="unicode")
+        )
+        result = ml.eval.xquery(
+            render_test_resource(__file__, "option-query-matches-alpha.xqy"),
+            variables={"options": body, "qtext": ""},
+            database=database,
+        )
+        assert result is False
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_default_suggestions_use_the_word_lexicon(
+        self,
+        indexed_database,
+        output_format,
+    ):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.default_suggestion_source(
+                opt.word_lexicon("http://marklogic.com/collation/"),
+            ),
+        )
+        body = (
+            json.dumps(options.to_json())
+            if output_format == "json"
+            else tostring(options.to_xml(), encoding="unicode")
+        )
+        result = ml.eval.xquery(
+            render_test_resource(__file__, "option-word-suggestions.xqy"),
+            variables={"options": body},
+            database=database,
+        )
+        assert result == "alpha"
+
+
+def _options_report(ml, database, options, query, output_format):
+    if output_format == "json":
+        body = {"search": {"options": options.to_json()["options"], "qtext": query}}
+    else:
+        search = XmlElement(f"{{{SEARCH_NS_URI}}}search")
+        search.append(options.to_xml())
+        text = XmlElement(f"{{{SEARCH_NS_URI}}}qtext")
+        text.text = query
+        search.append(text)
+        body = tostring(search, encoding="unicode")
+    response = ml.rest.search.post(
+        body,
+        database=database,
+        collection="cts-test",
+        data_format="json",
+    )
+    response.raise_for_status()
+    return response.json()

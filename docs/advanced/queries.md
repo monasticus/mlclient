@@ -396,28 +396,150 @@ options = SearchOptions(
 )
 ```
 
-[opt.page_length][mlclient.search.options.PageLength] requires a positive integer;
-[opt.return_facets][mlclient.search.options.ReturnFacets] requires a boolean.
-Use [opt.control][mlclient.search.options.Control] for other native scalar
-options, such as `opt.control("quality-weight", 0.5)`.
+### Typed options and nested components
 
-For an option without a typed constructor, [opt.native][mlclient.search.options.NativeOptions]
-accepts the same option in both native formats. Its result is an immutable group
-that can be nested in `opt.options(...)`; neither format is inferred from the other:
+`opt` covers the Search API options vocabulary, including nested definitions.
+Every constructor is an alias of the corresponding class in
+[`mlclient.search.options`][mlclient.search.options].
+
+| Configure | Constructors |
+| --- | --- |
+| Paging, scoring and execution | `page_length`, `quality_weight`, `concurrency_level`, `forest`, `fragment_scope`, `search_option`, `debug` |
+| Search report members | `return_aggregates`, `return_constraints`, `return_facets`, `return_frequencies`, `return_metrics`, `return_plan`, `return_qtext`, `return_query`, `return_results`, `return_similar`, `return_values` |
+| Named constraints | `range_constraint`, `word_constraint`, `value_constraint`, `collection_constraint`, `container_constraint`, `properties_constraint`, `geo_constraint`, `custom_constraint` |
+| Facet intervals | `bucket`, `computed_bucket`; pass them to `range_` |
+| Geospatial indexes | `geo_element`, `geo_element_pair`, `geo_attribute_pair`, `geo_json_property`, `geo_json_property_pair`, `geo_path`, `geo_region_path`; pass an index to `geo_constraint`, `values` or `tuples` |
+| Lexicons and aggregates | `values`, `tuples`, `aggregate`, `collection` |
+| Suggestions and unqualified terms | `suggestion_source`, `default_suggestion_source`, `word_lexicon`, `word`, `value`, `term`, `term_default` |
+| Query grammar and named states | `grammar`, `implicit`, `starter`, `joiner`, `operator`, `operator_state` |
+| Results and metadata | `sort`, `transform_results`, `preferred_matches`, `extract_document_data`, `extract_metadata`, `metadata_qname`, `constraint_value`, `result_decorator`, `annotation` |
+| Additional filtering and extensions | `additional_query`, `callback`, `anchor` |
+
+For example, define price bands and choose what the search report returns:
 
 ```python
-from xml.etree.ElementTree import Element
+from mlclient.search import opt, sq
 
-from mlclient.search import opt
-from mlclient.search.structured import SEARCH_NS_URI
-
-metrics = Element(f"{{{SEARCH_NS_URI}}}return-metrics")
-metrics.text = "false"
 options = opt.options(
-    opt.page_length(20),
-    opt.native({"return-metrics": False}, metrics),
+    opt.range_constraint(
+        "price",
+        opt.range_(
+            sq.element("price"),
+            "xs:decimal",
+            buckets=[
+                opt.bucket("budget", "Under 20", lt="20"),
+                opt.bucket("premium", "20 and above", ge="20"),
+            ],
+        ),
+    ),
+    opt.transform_results(
+        preferred_matches=opt.preferred_matches([sq.element("title")]),
+        max_matches=2,
+    ),
+    opt.return_metrics(False),
+    opt.quality_weight(0.5),
+)
+
+with MLClient() as ml:
+    report = ml.search(options=options).report("coffee")
+```
+
+The range index must already exist. `range_` also accepts `fragment_scope`,
+`weight`, `options` (range options), `facet_options` and `computed_buckets`.
+Word and value constraints accept `fragment_scope`, `weight` and an optional
+`annotation`. `sort` accepts a range index or a native marker such as
+`"score"`, `"document-order"` or `"unordered"`.
+
+Reuse a geospatial index definition in a named constraint:
+
+```python
+location = opt.geo_element(
+    sq.element("location"),
+    sq.element("point"),
+    options="coordinate-system=wgs84",
+    heatmap=opt.heatmap(-90, -180, 90, 180, 18, 36),
+)
+options = opt.options(opt.geo_constraint("location", location))
+```
+
+Geo constructors take `sq` selectors, like `range_`. A selector can also be a
+sequence when the native definition names several elements, properties or
+paths. Region-path indexes do not support heatmaps or facet options.
+
+`values` and `tuples` accept `style`, `options` (values options), `aggregates`
+and `annotation`. Tuples preserve index order, including mixed index kinds:
+
+```python
+options = opt.options(
+    opt.tuples(
+        "uri-price",
+        "uri",
+        opt.range_(sq.element("price"), "xs:decimal"),
+        aggregates=[opt.aggregate("count")],
+    ),
 )
 ```
+
+Choose term matching or suggestions by nesting their source definitions:
+
+```python
+options = opt.options(
+    opt.term(
+        opt.term_default(opt.word(sq.element("title"))),
+        empty="no-results",
+        options="case-insensitive",
+    ),
+    opt.default_suggestion_source(
+        opt.word_lexicon("http://marklogic.com/collation/"),
+        options="limit=5",
+    ),
+)
+```
+
+For custom parsing, faceting or result decoration, `callback` identifies the
+function by `apply`, `ns` and `at`; the module must already be installed.
+`operator_state` takes an `opt.options(...)` group containing the options
+allowed in a state. Use `opt.options(..., namespaces={...})` for prefix bindings
+needed by grammar QNames or custom extension data.
+
+`additional_query` accepts a CTS query object. MarkLogic's options JSON requires
+its CTS query as a quoted XML string; this constructor supplies that form.
+The same native requirement applies to `implicit` in a grammar.
+
+### XML-only range settings and legacy options
+
+MarkLogic 10 and 12 do not preserve range `nullable` or custom `anchor` elements
+when converting JSON options to XML. These settings are available through
+`range_(..., nullable=True)` and `range_(..., anchors=[opt.anchor(...)])`, but
+`to_json()` raises `TypeError`. Send their XML form through the raw REST API:
+
+```python
+from xml.etree.ElementTree import Element, tostring
+
+from mlclient.search.structured import SEARCH_NS_URI
+
+options = opt.options(
+    opt.values("price", opt.range_(sq.element("price"), "xs:decimal", nullable=True)),
+)
+body = Element(f"{{{SEARCH_NS_URI}}}search")
+body.append(options.to_xml())
+with MLClient() as ml:
+    response = ml.rest.search.post(tostring(body, encoding="unicode"))
+    response.raise_for_status()
+```
+
+`computed_bucket` works in both JSON and XML; its built-in anchor strings are
+separate from custom `anchor` elements.
+
+`element_query_constraint` and `searchable_expression` mirror deprecated native
+options. Prefer `container_constraint` and `additional_query` respectively;
+`searchable_expression` also requires MarkLogic's `eval-search-string` privilege.
+
+[opt.control][mlclient.search.options.Control] remains available for a native
+scalar name. [opt.native][mlclient.search.options.NativeOptions] accepts paired
+JSON members and XML elements for custom definitions. Prefer the typed
+constructors for standard options; use native components when an extension
+needs a shape specific to your server-side code.
 
 ## CTS queries
 

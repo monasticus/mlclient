@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:transform-results apply="decorate" ns="https://example.com/search" at="/search.xqy"><search:max-matches>3</search:max-matches></search:transform-results><search:result-decorator apply="result" ns="https://example.com/search" at="/search.xqy" /></search:options>

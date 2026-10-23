@@ -1,0 +1,25 @@
+{
+  "options": {
+    "term": {
+      "default": {
+        "ref": "title",
+        "word": {
+          "json-property": "title",
+          "fragment-scope": "documents",
+          "weight": 1,
+          "term-option": [
+            "case-insensitive"
+          ]
+        }
+      },
+      "empty": {
+        "apply": "no-results"
+      },
+      "fragment-scope": "documents",
+      "weight": 0.5,
+      "term-option": [
+        "unstemmed"
+      ]
+    }
+  }
+}

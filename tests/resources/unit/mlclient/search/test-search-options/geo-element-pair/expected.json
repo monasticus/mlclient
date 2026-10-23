@@ -1,0 +1,26 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "location",
+        "geo-elem-pair": {
+          "parent": {
+            "name": "location",
+            "ns": ""
+          },
+          "lat": {
+            "name": "latitude",
+            "ns": ""
+          },
+          "lon": {
+            "name": "longitude",
+            "ns": ""
+          }
+        },
+        "annotation": [
+          "Locations"
+        ]
+      }
+    ]
+  }
+}

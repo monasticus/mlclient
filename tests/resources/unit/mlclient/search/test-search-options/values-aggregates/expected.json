@@ -1,0 +1,30 @@
+{
+  "options": {
+    "values": [
+      {
+        "name": "prices",
+        "style": "consistent",
+        "range": {
+          "type": "xs:decimal",
+          "json-property": "price"
+        },
+        "aggregate": [
+          {
+            "apply": "sum"
+          },
+          {
+            "apply": "median",
+            "udf": "stats"
+          }
+        ],
+        "annotation": [
+          "Prices"
+        ],
+        "values-option": [
+          "item-frequency",
+          "descending"
+        ]
+      }
+    ]
+  }
+}

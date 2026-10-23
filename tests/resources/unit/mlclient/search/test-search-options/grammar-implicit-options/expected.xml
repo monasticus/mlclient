@@ -1,0 +1,1 @@
+<search:options xmlns:cts="http://marklogic.com/cts" xmlns:search="http://marklogic.com/appservices/search"><search:grammar><search:implicit options="unordered"><cts:or-query /></search:implicit></search:grammar></search:options>

@@ -2,10 +2,11 @@
 
 from dataclasses import FrozenInstanceError
 from xml.etree.ElementTree import Element as XmlElement
-from xml.etree.ElementTree import tostring
+from xml.etree.ElementTree import fromstring, tostring
 
 import pytest
 
+from mlclient.search import options
 from mlclient.search.options import (
     ContainerConstraint,
     Control,
@@ -28,7 +29,9 @@ from mlclient.search.structured import (
     Field,
     JsonProperty,
     PathIndex,
+    TermQuery,
 )
+from mlclient.xquery import cts
 from tests.utils.resources import discover_serialization_cases
 
 SEARCH_NAMESPACE = "http://marklogic.com/appservices/search"
@@ -411,3 +414,544 @@ def test_return_facets_true_serializes_to_json_and_xml():
         '<search:return-facets xmlns:search="http://marklogic.com/appservices/search">'
         "true</search:return-facets>"
     )
+
+
+@pytest.mark.parametrize(
+    ("constructor", "value", "error_type", "message"),
+    [
+        (options.Debug, 1, TypeError, "debug must be a boolean"),
+        (
+            options.ConcurrencyLevel,
+            0,
+            ValueError,
+            "concurrency-level must be a positive integer",
+        ),
+        (
+            options.ConcurrencyLevel,
+            True,
+            ValueError,
+            "concurrency-level must be a positive integer",
+        ),
+        (
+            options.QualityWeight,
+            float("inf"),
+            ValueError,
+            "quality-weight must be a finite number",
+        ),
+        (
+            options.QualityWeight,
+            False,
+            ValueError,
+            "quality-weight must be a finite number",
+        ),
+        (options.Forest, True, TypeError, "forest must be a string or integer ID"),
+        (
+            options.FragmentScope,
+            "all",
+            ValueError,
+            "fragment-scope must be documents or properties",
+        ),
+        (options.SearchOptionString, [], TypeError, "search-option must be a string"),
+    ],
+)
+def test_scalar_controls_reject_invalid_values(constructor, value, error_type, message):
+    with pytest.raises(error_type) as error:
+        constructor(value)
+    assert str(error.value) == message
+
+
+@pytest.mark.parametrize(
+    ("build", "message"),
+    [
+        (
+            lambda: options.Word(Element("title"), fragment_scope="all"),
+            "fragment scope must be documents or properties",
+        ),
+        (
+            lambda: options.Value(Element("title"), weight=float("nan")),
+            "weight must be a finite number",
+        ),
+        (
+            lambda: options.Value(JsonProperty("flag"), node_type="integer"),
+            "value node_type must be string, boolean, null or number",
+        ),
+        (
+            lambda: options.Heatmap(float("inf"), 0, 1, 1, 2, 2),
+            "heatmap coordinates must be finite numbers",
+        ),
+        (
+            lambda: options.Heatmap(0, 0, 1, 1, 0, 2),
+            "heatmap divisions must be positive integers",
+        ),
+        (
+            lambda: options.GeoRegionPath(
+                PathIndex("/region"),
+                heatmap=options.Heatmap(0, 0, 1, 1, 2, 2),
+            ),
+            "geo-region-path does not support heatmaps or facet options",
+        ),
+        (
+            lambda: options.OperatorState("short", SearchOptions(ReturnFacets(False))),
+            "return-facets is not supported in an operator state",
+        ),
+        (
+            lambda: options.ExtractDocumentData(selected="other"),
+            "extract selected must be all, include, include-with-ancestors or exclude",
+        ),
+        (
+            lambda: options.Values("price", Range(Element("price")), style="other"),
+            "lexicon style must be default or consistent",
+        ),
+        (
+            lambda: options.TransformResults(max_matches=-1),
+            "snippet limits must be non-negative integers",
+        ),
+        (
+            lambda: SearchOptions(namespaces={"search": "https://example.com/wrong"}),
+            "option namespace prefixes must be non-empty, "
+            "not reserved, and preserve cts",
+        ),
+    ],
+)
+def test_option_components_reject_invalid_native_settings(build, message):
+    with pytest.raises(ValueError, match=r".") as error:
+        build()
+    assert str(error.value) == message
+
+
+@pytest.mark.parametrize(
+    ("build", "message"),
+    [
+        (
+            lambda: options.PreferredMatches([Field("title")]),
+            "preferred matches require Element or JsonProperty targets",
+        ),
+        (
+            lambda: options.SuggestionSource(
+                ValueConstraint("title", Element("title")),
+                ref="title",
+            ),
+            "suggestion source must be Range, Word, Collection or WordLexicon",
+        ),
+        (
+            lambda: options.TermDefault(Element("title")),
+            "term default source must be Word, Value or Range",
+        ),
+        (
+            lambda: options.AdditionalQuery({}),
+            "additional query must be a serializable CTS SearchQuery",
+        ),
+        (
+            lambda: options.GeoConstraint("place", Range(Element("place"))),
+            "geo constraint index must be a geospatial index definition",
+        ),
+        (
+            lambda: options.GeoElement(Element("p"), [Attribute("point")]),
+            "element requires one or more Element selectors",
+        ),
+        (
+            lambda: options.ElementQueryConstraint("body", JsonProperty("body")),
+            "element-query constraint target must be an Element",
+        ),
+        (
+            lambda: options.ExtractMetadata([Element("title")]),
+            "metadata sources must be MetadataQName, JsonProperty or ConstraintValue",
+        ),
+        (
+            lambda: Range(Element("price"), buckets=["low"]),
+            "range bucket has an incompatible type",
+        ),
+        (
+            lambda: options.ResultDecorator("decorate"),
+            "result decorator callback has an incompatible type",
+        ),
+        (
+            lambda: options.Term(default=Element("title")),
+            "default term has an incompatible type",
+        ),
+        (
+            lambda: options.Grammar(starters=["AND"]),
+            "grammar starter has an incompatible type",
+        ),
+        (
+            lambda: options.CustomConstraint("custom", None),
+            "custom parse callback has an incompatible type",
+        ),
+    ],
+)
+def test_option_components_reject_incompatible_components(build, message):
+    with pytest.raises(TypeError) as error:
+        build()
+    assert str(error.value) == message
+
+
+def test_nullable_range_preserves_xml_and_rejects_lossy_json_conversion():
+    index = Range(JsonProperty("price"), "xs:decimal", nullable=True)
+    assert tostring(index.to_xml(), encoding="unicode") == (
+        '<search:range xmlns:search="http://marklogic.com/appservices/search" '
+        'type="xs:decimal" nullable="true"><search:json-property>price'
+        "</search:json-property></search:range>"
+    )
+    with pytest.raises(TypeError) as error:
+        index.to_json()
+    assert str(error.value) == (
+        "nullable range options require XML; "
+        "MarkLogic's JSON converter does not preserve nullable"
+    )
+
+
+def test_custom_anchors_preserve_xml_and_reject_lossy_json_conversion():
+    index = Range(
+        Element("created"),
+        "xs:date",
+        anchors=[
+            options.Anchor(
+                "today",
+                callback=options.Callback(
+                    "today",
+                    "https://example.com/search",
+                    "/search.xqy",
+                ),
+            ),
+            options.Anchor("fixed", value="2026-01-01"),
+        ],
+    )
+    assert tostring(index.to_xml(), encoding="unicode") == (
+        '<search:range xmlns:search="http://marklogic.com/appservices/search" '
+        'type="xs:date">'
+        '<search:element name="created" ns="" />'
+        '<search:anchor name="today" apply="today" '
+        'ns="https://example.com/search" at="/search.xqy" />'
+        '<search:anchor name="fixed" value="2026-01-01" /></search:range>'
+    )
+    with pytest.raises(TypeError) as error:
+        index.to_json()
+    assert str(error.value) == (
+        "custom range anchors require XML; "
+        "MarkLogic's JSON converter does not preserve anchor elements"
+    )
+
+
+def test_additional_query_rejects_structured_queries():
+    option = options.AdditionalQuery(TermQuery("coffee"))
+    with pytest.raises(TypeError) as error:
+        option.to_json()
+    assert (
+        str(error.value)
+        == "additional query requires a CTS query, not a structured query"
+    )
+
+
+def test_option_groups_merge_and_snapshot_namespace_bindings():
+    bindings = {"d": "https://example.com/docs"}
+    base = SearchOptions(PageLength(10), namespaces=bindings)
+    combined = SearchOptions(base, namespaces={"e": "https://example.com/extra"})
+    bindings["d"] = "https://example.com/changed"
+    expected = {
+        "options": {
+            "namespaces": {
+                "d": "https://example.com/docs",
+                "e": "https://example.com/extra",
+            },
+            "page-length": 10,
+        },
+    }
+    assert combined.to_json() == expected
+    assert tostring(combined.to_xml(), encoding="unicode") == (
+        '<search:options xmlns:search="http://marklogic.com/appservices/search" '
+        'xmlns:d="https://example.com/docs" xmlns:e="https://example.com/extra">'
+        "<search:page-length>10</search:page-length></search:options>"
+    )
+    combined.to_json()["options"]["namespaces"]["d"] = "changed"
+    assert combined.to_json() == expected
+    with pytest.raises(TypeError) as error:
+        combined.namespaces["d"] = "changed"
+    assert str(error.value) == "'mappingproxy' object does not support item assignment"
+
+
+def test_cts_namespace_is_declared_once_when_options_also_contain_a_cts_query():
+    composed = SearchOptions(
+        options.AdditionalQuery(cts.true_query()),
+        namespaces={"cts": "http://marklogic.com/cts"},
+    )
+    xml = tostring(composed.to_xml(), encoding="unicode")
+    assert xml.count('xmlns:cts="http://marklogic.com/cts"') == 1
+    assert fromstring(xml).find(".//{http://marklogic.com/cts}true-query") is not None
+
+
+@pytest.mark.parametrize(
+    ("build", "member", "expected"),
+    [
+        (
+            lambda a, b: options.GeoElementPair(a, b, b),
+            "geo-elem-pair",
+            {
+                "parent": [{"name": "a", "ns": ""}, {"name": "b", "ns": ""}],
+                "lat": [{"name": "a", "ns": ""}, {"name": "b", "ns": ""}],
+                "lon": [{"name": "a", "ns": ""}, {"name": "b", "ns": ""}],
+            },
+        ),
+        (
+            lambda a, b: options.GeoAttributePair(a, b, b),
+            "geo-attr-pair",
+            {
+                "parent": [{"name": "a", "ns": ""}, {"name": "b", "ns": ""}],
+                "lat": [{"name": "a", "ns": ""}, {"name": "b", "ns": ""}],
+                "lon": [{"name": "a", "ns": ""}, {"name": "b", "ns": ""}],
+            },
+        ),
+        (
+            options.GeoJsonProperty,
+            "geo-json-property",
+            {"parent-property": ["a", "b"], "json-property": ["a", "b"]},
+        ),
+        (
+            lambda a, b: options.GeoJsonPropertyPair(a, b, b),
+            "geo-json-property-pair",
+            {
+                "parent-property": ["a", "b"],
+                "lat-property": ["a", "b"],
+                "lon-property": ["a", "b"],
+            },
+        ),
+        (
+            lambda a, _b: options.GeoPath(a),
+            "geo-path",
+            {"path-index": [{"text": "/a"}, {"text": "/b"}]},
+        ),
+        (
+            lambda a, _b: options.GeoRegionPath(a),
+            "geo-region-path",
+            {"path-index": [{"text": "/a"}, {"text": "/b"}]},
+        ),
+    ],
+)
+def test_geospatial_definitions_snapshot_multiple_index_selectors(
+    build,
+    member,
+    expected,
+):
+    if member in ("geo-path", "geo-region-path"):
+        first = [PathIndex("/a"), PathIndex("/b")]
+        second = []
+    elif member.startswith("geo-json"):
+        first = [JsonProperty("a"), JsonProperty("b")]
+        second = first.copy()
+    else:
+        first = [Element("a"), Element("b")]
+        second = (
+            [Attribute("a"), Attribute("b")]
+            if member == "geo-attr-pair"
+            else first.copy()
+        )
+    definition = build(first, second)
+    first.clear()
+    second.clear()
+    assert definition.to_json() == {member: expected}
+    assert len(definition.to_xml()) == sum(len(value) for value in expected.values())
+
+
+def test_nested_options_snapshot_collections_and_namespace_inputs():
+    facet_options = ["limit=5"]
+    term_options = ["exact"]
+    sources = [options.MetadataQName(Element("title"))]
+    paths = ["/d:doc/d:title"]
+    bindings = {"d": "https://example.com/docs"}
+    custom = options.CustomConstraint(
+        "custom",
+        options.Callback("parse"),
+        facet_options=facet_options,
+        term_options=term_options,
+    )
+    collection = options.Collection(options=facet_options)
+    value = options.Value(Element("title"), options=term_options)
+    extraction = options.ExtractDocumentData(paths, namespaces=bindings)
+    metadata = options.ExtractMetadata(sources)
+    facet_options.clear()
+    term_options.clear()
+    sources.clear()
+    paths.clear()
+    bindings.clear()
+    assert custom.to_json() == {
+        "constraint": {
+            "name": "custom",
+            "custom": {
+                "parse": {"apply": "parse"},
+                "facet-option": ["limit=5"],
+                "term-option": ["exact"],
+            },
+        },
+    }
+    assert collection.to_json() == {"collection": {"facet-option": ["limit=5"]}}
+    assert value.to_json() == {
+        "value": {"element": {"name": "title", "ns": ""}, "term-option": ["exact"]},
+    }
+    assert extraction.to_json() == {
+        "extract-document-data": {
+            "extract-path": ["/d:doc/d:title"],
+            "namespaces": {"d": "https://example.com/docs"},
+        },
+    }
+    assert metadata.to_json() == {
+        "extract-metadata": {"qname": [{"elem-name": "title", "elem-ns": ""}]},
+    }
+    value.to_json()["value"]["term-option"].clear()
+    assert value.to_json()["value"]["term-option"] == ["exact"]
+
+
+def test_minimal_defaults_for_suggestions_and_terms():
+    assert options.SuggestionSource(ref="title").to_json() == {
+        "suggestion-source": {"ref": "title"},
+    }
+    assert options.DefaultSuggestionSource().to_json() == {
+        "default-suggestion-source": {},
+    }
+    assert options.Term().to_json() == {"term": {}}
+    assert options.TermDefault(ref="title").to_json() == {"default": {"ref": "title"}}
+    assert options.TermDefault().to_json() == {"default": {}}
+
+
+def test_term_options_are_snapshotted_and_keep_empty_values():
+    strings = ["case-insensitive", "unstemmed"]
+    term = options.Term(options=strings, weight=0)
+    strings.clear()
+    assert term.to_json() == {
+        "term": {"term-option": ["case-insensitive", "unstemmed"], "weight": 0},
+    }
+    assert tostring(term.to_xml(), encoding="unicode") == (
+        '<search:term xmlns:search="http://marklogic.com/appservices/search">'
+        "<search:weight>0</search:weight><search:term-option>case-insensitive"
+        "</search:term-option><search:term-option>unstemmed</search:term-option></search:term>"
+    )
+
+
+def test_constraint_facet_options_override_shared_range_options_in_both_formats():
+    index = Range(Element("price"), "xs:decimal", facet_options=["limit=5"])
+    constraint = options.RangeConstraint("price", index, options=["limit=10"])
+    assert constraint.to_json() == {
+        "constraint": {
+            "name": "price",
+            "range": {
+                "type": "xs:decimal",
+                "element": {"name": "price", "ns": ""},
+                "facet": True,
+                "facet-option": ["limit=10"],
+            },
+        },
+    }
+    assert tostring(constraint.to_xml(), encoding="unicode") == (
+        "<search:constraint "
+        'xmlns:search="http://marklogic.com/appservices/search" name="price">'
+        '<search:range type="xs:decimal" facet="true"><search:element '
+        'name="price" ns="" />'
+        "<search:facet-option>limit=10</search:facet-option></search:range></search:constraint>"
+    )
+    assert index.to_json()["range"]["facet-option"] == ["limit=5"]
+
+
+def test_sort_reuses_only_the_index_selector_from_a_range_with_facet_settings():
+    index = Range(
+        Element("price"),
+        "xs:decimal",
+        nullable=True,
+        facet=True,
+        facet_options=["limit=5"],
+        options=["cached"],
+        fragment_scope="properties",
+        weight=2,
+        buckets=[options.Bucket("low", "Under ten", lt="10")],
+    )
+    sort = options.SortOrder(index, direction="descending")
+    assert sort.to_json() == {
+        "sort-order": {
+            "type": "xs:decimal",
+            "direction": "descending",
+            "element": {"name": "price", "ns": ""},
+        },
+    }
+    assert tostring(sort.to_xml(), encoding="unicode") == (
+        '<search:sort-order xmlns:search="http://marklogic.com/appservices/search" '
+        'type="xs:decimal" direction="descending"><search:element name="price" '
+        'ns="" /></search:sort-order>'
+    )
+    assert index.nullable is True
+    assert len(index.to_xml().findall(f"{{{SEARCH_NAMESPACE}}}bucket")) == 1
+
+
+def test_word_collation_and_annotated_defaults_have_native_forms():
+    word = options.Word(Element("title"), collation="http://marklogic.com/collation/")
+    definition = options.TermDefault(word, annotation="Titles")
+    assert definition.to_json() == {
+        "default": {
+            "word": {
+                "element": {"name": "title", "ns": ""},
+                "collation": "http://marklogic.com/collation/",
+            },
+            "annotation": ["Titles"],
+        },
+    }
+    assert tostring(definition.to_xml(), encoding="unicode") == (
+        '<search:default xmlns:search="http://marklogic.com/appservices/search">'
+        "<search:word "
+        'collation="http://marklogic.com/collation/">'
+        '<search:element name="title" ns="" /></search:word>'
+        "<search:annotation>Titles</search:annotation></search:default>"
+    )
+    constraint = options.WordConstraint(
+        "title",
+        Element("title"),
+        collation="http://marklogic.com/collation/",
+    )
+    assert constraint.to_json() == {"constraint": {"name": "title", **word.to_json()}}
+
+
+def test_custom_empty_term_callback_has_native_forms():
+    term = options.Term(
+        empty=options.Callback("empty", "https://example.com/search", "/search.xqy"),
+    )
+    assert term.to_json() == {
+        "term": {
+            "empty": {
+                "apply": "empty",
+                "ns": "https://example.com/search",
+                "at": "/search.xqy",
+            },
+        },
+    }
+    assert tostring(term.to_xml(), encoding="unicode") == (
+        '<search:term xmlns:search="http://marklogic.com/appservices/search">'
+        '<search:empty apply="empty" ns="https://example.com/search" '
+        'at="/search.xqy" /></search:term>'
+    )
+
+
+def test_sort_and_suggestion_annotations_have_native_forms():
+    sort = SortOrder("score", annotation="Relevance")
+    suggestion = options.SuggestionSource(ref="title", annotation="Titles")
+    assert sort.to_json() == {
+        "sort-order": {
+            "direction": "ascending",
+            "score": None,
+            "annotation": ["Relevance"],
+        },
+    }
+    assert suggestion.to_json() == {
+        "suggestion-source": {"ref": "title", "annotation": ["Titles"]},
+    }
+    assert tostring(sort.to_xml(), encoding="unicode") == (
+        "<search:sort-order "
+        'xmlns:search="http://marklogic.com/appservices/search" direction="ascending">'
+        "<search:score /><search:annotation>Relevance</search:annotation>"
+        "</search:sort-order>"
+    )
+    assert tostring(suggestion.to_xml(), encoding="unicode") == (
+        "<search:suggestion-source "
+        'xmlns:search="http://marklogic.com/appservices/search" ref="title">'
+        "<search:annotation>Titles</search:annotation></search:suggestion-source>"
+    )
+
+
+def test_named_suggestion_source_requires_a_constraint_reference():
+    with pytest.raises(ValueError, match=r".") as error:
+        options.SuggestionSource(options.WordLexicon())
+    assert str(error.value) == "suggestion-source requires a constraint ref"

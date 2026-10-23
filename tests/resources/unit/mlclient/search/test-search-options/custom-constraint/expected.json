@@ -1,0 +1,36 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "rating",
+        "custom": {
+          "facet": true,
+          "parse": {
+            "apply": "parse",
+            "ns": "https://example.com/search",
+            "at": "/rating.xqy"
+          },
+          "start-facet": {
+            "apply": "start",
+            "ns": "https://example.com/search",
+            "at": "/rating.xqy"
+          },
+          "finish-facet": {
+            "apply": "finish",
+            "ns": "https://example.com/search",
+            "at": "/rating.xqy"
+          },
+          "facet-option": [
+            "limit=5"
+          ],
+          "term-option": [
+            "case-insensitive"
+          ]
+        },
+        "annotation": [
+          "Ratings"
+        ]
+      }
+    ]
+  }
+}

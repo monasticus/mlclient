@@ -1,0 +1,29 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "tag",
+        "collection": {
+          "facet": true,
+          "prefix": "https://example.com/tags/",
+          "facet-option": [
+            "limit=3"
+          ]
+        },
+        "annotation": [
+          "Tags"
+        ]
+      },
+      {
+        "name": "content",
+        "container": {
+          "json-property": "content",
+          "fragment-scope": "properties"
+        },
+        "annotation": [
+          "Body"
+        ]
+      }
+    ]
+  }
+}

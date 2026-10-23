@@ -283,6 +283,10 @@ Components and groups are immutable and reusable. Each factory has a typed
 constructor signature, so editors suggest its parameters. `opt.options` creates
 a complete options object; it never changes a component or another group.
 Indexes must already exist in the target database; options do not create them.
+`opt` also provides typed constructors for snippets, extraction, suggestions,
+buckets, geospatial definitions and grammar. For example,
+`opt.transform_results("empty-snippet")` selects empty snippets, and
+`opt.return_metrics(False)` omits report metrics.
 See [Search options](../advanced/queries.md#search-options) for reuse, direct
 classes and native definitions, and the
 [factory reference][mlclient.search.opt] for all constructors.

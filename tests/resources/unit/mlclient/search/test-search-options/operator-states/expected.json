@@ -1,0 +1,39 @@
+{
+  "options": {
+    "operator": [
+      {
+        "name": "sort",
+        "state": [
+          {
+            "name": "recent",
+            "sort-order": [
+              {
+                "type": "xs:dateTime",
+                "direction": "descending",
+                "json-property": "created"
+              }
+            ],
+            "page-length": 10,
+            "forest": [
+              "123",
+              "456"
+            ],
+            "search-option": [
+              "unfiltered"
+            ]
+          },
+          {
+            "name": "relevance",
+            "sort-order": [
+              {
+                "direction": "descending",
+                "score": null
+              }
+            ],
+            "quality-weight": 1
+          }
+        ]
+      }
+    ]
+  }
+}

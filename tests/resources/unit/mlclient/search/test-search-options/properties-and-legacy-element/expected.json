@@ -1,0 +1,24 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "props",
+        "properties": null,
+        "annotation": [
+          "Property values"
+        ]
+      },
+      {
+        "name": "body",
+        "element-query": {
+          "ns": "https://example.com/docs",
+          "name": "body",
+          "fragment-scope": "documents"
+        },
+        "annotation": [
+          "Legacy"
+        ]
+      }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
 {
   "type": "TypeError",
-  "message": "sort index must be a Range"
+  "message": "sort index must be a Range or a native sort marker"
 }

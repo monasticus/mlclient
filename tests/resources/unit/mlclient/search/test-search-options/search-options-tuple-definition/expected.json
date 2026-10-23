@@ -3,19 +3,23 @@
     "tuples": [
       {
         "name": "prices",
-        "range": [
+        "indexes": [
           {
-            "type": "xs:decimal",
-            "element": {
-              "name": "price",
-              "ns": ""
+            "range": {
+              "type": "xs:decimal",
+              "element": {
+                "name": "price",
+                "ns": ""
+              }
             }
           },
           {
-            "type": "xs:date",
-            "element": {
-              "name": "day",
-              "ns": ""
+            "range": {
+              "type": "xs:date",
+              "element": {
+                "name": "day",
+                "ns": ""
+              }
             }
           }
         ]

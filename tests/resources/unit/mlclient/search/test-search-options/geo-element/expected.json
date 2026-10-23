@@ -1,0 +1,22 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "location",
+        "geo-elem": {
+          "parent": {
+            "name": "location",
+            "ns": ""
+          },
+          "element": {
+            "name": "point",
+            "ns": ""
+          }
+        },
+        "annotation": [
+          "Locations"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "location",
+        "geo-path": {
+          "path-index": {
+            "text": "/location/point"
+          }
+        },
+        "annotation": [
+          "Locations"
+        ]
+      }
+    ]
+  }
+}

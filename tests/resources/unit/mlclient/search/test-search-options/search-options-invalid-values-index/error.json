@@ -1,4 +1,4 @@
 {
   "type": "TypeError",
-  "message": "values index must be a Range, uri or collection"
+  "message": "values index must be a Range, geospatial index, Collection, uri or collection"
 }

@@ -1,0 +1,10 @@
+{
+  "options": {
+    "grammar": {
+      "implicit": {
+        "cts-options": "unordered",
+        "text": "<cts:or-query xmlns:cts=\"http://marklogic.com/cts\" />"
+      }
+    }
+  }
+}

@@ -34,24 +34,41 @@ with MLClient() as ml:
     result = ml.eval.xquery("1 + 1")
 ```
 
-Services come in two kinds, and the access syntax tells them apart:
+### Reuse a scoped service
 
-| Kind | Example | What it holds | Creating it |
+`ml.documents`, `ml.eval` and `ml.search` start with an empty scope. Calling one
+with settings, such as `ml.documents(database="catalog")`, returns a new service
+that uses those defaults for subsequent operations. Creating it sends no request
+and leaves the original service unchanged; both share the same connection.
+
+| Service | Empty scope | With defaults | Scope type |
 | --- | --- | --- | --- |
-| Scoped | `ml.documents`, `ml.eval` | An immutable [ServiceScope][mlclient.services.ServiceScope] with database and transaction defaults | Calling the service, no request |
-| Scoped | `ml.search`, `ml.search(database="catalog")` | An immutable [SearchScope][mlclient.services.SearchScope] applied to every call | Calling the service, no request |
-| Opened | `ml.transaction(database="catalog")` | Server-side state: an open transaction | A method that sends a request |
+| Documents | `ml.documents` | `ml.documents(database="catalog")` | [ServiceScope][mlclient.services.ServiceScope] |
+| Evaluation | `ml.eval` | `ml.eval(database="catalog")` | [ServiceScope][mlclient.services.ServiceScope] |
+| Search | `ml.search` | `ml.search(database="catalog", collection="products")` | [SearchScope][mlclient.services.SearchScope] |
 
-`ml.documents(database="catalog")` and `ml.eval(database="catalog")` return
-scoped copies sharing the same connection. Existing per-operation `database=`
-and `txid=` arguments override their defaults; `None` clears an inherited value.
-Both also accept transaction settings via `ml.documents(**txn)` or `ml.eval(**txn)`.
+`ServiceScope` holds `database` and `txid`. `SearchScope` also supports search
+settings, such as collections, directories and query options:
 
-`ml.search` is itself a scoped service with an empty scope. Calling it returns a
-new, narrower service and never changes the original, so scoped services can be
-created freely and shared. For one request, basic `database` and `txid` overrides
-are also keyword arguments, so `**txn` works directly on operations. Use `scope=SearchScope(...)` for the
-additional search settings. See [Search](../guides/search.md#scope-databases-filters-and-options).
+```python
+with MLClient() as ml:
+    documents = ml.documents(database="catalog")
+    evaluation = ml.eval(database="catalog")
+    products = ml.search(database="catalog", collection="products")
+
+    document = documents.read("/example.json")
+    result = evaluation.xquery("1 + 1")
+    uris = products.uris("coffee")
+```
+
+On all three services, per-operation `database=` and `txid=` arguments override
+the service defaults; `None` clears an inherited value. Transaction settings can
+also be unpacked with `**txn`, on the service (`ml.documents(**txn)`) or an
+operation (`ml.documents.read("/example.json", **txn)`). For search-specific
+per-operation settings, use `scope=SearchScope(...)`. See
+[Search scope](../guides/search.md#scope-databases-filters-and-options).
+
+### Open a transaction
 
 `ml.transaction()` is a method instead: opening a transaction performs a
 request, so it returns a
@@ -60,29 +77,6 @@ to that transaction - a
 context manager that commits on a clean exit, rolls back on error, and unpacks
 with `**` into the operations it should cover, such as
 `ml.search.uris(**txn)`. See [Transactions](../guides/transactions.md).
-
-## Use one API without the facade
-
-The individual layers can be used independently. If you only need Admin
-operations, compose [AdminApi][mlclient.api.AdminApi] with an
-[ApiClient][mlclient.clients.ApiClient] and a
-[HttpClient][mlclient.clients.HttpClient]:
-
-```python
-from mlclient.api import AdminApi
-from mlclient.clients import ApiClient, HttpClient
-
-with HttpClient(port=8001) as http:
-    admin = AdminApi(ApiClient(http))
-    response = admin.get_timestamp()
-    print(response.text)
-```
-
-[`HttpClient`][mlclient.clients.HttpClient] owns the connection; its context manager closes it. The API wrappers
-use that connection and do not select a port or create additional clients.
-[`RestApi`][mlclient.api.RestApi] and [`ManageApi`][mlclient.api.ManageApi] compose in the same way, using their respective server
-configurations. Async code uses [`AsyncHttpClient`][mlclient.clients.AsyncHttpClient], [`AsyncApiClient`][mlclient.clients.AsyncApiClient] and the
-corresponding async wrapper, with `async with` and awaited operations.
 
 ## Diagnostics
 

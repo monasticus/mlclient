@@ -3,8 +3,7 @@
 Start with [the quickstart](../quickstart.md) to connect and evaluate a query.
 Use a context manager so connections close even when an operation fails.
 Choose [`MLClient`][mlclient.MLClient] for synchronous scripts or [`AsyncMLClient`][mlclient.AsyncMLClient] inside async code.
-These clients are facades combining services and several APIs. You can also
-[use a single API directly](../advanced/services.md#use-one-api-without-the-facade).
+These clients combine services and API wrappers.
 
 ## Entry points at a glance
 

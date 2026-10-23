@@ -10,7 +10,7 @@ from mlclient.clients import http as http_client_module
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import NoRestServerConfiguredError, NoSuchAppServerError
 from mlclient.http import (
-    _HEALTH_TIMEOUT,
+    DEFAULT_HEALTH_TIMEOUT,
     DEFAULT_RETRY_STRATEGY,
     DEFAULT_TIMEOUT,
     NO_RETRY_STRATEGY,
@@ -170,7 +170,7 @@ def test_timeout_defaults_per_server_kind_without_manager_override():
 
     assert manager.get_config("content").timeout == DEFAULT_TIMEOUT
     assert not manager.get_config("content").has_explicit_timeout
-    assert manager.get_config("health").timeout == _HEALTH_TIMEOUT
+    assert manager.get_config("health").timeout == DEFAULT_HEALTH_TIMEOUT
 
 
 def test_manager_timeout_applies_to_every_server_including_health():

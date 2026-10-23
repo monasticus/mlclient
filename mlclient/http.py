@@ -49,7 +49,7 @@ DEFAULT_TIMEOUT = httpx.Timeout(
     pool=5.0,
 )
 
-_HEALTH_TIMEOUT = httpx.Timeout(5.0)
+DEFAULT_HEALTH_TIMEOUT = httpx.Timeout(5.0)
 
 NO_RETRY_STRATEGY = Retry(total=0)
 
@@ -344,7 +344,7 @@ class HTTPConfig:
     def with_health_defaults(self) -> HTTPConfig:
         """Fill unspecified retry and timeout settings for a HealthCheck client.
 
-        Retry defaults to NO_RETRY_STRATEGY and timeout to five seconds.
+        Retry defaults to NO_RETRY_STRATEGY and timeout to DEFAULT_HEALTH_TIMEOUT.
         Each setting is resolved independently. Explicit values, including
         timeout=None, are preserved; host, auth, TLS and limits are unchanged.
 
@@ -358,7 +358,7 @@ class HTTPConfig:
         if not self.has_explicit_retry:
             overrides["retry"] = NO_RETRY_STRATEGY
         if not self.has_explicit_timeout:
-            overrides["timeout"] = _HEALTH_TIMEOUT
+            overrides["timeout"] = DEFAULT_HEALTH_TIMEOUT
         return self.clone(**overrides) if overrides else self
 
     def transport_verify(self) -> ssl.SSLContext | bool:
@@ -422,6 +422,7 @@ class HTTPConfig:
 
 
 __all__ = [
+    "DEFAULT_HEALTH_TIMEOUT",
     "DEFAULT_RETRY_STRATEGY",
     "DEFAULT_TIMEOUT",
     "NO_RETRY_STRATEGY",

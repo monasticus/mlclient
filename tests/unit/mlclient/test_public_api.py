@@ -60,6 +60,7 @@ EXPECTED_EXPORTS = {
     "mlclient.http": [
         "HTTPConfig",
         "DEFAULT_TIMEOUT",
+        "DEFAULT_HEALTH_TIMEOUT",
         "DEFAULT_RETRY_STRATEGY",
         "NO_RETRY_STRATEGY",
         "UNSET",

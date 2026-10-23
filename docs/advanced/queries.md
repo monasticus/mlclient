@@ -24,26 +24,24 @@ from mlclient.search import sq
 from mlclient.xquery import cts
 
 structured = sq.query(sq.and_(sq.collection("reports"), sq.term("blue")))
-native = cts.and_query(
+cts_query = cts.and_query(
     [
         cts.collection_query("reports"),
         cts.word_query("blue"),
     ]
 )
 
-for query in (structured, native):
+for query in (structured, cts_query):
     json_query = query.serialize()  # Same as serialize("json") or to_json().
     xml_query = query.serialize("xml")  # Same as to_xml(); an ElementTree element.
     xml_text = tostring(xml_query, encoding="unicode")
     combined = query.to_combined_query()
 ```
 
-Serialization runs locally and sends no request. JSON results are fresh
-JSON-compatible dictionaries; XML results are fresh ElementTree elements.
-Changing either result does not change the query. JSON and XML are built
-independently, rather than converting through the other format.
-XML output uses the conventional `search` and `cts` namespace prefixes; the
-namespace URI, rather than its prefix, identifies each vocabulary.
+Use `to_json()` when you need a Python dictionary, or `to_xml()` when you need
+an ElementTree element. MLClient builds either representation locally from the
+query object, without making a server request. Each call returns a new result,
+so you can modify it without changing the query.
 
 ## Execute over REST
 
@@ -54,7 +52,7 @@ from mlclient import MLClient
 
 with MLClient() as ml:
     structured_documents = ml.search.documents(structured)
-    cts_documents = ml.search.documents(native)
+    cts_documents = ml.search.documents(cts_query)
 ```
 
 ### Native JSON or Python query objects
@@ -238,9 +236,9 @@ document selection. [`ContainerQuery`][mlclient.search.structured.ContainerQuery
 or JSON property. [`DocumentFragmentQuery`][mlclient.search.structured.DocumentFragmentQuery], [`PropertiesFragmentQuery`][mlclient.search.structured.PropertiesFragmentQuery], and
 [`LocksFragmentQuery`][mlclient.search.structured.LocksFragmentQuery] select the fragment kind.
 
-Optional parameters set to `None` are omitted, leaving MarkLogic's defaults
-intact. Explicit `False` and zero values are retained. Directory URIs must end
-with `/`; an omitted `infinite` uses the server's recursive default.
+Pass `None` for an optional setting when you want MarkLogic to use its default.
+MLClient leaves that setting out of the serialized query. Values such as `False`
+and `0` are explicit choices and are sent as supplied.
 
 ### Range queries
 
@@ -482,16 +480,21 @@ CTS under other functions.
 
 ### Local CTS serialization and limitations
 
-Serialization keeps the arguments you supplied: options stay in their order,
-`exact` is not expanded, an omitted `lang=` stays omitted and weights are not
-clamped. MarkLogic applies those normalizations, including the database
-language, when it reads the serialized query, so it reconstructs the same query
-as the native constructor. Near-query serialization still applies native
-distance rounding and minimum-distance normalization. Native constructors can
-emit distances above the signed 32-bit range that `cts:query` itself rejects
-when reading XML; local serialization retains that representation rather than
-hiding the server limitation. Reconstructing field queries also requires the
-referenced field to exist in the destination database.
+Local serialization describes the query you built, leaving database-dependent
+interpretation to MarkLogic. For example, when you omit `lang=`, the serialized
+query leaves the language unspecified so the destination database can supply
+its default. Options such as `exact` and query weights are also passed through
+for MarkLogic to interpret when it reads the query.
+
+For `cts.near_query()`, MLClient normalizes distances and `minimum-distance`
+options as MarkLogic's constructor does. Very large distances can still produce
+XML that `cts:query` rejects: the constructor can emit values above the signed
+32-bit range accepted by the XML reader. Local serialization retains the
+constructor's representation, so such a query can fail when sent to the server.
+
+A serialized field query identifies its field by name. Run it against a database
+where that field is configured; the name alone is not enough to reconstruct the
+query in another database.
 
 Arbitrary expressions remain compilable, but local serialization rejects
 arguments that require server evaluation with `TypeError`. Arguments are

@@ -9,7 +9,8 @@ import pytest
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import ValueHit
-from mlclient.search.options import Range, opt
+from mlclient.search import opt
+from mlclient.search.options import Range
 from mlclient.search.structured import Element
 
 pytestmark = pytest.mark.ml_access

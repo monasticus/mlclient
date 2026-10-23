@@ -1,11 +1,11 @@
-"""The options builder constructs the same models as their public constructors."""
+"""Options constructor aliases compose immutable model components."""
 
 from xml.etree.ElementTree import Element as XmlElement
 
 import pytest
 
-from mlclient.search import options
-from mlclient.search.options import Range, opt
+from mlclient.search import opt, options
+from mlclient.search.options import Range
 from mlclient.search.structured import Attribute, Element, JsonProperty
 
 PRICE_RANGE = Range(Element("price"), "xs:decimal")
@@ -28,12 +28,12 @@ NATIVE_ELEMENT.text = "false"
             id="options",
         ),
         pytest.param(
-            lambda b: b.range(Element("title")),
+            lambda b: b.range_(Element("title")),
             Range(Element("title")),
             id="range-defaults",
         ),
         pytest.param(
-            lambda b: b.range(
+            lambda b: b.range_(
                 Element("item"),
                 "xs:string",
                 collation="http://marklogic.com/collation/",
@@ -186,11 +186,11 @@ NATIVE_ELEMENT.text = "false"
         ),
     ],
 )
-def test_builder_factories_preserve_constructor_arguments(build, expected):
+def test_opt_factories_preserve_constructor_arguments(build, expected):
     assert build(opt) == expected
 
 
-def test_builder_composes_reusable_option_groups():
+def test_opt_composes_reusable_option_groups():
     defaults = opt.options(
         opt.word_constraint("title", Element("title")),
         opt.page_length(10),
@@ -206,7 +206,7 @@ def test_builder_composes_reusable_option_groups():
     )
 
 
-def test_builder_rejects_invalid_page_length():
+def test_opt_rejects_invalid_page_length():
     with pytest.raises(ValueError, match="page length must be positive") as error:
         opt.page_length(0)
     assert str(error.value) == "page length must be positive"

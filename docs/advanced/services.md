@@ -16,7 +16,7 @@ See [Clients](../guides/clients.md) for the full tier map.
 ## Client services
 
 Documents, evaluation, search and transactions are available directly on the
-client. Construct the CTS search service from `ml.rest`:
+client:
 
 | Service | Access | Guide |
 | --- | --- | --- |
@@ -24,7 +24,6 @@ client. Construct the CTS search service from `ml.rest`:
 | Evaluate code | `ml.eval` | [Evaluate code](../guides/eval.md) |
 | Search | `ml.search` | [Search](../guides/search.md) |
 | Transactions | `ml.transaction()` | [Transactions](../guides/transactions.md) |
-| CTS search (eval) | `CtsService(ml.rest)` | [CTS search with eval](../guides/search.md#cts-search-with-eval) |
 
 ```python
 from mlclient import MLClient
@@ -78,17 +77,38 @@ context manager that commits on a clean exit, rolls back on error, and unpacks
 with `**` into the operations it should cover, such as
 `ml.search.uris(**txn)`. See [Transactions](../guides/transactions.md).
 
-## Diagnostics
+## Additional services
 
-Operational services live in [`mlclient.services.diagnostics`][mlclient.services.diagnostics]: Logs, LogLevel
-and TraceEvents.
+Construct these services from the API tier handles on an existing client. They
+use the same connections and return parsed Python results, but are not properties
+on the client facade.
 
-Other services are not on the client facade. They cover narrower or more
-operational needs, so instead of a ready property you construct them yourself
-and pass the API tier handle they build on. They are the same layer - parsed
-Python output, defaults applied - just off the curated client surface.
+### CTS search
 
-### Logs
+[CtsService][mlclient.services.CtsService] executes CTS queries through eval.
+Use it to search XML subtrees or combine search with other XQuery operations:
+
+```python
+from mlclient.services import CtsService
+from mlclient.xquery import cts
+
+with MLClient() as ml:
+    search = CtsService(ml.rest)
+    hits = search.search(query=cts.collection_query("products"), pos=[1, 10])
+```
+
+It needs eval privileges. For ordinary REST searches with structured, CTS or
+text queries, use `ml.search`. See
+[CTS search with eval](../guides/search.md#cts-search-with-eval) for query composition
+and the async counterpart.
+
+### Diagnostics
+
+Operational services live in
+[mlclient.services.diagnostics][mlclient.services.diagnostics]. They read logs,
+change log levels and manage trace events.
+
+#### Logs
 
 [LogsService][mlclient.services.diagnostics.LogsService] returns parsed log records
 through the Management API. Construct it from `ml.manage`:
@@ -109,7 +129,7 @@ filters by app server, log type, time range and regex; `list` returns the
 available log files. Prefer a time range over refetching a whole file for large
 logs. Use the [logs command](../cli/logs.md) when you only need terminal output.
 
-### Log level
+#### Log level
 
 [LogLevelService][mlclient.services.diagnostics.LogLevelService] reads or changes
 a group or App Server log level. It evaluates
@@ -132,7 +152,7 @@ level; App Servers have no system log level. Both `get` and `set` accept a
 keyword-only `timeout`. Use the [log-level command](../cli/log-level.md) for
 supported levels and the Management permissions each path needs.
 
-### Trace events
+#### Trace events
 
 [TraceEventsService][mlclient.services.diagnostics.TraceEventsService] reads and changes
 group diagnostics through the REST server's Admin-module evaluation:

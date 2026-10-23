@@ -4,7 +4,7 @@ import pytest
 import respx
 
 from mlclient import AsyncMLClient, MLClient
-from mlclient.search.options import opt
+from mlclient.search import opt
 from mlclient.services import (
     AsyncSearchService,
     SearchScope,

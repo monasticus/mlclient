@@ -1,8 +1,8 @@
-"""The structured builder constructs query objects with the supplied arguments."""
+"""Structured constructor aliases and composition helpers build query models."""
 
 import pytest
 
-from mlclient.search import structured
+from mlclient.search import sq, structured
 from mlclient.search.structured import (
     AndQuery,
     CollectionQuery,
@@ -12,16 +12,14 @@ from mlclient.search.structured import (
     OrQuery,
     Query,
     RangeQuery,
-    StructuredQueryBuilder,
     TermQuery,
-    sq,
 )
 
 
-def test_builder_composes_range_and_term():
+def test_sq_composes_range_and_term():
     query = sq.query(
         sq.and_(
-            sq.range(sq.element("price"), 20, operator="GE", index_type="xs:int"),
+            sq.range_(sq.element("price"), 20, operator="GE", index_type="xs:int"),
             sq.term("blue"),
         ),
     )
@@ -43,23 +41,22 @@ def test_builder_composes_range_and_term():
 
 
 @pytest.mark.parametrize("ordered", [None, True, False])
-def test_builder_and_preserves_order(ordered):
-    builder = StructuredQueryBuilder()
-    blue = builder.term("blue")
-    green = builder.term("green")
-    assert builder.and_(blue, green, ordered=ordered) == AndQuery(
+def test_sq_and_preserves_order(ordered):
+    blue = sq.term("blue")
+    green = sq.term("green")
+    assert sq.and_(blue, green, ordered=ordered) == AndQuery(
         [TermQuery("blue"), TermQuery("green")],
         ordered=ordered,
     )
 
 
-def test_builder_or_composes_queries():
+def test_sq_or_composes_queries():
     assert sq.or_(sq.collection("reports"), sq.not_(sq.term("blue"))) == OrQuery(
         [CollectionQuery("reports"), NotQuery(TermQuery("blue"))],
     )
 
 
-def test_builder_near_preserves_optional_arguments():
+def test_sq_near_preserves_optional_arguments():
     assert sq.near(
         sq.term("blue"),
         sq.term("green"),
@@ -76,7 +73,7 @@ def test_builder_near_preserves_optional_arguments():
     )
 
 
-def test_builder_near_without_options():
+def test_sq_near_without_options():
     assert sq.near(sq.term("blue")) == NearQuery([TermQuery("blue")])
 
 
@@ -90,21 +87,16 @@ def test_builder_near_without_options():
     ],
     ids=["query", "and", "or", "near"],
 )
-def test_builder_empty_composition(build, expected):
+def test_sq_empty_composition(build, expected):
     assert build() == expected
 
 
-def test_builder_near_rejects_invalid_distance():
+def test_sq_near_rejects_invalid_distance():
     with pytest.raises(TypeError) as error:
         sq.near(sq.term("blue"), distance=1.5)
     assert str(error.value) == "NearQuery.distance must be an integer, got float"
 
 
-@pytest.mark.parametrize(
-    "builder",
-    [sq, StructuredQueryBuilder()],
-    ids=["sq", "instance"],
-)
 @pytest.mark.parametrize(
     ("build", "expected"),
     [
@@ -492,7 +484,7 @@ def test_builder_near_rejects_invalid_distance():
             id="range_constraint",
         ),
         pytest.param(
-            lambda b: b.range(
+            lambda b: b.range_(
                 Element("price"),
                 20,
                 operator="GE",
@@ -574,7 +566,11 @@ def test_builder_near_rejects_invalid_distance():
         ),
     ],
 )
-def test_builder_factories_construct_expected_objects(builder, build, expected):
-    actual = build(builder)
+def test_sq_factories_construct_expected_objects(build, expected):
+    actual = build(sq)
     assert type(actual) is type(expected)
     assert actual == expected
+
+
+def test_path_index_without_namespaces():
+    assert sq.path_index("/price") == structured.PathIndex("/price")

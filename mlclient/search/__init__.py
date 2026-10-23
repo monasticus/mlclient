@@ -1,18 +1,11 @@
-"""Search API inputs: structured queries, search options and the query contract.
+"""Search API query contracts, models and factory modules.
 
-The package mirrors MarkLogic's search namespace
-(http://marklogic.com/appservices/search) that structured queries and query
-options belong to: mlclient.search.structured holds structured queries and their
-sq builder, mlclient.search.options immutable option components and opt factories.
-QueryComponent
-and SearchQuery are the contracts every locally serialized query implements;
-CTS queries implement them in mlclient.xquery, because they also compile to
-XQuery. This package never imports mlclient.xquery.
+Use sq for structured query factories and opt for option factories. Their
+immutable model classes belong to structured and options respectively. This
+package does not import the XQuery compiler or CTS query implementations.
 """
 
+from mlclient.search import opt, sq
 from mlclient.search.base import QueryComponent, SearchQuery
 
-__all__ = [
-    "QueryComponent",
-    "SearchQuery",
-]
+__all__ = ["QueryComponent", "SearchQuery", "opt", "sq"]

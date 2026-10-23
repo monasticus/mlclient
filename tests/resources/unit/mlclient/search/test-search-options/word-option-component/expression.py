@@ -1,5 +1,5 @@
+from mlclient.search import sq
 from mlclient.search.options import WordConstraint
-from mlclient.search.structured import sq
 
 
 def run():

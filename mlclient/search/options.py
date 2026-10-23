@@ -33,13 +33,11 @@ __all__ = [
     "ReturnFacets",
     "SearchOption",
     "SearchOptions",
-    "SearchOptionsBuilder",
     "SortOrder",
     "Tuples",
     "ValueConstraint",
     "Values",
     "WordConstraint",
-    "opt",
 ]
 
 # MarkLogic's REST options converter holds these members in JSON arrays
@@ -753,7 +751,7 @@ class Control(SearchOption):
         name : str
             Native Search API scalar option name, including hyphens.
         value : str | int | float | bool
-            Native scalar value. Complex options belong in add instead.
+            Native scalar value. Use native definitions for complex options.
 
         Raises
         ------
@@ -930,34 +928,6 @@ class ReturnFacets(SearchOption):
             "_definition",
             _Definition("return-facets", value=value),
         )
-
-
-class SearchOptionsBuilder:
-    """Construct immutable options with typed signatures and no mutable state.
-
-    Each factory has the signature of its corresponding option class. Nest
-    components in options(), which accepts individual options and reusable
-    groups. Range and selector objects describe existing database indexes.
-    """
-
-    options = SearchOptions
-    range = Range
-    values = Values
-    tuples = Tuples
-    range_constraint = RangeConstraint
-    word_constraint = WordConstraint
-    value_constraint = ValueConstraint
-    collection_constraint = CollectionConstraint
-    container_constraint = ContainerConstraint
-    sort = SortOrder
-    control = Control
-    native = NativeOptions
-    page_length = PageLength
-    return_facets = ReturnFacets
-
-
-opt = SearchOptionsBuilder()
-"""Stateless search-options factories, equivalent to SearchOptionsBuilder()."""
 
 
 @dataclass(frozen=True)

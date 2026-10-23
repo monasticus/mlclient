@@ -24,7 +24,7 @@ Every operation accepts the same query argument:
 | Query | Sent as |
 | --- | --- |
 | A CTS query from [`cts`][mlclient.xquery.Cts], or a JSON dictionary `{"ctsquery": {...}}` | Serialized CTS JSON, `{"ctsquery": ...}` |
-| A structured query from [`sq`][mlclient.search.structured.StructuredQueryBuilder] or its classes, or a JSON dictionary `{"query": {...}}` | Serialized structured JSON, `{"query": ...}` |
+| A structured query from [`sq`][mlclient.search.sq] or its classes, or a JSON dictionary `{"query": {...}}` | Serialized structured JSON, `{"query": ...}` |
 | A JSON combined-query dictionary, `{"search": {...}}` | Combined query including inline options and/or `qtext` |
 | A string, such as `"coffee AND tea"` | Search API string query (`qtext`) |
 | `None` (default) | No query; matches every document |
@@ -34,9 +34,9 @@ instead of raw CTS JSON; see the [lexicon restriction](../advanced/queries.md#co
 
 ```python
 from mlclient import MLClient
-from mlclient.search.options import opt
+from mlclient.search import opt
 from mlclient.xquery import cts
-from mlclient.search.structured import sq
+from mlclient.search import sq
 
 with MLClient() as ml:
     by_cts = ml.search.documents(
@@ -160,7 +160,7 @@ Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
 values or tuples definition. It returns the parsed result, not a [`ValueHit`][mlclient.models.ValueHit]:
 
 ```python
-options = opt.options(opt.values("price", opt.range(sq.element("price"), "xs:decimal")))
+options = opt.options(opt.values("price", opt.range_(sq.element("price"), "xs:decimal")))
 
 with MLClient() as ml:
     prices = ml.search(options=options)
@@ -195,8 +195,8 @@ the lexicon. A missing value returns `None`.
 options = opt.options(
     opt.tuples(
         "price-day",
-        opt.range(sq.element("price"), "xs:decimal"),
-        opt.range(sq.element("day"), "xs:date"),
+        opt.range_(sq.element("price"), "xs:decimal"),
+        opt.range_(sq.element("day"), "xs:date"),
     )
 )
 
@@ -257,15 +257,15 @@ paging and report contents.
 
 Pass an installed options name, an inline dictionary, or an immutable
 [SearchOptions][mlclient.search.options.SearchOptions] composition to `ml.search`.
-The stateless [opt][mlclient.search.options.SearchOptionsBuilder] factories work
-like [sq][mlclient.search.structured.StructuredQueryBuilder]: nest typed
+The [opt module][mlclient.search.opt] provides constructor aliases that work
+like [sq][mlclient.search.sq]: nest typed
 components in `opt.options(...)`.
 
 ```python
-from mlclient.search.options import opt
-from mlclient.search.structured import sq
+from mlclient.search import opt
+from mlclient.search import sq
 
-price = opt.range(sq.element("price"), "xs:decimal")
+price = opt.range_(sq.element("price"), "xs:decimal")
 options = opt.options(
     opt.values("price", price),
     opt.range_constraint("price", price),
@@ -285,7 +285,7 @@ a complete options object; it never changes a component or another group.
 Indexes must already exist in the target database; options do not create them.
 See [Search options](../advanced/queries.md#search-options) for reuse, direct
 classes and native definitions, and the
-[factory reference][mlclient.search.options.SearchOptionsBuilder] for all constructors.
+[factory reference][mlclient.search.opt] for all constructors.
 
 For inline dictionaries, pass the options members directly, without the outer
 `{"options": ...}` wrapper:

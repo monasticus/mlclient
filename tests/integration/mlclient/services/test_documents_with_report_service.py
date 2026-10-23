@@ -4,7 +4,8 @@ import pytest
 
 from mlclient import AsyncMLClient
 from mlclient.models import JSONDocument, XMLDocument
-from mlclient.search.options import Range, opt
+from mlclient.search import opt
+from mlclient.search.options import Range
 from mlclient.search.structured import Element
 
 pytestmark = pytest.mark.ml_access

@@ -10,8 +10,9 @@ import respx
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import JSONDocument, SearchReport, TupleHit, ValueHit, XMLDocument
-from mlclient.search.options import Range, opt
-from mlclient.search.structured import Element, sq
+from mlclient.search import opt, sq
+from mlclient.search.options import Range
+from mlclient.search.structured import Element
 from mlclient.services import SearchScope, TransactionService
 from mlclient.xquery import cts
 from tests.utils import data as test_data

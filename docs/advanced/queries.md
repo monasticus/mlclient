@@ -4,7 +4,7 @@ Choose a query vocabulary, then use the same API to serialize and search:
 
 | | Structured queries | CTS queries |
 | --- | --- | --- |
-| Builder | [`sq`][mlclient.search.structured.StructuredQueryBuilder] from [`mlclient.search.structured`][mlclient.search.structured] | [`cts`][mlclient.xquery.Cts] from [`mlclient.xquery`][mlclient.xquery] |
+| Builder | [`sq`][mlclient.search.sq] from [`mlclient.search`][mlclient.search] | [`cts`][mlclient.xquery.Cts] from [`mlclient.xquery`][mlclient.xquery] |
 | Native format | Search API structured JSON/XML | CTS JSON/XML |
 | Local serialization | `serialize()`, `to_json()`, `to_xml()` | `serialize()`, `to_json()`, `to_xml()` |
 | Combined query | `to_combined_query()` under `query` | `to_combined_query()` under `ctsquery` |
@@ -20,7 +20,7 @@ remain distinct. Build equivalent queries with either vocabulary:
 ```python
 from xml.etree.ElementTree import tostring
 
-from mlclient.search.structured import sq
+from mlclient.search import sq
 from mlclient.xquery import cts
 
 structured = sq.query(sq.and_(sq.collection("reports"), sq.term("blue")))
@@ -79,7 +79,7 @@ with MLClient() as ml:
     )
 ```
 
-Use [sq][mlclient.search.structured.StructuredQueryBuilder] or
+Use [sq][mlclient.search.sq] or
 [cts][mlclient.xquery.Cts] when you want Python constructors and local
 validation; use dictionaries when you already have native JSON. Both are sent
 as `application/json`. Strings remain Search API text queries, not JSON or XML
@@ -90,12 +90,13 @@ source. See the lexicon restriction below for raw CTS JSON.
 Both structured and CTS queries accept `options=` and `qtext=` in
 `to_combined_query()`. Options are inline members as a dictionary, without an
 outer `options` wrapper, or a [SearchOptions][mlclient.search.options.SearchOptions]
-composition built with [opt][mlclient.search.options.SearchOptionsBuilder]. `qtext` is an additional Search API string query; MarkLogic ANDs it
+composition built with [opt][mlclient.search.opt]. `qtext` is an additional Search API string query; MarkLogic ANDs it
 with the structured or CTS query.
 
 ```python
-from mlclient.search.options import opt
-from mlclient.search.structured import Element, sq
+from mlclient.search import opt
+from mlclient.search.structured import Element
+from mlclient.search import sq
 
 options = opt.options(opt.word_constraint("title", Element("title")))
 combined = sq.collection("reports").to_combined_query(
@@ -137,21 +138,22 @@ search and lexicon endpoints.
 
 ## Structured queries
 
-Build Search API queries with [`sq`][mlclient.search.structured.StructuredQueryBuilder] or classes from [`mlclient.search.structured`][mlclient.search.structured].
+Build Search API queries with [`sq`][mlclient.search.sq] or classes from [`mlclient.search.structured`][mlclient.search.structured].
 Wrap subqueries in [`Query`][mlclient.search.structured.Query] when passing them directly to the Search API.
 
 ### Builder
 
-The stateless [`sq` builder][mlclient.search.structured.StructuredQueryBuilder] uses short factory names. Python keywords have a
-trailing underscore: `and_`, `or_`, and `not_`. Query classes retain their full
+The [`sq` module][mlclient.search.sq] provides short constructor aliases and
+composition functions. Names that conflict with Python keywords or builtins have
+a trailing underscore: `and_`, `or_`, `not_`, and `range_`. Query classes retain their full
 names, such as [`AndQuery`][mlclient.search.structured.AndQuery] and [`RangeQuery`][mlclient.search.structured.RangeQuery].
 
 ```python
-from mlclient.search.structured import sq
+from mlclient.search import sq
 
 query = sq.query(
     sq.and_(
-        sq.range(sq.element("price"), 20, operator="GE", index_type="xs:int"),
+        sq.range_(sq.element("price"), 20, operator="GE", index_type="xs:int"),
         sq.term("blue"),
     )
 )
@@ -159,8 +161,10 @@ json_query = query.serialize()
 xml_query = query.serialize("xml")
 ```
 
-Use [`StructuredQueryBuilder()`][mlclient.search.structured.StructuredQueryBuilder] to create another builder. Leaf factories accept
-the same parameters as the corresponding classes; composition factories
+Import it with `from mlclient.search import sq`, or import an individual function
+with `from mlclient.search.sq import term`. Leaf factories accept the same
+parameters as the corresponding classes because they are aliases of those
+constructors; composition functions
 `query`, `and_`, `or_`, and `near` accept positional subqueries.
 
 ### Structured serialization details
@@ -291,7 +295,8 @@ them:
 
 ```python
 from mlclient import MLClient
-from mlclient.search.options import Range, opt
+from mlclient.search.options import Range
+from mlclient.search import opt
 from mlclient.search.structured import Element
 
 options = opt.options(
@@ -303,7 +308,7 @@ with MLClient() as ml:
     documents = ml.search(options=options).documents(query)
 ```
 
-Use [opt][mlclient.search.options.SearchOptionsBuilder] to compose range, word,
+Use [opt][mlclient.search.opt] to compose range, word,
 value, collection and container options. For other native option kinds, use
 `opt.native(...)` with matching JSON and XML; see [Search options](#search-options).
 
@@ -333,12 +338,12 @@ For the complete native syntax and semantics, see the official
 ## Search options
 
 Build options by nesting immutable components, just as `sq` composes query
-objects. The [opt][mlclient.search.options.SearchOptionsBuilder] factories use
+objects. The [opt module][mlclient.search.opt] provides factories using
 the signatures of their corresponding classes. For example,
 `opt.word_constraint(...)` constructs a
 [WordConstraint][mlclient.search.options.WordConstraint], and
 `opt.options(...)` constructs [SearchOptions][mlclient.search.options.SearchOptions].
-Use [Range][mlclient.search.options.Range] or `opt.range(...)` for an index target.
+Use [Range][mlclient.search.options.Range] or `opt.range_(...)` for an index target.
 
 Selectors such as [sq.element][mlclient.search.structured.Element],
 [sq.json_property][mlclient.search.structured.JsonProperty] and
@@ -350,8 +355,8 @@ whose target is defined by `sq.element()`:
 
 ```python
 from mlclient import MLClient
-from mlclient.search.options import opt
-from mlclient.search.structured import sq
+from mlclient.search import opt
+from mlclient.search import sq
 from mlclient.xquery import cts
 
 options = opt.options(opt.word_constraint("title", sq.element("title")))
@@ -368,8 +373,8 @@ CTS index references and CTS query constructors are not option target selectors;
 use `sq` selectors or their corresponding classes when defining these options.
 
 ```python
-from mlclient.search.options import opt
-from mlclient.search.structured import sq
+from mlclient.search import opt
+from mlclient.search import sq
 
 base = opt.options(
     opt.word_constraint("title", sq.element("title")),
@@ -412,7 +417,7 @@ that can be nested in `opt.options(...)`; neither format is inferred from the ot
 ```python
 from xml.etree.ElementTree import Element
 
-from mlclient.search.options import opt
+from mlclient.search import opt
 from mlclient.search.structured import SEARCH_NS_URI
 
 metrics = Element(f"{{{SEARCH_NS_URI}}}return-metrics")

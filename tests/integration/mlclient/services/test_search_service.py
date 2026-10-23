@@ -13,7 +13,8 @@ from mlclient import _constants as constants
 from mlclient.calls import ApiCall
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import JSONDocument, TupleHit, ValueHit, XMLDocument
-from mlclient.search.options import Range, SearchOptions, opt
+from mlclient.search import opt, sq
+from mlclient.search.options import Range, SearchOptions
 from mlclient.search.structured import (
     SEARCH_NS_URI,
     Attribute,
@@ -23,7 +24,6 @@ from mlclient.search.structured import (
     JsonProperty,
     PathIndex,
     TermQuery,
-    sq,
 )
 from mlclient.xquery import cts, fn
 from tests.utils.resources import render_test_resource

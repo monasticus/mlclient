@@ -34,9 +34,8 @@ instead of raw CTS JSON; see the [lexicon restriction](../advanced/queries.md#co
 
 ```python
 from mlclient import MLClient
-from mlclient.search import opt
+from mlclient.search import opt, sq
 from mlclient.xquery import cts
-from mlclient.search import sq
 
 with MLClient() as ml:
     by_cts = ml.search.documents(
@@ -160,7 +159,9 @@ Tuples definitions raise `ValueError` in `values()`; use `tuples()` instead.
 values or tuples definition. It returns the parsed result, not a [`ValueHit`][mlclient.models.ValueHit]:
 
 ```python
-options = opt.options(opt.values("price", opt.range_(sq.element("price"), "xs:decimal")))
+options = opt.options(
+    opt.values("price", opt.range_(sq.element("price"), "xs:decimal")),
+)
 
 with MLClient() as ml:
     prices = ml.search(options=options)
@@ -262,8 +263,7 @@ like [sq][mlclient.search.sq]: nest typed
 components in `opt.options(...)`.
 
 ```python
-from mlclient.search import opt
-from mlclient.search import sq
+from mlclient.search import opt, sq
 
 price = opt.range_(sq.element("price"), "xs:decimal")
 options = opt.options(

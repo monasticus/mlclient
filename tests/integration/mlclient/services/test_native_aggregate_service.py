@@ -9,9 +9,7 @@ import pytest
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import ValueHit
-from mlclient.search import opt
-from mlclient.search.options import Range
-from mlclient.search.structured import Element
+from mlclient.search import opt, sq
 
 pytestmark = pytest.mark.ml_access
 
@@ -68,7 +66,7 @@ def native_aggregate_plugin(indexed_database):
 
 class TestNativeAggregates:
     options = opt.options(
-        opt.values("price", Range(Element("price", NS), "xs:decimal")),
+        opt.values("price", opt.range_(sq.element("price", NS), "xs:decimal")),
     )
 
     def test_values_and_builtin_average(self, indexed_database):

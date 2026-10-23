@@ -1,6 +1,6 @@
-from mlclient.search import sq
 from mlclient.search.options import WordConstraint
+from mlclient.search.structured import Element
 
 
 def run():
-    return WordConstraint("title", sq.element("title"))
+    return WordConstraint("title", Element("title"))

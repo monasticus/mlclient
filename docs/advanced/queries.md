@@ -94,11 +94,9 @@ composition built with [opt][mlclient.search.opt]. `qtext` is an additional Sear
 with the structured or CTS query.
 
 ```python
-from mlclient.search import opt
-from mlclient.search.structured import Element
-from mlclient.search import sq
+from mlclient.search import opt, sq
 
-options = opt.options(opt.word_constraint("title", Element("title")))
+options = opt.options(opt.word_constraint("title", sq.element("title")))
 combined = sq.collection("reports").to_combined_query(
     options=options,
     qtext="title:coffee",
@@ -181,6 +179,8 @@ including geographic coordinates, distances and weights, must be finite in both
 formats; range and value query values may be `INF`, `-INF` or `NaN` and remain
 lexical text with their declared index type.
 
+The model classes can also be constructed directly:
+
 ```python
 from xml.etree.ElementTree import tostring
 
@@ -215,12 +215,12 @@ The query's XML format does not restrict it to XML documents. Do not mix
 target kinds in one query.
 
 ```python
-from mlclient.search.structured import Attribute, Element, JsonProperty, ValueQuery
+from mlclient.search import sq
 
-xml_value = ValueQuery(Element("item"), "published", attribute=Attribute("status"))
-json_number = ValueQuery(JsonProperty("count"), 7, node_type="number")
-json_boolean = ValueQuery(JsonProperty("active"), True, node_type="boolean")
-json_null = ValueQuery(JsonProperty("deleted"), "", node_type="null")
+xml_value = sq.value(sq.element("item"), "published", attribute=sq.attribute("status"))
+json_number = sq.value(sq.json_property("count"), 7, node_type="number")
+json_boolean = sq.value(sq.json_property("active"), True, node_type="boolean")
+json_null = sq.value(sq.json_property("deleted"), "", node_type="null")
 ```
 
 JSON value queries default to string matching on the server. Set `node_type`
@@ -245,11 +245,11 @@ with `/`; an omitted `infinite` uses the server's recursive default.
 ### Range queries
 
 ```python
-from mlclient.search.structured import Element, PathIndex, RangeQuery
+from mlclient.search import sq
 
-price = RangeQuery(Element("price"), 20, operator="GE", index_type="xs:decimal")
-path = RangeQuery(
-    PathIndex(
+price = sq.range_(sq.element("price"), 20, operator="GE", index_type="xs:decimal")
+path = sq.range_(
+    sq.path_index(
         "/r:report/r:price", namespaces={"r": "https://example.com/example/reports"}
     ),
     20,
@@ -271,19 +271,12 @@ Named constraints refer to definitions supplied in Search API options, rather
 than embedding their target elements, properties, fields, or indexes:
 
 ```python
-from mlclient.search.structured import (
-    AndQuery,
-    Query,
-    RangeConstraintQuery,
-    WordConstraintQuery,
-)
+from mlclient.search import sq
 
-query = Query(
-    AndQuery(
-        [
-            RangeConstraintQuery("price", 20, operator="GE"),
-            WordConstraintQuery("title", "blue"),
-        ]
+query = sq.query(
+    sq.and_(
+        sq.range_constraint("price", 20, operator="GE"),
+        sq.word_constraint("title", "blue"),
     )
 )
 xml = query.serialize("xml")
@@ -295,13 +288,15 @@ them:
 
 ```python
 from mlclient import MLClient
-from mlclient.search.options import Range
-from mlclient.search import opt
-from mlclient.search.structured import Element
+from mlclient.search import opt, sq
 
 options = opt.options(
-    opt.range_constraint("price", Range(Element("price"), "xs:decimal"), facet=False),
-    opt.word_constraint("title", Element("title")),
+    opt.range_constraint(
+        "price",
+        opt.range_(sq.element("price"), "xs:decimal"),
+        facet=False,
+    ),
+    opt.word_constraint("title", sq.element("title")),
 )
 
 with MLClient() as ml:
@@ -355,8 +350,7 @@ whose target is defined by `sq.element()`:
 
 ```python
 from mlclient import MLClient
-from mlclient.search import opt
-from mlclient.search import sq
+from mlclient.search import opt, sq
 from mlclient.xquery import cts
 
 options = opt.options(opt.word_constraint("title", sq.element("title")))
@@ -373,8 +367,7 @@ CTS index references and CTS query constructors are not option target selectors;
 use `sq` selectors or their corresponding classes when defining these options.
 
 ```python
-from mlclient.search import opt
-from mlclient.search import sq
+from mlclient.search import opt, sq
 
 base = opt.options(
     opt.word_constraint("title", sq.element("title")),

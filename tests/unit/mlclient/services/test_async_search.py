@@ -10,8 +10,6 @@ from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import JSONDocument, SearchReport, TupleHit, ValueHit, XMLDocument
 from mlclient.search import opt, sq
-from mlclient.search.options import Range
-from mlclient.search.structured import Element
 from mlclient.services import AsyncTransactionService, SearchScope
 from mlclient.xquery import cts
 from tests.utils import data as test_data
@@ -2708,7 +2706,9 @@ async def test_inline_options_with_query(query, fragment):
 @pytest.mark.asyncio
 @respx.mock
 async def test_values_with_options_builder_and_controls():
-    options = opt.options(opt.values("price", Range(Element("price"), "xs:decimal")))
+    options = opt.options(
+        opt.values("price", opt.range_(sq.element("price"), "xs:decimal")),
+    )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(VALUES_URL)
     ml_mocker.with_request_param("format", "json")
@@ -2761,8 +2761,8 @@ async def test_tuples_without_scope():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -2813,8 +2813,8 @@ async def test_tuples_with_scope_kwargs():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -2871,8 +2871,8 @@ async def test_tuples_inherits_service_scope():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -2929,8 +2929,8 @@ async def test_tuples_scope_kwargs_override_service_scope():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -2987,8 +2987,8 @@ async def test_tuples_scope_kwargs_clear_service_database():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -3044,8 +3044,8 @@ async def test_tuples_scope_kwargs_clear_service_transaction():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -3101,8 +3101,8 @@ async def test_tuples_operation_scope_overrides_service_scope():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -3162,8 +3162,8 @@ async def test_tuples_scope_kwargs_override_operation_scope():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -3226,8 +3226,8 @@ async def test_tuples_with_transaction_scope_kwargs():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
@@ -3281,8 +3281,8 @@ async def test_tuples_transaction_scope_inherits_service_database():
     options = opt.options(
         opt.tuples(
             "price-day",
-            Range(Element("price"), "xs:decimal"),
-            Range(Element("day"), "xs:date"),
+            opt.range_(sq.element("price"), "xs:decimal"),
+            opt.range_(sq.element("day"), "xs:date"),
         ),
     )
     ml_mocker = MLRespXMocker(use_router=False, strict_params=True)

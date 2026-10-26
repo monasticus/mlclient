@@ -1,3 +1,5 @@
 {
-  "return-similar": true
+  "options": {
+    "return-similar": true
+  }
 }

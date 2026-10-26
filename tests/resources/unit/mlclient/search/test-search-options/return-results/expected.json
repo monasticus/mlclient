@@ -1,3 +1,5 @@
 {
-  "return-results": false
+  "options": {
+    "return-results": false
+  }
 }

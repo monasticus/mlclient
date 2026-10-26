@@ -1,3 +1,5 @@
 {
-  "return-constraints": true
+  "options": {
+    "return-constraints": true
+  }
 }

@@ -1,3 +1,5 @@
 {
-  "return-qtext": false
+  "options": {
+    "return-qtext": false
+  }
 }

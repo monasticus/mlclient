@@ -1,1 +1,1 @@
-<search:debug xmlns:search="http://marklogic.com/appservices/search">true</search:debug>
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:debug>true</search:debug></search:options>

@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:result-decorator apply="result" ns="https://example.com/search" at="/search.xqy" /></search:options>

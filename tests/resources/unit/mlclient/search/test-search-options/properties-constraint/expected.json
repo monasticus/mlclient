@@ -1,0 +1,13 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "props",
+        "properties": null,
+        "annotation": [
+          "Property values"
+        ]
+      }
+    ]
+  }
+}

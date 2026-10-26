@@ -1,1 +1,1 @@
-<search:return-similar xmlns:search="http://marklogic.com/appservices/search">true</search:return-similar>
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:return-similar>true</search:return-similar></search:options>

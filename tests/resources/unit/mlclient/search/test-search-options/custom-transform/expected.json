@@ -1,0 +1,10 @@
+{
+  "options": {
+    "transform-results": {
+      "apply": "decorate",
+      "ns": "https://example.com/search",
+      "at": "/search.xqy",
+      "max-matches": 3
+    }
+  }
+}

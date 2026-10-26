@@ -1,6 +1,13 @@
 {
-  "range": {
-    "type": "xs:decimal",
-    "json-property": "price"
+  "options": {
+    "values": [
+      {
+        "name": "index",
+        "range": {
+          "type": "xs:decimal",
+          "json-property": "price"
+        }
+      }
+    ]
   }
 }

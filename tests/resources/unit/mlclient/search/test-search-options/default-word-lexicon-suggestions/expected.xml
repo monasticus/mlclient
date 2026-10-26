@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:default-suggestion-source ref="title"><search:word-lexicon collation="http://marklogic.com/collation/"><search:fragment-scope>documents</search:fragment-scope></search:word-lexicon><search:suggestion-option>limit=5</search:suggestion-option></search:default-suggestion-source></search:options>

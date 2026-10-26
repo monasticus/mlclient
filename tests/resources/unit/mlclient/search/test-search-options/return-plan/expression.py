@@ -1,5 +1,5 @@
-from mlclient.search.options import ReturnPlan
+from mlclient.search.options import ReturnPlan, SearchOptions
 
 
 def run():
-    return ReturnPlan(True)
+    return SearchOptions(ReturnPlan(True))

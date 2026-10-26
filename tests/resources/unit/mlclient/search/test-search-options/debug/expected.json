@@ -1,3 +1,5 @@
 {
-  "debug": true
+  "options": {
+    "debug": true
+  }
 }

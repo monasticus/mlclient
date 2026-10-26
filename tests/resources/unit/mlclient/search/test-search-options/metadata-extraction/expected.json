@@ -1,8 +1,5 @@
 {
   "options": {
-    "annotation": [
-      "Search configuration"
-    ],
     "extract-metadata": {
       "qname": [
         {

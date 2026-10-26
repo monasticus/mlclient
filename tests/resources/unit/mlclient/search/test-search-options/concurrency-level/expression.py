@@ -1,5 +1,5 @@
-from mlclient.search.options import ConcurrencyLevel
+from mlclient.search.options import ConcurrencyLevel, SearchOptions
 
 
 def run():
-    return ConcurrencyLevel(4)
+    return SearchOptions(ConcurrencyLevel(4))

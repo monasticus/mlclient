@@ -1,3 +1,7 @@
 {
-  "search-option": "unfiltered"
+  "options": {
+    "search-option": [
+      "unfiltered"
+    ]
+  }
 }

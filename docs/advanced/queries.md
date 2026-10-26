@@ -23,7 +23,7 @@ from xml.etree.ElementTree import tostring
 from mlclient.search import sq
 from mlclient.xquery import cts
 
-structured = sq.query(sq.and_(sq.collection("reports"), sq.term("blue")))
+structured_query = sq.query(sq.and_(sq.collection("reports"), sq.term("blue")))
 cts_query = cts.and_query(
     [
         cts.collection_query("reports"),
@@ -31,7 +31,7 @@ cts_query = cts.and_query(
     ]
 )
 
-for query in (structured, cts_query):
+for query in (structured_query, cts_query):
     json_query = query.serialize()  # Same as serialize("json") or to_json().
     xml_query = query.serialize("xml")  # Same as to_xml(); an ElementTree element.
     xml_text = tostring(xml_query, encoding="unicode")
@@ -41,7 +41,8 @@ for query in (structured, cts_query):
 Use `to_json()` when you need a Python dictionary, or `to_xml()` when you need
 an ElementTree element. MLClient builds either representation locally from the
 query object, without making a server request. Each call returns a new result,
-so you can modify it without changing the query.
+so you can modify it without changing the query. Optional settings set to `None`
+are omitted; explicit `False` and `0` values are retained.
 
 ## Execute over REST
 
@@ -51,7 +52,7 @@ so you can modify it without changing the query.
 from mlclient import MLClient
 
 with MLClient() as ml:
-    structured_documents = ml.search.documents(structured)
+    structured_documents = ml.search.documents(structured_query)
     cts_documents = ml.search.documents(cts_query)
 ```
 
@@ -224,23 +225,8 @@ json_null = sq.value(sq.json_property("deleted"), "", node_type="null")
 JSON value queries default to string matching on the server. Set `node_type`
 explicitly for numbers, booleans, or null values. Word queries only match text.
 
-### Composition and scope
-
-Use [`AndQuery`][mlclient.search.structured.AndQuery], [`OrQuery`][mlclient.search.structured.OrQuery], [`AndNotQuery`][mlclient.search.structured.AndNotQuery], [`NotQuery`][mlclient.search.structured.NotQuery], [`NotInQuery`][mlclient.search.structured.NotInQuery],
-[`NearQuery`][mlclient.search.structured.NearQuery], and [`BoostQuery`][mlclient.search.structured.BoostQuery] to compose subqueries. [`TrueQuery`][mlclient.search.structured.TrueQuery] matches all
-fragments; [`FalseQuery`][mlclient.search.structured.FalseQuery] matches none. [`TermQuery`][mlclient.search.structured.TermQuery] searches the current scope,
-whereas [`WordQuery`][mlclient.search.structured.WordQuery] and [`ValueQuery`][mlclient.search.structured.ValueQuery] select a specific location.
-
-Use [`CollectionQuery`][mlclient.search.structured.CollectionQuery], [`DirectoryQuery`][mlclient.search.structured.DirectoryQuery], and [`DocumentQuery`][mlclient.search.structured.DocumentQuery] to restrict
-document selection. [`ContainerQuery`][mlclient.search.structured.ContainerQuery] applies a subquery inside an XML element
-or JSON property. [`DocumentFragmentQuery`][mlclient.search.structured.DocumentFragmentQuery], [`PropertiesFragmentQuery`][mlclient.search.structured.PropertiesFragmentQuery], and
-[`LocksFragmentQuery`][mlclient.search.structured.LocksFragmentQuery] select the fragment kind.
-
-Pass `None` for an optional setting when you want MarkLogic to use its default.
-MLClient leaves that setting out of the serialized query. Values such as `False`
-and `0` are explicit choices and are sent as supplied.
-
-### Range queries
+`sq.range_` uses the same selectors, with a comparison operator and index type.
+Pass `sq.path_index(...)` as its target for a path range index:
 
 ```python
 from mlclient.search import sq
@@ -256,77 +242,10 @@ path = sq.range_(
 )
 ```
 
-The database must have matching range indexes. Local serialization cannot
-verify database indexes, fields, or configured query options. MarkLogic resolves
-those when it executes the query. Operators use the Search API spellings
-`LT`, `LE`, `GT`, `GE`, `EQ`, and `NE`.
-Supply at least one value. Multiple values are supported only with `EQ` and
-`NE`; MarkLogic otherwise discards the invalid condition with a query warning.
-
-### Named constraints
-
-Named constraints refer to definitions supplied in Search API options, rather
-than embedding their target elements, properties, fields, or indexes:
-
-```python
-from mlclient.search import sq
-
-query = sq.query(
-    sq.and_(
-        sq.range_constraint("price", 20, operator="GE"),
-        sq.word_constraint("title", "blue"),
-    )
-)
-xml = query.serialize("xml")
-```
-
-Build the corresponding options with
-[SearchOptions][mlclient.search.options.SearchOptions] and run the query with
-them:
-
-```python
-from mlclient import MLClient
-from mlclient.search import opt, sq
-
-options = opt.options(
-    opt.range_constraint(
-        "price",
-        opt.range_(sq.element("price"), "xs:decimal"),
-        facet=False,
-    ),
-    opt.word_constraint("title", sq.element("title")),
-)
-
-with MLClient() as ml:
-    documents = ml.search(options=options).documents(query)
-```
-
-Use [opt][mlclient.search.opt] to compose range, word,
-value, collection and container options. For other native option kinds, use
-`opt.native(...)` with matching JSON and XML; see [Search options](#search-options).
-
-Collection, container, properties, custom, value, word, and range constraint
-builders are supported. A custom constraint delegates to its configured
-server-side parser. [`ElementConstraintQuery`][mlclient.search.structured.ElementConstraintQuery] represents MarkLogic's deprecated
-element constraint syntax; prefer [`ContainerConstraintQuery`][mlclient.search.structured.ContainerConstraintQuery] for new queries.
-[`OperatorState`][mlclient.search.structured.OperatorState] selects a named operator state in the supplied options.
-
-[`ValueConstraintQuery`][mlclient.search.structured.ValueConstraintQuery] writes values as XML `text` children. For JSON property
-constraints, configure `<value type="number">`, `type="boolean"`, or
-`type="null"` in options. Numbers and booleans are serialized using their XML
-lexical forms. For null, omit the values and configure `type="null"`.
-The local builder does not resolve or validate named constraint definitions.
-
-Each constraint query accepts one non-empty constraint name. To match either
-of two named constraints, combine separate builders with [`OrQuery`][mlclient.search.structured.OrQuery]. Although
-the native documentation describes repeated constraint names, on the tested
-versions MarkLogic resolves them as a singleton and rejects multiple names.
-
-Geospatial and temporal query classes also have corresponding builder factories,
-including `geo_element`, `geo_path`, `period_range`, and `period_compare`.
-
-For the complete native syntax and semantics, see the official
-[structured-query reference](https://docs.progress.com/bundle/marklogic-server-use-search-12/page/topics/structured-query.html).
+The index must already exist in the database. Local serialization validates the
+Python arguments; MarkLogic checks database configuration when executing the
+query. See the native [structured-query reference](https://docs.progress.com/bundle/marklogic-server-use-search-12/page/topics/structured-query.html)
+for index requirements and query semantics.
 
 ## Search options
 
@@ -395,6 +314,39 @@ options = SearchOptions(
     PageLength(20),
 )
 ```
+
+### Use named constraints in a query
+
+A constraint query names a definition from the options. Define the target with
+`opt`, refer to its name with `sq`, and pass both to the search service:
+
+```python
+from mlclient import MLClient
+from mlclient.search import opt, sq
+
+options = opt.options(
+    opt.range_constraint(
+        "price",
+        opt.range_(sq.element("price"), "xs:decimal"),
+        facet=False,
+    ),
+    opt.word_constraint("title", sq.element("title")),
+)
+query = sq.query(
+    sq.and_(
+        sq.range_constraint("price", 20, operator="GE"),
+        sq.word_constraint("title", "blue"),
+    ),
+)
+
+with MLClient() as ml:
+    documents = ml.search(options=options).documents(query)
+```
+
+The query constructors validate their arguments, including a non-empty
+constraint name; they do not resolve the corresponding options definition.
+For JSON value constraints, set `node_type` on `opt.value_constraint(...)`,
+just as you do on `sq.value(...)` for an inline value query.
 
 ### Typed options and nested components
 

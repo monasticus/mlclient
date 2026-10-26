@@ -1,5 +1,5 @@
-from mlclient.search.options import ReturnMetrics
+from mlclient.search.options import ReturnMetrics, SearchOptions
 
 
 def run():
-    return ReturnMetrics(False)
+    return SearchOptions(ReturnMetrics(False))

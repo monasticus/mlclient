@@ -1,1 +1,1 @@
-<search:return-metrics xmlns:search="http://marklogic.com/appservices/search">false</search:return-metrics>
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:return-metrics>false</search:return-metrics></search:options>

@@ -1,4 +1,9 @@
-"""Search option models serialize, validate and compose independently of builders."""
+"""Model validation, immutable composition and complete native options payloads.
+
+Each serialization resource covers one option inside SearchOptions, except cases
+specifically checking accumulation or replacement. Constructor aliases belong
+in test_opt.py; component behavior is checked directly when composition is irrelevant.
+"""
 
 from dataclasses import FrozenInstanceError
 from xml.etree.ElementTree import Element as XmlElement

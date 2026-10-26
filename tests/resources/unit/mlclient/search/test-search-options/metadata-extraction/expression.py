@@ -4,7 +4,6 @@ from mlclient.search import structured as s
 
 def run():
     return o.SearchOptions(
-        o.Annotation("Search configuration"),
         o.ExtractMetadata(
             [
                 o.MetadataQName(s.Element("title", "https://example.com/docs")),

@@ -1,1 +1,1 @@
-<search:return-plan xmlns:search="http://marklogic.com/appservices/search">true</search:return-plan>
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:return-plan>true</search:return-plan></search:options>

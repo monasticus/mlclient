@@ -1,9 +1,16 @@
 {
-  "range": {
-    "type": "xs:decimal",
-    "element": {
-      "name": "price",
-      "ns": "https://example.com/products"
-    }
+  "options": {
+    "values": [
+      {
+        "name": "index",
+        "range": {
+          "type": "xs:decimal",
+          "element": {
+            "name": "price",
+            "ns": "https://example.com/products"
+          }
+        }
+      }
+    ]
   }
 }

@@ -1,5 +1,5 @@
-from mlclient.search.options import ReturnSimilar
+from mlclient.search.options import ReturnSimilar, SearchOptions
 
 
 def run():
-    return ReturnSimilar(True)
+    return SearchOptions(ReturnSimilar(True))

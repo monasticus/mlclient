@@ -1,5 +1,5 @@
-from mlclient.search.options import ReturnQtext
+from mlclient.search.options import ReturnQtext, SearchOptions
 
 
 def run():
-    return ReturnQtext(False)
+    return SearchOptions(ReturnQtext(False))

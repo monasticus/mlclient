@@ -1,5 +1,5 @@
-from mlclient.search.options import ReturnFrequencies
+from mlclient.search.options import ReturnFrequencies, SearchOptions
 
 
 def run():
-    return ReturnFrequencies(True)
+    return SearchOptions(ReturnFrequencies(True))

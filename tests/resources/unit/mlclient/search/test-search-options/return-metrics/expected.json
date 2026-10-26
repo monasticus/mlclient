@@ -1,3 +1,5 @@
 {
-  "return-metrics": false
+  "options": {
+    "return-metrics": false
+  }
 }

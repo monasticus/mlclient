@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:extract-document-data xmlns:d="https://example.com/docs" selected="include"><search:extract-path>/d:doc/d:title</search:extract-path><search:extract-path>/d:doc/d:summary</search:extract-path></search:extract-document-data></search:options>

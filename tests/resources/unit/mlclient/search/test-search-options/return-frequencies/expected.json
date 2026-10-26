@@ -1,3 +1,5 @@
 {
-  "return-frequencies": true
+  "options": {
+    "return-frequencies": true
+  }
 }

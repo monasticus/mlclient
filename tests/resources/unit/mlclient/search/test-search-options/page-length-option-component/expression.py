@@ -1,5 +1,5 @@
-from mlclient.search.options import PageLength
+from mlclient.search.options import PageLength, SearchOptions
 
 
 def run():
-    return PageLength(20)
+    return SearchOptions(PageLength(20))

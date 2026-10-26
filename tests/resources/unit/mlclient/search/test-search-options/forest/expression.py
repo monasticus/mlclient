@@ -1,5 +1,5 @@
-from mlclient.search.options import Forest
+from mlclient.search.options import Forest, SearchOptions
 
 
 def run():
-    return Forest("1234")
+    return SearchOptions(Forest("1234"))

@@ -1,5 +1,5 @@
-from mlclient.search.options import QualityWeight
+from mlclient.search.options import QualityWeight, SearchOptions
 
 
 def run():
-    return QualityWeight(0.5)
+    return SearchOptions(QualityWeight(0.5))

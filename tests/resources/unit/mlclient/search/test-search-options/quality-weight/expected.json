@@ -1,3 +1,5 @@
 {
-  "quality-weight": 0.5
+  "options": {
+    "quality-weight": 0.5
+  }
 }

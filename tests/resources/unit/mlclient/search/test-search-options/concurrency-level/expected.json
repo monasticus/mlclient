@@ -1,3 +1,5 @@
 {
-  "concurrency-level": 4
+  "options": {
+    "concurrency-level": 4
+  }
 }

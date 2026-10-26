@@ -1,3 +1,5 @@
 {
-  "return-query": true
+  "options": {
+    "return-query": true
+  }
 }

@@ -1,14 +1,21 @@
 {
-  "range": {
-    "type": "xs:string",
-    "collation": "https://example.com/collation",
-    "element": {
-      "name": "product",
-      "ns": ""
-    },
-    "attribute": {
-      "name": "category",
-      "ns": ""
-    }
+  "options": {
+    "values": [
+      {
+        "name": "index",
+        "range": {
+          "type": "xs:string",
+          "collation": "https://example.com/collation",
+          "element": {
+            "name": "product",
+            "ns": ""
+          },
+          "attribute": {
+            "name": "category",
+            "ns": ""
+          }
+        }
+      }
+    ]
   }
 }

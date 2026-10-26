@@ -1,0 +1,14 @@
+{
+  "options": {
+    "extract-document-data": {
+      "selected": "include",
+      "extract-path": [
+        "/d:doc/d:title",
+        "/d:doc/d:summary"
+      ],
+      "namespaces": {
+        "d": "https://example.com/docs"
+      }
+    }
+  }
+}

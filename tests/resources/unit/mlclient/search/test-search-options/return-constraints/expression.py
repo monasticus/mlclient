@@ -1,5 +1,5 @@
-from mlclient.search.options import ReturnConstraints
+from mlclient.search.options import ReturnConstraints, SearchOptions
 
 
 def run():
-    return ReturnConstraints(True)
+    return SearchOptions(ReturnConstraints(True))

@@ -1,5 +1,5 @@
-from mlclient.search.options import SearchOptionString
+from mlclient.search.options import SearchOptions, SearchOptionString
 
 
 def run():
-    return SearchOptionString("unfiltered")
+    return SearchOptions(SearchOptionString("unfiltered"))

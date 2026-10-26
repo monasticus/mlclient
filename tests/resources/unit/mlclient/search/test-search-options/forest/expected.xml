@@ -1,1 +1,1 @@
-<search:forest xmlns:search="http://marklogic.com/appservices/search">1234</search:forest>
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:forest>1234</search:forest></search:options>

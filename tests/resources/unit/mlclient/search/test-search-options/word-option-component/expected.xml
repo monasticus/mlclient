@@ -1,1 +1,1 @@
-<search:constraint xmlns:search="http://marklogic.com/appservices/search" name="title"><search:word><search:element name="title" ns="" /></search:word></search:constraint>
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="title"><search:word><search:element name="title" ns="" /></search:word></search:constraint></search:options>

@@ -1,5 +1,5 @@
-from mlclient.search.options import FragmentScope
+from mlclient.search.options import FragmentScope, SearchOptions
 
 
 def run():
-    return FragmentScope("properties")
+    return SearchOptions(FragmentScope("properties"))

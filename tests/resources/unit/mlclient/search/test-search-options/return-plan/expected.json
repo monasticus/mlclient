@@ -1,3 +1,5 @@
 {
-  "return-plan": true
+  "options": {
+    "return-plan": true
+  }
 }

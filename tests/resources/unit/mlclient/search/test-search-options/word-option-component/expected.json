@@ -1,6 +1,15 @@
 {
-  "constraint": {
-    "name": "title",
-    "word": {"element": {"name": "title", "ns": ""}}
+  "options": {
+    "constraint": [
+      {
+        "name": "title",
+        "word": {
+          "element": {
+            "name": "title",
+            "ns": ""
+          }
+        }
+      }
+    ]
   }
 }

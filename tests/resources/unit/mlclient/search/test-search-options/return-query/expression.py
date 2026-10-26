@@ -1,5 +1,5 @@
-from mlclient.search.options import ReturnQuery
+from mlclient.search.options import ReturnQuery, SearchOptions
 
 
 def run():
-    return ReturnQuery(True)
+    return SearchOptions(ReturnQuery(True))

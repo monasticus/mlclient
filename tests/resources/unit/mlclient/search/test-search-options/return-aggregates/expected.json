@@ -1,3 +1,5 @@
 {
-  "return-aggregates": false
+  "options": {
+    "return-aggregates": false
+  }
 }

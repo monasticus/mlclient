@@ -1,5 +1,5 @@
-from mlclient.search.options import Debug
+from mlclient.search.options import Debug, SearchOptions
 
 
 def run():
-    return Debug(True)
+    return SearchOptions(Debug(True))

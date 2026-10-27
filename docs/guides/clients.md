@@ -13,7 +13,7 @@ each axis.
 
 | Entry point               | Returns                    | Server (port)       | Reach for it when |
 | ------------------------- | -------------------------- | ------------------- | ----------------- |
-| `ml.documents`, `ml.eval` | Parsed values and models   | REST (main)         | You want Python values without handling HTTP yourself |
+| `ml.documents`, `ml.eval`, `ml.invoke` | Parsed values and models | REST (main) | You want Python values without handling HTTP yourself |
 | `ml.search`               | Parsed documents, URIs, lexicon values and reports | REST (main) | You search with structured, CTS or string queries without eval privileges |
 | `ml.transaction()`        | Transaction context manager | REST (main)        | You group operations to commit or roll back together |
 | `ml.rest`                 | [`httpx.Response`](https://www.python-httpx.org/api/#response)           | REST (main)         | Named `/v1/*` operations where you read the response |
@@ -31,7 +31,7 @@ one. See [Transactions](transactions.md).
 The client works at three levels of abstraction. Use the highest one that fits
 the task; you can mix them in one application.
 
-- **Services** (`ml.documents`, `ml.eval`, `ml.search`) parse the response into
+- **Services** (`ml.documents`, `ml.eval`, `ml.invoke`, `ml.search`) parse the response into
   Python values and document models.
 - **Wrappers** (`ml.rest`, `ml.manage`, `ml.admin`) build the request for a named
   endpoint and return the raw [`httpx.Response`](https://www.python-httpx.org/api/#response).

@@ -7,6 +7,7 @@ from mlclient.api.eval import AsyncEvalApi, EvalApi
 from mlclient.api.forests import AsyncForestsApi, ForestsApi
 from mlclient.api.groups import AsyncGroupsApi, GroupsApi
 from mlclient.api.hosts import AsyncHostsApi, HostsApi
+from mlclient.api.invoke import AsyncInvokeApi, InvokeApi
 from mlclient.api.logs import AsyncLogsApi, LogsApi
 from mlclient.api.manage import AsyncManageApi, ManageApi
 from mlclient.api.rest import AsyncRestApi, RestApi
@@ -26,6 +27,7 @@ __all__ = [
     "AsyncForestsApi",
     "AsyncGroupsApi",
     "AsyncHostsApi",
+    "AsyncInvokeApi",
     "AsyncLogsApi",
     "AsyncManageApi",
     "AsyncRestApi",
@@ -41,6 +43,7 @@ __all__ = [
     "ForestsApi",
     "GroupsApi",
     "HostsApi",
+    "InvokeApi",
     "LogsApi",
     "ManageApi",
     "RestApi",

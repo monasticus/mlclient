@@ -3,6 +3,8 @@
 It contains all CLI commands modules:
     * eval
         The Eval Command module.
+    * invoke
+        The Invoke Command module.
     * logs
         The Logs Command module.
     * http
@@ -33,6 +35,8 @@ It contains all CLI commands modules:
 It exports the following commands:
     * EvalCommand
         Sends a GET request to the /v1/eval endpoint.
+    * InvokeCommand
+        Sends a POST request to the /v1/invoke endpoint.
     * LogsCommand
         Sends a GET request to the /manage/v2/logs endpoint.
     * HttpCommand
@@ -70,6 +74,7 @@ from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
 from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
+from mlclient.cli.commands.invoke import InvokeCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
 from mlclient.cli.commands.sample import SampleCommand
@@ -86,6 +91,7 @@ __all__ = [
     "EvalCommand",
     "HealthCommand",
     "HttpCommand",
+    "InvokeCommand",
     "LogLevelCommand",
     "LogsCommand",
     "SampleCommand",

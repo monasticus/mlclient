@@ -127,6 +127,24 @@ def test_command_eval_with_vars():
 
 
 @respx.mock
+def test_command_eval_var_value_with_equals_sign():
+    code = "declare variable $filter external; $filter"
+
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code, "vars": '{"filter": "a=b"}'})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "a=b")
+    ml_mocker.mock_post()
+
+    tester = _get_tester("eval")
+    tester.execute(f"-e test -x '{code}' --var filter=a=b")
+
+    assert tester.status_code == 0
+
+
+@respx.mock
 def test_command_eval_xquery_flag():
     code = 'xquery version "1.0"; ""'
 
@@ -329,3 +347,15 @@ def _get_tester(
     app = MLCLIentApplication()
     command = app.find(command_name)
     return CommandTester(command)
+
+
+@pytest.mark.parametrize("variable", ["=value", "   =value"])
+@respx.mock
+def test_command_eval_rejects_blank_variable_names_before_request(variable):
+    tester = _get_tester("eval")
+
+    with pytest.raises(WrongParametersError, match="name cannot be empty") as error:
+        tester.execute(f"-x 1 --var '{variable}'")
+
+    assert str(error.value) == "A variable name cannot be empty."
+    assert not respx.calls

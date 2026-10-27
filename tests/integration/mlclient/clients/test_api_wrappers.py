@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 from time import sleep
 from typing import ClassVar
+from uuid import uuid4
 
 import httpx
 import pytest
@@ -11,7 +12,7 @@ from httpx import Response
 from mlclient import MLClient
 from mlclient.connection import MARKLOGIC_MANAGE_PORT
 from mlclient.http import HTTPConfig
-from mlclient.models import DocumentsBodyPart
+from mlclient.models import DocumentsBodyPart, TextDocument
 from mlclient.responses import MLResponseParser
 
 EVAL_XQUERY = (
@@ -19,6 +20,18 @@ EVAL_XQUERY = (
     "declare variable $element external;\n\n"
     "<new-parent>{xdmp:unquote($element)/parent/child}</new-parent>"
 )
+INVOKE_ROOT = f"/mlclient-invoke-endpoint-test/{uuid4().hex}"
+INVOKE_WORDS_MODULE = f"{INVOKE_ROOT}/words.xqy"
+INVOKE_EMPTY_MODULE = f"{INVOKE_ROOT}/empty.xqy"
+INVOKE_MODULES = {
+    INVOKE_WORDS_MODULE: (
+        'xquery version "1.0-ml";\n'
+        "declare variable $word1 as xs:string external;\n"
+        "declare variable $word2 as xs:string external;\n"
+        '($word1, $word2, fn:concat($word1, " ", $word2))'
+    ),
+    INVOKE_EMPTY_MODULE: 'xquery version "1.0-ml"; ()',
+}
 
 
 @pytest.fixture(scope="class")
@@ -38,6 +51,55 @@ class TestEvalEndpoint:
         assert resp.status_code == httpx.codes.OK
         parsed_resp = MLResponseParser.parse(resp, str)
         assert parsed_resp == "<new-parent><child/></new-parent>"
+
+
+@pytest.fixture(scope="class")
+def invoke_modules(ml_client: MLClient):
+    database = ml_client.eval.xquery("xdmp:database-name(xdmp:modules-database())")
+    ml_client.documents.write(
+        [TextDocument(code, uri) for uri, code in INVOKE_MODULES.items()],
+        database=database,
+    )
+    try:
+        yield
+    finally:
+        ml_client.documents.delete(list(INVOKE_MODULES), database=database)
+
+
+@pytest.mark.usefixtures("invoke_modules")
+class TestInvokeEndpoint:
+    @pytest.mark.ml_access
+    def test_invoke_returns_one_part_per_item(self, ml_client: MLClient):
+        resp = ml_client.rest.invoke.post(
+            INVOKE_WORDS_MODULE,
+            variables={"word1": "hello", "word2": "world"},
+        )
+
+        assert resp.status_code == httpx.codes.OK
+        assert resp.headers["Content-Type"].startswith("multipart/mixed")
+        parsed_resp = MLResponseParser.parse(resp, str)
+        assert parsed_resp == ["hello", "world", "hello world"]
+
+    @pytest.mark.ml_access
+    def test_invoke_of_empty_result_has_no_body(self, ml_client: MLClient):
+        resp = ml_client.rest.invoke.post(INVOKE_EMPTY_MODULE)
+
+        assert resp.status_code == httpx.codes.OK
+        assert resp.content == b""
+        assert "Content-Type" not in resp.headers
+
+    @pytest.mark.ml_access
+    def test_invoke_of_missing_module_is_rejected(self, ml_client: MLClient):
+        missing_module = f"{INVOKE_ROOT}/missing.xqy"
+
+        resp = ml_client.rest.invoke.post(missing_module)
+
+        assert resp.status_code == httpx.codes.BAD_REQUEST
+        assert resp.headers["Content-Type"] == "text/html; charset=utf-8"
+        assert (
+            f"XDMP-MODNOTFOUND: (err:XQST0059) Module {missing_module} not found"
+            in resp.text
+        )
 
 
 class TestHealthCheckEndpoint:

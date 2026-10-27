@@ -425,6 +425,18 @@ class MLClient:
         return ClusterHealth(healthy=all(hosts.values()), hosts=hosts)
 
     def _get_cluster_status(self) -> Response:
+        """Fetch the cluster verdict through the configured Manage connection.
+
+        Returns
+        -------
+        Response
+            Raw Management API health check response, with status unchecked.
+
+        Raises
+        ------
+        httpx.RequestError
+            If the request fails at the transport level.
+        """
         return self._manage_http.get(
             "/manage/v2",
             params={"view": "healthcheck", "format": "json"},
@@ -991,6 +1003,18 @@ class AsyncMLClient:
         return ClusterHealth(healthy=all(hosts.values()), hosts=hosts)
 
     async def _get_cluster_status(self) -> Response:
+        """Fetch the cluster verdict through the configured Manage connection.
+
+        Returns
+        -------
+        Response
+            Raw Management API health check response, with status unchecked.
+
+        Raises
+        ------
+        httpx.RequestError
+            If the request fails at the transport level.
+        """
         return await self._manage_http.get(
             "/manage/v2",
             params={"view": "healthcheck", "format": "json"},

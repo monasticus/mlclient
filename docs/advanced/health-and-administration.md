@@ -115,3 +115,47 @@ If you call [wait_for_restart][mlclient.MLClient.wait_for_restart] without a res
 ```
 
 For multi-host restart responses, the method waits for all affected hosts before it returns.
+
+## Groups and hosts
+
+The [Management API](../guides/clients.md#server-tiers-and-ports) exposes groups and hosts through
+`ml.manage.groups` and `ml.manage.hosts`. These methods return raw HTTP responses;
+check the status before reading a response body:
+
+```python
+from mlclient import MLClient
+
+with MLClient() as ml:
+    groups = ml.manage.groups.get_list(data_format="json")
+    groups.raise_for_status()
+    hosts = ml.manage.hosts.get_list(data_format="json")
+    hosts.raise_for_status()
+    properties = ml.manage.hosts.get_properties("localhost", data_format="json")
+    properties.raise_for_status()
+```
+
+Use the actual cluster host name or id in place of `localhost`. Group operations
+include creation, deletion, property updates, restart and shutdown; host
+operations include property updates, restart and shutdown. See
+[GroupsApi][mlclient.api.GroupsApi] and [HostsApi][mlclient.api.HostsApi] for the
+request bodies and supported views. Async clients expose the same operations as
+awaitable methods.
+
+## Initialize and join a cluster
+
+[AdminApi][mlclient.api.AdminApi] includes initialization, administrator setup,
+cluster joins and host removal. `head_timestamp()` checks availability without
+fetching a response body. These operations use the client's Admin connection;
+Management operations use its Manage connection.
+
+On a fresh host, call `post_init()` and wait for its restart before
+`post_instance_admin()`. To join another host, retrieve its `get_server_config()`,
+pass that XML as `server_config` to `post_cluster_config()` on an existing cluster
+member, then pass the returned ZIP bytes as `cluster_config` to
+`post_cluster_config()` on the joining host. Wait for that host's restart before
+sending further requests.
+
+`delete_host_config()` removes the receiving host from its cluster;
+`remote_host=` removes the named remote host. Initialization, joining and removal
+change cluster membership and can restart hosts. Run them only on hosts intended
+for those operations; the integration suite uses disposable containers.

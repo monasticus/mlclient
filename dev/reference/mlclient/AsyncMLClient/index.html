@@ -340,6 +340,8 @@
       
         
       
+        
+      
     
     
     
@@ -451,6 +453,34 @@
     
   
     Evaluate code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/invoke/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke modules
   
 
     
@@ -1072,6 +1102,8 @@
       
         
       
+        
+      
     
     
     
@@ -1386,6 +1418,34 @@
     
   
     eval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/invoke/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    invoke
   
 
     
@@ -1936,6 +1996,17 @@
     <span class="md-ellipsis">
       
         http
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlclient.AsyncMLClient.invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invoke
       
     </span>
   </a>
@@ -10459,6 +10530,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -10710,6 +10785,34 @@
     
   
     AsyncHostsApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/AsyncInvokeApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncInvokeApi
   
 
     
@@ -11150,6 +11253,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../api/InvokeApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/LogsApi/" class="md-nav__link">
         
   
@@ -11411,6 +11542,8 @@
   
     
     
+      
+        
       
         
       
@@ -12189,6 +12322,34 @@
     
   
     HostsGetCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../calls/InvokeCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeCall
   
 
     
@@ -13087,6 +13248,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -13198,6 +13363,34 @@
     
   
     AsyncEvalService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/AsyncInvokeService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncInvokeService
   
 
     
@@ -13338,6 +13531,34 @@
     
   
     EvalService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/InvokeService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeService
   
 
     
@@ -15296,6 +15517,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mlclient.AsyncMLClient.invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#mlclient.AsyncMLClient.manage" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15494,6 +15726,7 @@
 <li><code>ml.search.documents(query)</code> -- higher-level, parsed search results;
   <code>ml.search(database=...)</code> narrows its scope</li>
 <li><code>ml.eval.xquery("1+1")</code> -- higher-level, parsed results</li>
+<li><code>ml.invoke.module("/ext/report.xqy")</code> -- invoke an installed module</li>
 <li><code>await ml.version()</code> -- complete MarkLogic version with four numeric parts</li>
 <li><code>ml.transaction(database=...)</code> -- open a scoped transaction (context manager)</li>
 </ul>
@@ -15797,27 +16030,7 @@ preserved</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/_client.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-632">632</a></span>
-<span class="normal"><a href="#__codelineno-0-633">633</a></span>
-<span class="normal"><a href="#__codelineno-0-634">634</a></span>
-<span class="normal"><a href="#__codelineno-0-635">635</a></span>
-<span class="normal"><a href="#__codelineno-0-636">636</a></span>
-<span class="normal"><a href="#__codelineno-0-637">637</a></span>
-<span class="normal"><a href="#__codelineno-0-638">638</a></span>
-<span class="normal"><a href="#__codelineno-0-639">639</a></span>
-<span class="normal"><a href="#__codelineno-0-640">640</a></span>
-<span class="normal"><a href="#__codelineno-0-641">641</a></span>
-<span class="normal"><a href="#__codelineno-0-642">642</a></span>
-<span class="normal"><a href="#__codelineno-0-643">643</a></span>
-<span class="normal"><a href="#__codelineno-0-644">644</a></span>
-<span class="normal"><a href="#__codelineno-0-645">645</a></span>
-<span class="normal"><a href="#__codelineno-0-646">646</a></span>
-<span class="normal"><a href="#__codelineno-0-647">647</a></span>
-<span class="normal"><a href="#__codelineno-0-648">648</a></span>
-<span class="normal"><a href="#__codelineno-0-649">649</a></span>
-<span class="normal"><a href="#__codelineno-0-650">650</a></span>
-<span class="normal"><a href="#__codelineno-0-651">651</a></span>
-<span class="normal"><a href="#__codelineno-0-652">652</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-652">652</a></span>
 <span class="normal"><a href="#__codelineno-0-653">653</a></span>
 <span class="normal"><a href="#__codelineno-0-654">654</a></span>
 <span class="normal"><a href="#__codelineno-0-655">655</a></span>
@@ -15904,114 +16117,134 @@ preserved</p>
 <span class="normal"><a href="#__codelineno-0-736">736</a></span>
 <span class="normal"><a href="#__codelineno-0-737">737</a></span>
 <span class="normal"><a href="#__codelineno-0-738">738</a></span>
-<span class="normal"><a href="#__codelineno-0-739">739</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-632" name="__codelineno-0-632"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-633" name="__codelineno-0-633"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-634" name="__codelineno-0-634"></a>    <span class="n">protocol</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-636" name="__codelineno-0-636"></a>    <span class="n">port</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-637" name="__codelineno-0-637"></a>    <span class="n">auth</span><span class="p">:</span> <span class="n">AuthParam</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a>    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a>    <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-640" name="__codelineno-0-640"></a>    <span class="n">ssl</span><span class="p">:</span> <span class="n">SSLConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a>    <span class="n">cloud</span><span class="p">:</span> <span class="n">CloudConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-642" name="__codelineno-0-642"></a>    <span class="n">retry</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-643" name="__codelineno-0-643"></a>    <span class="n">limits</span><span class="p">:</span> <span class="n">Limits</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-644" name="__codelineno-0-644"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-645" name="__codelineno-0-645"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-646" name="__codelineno-0-646"></a>    <span class="n">config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-647" name="__codelineno-0-647"></a>    <span class="n">manage_config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-648" name="__codelineno-0-648"></a>    <span class="n">admin_config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-649" name="__codelineno-0-649"></a>    <span class="n">health_config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-650" name="__codelineno-0-650"></a><span class="p">):</span>
-<a id="__codelineno-0-651" name="__codelineno-0-651"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize AsyncMLClient instance.</span>
-<a id="__codelineno-0-652" name="__codelineno-0-652"></a>
-<a id="__codelineno-0-653" name="__codelineno-0-653"></a><span class="sd">    The connection parameters describe the primary connection. The Manage</span>
-<a id="__codelineno-0-654" name="__codelineno-0-654"></a><span class="sd">    (8002), Admin (8001) and HealthCheck (7997) connections are derived from it</span>
-<a id="__codelineno-0-655" name="__codelineno-0-655"></a><span class="sd">    by default; pass ``manage_config`` / ``admin_config`` / ``health_config``</span>
-<a id="__codelineno-0-656" name="__codelineno-0-656"></a><span class="sd">    only to point them at a different host, credentials or port. The derived</span>
-<a id="__codelineno-0-657" name="__codelineno-0-657"></a><span class="sd">    HealthCheck connection targets port 7997 with no authentication.</span>
-<a id="__codelineno-0-658" name="__codelineno-0-658"></a>
-<a id="__codelineno-0-659" name="__codelineno-0-659"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-660" name="__codelineno-0-660"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-661" name="__codelineno-0-661"></a><span class="sd">    protocol : str, default &quot;http&quot;</span>
-<a id="__codelineno-0-662" name="__codelineno-0-662"></a><span class="sd">        A protocol used for HTTP requests (http / https)</span>
-<a id="__codelineno-0-663" name="__codelineno-0-663"></a><span class="sd">    host : str, default &quot;localhost&quot;</span>
-<a id="__codelineno-0-664" name="__codelineno-0-664"></a><span class="sd">        A host name</span>
-<a id="__codelineno-0-665" name="__codelineno-0-665"></a><span class="sd">    port : int, default 8000</span>
-<a id="__codelineno-0-666" name="__codelineno-0-666"></a><span class="sd">        An App Service port</span>
-<a id="__codelineno-0-667" name="__codelineno-0-667"></a><span class="sd">    auth : str | httpx.Auth | AuthConfig | None, default &quot;digest&quot;</span>
-<a id="__codelineno-0-668" name="__codelineno-0-668"></a><span class="sd">        An authentication method: a string shortcut (&quot;basic&quot;, &quot;digest&quot;,</span>
-<a id="__codelineno-0-669" name="__codelineno-0-669"></a><span class="sd">        &quot;digestbasic&quot;, &quot;certificate&quot;, &quot;kerberos&quot;), an AuthConfig, a custom</span>
-<a id="__codelineno-0-670" name="__codelineno-0-670"></a><span class="sd">        httpx.Auth, or None</span>
-<a id="__codelineno-0-671" name="__codelineno-0-671"></a><span class="sd">    username : str, default &quot;admin&quot;</span>
-<a id="__codelineno-0-672" name="__codelineno-0-672"></a><span class="sd">        A username</span>
-<a id="__codelineno-0-673" name="__codelineno-0-673"></a><span class="sd">    password : str, default &quot;admin&quot;</span>
-<a id="__codelineno-0-674" name="__codelineno-0-674"></a><span class="sd">        A password</span>
-<a id="__codelineno-0-675" name="__codelineno-0-675"></a><span class="sd">    ssl : SSLConfig | None, default None</span>
-<a id="__codelineno-0-676" name="__codelineno-0-676"></a><span class="sd">        SSL/TLS configuration; a client certificate forces HTTPS and</span>
-<a id="__codelineno-0-677" name="__codelineno-0-677"></a><span class="sd">        defaults the auth method to &quot;certificate&quot;</span>
-<a id="__codelineno-0-678" name="__codelineno-0-678"></a><span class="sd">    cloud : CloudConfig | None, default None</span>
-<a id="__codelineno-0-679" name="__codelineno-0-679"></a><span class="sd">        MarkLogic Cloud configuration; forces HTTPS on port 443 and handles</span>
-<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="sd">        authentication via the API key</span>
-<a id="__codelineno-0-681" name="__codelineno-0-681"></a><span class="sd">    retry : Retry | int | None, default Retry(total=5, backoff_factor=0.5)</span>
-<a id="__codelineno-0-682" name="__codelineno-0-682"></a><span class="sd">        A retry strategy; an int is shorthand for Retry(total=n)</span>
-<a id="__codelineno-0-683" name="__codelineno-0-683"></a><span class="sd">    limits : httpx.Limits | int | None, default None</span>
-<a id="__codelineno-0-684" name="__codelineno-0-684"></a><span class="sd">        Connection-pool limits; None defers to httpx&#39;s own default; an int</span>
-<a id="__codelineno-0-685" name="__codelineno-0-685"></a><span class="sd">        is shorthand for httpx.Limits(max_connections=n)</span>
-<a id="__codelineno-0-686" name="__codelineno-0-686"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-687" name="__codelineno-0-687"></a><span class="sd">        The request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,</span>
-<a id="__codelineno-0-688" name="__codelineno-0-688"></a><span class="sd">        write=60, pool=5 seconds). None disables every HTTP timeout. A number</span>
-<a id="__codelineno-0-689" name="__codelineno-0-689"></a><span class="sd">        sets all four components to that many seconds. An httpx.Timeout fully</span>
-<a id="__codelineno-0-690" name="__codelineno-0-690"></a><span class="sd">        overrides them without merging. The derived HealthCheck connection</span>
-<a id="__codelineno-0-691" name="__codelineno-0-691"></a><span class="sd">        always uses DEFAULT_HEALTH_TIMEOUT, independent of this value</span>
-<a id="__codelineno-0-692" name="__codelineno-0-692"></a><span class="sd">    config : HTTPConfig | None, default None</span>
-<a id="__codelineno-0-693" name="__codelineno-0-693"></a><span class="sd">        An already-resolved primary configuration; when given, the</span>
-<a id="__codelineno-0-694" name="__codelineno-0-694"></a><span class="sd">        connection parameters above are ignored</span>
-<a id="__codelineno-0-695" name="__codelineno-0-695"></a><span class="sd">    manage_config : HTTPConfig | None, default None</span>
-<a id="__codelineno-0-696" name="__codelineno-0-696"></a><span class="sd">        An already-resolved Manage configuration; when given, it is used</span>
-<a id="__codelineno-0-697" name="__codelineno-0-697"></a><span class="sd">        instead of deriving the Manage connection from the primary</span>
-<a id="__codelineno-0-698" name="__codelineno-0-698"></a><span class="sd">    admin_config : HTTPConfig | None, default None</span>
-<a id="__codelineno-0-699" name="__codelineno-0-699"></a><span class="sd">        An already-resolved Admin configuration; when given, it is used</span>
-<a id="__codelineno-0-700" name="__codelineno-0-700"></a><span class="sd">        instead of deriving the Admin connection from the primary</span>
-<a id="__codelineno-0-701" name="__codelineno-0-701"></a><span class="sd">    health_config : HTTPConfig | None, default None</span>
-<a id="__codelineno-0-702" name="__codelineno-0-702"></a><span class="sd">        An already-resolved HealthCheck configuration; when given, it is used</span>
-<a id="__codelineno-0-703" name="__codelineno-0-703"></a><span class="sd">        instead of deriving the HealthCheck connection (port 7997, no auth,</span>
-<a id="__codelineno-0-704" name="__codelineno-0-704"></a><span class="sd">        no retries, DEFAULT_HEALTH_TIMEOUT) from the primary. Retry and timeout are</span>
-<a id="__codelineno-0-705" name="__codelineno-0-705"></a><span class="sd">        resolved independently: an unspecified retry defaults to no retries</span>
-<a id="__codelineno-0-706" name="__codelineno-0-706"></a><span class="sd">        and an unspecified timeout to DEFAULT_HEALTH_TIMEOUT, while an explicitly</span>
-<a id="__codelineno-0-707" name="__codelineno-0-707"></a><span class="sd">        supplied retry strategy or timeout (including None to disable it) is</span>
-<a id="__codelineno-0-708" name="__codelineno-0-708"></a><span class="sd">        preserved</span>
-<a id="__codelineno-0-709" name="__codelineno-0-709"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-710" name="__codelineno-0-710"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_http</span> <span class="o">=</span> <span class="n">AsyncHttpClient</span><span class="p">(</span>
-<a id="__codelineno-0-711" name="__codelineno-0-711"></a>        <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
-<a id="__codelineno-0-712" name="__codelineno-0-712"></a>        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
-<a id="__codelineno-0-713" name="__codelineno-0-713"></a>        <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
-<a id="__codelineno-0-714" name="__codelineno-0-714"></a>        <span class="n">auth</span><span class="o">=</span><span class="n">auth</span><span class="p">,</span>
-<a id="__codelineno-0-715" name="__codelineno-0-715"></a>        <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
-<a id="__codelineno-0-716" name="__codelineno-0-716"></a>        <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
-<a id="__codelineno-0-717" name="__codelineno-0-717"></a>        <span class="n">ssl</span><span class="o">=</span><span class="n">ssl</span><span class="p">,</span>
-<a id="__codelineno-0-718" name="__codelineno-0-718"></a>        <span class="n">cloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span>
-<a id="__codelineno-0-719" name="__codelineno-0-719"></a>        <span class="n">retry</span><span class="o">=</span><span class="n">retry</span><span class="p">,</span>
-<a id="__codelineno-0-720" name="__codelineno-0-720"></a>        <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
-<a id="__codelineno-0-721" name="__codelineno-0-721"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-722" name="__codelineno-0-722"></a>        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
-<a id="__codelineno-0-723" name="__codelineno-0-723"></a>    <span class="p">)</span>
-<a id="__codelineno-0-724" name="__codelineno-0-724"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_manage_http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_http</span><span class="p">(</span>
-<a id="__codelineno-0-725" name="__codelineno-0-725"></a>        <span class="n">manage_config</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">MARKLOGIC_MANAGE_PORT</span><span class="p">),</span>
-<a id="__codelineno-0-726" name="__codelineno-0-726"></a>    <span class="p">)</span>
-<a id="__codelineno-0-727" name="__codelineno-0-727"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_admin_http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_http</span><span class="p">(</span>
-<a id="__codelineno-0-728" name="__codelineno-0-728"></a>        <span class="n">admin_config</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">MARKLOGIC_ADMIN_PORT</span><span class="p">),</span>
-<a id="__codelineno-0-729" name="__codelineno-0-729"></a>    <span class="p">)</span>
-<a id="__codelineno-0-730" name="__codelineno-0-730"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_health_http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_http</span><span class="p">(</span>
-<a id="__codelineno-0-731" name="__codelineno-0-731"></a>        <span class="n">health_config</span><span class="o">.</span><span class="n">with_health_defaults</span><span class="p">()</span>
-<a id="__codelineno-0-732" name="__codelineno-0-732"></a>        <span class="k">if</span> <span class="n">health_config</span>
-<a id="__codelineno-0-733" name="__codelineno-0-733"></a>        <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span>
-<a id="__codelineno-0-734" name="__codelineno-0-734"></a>            <span class="n">port</span><span class="o">=</span><span class="n">MARKLOGIC_HEALTHCHECK_PORT</span><span class="p">,</span>
-<a id="__codelineno-0-735" name="__codelineno-0-735"></a>            <span class="n">auth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-736" name="__codelineno-0-736"></a>            <span class="n">retry</span><span class="o">=</span><span class="n">NO_RETRY_STRATEGY</span><span class="p">,</span>
-<a id="__codelineno-0-737" name="__codelineno-0-737"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_HEALTH_TIMEOUT</span><span class="p">,</span>
-<a id="__codelineno-0-738" name="__codelineno-0-738"></a>        <span class="p">),</span>
-<a id="__codelineno-0-739" name="__codelineno-0-739"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-739">739</a></span>
+<span class="normal"><a href="#__codelineno-0-740">740</a></span>
+<span class="normal"><a href="#__codelineno-0-741">741</a></span>
+<span class="normal"><a href="#__codelineno-0-742">742</a></span>
+<span class="normal"><a href="#__codelineno-0-743">743</a></span>
+<span class="normal"><a href="#__codelineno-0-744">744</a></span>
+<span class="normal"><a href="#__codelineno-0-745">745</a></span>
+<span class="normal"><a href="#__codelineno-0-746">746</a></span>
+<span class="normal"><a href="#__codelineno-0-747">747</a></span>
+<span class="normal"><a href="#__codelineno-0-748">748</a></span>
+<span class="normal"><a href="#__codelineno-0-749">749</a></span>
+<span class="normal"><a href="#__codelineno-0-750">750</a></span>
+<span class="normal"><a href="#__codelineno-0-751">751</a></span>
+<span class="normal"><a href="#__codelineno-0-752">752</a></span>
+<span class="normal"><a href="#__codelineno-0-753">753</a></span>
+<span class="normal"><a href="#__codelineno-0-754">754</a></span>
+<span class="normal"><a href="#__codelineno-0-755">755</a></span>
+<span class="normal"><a href="#__codelineno-0-756">756</a></span>
+<span class="normal"><a href="#__codelineno-0-757">757</a></span>
+<span class="normal"><a href="#__codelineno-0-758">758</a></span>
+<span class="normal"><a href="#__codelineno-0-759">759</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-652" name="__codelineno-0-652"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-653" name="__codelineno-0-653"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-654" name="__codelineno-0-654"></a>    <span class="n">protocol</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-655" name="__codelineno-0-655"></a>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-656" name="__codelineno-0-656"></a>    <span class="n">port</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-657" name="__codelineno-0-657"></a>    <span class="n">auth</span><span class="p">:</span> <span class="n">AuthParam</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-658" name="__codelineno-0-658"></a>    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-659" name="__codelineno-0-659"></a>    <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-660" name="__codelineno-0-660"></a>    <span class="n">ssl</span><span class="p">:</span> <span class="n">SSLConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-661" name="__codelineno-0-661"></a>    <span class="n">cloud</span><span class="p">:</span> <span class="n">CloudConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-662" name="__codelineno-0-662"></a>    <span class="n">retry</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-663" name="__codelineno-0-663"></a>    <span class="n">limits</span><span class="p">:</span> <span class="n">Limits</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-664" name="__codelineno-0-664"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-665" name="__codelineno-0-665"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-666" name="__codelineno-0-666"></a>    <span class="n">config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-667" name="__codelineno-0-667"></a>    <span class="n">manage_config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-668" name="__codelineno-0-668"></a>    <span class="n">admin_config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-669" name="__codelineno-0-669"></a>    <span class="n">health_config</span><span class="p">:</span> <span class="n">HTTPConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-670" name="__codelineno-0-670"></a><span class="p">):</span>
+<a id="__codelineno-0-671" name="__codelineno-0-671"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize AsyncMLClient instance.</span>
+<a id="__codelineno-0-672" name="__codelineno-0-672"></a>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a><span class="sd">    The connection parameters describe the primary connection. The Manage</span>
+<a id="__codelineno-0-674" name="__codelineno-0-674"></a><span class="sd">    (8002), Admin (8001) and HealthCheck (7997) connections are derived from it</span>
+<a id="__codelineno-0-675" name="__codelineno-0-675"></a><span class="sd">    by default; pass ``manage_config`` / ``admin_config`` / ``health_config``</span>
+<a id="__codelineno-0-676" name="__codelineno-0-676"></a><span class="sd">    only to point them at a different host, credentials or port. The derived</span>
+<a id="__codelineno-0-677" name="__codelineno-0-677"></a><span class="sd">    HealthCheck connection targets port 7997 with no authentication.</span>
+<a id="__codelineno-0-678" name="__codelineno-0-678"></a>
+<a id="__codelineno-0-679" name="__codelineno-0-679"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-681" name="__codelineno-0-681"></a><span class="sd">    protocol : str, default &quot;http&quot;</span>
+<a id="__codelineno-0-682" name="__codelineno-0-682"></a><span class="sd">        A protocol used for HTTP requests (http / https)</span>
+<a id="__codelineno-0-683" name="__codelineno-0-683"></a><span class="sd">    host : str, default &quot;localhost&quot;</span>
+<a id="__codelineno-0-684" name="__codelineno-0-684"></a><span class="sd">        A host name</span>
+<a id="__codelineno-0-685" name="__codelineno-0-685"></a><span class="sd">    port : int, default 8000</span>
+<a id="__codelineno-0-686" name="__codelineno-0-686"></a><span class="sd">        An App Service port</span>
+<a id="__codelineno-0-687" name="__codelineno-0-687"></a><span class="sd">    auth : str | httpx.Auth | AuthConfig | None, default &quot;digest&quot;</span>
+<a id="__codelineno-0-688" name="__codelineno-0-688"></a><span class="sd">        An authentication method: a string shortcut (&quot;basic&quot;, &quot;digest&quot;,</span>
+<a id="__codelineno-0-689" name="__codelineno-0-689"></a><span class="sd">        &quot;digestbasic&quot;, &quot;certificate&quot;, &quot;kerberos&quot;), an AuthConfig, a custom</span>
+<a id="__codelineno-0-690" name="__codelineno-0-690"></a><span class="sd">        httpx.Auth, or None</span>
+<a id="__codelineno-0-691" name="__codelineno-0-691"></a><span class="sd">    username : str, default &quot;admin&quot;</span>
+<a id="__codelineno-0-692" name="__codelineno-0-692"></a><span class="sd">        A username</span>
+<a id="__codelineno-0-693" name="__codelineno-0-693"></a><span class="sd">    password : str, default &quot;admin&quot;</span>
+<a id="__codelineno-0-694" name="__codelineno-0-694"></a><span class="sd">        A password</span>
+<a id="__codelineno-0-695" name="__codelineno-0-695"></a><span class="sd">    ssl : SSLConfig | None, default None</span>
+<a id="__codelineno-0-696" name="__codelineno-0-696"></a><span class="sd">        SSL/TLS configuration; a client certificate forces HTTPS and</span>
+<a id="__codelineno-0-697" name="__codelineno-0-697"></a><span class="sd">        defaults the auth method to &quot;certificate&quot;</span>
+<a id="__codelineno-0-698" name="__codelineno-0-698"></a><span class="sd">    cloud : CloudConfig | None, default None</span>
+<a id="__codelineno-0-699" name="__codelineno-0-699"></a><span class="sd">        MarkLogic Cloud configuration; forces HTTPS on port 443 and handles</span>
+<a id="__codelineno-0-700" name="__codelineno-0-700"></a><span class="sd">        authentication via the API key</span>
+<a id="__codelineno-0-701" name="__codelineno-0-701"></a><span class="sd">    retry : Retry | int | None, default Retry(total=5, backoff_factor=0.5)</span>
+<a id="__codelineno-0-702" name="__codelineno-0-702"></a><span class="sd">        A retry strategy; an int is shorthand for Retry(total=n)</span>
+<a id="__codelineno-0-703" name="__codelineno-0-703"></a><span class="sd">    limits : httpx.Limits | int | None, default None</span>
+<a id="__codelineno-0-704" name="__codelineno-0-704"></a><span class="sd">        Connection-pool limits; None defers to httpx&#39;s own default; an int</span>
+<a id="__codelineno-0-705" name="__codelineno-0-705"></a><span class="sd">        is shorthand for httpx.Limits(max_connections=n)</span>
+<a id="__codelineno-0-706" name="__codelineno-0-706"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-707" name="__codelineno-0-707"></a><span class="sd">        The request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,</span>
+<a id="__codelineno-0-708" name="__codelineno-0-708"></a><span class="sd">        write=60, pool=5 seconds). None disables every HTTP timeout. A number</span>
+<a id="__codelineno-0-709" name="__codelineno-0-709"></a><span class="sd">        sets all four components to that many seconds. An httpx.Timeout fully</span>
+<a id="__codelineno-0-710" name="__codelineno-0-710"></a><span class="sd">        overrides them without merging. The derived HealthCheck connection</span>
+<a id="__codelineno-0-711" name="__codelineno-0-711"></a><span class="sd">        always uses DEFAULT_HEALTH_TIMEOUT, independent of this value</span>
+<a id="__codelineno-0-712" name="__codelineno-0-712"></a><span class="sd">    config : HTTPConfig | None, default None</span>
+<a id="__codelineno-0-713" name="__codelineno-0-713"></a><span class="sd">        An already-resolved primary configuration; when given, the</span>
+<a id="__codelineno-0-714" name="__codelineno-0-714"></a><span class="sd">        connection parameters above are ignored</span>
+<a id="__codelineno-0-715" name="__codelineno-0-715"></a><span class="sd">    manage_config : HTTPConfig | None, default None</span>
+<a id="__codelineno-0-716" name="__codelineno-0-716"></a><span class="sd">        An already-resolved Manage configuration; when given, it is used</span>
+<a id="__codelineno-0-717" name="__codelineno-0-717"></a><span class="sd">        instead of deriving the Manage connection from the primary</span>
+<a id="__codelineno-0-718" name="__codelineno-0-718"></a><span class="sd">    admin_config : HTTPConfig | None, default None</span>
+<a id="__codelineno-0-719" name="__codelineno-0-719"></a><span class="sd">        An already-resolved Admin configuration; when given, it is used</span>
+<a id="__codelineno-0-720" name="__codelineno-0-720"></a><span class="sd">        instead of deriving the Admin connection from the primary</span>
+<a id="__codelineno-0-721" name="__codelineno-0-721"></a><span class="sd">    health_config : HTTPConfig | None, default None</span>
+<a id="__codelineno-0-722" name="__codelineno-0-722"></a><span class="sd">        An already-resolved HealthCheck configuration; when given, it is used</span>
+<a id="__codelineno-0-723" name="__codelineno-0-723"></a><span class="sd">        instead of deriving the HealthCheck connection (port 7997, no auth,</span>
+<a id="__codelineno-0-724" name="__codelineno-0-724"></a><span class="sd">        no retries, DEFAULT_HEALTH_TIMEOUT) from the primary. Retry and timeout are</span>
+<a id="__codelineno-0-725" name="__codelineno-0-725"></a><span class="sd">        resolved independently: an unspecified retry defaults to no retries</span>
+<a id="__codelineno-0-726" name="__codelineno-0-726"></a><span class="sd">        and an unspecified timeout to DEFAULT_HEALTH_TIMEOUT, while an explicitly</span>
+<a id="__codelineno-0-727" name="__codelineno-0-727"></a><span class="sd">        supplied retry strategy or timeout (including None to disable it) is</span>
+<a id="__codelineno-0-728" name="__codelineno-0-728"></a><span class="sd">        preserved</span>
+<a id="__codelineno-0-729" name="__codelineno-0-729"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-730" name="__codelineno-0-730"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_http</span> <span class="o">=</span> <span class="n">AsyncHttpClient</span><span class="p">(</span>
+<a id="__codelineno-0-731" name="__codelineno-0-731"></a>        <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+<a id="__codelineno-0-732" name="__codelineno-0-732"></a>        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+<a id="__codelineno-0-733" name="__codelineno-0-733"></a>        <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+<a id="__codelineno-0-734" name="__codelineno-0-734"></a>        <span class="n">auth</span><span class="o">=</span><span class="n">auth</span><span class="p">,</span>
+<a id="__codelineno-0-735" name="__codelineno-0-735"></a>        <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+<a id="__codelineno-0-736" name="__codelineno-0-736"></a>        <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+<a id="__codelineno-0-737" name="__codelineno-0-737"></a>        <span class="n">ssl</span><span class="o">=</span><span class="n">ssl</span><span class="p">,</span>
+<a id="__codelineno-0-738" name="__codelineno-0-738"></a>        <span class="n">cloud</span><span class="o">=</span><span class="n">cloud</span><span class="p">,</span>
+<a id="__codelineno-0-739" name="__codelineno-0-739"></a>        <span class="n">retry</span><span class="o">=</span><span class="n">retry</span><span class="p">,</span>
+<a id="__codelineno-0-740" name="__codelineno-0-740"></a>        <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
+<a id="__codelineno-0-741" name="__codelineno-0-741"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-742" name="__codelineno-0-742"></a>        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+<a id="__codelineno-0-743" name="__codelineno-0-743"></a>    <span class="p">)</span>
+<a id="__codelineno-0-744" name="__codelineno-0-744"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_manage_http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_http</span><span class="p">(</span>
+<a id="__codelineno-0-745" name="__codelineno-0-745"></a>        <span class="n">manage_config</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">MARKLOGIC_MANAGE_PORT</span><span class="p">),</span>
+<a id="__codelineno-0-746" name="__codelineno-0-746"></a>    <span class="p">)</span>
+<a id="__codelineno-0-747" name="__codelineno-0-747"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_admin_http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_http</span><span class="p">(</span>
+<a id="__codelineno-0-748" name="__codelineno-0-748"></a>        <span class="n">admin_config</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">MARKLOGIC_ADMIN_PORT</span><span class="p">),</span>
+<a id="__codelineno-0-749" name="__codelineno-0-749"></a>    <span class="p">)</span>
+<a id="__codelineno-0-750" name="__codelineno-0-750"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_health_http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_http</span><span class="p">(</span>
+<a id="__codelineno-0-751" name="__codelineno-0-751"></a>        <span class="n">health_config</span><span class="o">.</span><span class="n">with_health_defaults</span><span class="p">()</span>
+<a id="__codelineno-0-752" name="__codelineno-0-752"></a>        <span class="k">if</span> <span class="n">health_config</span>
+<a id="__codelineno-0-753" name="__codelineno-0-753"></a>        <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span>
+<a id="__codelineno-0-754" name="__codelineno-0-754"></a>            <span class="n">port</span><span class="o">=</span><span class="n">MARKLOGIC_HEALTHCHECK_PORT</span><span class="p">,</span>
+<a id="__codelineno-0-755" name="__codelineno-0-755"></a>            <span class="n">auth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-756" name="__codelineno-0-756"></a>            <span class="n">retry</span><span class="o">=</span><span class="n">NO_RETRY_STRATEGY</span><span class="p">,</span>
+<a id="__codelineno-0-757" name="__codelineno-0-757"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_HEALTH_TIMEOUT</span><span class="p">,</span>
+<a id="__codelineno-0-758" name="__codelineno-0-758"></a>        <span class="p">),</span>
+<a id="__codelineno-0-759" name="__codelineno-0-759"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16218,6 +16451,60 @@ Access this property normally; asynchronous methods run when awaited.</p>
           <tr class="doc-section-item">
             <td>
                   <code><a class="autorefs autorefs-internal" title="mlclient.clients.AsyncHttpClient (mlclient.clients.http.AsyncHttpClient)" href="../clients/AsyncHttpClient/#mlclient.clients.AsyncHttpClient">AsyncHttpClient</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The connection-bound API or service object.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mlclient.AsyncMLClient.invoke" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">invoke</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-cached"><code>cached</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#mlclient.AsyncMLClient.invoke" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">invoke</span><span class="p">:</span> <span class="n">AsyncInvokeService</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Invoke XQuery or JavaScript modules installed in MarkLogic.</p>
+<p>Uses the primary REST connection, whose App Server resolves module
+paths. The service is cached per client, not the results: every
+invocation sends a new request. Accessing this property alone performs
+no network I/O. Call it, as in <code>ml.invoke(database="catalog")</code>, for a
+service with a narrower ServiceScope. Access this property normally;
+asynchronous methods run when awaited.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="mlclient.services.AsyncInvokeService (mlclient.services.invoke.AsyncInvokeService)" href="../services/AsyncInvokeService/#mlclient.services.AsyncInvokeService">AsyncInvokeService</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16468,21 +16755,21 @@ request. Prefer the client context manager for automatic cleanup.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1038">1038</a></span>
-<span class="normal"><a href="#__codelineno-0-1039">1039</a></span>
-<span class="normal"><a href="#__codelineno-0-1040">1040</a></span>
-<span class="normal"><a href="#__codelineno-0-1041">1041</a></span>
-<span class="normal"><a href="#__codelineno-0-1042">1042</a></span>
-<span class="normal"><a href="#__codelineno-0-1043">1043</a></span>
-<span class="normal"><a href="#__codelineno-0-1044">1044</a></span>
-<span class="normal"><a href="#__codelineno-0-1045">1045</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1038" name="__codelineno-0-1038"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-1039" name="__codelineno-0-1039"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open the primary local HTTP session.</span>
-<a id="__codelineno-0-1040" name="__codelineno-0-1040"></a>
-<a id="__codelineno-0-1041" name="__codelineno-0-1041"></a><span class="sd">    This allocates transport resources; it does not probe connectivity or</span>
-<a id="__codelineno-0-1042" name="__codelineno-0-1042"></a><span class="sd">    authenticate with the server. Auxiliary sessions open on their first</span>
-<a id="__codelineno-0-1043" name="__codelineno-0-1043"></a><span class="sd">    request. Prefer the client context manager for automatic cleanup.</span>
-<a id="__codelineno-0-1044" name="__codelineno-0-1044"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1045" name="__codelineno-0-1045"></a>    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1076">1076</a></span>
+<span class="normal"><a href="#__codelineno-0-1077">1077</a></span>
+<span class="normal"><a href="#__codelineno-0-1078">1078</a></span>
+<span class="normal"><a href="#__codelineno-0-1079">1079</a></span>
+<span class="normal"><a href="#__codelineno-0-1080">1080</a></span>
+<span class="normal"><a href="#__codelineno-0-1081">1081</a></span>
+<span class="normal"><a href="#__codelineno-0-1082">1082</a></span>
+<span class="normal"><a href="#__codelineno-0-1083">1083</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1076" name="__codelineno-0-1076"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-1077" name="__codelineno-0-1077"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open the primary local HTTP session.</span>
+<a id="__codelineno-0-1078" name="__codelineno-0-1078"></a>
+<a id="__codelineno-0-1079" name="__codelineno-0-1079"></a><span class="sd">    This allocates transport resources; it does not probe connectivity or</span>
+<a id="__codelineno-0-1080" name="__codelineno-0-1080"></a><span class="sd">    authenticate with the server. Auxiliary sessions open on their first</span>
+<a id="__codelineno-0-1081" name="__codelineno-0-1081"></a><span class="sd">    request. Prefer the client context manager for automatic cleanup.</span>
+<a id="__codelineno-0-1082" name="__codelineno-0-1082"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1083" name="__codelineno-0-1083"></a>    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16514,33 +16801,33 @@ context manager to give their lifetime an explicit scope.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1047">1047</a></span>
-<span class="normal"><a href="#__codelineno-0-1048">1048</a></span>
-<span class="normal"><a href="#__codelineno-0-1049">1049</a></span>
-<span class="normal"><a href="#__codelineno-0-1050">1050</a></span>
-<span class="normal"><a href="#__codelineno-0-1051">1051</a></span>
-<span class="normal"><a href="#__codelineno-0-1052">1052</a></span>
-<span class="normal"><a href="#__codelineno-0-1053">1053</a></span>
-<span class="normal"><a href="#__codelineno-0-1054">1054</a></span>
-<span class="normal"><a href="#__codelineno-0-1055">1055</a></span>
-<span class="normal"><a href="#__codelineno-0-1056">1056</a></span>
-<span class="normal"><a href="#__codelineno-0-1057">1057</a></span>
-<span class="normal"><a href="#__codelineno-0-1058">1058</a></span>
-<span class="normal"><a href="#__codelineno-0-1059">1059</a></span>
-<span class="normal"><a href="#__codelineno-0-1060">1060</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1047" name="__codelineno-0-1047"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-1048" name="__codelineno-0-1048"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Close the primary and auxiliary sessions owned by this client.</span>
-<a id="__codelineno-0-1049" name="__codelineno-0-1049"></a>
-<a id="__codelineno-0-1050" name="__codelineno-0-1050"></a><span class="sd">    Shared HTTP clients are closed once. Cached API/service wrappers are</span>
-<a id="__codelineno-0-1051" name="__codelineno-0-1051"></a><span class="sd">    retained. Subsequent operations may open sessions again; use an async</span>
-<a id="__codelineno-0-1052" name="__codelineno-0-1052"></a><span class="sd">    context manager to give their lifetime an explicit scope.</span>
-<a id="__codelineno-0-1053" name="__codelineno-0-1053"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1054" name="__codelineno-0-1054"></a>    <span class="k">for</span> <span class="n">http</span> <span class="ow">in</span> <span class="p">{</span>
-<a id="__codelineno-0-1055" name="__codelineno-0-1055"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="p">,</span>
-<a id="__codelineno-0-1056" name="__codelineno-0-1056"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_manage_http</span><span class="p">,</span>
-<a id="__codelineno-0-1057" name="__codelineno-0-1057"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_admin_http</span><span class="p">,</span>
-<a id="__codelineno-0-1058" name="__codelineno-0-1058"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_health_http</span><span class="p">,</span>
-<a id="__codelineno-0-1059" name="__codelineno-0-1059"></a>    <span class="p">}:</span>
-<a id="__codelineno-0-1060" name="__codelineno-0-1060"></a>        <span class="k">await</span> <span class="n">http</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1085">1085</a></span>
+<span class="normal"><a href="#__codelineno-0-1086">1086</a></span>
+<span class="normal"><a href="#__codelineno-0-1087">1087</a></span>
+<span class="normal"><a href="#__codelineno-0-1088">1088</a></span>
+<span class="normal"><a href="#__codelineno-0-1089">1089</a></span>
+<span class="normal"><a href="#__codelineno-0-1090">1090</a></span>
+<span class="normal"><a href="#__codelineno-0-1091">1091</a></span>
+<span class="normal"><a href="#__codelineno-0-1092">1092</a></span>
+<span class="normal"><a href="#__codelineno-0-1093">1093</a></span>
+<span class="normal"><a href="#__codelineno-0-1094">1094</a></span>
+<span class="normal"><a href="#__codelineno-0-1095">1095</a></span>
+<span class="normal"><a href="#__codelineno-0-1096">1096</a></span>
+<span class="normal"><a href="#__codelineno-0-1097">1097</a></span>
+<span class="normal"><a href="#__codelineno-0-1098">1098</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1085" name="__codelineno-0-1085"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-1086" name="__codelineno-0-1086"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Close the primary and auxiliary sessions owned by this client.</span>
+<a id="__codelineno-0-1087" name="__codelineno-0-1087"></a>
+<a id="__codelineno-0-1088" name="__codelineno-0-1088"></a><span class="sd">    Shared HTTP clients are closed once. Cached API/service wrappers are</span>
+<a id="__codelineno-0-1089" name="__codelineno-0-1089"></a><span class="sd">    retained. Subsequent operations may open sessions again; use an async</span>
+<a id="__codelineno-0-1090" name="__codelineno-0-1090"></a><span class="sd">    context manager to give their lifetime an explicit scope.</span>
+<a id="__codelineno-0-1091" name="__codelineno-0-1091"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1092" name="__codelineno-0-1092"></a>    <span class="k">for</span> <span class="n">http</span> <span class="ow">in</span> <span class="p">{</span>
+<a id="__codelineno-0-1093" name="__codelineno-0-1093"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="p">,</span>
+<a id="__codelineno-0-1094" name="__codelineno-0-1094"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_manage_http</span><span class="p">,</span>
+<a id="__codelineno-0-1095" name="__codelineno-0-1095"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_admin_http</span><span class="p">,</span>
+<a id="__codelineno-0-1096" name="__codelineno-0-1096"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_health_http</span><span class="p">,</span>
+<a id="__codelineno-0-1097" name="__codelineno-0-1097"></a>    <span class="p">}:</span>
+<a id="__codelineno-0-1098" name="__codelineno-0-1098"></a>        <span class="k">await</span> <span class="n">http</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16663,27 +16950,7 @@ than an unhealthy server</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-825">825</a></span>
-<span class="normal"><a href="#__codelineno-0-826">826</a></span>
-<span class="normal"><a href="#__codelineno-0-827">827</a></span>
-<span class="normal"><a href="#__codelineno-0-828">828</a></span>
-<span class="normal"><a href="#__codelineno-0-829">829</a></span>
-<span class="normal"><a href="#__codelineno-0-830">830</a></span>
-<span class="normal"><a href="#__codelineno-0-831">831</a></span>
-<span class="normal"><a href="#__codelineno-0-832">832</a></span>
-<span class="normal"><a href="#__codelineno-0-833">833</a></span>
-<span class="normal"><a href="#__codelineno-0-834">834</a></span>
-<span class="normal"><a href="#__codelineno-0-835">835</a></span>
-<span class="normal"><a href="#__codelineno-0-836">836</a></span>
-<span class="normal"><a href="#__codelineno-0-837">837</a></span>
-<span class="normal"><a href="#__codelineno-0-838">838</a></span>
-<span class="normal"><a href="#__codelineno-0-839">839</a></span>
-<span class="normal"><a href="#__codelineno-0-840">840</a></span>
-<span class="normal"><a href="#__codelineno-0-841">841</a></span>
-<span class="normal"><a href="#__codelineno-0-842">842</a></span>
-<span class="normal"><a href="#__codelineno-0-843">843</a></span>
-<span class="normal"><a href="#__codelineno-0-844">844</a></span>
-<span class="normal"><a href="#__codelineno-0-845">845</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-845">845</a></span>
 <span class="normal"><a href="#__codelineno-0-846">846</a></span>
 <span class="normal"><a href="#__codelineno-0-847">847</a></span>
 <span class="normal"><a href="#__codelineno-0-848">848</a></span>
@@ -16691,35 +16958,55 @@ than an unhealthy server</p>
 <span class="normal"><a href="#__codelineno-0-850">850</a></span>
 <span class="normal"><a href="#__codelineno-0-851">851</a></span>
 <span class="normal"><a href="#__codelineno-0-852">852</a></span>
-<span class="normal"><a href="#__codelineno-0-853">853</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-825" name="__codelineno-0-825"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">healthcheck</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-826" name="__codelineno-0-826"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Report whether the HealthCheck app server (port 7997 by default) is healthy.</span>
-<a id="__codelineno-0-827" name="__codelineno-0-827"></a>
-<a id="__codelineno-0-828" name="__codelineno-0-828"></a><span class="sd">    Sends a HEAD request to ``/`` on the HealthCheck connection.</span>
-<a id="__codelineno-0-829" name="__codelineno-0-829"></a>
-<a id="__codelineno-0-830" name="__codelineno-0-830"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-831" name="__codelineno-0-831"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-832" name="__codelineno-0-832"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-833" name="__codelineno-0-833"></a><span class="sd">        A per-request timeout for this probe. Unset uses the HealthCheck</span>
-<a id="__codelineno-0-834" name="__codelineno-0-834"></a><span class="sd">        connection&#39;s timeout (five seconds per component by default). None</span>
-<a id="__codelineno-0-835" name="__codelineno-0-835"></a><span class="sd">        disables every HTTP timeout; a number sets all four components to</span>
-<a id="__codelineno-0-836" name="__codelineno-0-836"></a><span class="sd">        that many seconds; an httpx.Timeout overrides them.</span>
-<a id="__codelineno-0-837" name="__codelineno-0-837"></a>
-<a id="__codelineno-0-838" name="__codelineno-0-838"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-839" name="__codelineno-0-839"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-840" name="__codelineno-0-840"></a><span class="sd">    bool</span>
-<a id="__codelineno-0-841" name="__codelineno-0-841"></a><span class="sd">        True when the server answered 2xx, False when it answered 5xx</span>
-<a id="__codelineno-0-842" name="__codelineno-0-842"></a>
-<a id="__codelineno-0-843" name="__codelineno-0-843"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-844" name="__codelineno-0-844"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-845" name="__codelineno-0-845"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-846" name="__codelineno-0-846"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-847" name="__codelineno-0-847"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-848" name="__codelineno-0-848"></a><span class="sd">    httpx.HTTPStatusError</span>
-<a id="__codelineno-0-849" name="__codelineno-0-849"></a><span class="sd">        If the server answered with a 4xx status, which signals a</span>
-<a id="__codelineno-0-850" name="__codelineno-0-850"></a><span class="sd">        misdirected request (the HealthCheck server takes no auth) rather</span>
-<a id="__codelineno-0-851" name="__codelineno-0-851"></a><span class="sd">        than an unhealthy server</span>
-<a id="__codelineno-0-852" name="__codelineno-0-852"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-853" name="__codelineno-0-853"></a>    <span class="k">return</span> <span class="n">_healthy_or_raise</span><span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_health_http</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">))</span>
+<span class="normal"><a href="#__codelineno-0-853">853</a></span>
+<span class="normal"><a href="#__codelineno-0-854">854</a></span>
+<span class="normal"><a href="#__codelineno-0-855">855</a></span>
+<span class="normal"><a href="#__codelineno-0-856">856</a></span>
+<span class="normal"><a href="#__codelineno-0-857">857</a></span>
+<span class="normal"><a href="#__codelineno-0-858">858</a></span>
+<span class="normal"><a href="#__codelineno-0-859">859</a></span>
+<span class="normal"><a href="#__codelineno-0-860">860</a></span>
+<span class="normal"><a href="#__codelineno-0-861">861</a></span>
+<span class="normal"><a href="#__codelineno-0-862">862</a></span>
+<span class="normal"><a href="#__codelineno-0-863">863</a></span>
+<span class="normal"><a href="#__codelineno-0-864">864</a></span>
+<span class="normal"><a href="#__codelineno-0-865">865</a></span>
+<span class="normal"><a href="#__codelineno-0-866">866</a></span>
+<span class="normal"><a href="#__codelineno-0-867">867</a></span>
+<span class="normal"><a href="#__codelineno-0-868">868</a></span>
+<span class="normal"><a href="#__codelineno-0-869">869</a></span>
+<span class="normal"><a href="#__codelineno-0-870">870</a></span>
+<span class="normal"><a href="#__codelineno-0-871">871</a></span>
+<span class="normal"><a href="#__codelineno-0-872">872</a></span>
+<span class="normal"><a href="#__codelineno-0-873">873</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-845" name="__codelineno-0-845"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">healthcheck</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-846" name="__codelineno-0-846"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Report whether the HealthCheck app server (port 7997 by default) is healthy.</span>
+<a id="__codelineno-0-847" name="__codelineno-0-847"></a>
+<a id="__codelineno-0-848" name="__codelineno-0-848"></a><span class="sd">    Sends a HEAD request to ``/`` on the HealthCheck connection.</span>
+<a id="__codelineno-0-849" name="__codelineno-0-849"></a>
+<a id="__codelineno-0-850" name="__codelineno-0-850"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-851" name="__codelineno-0-851"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-852" name="__codelineno-0-852"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-853" name="__codelineno-0-853"></a><span class="sd">        A per-request timeout for this probe. Unset uses the HealthCheck</span>
+<a id="__codelineno-0-854" name="__codelineno-0-854"></a><span class="sd">        connection&#39;s timeout (five seconds per component by default). None</span>
+<a id="__codelineno-0-855" name="__codelineno-0-855"></a><span class="sd">        disables every HTTP timeout; a number sets all four components to</span>
+<a id="__codelineno-0-856" name="__codelineno-0-856"></a><span class="sd">        that many seconds; an httpx.Timeout overrides them.</span>
+<a id="__codelineno-0-857" name="__codelineno-0-857"></a>
+<a id="__codelineno-0-858" name="__codelineno-0-858"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-859" name="__codelineno-0-859"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-860" name="__codelineno-0-860"></a><span class="sd">    bool</span>
+<a id="__codelineno-0-861" name="__codelineno-0-861"></a><span class="sd">        True when the server answered 2xx, False when it answered 5xx</span>
+<a id="__codelineno-0-862" name="__codelineno-0-862"></a>
+<a id="__codelineno-0-863" name="__codelineno-0-863"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-864" name="__codelineno-0-864"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-865" name="__codelineno-0-865"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-866" name="__codelineno-0-866"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-867" name="__codelineno-0-867"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-868" name="__codelineno-0-868"></a><span class="sd">    httpx.HTTPStatusError</span>
+<a id="__codelineno-0-869" name="__codelineno-0-869"></a><span class="sd">        If the server answered with a 4xx status, which signals a</span>
+<a id="__codelineno-0-870" name="__codelineno-0-870"></a><span class="sd">        misdirected request (the HealthCheck server takes no auth) rather</span>
+<a id="__codelineno-0-871" name="__codelineno-0-871"></a><span class="sd">        than an unhealthy server</span>
+<a id="__codelineno-0-872" name="__codelineno-0-872"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-873" name="__codelineno-0-873"></a>    <span class="k">return</span> <span class="n">_healthy_or_raise</span><span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_health_http</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16769,27 +17056,27 @@ Use healthcheck() to probe the server.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1062">1062</a></span>
-<span class="normal"><a href="#__codelineno-0-1063">1063</a></span>
-<span class="normal"><a href="#__codelineno-0-1064">1064</a></span>
-<span class="normal"><a href="#__codelineno-0-1065">1065</a></span>
-<span class="normal"><a href="#__codelineno-0-1066">1066</a></span>
-<span class="normal"><a href="#__codelineno-0-1067">1067</a></span>
-<span class="normal"><a href="#__codelineno-0-1068">1068</a></span>
-<span class="normal"><a href="#__codelineno-0-1069">1069</a></span>
-<span class="normal"><a href="#__codelineno-0-1070">1070</a></span>
-<span class="normal"><a href="#__codelineno-0-1071">1071</a></span>
-<span class="normal"><a href="#__codelineno-0-1072">1072</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1062" name="__codelineno-0-1062"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1063" name="__codelineno-0-1063"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a connection status.</span>
-<a id="__codelineno-0-1064" name="__codelineno-0-1064"></a>
-<a id="__codelineno-0-1065" name="__codelineno-0-1065"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1066" name="__codelineno-0-1066"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1067" name="__codelineno-0-1067"></a><span class="sd">    bool</span>
-<a id="__codelineno-0-1068" name="__codelineno-0-1068"></a><span class="sd">        True if the primary local HTTP session is open; otherwise False.</span>
-<a id="__codelineno-0-1069" name="__codelineno-0-1069"></a><span class="sd">        This does not probe the server or describe auxiliary session state.</span>
-<a id="__codelineno-0-1070" name="__codelineno-0-1070"></a><span class="sd">        Use healthcheck() to probe the server.</span>
-<a id="__codelineno-0-1071" name="__codelineno-0-1071"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1072" name="__codelineno-0-1072"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">is_connected</span><span class="p">()</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1100">1100</a></span>
+<span class="normal"><a href="#__codelineno-0-1101">1101</a></span>
+<span class="normal"><a href="#__codelineno-0-1102">1102</a></span>
+<span class="normal"><a href="#__codelineno-0-1103">1103</a></span>
+<span class="normal"><a href="#__codelineno-0-1104">1104</a></span>
+<span class="normal"><a href="#__codelineno-0-1105">1105</a></span>
+<span class="normal"><a href="#__codelineno-0-1106">1106</a></span>
+<span class="normal"><a href="#__codelineno-0-1107">1107</a></span>
+<span class="normal"><a href="#__codelineno-0-1108">1108</a></span>
+<span class="normal"><a href="#__codelineno-0-1109">1109</a></span>
+<span class="normal"><a href="#__codelineno-0-1110">1110</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1100" name="__codelineno-0-1100"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1101" name="__codelineno-0-1101"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a connection status.</span>
+<a id="__codelineno-0-1102" name="__codelineno-0-1102"></a>
+<a id="__codelineno-0-1103" name="__codelineno-0-1103"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1104" name="__codelineno-0-1104"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1105" name="__codelineno-0-1105"></a><span class="sd">    bool</span>
+<a id="__codelineno-0-1106" name="__codelineno-0-1106"></a><span class="sd">        True if the primary local HTTP session is open; otherwise False.</span>
+<a id="__codelineno-0-1107" name="__codelineno-0-1107"></a><span class="sd">        This does not probe the server or describe auxiliary session state.</span>
+<a id="__codelineno-0-1108" name="__codelineno-0-1108"></a><span class="sd">        Use healthcheck() to probe the server.</span>
+<a id="__codelineno-0-1109" name="__codelineno-0-1109"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1110" name="__codelineno-0-1110"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">is_connected</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16981,45 +17268,7 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-978"> 978</a></span>
-<span class="normal"><a href="#__codelineno-0-979"> 979</a></span>
-<span class="normal"><a href="#__codelineno-0-980"> 980</a></span>
-<span class="normal"><a href="#__codelineno-0-981"> 981</a></span>
-<span class="normal"><a href="#__codelineno-0-982"> 982</a></span>
-<span class="normal"><a href="#__codelineno-0-983"> 983</a></span>
-<span class="normal"><a href="#__codelineno-0-984"> 984</a></span>
-<span class="normal"><a href="#__codelineno-0-985"> 985</a></span>
-<span class="normal"><a href="#__codelineno-0-986"> 986</a></span>
-<span class="normal"><a href="#__codelineno-0-987"> 987</a></span>
-<span class="normal"><a href="#__codelineno-0-988"> 988</a></span>
-<span class="normal"><a href="#__codelineno-0-989"> 989</a></span>
-<span class="normal"><a href="#__codelineno-0-990"> 990</a></span>
-<span class="normal"><a href="#__codelineno-0-991"> 991</a></span>
-<span class="normal"><a href="#__codelineno-0-992"> 992</a></span>
-<span class="normal"><a href="#__codelineno-0-993"> 993</a></span>
-<span class="normal"><a href="#__codelineno-0-994"> 994</a></span>
-<span class="normal"><a href="#__codelineno-0-995"> 995</a></span>
-<span class="normal"><a href="#__codelineno-0-996"> 996</a></span>
-<span class="normal"><a href="#__codelineno-0-997"> 997</a></span>
-<span class="normal"><a href="#__codelineno-0-998"> 998</a></span>
-<span class="normal"><a href="#__codelineno-0-999"> 999</a></span>
-<span class="normal"><a href="#__codelineno-0-1000">1000</a></span>
-<span class="normal"><a href="#__codelineno-0-1001">1001</a></span>
-<span class="normal"><a href="#__codelineno-0-1002">1002</a></span>
-<span class="normal"><a href="#__codelineno-0-1003">1003</a></span>
-<span class="normal"><a href="#__codelineno-0-1004">1004</a></span>
-<span class="normal"><a href="#__codelineno-0-1005">1005</a></span>
-<span class="normal"><a href="#__codelineno-0-1006">1006</a></span>
-<span class="normal"><a href="#__codelineno-0-1007">1007</a></span>
-<span class="normal"><a href="#__codelineno-0-1008">1008</a></span>
-<span class="normal"><a href="#__codelineno-0-1009">1009</a></span>
-<span class="normal"><a href="#__codelineno-0-1010">1010</a></span>
-<span class="normal"><a href="#__codelineno-0-1011">1011</a></span>
-<span class="normal"><a href="#__codelineno-0-1012">1012</a></span>
-<span class="normal"><a href="#__codelineno-0-1013">1013</a></span>
-<span class="normal"><a href="#__codelineno-0-1014">1014</a></span>
-<span class="normal"><a href="#__codelineno-0-1015">1015</a></span>
-<span class="normal"><a href="#__codelineno-0-1016">1016</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1016">1016</a></span>
 <span class="normal"><a href="#__codelineno-0-1017">1017</a></span>
 <span class="normal"><a href="#__codelineno-0-1018">1018</a></span>
 <span class="normal"><a href="#__codelineno-0-1019">1019</a></span>
@@ -17039,65 +17288,103 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-1033">1033</a></span>
 <span class="normal"><a href="#__codelineno-0-1034">1034</a></span>
 <span class="normal"><a href="#__codelineno-0-1035">1035</a></span>
-<span class="normal"><a href="#__codelineno-0-1036">1036</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-978" name="__codelineno-0-978"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">transaction</span><span class="p">(</span>
-<a id="__codelineno-0-979" name="__codelineno-0-979"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-980" name="__codelineno-0-980"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-981" name="__codelineno-0-981"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-982" name="__codelineno-0-982"></a>    <span class="n">time_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-983" name="__codelineno-0-983"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-984" name="__codelineno-0-984"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-985" name="__codelineno-0-985"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncTransactionService</span><span class="p">:</span>
-<a id="__codelineno-0-986" name="__codelineno-0-986"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a multi-statement transaction and return a service scoped to it.</span>
-<a id="__codelineno-0-987" name="__codelineno-0-987"></a>
-<a id="__codelineno-0-988" name="__codelineno-0-988"></a><span class="sd">    Use as an async context manager to commit on a clean exit and roll back</span>
-<a id="__codelineno-0-989" name="__codelineno-0-989"></a><span class="sd">    on error:</span>
-<a id="__codelineno-0-990" name="__codelineno-0-990"></a>
-<a id="__codelineno-0-991" name="__codelineno-0-991"></a><span class="sd">    &gt;&gt;&gt; async with await ml.transaction(database=&quot;my-db&quot;) as txn:  # doctest: +SKIP</span>
-<a id="__codelineno-0-992" name="__codelineno-0-992"></a><span class="sd">    ...     await ml.eval.xquery(&quot;...&quot;, **txn)</span>
-<a id="__codelineno-0-993" name="__codelineno-0-993"></a>
-<a id="__codelineno-0-994" name="__codelineno-0-994"></a><span class="sd">    ``timeout`` bounds only the HTTP request that opens the transaction:</span>
-<a id="__codelineno-0-995" name="__codelineno-0-995"></a><span class="sd">    unset uses the client&#39;s configured timeout, None disables every HTTP</span>
-<a id="__codelineno-0-996" name="__codelineno-0-996"></a><span class="sd">    timeout, a number sets all four components to that many seconds, and an</span>
-<a id="__codelineno-0-997" name="__codelineno-0-997"></a><span class="sd">    httpx.Timeout overrides them. It is unrelated to ``time_limit``, the</span>
-<a id="__codelineno-0-998" name="__codelineno-0-998"></a><span class="sd">    server-side lifetime of the transaction. Subsequent operations</span>
-<a id="__codelineno-0-999" name="__codelineno-0-999"></a><span class="sd">    (status/commit/rollback and content ops run with ``**txn``) accept their</span>
-<a id="__codelineno-0-1000" name="__codelineno-0-1000"></a><span class="sd">    own ``timeout``.</span>
-<a id="__codelineno-0-1001" name="__codelineno-0-1001"></a>
-<a id="__codelineno-0-1002" name="__codelineno-0-1002"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1003" name="__codelineno-0-1003"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1004" name="__codelineno-0-1004"></a><span class="sd">    name : str | None, default None</span>
-<a id="__codelineno-0-1005" name="__codelineno-0-1005"></a><span class="sd">        Optional server-side label; it is not the transaction identifier.</span>
-<a id="__codelineno-0-1006" name="__codelineno-0-1006"></a><span class="sd">    time_limit : int | None, default None</span>
-<a id="__codelineno-0-1007" name="__codelineno-0-1007"></a><span class="sd">        Server-side transaction lifetime in seconds. None uses the server</span>
-<a id="__codelineno-0-1008" name="__codelineno-0-1008"></a><span class="sd">        default; this is independent of the HTTP timeout.</span>
-<a id="__codelineno-0-1009" name="__codelineno-0-1009"></a><span class="sd">    database : str | None, default None</span>
-<a id="__codelineno-0-1010" name="__codelineno-0-1010"></a><span class="sd">        Content database name or id. None uses the REST server&#39;s database.</span>
-<a id="__codelineno-0-1011" name="__codelineno-0-1011"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-1012" name="__codelineno-0-1012"></a><span class="sd">        HTTP timeout for opening the transaction only. Unset inherits the</span>
-<a id="__codelineno-0-1013" name="__codelineno-0-1013"></a><span class="sd">        connection setting; None disables the HTTP timeout.</span>
-<a id="__codelineno-0-1014" name="__codelineno-0-1014"></a>
-<a id="__codelineno-0-1015" name="__codelineno-0-1015"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1016" name="__codelineno-0-1016"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1017" name="__codelineno-0-1017"></a><span class="sd">    AsyncTransactionService</span>
-<a id="__codelineno-0-1018" name="__codelineno-0-1018"></a><span class="sd">        The newly opened transaction. Use its context manager to finish it;</span>
-<a id="__codelineno-0-1019" name="__codelineno-0-1019"></a><span class="sd">        otherwise commit or roll it back explicitly. ``**txn`` forwards</span>
-<a id="__codelineno-0-1020" name="__codelineno-0-1020"></a><span class="sd">        the transaction id and its database to content operations.</span>
-<a id="__codelineno-0-1021" name="__codelineno-0-1021"></a>
-<a id="__codelineno-0-1022" name="__codelineno-0-1022"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-1023" name="__codelineno-0-1023"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-1024" name="__codelineno-0-1024"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-1025" name="__codelineno-0-1025"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-1026" name="__codelineno-0-1026"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-1027" name="__codelineno-0-1027"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-1028" name="__codelineno-0-1028"></a><span class="sd">        If MarkLogic rejects opening the transaction.</span>
-<a id="__codelineno-0-1029" name="__codelineno-0-1029"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1030" name="__codelineno-0-1030"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">async_open_transaction</span><span class="p">(</span>
-<a id="__codelineno-0-1031" name="__codelineno-0-1031"></a>        <span class="n">AsyncApiClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="p">),</span>
-<a id="__codelineno-0-1032" name="__codelineno-0-1032"></a>        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-<a id="__codelineno-0-1033" name="__codelineno-0-1033"></a>        <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
-<a id="__codelineno-0-1034" name="__codelineno-0-1034"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
-<a id="__codelineno-0-1035" name="__codelineno-0-1035"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-1036" name="__codelineno-0-1036"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-1036">1036</a></span>
+<span class="normal"><a href="#__codelineno-0-1037">1037</a></span>
+<span class="normal"><a href="#__codelineno-0-1038">1038</a></span>
+<span class="normal"><a href="#__codelineno-0-1039">1039</a></span>
+<span class="normal"><a href="#__codelineno-0-1040">1040</a></span>
+<span class="normal"><a href="#__codelineno-0-1041">1041</a></span>
+<span class="normal"><a href="#__codelineno-0-1042">1042</a></span>
+<span class="normal"><a href="#__codelineno-0-1043">1043</a></span>
+<span class="normal"><a href="#__codelineno-0-1044">1044</a></span>
+<span class="normal"><a href="#__codelineno-0-1045">1045</a></span>
+<span class="normal"><a href="#__codelineno-0-1046">1046</a></span>
+<span class="normal"><a href="#__codelineno-0-1047">1047</a></span>
+<span class="normal"><a href="#__codelineno-0-1048">1048</a></span>
+<span class="normal"><a href="#__codelineno-0-1049">1049</a></span>
+<span class="normal"><a href="#__codelineno-0-1050">1050</a></span>
+<span class="normal"><a href="#__codelineno-0-1051">1051</a></span>
+<span class="normal"><a href="#__codelineno-0-1052">1052</a></span>
+<span class="normal"><a href="#__codelineno-0-1053">1053</a></span>
+<span class="normal"><a href="#__codelineno-0-1054">1054</a></span>
+<span class="normal"><a href="#__codelineno-0-1055">1055</a></span>
+<span class="normal"><a href="#__codelineno-0-1056">1056</a></span>
+<span class="normal"><a href="#__codelineno-0-1057">1057</a></span>
+<span class="normal"><a href="#__codelineno-0-1058">1058</a></span>
+<span class="normal"><a href="#__codelineno-0-1059">1059</a></span>
+<span class="normal"><a href="#__codelineno-0-1060">1060</a></span>
+<span class="normal"><a href="#__codelineno-0-1061">1061</a></span>
+<span class="normal"><a href="#__codelineno-0-1062">1062</a></span>
+<span class="normal"><a href="#__codelineno-0-1063">1063</a></span>
+<span class="normal"><a href="#__codelineno-0-1064">1064</a></span>
+<span class="normal"><a href="#__codelineno-0-1065">1065</a></span>
+<span class="normal"><a href="#__codelineno-0-1066">1066</a></span>
+<span class="normal"><a href="#__codelineno-0-1067">1067</a></span>
+<span class="normal"><a href="#__codelineno-0-1068">1068</a></span>
+<span class="normal"><a href="#__codelineno-0-1069">1069</a></span>
+<span class="normal"><a href="#__codelineno-0-1070">1070</a></span>
+<span class="normal"><a href="#__codelineno-0-1071">1071</a></span>
+<span class="normal"><a href="#__codelineno-0-1072">1072</a></span>
+<span class="normal"><a href="#__codelineno-0-1073">1073</a></span>
+<span class="normal"><a href="#__codelineno-0-1074">1074</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1016" name="__codelineno-0-1016"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">transaction</span><span class="p">(</span>
+<a id="__codelineno-0-1017" name="__codelineno-0-1017"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1018" name="__codelineno-0-1018"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-1019" name="__codelineno-0-1019"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1020" name="__codelineno-0-1020"></a>    <span class="n">time_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1021" name="__codelineno-0-1021"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1022" name="__codelineno-0-1022"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-1023" name="__codelineno-0-1023"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncTransactionService</span><span class="p">:</span>
+<a id="__codelineno-0-1024" name="__codelineno-0-1024"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a multi-statement transaction and return a service scoped to it.</span>
+<a id="__codelineno-0-1025" name="__codelineno-0-1025"></a>
+<a id="__codelineno-0-1026" name="__codelineno-0-1026"></a><span class="sd">    Use as an async context manager to commit on a clean exit and roll back</span>
+<a id="__codelineno-0-1027" name="__codelineno-0-1027"></a><span class="sd">    on error:</span>
+<a id="__codelineno-0-1028" name="__codelineno-0-1028"></a>
+<a id="__codelineno-0-1029" name="__codelineno-0-1029"></a><span class="sd">    &gt;&gt;&gt; async with await ml.transaction(database=&quot;my-db&quot;) as txn:  # doctest: +SKIP</span>
+<a id="__codelineno-0-1030" name="__codelineno-0-1030"></a><span class="sd">    ...     await ml.eval.xquery(&quot;...&quot;, **txn)</span>
+<a id="__codelineno-0-1031" name="__codelineno-0-1031"></a>
+<a id="__codelineno-0-1032" name="__codelineno-0-1032"></a><span class="sd">    ``timeout`` bounds only the HTTP request that opens the transaction:</span>
+<a id="__codelineno-0-1033" name="__codelineno-0-1033"></a><span class="sd">    unset uses the client&#39;s configured timeout, None disables every HTTP</span>
+<a id="__codelineno-0-1034" name="__codelineno-0-1034"></a><span class="sd">    timeout, a number sets all four components to that many seconds, and an</span>
+<a id="__codelineno-0-1035" name="__codelineno-0-1035"></a><span class="sd">    httpx.Timeout overrides them. It is unrelated to ``time_limit``, the</span>
+<a id="__codelineno-0-1036" name="__codelineno-0-1036"></a><span class="sd">    server-side lifetime of the transaction. Subsequent operations</span>
+<a id="__codelineno-0-1037" name="__codelineno-0-1037"></a><span class="sd">    (status/commit/rollback and content ops run with ``**txn``) accept their</span>
+<a id="__codelineno-0-1038" name="__codelineno-0-1038"></a><span class="sd">    own ``timeout``.</span>
+<a id="__codelineno-0-1039" name="__codelineno-0-1039"></a>
+<a id="__codelineno-0-1040" name="__codelineno-0-1040"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1041" name="__codelineno-0-1041"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1042" name="__codelineno-0-1042"></a><span class="sd">    name : str | None, default None</span>
+<a id="__codelineno-0-1043" name="__codelineno-0-1043"></a><span class="sd">        Optional server-side label; it is not the transaction identifier.</span>
+<a id="__codelineno-0-1044" name="__codelineno-0-1044"></a><span class="sd">    time_limit : int | None, default None</span>
+<a id="__codelineno-0-1045" name="__codelineno-0-1045"></a><span class="sd">        Server-side transaction lifetime in seconds. None uses the server</span>
+<a id="__codelineno-0-1046" name="__codelineno-0-1046"></a><span class="sd">        default; this is independent of the HTTP timeout.</span>
+<a id="__codelineno-0-1047" name="__codelineno-0-1047"></a><span class="sd">    database : str | None, default None</span>
+<a id="__codelineno-0-1048" name="__codelineno-0-1048"></a><span class="sd">        Content database name or id. None uses the REST server&#39;s database.</span>
+<a id="__codelineno-0-1049" name="__codelineno-0-1049"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-1050" name="__codelineno-0-1050"></a><span class="sd">        HTTP timeout for opening the transaction only. Unset inherits the</span>
+<a id="__codelineno-0-1051" name="__codelineno-0-1051"></a><span class="sd">        connection setting; None disables the HTTP timeout.</span>
+<a id="__codelineno-0-1052" name="__codelineno-0-1052"></a>
+<a id="__codelineno-0-1053" name="__codelineno-0-1053"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1054" name="__codelineno-0-1054"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1055" name="__codelineno-0-1055"></a><span class="sd">    AsyncTransactionService</span>
+<a id="__codelineno-0-1056" name="__codelineno-0-1056"></a><span class="sd">        The newly opened transaction. Use its context manager to finish it;</span>
+<a id="__codelineno-0-1057" name="__codelineno-0-1057"></a><span class="sd">        otherwise commit or roll it back explicitly. ``**txn`` forwards</span>
+<a id="__codelineno-0-1058" name="__codelineno-0-1058"></a><span class="sd">        the transaction id and its database to content operations.</span>
+<a id="__codelineno-0-1059" name="__codelineno-0-1059"></a>
+<a id="__codelineno-0-1060" name="__codelineno-0-1060"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-1061" name="__codelineno-0-1061"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-1062" name="__codelineno-0-1062"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-1063" name="__codelineno-0-1063"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-1064" name="__codelineno-0-1064"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-1065" name="__codelineno-0-1065"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-1066" name="__codelineno-0-1066"></a><span class="sd">        If MarkLogic rejects opening the transaction.</span>
+<a id="__codelineno-0-1067" name="__codelineno-0-1067"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1068" name="__codelineno-0-1068"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">async_open_transaction</span><span class="p">(</span>
+<a id="__codelineno-0-1069" name="__codelineno-0-1069"></a>        <span class="n">AsyncApiClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="p">),</span>
+<a id="__codelineno-0-1070" name="__codelineno-0-1070"></a>        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+<a id="__codelineno-0-1071" name="__codelineno-0-1071"></a>        <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
+<a id="__codelineno-0-1072" name="__codelineno-0-1072"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+<a id="__codelineno-0-1073" name="__codelineno-0-1073"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-1074" name="__codelineno-0-1074"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17206,75 +17493,75 @@ with None for missing components; <code>str()</code> preserves the full version.
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-920">920</a></span>
-<span class="normal"><a href="#__codelineno-0-921">921</a></span>
-<span class="normal"><a href="#__codelineno-0-922">922</a></span>
-<span class="normal"><a href="#__codelineno-0-923">923</a></span>
-<span class="normal"><a href="#__codelineno-0-924">924</a></span>
-<span class="normal"><a href="#__codelineno-0-925">925</a></span>
-<span class="normal"><a href="#__codelineno-0-926">926</a></span>
-<span class="normal"><a href="#__codelineno-0-927">927</a></span>
-<span class="normal"><a href="#__codelineno-0-928">928</a></span>
-<span class="normal"><a href="#__codelineno-0-929">929</a></span>
-<span class="normal"><a href="#__codelineno-0-930">930</a></span>
-<span class="normal"><a href="#__codelineno-0-931">931</a></span>
-<span class="normal"><a href="#__codelineno-0-932">932</a></span>
-<span class="normal"><a href="#__codelineno-0-933">933</a></span>
-<span class="normal"><a href="#__codelineno-0-934">934</a></span>
-<span class="normal"><a href="#__codelineno-0-935">935</a></span>
-<span class="normal"><a href="#__codelineno-0-936">936</a></span>
-<span class="normal"><a href="#__codelineno-0-937">937</a></span>
-<span class="normal"><a href="#__codelineno-0-938">938</a></span>
-<span class="normal"><a href="#__codelineno-0-939">939</a></span>
-<span class="normal"><a href="#__codelineno-0-940">940</a></span>
-<span class="normal"><a href="#__codelineno-0-941">941</a></span>
-<span class="normal"><a href="#__codelineno-0-942">942</a></span>
-<span class="normal"><a href="#__codelineno-0-943">943</a></span>
-<span class="normal"><a href="#__codelineno-0-944">944</a></span>
-<span class="normal"><a href="#__codelineno-0-945">945</a></span>
-<span class="normal"><a href="#__codelineno-0-946">946</a></span>
-<span class="normal"><a href="#__codelineno-0-947">947</a></span>
-<span class="normal"><a href="#__codelineno-0-948">948</a></span>
-<span class="normal"><a href="#__codelineno-0-949">949</a></span>
-<span class="normal"><a href="#__codelineno-0-950">950</a></span>
-<span class="normal"><a href="#__codelineno-0-951">951</a></span>
-<span class="normal"><a href="#__codelineno-0-952">952</a></span>
-<span class="normal"><a href="#__codelineno-0-953">953</a></span>
-<span class="normal"><a href="#__codelineno-0-954">954</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-920" name="__codelineno-0-920"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MarkLogicVersion</span><span class="p">:</span>
-<a id="__codelineno-0-921" name="__codelineno-0-921"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete MarkLogic version with four unpackable numeric parts.</span>
-<a id="__codelineno-0-922" name="__codelineno-0-922"></a>
-<a id="__codelineno-0-923" name="__codelineno-0-923"></a><span class="sd">    Each ``await ml.version()`` performs a new lookup; no version value</span>
-<a id="__codelineno-0-924" name="__codelineno-0-924"></a><span class="sd">    is cached by the asynchronous client.</span>
-<a id="__codelineno-0-925" name="__codelineno-0-925"></a>
-<a id="__codelineno-0-926" name="__codelineno-0-926"></a><span class="sd">    Resolved from ``xdmp:version()``. When the connecting user lacks the</span>
-<a id="__codelineno-0-927" name="__codelineno-0-927"></a><span class="sd">    eval privilege the query fails; the Manage and Admin server-config</span>
-<a id="__codelineno-0-928" name="__codelineno-0-928"></a><span class="sd">    endpoints are then tried in turn. If every source fails the eval error</span>
-<a id="__codelineno-0-929" name="__codelineno-0-929"></a><span class="sd">    is re-raised. A connection error propagates from the eval attempt --</span>
-<a id="__codelineno-0-930" name="__codelineno-0-930"></a><span class="sd">    auxiliary servers are not queried for eval transport failures.</span>
-<a id="__codelineno-0-931" name="__codelineno-0-931"></a><span class="sd">    Unavailable or malformed fallback responses are skipped.</span>
-<a id="__codelineno-0-932" name="__codelineno-0-932"></a>
-<a id="__codelineno-0-933" name="__codelineno-0-933"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-934" name="__codelineno-0-934"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-935" name="__codelineno-0-935"></a><span class="sd">    MarkLogicVersion</span>
-<a id="__codelineno-0-936" name="__codelineno-0-936"></a><span class="sd">        The full server version. ``parts`` always contains four components,</span>
-<a id="__codelineno-0-937" name="__codelineno-0-937"></a><span class="sd">        with None for missing components; ``str()`` preserves the full version.</span>
-<a id="__codelineno-0-938" name="__codelineno-0-938"></a>
-<a id="__codelineno-0-939" name="__codelineno-0-939"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-940" name="__codelineno-0-940"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-941" name="__codelineno-0-941"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-942" name="__codelineno-0-942"></a><span class="sd">        If MarkLogic returns an error and no fallback source succeeds</span>
-<a id="__codelineno-0-943" name="__codelineno-0-943"></a><span class="sd">    RequestError</span>
-<a id="__codelineno-0-944" name="__codelineno-0-944"></a><span class="sd">        If the eval request fails at the HTTP transport level</span>
-<a id="__codelineno-0-945" name="__codelineno-0-945"></a><span class="sd">    ValueError</span>
-<a id="__codelineno-0-946" name="__codelineno-0-946"></a><span class="sd">        If the eval result is not a recognizable version string</span>
-<a id="__codelineno-0-947" name="__codelineno-0-947"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-948" name="__codelineno-0-948"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-949" name="__codelineno-0-949"></a>        <span class="k">return</span> <span class="n">MarkLogicVersion</span><span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">xquery</span><span class="p">(</span><span class="s2">&quot;xdmp:version()&quot;</span><span class="p">))</span>
-<a id="__codelineno-0-950" name="__codelineno-0-950"></a>    <span class="k">except</span> <span class="n">MarkLogicError</span><span class="p">:</span>
-<a id="__codelineno-0-951" name="__codelineno-0-951"></a>        <span class="n">version</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_version_from_secondaries</span><span class="p">()</span>
-<a id="__codelineno-0-952" name="__codelineno-0-952"></a>        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-953" name="__codelineno-0-953"></a>            <span class="k">return</span> <span class="n">version</span>
-<a id="__codelineno-0-954" name="__codelineno-0-954"></a>        <span class="k">raise</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-958">958</a></span>
+<span class="normal"><a href="#__codelineno-0-959">959</a></span>
+<span class="normal"><a href="#__codelineno-0-960">960</a></span>
+<span class="normal"><a href="#__codelineno-0-961">961</a></span>
+<span class="normal"><a href="#__codelineno-0-962">962</a></span>
+<span class="normal"><a href="#__codelineno-0-963">963</a></span>
+<span class="normal"><a href="#__codelineno-0-964">964</a></span>
+<span class="normal"><a href="#__codelineno-0-965">965</a></span>
+<span class="normal"><a href="#__codelineno-0-966">966</a></span>
+<span class="normal"><a href="#__codelineno-0-967">967</a></span>
+<span class="normal"><a href="#__codelineno-0-968">968</a></span>
+<span class="normal"><a href="#__codelineno-0-969">969</a></span>
+<span class="normal"><a href="#__codelineno-0-970">970</a></span>
+<span class="normal"><a href="#__codelineno-0-971">971</a></span>
+<span class="normal"><a href="#__codelineno-0-972">972</a></span>
+<span class="normal"><a href="#__codelineno-0-973">973</a></span>
+<span class="normal"><a href="#__codelineno-0-974">974</a></span>
+<span class="normal"><a href="#__codelineno-0-975">975</a></span>
+<span class="normal"><a href="#__codelineno-0-976">976</a></span>
+<span class="normal"><a href="#__codelineno-0-977">977</a></span>
+<span class="normal"><a href="#__codelineno-0-978">978</a></span>
+<span class="normal"><a href="#__codelineno-0-979">979</a></span>
+<span class="normal"><a href="#__codelineno-0-980">980</a></span>
+<span class="normal"><a href="#__codelineno-0-981">981</a></span>
+<span class="normal"><a href="#__codelineno-0-982">982</a></span>
+<span class="normal"><a href="#__codelineno-0-983">983</a></span>
+<span class="normal"><a href="#__codelineno-0-984">984</a></span>
+<span class="normal"><a href="#__codelineno-0-985">985</a></span>
+<span class="normal"><a href="#__codelineno-0-986">986</a></span>
+<span class="normal"><a href="#__codelineno-0-987">987</a></span>
+<span class="normal"><a href="#__codelineno-0-988">988</a></span>
+<span class="normal"><a href="#__codelineno-0-989">989</a></span>
+<span class="normal"><a href="#__codelineno-0-990">990</a></span>
+<span class="normal"><a href="#__codelineno-0-991">991</a></span>
+<span class="normal"><a href="#__codelineno-0-992">992</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-958" name="__codelineno-0-958"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MarkLogicVersion</span><span class="p">:</span>
+<a id="__codelineno-0-959" name="__codelineno-0-959"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete MarkLogic version with four unpackable numeric parts.</span>
+<a id="__codelineno-0-960" name="__codelineno-0-960"></a>
+<a id="__codelineno-0-961" name="__codelineno-0-961"></a><span class="sd">    Each ``await ml.version()`` performs a new lookup; no version value</span>
+<a id="__codelineno-0-962" name="__codelineno-0-962"></a><span class="sd">    is cached by the asynchronous client.</span>
+<a id="__codelineno-0-963" name="__codelineno-0-963"></a>
+<a id="__codelineno-0-964" name="__codelineno-0-964"></a><span class="sd">    Resolved from ``xdmp:version()``. When the connecting user lacks the</span>
+<a id="__codelineno-0-965" name="__codelineno-0-965"></a><span class="sd">    eval privilege the query fails; the Manage and Admin server-config</span>
+<a id="__codelineno-0-966" name="__codelineno-0-966"></a><span class="sd">    endpoints are then tried in turn. If every source fails the eval error</span>
+<a id="__codelineno-0-967" name="__codelineno-0-967"></a><span class="sd">    is re-raised. A connection error propagates from the eval attempt --</span>
+<a id="__codelineno-0-968" name="__codelineno-0-968"></a><span class="sd">    auxiliary servers are not queried for eval transport failures.</span>
+<a id="__codelineno-0-969" name="__codelineno-0-969"></a><span class="sd">    Unavailable or malformed fallback responses are skipped.</span>
+<a id="__codelineno-0-970" name="__codelineno-0-970"></a>
+<a id="__codelineno-0-971" name="__codelineno-0-971"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-972" name="__codelineno-0-972"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-973" name="__codelineno-0-973"></a><span class="sd">    MarkLogicVersion</span>
+<a id="__codelineno-0-974" name="__codelineno-0-974"></a><span class="sd">        The full server version. ``parts`` always contains four components,</span>
+<a id="__codelineno-0-975" name="__codelineno-0-975"></a><span class="sd">        with None for missing components; ``str()`` preserves the full version.</span>
+<a id="__codelineno-0-976" name="__codelineno-0-976"></a>
+<a id="__codelineno-0-977" name="__codelineno-0-977"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-978" name="__codelineno-0-978"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-979" name="__codelineno-0-979"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-980" name="__codelineno-0-980"></a><span class="sd">        If MarkLogic returns an error and no fallback source succeeds</span>
+<a id="__codelineno-0-981" name="__codelineno-0-981"></a><span class="sd">    RequestError</span>
+<a id="__codelineno-0-982" name="__codelineno-0-982"></a><span class="sd">        If the eval request fails at the HTTP transport level</span>
+<a id="__codelineno-0-983" name="__codelineno-0-983"></a><span class="sd">    ValueError</span>
+<a id="__codelineno-0-984" name="__codelineno-0-984"></a><span class="sd">        If the eval result is not a recognizable version string</span>
+<a id="__codelineno-0-985" name="__codelineno-0-985"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-986" name="__codelineno-0-986"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-987" name="__codelineno-0-987"></a>        <span class="k">return</span> <span class="n">MarkLogicVersion</span><span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">xquery</span><span class="p">(</span><span class="s2">&quot;xdmp:version()&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-988" name="__codelineno-0-988"></a>    <span class="k">except</span> <span class="n">MarkLogicError</span><span class="p">:</span>
+<a id="__codelineno-0-989" name="__codelineno-0-989"></a>        <span class="n">version</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_version_from_secondaries</span><span class="p">()</span>
+<a id="__codelineno-0-990" name="__codelineno-0-990"></a>        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-991" name="__codelineno-0-991"></a>            <span class="k">return</span> <span class="n">version</span>
+<a id="__codelineno-0-992" name="__codelineno-0-992"></a>        <span class="k">raise</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17388,61 +17675,61 @@ with None for missing components; <code>str()</code> preserves the full version.
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1074">1074</a></span>
-<span class="normal"><a href="#__codelineno-0-1075">1075</a></span>
-<span class="normal"><a href="#__codelineno-0-1076">1076</a></span>
-<span class="normal"><a href="#__codelineno-0-1077">1077</a></span>
-<span class="normal"><a href="#__codelineno-0-1078">1078</a></span>
-<span class="normal"><a href="#__codelineno-0-1079">1079</a></span>
-<span class="normal"><a href="#__codelineno-0-1080">1080</a></span>
-<span class="normal"><a href="#__codelineno-0-1081">1081</a></span>
-<span class="normal"><a href="#__codelineno-0-1082">1082</a></span>
-<span class="normal"><a href="#__codelineno-0-1083">1083</a></span>
-<span class="normal"><a href="#__codelineno-0-1084">1084</a></span>
-<span class="normal"><a href="#__codelineno-0-1085">1085</a></span>
-<span class="normal"><a href="#__codelineno-0-1086">1086</a></span>
-<span class="normal"><a href="#__codelineno-0-1087">1087</a></span>
-<span class="normal"><a href="#__codelineno-0-1088">1088</a></span>
-<span class="normal"><a href="#__codelineno-0-1089">1089</a></span>
-<span class="normal"><a href="#__codelineno-0-1090">1090</a></span>
-<span class="normal"><a href="#__codelineno-0-1091">1091</a></span>
-<span class="normal"><a href="#__codelineno-0-1092">1092</a></span>
-<span class="normal"><a href="#__codelineno-0-1093">1093</a></span>
-<span class="normal"><a href="#__codelineno-0-1094">1094</a></span>
-<span class="normal"><a href="#__codelineno-0-1095">1095</a></span>
-<span class="normal"><a href="#__codelineno-0-1096">1096</a></span>
-<span class="normal"><a href="#__codelineno-0-1097">1097</a></span>
-<span class="normal"><a href="#__codelineno-0-1098">1098</a></span>
-<span class="normal"><a href="#__codelineno-0-1099">1099</a></span>
-<span class="normal"><a href="#__codelineno-0-1100">1100</a></span>
-<span class="normal"><a href="#__codelineno-0-1101">1101</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1074" name="__codelineno-0-1074"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_restart</span><span class="p">(</span>
-<a id="__codelineno-0-1075" name="__codelineno-0-1075"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1076" name="__codelineno-0-1076"></a>    <span class="n">response</span><span class="p">:</span> <span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1077" name="__codelineno-0-1077"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-1078" name="__codelineno-0-1078"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">30.0</span><span class="p">,</span>
-<a id="__codelineno-0-1079" name="__codelineno-0-1079"></a>    <span class="n">poll_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
-<a id="__codelineno-0-1080" name="__codelineno-0-1080"></a>    <span class="n">retry</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1081" name="__codelineno-0-1081"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-1082" name="__codelineno-0-1082"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait for MarkLogic readiness after a restart-signaling response.</span>
-<a id="__codelineno-0-1083" name="__codelineno-0-1083"></a>
-<a id="__codelineno-0-1084" name="__codelineno-0-1084"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1085" name="__codelineno-0-1085"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1086" name="__codelineno-0-1086"></a><span class="sd">    response : Response | None</span>
-<a id="__codelineno-0-1087" name="__codelineno-0-1087"></a><span class="sd">        Response from an operation that may have initiated a restart.</span>
-<a id="__codelineno-0-1088" name="__codelineno-0-1088"></a><span class="sd">    timeout : float</span>
-<a id="__codelineno-0-1089" name="__codelineno-0-1089"></a><span class="sd">        Maximum number of seconds to wait for readiness.</span>
-<a id="__codelineno-0-1090" name="__codelineno-0-1090"></a><span class="sd">    poll_interval : float</span>
-<a id="__codelineno-0-1091" name="__codelineno-0-1091"></a><span class="sd">        Delay between readiness probes.</span>
-<a id="__codelineno-0-1092" name="__codelineno-0-1092"></a><span class="sd">    retry : Retry | None</span>
-<a id="__codelineno-0-1093" name="__codelineno-0-1093"></a><span class="sd">        Retry strategy for readiness probes.</span>
-<a id="__codelineno-0-1094" name="__codelineno-0-1094"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1095" name="__codelineno-0-1095"></a>    <span class="n">waiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_restart_waiter</span><span class="p">()</span>
-<a id="__codelineno-0-1096" name="__codelineno-0-1096"></a>    <span class="k">await</span> <span class="n">waiter</span><span class="o">.</span><span class="n">async_wait_for_restart_completion</span><span class="p">(</span>
-<a id="__codelineno-0-1097" name="__codelineno-0-1097"></a>        <span class="n">response</span><span class="p">,</span>
-<a id="__codelineno-0-1098" name="__codelineno-0-1098"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-1099" name="__codelineno-0-1099"></a>        <span class="n">poll_interval</span><span class="o">=</span><span class="n">poll_interval</span><span class="p">,</span>
-<a id="__codelineno-0-1100" name="__codelineno-0-1100"></a>        <span class="n">retry</span><span class="o">=</span><span class="n">retry</span> <span class="ow">or</span> <span class="n">_RESTART_RETRY_STRATEGY</span><span class="p">,</span>
-<a id="__codelineno-0-1101" name="__codelineno-0-1101"></a>    <span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1112">1112</a></span>
+<span class="normal"><a href="#__codelineno-0-1113">1113</a></span>
+<span class="normal"><a href="#__codelineno-0-1114">1114</a></span>
+<span class="normal"><a href="#__codelineno-0-1115">1115</a></span>
+<span class="normal"><a href="#__codelineno-0-1116">1116</a></span>
+<span class="normal"><a href="#__codelineno-0-1117">1117</a></span>
+<span class="normal"><a href="#__codelineno-0-1118">1118</a></span>
+<span class="normal"><a href="#__codelineno-0-1119">1119</a></span>
+<span class="normal"><a href="#__codelineno-0-1120">1120</a></span>
+<span class="normal"><a href="#__codelineno-0-1121">1121</a></span>
+<span class="normal"><a href="#__codelineno-0-1122">1122</a></span>
+<span class="normal"><a href="#__codelineno-0-1123">1123</a></span>
+<span class="normal"><a href="#__codelineno-0-1124">1124</a></span>
+<span class="normal"><a href="#__codelineno-0-1125">1125</a></span>
+<span class="normal"><a href="#__codelineno-0-1126">1126</a></span>
+<span class="normal"><a href="#__codelineno-0-1127">1127</a></span>
+<span class="normal"><a href="#__codelineno-0-1128">1128</a></span>
+<span class="normal"><a href="#__codelineno-0-1129">1129</a></span>
+<span class="normal"><a href="#__codelineno-0-1130">1130</a></span>
+<span class="normal"><a href="#__codelineno-0-1131">1131</a></span>
+<span class="normal"><a href="#__codelineno-0-1132">1132</a></span>
+<span class="normal"><a href="#__codelineno-0-1133">1133</a></span>
+<span class="normal"><a href="#__codelineno-0-1134">1134</a></span>
+<span class="normal"><a href="#__codelineno-0-1135">1135</a></span>
+<span class="normal"><a href="#__codelineno-0-1136">1136</a></span>
+<span class="normal"><a href="#__codelineno-0-1137">1137</a></span>
+<span class="normal"><a href="#__codelineno-0-1138">1138</a></span>
+<span class="normal"><a href="#__codelineno-0-1139">1139</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1112" name="__codelineno-0-1112"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_restart</span><span class="p">(</span>
+<a id="__codelineno-0-1113" name="__codelineno-0-1113"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1114" name="__codelineno-0-1114"></a>    <span class="n">response</span><span class="p">:</span> <span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1115" name="__codelineno-0-1115"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-1116" name="__codelineno-0-1116"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">30.0</span><span class="p">,</span>
+<a id="__codelineno-0-1117" name="__codelineno-0-1117"></a>    <span class="n">poll_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
+<a id="__codelineno-0-1118" name="__codelineno-0-1118"></a>    <span class="n">retry</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1119" name="__codelineno-0-1119"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1120" name="__codelineno-0-1120"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait for MarkLogic readiness after a restart-signaling response.</span>
+<a id="__codelineno-0-1121" name="__codelineno-0-1121"></a>
+<a id="__codelineno-0-1122" name="__codelineno-0-1122"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1123" name="__codelineno-0-1123"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1124" name="__codelineno-0-1124"></a><span class="sd">    response : Response | None</span>
+<a id="__codelineno-0-1125" name="__codelineno-0-1125"></a><span class="sd">        Response from an operation that may have initiated a restart.</span>
+<a id="__codelineno-0-1126" name="__codelineno-0-1126"></a><span class="sd">    timeout : float</span>
+<a id="__codelineno-0-1127" name="__codelineno-0-1127"></a><span class="sd">        Maximum number of seconds to wait for readiness.</span>
+<a id="__codelineno-0-1128" name="__codelineno-0-1128"></a><span class="sd">    poll_interval : float</span>
+<a id="__codelineno-0-1129" name="__codelineno-0-1129"></a><span class="sd">        Delay between readiness probes.</span>
+<a id="__codelineno-0-1130" name="__codelineno-0-1130"></a><span class="sd">    retry : Retry | None</span>
+<a id="__codelineno-0-1131" name="__codelineno-0-1131"></a><span class="sd">        Retry strategy for readiness probes.</span>
+<a id="__codelineno-0-1132" name="__codelineno-0-1132"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1133" name="__codelineno-0-1133"></a>    <span class="n">waiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_restart_waiter</span><span class="p">()</span>
+<a id="__codelineno-0-1134" name="__codelineno-0-1134"></a>    <span class="k">await</span> <span class="n">waiter</span><span class="o">.</span><span class="n">async_wait_for_restart_completion</span><span class="p">(</span>
+<a id="__codelineno-0-1135" name="__codelineno-0-1135"></a>        <span class="n">response</span><span class="p">,</span>
+<a id="__codelineno-0-1136" name="__codelineno-0-1136"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-1137" name="__codelineno-0-1137"></a>        <span class="n">poll_interval</span><span class="o">=</span><span class="n">poll_interval</span><span class="p">,</span>
+<a id="__codelineno-0-1138" name="__codelineno-0-1138"></a>        <span class="n">retry</span><span class="o">=</span><span class="n">retry</span> <span class="ow">or</span> <span class="n">_RESTART_RETRY_STRATEGY</span><span class="p">,</span>
+<a id="__codelineno-0-1139" name="__codelineno-0-1139"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

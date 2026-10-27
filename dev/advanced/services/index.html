@@ -340,6 +340,8 @@
       
         
       
+        
+      
     
     
     
@@ -451,6 +453,34 @@
     
   
     Evaluate code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/invoke/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke modules
   
 
     
@@ -1249,6 +1279,8 @@
       
         
       
+        
+      
     
     
     
@@ -1563,6 +1595,34 @@
     
   
     eval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/invoke/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    invoke
   
 
     
@@ -10407,6 +10467,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -10658,6 +10722,34 @@
     
   
     AsyncHostsApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/api/AsyncInvokeApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncInvokeApi
   
 
     
@@ -11098,6 +11190,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/mlclient/api/InvokeApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/mlclient/api/LogsApi/" class="md-nav__link">
         
   
@@ -11359,6 +11479,8 @@
   
     
     
+      
+        
       
         
       
@@ -12137,6 +12259,34 @@
     
   
     HostsGetCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/calls/InvokeCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeCall
   
 
     
@@ -13035,6 +13185,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -13146,6 +13300,34 @@
     
   
     AsyncEvalService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/services/AsyncInvokeService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncInvokeService
   
 
     
@@ -13286,6 +13468,34 @@
     
   
     EvalService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/services/InvokeService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeService
   
 
     
@@ -15349,7 +15559,7 @@ document model, a <code>dict</code>, a <code>datetime</code>. You work with resu
 for an endpoint no service wraps, or when you need the raw status and headers.
 See <a href="../../guides/clients/">Clients</a> for the full tier map.</p>
 <h2 id="client-services">Client services<a class="headerlink" href="#client-services" title="Permanent link">&para;</a></h2>
-<p>Documents, evaluation, search and transactions are available directly on the
+<p>Documents, evaluation, module invocation, search and transactions are available directly on the
 client:</p>
 <table>
 <thead>
@@ -15371,6 +15581,11 @@ client:</p>
 <td><a href="../../guides/eval/">Evaluate code</a></td>
 </tr>
 <tr>
+<td>Invoke modules</td>
+<td><code>ml.invoke</code></td>
+<td><a href="../../guides/invoke/">Invoke modules</a></td>
+</tr>
+<tr>
 <td>Search</td>
 <td><code>ml.search</code></td>
 <td><a href="../../guides/search/">Search</a></td>
@@ -15389,7 +15604,7 @@ client:</p>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">xquery</span><span class="p">(</span><span class="s2">&quot;1 + 1&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="reuse-a-scoped-service">Reuse a scoped service<a class="headerlink" href="#reuse-a-scoped-service" title="Permanent link">&para;</a></h3>
-<p><code>ml.documents</code>, <code>ml.eval</code> and <code>ml.search</code> start with an empty scope. Calling one
+<p><code>ml.documents</code>, <code>ml.eval</code>, <code>ml.invoke</code> and <code>ml.search</code> start with an empty scope. Calling one
 with settings, such as <code>ml.documents(database="catalog")</code>, returns a new service
 that uses those defaults for subsequent operations. Creating it sends no request
 and leaves the original service unchanged; both share the same connection.</p>
@@ -15426,6 +15641,17 @@ and leaves the original service unchanged; both share the same connection.</p>
   " href="../../reference/mlclient/services/ServiceScope/#mlclient.services.ServiceScope">ServiceScope</a></td>
 </tr>
 <tr>
+<td>Invocation</td>
+<td><code>ml.invoke</code></td>
+<td><code>ml.invoke(database="catalog")</code></td>
+<td><a class="autorefs autorefs-internal" title="mlclient.services.ServiceScope
+
+
+  
+      dataclass
+  " href="../../reference/mlclient/services/ServiceScope/#mlclient.services.ServiceScope">ServiceScope</a></td>
+</tr>
+<tr>
 <td>Search</td>
 <td><code>ml.search</code></td>
 <td><code>ml.search(database="catalog", collection="products")</code></td>
@@ -15449,7 +15675,7 @@ settings, such as collections, directories and query options:</p>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">xquery</span><span class="p">(</span><span class="s2">&quot;1 + 1&quot;</span><span class="p">)</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">uris</span> <span class="o">=</span> <span class="n">products</span><span class="o">.</span><span class="n">uris</span><span class="p">(</span><span class="s2">&quot;coffee&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>On all three services, per-operation <code>database=</code> and <code>txid=</code> arguments override
+<p>On all four services, per-operation <code>database=</code> and <code>txid=</code> arguments override
 the service defaults; <code>None</code> clears an inherited value. Transaction settings can
 also be unpacked with <code>**txn</code>, on the service (<code>ml.documents(**txn)</code>) or an
 operation (<code>ml.documents.read("/example.json", **txn)</code>). For search-specific

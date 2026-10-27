@@ -77,6 +77,10 @@
          <lastmod>2026-10-27</lastmod>
     </url>
     <url>
+         <loc>https://monasticus.github.io/mlclient/dev/cli/invoke/</loc>
+         <lastmod>2026-10-27</lastmod>
+    </url>
+    <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/log-level/</loc>
          <lastmod>2026-10-27</lastmod>
     </url>
@@ -165,6 +169,10 @@
          <lastmod>2026-10-27</lastmod>
     </url>
     <url>
+         <loc>https://monasticus.github.io/mlclient/dev/guides/invoke/</loc>
+         <lastmod>2026-10-27</lastmod>
+    </url>
+    <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/logging/</loc>
          <lastmod>2026-10-27</lastmod>
     </url>
@@ -237,6 +245,10 @@
          <lastmod>2026-10-27</lastmod>
     </url>
     <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncInvokeApi/</loc>
+         <lastmod>2026-10-27</lastmod>
+    </url>
+    <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncLogsApi/</loc>
          <lastmod>2026-10-27</lastmod>
     </url>
@@ -294,6 +306,10 @@
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/HostsApi/</loc>
+         <lastmod>2026-10-27</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/InvokeApi/</loc>
          <lastmod>2026-10-27</lastmod>
     </url>
     <url>
@@ -446,6 +462,10 @@
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/HostsGetCall/</loc>
+         <lastmod>2026-10-27</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/InvokeCall/</loc>
          <lastmod>2026-10-27</lastmod>
     </url>
     <url>
@@ -1441,6 +1461,10 @@
          <lastmod>2026-10-27</lastmod>
     </url>
     <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncInvokeService/</loc>
+         <lastmod>2026-10-27</lastmod>
+    </url>
+    <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncSearchService/</loc>
          <lastmod>2026-10-27</lastmod>
     </url>
@@ -1458,6 +1482,10 @@
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/EvalService/</loc>
+         <lastmod>2026-10-27</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/InvokeService/</loc>
          <lastmod>2026-10-27</lastmod>
     </url>
     <url>

@@ -340,6 +340,8 @@
       
         
       
+        
+      
     
     
     
@@ -451,6 +453,34 @@
     
   
     Evaluate code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../guides/invoke/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke modules
   
 
     
@@ -1072,6 +1102,8 @@
       
         
       
+        
+      
     
     
     
@@ -1386,6 +1418,34 @@
     
   
     eval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cli/invoke/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    invoke
   
 
     
@@ -10234,6 +10294,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -10485,6 +10549,34 @@
     
   
     AsyncHostsApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AsyncInvokeApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncInvokeApi
   
 
     
@@ -10925,6 +11017,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../InvokeApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../LogsApi/" class="md-nav__link">
         
   
@@ -11064,6 +11184,17 @@
     <span class="md-ellipsis">
       
         eval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlclient.api.RestApi.invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invoke
       
     </span>
   </a>
@@ -11312,6 +11443,8 @@
   
     
     
+      
+        
       
         
       
@@ -12090,6 +12223,34 @@
     
   
     HostsGetCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../calls/InvokeCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeCall
   
 
     
@@ -12988,6 +13149,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -13099,6 +13264,34 @@
     
   
     AsyncEvalService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/AsyncInvokeService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncInvokeService
   
 
     
@@ -13239,6 +13432,34 @@
     
   
     EvalService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/InvokeService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    InvokeService
   
 
     
@@ -15175,6 +15396,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mlclient.api.RestApi.invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#mlclient.api.RestApi.search" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15266,7 +15498,7 @@
 
 
         <p>REST API group for /v1/* endpoints.</p>
-<p>Eval, documents, search, values and transactions.</p>
+<p>Eval, invoke, documents, search, values and transactions.</p>
 <p>Requires a REST app server.</p>
 
 
@@ -15278,9 +15510,9 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/api/rest.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-34">34</a></span>
-<span class="normal"><a href="#__codelineno-0-35">35</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api</span><span class="p">:</span> <span class="n">ApiClient</span><span class="p">):</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_api</span> <span class="o">=</span> <span class="n">api</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api</span><span class="p">:</span> <span class="n">ApiClient</span><span class="p">):</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_api</span> <span class="o">=</span> <span class="n">api</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -15382,6 +15614,57 @@ and returns a raw HTTP response. Responses are not cached.</p>
           <tr class="doc-section-item">
             <td>
                   <code><a class="autorefs autorefs-internal" title="mlclient.api.EvalApi (mlclient.api.eval.EvalApi)" href="../EvalApi/#mlclient.api.EvalApi">EvalApi</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The endpoint wrapper bound to this group's configured connection.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="mlclient.api.RestApi.invoke" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">invoke</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-cached"><code>cached</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#mlclient.api.RestApi.invoke" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">invoke</span><span class="p">:</span> <span class="n">InvokeApi</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Access invoke operations through this API group's connection.</p>
+<p>Created once on first access and reused by this group. Reading the
+property sends no request; calling an endpoint method performs I/O
+and returns a raw HTTP response. Responses are not cached.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="mlclient.api.InvokeApi (mlclient.api.invoke.InvokeApi)" href="../InvokeApi/#mlclient.api.InvokeApi">InvokeApi</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15667,8 +15950,7 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/rest.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-37">37</a></span>
-<span class="normal"><a href="#__codelineno-0-38">38</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
 <span class="normal"><a href="#__codelineno-0-41">41</a></span>
@@ -15691,31 +15973,32 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-58">58</a></span>
 <span class="normal"><a href="#__codelineno-0-59">59</a></span>
 <span class="normal"><a href="#__codelineno-0-60">60</a></span>
-<span class="normal"><a href="#__codelineno-0-61">61</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_</span><span class="p">:</span> <span class="n">ApiCall</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a custom ApiCall.</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    call_ : ApiCall</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">        A specific endpoint call implementation</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        An HTTP response</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call_</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_</span><span class="p">:</span> <span class="n">ApiCall</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a custom ApiCall.</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">    call_ : ApiCall</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">        A specific endpoint call implementation</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">        An HTTP response</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call_</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

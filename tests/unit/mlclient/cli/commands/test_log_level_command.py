@@ -119,6 +119,7 @@ def test_command_log_level_falls_back_to_manage_when_eval_forbidden():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"file-log-level": "notice"})
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.mock_get()
 
     tester = _get_tester()

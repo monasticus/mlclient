@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import date
 from decimal import Decimal
 from uuid import uuid4
@@ -8,22 +9,13 @@ from xml.etree.ElementTree import tostring
 
 import pytest
 
+from mlclient import AsyncMLClient
 from mlclient import _constants as constants
 from mlclient.calls import ApiCall
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import JSONDocument, TupleHit, ValueHit, XMLDocument
-from mlclient.search.options import Range, SearchOptions
-from mlclient.search.structured import (
-    SEARCH_NS_URI,
-    Attribute,
-    ContainerConstraintQuery,
-    Element,
-    Field,
-    JsonProperty,
-    PathIndex,
-    TermQuery,
-    sq,
-)
+from mlclient.search import opt, sq
+from mlclient.search.structured import SEARCH_NS_URI
 from mlclient.xquery import cts, fn
 from tests.utils.resources import render_test_resource
 
@@ -114,13 +106,93 @@ def values_options(indexed_database):
 
 
 class TestSearchService:
+    @pytest.mark.parametrize(
+        "query",
+        [
+            sq.term("alpha"),
+            cts.word_query("alpha"),
+            {"query": {"term-query": {"text": "alpha"}}},
+            {"ctsquery": {"wordQuery": {"text": "alpha"}}},
+        ],
+        ids=["structured-object", "cts-object", "structured-json", "cts-json"],
+    )
+    def test_raw_json_and_python_query_objects_return_same_documents(
+        self,
+        indexed_database,
+        query,
+    ):
+        ml, database, _ = indexed_database
+
+        documents = ml.search(database=database, collection="cts-test").documents(query)
+
+        assert [document.uri for document in documents] == [URIS[0]]
+
+    @pytest.mark.parametrize(
+        "query",
+        [sq.document(URIS[0]), cts.document_query(URIS[0])],
+        ids=["structured", "cts"],
+    )
+    @pytest.mark.parametrize(
+        ("qtext", "expected"),
+        [("label:alpha", [URIS[0]]), ("label:beta", [])],
+        ids=["both-match", "text-matches-another-document"],
+    )
+    def test_combined_query_ands_text_with_native_criteria(
+        self,
+        indexed_database,
+        query,
+        qtext,
+        expected,
+    ):
+        ml, database, _ = indexed_database
+        options = opt.options(opt.word_constraint("label", sq.element("label", NS)))
+        combined = query.to_combined_query(options=options, qtext=qtext)
+
+        documents = ml.search(database=database).documents(combined)
+
+        assert [document.uri for document in documents] == expected
+
+    def test_combined_structured_query_filters_values(self, indexed_database):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.word_constraint("label", sq.element("label", NS)),
+            opt.values("uris", "uri"),
+        )
+        combined = sq.collection("cts-test").to_combined_query(
+            options=options,
+            qtext="label:alpha",
+        )
+
+        values = ml.search(database=database).values("uris", combined)
+
+        assert [hit.value for hit in values] == [URIS[0]]
+
+    @pytest.mark.asyncio
+    async def test_async_combined_query_ands_text_with_cts_criteria(
+        self,
+        indexed_database,
+    ):
+        _, database, port = indexed_database
+        options = opt.options(opt.word_constraint("label", sq.element("label", NS)))
+        combined = cts.document_query(URIS[0]).to_combined_query(
+            options=options,
+            qtext="label:beta",
+        )
+
+        async with AsyncMLClient(port=port) as ml:
+            documents = await ml.search(database=database).documents(combined)
+
+        assert documents == []
+
     def test_json_property_values_options(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "label",
-            Range(
-                JsonProperty("label"),
-                collation="http://marklogic.com/collation/",
+        options = opt.options(
+            opt.values(
+                "label",
+                opt.range_(
+                    sq.json_property("label"),
+                    collation="http://marklogic.com/collation/",
+                ),
             ),
         )
 
@@ -130,11 +202,13 @@ class TestSearchService:
 
     def test_json_property_options_as_native_xml(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "label",
-            Range(
-                JsonProperty("label"),
-                collation="http://marklogic.com/collation/",
+        options = opt.options(
+            opt.values(
+                "label",
+                opt.range_(
+                    sq.json_property("label"),
+                    collation="http://marklogic.com/collation/",
+                ),
             ),
         )
         body = XmlElement(f"{{{SEARCH_NS_URI}}}search")
@@ -179,7 +253,7 @@ class TestSearchService:
     ):
         ml, database, _ = indexed_database
 
-        result = ml.search(database=database, options=SearchOptions()).documents(
+        result = ml.search(database=database, options=opt.options()).documents(
             cts.document_query("/cts-test/a.xml"),
             transform=response_transform,
             transform_params={"value": 0},
@@ -197,7 +271,9 @@ class TestSearchService:
 
     def test_field_values_options(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values("price", Range(Field("price"), "xs:decimal"))
+        options = opt.options(
+            opt.values("price", opt.range_(sq.field("price"), "xs:decimal")),
+        )
 
         result = ml.search(database=database, options=options).values("price")
 
@@ -208,9 +284,11 @@ class TestSearchService:
 
     def test_path_values_options(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "price",
-            Range(PathIndex("/t:item/t:price", {"t": NS}), "xs:decimal"),
+        options = opt.options(
+            opt.values(
+                "price",
+                opt.range_(sq.path_index("/t:item/t:price", {"t": NS}), "xs:decimal"),
+            ),
         )
 
         result = ml.search(database=database, options=options).values("price")
@@ -222,9 +300,15 @@ class TestSearchService:
 
     def test_attribute_values_options(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "amount",
-            Range(Element("item", NS), "xs:decimal", attribute=Attribute("amount")),
+        options = opt.options(
+            opt.values(
+                "amount",
+                opt.range_(
+                    sq.element("item", NS),
+                    "xs:decimal",
+                    attribute=sq.attribute("amount"),
+                ),
+            ),
         )
 
         result = ml.search(database=database, options=options).values("amount")
@@ -236,9 +320,8 @@ class TestSearchService:
 
     def test_options_as_native_xml(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.values("price", opt.range_(sq.element("price", NS), "xs:decimal")),
         )
         body = XmlElement(f"{{{SEARCH_NS_URI}}}search")
         body.append(options.to_xml())
@@ -259,9 +342,8 @@ class TestSearchService:
 
     def test_zero_values_limit(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.values("price", opt.range_(sq.element("price", NS), "xs:decimal")),
         )
 
         assert (
@@ -270,9 +352,8 @@ class TestSearchService:
 
     def test_empty_aggregate(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.values("price", opt.range_(sq.element("price", NS), "xs:decimal")),
         )
 
         assert (
@@ -292,10 +373,12 @@ class TestSearchService:
             "<day>2026-01-01</day></item>",
             uri,
         )
-        options = SearchOptions().tuples(
-            "price-day",
-            Range(Element("price", NS), "xs:decimal"),
-            Range(Element("day", NS), "xs:date"),
+        options = opt.options(
+            opt.tuples(
+                "price-day",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+                opt.range_(sq.element("day", NS), "xs:date"),
+            ),
         )
         try:
             ml.documents.write(doc, database=database)
@@ -316,9 +399,8 @@ class TestSearchService:
 
     def test_values_with_inline_options(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.values("price", opt.range_(sq.element("price", NS), "xs:decimal")),
         )
 
         values = ml.search(database=database, options=options).values(
@@ -332,9 +414,8 @@ class TestSearchService:
 
     def test_aggregate_of_decimal_values(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.values("price", opt.range_(sq.element("price", NS), "xs:decimal")),
         )
 
         result = ml.search(database=database, options=options).aggregate("price", "sum")
@@ -344,9 +425,8 @@ class TestSearchService:
 
     def test_aggregate_count_has_integer_type(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().values(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.values("price", opt.range_(sq.element("price", NS), "xs:decimal")),
         )
 
         prices = ml.search(database=database, options=options)
@@ -357,10 +437,12 @@ class TestSearchService:
 
     def test_typed_co_occurrences(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().tuples(
-            "price-day",
-            Range(Element("price", NS), "xs:decimal"),
-            Range(Element("day", NS), "xs:date"),
+        options = opt.options(
+            opt.tuples(
+                "price-day",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+                opt.range_(sq.element("day", NS), "xs:date"),
+            ),
         )
 
         result = ml.search(database=database, options=options).tuples("price-day")
@@ -372,9 +454,11 @@ class TestSearchService:
 
     def test_report_with_facets_and_scores(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().range_constraint(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.range_constraint(
+                "price",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+            ),
         )
 
         scoped = ml.search(database=database, collection="cts-test", options=options)
@@ -404,7 +488,7 @@ class TestSearchService:
         indexed_database,
     ):
         ml, database, _ = indexed_database
-        options = SearchOptions().control("page-length", 2)
+        options = opt.options(opt.control("page-length", 2))
         scoped = ml.search(database=database, collection="cts-test", options=options)
 
         assert len(scoped.uris()) == 2
@@ -431,7 +515,7 @@ class TestSearchService:
 
     def test_word_constraint_in_a_string_query(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().word_constraint("label", Element("label", NS))
+        options = opt.options(opt.word_constraint("label", sq.element("label", NS)))
 
         scoped = ml.search(database=database, collection="cts-test", options=options)
 
@@ -439,7 +523,7 @@ class TestSearchService:
 
     def test_value_constraint_on_a_json_property(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().value_constraint("label", JsonProperty("label"))
+        options = opt.options(opt.value_constraint("label", sq.json_property("label")))
 
         scoped = ml.search(database=database, collection="cts-test", options=options)
 
@@ -447,10 +531,12 @@ class TestSearchService:
 
     def test_word_constraint_on_an_attribute(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().word_constraint(
-            "quantity",
-            Element("item", NS),
-            attribute=Attribute("quantity"),
+        options = opt.options(
+            opt.word_constraint(
+                "quantity",
+                sq.element("item", NS),
+                attribute=sq.attribute("quantity"),
+            ),
         )
 
         scoped = ml.search(database=database, collection="cts-test", options=options)
@@ -459,10 +545,12 @@ class TestSearchService:
 
     def test_value_constraint_on_an_attribute(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().value_constraint(
-            "quantity",
-            Element("item", NS),
-            attribute=Attribute("quantity"),
+        options = opt.options(
+            opt.value_constraint(
+                "quantity",
+                sq.element("item", NS),
+                attribute=sq.attribute("quantity"),
+            ),
         )
 
         scoped = ml.search(database=database, collection="cts-test", options=options)
@@ -471,12 +559,16 @@ class TestSearchService:
 
     def test_value_constraint_matches_only_its_json_node_type(self, indexed_database):
         ml, database, _ = indexed_database
-        as_boolean = SearchOptions().value_constraint(
-            "active",
-            JsonProperty("active"),
-            node_type="boolean",
+        as_boolean = opt.options(
+            opt.value_constraint(
+                "active",
+                sq.json_property("active"),
+                node_type="boolean",
+            ),
         )
-        as_string = SearchOptions().value_constraint("active", JsonProperty("active"))
+        as_string = opt.options(
+            opt.value_constraint("active", sq.json_property("active")),
+        )
 
         def search(options):
             return ml.search(database=database, collection="cts-test", options=options)
@@ -489,7 +581,7 @@ class TestSearchService:
         indexed_database,
     ):
         ml, database, _ = indexed_database
-        options = SearchOptions().collection_constraint("set", prefix="cts-")
+        options = opt.options(opt.collection_constraint("set", prefix="cts-"))
 
         report = ml.search(database=database, options=options).report("set:test")
 
@@ -497,7 +589,7 @@ class TestSearchService:
 
     def test_collection_constraint_with_prefix(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().collection_constraint("set", prefix="cts-")
+        options = opt.options(opt.collection_constraint("set", prefix="cts-"))
 
         uris = ml.search(database=database, options=options).uris("set:test")
 
@@ -505,11 +597,10 @@ class TestSearchService:
 
     def test_container_constraint_query(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().container_constraint(
-            "place",
-            Element("location", NS),
+        options = opt.options(
+            opt.container_constraint("place", sq.element("location", NS)),
         )
-        query = ContainerConstraintQuery("place", TermQuery("20"))
+        query = sq.container_constraint("place", sq.term("20"))
 
         uris = ml.search(database=database, options=options).uris(query)
 
@@ -517,13 +608,15 @@ class TestSearchService:
 
     def test_constraint_options_are_valid_native_xml(self, indexed_database):
         ml, database, _ = indexed_database
-        options = (
-            SearchOptions()
-            .range_constraint("price", Range(Element("price", NS), "xs:decimal"))
-            .word_constraint("label", Element("label", NS), options="unstemmed")
-            .value_constraint("name", JsonProperty("label"))
-            .collection_constraint("set", prefix="cts-")
-            .container_constraint("place", Element("location", NS))
+        options = opt.options(
+            opt.range_constraint(
+                "price",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+            ),
+            opt.word_constraint("label", sq.element("label", NS), options="unstemmed"),
+            opt.value_constraint("name", sq.json_property("label")),
+            opt.collection_constraint("set", prefix="cts-"),
+            opt.container_constraint("place", sq.element("location", NS)),
         )
 
         report = ml.eval.xquery(
@@ -539,9 +632,11 @@ class TestSearchService:
 
     def test_documents_sorted_with_inline_options(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().sort(
-            Range(Element("price", NS), "xs:decimal"),
-            direction="descending",
+        options = opt.options(
+            opt.sort(
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+                direction="descending",
+            ),
         )
 
         scoped = ml.search(database=database, collection="cts-test", options=options)
@@ -555,7 +650,7 @@ class TestSearchService:
         uris = ml.search(
             database=database,
             collection="cts-test",
-            options=SearchOptions().control("page-length", 1),
+            options=opt.options(opt.control("page-length", 1)),
         ).uris(
             "alpha OR beta",
             pos=1,
@@ -605,7 +700,7 @@ class TestSearchService:
         ml, database, _ = indexed_database
         query = sq.and_(
             sq.collection("cts-test"),
-            sq.word(Element("label", NS), "beta"),
+            sq.word(sq.element("label", NS), "beta"),
         )
 
         docs = ml.search(database=database).documents(query)
@@ -702,3 +797,236 @@ class TestSearchService:
 
         with pytest.raises(MarkLogicError, match="REST-INVALIDPARAM"):
             ml.search(database=database, options=values_options).values("missing")
+
+
+class TestExtendedSearchOptions:
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_additional_query_and_typed_controls(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.additional_query(cts.document_query(URIS[0])),
+            opt.concurrency_level(2),
+            opt.quality_weight(0),
+            opt.fragment_scope("documents"),
+            opt.search_option("filtered"),
+            opt.return_query(True),
+            opt.return_qtext(True),
+            opt.return_metrics(False),
+            opt.return_facets(False),
+            opt.transform_results("empty-snippet"),
+        )
+        report = _options_report(ml, database, options, "alpha OR beta", output_format)
+        assert report["total"] == 1
+        assert [result["uri"] for result in report["results"]] == [URIS[0]]
+        assert report["qtext"] == "alpha OR beta"
+        assert "query" in report
+        assert "metrics" not in report
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_fixed_bucket_facets(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.range_constraint(
+                "price",
+                opt.range_(
+                    sq.element("price", NS),
+                    "xs:decimal",
+                    buckets=[
+                        opt.bucket("low", "Under two", lt="2"),
+                        opt.bucket("high", "Two or more", ge="2"),
+                    ],
+                ),
+                annotation="Price bands",
+            ),
+            opt.return_constraints(True),
+        )
+        report = _options_report(ml, database, options, "alpha OR beta", output_format)
+        assert report["total"] == 2
+        assert report["facets"]["price"]["facetValues"] == [
+            {"name": "low", "value": "Under two", "count": 1},
+            {"name": "high", "value": "Two or more", "count": 1},
+        ]
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_operator_state_changes_sort_order(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.operator(
+                "sort",
+                [
+                    opt.operator_state(
+                        "price",
+                        opt.options(
+                            opt.sort(
+                                opt.range_(sq.element("price", NS), "xs:decimal"),
+                                direction="descending",
+                            ),
+                            opt.page_length(1),
+                        ),
+                    ),
+                ],
+            ),
+        )
+        report = _options_report(
+            ml,
+            database,
+            options,
+            "(alpha OR beta) sort:price",
+            output_format,
+        )
+        assert report["total"] == 2
+        assert [result["uri"] for result in report["results"]] == [URIS[1]]
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_default_term_targets_xml_values(self, indexed_database, output_format):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.term(
+                opt.term_default(opt.value(sq.element("label", NS))),
+                empty="no-results",
+            ),
+        )
+        report = _options_report(ml, database, options, "alpha", output_format)
+        assert [result["uri"] for result in report["results"]] == [URIS[0]]
+        assert (
+            _options_report(ml, database, options, "gamma", output_format)["total"] == 0
+        )
+
+    @pytest.mark.parametrize(
+        "index",
+        [
+            opt.geo_element(sq.element("location", NS), sq.element("point", NS)),
+            opt.geo_element_pair(
+                sq.element("location", NS),
+                sq.element("lat", NS),
+                sq.element("lon", NS),
+            ),
+            opt.geo_attribute_pair(
+                sq.element("item", NS),
+                sq.attribute("lat"),
+                sq.attribute("lon"),
+            ),
+        ],
+        ids=["element", "element-pair", "attribute-pair"],
+    )
+    def test_named_geospatial_constraints(self, indexed_database, index):
+        ml, database, _ = indexed_database
+        options = opt.options(opt.geo_constraint("place", index))
+        documents = ml.search(database=database, options=options).documents(
+            sq.geospatial_constraint("place", sq.box(5, 15, 15, 25)),
+        )
+        assert [document.uri for document in documents] == [URIS[0]]
+
+    def test_mixed_tuple_indexes_preserve_component_order(self, indexed_database):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.search_option("filtered"),
+            opt.tuples(
+                "uri-price",
+                "uri",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+            ),
+        )
+        result = ml.search(database=database, options=options).tuples(
+            "uri-price",
+            cts.collection_query("cts-test"),
+        )
+        assert result == [
+            TupleHit((URIS[0], Decimal("1.25")), frequency=1),
+            TupleHit((URIS[1], Decimal("2.5")), frequency=1),
+        ]
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    @pytest.mark.parametrize(
+        ("implicit", "expected"),
+        [(cts.and_query([]), False), (cts.or_query([]), True)],
+        ids=["and", "or"],
+    )
+    def test_implicit_grammar_operator_controls_term_combination(
+        self,
+        indexed_database,
+        output_format,
+        implicit,
+        expected,
+    ):
+        ml, database, _ = indexed_database
+        options = opt.options(opt.grammar(implicit=opt.implicit(implicit)))
+        body = (
+            json.dumps(options.to_json())
+            if output_format == "json"
+            else tostring(options.to_xml(), encoding="unicode")
+        )
+        result = ml.eval.xquery(
+            render_test_resource(__file__, "option-query-matches-alpha.xqy"),
+            variables={"options": body, "qtext": "alpha beta"},
+            database=database,
+        )
+        assert result is expected
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_empty_term_behavior_in_native_parser(
+        self,
+        indexed_database,
+        output_format,
+    ):
+        ml, database, _ = indexed_database
+        options = opt.options(opt.term(empty="no-results"))
+        body = (
+            json.dumps(options.to_json())
+            if output_format == "json"
+            else tostring(options.to_xml(), encoding="unicode")
+        )
+        result = ml.eval.xquery(
+            render_test_resource(__file__, "option-query-matches-alpha.xqy"),
+            variables={"options": body, "qtext": ""},
+            database=database,
+        )
+        assert result is False
+
+    @pytest.mark.parametrize("output_format", ["json", "xml"])
+    def test_default_suggestions_use_the_word_lexicon(
+        self,
+        indexed_database,
+        output_format,
+    ):
+        ml, database, _ = indexed_database
+        options = opt.options(
+            opt.default_suggestion_source(
+                opt.word_lexicon("http://marklogic.com/collation/"),
+            ),
+        )
+        body = (
+            json.dumps(options.to_json())
+            if output_format == "json"
+            else tostring(options.to_xml(), encoding="unicode")
+        )
+        result = ml.eval.xquery(
+            render_test_resource(__file__, "option-word-suggestions.xqy"),
+            variables={"options": body},
+            database=database,
+        )
+        assert result == "alpha"
+
+
+def _options_report(ml, database, options, query, output_format):
+    if output_format == "json":
+        body = {"search": {"options": options.to_json()["options"], "qtext": query}}
+    else:
+        search = XmlElement(f"{{{SEARCH_NS_URI}}}search")
+        search.append(options.to_xml())
+        text = XmlElement(f"{{{SEARCH_NS_URI}}}qtext")
+        text.text = query
+        search.append(text)
+        body = tostring(search, encoding="unicode")
+    response = ml.rest.search.post(
+        body,
+        database=database,
+        collection="cts-test",
+        data_format="json",
+    )
+    response.raise_for_status()
+    return response.json()

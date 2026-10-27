@@ -1,0 +1,16 @@
+{
+  "options": {
+    "values": [
+      {
+        "name": "index",
+        "range": {
+          "type": "xs:string",
+          "field": {
+            "name": "category",
+            "collation": "https://example.com/collation"
+          }
+        }
+      }
+    ]
+  }
+}

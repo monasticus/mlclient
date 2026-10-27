@@ -39,7 +39,7 @@ from mlclient.connection import (
     SSLConfig,
 )
 from mlclient.exceptions import MarkLogicError
-from mlclient.http import _HEALTH_TIMEOUT, NO_RETRY_STRATEGY, HTTPConfig
+from mlclient.http import DEFAULT_HEALTH_TIMEOUT, NO_RETRY_STRATEGY, HTTPConfig
 from mlclient.models.version import MarkLogicVersion
 from mlclient.responses import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
@@ -197,7 +197,7 @@ class MLClient:
             write=60, pool=5 seconds). None disables every HTTP timeout. A number
             sets all four components to that many seconds. An httpx.Timeout fully
             overrides them without merging. The derived HealthCheck connection
-            always uses _HEALTH_TIMEOUT, independent of this value
+            always uses DEFAULT_HEALTH_TIMEOUT, independent of this value
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -210,9 +210,9 @@ class MLClient:
         health_config : HTTPConfig | None, default None
             An already-resolved HealthCheck configuration; when given, it is used
             instead of deriving the HealthCheck connection (port 7997, no auth,
-            no retries, _HEALTH_TIMEOUT) from the primary. Retry and timeout are
+            no retries, DEFAULT_HEALTH_TIMEOUT) from the primary. Retry and timeout are
             resolved independently: an unspecified retry defaults to no retries
-            and an unspecified timeout to _HEALTH_TIMEOUT, while an explicitly
+            and an unspecified timeout to DEFAULT_HEALTH_TIMEOUT, while an explicitly
             supplied retry strategy or timeout (including None to disable it) is
             preserved
         """
@@ -243,7 +243,7 @@ class MLClient:
                 port=MARKLOGIC_HEALTHCHECK_PORT,
                 auth=None,
                 retry=NO_RETRY_STRATEGY,
-                timeout=_HEALTH_TIMEOUT,
+                timeout=DEFAULT_HEALTH_TIMEOUT,
             ),
         )
 
@@ -688,7 +688,7 @@ class AsyncMLClient:
             write=60, pool=5 seconds). None disables every HTTP timeout. A number
             sets all four components to that many seconds. An httpx.Timeout fully
             overrides them without merging. The derived HealthCheck connection
-            always uses _HEALTH_TIMEOUT, independent of this value
+            always uses DEFAULT_HEALTH_TIMEOUT, independent of this value
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -701,9 +701,9 @@ class AsyncMLClient:
         health_config : HTTPConfig | None, default None
             An already-resolved HealthCheck configuration; when given, it is used
             instead of deriving the HealthCheck connection (port 7997, no auth,
-            no retries, _HEALTH_TIMEOUT) from the primary. Retry and timeout are
+            no retries, DEFAULT_HEALTH_TIMEOUT) from the primary. Retry and timeout are
             resolved independently: an unspecified retry defaults to no retries
-            and an unspecified timeout to _HEALTH_TIMEOUT, while an explicitly
+            and an unspecified timeout to DEFAULT_HEALTH_TIMEOUT, while an explicitly
             supplied retry strategy or timeout (including None to disable it) is
             preserved
         """
@@ -734,7 +734,7 @@ class AsyncMLClient:
                 port=MARKLOGIC_HEALTHCHECK_PORT,
                 auth=None,
                 retry=NO_RETRY_STRATEGY,
-                timeout=_HEALTH_TIMEOUT,
+                timeout=DEFAULT_HEALTH_TIMEOUT,
             ),
         )
 

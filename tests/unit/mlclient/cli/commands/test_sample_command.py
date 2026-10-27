@@ -60,6 +60,33 @@ def test_command_sample_sends_search_request():
     assert tester.io.fetch_output() == ""
 
 
+@respx.mock
+def test_command_sample_json_root_sends_document_search():
+    xquery = (
+        'xquery version "1.0-ml";\n'
+        "declare variable $v0 as xs:string external;\n"
+        "declare variable $v1 as xs:integer external;\n"
+        "declare variable $v2 as xs:integer external;\n"
+        "cts:search(/, (), $v0)[$v1 to $v2]"
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8100/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
+        {
+            "xquery": xquery,
+            "vars": json.dumps({"v0": "format-json", "v1": "1", "v2": "3"}),
+        },
+    )
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+    tester = _get_tester()
+
+    assert tester.execute("-j / -l 3 --no-pretty") == 0
+    assert tester.io.fetch_output() == ""
+
+
 def test_command_sample_root(mocker):
     evaluate = mocker.patch.object(
         EvalService,
@@ -87,10 +114,9 @@ def test_command_sample_document(mocker):
 
     assert tester.execute("") == 0
 
-    evaluate.assert_called_once_with(
-        cts.search("/", options="format-xml").pos([1, 1]),
-        output_type=str,
-    )
+    expected = cts.search(options="format-xml").pos([1, 1]).compile()
+    assert evaluate.call_args.args[0].compile() == expected
+    assert evaluate.call_args.kwargs == {"output_type": str}
     assert tester.io.fetch_output() == "<order>\n  <item/>\n</order>\n"
 
 
@@ -188,10 +214,9 @@ def test_command_sample_json_document(mocker, json_option):
 
     assert tester.execute(json_option) == 0
 
-    evaluate.assert_called_once_with(
-        cts.search("/", options="format-json").pos([1, 1]),
-        output_type=str,
-    )
+    expected = cts.search(options="format-json").pos([1, 1]).compile()
+    assert evaluate.call_args.args[0].compile() == expected
+    assert evaluate.call_args.kwargs == {"output_type": str}
     assert tester.io.fetch_output() == '{\n  "name": "zażółć"\n}\n'
 
 
@@ -218,10 +243,9 @@ def test_command_sample_json_array(mocker):
 
     assert tester.execute("--json") == 0
 
-    evaluate.assert_called_once_with(
-        cts.search("/", options="format-json").pos([1, 1]),
-        output_type=str,
-    )
+    expected = cts.search(options="format-json").pos([1, 1]).compile()
+    assert evaluate.call_args.args[0].compile() == expected
+    assert evaluate.call_args.kwargs == {"output_type": str}
     assert tester.io.fetch_output() == "[\n  1,\n  2\n]\n"
 
 

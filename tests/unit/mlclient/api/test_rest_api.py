@@ -265,6 +265,7 @@ def test_delete_search_clearing_database():
     ml_mocker.with_url("http://localhost:8000/v1/search")
     ml_mocker.with_response_code(204)
     ml_mocker.with_empty_response_body()
+    ml_mocker.with_request_param("database", "Documents")
     route = ml_mocker.mock_delete()
 
     with MLClient() as ml:

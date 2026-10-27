@@ -1,0 +1,5 @@
+{
+  "options": {
+    "additional-query": "<cts:collection-query xmlns:cts=\"http://marklogic.com/cts\"><cts:uri>published</cts:uri></cts:collection-query>"
+  }
+}

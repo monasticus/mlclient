@@ -1,0 +1,35 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "location",
+        "geo-elem": {
+          "parent": {
+            "name": "location",
+            "ns": ""
+          },
+          "element": {
+            "name": "point",
+            "ns": ""
+          },
+          "fragment-scope": "documents",
+          "weight": 2,
+          "heatmap": {
+            "s": -10,
+            "w": -20,
+            "n": 10,
+            "e": 20,
+            "latdivs": 4,
+            "londivs": 8
+          },
+          "geo-option": [
+            "coordinate-system=wgs84"
+          ],
+          "facet-option": [
+            "limit=5"
+          ]
+        }
+      }
+    ]
+  }
+}

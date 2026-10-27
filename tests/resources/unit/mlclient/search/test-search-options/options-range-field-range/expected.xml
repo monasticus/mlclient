@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:values name="index"><search:range type="xs:string"><search:field name="category" collation="https://example.com/collation" /></search:range></search:values></search:options>

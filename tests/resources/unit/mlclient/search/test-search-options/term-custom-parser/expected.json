@@ -1,0 +1,25 @@
+{
+  "options": {
+    "term": {
+      "apply": "term",
+      "ns": "https://example.com/search",
+      "at": "/search.xqy",
+      "default": {
+        "value": {
+          "element": {
+            "name": "item",
+            "ns": ""
+          },
+          "attribute": {
+            "name": "code",
+            "ns": ""
+          },
+          "weight": 2,
+          "term-option": [
+            "exact"
+          ]
+        }
+      }
+    }
+  }
+}

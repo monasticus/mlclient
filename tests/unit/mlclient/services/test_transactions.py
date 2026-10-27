@@ -206,6 +206,7 @@ def test_status_raises_on_error(ml):
     ml_mocker.with_response_code(404)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body(json.dumps(error).encode())
+    ml_mocker.with_request_param("format", "json")
     ml_mocker.mock_get()
 
     txn = ml.transaction()
@@ -296,6 +297,7 @@ def test_commit_raises_on_error(ml):
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body(json.dumps(error).encode())
+    ml_mocker.with_request_param("result", "commit")
     ml_mocker.mock_post()
 
     txn = ml.transaction()

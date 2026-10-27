@@ -10,7 +10,7 @@ from mlclient.clients import http as http_client_module
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import NoRestServerConfiguredError, NoSuchAppServerError
 from mlclient.http import (
-    _HEALTH_TIMEOUT,
+    DEFAULT_HEALTH_TIMEOUT,
     DEFAULT_RETRY_STRATEGY,
     DEFAULT_TIMEOUT,
     NO_RETRY_STRATEGY,
@@ -170,7 +170,7 @@ def test_timeout_defaults_per_server_kind_without_manager_override():
 
     assert manager.get_config("content").timeout == DEFAULT_TIMEOUT
     assert not manager.get_config("content").has_explicit_timeout
-    assert manager.get_config("health").timeout == _HEALTH_TIMEOUT
+    assert manager.get_config("health").timeout == DEFAULT_HEALTH_TIMEOUT
 
 
 def test_manager_timeout_applies_to_every_server_including_health():
@@ -251,6 +251,8 @@ def test_get_client_wires_env_manage_admin_and_health_servers():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://localhost:9001/admin/v1/timestamp")
@@ -292,6 +294,8 @@ async def test_get_async_client_wires_env_manage_admin_and_health_servers():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://localhost:9001/admin/v1/timestamp")
@@ -322,6 +326,8 @@ def test_health_shares_session_and_preserves_other_endpoints(mocker):
     ml_mocker.with_url("https://localhost:8002/manage/v2/databases")
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
     manager = MLClientManager("test")
 
@@ -408,6 +414,8 @@ async def test_async_health_shares_session_and_preserves_other_endpoints(mocker)
     ml_mocker.with_url("https://localhost:8002/manage/v2/databases")
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
     manager = MLClientManager("test")
 

@@ -7,7 +7,7 @@ from httpx_retries import Retry
 from mlclient._options import UNSET
 from mlclient.connection import CloudConfig, SSLConfig
 from mlclient.http import (
-    _HEALTH_TIMEOUT,
+    DEFAULT_HEALTH_TIMEOUT,
     DEFAULT_RETRY_STRATEGY,
     DEFAULT_TIMEOUT,
     NO_RETRY_STRATEGY,
@@ -267,12 +267,12 @@ def test_health_defaults_resolve_retry_and_timeout_independently(timeout, retry)
 
     assert health.retry is (NO_RETRY_STRATEGY if retry is None else retry)
     assert health.timeout == (
-        _HEALTH_TIMEOUT if timeout is UNSET else httpx.Timeout(timeout)
+        DEFAULT_HEALTH_TIMEOUT if timeout is UNSET else httpx.Timeout(timeout)
     )
     assert config.has_explicit_timeout is (timeout is not UNSET)
     assert config.has_explicit_retry is (retry is not None)
     health.timeout.read = 100
-    assert httpx.Timeout(5) == _HEALTH_TIMEOUT
+    assert httpx.Timeout(5) == DEFAULT_HEALTH_TIMEOUT
 
 
 @pytest.mark.parametrize(

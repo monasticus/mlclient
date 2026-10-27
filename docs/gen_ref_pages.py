@@ -19,6 +19,8 @@ namespaces = (
     "mlclient.search",
     "mlclient.search.structured",
     "mlclient.search.options",
+    "mlclient.search.sq",
+    "mlclient.search.opt",
     "mlclient.xquery",
     "mlclient.api",
     "mlclient.calls",
@@ -49,8 +51,14 @@ for namespace in namespaces:
     source = Path(module.__file__).relative_to(root)
     members = []
     values = []
+    aliases = []
     for name in module.__all__:
         obj = getattr(module, name)
+        if inspect.ismodule(obj):
+            continue
+        if namespace in {"mlclient.search.sq", "mlclient.search.opt"} and inspect.isclass(obj):
+            aliases.append((name, obj))
+            continue
         (members if inspect.isclass(obj) or inspect.isfunction(obj) else values).append(
             name,
         )
@@ -65,6 +73,11 @@ for namespace in namespaces:
         if not values
         else "\n" + "".join(f"        - {name}\n" for name in values)
     )
+    if aliases:
+        body += "\n## Constructors\n\n| Alias | Model constructor |\n| --- | --- |\n"
+        for name, obj in aliases:
+            canonical = f"{obj.__module__}.{obj.__qualname__}"
+            body += f"| `{name}(...)` | [{obj.__name__}][{canonical}] |\n"
     with mkdocs_gen_files.open(Path("reference") / index, "w") as output:
         output.write(body)
     mkdocs_gen_files.set_edit_path(Path("reference") / index, Path("..") / source)
@@ -84,6 +97,6 @@ for namespace in namespaces:
 
 with mkdocs_gen_files.open("reference/SUMMARY.md", "w") as output:
     output.writelines(nav.build_literate_nav())
-with mkdocs_gen_files.open("contributing.md", "w") as output:
+with mkdocs_gen_files.open("community/contributing.md", "w") as output:
     output.write((root / "CONTRIBUTING.md").read_text())
-mkdocs_gen_files.set_edit_path("contributing.md", "../CONTRIBUTING.md")
+mkdocs_gen_files.set_edit_path("community/contributing.md", "../CONTRIBUTING.md")

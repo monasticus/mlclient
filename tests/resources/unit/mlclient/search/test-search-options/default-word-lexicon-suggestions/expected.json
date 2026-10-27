@@ -1,0 +1,14 @@
+{
+  "options": {
+    "default-suggestion-source": {
+      "ref": "title",
+      "word-lexicon": {
+        "collation": "http://marklogic.com/collation/",
+        "fragment-scope": "documents"
+      },
+      "suggestion-option": [
+        "limit=5"
+      ]
+    }
+  }
+}

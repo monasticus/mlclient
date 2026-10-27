@@ -6,9 +6,8 @@ without evaluating XQuery, and parses the responses into mlclient models.
 
 from __future__ import annotations
 
-import copy
 import json
-from dataclasses import dataclass, fields, replace
+from copy import deepcopy
 from typing import TYPE_CHECKING, Literal
 from xml.etree import ElementTree
 
@@ -21,6 +20,7 @@ from mlclient.search.base import SearchQuery
 from mlclient.search.options import SearchOptions
 from mlclient.search.structured import SEARCH_NS_URI
 from mlclient.services._documents_parsing import DocumentsReader, normalize_category
+from mlclient.services.scope import OptionsInput, SearchScope
 
 if TYPE_CHECKING:
     from httpx import Response
@@ -28,14 +28,11 @@ if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
     from mlclient.models.documents import Document
 
-SearchInput = SearchQuery | str | None
-"""A structured or CTS query, a Search API string query, or None for all."""
+SearchInput = SearchQuery | dict | str | None
+"""A query object, structured/CTS/combined JSON, text query, or None for all."""
 
 PositionInput = int | list[int] | tuple[int, int] | None
 """A one-based position or an inclusive two-position range."""
-
-OptionsInput = str | dict | SearchOptions | None
-"""Installed options name, native inline options members, or an options builder."""
 
 Direction = Literal["ascending", "descending"]
 """Lexicon order."""
@@ -64,147 +61,16 @@ _INTEGER_LEXICON_TYPES = frozenset(
 )
 
 
-@dataclass(frozen=True)
-class SearchScope:
-    """Where searches run and which search options apply.
-
-    Every field defaults to unset, meaning inherited: a scope passed to one
-    operation overrides only the fields it sets on its service's scope, and
-    None explicitly clears an inherited value. A TransactionService unpacks
-    into it: ``SearchScope(**txn)``.
-
-    Parameters
-    ----------
-    database : str | None, default unset
-        Content database name or id; None uses the REST server's database.
-    txid : str | None, default unset
-        Multi-statement transaction to search within.
-    collection : str | list[str] | None, default unset
-        Restrict matches to one or more OR-related collections.
-    directory : str | None, default unset
-        Restrict matches to this database directory.
-    forest_name : str | list[str] | None, default unset
-        Restrict matches to these database forests.
-    options : str | dict | SearchOptions | None, default unset
-        Installed options name, or inline options members or builder sent in
-        the combined query. Inline options do not install configuration; a
-        dict is copied, so later changes to it do not affect the scope.
-    timestamp : str | None, default unset
-        Effective timestamp from an earlier response, for snapshot pagination.
-
-    Raises
-    ------
-    TypeError
-        If options are not a name, dict or SearchOptions, or a dict wraps its
-        members in an ``options`` key.
-    """
-
-    database: str | None = UNSET
-    txid: str | None = UNSET
-    collection: str | list[str] | None = UNSET
-    directory: str | None = UNSET
-    forest_name: str | list[str] | None = UNSET
-    options: OptionsInput = UNSET
-    timestamp: str | None = UNSET
-
-    def __post_init__(self):
-        """Freeze list restrictions to tuples and copy inline options.
-
-        Raises
-        ------
-        TypeError
-            If options are not a name, dict or SearchOptions, or a dict wraps
-            its members in an ``options`` key.
-        """
-        for name in ("collection", "forest_name"):
-            if isinstance(getattr(self, name), list):
-                object.__setattr__(self, name, tuple(getattr(self, name)))
-        if isinstance(self.options, dict):
-            _check_inline_options(self.options)
-            object.__setattr__(self, "options", copy.deepcopy(self.options))
-        elif not isinstance(self.options, (str, SearchOptions)) and (
-            self.options is not UNSET and self.options is not None
-        ):
-            message = (
-                "options must be an installed name, inline dictionary or "
-                f"SearchOptions, got {type(self.options).__name__}"
-            )
-            raise TypeError(message)
-
-    def overridden_by(self, other: SearchScope | None) -> SearchScope:
-        """Return this scope with every field another scope sets.
-
-        Parameters
-        ----------
-        other : SearchScope | None
-            The overriding scope; None overrides nothing.
-
-        Returns
-        -------
-        SearchScope
-            A new scope; fields unset in other keep this scope's values.
-
-        Raises
-        ------
-        TypeError
-            If other is neither a SearchScope nor None.
-        """
-        if other is None:
-            return self
-        if not isinstance(other, SearchScope):
-            message = f"scope must be a SearchScope, got {type(other).__name__}"
-            raise TypeError(message)
-        overrides = {
-            field.name: getattr(other, field.name)
-            for field in fields(other)
-            if getattr(other, field.name) is not UNSET
-        }
-        return replace(self, **overrides)
-
-    def request_params(self) -> dict:
-        """Return the endpoint arguments of every set field except options.
-
-        Options are not a plain argument: installed names are sent as a query
-        parameter and inline options in a combined-query body.
-
-        Returns
-        -------
-        dict
-            Endpoint keyword arguments; unset fields are omitted.
-        """
-        return {
-            field.name: getattr(self, field.name)
-            for field in fields(self)
-            if field.name != "options" and getattr(self, field.name) is not UNSET
-        }
-
-
-def _check_inline_options(options: dict):
-    """Reject inline options still wrapped in their ``options`` object.
-
-    Parameters
-    ----------
-    options : dict
-        Inline options members, as the combined query's options member.
-
-    Raises
-    ------
-    TypeError
-        If the only member is ``options``, which is not a search option.
-    """
-    if options.keys() == {"options"}:
-        message = (
-            "inline options must be the members of the options object; "
-            "pass options['options'] instead of the whole object"
-        )
-        raise TypeError(message)
-
-
 class SearchService:
     """Search documents, URIs and lexicon values through the REST Search API.
 
     Queries are sent as JSON: structured queries as ``{"query": ...}``, CTS
     queries as ``{"ctsquery": ...}``, a string as a Search API string query.
+    Structured, CTS and combined JSON dictionaries are accepted directly.
+    Combined-query options override matching service defaults; per-operation
+    scope options override both.
+    Raw CTS JSON cannot filter lexicon operations; pass a CTS query object
+    to those operations instead.
     No XQuery is evaluated, so the REST user needs only the rest-reader role;
     a scope naming another database also needs the xdmp-eval-in privilege.
 
@@ -258,7 +124,7 @@ class SearchService:
         forest_name : str | list[str] | None, default unset
             Restrict matches to these database forests.
         options : str | dict | SearchOptions | None, default unset
-            Installed options name, or inline options members or builder.
+            Installed options name, or inline options members or composition.
         timestamp : str | None, default unset
             Effective timestamp from an earlier response, for snapshot
             pagination.
@@ -299,6 +165,8 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
@@ -309,8 +177,9 @@ class SearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -323,6 +192,10 @@ class SearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -351,7 +224,14 @@ class SearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             category=category,
@@ -372,6 +252,8 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
@@ -381,8 +263,9 @@ class SearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -396,6 +279,10 @@ class SearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -425,7 +312,14 @@ class SearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             category=category,
@@ -444,6 +338,8 @@ class SearchService:
         *,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
@@ -454,14 +350,19 @@ class SearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
             Installed options' page-length does not apply to this read.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -487,7 +388,14 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             category=Category.QUALITY.value,
@@ -507,6 +415,8 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
@@ -519,7 +429,7 @@ class SearchService:
         ----------
         name : str
             The name of a values definition in the query options.
-        query : SearchQuery | str | None, default None
+        query : SearchQuery | dict | str | None, default None
             Restrict values to documents matching a structured, CTS or string
             query; None reads the whole lexicon.
         direction : {'ascending', 'descending'} | None, default None
@@ -533,6 +443,10 @@ class SearchService:
             None returns every value, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -562,7 +476,15 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
+        )
         resp = self._rest.values.post(
             name,
             **params,
@@ -587,6 +509,8 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
@@ -604,7 +528,7 @@ class SearchService:
             variance-population, correlation,
             covariance and covariance-population. For a native plugin function,
             also supply aggregate_path.
-        query : SearchQuery | str | None, default None
+        query : SearchQuery | dict | str | None, default None
             Restrict the aggregated values to documents matching a structured,
             CTS or string query; None aggregates the whole lexicon.
         aggregate_path : str | None, default None
@@ -622,6 +546,10 @@ class SearchService:
             aggregate. None aggregates every value.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -652,7 +580,15 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
+        )
         resp = self._rest.values.post(
             name,
             **params,
@@ -677,6 +613,8 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
@@ -690,7 +628,7 @@ class SearchService:
         ----------
         name : str
             The name of a tuples definition in the query options.
-        query : SearchQuery | str | None, default None
+        query : SearchQuery | dict | str | None, default None
             Restrict co-occurrences to documents matching a structured, CTS or
             string query; None reads the whole lexicon.
         direction : {'ascending', 'descending'} | None, default None
@@ -704,6 +642,10 @@ class SearchService:
             None returns every tuple, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -733,7 +675,15 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
+        )
         resp = self._rest.values.post(
             name,
             **params,
@@ -755,6 +705,8 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
@@ -764,8 +716,9 @@ class SearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the options' page-length, 10 by default.
@@ -777,6 +730,10 @@ class SearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -805,7 +762,14 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = self._rest.search.post(
             **params,
             view=view,
@@ -822,6 +786,11 @@ class AsyncSearchService:
 
     Queries are sent as JSON: structured queries as ``{"query": ...}``, CTS
     queries as ``{"ctsquery": ...}``, a string as a Search API string query.
+    Structured, CTS and combined JSON dictionaries are accepted directly.
+    Combined-query options override matching service defaults; per-operation
+    scope options override both.
+    Raw CTS JSON cannot filter lexicon operations; pass a CTS query object
+    to those operations instead.
     No XQuery is evaluated, so the REST user needs only the rest-reader role;
     a scope naming another database also needs the xdmp-eval-in privilege.
 
@@ -875,7 +844,7 @@ class AsyncSearchService:
         forest_name : str | list[str] | None, default unset
             Restrict matches to these database forests.
         options : str | dict | SearchOptions | None, default unset
-            Installed options name, or inline options members or builder.
+            Installed options name, or inline options members or composition.
         timestamp : str | None, default unset
             Effective timestamp from an earlier response, for snapshot
             pagination.
@@ -916,6 +885,8 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
@@ -926,8 +897,9 @@ class AsyncSearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -940,6 +912,10 @@ class AsyncSearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -968,7 +944,14 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             category=category,
@@ -989,6 +972,8 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
@@ -998,8 +983,9 @@ class AsyncSearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
@@ -1013,6 +999,10 @@ class AsyncSearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1042,7 +1032,14 @@ class AsyncSearchService:
             If MarkLogic returns an error.
         """
         category = normalize_category(category)
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             category=category,
@@ -1061,6 +1058,8 @@ class AsyncSearchService:
         *,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
@@ -1071,14 +1070,19 @@ class AsyncSearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the page-length of inline options, else 10.
             Installed options' page-length does not apply to this read.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1104,7 +1108,14 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             category=Category.QUALITY.value,
@@ -1124,6 +1135,8 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
@@ -1136,7 +1149,7 @@ class AsyncSearchService:
         ----------
         name : str
             The name of a values definition in the query options.
-        query : SearchQuery | str | None, default None
+        query : SearchQuery | dict | str | None, default None
             Restrict values to documents matching a structured, CTS or string
             query; None reads the whole lexicon.
         direction : {'ascending', 'descending'} | None, default None
@@ -1150,6 +1163,10 @@ class AsyncSearchService:
             None returns every value, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1179,7 +1196,15 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
+        )
         resp = await self._rest.values.post(
             name,
             **params,
@@ -1204,6 +1229,8 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
@@ -1221,7 +1248,7 @@ class AsyncSearchService:
             variance-population, correlation,
             covariance and covariance-population. For a native plugin function,
             also supply aggregate_path.
-        query : SearchQuery | str | None, default None
+        query : SearchQuery | dict | str | None, default None
             Restrict the aggregated values to documents matching a structured,
             CTS or string query; None aggregates the whole lexicon.
         aggregate_path : str | None, default None
@@ -1239,6 +1266,10 @@ class AsyncSearchService:
             aggregate. None aggregates every value.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1269,7 +1300,15 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
+        )
         resp = await self._rest.values.post(
             name,
             **params,
@@ -1294,6 +1333,8 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
@@ -1307,7 +1348,7 @@ class AsyncSearchService:
         ----------
         name : str
             The name of a tuples definition in the query options.
-        query : SearchQuery | str | None, default None
+        query : SearchQuery | dict | str | None, default None
             Restrict co-occurrences to documents matching a structured, CTS or
             string query; None reads the whole lexicon.
         direction : {'ascending', 'descending'} | None, default None
@@ -1321,6 +1362,10 @@ class AsyncSearchService:
             None returns every tuple, as the endpoint does.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1350,7 +1395,15 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope, lexicon=True)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+            lexicon=True,
+        )
         resp = await self._rest.values.post(
             name,
             **params,
@@ -1372,6 +1425,8 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
         timeout=UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
@@ -1381,8 +1436,9 @@ class AsyncSearchService:
 
         Parameters
         ----------
-        query : SearchQuery | str | None, default None
-            A structured or CTS query, a string query, or None to match all.
+        query : SearchQuery | dict | str | None, default None
+            A structured/CTS query object or JSON, combined JSON, a text query,
+            or None to match all.
         pos : int | list[int] | tuple[int, int] | None, default None
             A one-based position or an inclusive [start, end] range. None returns
             the first page: the options' page-length, 10 by default.
@@ -1394,6 +1450,10 @@ class AsyncSearchService:
             Named parameters passed to the installed transform.
         scope : SearchScope | None, default None
             Overrides the fields it sets on this service's scope for this request.
+        database : str | None, default unset
+            Database override, taking precedence over scope; None clears it.
+        txid : str | None, default unset
+            Transaction override, taking precedence over scope; None clears it.
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout. Unset uses the client's configured
             timeout; None disables every HTTP timeout; a number sets all four
@@ -1422,7 +1482,14 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        params = _request_params(self._scope, query, pos, scope)
+        params = _request_params(
+            self._scope,
+            query,
+            pos,
+            scope,
+            database=database,
+            txid=txid,
+        )
         resp = await self._rest.search.post(
             **params,
             view=view,
@@ -1441,6 +1508,8 @@ def _request_params(
     scope: SearchScope | None,
     *,
     lexicon: bool = False,
+    database: str | None = UNSET,
+    txid: str | None = UNSET,
 ) -> dict:
     """Build the combined-query POST arguments with their scope and paging.
 
@@ -1451,7 +1520,7 @@ def _request_params(
     ----------
     service_scope : SearchScope
         Scope of the service sending the request.
-    query : SearchQuery | str | None
+    query : SearchQuery | dict | str | None
         Search criteria, serialized locally.
     pos : int | list[int] | tuple[int, int] | None
         Requested positions.
@@ -1459,6 +1528,10 @@ def _request_params(
         Per-request overrides of the service scope.
     lexicon : bool, default False
         Whether the request reads a lexicon through /v1/values.
+    database : str | None, default unset
+        Overrides the merged scopes' database; None clears it.
+    txid : str | None, default unset
+        Overrides the merged scopes' transaction; None clears it.
 
     Returns
     -------
@@ -1472,8 +1545,15 @@ def _request_params(
     ValueError
         If pos is invalid.
     """
-    effective = service_scope.overridden_by(scope)
-    body, params = _criteria(query, effective.options, lexicon=lexicon)
+    effective = service_scope.overridden_by(scope).overridden_by(
+        SearchScope(database=database, txid=txid),
+    )
+    body, params = _criteria(
+        query,
+        service_scope.options,
+        lexicon=lexicon,
+        operation_options=scope.options if scope is not None else UNSET,
+    )
     params.update(effective.request_params())
     if pos is None and not lexicon:
         params.update(_inline_page_length(body))
@@ -1486,6 +1566,7 @@ def _criteria(
     options: OptionsInput,
     *,
     lexicon: bool = False,
+    operation_options: OptionsInput = UNSET,
 ) -> tuple[dict, dict]:
     """Carry a query and options in a combined-query body.
 
@@ -1494,13 +1575,16 @@ def _criteria(
 
     Parameters
     ----------
-    query : SearchQuery | str | None
+    query : SearchQuery | dict | str | None
         Search criteria, serialized locally.
     options : str | dict | SearchOptions | None
-        Installed name, inline options members or builder, or unset.
+        Installed name, inline options members or composition, or unset.
     lexicon : bool, default False
         Use additional-query for inline CTS restrictions: ML10/ML12 ignore
         the combined body's ctsquery member on the values endpoint.
+    operation_options : str | dict | SearchOptions | None, default unset
+        Per-operation options overriding service and combined-query options.
+        None clears options; a name replaces the installed options name.
 
     Returns
     -------
@@ -1514,31 +1598,50 @@ def _criteria(
     """
     params = {}
     inline: dict = {}
+    if operation_options is None or isinstance(operation_options, str):
+        options = operation_options
     if isinstance(options, str):
         params["options"] = options
     elif isinstance(options, SearchOptions):
         inline = options.to_json()["options"]
     elif isinstance(options, dict):
         inline = options
-    return {"search": _combined_search(query, inline, lexicon=lexicon)}, params
+    search = _combined_search(query, inline)
+    if operation_options is None:
+        search.pop("options", None)
+    elif isinstance(operation_options, (dict, SearchOptions)):
+        overrides = (
+            operation_options.to_json()["options"]
+            if isinstance(operation_options, SearchOptions)
+            else operation_options
+        )
+        search["options"] = {**search.get("options", {}), **overrides}
+        params.pop("options", None)
+    if lexicon and "ctsquery" in search:
+        if not isinstance(query, SearchQuery):
+            message = (
+                "raw CTS JSON cannot filter lexicon operations; "
+                "pass a CTS query object instead"
+            )
+            raise TypeError(message)
+        # ML10/ML12 ignore ctsquery on /v1/values. Send equivalent CTS XML.
+        search.pop("ctsquery")
+        search["options"] = _with_additional_query(search.get("options", {}), query)
+    return {"search": search}, params
 
 
 def _combined_search(
     query: SearchInput,
     options: dict,
-    *,
-    lexicon: bool,
 ) -> dict:
     """Build the inner member of a combined query.
 
     Parameters
     ----------
-    query : SearchQuery | str | None
+    query : SearchQuery | dict | str | None
         Search criteria, serialized locally.
     options : dict
         Native inline options members; empty when there are none.
-    lexicon : bool
-        Whether the combined query is sent to the values endpoint.
 
     Returns
     -------
@@ -1548,21 +1651,34 @@ def _combined_search(
     Raises
     ------
     TypeError
-        If the query has an unsupported type, or a lexicon request's existing
-        additional-query option is neither an XML string nor a list of them.
+        If the query has an unsupported type or JSON query shape.
     """
     if query is None:
         return _with_options({}, options)
     if isinstance(query, str):
         return _with_options({"qtext": query}, options)
+    if isinstance(query, dict):
+        if (
+            len(query) != 1
+            or not query.keys() <= {"search", "query", "ctsquery"}
+            or not isinstance(next(iter(query.values())), dict)
+        ):
+            message = (
+                "query dictionary must contain exactly one "
+                "search, query or ctsquery dictionary"
+            )
+            raise TypeError(message)
+        search = deepcopy(query.get("search", query))
+        if "options" in search and not isinstance(search["options"], dict):
+            message = "combined query options must be a dictionary"
+            raise TypeError(message)
+        return _with_options(search, options)
     if not isinstance(query, SearchQuery):
-        message = "query must be a SearchQuery, a string query or None"
+        message = (
+            "query must be a SearchQuery, a query dictionary, a string query or None"
+        )
         raise TypeError(message)
     search = query.to_combined_query()["search"]
-    if lexicon and "ctsquery" in search:
-        # Values POST ignores combined ctsquery on ML10/ML12. The native
-        # additional-query option accepts CTS XML strings in JSON options.
-        return {"options": _with_additional_query(options, query)}
     return _with_options(search, options)
 
 
@@ -1572,16 +1688,19 @@ def _with_options(search: dict, options: dict) -> dict:
     Parameters
     ----------
     search : dict
-        The query or qtext member.
+        Native search members, possibly including explicit inline options.
     options : dict
         Native inline options members.
 
     Returns
     -------
     dict
-        The search member, with an options member only for non-empty options.
+        The search member with merged inline options. Explicit query options
+        override matching scope options; option members are not deep-merged.
     """
-    return {**search, "options": options} if options else search
+    if options:
+        return {**search, "options": {**options, **search.get("options", {})}}
+    return search
 
 
 def _inline_page_length(body: dict) -> dict:

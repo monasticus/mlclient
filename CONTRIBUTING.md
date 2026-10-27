@@ -39,7 +39,8 @@ documentation and lint run independently when selected. Coverage and integration
 follow successful unit tests; integration-only changes can run with unit tests
 skipped. Unit and integration resources select their respective suites, while
 shared test utilities select both. Coverage comments run on PRs, and coverage
-badge updates run on `main`. Release tags use the separate release workflow.
+badge updates open a README pull request after successful checks on `main`.
+Release tags use the separate release workflow.
 
 ```sh
 poetry env use python3.11
@@ -80,6 +81,8 @@ Export a public symbol from one canonical namespace using `__all__`. Main
 clients and the manager belong to `mlclient`; transport clients to
 `mlclient.clients`; settings to `mlclient.http`, `mlclient.auth`,
 `mlclient.connection`, or `mlclient.env`; domain models to `mlclient.models`.
+Structured query builders belong to `mlclient.search`, composable XQuery
+expressions to `mlclient.xquery`, and service scopes to `mlclient.services`.
 The API reference reads these exports, so update the import contract tests and
 examples whenever the public surface changes. Internal helpers use `_` names
 and retain docstrings explaining their parameters, behavior, and exceptions.
@@ -139,6 +142,9 @@ also test distinct requirements that happen to share a line.
 # During development, select the affected module or test.
 poetry run pytest tests/unit/mlclient/cli/commands/test_log_level_command.py -q
 
+# Before committing, format and review the resulting diff.
+make format
+
 # Before submitting a code change.
 poetry run pytest tests/unit --cov=mlclient --cov-report=term-missing
 poetry run ruff check .
@@ -171,7 +177,7 @@ MARKLOGIC_IMAGE=progressofficial/marklogic-db:10.0-11.1-ubi-2.2.4 \
   docker compose -f tests/integration/docker-compose.yaml up -d --build
 ```
 
-The [version matrix](https://github.com/monasticus/mlclient/blob/main/docs/stability.md#supported-and-tested-versions) lists the
+The [version matrix](https://github.com/monasticus/mlclient/blob/main/docs/community/stability.md#supported-and-tested-versions) lists the
 images used in CI. Rebuild the rig after changing its provisioning code or image;
 the provisioner replaces the OAuth configuration with the current server's support
 status, including an explicit unsupported status before MarkLogic 11.2.
@@ -266,9 +272,9 @@ guide with basic usage before advanced overrides.
 ## Documentation
 
 Authored documentation is Markdown in `docs/`. The main entry points are
-`docs/index.md`, `docs/quickstart.md`, `docs/user/environments.md`, the Python task guides
-under `docs/user/python/`, and the command
-pages under `docs/user/cli/`. Keep README examples aligned with Home. Register
+`docs/index.md`, `docs/quickstart.md`, `docs/guides/environments.md`, the Python task guides
+under `docs/guides/` and `docs/advanced/`, and the command
+pages under `docs/cli/`. Keep README examples aligned with Home. Register
 new guide pages in `mkdocs.yml`; API pages are generated from canonical public exports
 and NumPy docstrings, including Pydantic fields and schemas.
 
@@ -279,7 +285,7 @@ make docs-build
 
 `make docs-build` runs a strict MkDocs build and checks generated pages, links,
 anchors and representative API rendering. Do not commit `site/` or generated
-reference pages. See the [documentation contribution guide](https://github.com/monasticus/mlclient/blob/main/docs/documentation.md)
+reference pages. See the [documentation contribution guide](https://github.com/monasticus/mlclient/blob/main/docs/community/documentation.md)
 for build details and versioned publication.
 
 ## Pull requests, branches and releases
@@ -299,18 +305,16 @@ that every existing interface is frozen, or that a breaking change needs no
 explanation. CI currently tests Python 3.10–3.14; this does not establish support
 for every Python or MarkLogic version.
 
-Releases are maintainer work. Version preparation opens a PR; tagging happens
-only after it is squash-merged into `main`. Numeric tags trigger reusable test,
-coverage and lint gates, artifact checks, OIDC PyPI publication and release notes.
-See the
-[release process](https://github.com/monasticus/mlclient/blob/main/docs/releasing.md)
-for the commands, publication checks and recovery procedures.
+The project maintainer prepares and publishes releases after reviewed changes
+are merged into `main`. Contributors submit changes through pull requests.
+Published versions and their changes are listed in
+[GitHub Releases](https://github.com/monasticus/mlclient/releases).
 
 From 1.0.0, stable APIs and CLI commands follow SemVer. The entire jobs package
 is experimental and can change in minor releases. Stable feature removal needs
 a major release, a prior working deprecation with `DeprecationWarning`, and
 migration guidance. See the
-[stability policy](https://github.com/monasticus/mlclient/blob/main/docs/stability.md).
+[stability policy](https://github.com/monasticus/mlclient/blob/main/docs/community/stability.md).
 
 ## License and third-party code
 

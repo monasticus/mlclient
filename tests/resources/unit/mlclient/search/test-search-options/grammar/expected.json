@@ -1,0 +1,40 @@
+{
+  "options": {
+    "grammar": {
+      "quotation": "\"",
+      "implicit": "<cts:and-query xmlns:cts=\"http://marklogic.com/cts\" />",
+      "starter": [
+        {
+          "strength": 30,
+          "apply": "group",
+          "delimiter": ")",
+          "label": "("
+        },
+        {
+          "strength": 40,
+          "apply": "prefix",
+          "ns": "https://example.com/search",
+          "at": "/grammar.xqy",
+          "cts-element": "cts:not-query",
+          "cts-options": "unfiltered",
+          "tokenize": "word",
+          "label": "-"
+        }
+      ],
+      "joiner": [
+        {
+          "strength": 20,
+          "apply": "infix",
+          "ns": "https://example.com/search",
+          "at": "/grammar.xqy",
+          "cts-element": "cts:and-query",
+          "cts-options": "unordered",
+          "compare": "EQ",
+          "consume": 1,
+          "tokenize": "word",
+          "label": "AND"
+        }
+      ]
+    }
+  }
+}

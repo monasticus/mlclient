@@ -1,0 +1,25 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "created",
+        "range": {
+          "type": "xs:dateTime",
+          "facet": true,
+          "json-property": "created",
+          "computed-bucket": [
+            {
+              "name": "today",
+              "ge": "P0D",
+              "lt": "P1D",
+              "anchor": "start-of-day",
+              "ge-anchor": "start-of-day",
+              "lt-anchor": "start-of-day",
+              "label": "Today"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

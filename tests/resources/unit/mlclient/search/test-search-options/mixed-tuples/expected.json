@@ -1,0 +1,35 @@
+{
+  "options": {
+    "tuples": [
+      {
+        "name": "uri-price",
+        "style": "consistent",
+        "indexes": [
+          {
+            "uri": null
+          },
+          {
+            "range": {
+              "type": "xs:decimal",
+              "json-property": "price"
+            }
+          },
+          {
+            "collection": null
+          }
+        ],
+        "aggregate": [
+          {
+            "apply": "count"
+          }
+        ],
+        "annotation": [
+          "Mixed indexes"
+        ],
+        "values-option": [
+          "item-frequency"
+        ]
+      }
+    ]
+  }
+}

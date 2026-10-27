@@ -1,0 +1,4 @@
+{
+  "type": "ValueError",
+  "message": "native options require XML elements in the http://marklogic.com/appservices/search namespace; got page-length"
+}

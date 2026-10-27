@@ -1,0 +1,10 @@
+{
+  "options": {
+    "searchable-expression": {
+      "text": "/d:doc",
+      "namespaces": {
+        "d": "https://example.com/docs"
+      }
+    }
+  }
+}

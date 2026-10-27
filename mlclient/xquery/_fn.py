@@ -2,7 +2,7 @@
 
 Arguments are data or XqyExpression trees. None passes the empty sequence; omitted
 optional arguments retain the native function's context-dependent defaults.
-XSLT-only and legacy functions retain their native context/dialect restrictions.
+Functions unavailable in XQuery 1.0-ml are excluded.
 """
 
 from __future__ import annotations
@@ -508,24 +508,6 @@ class Fn:
         return _optional_call("fn:count", sequence, maximum)
 
     @staticmethod
-    def current() -> FunctionCall:
-        """Build a native XQuery expression.
-
-        Returns the item that was the context item at the point where the expression was
-        invoked from the XSLT stylesheet.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:current``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:current
-        """
-        return FunctionCall("fn:current")
-
-    @staticmethod
     def current_date() -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -558,40 +540,6 @@ class Fn:
         Native reference: https://docs.marklogic.com/fn:current-dateTime
         """
         return FunctionCall("fn:current-dateTime")
-
-    @staticmethod
-    def current_group() -> FunctionCall:
-        """Build a native XQuery expression.
-
-        Returns the current regex group.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:current-group``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:current-group
-        """
-        return FunctionCall("fn:current-group")
-
-    @staticmethod
-    def current_grouping_key() -> FunctionCall:
-        """Build a native XQuery expression.
-
-        Returns the current regex grouping key.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:current-grouping-key``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:current-grouping-key
-        """
-        return FunctionCall("fn:current-grouping-key")
 
     @staticmethod
     def current_time() -> FunctionCall:
@@ -780,33 +728,6 @@ class Fn:
         Native reference: https://docs.marklogic.com/fn:default-collation
         """
         return FunctionCall("fn:default-collation")
-
-    @staticmethod
-    def distinct_nodes(
-        nodes: NodeInput,
-    ) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        [0.9-ml only] Returns the sequence resulting from removing from the input
-        sequence all but one of a set of nodes that have the same identity as one
-        another.
-
-        Parameters
-        ----------
-        nodes : NodeInput
-            A sequence of nodes from which to eliminate duplicate nodes (nodes with the
-            same identity) so that only one node of each identity remains.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:distinct-nodes``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:distinct-nodes
-        """
-        return FunctionCall("fn:distinct-nodes", (nodes,))
 
     @staticmethod
     def distinct_values(
@@ -1114,9 +1035,10 @@ class Fn:
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
-        This is a May 2003 function, and is only available in compatibility mode (XQuery
-        0.9-ML)--it has been replaced with fn:encode-for-uri, fn:iri-to-uri, and
-        fn:escape-html-uri.
+        Escape a URI using the legacy May 2003 function. Prefer fn:encode-for-uri,
+        fn:iri-to-uri, or fn:escape-html-uri for new expressions. Although the native
+        reference describes this as 0.9-ml-only, it also executes in 1.0-ml on
+        MarkLogic 10.0-11 and 12.1.0.
 
         Parameters
         ----------
@@ -1181,34 +1103,6 @@ class Fn:
         Native reference: https://docs.marklogic.com/fn:exists
         """
         return FunctionCall("fn:exists", (sequence,))
-
-    @staticmethod
-    def expanded_qname(
-        param_uri: str | XqyExpression | None,
-        param_local: str | XqyExpression,
-    ) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        [0.9-ml only, use fn:QName instead] Returns an xs:QName with the namespace URI
-        given in $paramURI and the local name in $paramLocal.
-
-        Parameters
-        ----------
-        param_uri : str | XqyExpression | None
-            A namespace URI, as a string.
-        param_local : str | XqyExpression
-            A localname, as a string.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:expanded-QName``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:expanded-QName
-        """
-        return FunctionCall("fn:expanded-QName", (param_uri, param_local))
 
     @staticmethod
     def false() -> FunctionCall:
@@ -2543,30 +2437,6 @@ class Fn:
         return FunctionCall("fn:nilled", (arg,))
 
     @staticmethod
-    def node_kind(node: NodeInput) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        [0.9-ml only, use xdmp:node-kind in 1.0 and 1.0-ml] Returns an xs:string
-        representing the node's kind: either "document", "element", "attribute", "text",
-        "namespace", "processing-instruction", "binary", or "comment".
-
-        Parameters
-        ----------
-        node : NodeInput
-            The node whose kind is to be returned.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:node-kind``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:node-kind
-        """
-        return FunctionCall("fn:node-kind", (node,))
-
-    @staticmethod
     def node_name(arg: NodeInput) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2781,30 +2651,6 @@ class Fn:
         Native reference: https://docs.marklogic.com/fn:QName
         """
         return FunctionCall("fn:QName", (uri, lexical))
-
-    @staticmethod
-    def regex_group(group_number: int | XqyExpression) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        While the xsl:matching-substring instruction is active, a set of current
-        captured substrings is available, corresponding to the parenthesized sub-
-        expressions of the regular expression.
-
-        Parameters
-        ----------
-        group_number : int | XqyExpression
-            The group number to return.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:regex-group``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:regex-group
-        """
-        return FunctionCall("fn:regex-group", (group_number,))
 
     @staticmethod
     def remove(
@@ -3231,34 +3077,6 @@ class Fn:
         return _optional_call("fn:string-length", source_string)
 
     @staticmethod
-    def string_pad(
-        pad_string: str | XqyExpression | None,
-        pad_count: int | XqyExpression,
-    ) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        [0.9-ml only] Returns a string representing the $padString concatenated with
-        itself the number of times specified in $padCount.
-
-        Parameters
-        ----------
-        pad_string : str | XqyExpression | None
-            The string to pad.
-        pad_count : int | XqyExpression
-            The number of times to pad the string.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:string-pad``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:string-pad
-        """
-        return FunctionCall("fn:string-pad", (pad_string, pad_count))
-
-    @staticmethod
     def string_to_codepoints(arg: str | XqyExpression) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3414,70 +3232,6 @@ class Fn:
         Native reference: https://docs.marklogic.com/fn:substring-before
         """
         return _optional_call("fn:substring-before", input, before, collation)
-
-    @staticmethod
-    def subtract_date_times_yielding_day_time_duration(
-        srcval1: datetime.datetime | XqyExpression,
-        srcval2: datetime.datetime | XqyExpression,
-    ) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        [0.9-ml only, use the minus operator ( - ) instead] Returns the
-        xdt:dayTimeDuration that corresponds to the difference between the normalized
-        value of $srcval1 and the normalized value of $srcval2.
-
-        Parameters
-        ----------
-        srcval1 : datetime.datetime | XqyExpression
-            The second xs:dateTime value.
-        srcval2 : datetime.datetime | XqyExpression
-            The second xs:dateTime value.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:subtract-dateTimes-yielding-dayTimeDuration``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:subtract-dateTimes-yielding-dayTimeDuration
-        """
-        return FunctionCall(
-            "fn:subtract-dateTimes-yielding-dayTimeDuration",
-            (srcval1, srcval2),
-        )
-
-    @staticmethod
-    def subtract_date_times_yielding_year_month_duration(
-        srcval1: datetime.datetime | XqyExpression,
-        srcval2: datetime.datetime | XqyExpression,
-    ) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        [0.9-ml only, use the minus operator ( - ) instead] Returns the
-        xdt:yearMonthDuration that corresponds to the difference between the normalized
-        value of $srcval1 and the normalized value of $srcval2.
-
-        Parameters
-        ----------
-        srcval1 : datetime.datetime | XqyExpression
-            The second xs:dateTime value.
-        srcval2 : datetime.datetime | XqyExpression
-            The second xs:dateTime value.
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:subtract-dateTimes-yielding-yearMonthDuration``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:subtract-dateTimes-yielding-yearMonthDuration
-        """
-        return FunctionCall(
-            "fn:subtract-dateTimes-yielding-yearMonthDuration",
-            (srcval1, srcval2),
-        )
 
     @staticmethod
     def sum(
@@ -3798,53 +3552,6 @@ class Fn:
         Native reference: https://docs.marklogic.com/fn:unordered
         """
         return FunctionCall("fn:unordered", (source_seq,))
-
-    @staticmethod
-    def unparsed_entity_public_id(entity_name: str | XqyExpression) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        Returns the public identifier of the unparsed entity specified by the $entity-
-        name parameter.
-
-        Parameters
-        ----------
-        entity_name : str | XqyExpression
-            The entity name.
-            ---
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:unparsed-entity-public-id``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:unparsed-entity-public-id
-        """
-        return FunctionCall("fn:unparsed-entity-public-id", (entity_name,))
-
-    @staticmethod
-    def unparsed_entity_uri(entity_name: str | XqyExpression) -> FunctionCall:
-        """Build a native XQuery expression.
-
-        Always returns the zero length string.
-
-        Parameters
-        ----------
-        entity_name : str | XqyExpression
-            The entity name.
-            ---
-
-        Returns
-        -------
-        FunctionCall
-            Composable call to ``fn:unparsed-entity-uri``.
-
-        Notes
-        -----
-        Native reference: https://docs.marklogic.com/fn:unparsed-entity-uri
-        """
-        return FunctionCall("fn:unparsed-entity-uri", (entity_name,))
 
     @staticmethod
     def unparsed_text(

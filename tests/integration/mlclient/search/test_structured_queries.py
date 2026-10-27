@@ -11,7 +11,7 @@ import pytest
 
 from mlclient import MLClient
 from mlclient.http import HTTPConfig
-from mlclient.search import QueryComponent
+from mlclient.search import QueryComponent, sq
 from mlclient.search.structured import (
     AndNotQuery,
     AndQuery,
@@ -67,7 +67,6 @@ from mlclient.search.structured import (
     ValueQuery,
     WordConstraintQuery,
     WordQuery,
-    sq,
 )
 from tests.utils.resources import render_test_resource
 
@@ -961,7 +960,7 @@ class TestStructuredComponentSerialization:
     def test_query_builder(self, ml_client):
         query = sq.query(
             sq.and_(
-                sq.range(sq.element("price"), 20, operator="GE", index_type="xs:int"),
+                sq.range_(sq.element("price"), 20, operator="GE", index_type="xs:int"),
                 sq.term("blue"),
             ),
         )

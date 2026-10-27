@@ -4,8 +4,7 @@ import pytest
 
 from mlclient import AsyncMLClient
 from mlclient.models import JSONDocument, XMLDocument
-from mlclient.search.options import Range, SearchOptions
-from mlclient.search.structured import Element
+from mlclient.search import opt, sq
 
 pytestmark = pytest.mark.ml_access
 NS = "https://monasticus.com/mlclient/examples/cts-test"
@@ -34,9 +33,11 @@ class TestDocumentsWithReport:
 
     def test_report_total_and_facets_cover_more_than_the_page(self, indexed_database):
         ml, database, _ = indexed_database
-        options = SearchOptions().range_constraint(
-            "price",
-            Range(Element("price", NS), "xs:decimal"),
+        options = opt.options(
+            opt.range_constraint(
+                "price",
+                opt.range_(sq.element("price", NS), "xs:decimal"),
+            ),
         )
         report, documents = ml.search(
             database=database,

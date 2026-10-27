@@ -543,3 +543,892 @@ def test_expression_rejects_output_type(ml):
         ml.eval.expression(fn.true(), output_type=int)
 
     assert str(error.value) == "output_type must be None, str or bytes"
+
+
+@respx.mock
+def test_xquery_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.xquery("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_xquery_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.xquery("1", database="request-db", txid="request-tx")
+
+    assert result == []
+
+
+@respx.mock
+def test_xquery_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xquery("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_xquery_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xquery(
+            "1",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_xquery_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xquery(
+            "1",
+            database=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_xquery_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xquery(
+            "1",
+            txid=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_xqy_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.xqy("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_xqy_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.xqy("1", database="request-db", txid="request-tx")
+
+    assert result == []
+
+
+@respx.mock
+def test_xqy_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xqy("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_xqy_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xqy(
+            "1",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_xqy_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xqy(
+            "1",
+            database=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_xqy_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").xqy("1", txid=None)
+
+    assert result == []
+
+
+@respx.mock
+def test_javascript_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.javascript("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_javascript_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.javascript("1", database="request-db", txid="request-tx")
+
+    assert result == []
+
+
+@respx.mock
+def test_javascript_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").javascript("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_javascript_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").javascript(
+            "1",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_javascript_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").javascript(
+            "1",
+            database=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_javascript_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").javascript(
+            "1",
+            txid=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_js_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.js("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_js_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.js("1", database="request-db", txid="request-tx")
+
+    assert result == []
+
+
+@respx.mock
+def test_js_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").js("1")
+
+    assert result == []
+
+
+@respx.mock
+def test_js_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").js(
+            "1",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_js_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").js(
+            "1",
+            database=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_js_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"javascript": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").js("1", txid=None)
+
+    assert result == []
+
+
+@respx.mock
+def test_file_without_scope(tmp_path):
+    file = tmp_path / "probe.xqy"
+    file.write_text("1")
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.file(str(file))
+
+    assert result == []
+
+
+@respx.mock
+def test_file_with_scope_kwargs(tmp_path):
+    file = tmp_path / "probe.xqy"
+    file.write_text("1")
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.file(str(file), database="request-db", txid="request-tx")
+
+    assert result == []
+
+
+@respx.mock
+def test_file_inherits_service_scope(tmp_path):
+    file = tmp_path / "probe.xqy"
+    file.write_text("1")
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").file(str(file))
+
+    assert result == []
+
+
+@respx.mock
+def test_file_scope_kwargs_override_service_scope(tmp_path):
+    file = tmp_path / "probe.xqy"
+    file.write_text("1")
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").file(
+            str(file),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_file_scope_kwargs_clear_service_database(tmp_path):
+    file = tmp_path / "probe.xqy"
+    file.write_text("1")
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").file(
+            str(file),
+            database=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_file_scope_kwargs_clear_service_transaction(tmp_path):
+    file = tmp_path / "probe.xqy"
+    file.write_text("1")
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").file(
+            str(file),
+            txid=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_execute_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.execute(xq="1")
+
+    assert result == []
+
+
+@respx.mock
+def test_execute_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.execute(xq="1", database="request-db", txid="request-tx")
+
+    assert result == []
+
+
+@respx.mock
+def test_execute_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").execute(xq="1")
+
+    assert result == []
+
+
+@respx.mock
+def test_execute_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").execute(
+            xq="1",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_execute_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").execute(
+            xq="1",
+            database=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_execute_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").execute(
+            xq="1",
+            txid=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_expression_without_scope():
+    expression = fn.string_length("coffee")
+    code, variables = expression.compile()
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.expression(expression)
+
+    assert result == []
+
+
+@respx.mock
+def test_expression_with_scope_kwargs():
+    expression = fn.string_length("coffee")
+    code, variables = expression.compile()
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval.expression(
+            expression,
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_expression_inherits_service_scope():
+    expression = fn.string_length("coffee")
+    code, variables = expression.compile()
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").expression(
+            expression,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_expression_scope_kwargs_override_service_scope():
+    expression = fn.string_length("coffee")
+    code, variables = expression.compile()
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").expression(
+            expression,
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_expression_scope_kwargs_clear_service_database():
+    expression = fn.string_length("coffee")
+    code, variables = expression.compile()
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").expression(
+            expression,
+            database=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_expression_scope_kwargs_clear_service_transaction():
+    expression = fn.string_length("coffee")
+    code, variables = expression.compile()
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": code, "vars": json.dumps(variables)})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        result = ml.eval(database="service-db", txid="service-tx").expression(
+            expression,
+            txid=None,
+        )
+
+    assert result == []
+
+
+@respx.mock
+def test_eval_scope_keeps_external_variables_separate():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "$message", "vars": '{"message": "coffee"}'})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "catalog")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        ml.eval(database="catalog").xquery("$message", message="coffee")
+
+
+@respx.mock
+def test_overriding_scope_on_service_copy_preserves_original_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
+    mocker.mock_post()
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-2")
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        original_service = ml.eval(database="catalog", txid="tx-1")
+        overridden_scope_service = original_service(txid="tx-2")
+        overridden_scope_service.xquery("1")
+        original_service.xquery("1")
+
+
+@respx.mock
+def test_clearing_scope_on_service_copy_preserves_original_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
+    mocker.mock_post()
+    mocker.with_url("http://localhost:8000/v1/eval")
+    mocker.with_request_content_type("application/x-www-form-urlencoded")
+    mocker.with_request_body({"xquery": "1"})
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+
+    with MLClient() as ml:
+        original_service = ml.eval(database="catalog", txid="tx-1")
+        cleared_scope_service = original_service(database=None, txid=None)
+        cleared_scope_service.xquery("1")
+        original_service.xquery("1")

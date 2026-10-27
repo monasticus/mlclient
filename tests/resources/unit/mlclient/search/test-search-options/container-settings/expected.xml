@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="content"><search:container><search:json-property>content</search:json-property><search:fragment-scope>properties</search:fragment-scope></search:container><search:annotation>Body</search:annotation></search:constraint></search:options>

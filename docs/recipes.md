@@ -2,7 +2,6 @@
 
 Start with a test database and credentials allowed to perform the operations
 shown. These recipes use stable document, client and XQuery APIs.
-Experimental jobs are not required.
 
 ## Replace a collection without rewriting content
 
@@ -33,8 +32,8 @@ collection name is rejected before opening a transaction.
 
 A successful context-manager exit commits; an exception rolls back. For a large
 migration, use a deliberate batch size and checkpoint strategy rather than one
-unbounded transaction. See [document models](user/python/documents.md) and
-[transactions](user/python/transactions.md).
+unbounded transaction. See [document models](guides/documents.md) and
+[transactions](guides/transactions.md).
 
 ## Evaluate queries across databases concurrently
 
@@ -68,7 +67,7 @@ here. For a large list, process bounded batches - pool limits bound in-flight
 requests, not the number of scheduled tasks.
 
 To read several documents from the same database, prefer a
-[single bulk read](user/python/documents.md#read) with `ml.documents.read(uris)`.
+[single bulk read](guides/documents.md#read) with `ml.documents.read(uris)`.
 
 ## Cap concurrency across several hosts of one cluster
 
@@ -100,15 +99,6 @@ print(names)
 `AsyncExitStack` closes every client on exit, including on error. The semaphore
 caps evaluations in flight across all hosts at once; raise `max_in_flight` to
 allow more overlap, or lower it to spare a loaded cluster.
-
-## Put a custom application API behind one method
-
-If scripts repeatedly compose the same raw HTTP calls, give the operation a
-name. The [custom API guide](user/python/custom-api.md) builds
-`ml.rest.tasks.list()` for the raw response and `ml.tasks.open_titles()` for
-parsed Python on a shared connection, with sync and async versions. This keeps
-transport details out of application scripts while retaining access to the raw
-response when needed.
 
 ## Call a custom XQuery module
 
@@ -171,5 +161,48 @@ quotes or XQuery-looking input; it is never interpolated into executable source.
 The namespace and module path are fixed application code, not user input.
 To inspect the generated query without a connection, call
 `label.normalize("coffee").compile()` and inspect its source and variable mapping.
-See the [XQuery API guide](user/python/xquery-api.md#custom-xquery-expressions)
+See the [XQuery API guide](advanced/xquery-api.md#custom-xquery-expressions)
 for composition and native result conventions.
+
+## Integrate a FastAPI application with MarkLogic
+
+This example connects FastAPI to MarkLogic with `AsyncMLClient`. One client
+stays open for the application's lifespan.
+
+It illustrates basic document caching: `GET /product` serves
+`/products/coffee.json` and keeps its `Document` in memory for five seconds.
+A cache hit sends no request to MarkLogic; after expiry, the next request reads
+the current document. The lock makes concurrent misses share one refresh.
+
+Save this as `cache_app.py`:
+
+```python
+--8<-- "examples/fastapi_cache.py"
+```
+
+Create the source document on your development server:
+
+```python
+from mlclient import MLClient
+from mlclient.models import Document
+
+with MLClient() as ml:
+    ml.documents.write(Document.create("/products/coffee.json", {"name": "Coffee", "price": 12}))
+```
+
+Install the example's optional dependencies and run one worker:
+
+```sh
+pip install mlclient fastapi uvicorn
+uvicorn cache_app:app --port 8080
+curl http://localhost:8080/product
+```
+
+## Extend MLClient with custom APIs
+
+If scripts repeatedly compose the same raw HTTP calls, give the operation a
+name. The [custom API guide](advanced/custom-api.md) builds
+`ml.rest.tasks.list()` for the raw response and `ml.tasks.open_titles()` for
+parsed Python on a shared connection, with sync and async versions. This keeps
+transport details out of application scripts while retaining access to the raw
+response when needed.

@@ -1,0 +1,16 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "content",
+        "container": {
+          "json-property": "content",
+          "fragment-scope": "properties"
+        },
+        "annotation": [
+          "Body"
+        ]
+      }
+    ]
+  }
+}

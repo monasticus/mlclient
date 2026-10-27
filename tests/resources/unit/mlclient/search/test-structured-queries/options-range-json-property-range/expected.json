@@ -1,6 +1,0 @@
-{
-  "range": {
-    "type": "xs:decimal",
-    "json-property": "price"
-  }
-}

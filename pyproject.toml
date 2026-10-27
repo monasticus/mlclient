@@ -206,6 +206,9 @@ max-complexity = 10
     "UP007", # pydantic evaluates field annotations at runtime; X | Y needs 3.10+
     "UP045", # pydantic evaluates field annotations at runtime; Optional needs 3.10+
 ]
+"mlclient/search/options.py" = [
+    "PLR0913", # constructors mirror native Search API options
+]
 "mlclient/models/documents.py" = [
     "PLR0913" # allow many arguments as they depend on ML structure
 ]

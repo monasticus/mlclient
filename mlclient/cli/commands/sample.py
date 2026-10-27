@@ -82,7 +82,9 @@ class SampleCommand(Command):
         manager = MLClientManager(self.option("environment"))
         with get_client(manager, self.option("connection")) as ml:
             results = ml.eval.expression(
-                cts.search(path, options=options).pos([1, limit]),
+                cts.search(None if path == "/" else path, options=options).pos(
+                    [1, limit],
+                ),
                 output_type=str,
             )
         if isinstance(results, str):

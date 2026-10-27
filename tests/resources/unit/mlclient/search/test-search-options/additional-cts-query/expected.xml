@@ -1,0 +1,1 @@
+<search:options xmlns:cts="http://marklogic.com/cts" xmlns:search="http://marklogic.com/appservices/search"><search:additional-query><cts:collection-query><cts:uri>published</cts:uri></cts:collection-query></search:additional-query></search:options>

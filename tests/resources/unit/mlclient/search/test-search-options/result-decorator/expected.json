@@ -1,0 +1,9 @@
+{
+  "options": {
+    "result-decorator": {
+      "apply": "result",
+      "ns": "https://example.com/search",
+      "at": "/search.xqy"
+    }
+  }
+}

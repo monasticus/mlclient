@@ -1,0 +1,27 @@
+{
+  "options": {
+    "extract-metadata": {
+      "qname": [
+        {
+          "elem-ns": "https://example.com/docs",
+          "elem-name": "title"
+        },
+        {
+          "elem-ns": "",
+          "elem-name": "item",
+          "attr-ns": "",
+          "attr-name": "code"
+        }
+      ],
+      "json-property": [
+        "title",
+        "author"
+      ],
+      "constraint-value": [
+        {
+          "ref": "tag"
+        }
+      ]
+    }
+  }
+}

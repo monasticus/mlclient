@@ -1,0 +1,38 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "price",
+        "range": {
+          "type": "xs:decimal",
+          "facet": true,
+          "json-property": "price",
+          "fragment-scope": "documents",
+          "weight": 2,
+          "bucket": [
+            {
+              "name": "low",
+              "ge": "0",
+              "lt": "10",
+              "label": "Under ten"
+            },
+            {
+              "name": "high",
+              "ge": "10",
+              "label": "Ten or more"
+            }
+          ],
+          "range-option": [
+            "cached"
+          ],
+          "facet-option": [
+            "limit=5"
+          ]
+        },
+        "annotation": [
+          "Prices"
+        ]
+      }
+    ]
+  }
+}

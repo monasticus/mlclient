@@ -17,7 +17,7 @@ from copy import deepcopy
 from dataclasses import dataclass, fields, replace
 from decimal import Decimal
 from io import StringIO
-from typing import ClassVar, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal
 from xml.dom import minidom
 from xml.etree.ElementTree import (
     Element,
@@ -29,7 +29,7 @@ from xml.etree.ElementTree import (
 )
 from xml.parsers.expat import ExpatError
 
-from mlclient.search.base import SearchQuery
+from mlclient.search.base import SearchQuery, build_combined_query
 from mlclient.xquery.expressions import (
     AtomicValue,
     FunctionCall,
@@ -42,6 +42,9 @@ from mlclient.xquery.expressions import (
     as_expr,
     as_qname,
 )
+
+if TYPE_CHECKING:
+    from mlclient.search.options import SearchOptions
 
 CTS_NS_URI = "http://marklogic.com/cts"
 # ElementTree has no per-call prefix map; registering the prefix makes every
@@ -295,8 +298,20 @@ class CtsQuery(SearchQuery, _NativeCall):
         """
         return self._FUNCTION
 
-    def to_combined_query(self) -> dict:
+    def to_combined_query(
+        self,
+        *,
+        options: dict | SearchOptions | None = None,
+        qtext: str | None = None,
+    ) -> dict:
         """Wrap this CTS query in a JSON combined query.
+
+        Parameters
+        ----------
+        options : dict | SearchOptions | None, default None
+            Inline option members without a wrapper, or a SearchOptions composition.
+        qtext : str | None, default None
+            Additional string query, AND-related to this query.
 
         Returns
         -------
@@ -306,11 +321,16 @@ class CtsQuery(SearchQuery, _NativeCall):
         Raises
         ------
         TypeError
-            For arguments requiring server evaluation.
+            For arguments requiring server evaluation or unsupported options
+            or qtext types.
         ValueError
             For values that cannot be serialized locally.
         """
-        return {"search": {"ctsquery": self.to_json()}}
+        return build_combined_query(
+            {"ctsquery": self.to_json()},
+            options=options,
+            qtext=qtext,
+        )
 
     def _native(self, members: list[_Member], output_format) -> dict | Element:
         """Render this query's native element from its described fields.

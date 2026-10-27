@@ -1,3 +1,8 @@
+<p align="center">
+  <a href="#gh-light-mode-only"><img alt="MLClient logo" src="docs/assets/branding/wordmark-black.svg" width="200"></a>
+  <a href="#gh-dark-mode-only"><img alt="MLClient logo" src="docs/assets/branding/wordmark-white.svg" width="200"></a>
+</p>
+
 [![License](https://img.shields.io/github/license/monasticus/mlclient?label=License&style=plastic)](https://github.com/monasticus/mlclient/blob/main/LICENSE)
 [![Version](https://img.shields.io/pypi/v/mlclient?color=blue&label=PyPI&style=plastic)](https://pypi.org/project/mlclient/)
 [![Python](https://img.shields.io/pypi/pyversions/mlclient?logo=python&label=Python&style=plastic)](https://www.python.org/)
@@ -47,12 +52,41 @@ response = ml.http.get("/v1/documents", params={"uri": "/example.json"})
 - Runtime retry, timeout and pool limits; independent auxiliary connections.
 - Public extension points for your application's endpoints and services.
 
-See the [Python guide](https://monasticus.github.io/mlclient/latest/user/clients/)
-and [connection options](https://monasticus.github.io/mlclient/latest/user/python/connections/).
+See the [Python guide](https://monasticus.github.io/mlclient/latest/guides/clients/)
+and [connection options](https://monasticus.github.io/mlclient/latest/advanced/connections/).
 Supported wrappers are listed in the generated reference; full REST coverage is
 an ongoing goal.
 
 ## Use the CLI
+
+### Initialize and evaluate code
+
+Create a local environment, run XQuery, then get the current date and time
+with JavaScript.
+
+![Initialize an environment, evaluate XQuery and get the current date and time with JavaScript](docs/assets/gifs/env-init-eval.gif)
+
+### Send HTTP requests
+
+Read XML and JSON responses as returned by the server, then format them with `--pretty`.
+
+![Retrieve XML and Manage API JSON, then recall each command and add --pretty](docs/assets/gifs/http-pretty.gif)
+
+### Read logs across a cluster
+
+Select an application server by name, then merge filtered logs from three
+hosts using its port.
+These are server-generated logs from requests to a demo bookstore application.
+
+![Read application logs by name, then merge logs from three cluster nodes by port](docs/assets/gifs/cluster-logs.gif)
+
+### Check a server and open QConsole
+
+Import Gradle settings, check health and version, then open Query Console.
+
+![Import dev settings, check health and MarkLogic 12 version, then open QConsole](docs/assets/gifs/gradle-health-version-url.gif)
+
+### More examples
 
 ```sh
 ml env init                               # Create and review project configuration
@@ -80,7 +114,7 @@ or port; `log-level -s/--server` selects an actual MarkLogic App Server name.
 `eval`, `http` and `sample` pretty-print XML and JSON with two-space indentation.
 Use `--no-pretty` to keep the original formatting.
 
-Read the [CLI guide](https://monasticus.github.io/mlclient/latest/user/cli/).
+Read more in the [CLI guide](https://monasticus.github.io/mlclient/latest/cli/).
 
 ## Background and stability
 
@@ -90,11 +124,11 @@ initially unaware of that project. After a break, I continued to offer another
 approach, particularly for async code, layered APIs and CLI workflows. If the
 requests-based MarkLogic client fits your needs, it is also worth considering.
 More background and future directions are in the
-[project notes](https://monasticus.github.io/mlclient/latest/about/).
+[project notes](https://monasticus.github.io/mlclient/latest/community/about/).
 
 Starting with 1.0.0, stable public APIs and CLI commands follow SemVer.
 `mlclient.jobs` remains explicitly experimental and may change in minor releases.
-See the [stability policy](https://monasticus.github.io/mlclient/latest/stability/)
+See the [stability policy](https://monasticus.github.io/mlclient/latest/community/stability/)
 and [release notes](https://github.com/monasticus/mlclient/releases).
 
 MLClient is independently maintained and licensed under MIT. Contributions are

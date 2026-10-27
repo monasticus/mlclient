@@ -1,0 +1,16 @@
+{
+  "options": {
+    "suggestion-source": [
+      {
+        "collection": {
+          "prefix": "https://example.com/tags/",
+          "facet": false,
+          "facet-option": [
+            "limit=4"
+          ]
+        },
+        "ref": "tags"
+      }
+    ]
+  }
+}

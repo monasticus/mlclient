@@ -1,0 +1,12 @@
+{
+  "options": {
+    "term": {
+      "default": {
+        "range": {
+          "type": "xs:int",
+          "json-property": "id"
+        }
+      }
+    }
+  }
+}

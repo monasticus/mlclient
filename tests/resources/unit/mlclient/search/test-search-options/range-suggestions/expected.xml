@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:suggestion-source ref="prices"><search:range type="xs:decimal"><search:field name="price" /></search:range><search:suggestion-option>ascending</search:suggestion-option></search:suggestion-source></search:options>

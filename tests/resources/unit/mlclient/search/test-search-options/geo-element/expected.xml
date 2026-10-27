@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:constraint name="location"><search:geo-elem><search:parent name="location" ns="" /><search:element name="point" ns="" /></search:geo-elem><search:annotation>Locations</search:annotation></search:constraint></search:options>

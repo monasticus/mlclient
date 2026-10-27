@@ -1,0 +1,21 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "active",
+        "value": {
+          "type": "boolean",
+          "json-property": "active",
+          "fragment-scope": "documents",
+          "weight": 0,
+          "term-option": [
+            "exact"
+          ]
+        },
+        "annotation": [
+          "Active"
+        ]
+      }
+    ]
+  }
+}

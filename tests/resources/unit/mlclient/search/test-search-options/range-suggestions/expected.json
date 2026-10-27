@@ -1,0 +1,18 @@
+{
+  "options": {
+    "suggestion-source": [
+      {
+        "range": {
+          "type": "xs:decimal",
+          "field": {
+            "name": "price"
+          }
+        },
+        "suggestion-option": [
+          "ascending"
+        ],
+        "ref": "prices"
+      }
+    ]
+  }
+}

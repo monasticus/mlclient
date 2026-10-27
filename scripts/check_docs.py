@@ -34,7 +34,7 @@ class Page(HTMLParser):
 for name, command in MLCLIentApplication().all().items():
     if not type(command).__module__.startswith("mlclient."):
         continue
-    guide_path = Path("docs/user/cli", *name.split()).with_suffix(".md")
+    guide_path = Path("docs/cli", *name.split()).with_suffix(".md")
     guide_text = guide_path.read_text()
     assert "Description:\n" not in guide_text, f"Help dump in {guide_path}"
     for argument in command.definition.arguments:
@@ -66,6 +66,8 @@ for info in pkgutil.iter_modules(mlclient.__path__, "mlclient."):
 for nested in (
     "mlclient.search.structured",
     "mlclient.search.options",
+    "mlclient.search.sq",
+    "mlclient.search.opt",
     "mlclient.services.diagnostics",
 ):
     documented[nested] = importlib.import_module(nested)
@@ -82,7 +84,19 @@ for dotted, module in documented.items():
     assert index in pages, f"Missing namespace page: {dotted}"
     for name in module.__all__:
         obj = getattr(module, name)
-        if inspect.isclass(obj) or inspect.isfunction(obj):
+        identifier = f"{dotted}.{name}"
+        if inspect.ismodule(obj):
+            page = (site / "reference" / obj.__name__.replace(".", "/") / "index.html").resolve()
+        elif dotted in {"mlclient.search.sq", "mlclient.search.opt"} and inspect.isclass(obj):
+            identifier = f"{obj.__module__}.{obj.__qualname__}"
+            assert seen.get((obj.__module__, obj.__qualname__)) == identifier, (
+                f"Constructor alias has no canonical model export: {dotted}.{name}"
+            )
+            page = (site / "reference" / obj.__module__.replace(".", "/") / obj.__name__ / "index.html").resolve()
+            assert any((index.parent / unquote(urlsplit(link).path)).resolve() in {page, page.parent} for link in pages[index].links), (
+                f"Constructor alias has no model link: {dotted}.{name}"
+            )
+        elif inspect.isclass(obj) or inspect.isfunction(obj):
             identity = (obj.__module__, obj.__qualname__)
             assert identity not in seen, (
                 f"Duplicate export: {dotted}.{name}, {seen.get(identity)}"
@@ -92,7 +106,7 @@ for dotted, module in documented.items():
         else:
             page = index
         assert page in pages, f"Missing API page: {dotted}.{name}"
-        assert f"{dotted}.{name}" in pages[page].ids, (
+        assert identifier in pages[page].ids, (
             f"Missing canonical anchor: {dotted}.{name}"
         )
         if getattr(obj, "__experimental__", None):
@@ -119,7 +133,7 @@ model = (site / "reference/mlclient/env/MLEnvironment/index.html").read_text()
 for marker in ("Show JSON schema:", "_ensure_default_app_servers", '"properties"'):
     # Schema JSON may be HTML-escaped by syntax highlighting.
     assert marker in model or marker.replace('"', "&quot;") in model, marker
-guide = (site / "user/clients/index.html").read_text()
+guide = (site / "guides/clients/index.html").read_text()
 assert "<table>" in guide, "Authored Markdown tables must render as HTML tables"
 
 client = (site / "reference/mlclient/MLClient/index.html").read_text()

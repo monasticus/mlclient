@@ -4,7 +4,7 @@ import pytest
 import respx
 
 from mlclient import AsyncMLClient, MLClient
-from mlclient.search.options import SearchOptions
+from mlclient.search import opt
 from mlclient.services import (
     AsyncSearchService,
     SearchScope,
@@ -127,7 +127,7 @@ def test_calling_the_service_returns_a_narrower_service():
 
 
 def test_narrowing_a_scoped_service_inherits_its_scope():
-    options = SearchOptions().control("page-length", 5)
+    options = opt.options(opt.control("page-length", 5))
     with MLClient() as ml:
         drinks = ml.search(database="catalog", options=options)(collection="drinks")
 

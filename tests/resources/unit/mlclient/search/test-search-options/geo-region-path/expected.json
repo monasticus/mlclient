@@ -1,0 +1,18 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "location",
+        "geo-region-path": {
+          "coord": "wgs84",
+          "path-index": {
+            "text": "/location/region"
+          }
+        },
+        "annotation": [
+          "Locations"
+        ]
+      }
+    ]
+  }
+}

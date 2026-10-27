@@ -1,0 +1,18 @@
+{
+  "options": {
+    "suggestion-source": [
+      {
+        "word": {
+          "element": {
+            "name": "title",
+            "ns": ""
+          },
+          "term-option": [
+            "case-insensitive"
+          ]
+        },
+        "ref": "title"
+      }
+    ]
+  }
+}

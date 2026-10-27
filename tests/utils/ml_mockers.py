@@ -153,7 +153,7 @@ class RespXRequest:
     data: dict | None = None
     json_: dict | None = None
 
-    def as_kwargs(self) -> dict[str, Any]:
+    def as_kwargs(self, *, strict_params: bool = False) -> dict[str, Any]:
         kwargs = {
             "name": self.name,
             "url": self.url,
@@ -164,6 +164,8 @@ class RespXRequest:
             "data": self.data,
             "json": self.json_,
         }
+        if strict_params:
+            kwargs["params__eq"] = kwargs.pop("params") or []
         return {key: value for key, value in kwargs.items() if value is not None}
 
 
@@ -199,12 +201,19 @@ class RespXMock:
 
 
 class MLRespXMocker(MLMocker):
-    def __init__(self, use_router: bool = True, router_base_url: str | None = None):
+    def __init__(
+        self,
+        use_router: bool = True,
+        router_base_url: str | None = None,
+        *,
+        strict_params: bool = False,
+    ):
         if use_router:
             self._mock = respx.mock(base_url=router_base_url, assert_all_called=False)
         else:
             self._mock = respx
         self._resp_mock = RespXMock()
+        self._strict_params = strict_params
 
     @property
     def router(self) -> MockRouter | None:
@@ -354,14 +363,14 @@ class MLRespXMocker(MLMocker):
     ) -> Route:
         if self._resp_mock.side_effect:
             route = self._mock.request(
-                **self._resp_mock.request.as_kwargs(),
+                **self._resp_mock.request.as_kwargs(strict_params=self._strict_params),
             )
             route.mock(side_effect=self._resp_mock.side_effect)
         else:
             self._validate()
             self._setup_response_body()
             route = self._mock.request(
-                **self._resp_mock.request.as_kwargs(),
+                **self._resp_mock.request.as_kwargs(strict_params=self._strict_params),
             )
             route.respond(**self._resp_mock.response.as_kwargs())
         self._resp_mock = RespXMock()

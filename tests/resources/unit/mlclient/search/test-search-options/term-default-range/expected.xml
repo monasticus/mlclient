@@ -1,0 +1,1 @@
+<search:options xmlns:search="http://marklogic.com/appservices/search"><search:term><search:default><search:range type="xs:int"><search:json-property>id</search:json-property></search:range></search:default></search:term></search:options>

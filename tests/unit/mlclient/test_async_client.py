@@ -65,6 +65,8 @@ async def test_manage_custom_call():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -129,6 +131,8 @@ async def test_manage_uses_main_port_when_already_8002():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     async with AsyncMLClient(port=8002) as ml:
@@ -145,6 +149,8 @@ async def test_manage_uses_port_8002_when_main_port_differs():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     async with AsyncMLClient(port=8000) as ml:
@@ -170,6 +176,8 @@ async def test_derived_secondaries_use_injected_primary_host():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://primary.example.com:8001/admin/v1/timestamp")
@@ -192,6 +200,8 @@ async def test_only_manage_config_given_admin_still_derived():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
@@ -223,6 +233,8 @@ async def test_only_admin_config_given_manage_still_derived():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     admin_config = HTTPConfig.resolve(host="admin.example.com", port=9001)
@@ -242,6 +254,8 @@ async def test_both_manage_and_admin_configs_given():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://admin.example.com:9001/admin/v1/timestamp")
@@ -704,6 +718,8 @@ async def test_sessions_open_on_requests_and_reopen_with_cached_apis(mocker):
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
     ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
     ml_mocker.with_response_code(200)
@@ -770,6 +786,9 @@ async def test_matching_injected_config_reuses_primary_session(mocker, tier, cal
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:9002" + call.endpoint)
+    if tier == "manage":
+        ml_mocker.with_request_param("format", "xml")
+        ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_get()
@@ -796,6 +815,8 @@ async def test_secondary_clients_connect_and_disconnect_with_main():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_request_param("view", "default")
     ml_mocker.mock_get()
 
     ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")

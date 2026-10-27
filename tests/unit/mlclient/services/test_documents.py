@@ -13,6 +13,7 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.models import (
     BinaryDocument,
     Category,
+    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -35,7 +36,10 @@ DOC_BODY_PARTS = [
 
 ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 
-ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
+ml_mocker = MLRespXMocker(
+    router_base_url="http://localhost:8000/v1/documents",
+    strict_params=False,
+)
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
 ml_mocker.with_delete_side_effect(
@@ -1177,6 +1181,7 @@ def test_read_forwards_txid(ml):
     mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("txid", "txn-123")
+    mocker.with_request_param("format", "json")
     mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 
     ml.documents.read(uri, txid="txn-123")
@@ -2027,3 +2032,463 @@ def test_delete_many_uris_are_batched(ml):
     ml.documents.delete(uris)
 
     assert ml_mocker.router.calls.call_count > 1
+
+
+@respx.mock
+def test_read_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents
+        result = documents.read("/some/dir/doc1.xml")
+
+    assert result.uri == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_read_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents
+        result = documents.read(
+            "/some/dir/doc1.xml",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result.uri == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_read_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.read("/some/dir/doc1.xml")
+
+    assert result.uri == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_read_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.read(
+            "/some/dir/doc1.xml",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result.uri == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_read_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.read("/some/dir/doc1.xml", database=None)
+
+    assert result.uri == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_read_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.read("/some/dir/doc1.xml", txid=None)
+
+    assert result.uri == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_read_stream_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents
+        result = list(documents.read_stream("/some/dir/doc1.xml"))
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+
+
+@respx.mock
+def test_read_stream_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents
+        result = list(
+            documents.read_stream(
+                "/some/dir/doc1.xml",
+                database="request-db",
+                txid="request-tx",
+            ),
+        )
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+
+
+@respx.mock
+def test_read_stream_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = list(documents.read_stream("/some/dir/doc1.xml"))
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+
+
+@respx.mock
+def test_read_stream_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = list(
+            documents.read_stream(
+                "/some/dir/doc1.xml",
+                database="request-db",
+                txid="request-tx",
+            ),
+        )
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+
+
+@respx.mock
+def test_read_stream_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = list(documents.read_stream("/some/dir/doc1.xml", database=None))
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+
+
+@respx.mock
+def test_read_stream_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_get_side_effect(ml_doc_mocker.get_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = list(documents.read_stream("/some/dir/doc1.xml", txid=None))
+
+    assert [doc.uri for doc in result] == ["/some/dir/doc1.xml"]
+
+
+@respx.mock
+def test_write_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents
+        result = documents.write(
+            Document.create("/some/dir/doc1.xml", "<root/>"),
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_write_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents
+        result = documents.write(
+            Document.create("/some/dir/doc1.xml", "<root/>"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_write_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.write(
+            Document.create("/some/dir/doc1.xml", "<root/>"),
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_write_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.write(
+            Document.create("/some/dir/doc1.xml", "<root/>"),
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_write_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.write(
+            Document.create("/some/dir/doc1.xml", "<root/>"),
+            database=None,
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_write_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_post_side_effect(ml_doc_mocker.post_documents_side_effect)
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        result = documents.write(
+            Document.create("/some/dir/doc1.xml", "<root/>"),
+            txid=None,
+        )
+
+    assert result["documents"][0]["uri"] == "/some/dir/doc1.xml"
+
+
+@respx.mock
+def test_delete_without_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        documents = ml.documents
+        documents.delete("/some/dir/doc1.xml")
+
+
+@respx.mock
+def test_delete_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        documents = ml.documents
+        documents.delete("/some/dir/doc1.xml", database="request-db", txid="request-tx")
+
+
+@respx.mock
+def test_delete_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        documents.delete("/some/dir/doc1.xml")
+
+
+@respx.mock
+def test_delete_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        documents.delete("/some/dir/doc1.xml", database="request-db", txid="request-tx")
+
+
+@respx.mock
+def test_delete_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        documents.delete("/some/dir/doc1.xml", database=None)
+
+
+@respx.mock
+def test_delete_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "service-db")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        documents.delete("/some/dir/doc1.xml", txid=None)
+
+
+@respx.mock
+def test_overriding_scope_on_service_copy_preserves_original_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
+    mocker.mock_delete()
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-2")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        original_service = ml.documents(database="catalog", txid="tx-1")
+        overridden_scope_service = original_service(txid="tx-2")
+        overridden_scope_service.delete("/some/dir/doc1.xml")
+        original_service.delete("/some/dir/doc1.xml")
+
+
+@respx.mock
+def test_clearing_scope_on_service_copy_preserves_original_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
+    mocker.mock_delete()
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.with_request_param("uri", "/some/dir/doc1.xml")
+    mocker.mock_delete()
+
+    with MLClient() as ml:
+        original_service = ml.documents(database="catalog", txid="tx-1")
+        cleared_scope_service = original_service(database=None, txid=None)
+        cleared_scope_service.delete("/some/dir/doc1.xml")
+        original_service.delete("/some/dir/doc1.xml")

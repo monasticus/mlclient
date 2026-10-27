@@ -1,4 +1,0 @@
-{
-  "type": "ValueError",
-  "message": "tuples requires at least two range indexes"
-}

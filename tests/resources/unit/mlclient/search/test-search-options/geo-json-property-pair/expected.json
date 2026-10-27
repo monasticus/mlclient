@@ -1,0 +1,17 @@
+{
+  "options": {
+    "constraint": [
+      {
+        "name": "location",
+        "geo-json-property-pair": {
+          "parent-property": "location",
+          "lat-property": "latitude",
+          "lon-property": "longitude"
+        },
+        "annotation": [
+          "Locations"
+        ]
+      }
+    ]
+  }
+}

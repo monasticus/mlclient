@@ -10,11 +10,14 @@ from dataclasses import dataclass, field, fields
 from datetime import date, datetime
 from decimal import Decimal
 from types import MappingProxyType
-from typing import ClassVar, Literal, TypeVar, get_args
+from typing import TYPE_CHECKING, ClassVar, Literal, TypeVar, get_args
 from xml.etree.ElementTree import Element as XmlElement
 from xml.etree.ElementTree import register_namespace
 
-from mlclient.search.base import QueryComponent, SearchQuery
+from mlclient.search.base import QueryComponent, SearchQuery, build_combined_query
+
+if TYPE_CHECKING:
+    from mlclient.search.options import SearchOptions
 
 SEARCH_NS_URI = "http://marklogic.com/appservices/search"
 """Namespace URI for structured queries and Search API options."""
@@ -74,14 +77,12 @@ __all__ = [
     "RangeQuery",
     "Region",
     "StructuredQuery",
-    "StructuredQueryBuilder",
     "TermQuery",
     "TrueQuery",
     "ValueConstraintQuery",
     "ValueQuery",
     "WordConstraintQuery",
     "WordQuery",
-    "sq",
 ]
 
 # MarkLogic's REST converter, json:config("custom"), keeps a bare text value of
@@ -228,18 +229,35 @@ class StructuredQuery(SearchQuery, _Validated):
         """
         return NotQuery(self)
 
-    def to_combined_query(self) -> dict:
+    def to_combined_query(
+        self,
+        *,
+        options: dict | SearchOptions | None = None,
+        qtext: str | None = None,
+    ) -> dict:
         """Wrap this structured query in a JSON combined query.
+
+        Parameters
+        ----------
+        options : dict | SearchOptions | None, default None
+            Inline option members without a wrapper, or a SearchOptions composition.
+        qtext : str | None, default None
+            Additional string query, AND-related to this query.
 
         Returns
         -------
         dict
             ``{"search": {"query": ...}}``. A subquery other than Query is
-            wrapped in a Query first, as the Search API requires.
+            wrapped in a Query first, as the Search API requires. Optional
+            inline options and qtext are included in the search member.
 
+        Raises
+        ------
+        TypeError
+            If options or qtext have unsupported types.
         """
         query = self if isinstance(self, Query) else Query(self)
-        return {"search": query.to_json()}
+        return build_combined_query(query.to_json(), options=options, qtext=qtext)
 
 
 class QueryTarget(QueryComponent, _Validated):
@@ -3162,156 +3180,6 @@ class QtextQuery(StructuredQuery):
         return _as_json_array(
             _node("qtext", text=self.text, output_format=output_format),
         )
-
-
-class StructuredQueryBuilder:
-    """Build composable queries without executing them or storing mutable state.
-
-    Leaf factories use the signatures of their corresponding query classes.
-    Composer factories accept positional subqueries, like the Java builder.
-    All returned queries support serialize() for JSON and serialize("xml") for XML.
-    """
-
-    def query(self, *queries: StructuredQuery) -> Query:
-        """Wrap structured queries for submission to the Search API.
-
-        Parameters
-        ----------
-        *queries : StructuredQuery
-            Top-level query components.
-
-        Returns
-        -------
-        Query
-            Structured-query wrapper.
-        """
-        return Query(queries)
-
-    def and_(
-        self,
-        *queries: StructuredQuery,
-        ordered: bool | None = None,
-    ) -> AndQuery:
-        """Build the intersection of positional query components.
-
-        Parameters
-        ----------
-        *queries : StructuredQuery
-            Queries that must all match.
-        ordered : bool or None, default None
-            Optional position-order requirement.
-
-        Returns
-        -------
-        AndQuery
-            Composable intersection query.
-        """
-        return AndQuery(queries, ordered=ordered)
-
-    def or_(self, *queries: StructuredQuery) -> OrQuery:
-        """Build the union of positional query components.
-
-        Parameters
-        ----------
-        *queries : StructuredQuery
-            Alternative queries.
-
-        Returns
-        -------
-        OrQuery
-            Composable union query.
-        """
-        return OrQuery(queries)
-
-    def near(
-        self,
-        *queries: StructuredQuery,
-        distance: int | None = None,
-        minimum_distance: int | None = None,
-        distance_weight: float | None = None,
-        ordered: bool | None = None,
-    ) -> NearQuery:
-        """Build proximity criteria for positional query components.
-
-        Parameters
-        ----------
-        *queries : StructuredQuery
-            Queries whose matches must be near each other.
-        distance : int or None, default None
-            Maximum distance.
-        minimum_distance : int or None, default None
-            Minimum distance.
-        distance_weight : float or None, default None
-            Distance scoring weight.
-        ordered : bool or None, default None
-            Optional match order.
-
-        Returns
-        -------
-        NearQuery
-            Composable proximity query.
-        """
-        return NearQuery(
-            queries,
-            distance=distance,
-            minimum_distance=minimum_distance,
-            distance_weight=distance_weight,
-            ordered=ordered,
-        )
-
-    and_not = AndNotQuery
-    attribute = Attribute
-    boost = BoostQuery
-    box = Box
-    circle = Circle
-    collection_constraint = CollectionConstraintQuery
-    collection = CollectionQuery
-    container_constraint = ContainerConstraintQuery
-    container = ContainerQuery
-    custom_constraint = CustomConstraintQuery
-    directory = DirectoryQuery
-    document_fragment = DocumentFragmentQuery
-    document = DocumentQuery
-    element = Element
-    element_constraint = ElementConstraintQuery
-    false = FalseQuery
-    field = Field
-    geo_attribute_pair = GeoAttributePairQuery
-    geo_element_pair = GeoElementPairQuery
-    geo_element = GeoElementQuery
-    geo_json_property_pair = GeoJsonPropertyPairQuery
-    geo_json_property = GeoJsonPropertyQuery
-    geo_path = GeoPathQuery
-    geo_region_constraint = GeoRegionConstraintQuery
-    geo_region_path = GeoRegionPathQuery
-    geospatial_constraint = GeospatialConstraintQuery
-    json_property = JsonProperty
-    locks_fragment = LocksFragmentQuery
-    lsqt = LsqtQuery
-    not_in = NotInQuery
-    not_ = NotQuery
-    operator_state = OperatorState
-    path_index = PathIndex
-    period = Period
-    period_compare = PeriodCompareQuery
-    period_range = PeriodRangeQuery
-    point = Point
-    polygon = Polygon
-    properties_constraint = PropertiesConstraintQuery
-    properties_fragment = PropertiesFragmentQuery
-    qtext = QtextQuery
-    range_constraint = RangeConstraintQuery
-    range = RangeQuery
-    term = TermQuery
-    true = TrueQuery
-    value_constraint = ValueConstraintQuery
-    value = ValueQuery
-    word_constraint = WordConstraintQuery
-    word = WordQuery
-
-
-sq = StructuredQueryBuilder()
-"""Stateless structured-query builder; equivalent to StructuredQueryBuilder()."""
 
 
 def _queries_node(

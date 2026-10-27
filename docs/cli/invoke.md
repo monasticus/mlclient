@@ -1,5 +1,7 @@
 # invoke
 
+![Module invocation demonstration](../assets/gifs/invoke.gif)
+
 Run an XQuery or server-side JavaScript module installed in MarkLogic and print
 the result. Results are printed and formatted as in [eval](eval.md).
 

@@ -94,7 +94,9 @@ class SampleCommand(Command):
         path = self._get_path()
         limit = self._get_limit()
         options = "format-json" if self.option("json") else "format-xml"
-        expression = cts.search(None if path == "/" else path, options=options).pos([1, limit])
+        expression = cts.search(None if path == "/" else path, options=options).pos(
+            [1, limit],
+        )
         environments = selected_environments(self)
         if len(environments) > 1:
             return self._sample_in_environments(environments, expression)

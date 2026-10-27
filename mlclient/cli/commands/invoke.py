@@ -13,8 +13,16 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
-from mlclient.cli.commands._execution_common import parse_variables, write_results
-from mlclient.cli.connection import get_client
+from mlclient.cli.commands._execution_common import (
+    format_results,
+    parse_variables,
+    write_results,
+)
+from mlclient.cli.commands._multi_env_common import (
+    selected_environments,
+    time_in_environments,
+)
+from mlclient.cli.connection import get_async_client, get_client
 
 
 class InvokeCommand(Command):
@@ -29,7 +37,7 @@ class InvokeCommand(Command):
 
     Options:
       -e, --environment=ENVIRONMENT
-            The ML Client environment name [default: "local"]
+            The ML Client environment names; repeat to compare (default: local)
       -c, --connection=CONNECTION
             Connection identifier from the environment or TCP port
           --var=VAR
@@ -54,9 +62,11 @@ class InvokeCommand(Command):
         option(
             "environment",
             "e",
-            description="The ML Client environment name",
+            description="The ML Client environment name; repeat to compare "
+            "environments",
             flag=False,
-            default="local",
+            multiple=True,
+            default=["local"],
         ),
         option(
             "connection",
@@ -93,18 +103,24 @@ class InvokeCommand(Command):
     ) -> int:
         """Execute the command."""
         variables = parse_variables(self.option("var"))
-        results = self._invoke_module(variables)
+        environments = selected_environments(self)
+        if len(environments) > 1:
+            return self._time_in_environments(environments, variables)
+        results = self._invoke_module(environments[0], variables)
         write_results(self, results)
         return 0
 
     def _invoke_module(
         self,
+        environment: str,
         variables: dict[str, str],
     ):
         """Invoke the module and get its results.
 
         Parameters
         ----------
+        environment : str
+            Environment in which to invoke the module.
         variables : dict[str, str]
             External variables to pass to the module.
 
@@ -113,10 +129,9 @@ class InvokeCommand(Command):
         str | list[str]
             The raw module results.
         """
-        env = self.option("environment")
         rest_server = self.option("connection")
 
-        mgr = MLClientManager(env)
+        mgr = MLClientManager(environment)
         with get_client(mgr, rest_server) as ml:
             self.info(f"Invoking module using REST App-Server {ml.http.base_url}")
             return ml.invoke.module(
@@ -126,3 +141,42 @@ class InvokeCommand(Command):
                 txid=self.option("txid"),
                 output_type=str,
             )
+
+    def _time_in_environments(
+        self,
+        environments: list[str],
+        variables: dict[str, str],
+    ) -> int:
+        """Invoke the module concurrently and compare the results.
+
+        Parameters
+        ----------
+        environments : list[str]
+            Environments in display order.
+        variables : dict[str, str]
+            External variables passed to every invocation.
+
+        Returns
+        -------
+        int
+            Zero when every invocation succeeds, one if any fails.
+        """
+        connection = self.option("connection")
+        pretty = not self.option("no-pretty")
+
+        async def invoke(environment: str) -> str | list[str]:
+            manager = MLClientManager(environment)
+            async with get_async_client(manager, connection) as ml:
+                return await ml.invoke.module(
+                    self.argument("module"),
+                    variables=variables,
+                    database=self.option("database"),
+                    txid=self.option("txid"),
+                    output_type=str,
+                )
+
+        def describe(results: str | list[str]) -> str:
+            results = format_results(results, pretty=pretty)
+            return "\n".join(results) if isinstance(results, list) else results
+
+        return time_in_environments(self, environments, invoke, describe)

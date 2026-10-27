@@ -115,7 +115,7 @@ or port; `log-level -s/--server` selects an actual MarkLogic App Server name.
 `eval`, `invoke`, `http` and `sample` pretty-print XML and JSON with two-space indentation.
 Use `--no-pretty` to keep the original formatting.
 
-Repeat `-e` to compare environments with `eval`, `http`, `sample`, `health`,
+Repeat `-e` to compare environments with `eval`, `invoke`, `http`, `sample`, `health`,
 `version` or `url`, for example `ml health -e dev -e test`.
 
 Read the [CLI guide](https://monasticus.github.io/mlclient/latest/cli/).

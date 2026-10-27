@@ -13,13 +13,16 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
-from mlclient.cli.commands._execution_common import parse_variables, write_results
+from mlclient.cli.commands._execution_common import (
+    format_results,
+    parse_variables,
+    write_results,
+)
 from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
 from mlclient.cli.connection import get_async_client, get_client
-from mlclient.cli.formatting import prettify
 from mlclient.exceptions import WrongParametersError
 
 
@@ -186,8 +189,7 @@ class EvalCommand(Command):
                 return await ml.eval.execute(**eval_params)
 
         def describe(results: list[str] | str) -> str:
-            if pretty:
-                results = _prettify(results)
+            results = format_results(results, pretty=pretty)
             return "\n".join(results) if isinstance(results, list) else results
 
         return time_in_environments(self, environments, evaluate, describe)
@@ -204,23 +206,3 @@ class EvalCommand(Command):
         with get_client(mgr, rest_server) as ml:
             self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
             return ml.eval.execute(**eval_params)
-
-
-def _prettify(
-    results: list[str] | str,
-) -> list[str] | str:
-    """Reformat XML and JSON results, item by item for a sequence.
-
-    Parameters
-    ----------
-    results : list[str] | str
-        Results returned by the Eval service.
-
-    Returns
-    -------
-    list[str] | str
-        The results in the same shape, XML and JSON reformatted.
-    """
-    if isinstance(results, list):
-        return [prettify(item) for item in results]
-    return prettify(results)

@@ -63,7 +63,7 @@ command page.
 
 ## Compare environments
 
-Repeat `-e` with `eval`, `http`, `sample`, `health`, `version` or `url`:
+Repeat `-e` with `eval`, `invoke`, `http`, `sample`, `health`, `version` or `url`:
 
 ```sh
 ml health -e dev -e test

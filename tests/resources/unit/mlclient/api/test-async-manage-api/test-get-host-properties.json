@@ -1,0 +1,1 @@
+{"host-name":"ml-host.example.com", "host-mode":"normal", "host-mode-description":"", "group":"Default", "bind-port":7999, "foreign-bind-port":7998, "zone":"", "bootstrap-host":true}

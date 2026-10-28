@@ -1,0 +1,8 @@
+<restart xmlns="http://marklogic.com/manage">
+  <last-startup host-id="3061134920503170303">2026-10-16T09:40:50.769518Z</last-startup>
+  <link>
+    <kindref>timestamp</kindref>
+    <uriref>/admin/v1/timestamp</uriref>
+  </link>
+  <message>Check for new timestamp to verify host restart.</message>
+</restart>

@@ -1,6 +1,14 @@
 """Public calls for MLClient."""
 
-from mlclient.calls.admin import ServerConfigGetCall, TimestampGetCall
+from mlclient.calls.admin import (
+    ClusterConfigPostCall,
+    HostConfigDeleteCall,
+    InitPostCall,
+    InstanceAdminPostCall,
+    ServerConfigGetCall,
+    TimestampGetCall,
+    TimestampHeadCall,
+)
 from mlclient.calls.base import ApiCall
 from mlclient.calls.databases import (
     DatabaseDeleteCall,
@@ -28,8 +36,22 @@ from mlclient.calls.forests import (
     ForestsPostCall,
     ForestsPutCall,
 )
-from mlclient.calls.groups import GroupPropertiesGetCall, GroupPropertiesPutCall
-from mlclient.calls.hosts import HostsGetCall
+from mlclient.calls.groups import (
+    GroupDeleteCall,
+    GroupGetCall,
+    GroupPostCall,
+    GroupPropertiesGetCall,
+    GroupPropertiesPutCall,
+    GroupsGetCall,
+    GroupsPostCall,
+)
+from mlclient.calls.hosts import (
+    HostGetCall,
+    HostPostCall,
+    HostPropertiesGetCall,
+    HostPropertiesPutCall,
+    HostsGetCall,
+)
 from mlclient.calls.logs import LogsCall
 from mlclient.calls.roles import (
     RoleDeleteCall,
@@ -65,6 +87,7 @@ from mlclient.calls.values import ValueGetCall, ValuePostCall, ValuesGetCall
 
 __all__ = [
     "ApiCall",
+    "ClusterConfigPostCall",
     "DatabaseDeleteCall",
     "DatabaseGetCall",
     "DatabasePostCall",
@@ -84,9 +107,21 @@ __all__ = [
     "ForestsGetCall",
     "ForestsPostCall",
     "ForestsPutCall",
+    "GroupDeleteCall",
+    "GroupGetCall",
+    "GroupPostCall",
     "GroupPropertiesGetCall",
     "GroupPropertiesPutCall",
+    "GroupsGetCall",
+    "GroupsPostCall",
+    "HostConfigDeleteCall",
+    "HostGetCall",
+    "HostPostCall",
+    "HostPropertiesGetCall",
+    "HostPropertiesPutCall",
     "HostsGetCall",
+    "InitPostCall",
+    "InstanceAdminPostCall",
     "InvokeCall",
     "LogsCall",
     "RoleDeleteCall",
@@ -106,6 +141,7 @@ __all__ = [
     "ServersGetCall",
     "ServersPostCall",
     "TimestampGetCall",
+    "TimestampHeadCall",
     "TransactionGetCall",
     "TransactionPostCall",
     "TransactionsPostCall",

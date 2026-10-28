@@ -2,1862 +2,1918 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/acknowledgements/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/quickstart/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/recipes/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/connections/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/custom-api/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/health-and-administration/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/more-on-environments/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/queries/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/services/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/xquery-api/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/http/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/http/limits/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/http/retries/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/advanced/http/timeouts/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/eval/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/health/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/http/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/invoke/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/log-level/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/logs/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/sample/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/trace-events/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/url/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/version/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/env/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/env/compare/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/env/copy/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/env/edit/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/env/init/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/env/remove/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/cli/env/show/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/community/about/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/community/contributing/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/community/documentation/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/community/stability/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/async/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/clients/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/documents/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/environments/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/eval/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/invoke/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/logging/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/search/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/guides/transactions/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/SUMMARY/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/AsyncMLClient/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/MLClient/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/MLClientManager/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AdminApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncAdminApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncDatabasesApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncDocumentsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncEvalApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncForestsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncGroupsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncHostsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncInvokeApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncLogsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncManageApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncRestApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncRolesApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncSearchApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncServersApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncTransactionsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncUsersApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncValuesApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/DatabasesApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/DocumentsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/EvalApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/ForestsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/GroupsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/HostsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/InvokeApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/LogsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/ManageApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/RestApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/RolesApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/SearchApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/ServersApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/TransactionsApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/UsersApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/ValuesApi/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/auth/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/auth/AuthConfig/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/auth/KerberosAuth/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/auth/MarkLogicCloudAuth/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/auth/OAuthBearerAuth/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ApiCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ClusterConfigPostCall/</loc>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DatabaseDeleteCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DatabaseGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DatabasePostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DatabasePropertiesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DatabasePropertiesPutCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DatabasesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DatabasesPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DocumentsDeleteCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DocumentsGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/DocumentsPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/EvalCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestDeleteCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestPropertiesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestPropertiesPutCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestsGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestsPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ForestsPutCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/GroupDeleteCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/GroupGetCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/GroupPostCall/</loc>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/GroupPropertiesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/GroupPropertiesPutCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/GroupsGetCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/GroupsPostCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/HostConfigDeleteCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/HostGetCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/HostPostCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/HostPropertiesGetCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/HostPropertiesPutCall/</loc>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/HostsGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/InitPostCall/</loc>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/InstanceAdminPostCall/</loc>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/InvokeCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/LogsCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RoleDeleteCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RoleGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RolePropertiesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RolePropertiesPutCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RolesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RolesPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/SearchDeleteCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/SearchGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/SearchPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ServerConfigGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ServerDeleteCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ServerGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ServerPropertiesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ServerPropertiesPutCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ServersGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ServersPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/TimestampGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/TimestampHeadCall/</loc>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/TransactionGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/TransactionPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/TransactionsPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/UserDeleteCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/UserGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/UserPropertiesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/UserPropertiesPutCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/UsersGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/UsersPostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ValueGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ValuePostCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/ValuesGetCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/clients/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/clients/ApiClient/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/clients/AsyncApiClient/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/clients/AsyncHttpClient/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/clients/HttpClient/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/connection/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/connection/CloudConfig/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/connection/SSLConfig/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/env/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/env/MLEnvironment/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/env/MLServerConfig/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/env/find_mlclient_directory/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/env/find_mlclient_environment/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/ConfigError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/EnvironmentFileExistsError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/InvalidLogTypeError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/InvalidMetadataError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/MLClientDirectoryNotFoundError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/MLClientEnvironmentNotFoundError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/MarkLogicError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/NoRestServerConfiguredError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/NoSuchAppServerError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/NotARestServerError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/ResourceNotFoundError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/UnsupportedFileExtensionError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/UnsupportedFormatError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/exceptions/WrongParametersError/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/http/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/http/HTTPConfig/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/io/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/io/DocumentsLoader/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/io/DocumentsWriter/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/jobs/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/jobs/DocumentJobReport/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/jobs/DocumentReport/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/jobs/DocumentStatus/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/jobs/DocumentStatusDetails/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/jobs/ReadDocumentsJob/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/jobs/WriteDocumentsJob/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/logging/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/logging/MLLogHandler/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/logging/setup_logger/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/logging/setup_ml_logger/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/BinaryDocument/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Category/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Document/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/DocumentType/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/DocumentsBodyPart/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/DocumentsBodyPartType/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/DocumentsDisposition/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Extract/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/JSONDocument/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/LogType/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/MarkLogicVersion/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Metadata/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/MetadataDocument/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Mimetype/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Mimetypes/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Permission/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/Repair/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/SearchHit/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/SearchReport/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/TextDocument/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/TupleHit/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/ValueHit/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/models/XMLDocument/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/multipart/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/multipart/MultipartPart/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/multipart/decode_multipart_mixed/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/multipart/encode_multipart_mixed/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/responses/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/responses/MLResponseParser/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/QueryComponent/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/SearchQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/opt/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/AdditionalQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Aggregate/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Anchor/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Annotation/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Bucket/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Callback/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Collection/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/CollectionConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ComputedBucket/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ConcurrencyLevel/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ConstraintValue/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ContainerConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Control/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/CustomConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Debug/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/DefaultSuggestionSource/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ElementQueryConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ExtractDocumentData/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ExtractMetadata/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Forest/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/FragmentScope/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoAttributePair/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoElement/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoElementPair/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoJsonProperty/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoJsonPropertyPair/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoPath/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/GeoRegionPath/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Grammar/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Heatmap/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Implicit/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Joiner/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/MetadataQName/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/NativeOption/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/NativeOptions/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Operator/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/OperatorState/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/PageLength/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/PreferredMatches/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/PropertiesConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/QualityWeight/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Range/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/RangeConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ResultDecorator/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnAggregates/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnConstraints/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnFacets/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnFrequencies/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnMetrics/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnPlan/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnQtext/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnResults/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnSimilar/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ReturnValues/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/SearchOption/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/SearchOptionString/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/SearchOptions/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/SearchableExpression/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/SortOrder/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Starter/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/SuggestionSource/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Term/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/TermDefault/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/TransformResults/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Tuples/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Value/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/ValueConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Values/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/Word/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/WordConstraint/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/options/WordLexicon/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/sq/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/sq/and_/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/sq/near/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/sq/or_/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/sq/query/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/AndNotQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/AndQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Attribute/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/BoostQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Box/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Circle/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/CollectionConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/CollectionQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/ContainerConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/ContainerQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/CustomConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/DirectoryQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/DocumentFragmentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/DocumentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Element/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/ElementConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/FalseQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Field/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoAttributePairQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoElementPairQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoElementQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoJsonPropertyPairQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoJsonPropertyQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoPathQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoRegionConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeoRegionPathQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/GeospatialConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/JsonProperty/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/LocksFragmentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/LsqtQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/NearQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/NotInQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/NotQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/OperatorState/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/OrQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/PathIndex/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Period/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/PeriodCompareQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/PeriodRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Point/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Polygon/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/PropertiesConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/PropertiesFragmentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/QtextQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Query/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/QueryTarget/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/RangeConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/RangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/Region/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/StructuredQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/TermQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/TrueQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/ValueConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/ValueQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/WordConstraintQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/search/structured/WordQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncCtsService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncDocumentsService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncEvalService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncInvokeService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncSearchService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/AsyncTransactionService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/CtsService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/DocumentsService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/EvalService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/InvokeService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/SearchScope/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/SearchService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/ServiceScope/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/TransactionService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/async_open_transaction/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/open_transaction/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/diagnostics/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/diagnostics/AsyncLogsService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/diagnostics/LogLevelService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/diagnostics/LogsService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/diagnostics/TraceEvents/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/services/diagnostics/TraceEventsService/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/AfterQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/AndNotQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/AndQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/AtomicValue/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/BeforeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/BoostQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Box/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Circle/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/CollectionQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ColumnRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Cts/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/CtsQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/DatabaseRoot/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/DirectoryQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/DocumentFormatQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/DocumentFragmentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/DocumentPermissionQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/DocumentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/DocumentRootQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementAttributePairGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementAttributeRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementAttributeValueQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementAttributeWordQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementChildGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementPairGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementValueQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ElementWordQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/FalseQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/FieldRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/FieldValueQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/FieldWordQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Fn/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/FunctionCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/GeospatialRegionQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Index/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/JsonPropertyChildGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/JsonPropertyGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/JsonPropertyPairGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/JsonPropertyRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/JsonPropertyScopeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/JsonPropertyValueQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/JsonPropertyWordQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/LocksFragmentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/LsqtQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ModuleFunctionCall/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/NamespaceMap/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/NearQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/NotInQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/NotQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/OrQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Path/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/PathGeospatialQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/PathRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Period/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/PeriodCompareQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/PeriodRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Point/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Polygon/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/PropertiesFragmentQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Range/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/RangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/RegisteredQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ResultXPath/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/ReverseQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/RuntimeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/SimilarQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/TripleRangeQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/TrueQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/WordQuery/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Xdmp/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/XqyCompilationContext/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/XqyExpression/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/XqySequence/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/Xs/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/as_searchable_expression/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/namespace_bindings/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/xquery/xpath/</loc>
-         <lastmod>2026-10-27</lastmod>
+         <lastmod>2026-10-28</lastmod>
     </url>
 </urlset>

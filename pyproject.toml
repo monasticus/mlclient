@@ -100,7 +100,7 @@ pythonpath = ["."]
 addopts = ["--strict-markers", "--benchmark-autosave"]
 markers = [
     "ml_access", # marks tests requiring an ML access
-    "ml_cluster" # marks tests starting their own MarkLogic hosts in Docker
+    "ml_cluster_lifecycle" # tests init/join/remove on disposable Docker hosts
 ]
 
 [tool.coverage.report]

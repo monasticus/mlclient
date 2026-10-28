@@ -191,12 +191,12 @@ MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES=1 MLCLIENT_IT_CERTS_DIR=tests/integrat
   poetry run pytest tests/integration -ra
 ```
 
-Tests marked `ml_cluster` initialize hosts, join them into a cluster and remove
+Tests marked `ml_cluster_lifecycle` initialize hosts, join them into a cluster and remove
 them again, which no shared server survives. They start two uninitialized
 MarkLogic hosts of their own through testcontainers, from the image in
 `MARKLOGIC_IMAGE` (the CI matrix image; set it to the image the rig uses so no
 other image is pulled). They need a Docker daemon, not the provisioned rig, and
-run alone with `poetry run pytest tests/integration -m ml_cluster`.
+run alone with `poetry run pytest tests/integration -m ml_cluster_lifecycle`.
 
 `MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES=1`, also set in CI, makes missing certificates, Docker or Kerberos
 tooling fail instead of skipping. Without it, tests requiring an unavailable

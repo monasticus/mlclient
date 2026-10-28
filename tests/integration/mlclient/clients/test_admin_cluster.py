@@ -33,7 +33,7 @@ class TestAdminClusterLifecycle:
     MANAGE_NS: ClassVar[str] = "http://marklogic.com/manage"
     RESTART_TIMEOUT: ClassVar[float] = 180
 
-    @pytest.mark.ml_cluster
+    @pytest.mark.ml_cluster_lifecycle
     def test_cluster_lifecycle(
         self,
         uninitialized_marklogic_nodes: list[DockerContainer],

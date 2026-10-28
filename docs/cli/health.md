@@ -49,14 +49,6 @@ Environment name. Defaults to `local`; use `-e dev` to load
 for example `-e dev -e test`. Explicit names replace the `local` default;
 duplicates run only once, in their first-given order.
 
-Requests run concurrently and results appear in a table with one column per
-environment and elapsed times. While running, output is limited to the terminal
-height; the final table contains the complete results. A failed environment
-returns exit status 1 and does not hide successful peers.
-
-With `--watch`, each poll adds a row. `--overwrite --lines N` retains the latest
-N rows on an ANSI terminal; plain output keeps appending. Ctrl+C exits with 0.
-
 ## Status and exit codes
 
 | Status | Meaning |

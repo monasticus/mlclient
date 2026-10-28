@@ -54,11 +54,10 @@ to another tool. Plain text and other scalar results are always printed unchange
 ### `--environment`, `-e`
 
 Environment name. Defaults to `local`; use `-e dev` to load
-`.mlclient/mlclient-dev.yaml`. Repeat it to invoke the module concurrently in
-several environments and compare results, for example
+`.mlclient/mlclient-dev.yaml`. Repeat it to select several
+environments, for example
 `ml invoke /ext/report.xqy -e dev -e test`. Repeated names are used once.
-Each target App Server must have the module installed; any failed environment
-gives exit status 1 while successful peers remain visible.
+Each target App Server must have the module installed.
 
 ### `--connection`, `-c`
 

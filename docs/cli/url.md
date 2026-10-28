@@ -38,8 +38,8 @@ Environment name. Defaults to `local`; use `-e dev` to load
 for example `-e dev -e test`. Explicit names replace the `local` default;
 duplicates run only once, in their first-given order.
 
-The table has one column per environment. With a target, all URLs are copied
-together, one per line; `--open` opens each URL in the browser.
+With a target, all URLs are copied together, one per line; `--open` opens each
+URL in the browser.
 
 ### `--open`
 

@@ -82,11 +82,6 @@ Environment name. Defaults to `local`; use `-e dev` to load
 for example `-e dev -e test`. Explicit names replace the `local` default;
 duplicates run only once, in their first-given order.
 
-Requests run concurrently and results appear in a table with one column per
-environment and elapsed times. While running, output is limited to the terminal
-height; the final table contains the complete results. A failed environment
-returns exit status 1 and does not hide successful peers.
-
 ### `--connection`, `-c`
 
 Configured connection identifier or TCP port (`1`–`65535`). Omit it to use the

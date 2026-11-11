@@ -340,7 +340,11 @@ _DEGRADED_CLUSTER = {"host-c": False, "host-a": True, "host-b": False}
 
 
 def test_command_health_cluster_reports_healthy_host_count(mocker):
-    _patch_cluster_health(mocker, ClusterHealth(healthy=True, hosts=_CLUSTER))
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
     tester = _get_tester()
 
     assert tester.execute("-e test --cluster") == 0
@@ -348,9 +352,10 @@ def test_command_health_cluster_reports_healthy_host_count(mocker):
 
 
 def test_command_health_cluster_lists_unhealthy_hosts_sorted_by_name(mocker):
-    _patch_cluster_health(
-        mocker,
-        ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
     )
     tester = _get_tester()
 
@@ -361,9 +366,10 @@ def test_command_health_cluster_lists_unhealthy_hosts_sorted_by_name(mocker):
 
 
 def test_command_health_cluster_verbose_lists_every_host_sorted_by_name(mocker):
-    _patch_cluster_health(
-        mocker,
-        ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
     )
     tester = _get_tester()
 
@@ -375,7 +381,11 @@ def test_command_health_cluster_verbose_lists_every_host_sorted_by_name(mocker):
 
 def test_command_health_cluster_sorts_numbers_in_host_names_by_value(mocker):
     hosts = {"ip-10-0-0-121": False, "ip-10-0-0-5": False, "ip-10-0-0-34": False}
-    _patch_cluster_health(mocker, ClusterHealth(healthy=False, hosts=hosts))
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=hosts),
+    )
     tester = _get_tester()
 
     tester.execute("-e test --cluster")
@@ -388,7 +398,11 @@ def test_command_health_cluster_sorts_numbers_in_host_names_by_value(mocker):
 
 
 def test_command_health_cluster_verbose_lists_hosts_of_a_healthy_cluster(mocker):
-    _patch_cluster_health(mocker, ClusterHealth(healthy=True, hosts=_CLUSTER))
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
     tester = _get_tester()
 
     assert tester.execute("-e test --cluster", verbosity=Verbosity.VERBOSE) == 0
@@ -410,7 +424,11 @@ def test_command_health_cluster_without_host_breakdown_reports_overall(
     expected_status,
     expected_output,
 ):
-    _patch_cluster_health(mocker, ClusterHealth(healthy=healthy, hosts=None))
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=healthy, hosts=None),
+    )
     tester = _get_tester()
 
     assert (
@@ -421,7 +439,11 @@ def test_command_health_cluster_without_host_breakdown_reports_overall(
 
 
 def test_command_health_cluster_colours_host_count_apart_from_status(mocker):
-    _patch_cluster_health(mocker, ClusterHealth(healthy=True, hosts=_CLUSTER))
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
     tester = _get_tester()
 
     tester.execute("-e test --cluster", decorated=True)
@@ -432,7 +454,11 @@ def test_command_health_cluster_colours_host_count_apart_from_status(mocker):
 
 
 def test_command_health_cluster_does_not_probe_the_healthcheck_server(mocker):
-    _patch_cluster_health(mocker, ClusterHealth(healthy=True, hosts=_CLUSTER))
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
     healthcheck = mocker.patch.object(MLClient, "healthcheck")
     tester = _get_tester()
 
@@ -442,8 +468,9 @@ def test_command_health_cluster_does_not_probe_the_healthcheck_server(mocker):
 
 
 def test_command_health_cluster_watch_names_unhealthy_hosts(mocker):
-    _patch_cluster_health(
-        mocker,
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
         side_effect=[
             ClusterHealth(healthy=True, hosts=_CLUSTER),
             ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
@@ -471,7 +498,11 @@ def test_command_health_cluster_watch_names_unhealthy_hosts(mocker):
 
 
 def test_command_health_cluster_in_several_environments_shows_host_counts(mocker):
-    _patch_async_cluster_health(mocker, ClusterHealth(healthy=True, hosts=_CLUSTER))
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
     tester = _get_tester()
 
     assert tester.execute("-e test -e other --cluster") == 0
@@ -486,8 +517,9 @@ def test_command_health_cluster_in_several_environments_fails_when_one_is_unheal
     mocker,
     verbosity,
 ):
-    _patch_async_cluster_health(
-        mocker,
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
         side_effect=[
             ClusterHealth(healthy=True, hosts=_CLUSTER),
             ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
@@ -505,7 +537,11 @@ def test_command_health_cluster_in_several_environments_fails_when_one_is_unheal
 
 
 def test_command_health_cluster_in_several_environments_colours_host_count(mocker):
-    _patch_async_cluster_health(mocker, ClusterHealth(healthy=True, hosts=_CLUSTER))
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
     tester = _get_tester()
 
     tester.execute("-e test -e other --cluster", decorated=True)
@@ -514,8 +550,9 @@ def test_command_health_cluster_in_several_environments_colours_host_count(mocke
 
 
 def test_command_health_cluster_watch_in_several_environments_adds_rows(mocker):
-    _patch_async_cluster_health(
-        mocker,
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
         side_effect=[
             ClusterHealth(healthy=True, hosts=_CLUSTER),
             ClusterHealth(healthy=True, hosts=_CLUSTER),
@@ -539,30 +576,6 @@ def test_command_health_cluster_watch_in_several_environments_adds_rows(mocker):
     assert len(rows) == 2
     assert rows[0].count("HEALTHY 3/3") == 2
     assert rows[1].count("UNHEALTHY (overall)") == 2
-
-
-def _patch_cluster_health(mocker, health=None, side_effect=None):
-    return mocker.patch.object(
-        MLClient,
-        "cluster_healthcheck",
-        return_value=health,
-        side_effect=side_effect,
-    )
-
-
-def _patch_async_cluster_health(mocker, health=None, side_effect=None):
-    return mocker.patch.object(
-        AsyncMLClient,
-        "cluster_healthcheck",
-        return_value=health,
-        side_effect=side_effect,
-    )
-
-
-def _get_tester() -> CommandTester:
-    app = MLCLIentApplication()
-    command = app.find("health")
-    return CommandTester(command)
 
 
 @pytest.mark.parametrize("overwrite", [False, True])
@@ -640,9 +653,10 @@ def test_command_health_cluster_multi_environment_watch_lists_unhealthy_hosts(
     overwrite,
     decorated,
 ):
-    _patch_async_cluster_health(
-        mocker,
-        ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
     )
     mocker.patch(
         "mlclient.cli.commands.health.asyncio.sleep",
@@ -666,9 +680,10 @@ def test_command_health_cluster_multi_environment_watch_lists_unhealthy_hosts(
 
 
 def test_command_health_cluster_multi_environment_watch_wraps_long_hosts(mocker):
-    _patch_async_cluster_health(
-        mocker,
-        ClusterHealth(
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(
             healthy=False,
             hosts={"ip-10-0-0-12.very-long-cluster-name.example.com": False},
         ),
@@ -692,9 +707,10 @@ def test_command_health_cluster_multi_environment_escapes_unhealthy_host_names(
     mocker,
     watch,
 ):
-    _patch_async_cluster_health(
-        mocker,
-        ClusterHealth(healthy=False, hosts={"<info>host</info>": False}),
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts={"<info>host</info>": False}),
     )
     mocker.patch(
         "mlclient.cli.commands.health.asyncio.sleep",
@@ -708,3 +724,9 @@ def test_command_health_cluster_multi_environment_escapes_unhealthy_host_names(
         decorated=True,
     ) == (0 if watch else 1)
     assert "<info>host</info>" in tester.io.fetch_output()
+
+
+def _get_tester() -> CommandTester:
+    app = MLCLIentApplication()
+    command = app.find("health")
+    return CommandTester(command)

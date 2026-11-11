@@ -39,17 +39,16 @@ UNHEALTHY 10/12
   UNHEALTHY  ip-10-0-0-91.ec2.internal
 ```
 
-Unhealthy hosts are listed below the status, sorted by name with the numbers in
-names ordered by value; `-v` lists every host in the same order. In watch mode the
-unhealthy hosts follow the status on its line
+Unhealthy hosts are listed below the status by default; `-v` also lists healthy
+hosts. In watch mode the unhealthy hosts follow the status on its line
 (`UNHEALTHY 11/12 down: ip-10-0-0-14.ec2.internal`). With several environments,
-each column also lists its unhealthy hosts after `down:`, without requiring
-`-v`. In watch mode these names wrap below the status within the same cell.
+each column also lists its unhealthy hosts after `down:`. In watch mode these
+names wrap below the status within the same cell.
 
 The query needs the eval privilege. Without it, on MarkLogic 11 or later, the
 Management API health check is read instead: it gives a verdict for the whole
 cluster without per-host health, shown as `HEALTHY (overall)` or
-`UNHEALTHY (overall)`. Each host has two seconds to answer, and hosts are probed
+`UNHEALTHY (overall)`. Each host has five seconds to answer, and hosts are probed
 one after another.
 
 ## Options

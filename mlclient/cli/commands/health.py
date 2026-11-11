@@ -97,9 +97,9 @@ class HealthCommand(Command):
     With --cluster every host of the cluster is checked from inside it through
     the environment's REST server, and the status is followed by the number of
     healthy hosts out of all, e.g. HEALTHY 12/12. Unhealthy hosts are listed
-    below it, sorted by name with numbers ordered by value; with -v every host
-    is. With --watch the unhealthy hosts follow the status on its line, and in a
-    table of several environments only the host count is shown. When the
+    below it; -v also lists healthy hosts. With --watch the unhealthy hosts
+    follow the status on its line; in a table of several environments they
+    appear below the status. When the
     cluster reports no per-host health (a user without the eval privilege on
     MarkLogic 11 or later), the count is replaced by (overall).
 
@@ -180,7 +180,7 @@ class HealthCommand(Command):
             return time_in_environments(
                 self,
                 environments,
-                functools.partial(_check_health, cluster=cluster),
+                self._check_environment,
                 highlight=_highlight,
             )
         manager = MLClientManager(environments[0])
@@ -192,6 +192,32 @@ class HealthCommand(Command):
             healthy = ml.healthcheck()
         self.line(_format_status(healthy))
         return 0 if healthy else 1
+
+    async def _check_environment(self, environment: str) -> str:
+        """Check one environment's HealthCheck server or every host of its cluster.
+
+        Parameters
+        ----------
+        environment : str
+            The environment name.
+
+        Returns
+        -------
+        str
+            The HEALTHY status, followed by the host count of a cluster.
+
+        Raises
+        ------
+        UnsuccessfulAnswerError
+            If the server or the cluster is unhealthy or cannot be reached.
+        """
+        cluster = self.option("cluster")
+        manager = MLClientManager(environment)
+        async with manager.get_async_client(_app_server_id(cluster)) as ml:
+            status = await _poll(ml, cluster=cluster)
+        if not _is_healthy(status):
+            raise UnsuccessfulAnswerError(status)
+        return status
 
     def _report_cluster(
         self,
@@ -328,34 +354,6 @@ class HealthCommand(Command):
                 _out_of_range_message(name, raw, minimum, maximum),
             )
         return value
-
-
-async def _check_health(environment: str, *, cluster: bool) -> str:
-    """Check one environment's HealthCheck server or every host of its cluster.
-
-    Parameters
-    ----------
-    environment : str
-        The environment name.
-    cluster : bool
-        Whether to check every host of the cluster.
-
-    Returns
-    -------
-    str
-        The HEALTHY status, followed by the host count of a cluster.
-
-    Raises
-    ------
-    UnsuccessfulAnswerError
-        If the server or the cluster is unhealthy or cannot be reached.
-    """
-    manager = MLClientManager(environment)
-    async with manager.get_async_client(_app_server_id(cluster)) as ml:
-        status = await _poll(ml, cluster=cluster)
-    if not _is_healthy(status):
-        raise UnsuccessfulAnswerError(status)
-    return status
 
 
 async def _poll_until_interrupted(

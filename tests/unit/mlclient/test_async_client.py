@@ -20,14 +20,22 @@ from mlclient.http import DEFAULT_RETRY_STRATEGY, HTTPConfig
 from mlclient.models import ClusterHealth
 from mlclient.responses import MLResponseParser
 from mlclient.services import AsyncDocumentsService, AsyncEvalService
-from tests.utils.cluster_health_mocks import (
-    mock_cluster_eval,
-    mock_cluster_status,
-    mock_forbidden_eval,
-    mock_manage_version,
-    unhealthy_cluster_statuses,
-)
 from tests.utils.ml_mockers import MLRespXMocker
+
+
+CLUSTER_STATUS_URL = "http://localhost:8002/manage/v2?view=healthcheck&format=json"
+
+HEALTHY_CLUSTER_STATUS = {
+    "clusterId": "1111111111111111111",
+    "hostId": "2222222222222222222",
+    "serverInitializing": False,
+    "serverRestarting": False,
+    "serverShutdown": False,
+    "quorumExists": True,
+    "serverHealthStatus": [{"serverId": "3333333333333333333", "healthy": True}],
+    "backgroundHealthStatus": [{"backgroundName": "XDQP Server", "healthy": True}],
+    "databaseHealthStatus": [{"databaseId": "4444444444444444444", "healthy": "true"}],
+}
 
 
 def test_properties_delegate_to_http_client():
@@ -724,7 +732,11 @@ async def test_healthcheck_cloud_uses_no_retry_and_preserves_gateway(injected):
 @respx.mock
 async def test_cluster_healthcheck_reports_every_host_from_eval():
     hosts = {"host-1.internal": True, "host-2.internal": True}
-    mock_cluster_eval(hosts)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("map", json.dumps(hosts))
+    ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         health = await ml.cluster_healthcheck()
@@ -737,7 +749,11 @@ async def test_cluster_healthcheck_reports_every_host_from_eval():
 @respx.mock
 async def test_cluster_healthcheck_is_unhealthy_when_any_host_is_down():
     hosts = {"host-1.internal": True, "host-2.internal": False}
-    mock_cluster_eval(hosts)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("map", json.dumps(hosts))
+    ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         health = await ml.cluster_healthcheck()
@@ -749,21 +765,40 @@ async def test_cluster_healthcheck_is_unhealthy_when_any_host_is_down():
 @pytest.mark.asyncio
 @respx.mock
 async def test_cluster_healthcheck_sends_healthcheck_port_to_eval():
-    route = mock_cluster_eval({"host-1.internal": True})
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("map", json.dumps({"host-1.internal": True}))
+    route = ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
         await ml.cluster_healthcheck()
 
     request_body = parse_qs(route.calls.last.request.content.decode())
-    assert json.loads(request_body["vars"][0]) == {"port": 7997}
+    assert json.loads(request_body["vars"][0]) == {"port": 7997, "timeout": 5}
 
 
 @pytest.mark.asyncio
 @respx.mock
 async def test_cluster_healthcheck_falls_back_to_manage_status_without_eval_privilege():
-    mock_forbidden_eval()
-    mock_manage_version("11.0.0")
-    mock_cluster_status()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"version": "11.0.0"})
+    ml_mocker.mock_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(CLUSTER_STATUS_URL)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(None or HEALTHY_CLUSTER_STATUS)
+    ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
         health = await ml.cluster_healthcheck()
@@ -771,13 +806,46 @@ async def test_cluster_healthcheck_falls_back_to_manage_status_without_eval_priv
     assert health == ClusterHealth(healthy=True, hosts=None)
 
 
-@pytest.mark.parametrize("status", unhealthy_cluster_statuses())
+@pytest.mark.parametrize(
+    "status",
+    [
+        HEALTHY_CLUSTER_STATUS | change
+        for change in [
+            {"serverInitializing": True},
+            {"serverRestarting": True},
+            {"serverShutdown": True},
+            {"quorumExists": False},
+            {"serverHealthStatus": [{"serverId": "1", "healthy": False}]},
+            {
+                "backgroundHealthStatus": [
+                    {"backgroundName": "database", "healthy": False},
+                ],
+            },
+            {"databaseHealthStatus": [{"databaseId": "1", "healthy": "false"}]},
+        ]
+    ],
+)
 @pytest.mark.asyncio
 @respx.mock
 async def test_cluster_healthcheck_reads_unhealthy_manage_status(status):
-    mock_forbidden_eval()
-    mock_manage_version("12.1.0")
-    mock_cluster_status(status)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"version": "12.1.0"})
+    ml_mocker.mock_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(CLUSTER_STATUS_URL)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(status or HEALTHY_CLUSTER_STATUS)
+    ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
         health = await ml.cluster_healthcheck()
@@ -788,9 +856,24 @@ async def test_cluster_healthcheck_reads_unhealthy_manage_status(status):
 @pytest.mark.asyncio
 @respx.mock
 async def test_cluster_healthcheck_reraises_eval_error_before_marklogic_11():
-    mock_forbidden_eval()
-    mock_manage_version("10.0-9.5")
-    status_route = mock_cluster_status()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"version": "10.0-9.5"})
+    ml_mocker.mock_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(CLUSTER_STATUS_URL)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(None or HEALTHY_CLUSTER_STATUS)
+    status_route = ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
         with pytest.raises(MarkLogicError):
@@ -802,9 +885,24 @@ async def test_cluster_healthcheck_reraises_eval_error_before_marklogic_11():
 @pytest.mark.asyncio
 @respx.mock
 async def test_cluster_healthcheck_raises_when_manage_status_is_forbidden_too():
-    mock_forbidden_eval()
-    mock_manage_version("12.1.0")
-    mock_cluster_status(status_code=403)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"version": "12.1.0"})
+    ml_mocker.mock_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(CLUSTER_STATUS_URL)
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(None or HEALTHY_CLUSTER_STATUS)
+    ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
         with pytest.raises(httpx.HTTPStatusError):
@@ -1011,3 +1109,85 @@ async def test_wait_for_restart_uses_custom_retry(
         poll_interval=0.5,
         retry=custom_retry,
     )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_preserves_eval_error_when_version_is_denied():
+    cluster_error = httpx.Response(
+        400,
+        json={
+            "errorResponse": {
+                "messageCode": "SEC-PRIV",
+                "message": "Missing cluster probe privilege",
+            },
+        },
+    )
+    version_error = httpx.Response(
+        400,
+        json={
+            "errorResponse": {
+                "messageCode": "SEC-PRIV",
+                "message": "Missing version privilege",
+            },
+        },
+    )
+    respx.post("http://localhost:8000/v1/eval").mock(
+        side_effect=[cluster_error, version_error],
+    )
+    respx.get("http://localhost:8002/manage/v2/properties").respond(403)
+    respx.get("http://localhost:8001/admin/v1/server-config").respond(403)
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(MarkLogicError) as error:
+            await ml.cluster_healthcheck()
+
+    assert str(error.value) == "[None None] (SEC-PRIV) Missing cluster probe privilege"
+    assert error.value.__suppress_context__
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_preserves_cluster_error_when_version_is_malformed():
+    cluster_error = httpx.Response(
+        400,
+        json={
+            "errorResponse": {
+                "messageCode": "SEC-PRIV",
+                "message": "Missing cluster probe privilege",
+            },
+        },
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "not-a-version")
+    route = ml_mocker.mock_post()
+    route.side_effect = [cluster_error, route.return_value]
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(MarkLogicError) as error:
+            await ml.cluster_healthcheck()
+
+    assert str(error.value) == "[None None] (SEC-PRIV) Missing cluster probe privilege"
+    assert error.value.__suppress_context__
+
+
+@pytest.mark.parametrize("failed_request", ["cluster", "version"])
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_propagates_transport_failure(failed_request):
+    responses = []
+    if failed_request == "version":
+        responses.append(
+            httpx.Response(400, json={"errorResponse": {"messageCode": "SEC-PRIV"}}),
+        )
+    responses.append(httpx.ConnectError("REST unavailable"))
+    route = respx.post("http://localhost:8000/v1/eval").mock(side_effect=responses)
+
+    async with AsyncMLClient(retry=Retry(total=0)) as ml:
+        with pytest.raises(httpx.ConnectError) as error:
+            await ml.cluster_healthcheck()
+
+    assert str(error.value) == "REST unavailable"
+    assert route.call_count == len(responses)

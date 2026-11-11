@@ -4,7 +4,6 @@ declare variable $host as xs:string external;
 declare variable $port as xs:integer external;
 declare variable $timeout as xs:integer external;
 
-(: An eval may reach any host behind a load balancer. :)
 let $address :=
     if ($host eq xdmp:host-name(xdmp:host())) then "localhost"
     else $host

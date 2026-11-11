@@ -700,7 +700,14 @@ def test_cluster_healthcheck_is_unhealthy_when_any_host_is_down():
 
 
 @respx.mock
-def test_cluster_healthcheck_sends_healthcheck_port_to_eval():
+@pytest.mark.parametrize(
+    "health_config",
+    [
+        None,
+        HTTPConfig.resolve(host="separate-health.example.com", port=9997, auth=None),
+    ],
+)
+def test_cluster_healthcheck_sends_healthcheck_port_to_eval(health_config):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_response_code(200)
@@ -714,7 +721,7 @@ def test_cluster_healthcheck_sends_healthcheck_port_to_eval():
     route = ml_mocker.mock_post()
     route.side_effect = [discovery, route.return_value]
 
-    with MLClient() as ml:
+    with MLClient(health_config=health_config) as ml:
         ml.cluster_healthcheck()
 
     request_body = parse_qs(route.calls.last.request.content.decode())

@@ -62,9 +62,22 @@ True
 ...     print("cluster degraded")
 ```
 
-The probes run inside the cluster: an evaluated query sends `GET /` to port `7997` of every host, so internal host names that do not resolve outside the cluster are probed too. A host that does not answer `200 OK` within five seconds is reported unhealthy. Host names are first discovered through eval. Each host is then probed through a separate eval request, and Python merges the results by host name. Each eval uses `localhost` if its target is the host executing the query, including when the REST endpoint is behind a load balancer. The asynchronous client sends the probes concurrently and waits for all results before returning or raising a probe error. The synchronous client uses a temporary pool of up to 32 threads sharing its HTTP session; a single host is probed directly. For 12 hosts the probes can overlap, instead of waiting up to 60 seconds for 12 successive timeouts. Connection limits and REST-server capacity can limit concurrency. The query needs the eval privilege and the privilege to send HTTP requests (`xdmp:http-get`).
+Host probes run inside the cluster through the REST connection, so internal
+host names and HealthCheck ports do not need to be reachable from Python.
+This also applies to a single-host cluster; `health_config` affects only
+[healthcheck][mlclient.MLClient.healthcheck]. The probes require the eval and
+HTTP request (`xdmp:http-get`) privileges. A host that does not answer `200 OK`
+within five seconds is unhealthy. Both clients probe hosts concurrently; the
+synchronous client uses up to 32 workers. Connection limits and REST-server
+capacity can limit concurrency.
 
-When the eval fails with a [MarkLogicError][mlclient.exceptions.MarkLogicError] - typically because the user lacks the eval privilege - and the server is MarkLogic 11 or later, the Management API health check (`/manage/v2?view=healthcheck`, manage privilege) is read instead. It reports the cluster as seen from the single host that answered, without a per-host breakdown, so `hosts` is `None`. The cluster counts as healthy when it is not starting, restarting or shutting down, has a quorum, and reports every app server, background process and database healthy. On older servers, or when version discovery fails because access is denied or the version is malformed, the original cluster eval error is re-raised. Transport failures propagate instead of being reported as an unhealthy cluster; when the Management API answers with an error status, [HTTPStatusError](https://www.python-httpx.org/exceptions/) is raised.
+If eval fails with a [MarkLogicError][mlclient.exceptions.MarkLogicError],
+MarkLogic 11 or later can fall back to the Management API health check
+(requires the manage privilege). It reports an overall verdict from the
+responding host, so `hosts` is `None`. On older servers, or if the version
+cannot be determined, the original eval error is raised. Transport failures
+and Management API HTTP errors propagate instead of being reported as an
+unhealthy cluster.
 
 ## Server version
 

@@ -13,13 +13,27 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
-from mlclient.cli.commands._execution_common import parse_variables, write_results
-from mlclient.cli.connection import get_client
+from mlclient.cli.commands._execution_common import (
+    format_results,
+    parse_variables,
+    write_results,
+)
+from mlclient.cli.commands._multi_env_common import (
+    selected_environments,
+    time_in_environments,
+)
+from mlclient.cli.connection import get_async_client, get_client
 from mlclient.exceptions import WrongParametersError
 
 
 class EvalCommand(Command):
     """Sends a POST request to the /v1/eval endpoint.
+
+    With several environments the code runs in all of them at once and the
+    results are shown in a table with one column per environment, wrapped to fit
+    the terminal width. Each column header counts the seconds waited so far and
+    shows the final time once that environment answers. Results show up as they
+    arrive, cut to the terminal height until every environment has answered.
 
     Usage:
       eval [options] [--] <code>
@@ -30,7 +44,8 @@ class EvalCommand(Command):
 
     Options:
       -e, --environment=ENVIRONMENT
-            The ML Client environment name [default: "local"]
+            The ML Client environment name; repeat it to time the code in several
+            environments (multiple values allowed) [default: ["local"]]
       -c, --connection=CONNECTION
             Connection identifier from the environment or TCP port
           --var=VAR
@@ -59,9 +74,11 @@ class EvalCommand(Command):
         option(
             "environment",
             "e",
-            description="The ML Client environment name",
+            description="The ML Client environment name; repeat it to time the code "
+            "in several environments",
             flag=False,
-            default="local",
+            multiple=True,
+            default=["local"],
         ),
         option(
             "connection",
@@ -108,7 +125,10 @@ class EvalCommand(Command):
     ) -> int:
         """Execute the command."""
         eval_params = self._get_eval_params()
-        results = self._call_eval(eval_params)
+        environments = selected_environments(self)
+        if len(environments) > 1:
+            return self._time_in_environments(environments, eval_params)
+        results = self._call_eval(environments[0], eval_params)
         write_results(self, results)
         return 0
 
@@ -141,15 +161,48 @@ class EvalCommand(Command):
 
         return params
 
+    def _time_in_environments(
+        self,
+        environments: list[str],
+        eval_params: dict,
+    ) -> int:
+        """Evaluate the code in every environment at once and show the results.
+
+        Parameters
+        ----------
+        environments : list[str]
+            Environment names, one table column each, in the given order.
+        eval_params : dict
+            Keyword arguments for the Eval service.
+
+        Returns
+        -------
+        int
+            0 when every environment returned a result, 1 when any failed.
+        """
+        connection = self.option("connection")
+        pretty = not self.option("no-pretty")
+
+        async def evaluate(environment: str) -> list[str] | str:
+            manager = MLClientManager(environment)
+            async with get_async_client(manager, connection) as ml:
+                return await ml.eval.execute(**eval_params)
+
+        def describe(results: list[str] | str) -> str:
+            results = format_results(results, pretty=pretty)
+            return "\n".join(results) if isinstance(results, list) else results
+
+        return time_in_environments(self, environments, evaluate, describe)
+
     def _call_eval(
         self,
+        environment: str,
         eval_params: dict,
     ):
         """Evaluate the code and get results."""
-        env = self.option("environment")
         rest_server = self.option("connection")
 
-        mgr = MLClientManager(env)
+        mgr = MLClientManager(environment)
         with get_client(mgr, rest_server) as ml:
             self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
             return ml.eval.execute(**eval_params)

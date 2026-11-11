@@ -61,7 +61,7 @@ def test_command_invoke_basic():
 
     assert tester.status_code == 0
     assert tester.command.argument("module") == MODULE
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("database") is None
@@ -248,3 +248,52 @@ def test_command_invoke_rejects_blank_variable_names_before_request(variable):
 
     assert str(error.value) == "A variable name cannot be empty."
     assert not respx.calls
+
+
+@pytest.mark.parametrize("pretty_option", ["", "--no-pretty"])
+@respx.mock
+def test_command_invoke_compares_environments_and_preserves_variables(pretty_option):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8100/v1/invoke")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
+        {"module": MODULE, "vars": '{"word1": "hello=world"}'},
+    )
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("txid", "123")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", "<hello><world/></hello>")
+    route = ml_mocker.mock_post()
+    tester = _get_tester("invoke")
+
+    status = tester.execute(
+        f"{MODULE} -e first -e second -e first -c 8100 "
+        f"--var word1=hello=world -d Documents -t 123 {pretty_option}",
+    )
+    output = tester.io.fetch_output()
+    assert status == 0, output
+    assert "first" in output
+    assert "second" in output
+    assert output.count("<hello>") == 2
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_command_invoke_keeps_successful_peers_when_environment_fails(
+    mocker, ml_config,
+):
+    mocker.patch(
+        "mlclient.env.MLEnvironment.load",
+        side_effect=[ml_config, ValueError("Missing environment")],
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/invoke")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "hello")
+    ml_mocker.mock_post()
+    tester = _get_tester("invoke")
+
+    assert tester.execute(f"{MODULE} -e first -e second") == 1
+    output = tester.io.fetch_output()
+    assert "hello" in output, output
+    assert "Missing environment" in output

@@ -13,9 +13,9 @@ ml url monitoring --open
 ```
 
 URLs are printed in a labelled box. With no target, the QConsole, Admin UI and
-Monitoring Dashboard URLs are shown. With a target, that single URL is shown and
-the bare URL is copied to the clipboard. With `--open`, the URL is opened in the
-default browser instead of being copied.
+Monitoring Dashboard URLs are shown. With a target and one environment, the
+bare URL is copied to the clipboard. With several environments, URLs are only
+printed. With `--open`, the URLs are opened in the default browser.
 
 The known targets are `admin`, `qconsole` (alias `qc`) and the Monitoring
 Dashboard (`monitoring`, alias `manage`); each resolves to the matching App
@@ -34,7 +34,12 @@ Server id. Omit it to print the QConsole, Admin UI and Monitoring Dashboard URLs
 ### `--environment`, `-e`
 
 Environment name. Defaults to `local`; use `-e dev` to load
-`.mlclient/mlclient-dev.yaml`.
+`.mlclient/mlclient-dev.yaml`. Repeat the option to select several environments,
+for example `-e dev -e test`. Explicit names replace the `local` default;
+duplicates run only once, in their first-given order.
+
+Multiple environments are displayed without copying URLs to the clipboard;
+`--open` opens each URL in the browser.
 
 ### `--open`
 

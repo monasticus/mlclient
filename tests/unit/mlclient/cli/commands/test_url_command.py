@@ -66,7 +66,7 @@ def test_no_target_defaults_to_local_environment():
     tester = _get_tester()
     tester.execute("")
 
-    assert tester.command.option("environment") == "local"
+    assert tester.command.option("environment") == ["local"]
 
 
 def test_no_target_with_open_is_rejected():
@@ -184,3 +184,48 @@ def test_output_escapes_environment_markup(
     assert "<error>host</error>:8001" in output
     assert "\x1b[31m" not in output
     clipboard_process.assert_called_once()
+
+
+def test_multi_environment_target_does_not_copy_urls(mocker):
+    copy = mocker.patch("mlclient.cli.commands.url.copy_to_clipboard")
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second -e first qc") == 0
+    copy.assert_not_called()
+    output = tester.io.fetch_output()
+    assert "first" in output
+    assert "second" in output
+
+    assert "Copied to clipboard." not in output
+
+
+def test_repeated_single_environment_target_still_copies_one_url(clipboard_process):
+    tester = _get_tester()
+
+    assert tester.execute("admin -e dev -e dev") == 0
+    clipboard_process.assert_called_once()
+    assert clipboard_process.call_args.kwargs["input"] == b"https://ml.example.com:8001"
+    assert "Copied to clipboard." in tester.io.fetch_output()
+
+
+def test_multi_environment_open_launches_each_url_without_copying(
+    mocker,
+    clipboard_process,
+    browser_open,
+):
+    mocker.patch(
+        "mlclient.env.MLEnvironment.load",
+        side_effect=[
+            MLEnvironment(host="ml-dev.example.com"),
+            MLEnvironment(host="ml-qa.example.com"),
+        ],
+    )
+    tester = _get_tester()
+
+    assert tester.execute("admin -e dev -e qa --open") == 0
+    assert browser_open.call_args_list == [
+        mocker.call("http://ml-dev.example.com:8001"),
+        mocker.call("http://ml-qa.example.com:8001"),
+    ]
+    clipboard_process.assert_not_called()
+    assert "Copied to clipboard." not in tester.io.fetch_output()

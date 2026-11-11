@@ -45,7 +45,9 @@ Number of statuses retained by `--overwrite`. Default: `3`; allowed range:
 ### `--environment`, `-e`
 
 Environment name. Defaults to `local`; use `-e dev` to load
-`.mlclient/mlclient-dev.yaml`.
+`.mlclient/mlclient-dev.yaml`. Repeat the option to select several environments,
+for example `-e dev -e test`. Explicit names replace the `local` default;
+duplicates run only once, in their first-given order.
 
 ## Status and exit codes
 

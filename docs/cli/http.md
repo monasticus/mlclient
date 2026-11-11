@@ -71,6 +71,8 @@ always prints them because it has no response body.
 ### `--pretty`, `-p`
 
 Format JSON and element-only XML with two-space indentation. Disabled by default.
+When the response has no Content-Type or uses `text/plain`, detect JSON/XML
+from the body.
 Invalid JSON/XML is left unchanged. Mixed XML content and `xml:space="preserve"`
 subtrees are not re-indented; the surrounding XML is still formatted.
 An existing XML declaration is preserved verbatim; none is added when absent.
@@ -78,7 +80,9 @@ An existing XML declaration is preserved verbatim; none is added when absent.
 ### `--environment`, `-e`
 
 Environment name. Defaults to `local`; use `-e dev` to load
-`.mlclient/mlclient-dev.yaml`.
+`.mlclient/mlclient-dev.yaml`. Repeat the option to select several environments,
+for example `-e dev -e test`. Explicit names replace the `local` default;
+duplicates run only once, in their first-given order.
 
 ### `--connection`, `-c`
 

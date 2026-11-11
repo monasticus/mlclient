@@ -19,7 +19,7 @@ Set TypingSpeed 50ms
 
 Hide
 Set TypingSpeed 1ms
-Type `unset NO_COLOR; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; mkdir .mlclient; dev_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); printf 'host: ml-dev.%s.nip.io\nusername: admin\npassword: admin\napp-servers:\n  - id: app-services\n    port: 8008\n    rest: true\n' "$dev_host" > .mlclient/mlclient-local.yaml`
+Type `unset NO_COLOR; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; mkdir .mlclient; dev_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); printf 'host: ml-dev.%s.nip.io\nusername: admin\npassword: admin\napp-servers:\n  - id: app-services\n    port: 8008\n    rest: true\n' "$dev_host" > .mlclient/mlclient-local.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-dev.yaml; printf 'host: localhost\nusername: admin\npassword: admin\napp-servers:\n  - id: app-services\n    port: 8000\n    rest: true\n' > .mlclient/mlclient-qa.yaml`
 Enter
 Wait
 Sleep 500ms
@@ -27,7 +27,7 @@ Set TypingSpeed 50ms
 Show
 Hide
 Set TypingSpeed 1ms
-Type `trap 'ml http delete /v1/documents uri=/doc1.json >/dev/null; ml http delete /v1/documents uri=/doc2.json >/dev/null; ml http delete /v1/documents uri=/doc3.json >/dev/null; rm -rf "$demo_dir"' EXIT`
+Type `trap 'ml http delete /v1/documents uri=/doc1.json >/dev/null; ml http delete /v1/documents uri=/doc2.json >/dev/null; ml http delete /v1/documents uri=/doc3.json >/dev/null; ml http delete /v1/config/query/orders >/dev/null; rm -rf "$demo_dir"' EXIT`
 Enter
 Wait
 Sleep 500ms
@@ -36,6 +36,14 @@ Show
 Hide
 Set TypingSpeed 1ms
 Type `ml http put /v1/documents uri=/doc1.json Content-Type:application/json -b '{"hello":"MarkLogic"}'`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Hide
+Set TypingSpeed 1ms
+Type `ml http put /v1/config/query/orders Content-Type:application/json -b '{"options":{"return-facets":false,"page-length":10}}'`
 Enter
 Wait
 Sleep 500ms
@@ -108,3 +116,17 @@ Type "ml http get /manage/v2/users/nobody/properties -c manage format=json --pre
 Enter
 Wait
 Sleep 4s
+
+Hide
+Set TypingSpeed 1ms
+Type `clear`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Type "ml http get /v1/config/query -e dev -e qa --pretty Accept:application/json"
+Enter
+Wait
+Wait+Screen /orders/
+Sleep 5s

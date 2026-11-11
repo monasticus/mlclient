@@ -66,12 +66,28 @@ def write_results(
     results : str | list[str]
         One raw result, or a list of them, each printed on its own line.
     """
-    if not command.option("no-pretty"):
-        results = (
-            [prettify(item) for item in results]
-            if isinstance(results, list)
-            else prettify(results)
-        )
-
+    results = format_results(results, pretty=not command.option("no-pretty"))
     command.io.write("\n")
     command.io.write(results, new_line=True, type=Type.RAW)
+
+
+def format_results(results: str | list[str], *, pretty: bool) -> str | list[str]:
+    """Format execution results without changing their cardinality.
+
+    Parameters
+    ----------
+    results : str | list[str]
+        One serialized result or several results.
+    pretty : bool
+        Whether XML and JSON should be indented.
+
+    Returns
+    -------
+    str | list[str]
+        Formatted results, or the original results when pretty is false.
+    """
+    if not pretty:
+        return results
+    if isinstance(results, list):
+        return [prettify(item) for item in results]
+    return prettify(results)

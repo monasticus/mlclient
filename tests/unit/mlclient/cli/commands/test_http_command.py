@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import asyncio
 import errno
+import os
 from pathlib import Path
 
 import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, Response
 
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
@@ -63,7 +65,7 @@ def test_command_http_get_writes_response_body():
     assert tester.command.argument("method") == "GET"
     assert tester.command.argument("endpoint") == "/manage/v2/hosts"
     assert tester.command.argument("params") == []
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert command_output == '{"host-default-list": {}}\n'
 
@@ -203,13 +205,17 @@ def test_command_http_include_flag_prints_response_before_raising():
     assert '{"errorResponse": {}}' in command_output
 
 
+@pytest.mark.parametrize(
+    "content_type", ["application/json", "text/plain; charset=UTF-8", None],
+)
 @pytest.mark.parametrize("pretty_option", ["--pretty", "-p"])
 @respx.mock
-def test_command_http_pretty_formats_response_body(pretty_option):
+def test_command_http_pretty_formats_response_body(pretty_option, content_type):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_header("Content-Type", "application/json")
+    if content_type is not None:
+        ml_mocker.with_response_header("Content-Type", content_type)
     ml_mocker.with_response_body('{"a": {"b": 1}}')
     ml_mocker.mock_get()
 
@@ -448,3 +454,95 @@ def _get_tester():
     app = MLCLIentApplication()
     command = app.find("http")
     return CommandTester(command)
+
+
+@respx.mock
+def test_command_http_multi_environment_records_formatting_failure(mocker):
+    route = respx.get("http://localhost:8002/manage/v2/hosts").respond(200)
+    tester = _get_tester()
+    mocker.patch.object(
+        tester.command,
+        "_render",
+        side_effect=[ValueError("Cannot format response"), "peer response"],
+    )
+
+    assert tester.execute("-e first -e second GET /manage/v2/hosts") == 1
+    output = tester.io.fetch_output()
+    assert "Cannot format response" in output
+    assert "peer response" in output
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_command_http_multi_environment_deduplicates_and_preserves_literal_output():
+    route = respx.get("http://localhost:8002/manage/v2/hosts").respond(
+        200,
+        text="<info>literal</info>",
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second -e first GET /manage/v2/hosts") == 0
+    output = tester.io.fetch_output()
+    assert output.count("<info>literal</info>") == 2
+    assert "first" in output
+    assert "second" in output
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_command_http_multi_environment_reports_http_errors_on_numeric_connection():
+    route = respx.get("http://localhost:8100/manage/v2/hosts").respond(
+        400,
+        text="temporarily unavailable",
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second -c 8100 GET /manage/v2/hosts") == 1
+    assert tester.io.fetch_output().count("temporarily unavailable") == 2
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_command_http_multi_environment_keeps_full_final_output(mocker):
+    mocker.patch(
+        "mlclient.cli.commands._multi_env_common.shutil.get_terminal_size",
+        return_value=os.terminal_size((120, 12)),
+    )
+    delays = iter([0, 0.15])
+    body = "\n".join([*(f"line {index}" for index in range(20)), "final line"])
+
+    async def respond(_request):
+        await asyncio.sleep(next(delays))
+        return Response(200, text=body)
+
+    respx.get("http://localhost:8002/manage/v2/hosts").mock(side_effect=respond)
+    tester = _get_tester()
+
+    assert (
+        tester.execute(
+            "-e first -e second GET /manage/v2/hosts",
+            decorated=True,
+        )
+        == 0
+    )
+    output = tester.io.fetch_output()
+    assert "more lines" in output
+    assert "final line" in output
+
+
+@pytest.mark.parametrize("content_type", ["text/plain; charset=UTF-8", None])
+@respx.mock
+def test_command_http_multi_environment_pretty_detects_json_payload(content_type):
+    headers = {"Content-Type": content_type} if content_type is not None else {}
+    route = respx.get("http://localhost:8002/v1/config/query").respond(
+        200,
+        headers=headers,
+        content=b'[{"name":"orders"}]',
+    )
+    tester = _get_tester()
+
+    assert tester.execute("get /v1/config/query -e dev -e qa --pretty") == 0
+    output = tester.io.fetch_output()
+    assert output.count('    "name": "orders"') == 2
+    assert '[{"name":"orders"}]' not in output
+    assert route.call_count == 2

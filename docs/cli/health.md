@@ -48,8 +48,10 @@ names wrap below the status within the same cell.
 The query needs the eval privilege. Without it, on MarkLogic 11 or later, the
 Management API health check is read instead: it gives a verdict for the whole
 cluster without per-host health, shown as `HEALTHY (overall)` or
-`UNHEALTHY (overall)`. Each host has five seconds to answer, and hosts are probed
-one after another.
+`UNHEALTHY (overall)`. Each host has five seconds to answer. Hosts are discovered through eval, then
+probed concurrently through separate eval requests. Async checks send all probes
+together; sync checks use up to 32 worker threads (without creating a pool for a
+single host). Connection limits and REST-server capacity can limit concurrency.
 
 ## Options
 

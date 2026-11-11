@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from urllib.parse import parse_qs
 
@@ -735,8 +736,32 @@ async def test_cluster_healthcheck_reports_every_host_from_eval():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body_part("map", json.dumps(hosts))
-    ml_mocker.mock_post()
+    ml_mocker.with_response_body_part("array", json.dumps(list(hosts)))
+    route = ml_mocker.mock_post()
+
+    discovery = route.return_value
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("boolean", "true")
+    route = ml_mocker.mock_post()
+    healthy = route.return_value
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("boolean", "false")
+    route = ml_mocker.mock_post()
+    unhealthy = route.return_value
+
+    def respond(request):
+        variables = json.loads(
+            parse_qs(request.content.decode()).get("vars", ["{}"])[0],
+        )
+        if not variables:
+            return discovery
+        return healthy if hosts[variables["host"]] else unhealthy
+
+    route.side_effect = respond
 
     async with AsyncMLClient() as ml:
         health = await ml.cluster_healthcheck()
@@ -752,8 +777,32 @@ async def test_cluster_healthcheck_is_unhealthy_when_any_host_is_down():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body_part("map", json.dumps(hosts))
-    ml_mocker.mock_post()
+    ml_mocker.with_response_body_part("array", json.dumps(list(hosts)))
+    route = ml_mocker.mock_post()
+
+    discovery = route.return_value
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("boolean", "true")
+    route = ml_mocker.mock_post()
+    healthy = route.return_value
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("boolean", "false")
+    route = ml_mocker.mock_post()
+    unhealthy = route.return_value
+
+    def respond(request):
+        variables = json.loads(
+            parse_qs(request.content.decode()).get("vars", ["{}"])[0],
+        )
+        if not variables:
+            return discovery
+        return healthy if hosts[variables["host"]] else unhealthy
+
+    route.side_effect = respond
 
     async with AsyncMLClient() as ml:
         health = await ml.cluster_healthcheck()
@@ -768,14 +817,26 @@ async def test_cluster_healthcheck_sends_healthcheck_port_to_eval():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body_part("map", json.dumps({"host-1.internal": True}))
+    ml_mocker.with_response_body_part("array", json.dumps(["host-1.internal"]))
     route = ml_mocker.mock_post()
+
+    discovery = route.return_value
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("boolean", "true")
+    route = ml_mocker.mock_post()
+    route.side_effect = [discovery, route.return_value]
 
     async with AsyncMLClient() as ml:
         await ml.cluster_healthcheck()
 
     request_body = parse_qs(route.calls.last.request.content.decode())
-    assert json.loads(request_body["vars"][0]) == {"port": 7997, "timeout": 5}
+    assert json.loads(request_body["vars"][0]) == {
+        "host": "host-1.internal",
+        "port": 7997,
+        "timeout": 5,
+    }
 
 
 @pytest.mark.asyncio
@@ -797,7 +858,7 @@ async def test_cluster_healthcheck_falls_back_to_manage_status_without_eval_priv
     ml_mocker.with_url(CLUSTER_STATUS_URL)
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
-    ml_mocker.with_response_body(None or HEALTHY_CLUSTER_STATUS)
+    ml_mocker.with_response_body(HEALTHY_CLUSTER_STATUS)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -844,7 +905,7 @@ async def test_cluster_healthcheck_reads_unhealthy_manage_status(status):
     ml_mocker.with_url(CLUSTER_STATUS_URL)
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
-    ml_mocker.with_response_body(status or HEALTHY_CLUSTER_STATUS)
+    ml_mocker.with_response_body(status)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -872,7 +933,7 @@ async def test_cluster_healthcheck_reraises_eval_error_before_marklogic_11():
     ml_mocker.with_url(CLUSTER_STATUS_URL)
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
-    ml_mocker.with_response_body(None or HEALTHY_CLUSTER_STATUS)
+    ml_mocker.with_response_body(HEALTHY_CLUSTER_STATUS)
     status_route = ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -901,7 +962,7 @@ async def test_cluster_healthcheck_raises_when_manage_status_is_forbidden_too():
     ml_mocker.with_url(CLUSTER_STATUS_URL)
     ml_mocker.with_response_code(403)
     ml_mocker.with_response_content_type("application/json")
-    ml_mocker.with_response_body(None or HEALTHY_CLUSTER_STATUS)
+    ml_mocker.with_response_body(HEALTHY_CLUSTER_STATUS)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -1191,3 +1252,91 @@ async def test_cluster_healthcheck_propagates_transport_failure(failed_request):
 
     assert str(error.value) == "REST unavailable"
     assert route.call_count == len(responses)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_rejects_empty_host_discovery():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("array", "[]")
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(
+            ValueError,
+            match=r"^Cluster host discovery returned no hosts\.$",
+        ) as error:
+            await ml.cluster_healthcheck()
+
+    assert str(error.value) == "Cluster host discovery returned no hosts."
+
+
+@pytest.mark.parametrize("count", [1, 12])
+@pytest.mark.parametrize("fail", [False, True])
+@pytest.mark.asyncio
+@respx.mock
+async def test_cluster_healthcheck_probes_hosts_concurrently(count, fail):
+    host_names = [f"host-{number}.internal" for number in range(count)]
+    expected = {host: number % 2 == 0 for number, host in enumerate(host_names)}
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("array", json.dumps(host_names))
+    route = ml_mocker.mock_post()
+    discovery = route.return_value
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("boolean", "true")
+    route = ml_mocker.mock_post()
+    healthy = route.return_value
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("boolean", "false")
+    route = ml_mocker.mock_post()
+    unhealthy = route.return_value
+    started = set()
+    finished = set()
+    ready = asyncio.Event()
+
+    async def respond(request):
+        variables = json.loads(
+            parse_qs(request.content.decode()).get("vars", ["{}"])[0],
+        )
+        if not variables:
+            return discovery
+        host = variables["host"]
+        started.add(host)
+        if len(started) == count:
+            ready.set()
+        await asyncio.wait_for(ready.wait(), timeout=2)
+        try:
+            if fail and host == host_names[0]:
+                msg = "Probe REST unavailable"
+                raise httpx.ConnectError(msg)
+            # Keep one sibling pending when another probe fails.
+            if host == host_names[-1]:
+                await asyncio.sleep(0.01)
+            return healthy if expected[host] else unhealthy
+        finally:
+            finished.add(host)
+
+    route.side_effect = respond
+
+    async with AsyncMLClient(retry=Retry(total=0)) as ml:
+        if fail:
+            with pytest.raises(httpx.ConnectError) as error:
+                await ml.cluster_healthcheck()
+            assert str(error.value) == "Probe REST unavailable"
+        else:
+            health = await ml.cluster_healthcheck()
+            assert health == ClusterHealth(
+                healthy=all(expected.values()),
+                hosts=expected,
+            )
+
+    assert started == set(host_names)
+    assert finished == set(host_names)

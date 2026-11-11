@@ -15968,7 +15968,10 @@ commit or roll back that transaction.</p>
 to another tool. Plain text and other scalar results are always printed unchanged.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
-<code>.mlclient/mlclient-dev.yaml</code>.</p>
+<code>.mlclient/mlclient-dev.yaml</code>. Repeat it to select several
+environments, for example
+<code>ml invoke /ext/report.xqy -e dev -e test</code>. Repeated names are used once.
+Each target App Server must have the module installed.</p>
 <h3 id="-connection-c"><code>--connection</code>, <code>-c</code><a class="headerlink" href="#-connection-c" title="Permanent link">&para;</a></h3>
 <p>Configured connection identifier or TCP port (<code>1</code>–<code>65535</code>). Omit it to use the
 default REST connection. A port changes that connection's port and retains its

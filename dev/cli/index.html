@@ -15667,6 +15667,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#compare-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compare environments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#find-a-command" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15835,6 +15846,14 @@ pass <code>--no-pretty</code> to keep the original formatting.
 A connection selector chooses where the request is sent; an operation target
 chooses what the server acts on. The distinction is explained below and on each
 command page.</p>
+<h2 id="compare-environments">Compare environments<a class="headerlink" href="#compare-environments" title="Permanent link">&para;</a></h2>
+<p>Repeat <code>-e</code> with <code>eval</code>, <code>invoke</code>, <code>http</code>, <code>sample</code>, <code>health</code>, <code>version</code> or <code>url</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ml<span class="w"> </span>health<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>-e<span class="w"> </span><span class="nb">test</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>ml<span class="w"> </span>version<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>-e<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<p>Request commands run concurrently and show a result column per environment.
+Any failed environment gives exit status 1; successful peers remain visible.
+Explicit names replace <code>local</code> and repeated names are used once.</p>
 <h2 id="find-a-command">Find a command<a class="headerlink" href="#find-a-command" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

@@ -15837,7 +15837,11 @@ hosts, async usage and CLI setup.</p>
 <p><a href="guides/clients/">The Python guide</a> helps choose between <code>ml.documents</code>,
 <code>ml.rest.documents</code> and <code>ml.http</code>. <a href="cli/">The CLI guide</a> gets a project
 connected without writing Python. <a href="recipes/">Recipes</a> show metadata cleanup,
-concurrent evaluations and a custom application API.</p>
+concurrent evaluations and a custom application API.
+Repeat <code>-e</code> to compare environments with <code>eval</code>, <code>invoke</code>, <code>http</code>, <code>sample</code>, <code>health</code>,
+<code>version</code> or <code>url</code>, for example <code>ml health -e dev -e test</code>.</p>
+<p>CLI <code>eval</code>, <code>invoke</code>, <code>http</code> and <code>sample</code> pretty-print XML and JSON with two-space indentation;
+<code>--no-pretty</code> keeps the original formatting.</p>
 <h2 id="from-simple-usage-to-application-specific-control">From simple usage to application-specific control<a class="headerlink" href="#from-simple-usage-to-application-specific-control" title="Permanent link">&para;</a></h2>
 <p>Use <a href="guides/environments/">environments</a> to share connection settings across scripts and
 commands. Configure <a href="advanced/connections/">authentication and TLS</a>, then

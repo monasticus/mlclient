@@ -15824,7 +15824,9 @@ use the global <code>ml --version</code> option instead.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
-<code>.mlclient/mlclient-dev.yaml</code>.</p>
+<code>.mlclient/mlclient-dev.yaml</code>. Repeat the option to select several environments,
+for example <code>-e dev -e test</code>. Explicit names replace the <code>local</code> default;
+duplicates run only once, in their first-given order.</p>
 <h3 id="-connection-c"><code>--connection</code>, <code>-c</code><a class="headerlink" href="#-connection-c" title="Permanent link">&para;</a></h3>
 <p>Configured connection identifier or TCP port (<code>1</code>–<code>65535</code>). Omit it to use the
 default REST connection. A port changes that connection's port and retains its

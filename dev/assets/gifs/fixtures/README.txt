@@ -18,7 +18,9 @@ Execution in the interactive selector and activates tracing again.
 Before log-level, save the Default group's file/system levels and the demo
 App Server's file level. The tape sets all twelve group file log levels.
 
-For health, copy the three .xqy files here into a fresh directory inside node 1.
+For health, copy the three .xqy files here into a fresh directory inside
+mlclient_cts_query_12. The dev environment uses its built-in HealthCheck server;
+qa uses the isolated endpoint described below.
 Create a disposable HTTP App Server named vhs-health on port 8011, with that
 root directory, filesystem modules, Documents content database,
 application-level authentication, default-user admin and /rewrite.xqy as its
@@ -47,3 +49,12 @@ three whole-document JSON samples contain only the demonstration customers.
 After recording, delete this REST instance with include=content&include=modules;
 these databases belong exclusively to this demo, unlike the shared Documents
 database used by the diagnostic recordings above.
+
+Multi-environment report recordings
+
+The sample and invoke tapes also use a second disposable REST instance named
+vhs-docs-qa on MarkLogic 12 port 8009, with content database vhs-docs-qa and
+modules database vhs-docs-qa-modules. The first instance uses vhs-docs-demo-modules.
+The tapes write their own monthly-report fixtures and delete them afterwards.
+Delete both disposable REST instances with include=content&include=modules
+when the recordings finish.

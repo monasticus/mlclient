@@ -16024,12 +16024,16 @@ Set the appropriate <code>Content-Type</code> header yourself.</p>
 always prints them because it has no response body.</p>
 <h3 id="-pretty-p"><code>--pretty</code>, <code>-p</code><a class="headerlink" href="#-pretty-p" title="Permanent link">&para;</a></h3>
 <p>Format JSON and element-only XML with two-space indentation. Disabled by default.
+When the response has no Content-Type or uses <code>text/plain</code>, detect JSON/XML
+from the body.
 Invalid JSON/XML is left unchanged. Mixed XML content and <code>xml:space="preserve"</code>
 subtrees are not re-indented; the surrounding XML is still formatted.
 An existing XML declaration is preserved verbatim; none is added when absent.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
-<code>.mlclient/mlclient-dev.yaml</code>.</p>
+<code>.mlclient/mlclient-dev.yaml</code>. Repeat the option to select several environments,
+for example <code>-e dev -e test</code>. Explicit names replace the <code>local</code> default;
+duplicates run only once, in their first-given order.</p>
 <h3 id="-connection-c"><code>--connection</code>, <code>-c</code><a class="headerlink" href="#-connection-c" title="Permanent link">&para;</a></h3>
 <p>Configured connection identifier or TCP port (<code>1</code>–<code>65535</code>). Omit it to use the
 default REST connection. A port changes that connection's port and retains its

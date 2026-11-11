@@ -4,8 +4,8 @@ Require docker
 # Requires the disposable vhs-docs-demo REST instance on MarkLogic 12 port 8008.
 
 Set Shell "bash"
-Set Width 800
-Set Height 480
+Set Width 1060
+Set Height 780
 Set Theme "Gruvbox Light"
 Set FontFamily "JetBrains Mono"
 Set FontSize 16
@@ -19,7 +19,7 @@ Set TypingSpeed 50ms
 
 Hide
 Set TypingSpeed 1ms
-Type `unset NO_COLOR; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; mkdir .mlclient; dev_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); printf 'host: ml-dev.%s.nip.io\nusername: admin\npassword: admin\napp-servers:\n  - id: app-services\n    port: 8008\n    rest: true\n' "$dev_host" > .mlclient/mlclient-local.yaml`
+Type `unset NO_COLOR; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; mkdir .mlclient; dev_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); printf 'host: ml-dev.%s.nip.io\nusername: admin\npassword: admin\napp-servers:\n  - id: app-services\n    port: 8008\n    rest: true\n' "$dev_host" > .mlclient/mlclient-local.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-dev.yaml; sed s/8008/8009/ .mlclient/mlclient-local.yaml > .mlclient/mlclient-qa.yaml`
 Enter
 Wait
 Sleep 500ms
@@ -27,7 +27,7 @@ Set TypingSpeed 50ms
 Show
 Hide
 Set TypingSpeed 1ms
-Type `trap 'for uri in /sample-order.xml /customer-1.json /customer-2.json /customer-3.json; do ml http delete /v1/documents uri="$uri" >/dev/null; done; rm -rf "$demo_dir"' EXIT`
+Type `trap 'for uri in /sample-order.xml /customer-1.json /customer-2.json /customer-3.json; do ml http delete /v1/documents uri="$uri" >/dev/null; done; for env in dev qa; do for uri in /monthly-report.xml /monthly-report.json; do ml http delete /v1/documents -e "$env" uri="$uri" >/dev/null; done; done; rm -rf "$demo_dir"' EXIT`
 Enter
 Wait
 Sleep 500ms
@@ -97,3 +97,53 @@ Type `ml sample -j / -l 3 --no-pretty`
 Enter
 Wait
 Sleep 4s
+Hide
+Set TypingSpeed 1ms
+Type `ml http put /v1/documents -e dev uri=/monthly-report.xml Content-Type:application/xml -b '<report month="2026-10"><sales><orders>24</orders><revenue>718.00</revenue></sales><currency>EUR</currency></report>'`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Hide
+Set TypingSpeed 1ms
+Type `ml http put /v1/documents -e dev uri=/monthly-report.json Content-Type:application/json -b '{"report":{"month":"2026-10","sales":{"orders":24,"revenue":"718.00"},"currency":"EUR"}}'`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Hide
+Set TypingSpeed 1ms
+Type `ml http put /v1/documents -e qa uri=/monthly-report.xml Content-Type:application/xml -b '<report><month>2026-10</month><orders>24</orders><revenue currency="EUR">718.00</revenue></report>'`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Hide
+Set TypingSpeed 1ms
+Type `ml http put /v1/documents -e qa uri=/monthly-report.json Content-Type:application/json -b '{"report":{"month":"2026-10","orders":24,"revenue":"718.00","currency":"EUR"}}'`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Hide
+Set TypingSpeed 1ms
+Type `clear`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+Type "ml sample report -e dev -e qa"
+Enter
+Wait
+Wait+Screen /sales/
+Sleep 5s
+Type "ml sample -j report -e dev -e qa"
+Enter
+Wait
+Wait+Screen /revenue/
+Sleep 5s

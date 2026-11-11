@@ -15905,7 +15905,9 @@ normally instead of repainting.</p>
 <code>1</code>–<code>100</code>. Ignored without <code>--watch</code>.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
-<code>.mlclient/mlclient-dev.yaml</code>.</p>
+<code>.mlclient/mlclient-dev.yaml</code>. Repeat the option to select several environments,
+for example <code>-e dev -e test</code>. Explicit names replace the <code>local</code> default;
+duplicates run only once, in their first-given order.</p>
 <h2 id="status-and-exit-codes">Status and exit codes<a class="headerlink" href="#status-and-exit-codes" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

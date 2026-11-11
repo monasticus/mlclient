@@ -15855,9 +15855,9 @@
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>ml<span class="w"> </span>url<span class="w"> </span>monitoring<span class="w"> </span>--open
 </code></pre></div>
 <p>URLs are printed in a labelled box. With no target, the QConsole, Admin UI and
-Monitoring Dashboard URLs are shown. With a target, that single URL is shown and
-the bare URL is copied to the clipboard. With <code>--open</code>, the URL is opened in the
-default browser instead of being copied.</p>
+Monitoring Dashboard URLs are shown. With a target and one environment, the
+bare URL is copied to the clipboard. With several environments, URLs are only
+printed. With <code>--open</code>, the URLs are opened in the default browser.</p>
 <p>The known targets are <code>admin</code>, <code>qconsole</code> (alias <code>qc</code>) and the Monitoring
 Dashboard (<code>monitoring</code>, alias <code>manage</code>); each resolves to the matching App
 Server's host, port and path in the selected environment. Any other target is
@@ -15869,7 +15869,11 @@ Server id. Omit it to print the QConsole, Admin UI and Monitoring Dashboard URLs
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
-<code>.mlclient/mlclient-dev.yaml</code>.</p>
+<code>.mlclient/mlclient-dev.yaml</code>. Repeat the option to select several environments,
+for example <code>-e dev -e test</code>. Explicit names replace the <code>local</code> default;
+duplicates run only once, in their first-given order.</p>
+<p>Multiple environments are displayed without copying URLs to the clipboard;
+<code>--open</code> opens each URL in the browser.</p>
 <h3 id="-open"><code>--open</code><a class="headerlink" href="#-open" title="Permanent link">&para;</a></h3>
 <p>Open the resolved URL in the default browser instead of copying it. Requires a
 target.</p>

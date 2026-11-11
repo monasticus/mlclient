@@ -481,22 +481,27 @@ def test_command_health_cluster_in_several_environments_shows_host_counts(mocker
     assert "host-a" not in tester.io.fetch_output()
 
 
+@pytest.mark.parametrize("verbosity", [Verbosity.NORMAL, Verbosity.VERBOSE])
 def test_command_health_cluster_in_several_environments_fails_when_one_is_unhealthy(
     mocker,
+    verbosity,
 ):
     _patch_async_cluster_health(
         mocker,
-        ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+        side_effect=[
+            ClusterHealth(healthy=True, hosts=_CLUSTER),
+            ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+        ],
     )
     tester = _get_tester()
 
-    assert (
-        tester.execute("-e test -e other --cluster", verbosity=Verbosity.VERBOSE) == 1
-    )
+    assert tester.execute("-e test -e other --cluster", verbosity=verbosity) == 1
 
     output = tester.io.fetch_output()
-    assert output.count("UNHEALTHY 1/3") == 2
-    assert "host-b" not in output
+    assert output.count("UNHEALTHY 1/3") == 1
+    assert "HEALTHY 3/3" in output
+    assert output.count("down: host-b, host-c") == 1
+    assert "host-a" not in output
 
 
 def test_command_health_cluster_in_several_environments_colours_host_count(mocker):
@@ -626,3 +631,80 @@ def test_command_health_multi_environment_escapes_configuration_error(mocker):
     assert tester.execute("-e first -e second") == 1
     assert tester.io.fetch_output().count("<info>demo</info>") == 2
     assert not respx.calls
+
+
+@pytest.mark.parametrize("overwrite", [False, True])
+@pytest.mark.parametrize("decorated", [False, True])
+def test_command_health_cluster_multi_environment_watch_lists_unhealthy_hosts(
+    mocker,
+    overwrite,
+    decorated,
+):
+    _patch_async_cluster_health(
+        mocker,
+        ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.asyncio.sleep",
+        side_effect=KeyboardInterrupt,
+    )
+    tester = _get_tester()
+    options = " --overwrite --lines 2" if overwrite else ""
+
+    assert (
+        tester.execute(
+            f"-e first -e second --cluster --watch{options}",
+            decorated=decorated,
+        )
+        == 0
+    )
+    output = tester.io.fetch_output()
+    assert "UNHEALTHY" in output
+    assert "1/3" in output
+    assert "down: host-b, host-c" in output
+    assert "host-a" not in output
+
+
+def test_command_health_cluster_multi_environment_watch_wraps_long_hosts(mocker):
+    _patch_async_cluster_health(
+        mocker,
+        ClusterHealth(
+            healthy=False,
+            hosts={"ip-10-0-0-12.very-long-cluster-name.example.com": False},
+        ),
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.asyncio.sleep",
+        side_effect=KeyboardInterrupt,
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second --cluster --watch") == 0
+    output = tester.io.fetch_output()
+    lines = output.splitlines()
+    assert all(len(line) == len(lines[0]) for line in lines)
+    assert "down: ip-10-0-0-12" in output
+    assert "example.com" in output
+
+
+@pytest.mark.parametrize("watch", [False, True])
+def test_command_health_cluster_multi_environment_escapes_unhealthy_host_names(
+    mocker,
+    watch,
+):
+    _patch_async_cluster_health(
+        mocker,
+        ClusterHealth(healthy=False, hosts={"<info>host</info>": False}),
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.asyncio.sleep",
+        side_effect=KeyboardInterrupt,
+    )
+    tester = _get_tester()
+    option = " --watch" if watch else ""
+
+    assert tester.execute(
+        f"-e first -e second --cluster{option}",
+        decorated=True,
+    ) == (0 if watch else 1)
+    assert "<info>host</info>" in tester.io.fetch_output()

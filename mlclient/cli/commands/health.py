@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import functools
 import re
+import textwrap
 import time
 from collections import deque
 from contextlib import AsyncExitStack
@@ -412,11 +413,11 @@ async def _poll(ml: AsyncMLClient, *, cluster: bool) -> str:
     -------
     str
         HEALTHY, UNHEALTHY or UNREACHABLE, followed by the host count of a
-        reachable cluster.
+        reachable cluster, with the names of any unhealthy hosts.
     """
     try:
         if cluster:
-            return _cluster_status(await ml.cluster_healthcheck())
+            return _cluster_status_with_hosts(await ml.cluster_healthcheck())
         healthy = await ml.healthcheck()
     except TransportError:
         healthy = None
@@ -614,7 +615,7 @@ def _watch_cell(
     waited: float,
     width: int,
 ) -> str:
-    """Describe a run as a watch table cell: its status, then its duration.
+    """Describe a run with its status, duration and wrapped unhealthy host names.
 
     Parameters
     ----------
@@ -628,13 +629,20 @@ def _watch_cell(
     Returns
     -------
     str
-        The coloured status and the duration aligned to the right of the cell.
+        Coloured status and right-aligned duration, with unhealthy hosts below.
     """
     duration, duration_style = run.duration(waited)
     status = "" if run.elapsed is None else run.output
+    status, _, hosts = status.partition(" down: ")
     gap = max(width - len(status) - len(duration), 1)
     coloured_status = _highlight(Formatter.escape(status)) if status else ""
-    return f"{coloured_status}{' ' * gap}<{duration_style}>{duration}</>"
+    cell = f"{coloured_status}{' ' * gap}<{duration_style}>{duration}</>"
+    if hosts:
+        details = "\n".join(
+            Formatter.escape(line) for line in textwrap.wrap(f"down: {hosts}", width)
+        )
+        cell += f"\n{details}"
+    return cell
 
 
 def _app_server_id(cluster: bool) -> str | None:
@@ -643,13 +651,39 @@ def _app_server_id(cluster: bool) -> str | None:
 
 
 def _cluster_watch_status(health: ClusterHealth) -> str:
-    """Colour a cluster status and append the unhealthy hosts, sorted by name."""
-    status = _highlight(_cluster_status(health))
+    """Colour a cluster verdict while preserving literal unhealthy host names.
+
+    Parameters
+    ----------
+    health : ClusterHealth
+        The checked cluster.
+
+    Returns
+    -------
+    str
+        Coloured status and host count, followed by escaped unhealthy hosts.
+    """
+    status, separator, hosts = _cluster_status_with_hosts(health).partition(" down: ")
+    return f"{_highlight(status)}{separator}{Formatter.escape(hosts)}"
+
+
+def _cluster_status_with_hosts(health: ClusterHealth) -> str:
+    """Describe a cluster verdict and its unhealthy hosts in natural name order.
+
+    Parameters
+    ----------
+    health : ClusterHealth
+        The checked cluster, optionally including per-host verdicts.
+
+    Returns
+    -------
+    str
+        Plain status and host count, with a down suffix when hosts are unhealthy.
+    """
+    status = _cluster_status(health)
     hosts = health.hosts or {}
     unhealthy = [
-        Formatter.escape(name)
-        for name in sorted(hosts, key=_host_name_order)
-        if not hosts[name]
+        name for name in sorted(hosts, key=_host_name_order) if not hosts[name]
     ]
     if not unhealthy:
         return status

@@ -19,9 +19,10 @@ from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 from dateutil.parser import isoparse
+from httpx import HTTPError
 
 from mlclient._manager import MLClientManager
-from mlclient.exceptions import WrongParametersError
+from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
 from mlclient.services.diagnostics.logs import AsyncLogsService, LogsService
@@ -164,7 +165,7 @@ class LogsCommand(Command):
         if self.option("list") is True:
             self._print_log_files()
         elif self.option("all-hosts") is True:
-            self._print_logs_all_hosts()
+            return self._print_logs_all_hosts()
         else:
             self._print_logs()
         return 0
@@ -276,13 +277,18 @@ class LogsCommand(Command):
 
     def _print_logs_all_hosts(
         self,
-    ):
+    ) -> int:
         """Print error logs from every cluster host, merged by timestamp.
 
         Each host is shown in parentheses between the log level and the
         message, colored by host on a decorated output. Restricted to the
         error log type: access, request and audit logs are served as a single
         opaque message stream that carries no timestamp to merge on.
+
+        Returns
+        -------
+        int
+            0 when every host was read, 1 when some host logs are missing.
 
         Raises
         ------
@@ -292,7 +298,31 @@ class LogsCommand(Command):
         if self.option("log-type").lower() != "error":
             msg = "The --all-hosts option supports the error log type only"
             raise WrongParametersError(msg)
-        colors, per_host_logs = asyncio.run(self._collect_all_hosts_logs())
+        colors, per_host_logs, failures = asyncio.run(self._collect_all_hosts_logs())
+        self._write_merged_logs(colors, per_host_logs)
+        if failures:
+            self.line_error("\nLogs are incomplete; missing hosts:", style="fg=yellow")
+            for host, reason in failures.items():
+                self.line_error(
+                    f"  {Formatter.escape(host)}: {Formatter.escape(reason)}",
+                    style="fg=yellow",
+                )
+        return 1 if failures else 0
+
+    def _write_merged_logs(
+        self,
+        colors: dict[str, int],
+        per_host_logs: list[Iterator[dict]],
+    ) -> None:
+        """Write the available host logs as one timeline.
+
+        Parameters
+        ----------
+        colors : dict[str, int]
+            The color assigned to each host.
+        per_host_logs : list[Iterator[dict]]
+            Timestamp-sorted entries tagged with their host names.
+        """
         self.line("")
         for log_dict in heapq.merge(
             *per_host_logs,
@@ -307,17 +337,18 @@ class LogsCommand(Command):
 
     async def _collect_all_hosts_logs(
         self,
-    ) -> tuple[dict[str, int], list[Iterator[dict]]]:
-        """Fetch error logs from every cluster host concurrently.
+    ) -> tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]:
+        """Collect available host logs and reasons for missing hosts.
 
-        Cancel and await outstanding reads before closing the shared client,
-        including when a host fails or the operation is interrupted.
+        Expected host errors do not interrupt other reads. Unexpected failures
+        and cancellation still cancel and await outstanding requests before
+        closing the shared client.
 
         Returns
         -------
-        tuple[dict[str, int], list[Iterator[dict]]]
-            A host-to-color mapping and one per-host generator of error logs,
-            each already sorted by timestamp and tagged with its host name.
+        tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]
+            Host colors, sorted and host-tagged logs from successful reads,
+            and failed host names mapped to their error messages.
         """
         env = self.option("environment")
         app_port = self._get_app_port()
@@ -332,7 +363,15 @@ class LogsCommand(Command):
                 host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
                 for index, host in enumerate(hosts)
             }
-            return colors, await self._fetch_hosts_logs(ml, hosts, app_port)
+            results = await self._fetch_hosts_logs(ml, hosts, app_port)
+            per_host_logs = []
+            failures = {}
+            for host, result in zip(hosts, results):
+                if isinstance(result, (HTTPError, MarkLogicError)):
+                    failures[host] = str(result) or type(result).__name__
+                else:
+                    per_host_logs.append(result)
+            return colors, per_host_logs, failures
 
     @staticmethod
     async def _get_hosts(
@@ -392,8 +431,10 @@ class LogsCommand(Command):
         ml,
         hosts: list[str],
         app_port: int | str | None,
-    ) -> list[Iterator[dict]]:
-        """Read host logs concurrently, cancelling outstanding reads on failure.
+    ) -> list[Iterator[dict] | HTTPError | MarkLogicError]:
+        """Read hosts concurrently, retaining expected per-host errors.
+
+        Unexpected failures or cancellation cancel and await outstanding reads.
 
         Parameters
         ----------
@@ -406,8 +447,8 @@ class LogsCommand(Command):
 
         Returns
         -------
-        list[Iterator[dict]]
-            Sorted, host-tagged logs in the same order as the requested hosts.
+        list[Iterator[dict] | HTTPError | MarkLogicError]
+            Host-tagged logs or a request error, in requested host order.
 
         Raises
         ------
@@ -431,8 +472,8 @@ class LogsCommand(Command):
         ml,
         host: str,
         app_port: int | str | None,
-    ) -> Iterator[dict]:
-        """Fetch error logs from a single host, tagged with the host name.
+    ) -> Iterator[dict] | HTTPError | MarkLogicError:
+        """Fetch a host's tagged logs, retaining expected request failures.
 
         Parameters
         ----------
@@ -445,17 +486,20 @@ class LogsCommand(Command):
 
         Returns
         -------
-        Iterator[dict]
-            Error logs sorted by timestamp, each carrying a ``host`` key.
+        Iterator[dict] | HTTPError | MarkLogicError
+            Sorted, host-tagged logs, or the HTTP/MarkLogic error for this host.
         """
-        logs = await AsyncLogsService(ml.manage).get(
-            app_port,
-            LogType.ERROR,
-            start_time=self.option("from"),
-            end_time=self.option("to"),
-            regex=self.option("regex"),
-            host=host,
-        )
+        try:
+            logs = await AsyncLogsService(ml.manage).get(
+                app_port,
+                LogType.ERROR,
+                start_time=self.option("from"),
+                end_time=self.option("to"),
+                regex=self.option("regex"),
+                host=host,
+            )
+        except (HTTPError, MarkLogicError) as error:
+            return error
         return ({**log, "host": host} for log in logs)
 
     def _format_host(

@@ -1,0 +1,8 @@
+{
+  "errorResponse": {
+    "statusCode": "500",
+    "status": "Internal Server Error",
+    "messageCode": "XDMP-HOSTOFFLINE",
+    "message": "XDMP-HOSTOFFLINE: xdmp:data-directory(xs:unsignedLong(\"1574451722765232358\")) -- Host is offline or not responding"
+  }
+}

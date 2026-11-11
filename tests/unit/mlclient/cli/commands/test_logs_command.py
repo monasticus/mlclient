@@ -960,18 +960,24 @@ def test_command_logs_all_hosts_forwards_filters_and_server(server, filename):
     assert tester.io.fetch_error() == ""
 
 
+@pytest.mark.parametrize("message", ["Host unavailable", ""])
 @respx.mock
-def test_command_logs_all_hosts_propagates_host_timeout(mocker):
+def test_command_logs_all_hosts_reports_host_timeout(mocker, message):
     mocker.patch("mlclient.http.DEFAULT_RETRY_STRATEGY", NO_RETRY_STRATEGY)
     respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
         200,
         json=_hosts_body(["ml_cluster_node1"]),
     )
     respx.get("http://ml_cluster_node1:8002/manage/v2/logs").mock(
-        side_effect=httpx.ReadTimeout("Host unavailable"),
+        side_effect=httpx.ReadTimeout(message),
     )
-    with pytest.raises(httpx.ReadTimeout):
-        _get_tester("logs").execute("-e test-cluster --all-hosts")
+    tester = _get_tester("logs")
+    assert tester.execute("-e test-cluster --all-hosts") == 1
+    assert tester.io.fetch_error() == (
+        "\nLogs are incomplete; missing hosts:\n"
+        f"  ml_cluster_node1: {message or 'ReadTimeout'}\n"
+    )
+    assert "<log-level>" not in tester.io.fetch_output()
 
 
 @respx.mock
@@ -987,7 +993,8 @@ def test_command_logs_all_hosts_cancels_reads_before_disconnect(mocker):
     async def read_logs(request):
         if request.url.params["host"] == "ml_cluster_node1":
             await started.wait()
-            return httpx.Response(403, json={"errorResponse": {"message": "Denied"}})
+            msg = "Invalid host response"
+            raise ValueError(msg)
         started.set()
         try:
             await asyncio.Future()
@@ -1001,9 +1008,166 @@ def test_command_logs_all_hosts_cancels_reads_before_disconnect(mocker):
     )
     respx.get("http://ml_cluster_node1:8002/manage/v2/logs").mock(side_effect=read_logs)
     tester = _get_tester("logs")
-    with pytest.raises(MarkLogicError, match="Denied"):
+    with pytest.raises(ValueError, match=r"^Invalid host response$") as error:
         tester.execute("-e test-cluster --all-hosts")
+    assert str(error.value) == "Invalid host response"
     assert events == ["cancelled", "disconnect"]
+    assert "<log-level>" not in tester.io.fetch_output()
+
+
+@pytest.mark.parametrize(
+    "failure",
+    ["offline", "timeout", "connection", "http", "denied"],
+)
+@respx.mock
+def test_command_logs_all_hosts_keeps_available_logs_after_host_error(mocker, failure):
+    mocker.patch("mlclient.http.DEFAULT_RETRY_STRATEGY", NO_RETRY_STRATEGY)
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json={
+            "host-default-list": {
+                "list-items": {
+                    "list-item": [
+                        {"nameref": "ml_cluster_node1"},
+                        {"nameref": "ml_cluster_node2"},
+                        {"nameref": "ml_cluster_node3"},
+                    ],
+                },
+            },
+        },
+    )
+    offline = resources_utils.get_test_resource_json(__file__, "host-offline.json")
+    available = {
+        host: resources_utils.get_test_resource_json(
+            __file__,
+            f"{host}-starting-logs.json",
+        )
+        for host in ("ml_cluster_node1", "ml_cluster_node2")
+    }
+    failed = asyncio.Event()
+    completed = []
+
+    async def respond(request):
+        host = request.url.params["host"]
+        if host == "ml_cluster_node3":
+            failed.set()
+            if failure == "timeout":
+                msg = "Host request timed out"
+                raise httpx.ReadTimeout(msg)
+            if failure == "connection":
+                msg = "Host connection refused"
+                raise httpx.ConnectError(msg)
+            if failure == "http":
+                return httpx.Response(503, json={})
+            if failure == "denied":
+                return httpx.Response(
+                    403,
+                    json={
+                        "errorResponse": {
+                            "statusCode": "403",
+                            "status": "Forbidden",
+                            "messageCode": "SEC-PRIV",
+                            "message": "Insufficient privileges",
+                        },
+                    },
+                )
+            return httpx.Response(500, json=offline)
+        await failed.wait()
+        completed.append(host)
+        return httpx.Response(200, json=available[host])
+
+    route = respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/logs",
+        params={
+            "filename": "ErrorLog.txt",
+            "format": "json",
+            "regex": "Starting MarkLogic Server",
+            "start": "2026-11-11T00:00:00",
+        },
+    ).mock(
+        side_effect=respond,
+    )
+    tester = _get_tester("logs")
+    assert (
+        tester.execute(
+            "-e test-cluster --all-hosts --from 2026-11-11 "
+            '--regex "Starting MarkLogic Server"',
+        )
+        == 1
+    )
+    output = tester.io.fetch_output()
+    log_lines = [line for line in output.splitlines() if "<log-level>" in line]
+    assert len(log_lines) == sum(
+        len(body["logfile"]["log"]) for body in available.values()
+    )
+    for host, body in available.items():
+        for log in body["logfile"]["log"]:
+            assert (
+                f"<time>{log['timestamp']} <log-level>{log['level'].upper()} "
+                f"({host}): {log['message']}"
+            ) in log_lines
+    timestamps = [line.split()[0] for line in log_lines]
+    assert timestamps == sorted(timestamps)
+    reason = {
+        "offline": "[500 Internal Server Error] (XDMP-HOSTOFFLINE) "
+        'XDMP-HOSTOFFLINE: xdmp:data-directory(xs:unsignedLong("1574451722765232358")) '
+        "-- Host is offline or not responding",
+        "timeout": "Host request timed out",
+        "connection": "Host connection refused",
+        "denied": "[403 Forbidden] (SEC-PRIV) Insufficient privileges",
+    }
+    error_output = tester.io.fetch_error()
+    if failure == "http":
+        assert error_output.startswith(
+            "\nLogs are incomplete; missing hosts:\n"
+            "  ml_cluster_node3: Server error '503 Service Unavailable'",
+        )
+    else:
+        assert (
+            error_output == "\nLogs are incomplete; missing hosts:\n"
+            f"  ml_cluster_node3: {reason[failure]}\n"
+        )
+    assert set(completed) == {"ml_cluster_node1", "ml_cluster_node2"}
+    assert route.call_count == 3
+
+
+@pytest.mark.parametrize("decorated", [False, True])
+@respx.mock
+def test_command_logs_all_hosts_reports_multiple_missing_hosts_literally(decorated):
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json={
+            "host-default-list": {
+                "list-items": {
+                    "list-item": [
+                        {"nameref": "<info>host1</info>"},
+                        {"nameref": "host2"},
+                    ],
+                },
+            },
+        },
+    )
+    for host in ("<info>host1</info>", "host2"):
+        respx.get(
+            "http://ml_cluster_node1:8002/manage/v2/logs",
+            params={"host": host},
+        ).respond(
+            403,
+            json={"errorResponse": {"message": "<info>Missing role</info>"}},
+        )
+    tester = _get_tester("logs")
+    assert (
+        tester.execute(
+            "-e test-cluster --all-hosts --regex needle",
+            decorated=decorated,
+        )
+        == 1
+    )
+    errors = tester.io.fetch_error()
+    assert "<info>host1</info>" in errors
+    assert "host2" in errors
+    assert errors.count("<info>Missing role</info>") == 2
+    assert "Logs are incomplete; missing hosts:" in errors
     assert "<log-level>" not in tester.io.fetch_output()
 
 

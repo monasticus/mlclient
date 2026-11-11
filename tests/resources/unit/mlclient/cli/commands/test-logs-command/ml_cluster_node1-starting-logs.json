@@ -1,0 +1,42 @@
+{
+  "logfile": {
+    "host": "ml_cluster_node1",
+    "filename": "ErrorLog.txt",
+    "start": "2026-11-11T00:00:00",
+    "end": "",
+    "regex": "Starting MarkLogic Server",
+    "regex-flags": "",
+    "log": [
+      {
+        "timestamp": "2026-11-11T13:19:26.251+01:00",
+        "level": "notice",
+        "message": "Starting MarkLogic Server 10.0-11 x86_64 in /opt/MarkLogic with data in /var/opt/MarkLogic"
+      },
+      {
+        "timestamp": "2026-11-11T13:27:24.439+01:00",
+        "level": "notice",
+        "message": "Starting MarkLogic Server 10.0-11 x86_64 in /opt/MarkLogic with data in /var/opt/MarkLogic"
+      },
+      {
+        "timestamp": "2026-11-11T13:38:44.438+01:00",
+        "level": "notice",
+        "message": "Starting MarkLogic Server 10.0-11 x86_64 in /opt/MarkLogic with data in /var/opt/MarkLogic"
+      },
+      {
+        "timestamp": "2026-11-11T14:37:54.772+01:00",
+        "level": "notice",
+        "message": "Starting MarkLogic Server 10.0-11 x86_64 in /opt/MarkLogic with data in /var/opt/MarkLogic"
+      },
+      {
+        "timestamp": "2026-11-11T16:58:13.335+01:00",
+        "level": "notice",
+        "message": "Starting MarkLogic Server 10.0-11 x86_64 in /opt/MarkLogic with data in /var/opt/MarkLogic"
+      },
+      {
+        "timestamp": "2026-11-11T17:04:56.352+01:00",
+        "level": "notice",
+        "message": "Starting MarkLogic Server 10.0-11 x86_64 in /opt/MarkLogic with data in /var/opt/MarkLogic"
+      }
+    ]
+  }
+}

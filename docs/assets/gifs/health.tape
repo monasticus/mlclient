@@ -5,7 +5,7 @@ Require docker
 
 Set Shell "bash"
 Set Width 860
-Set Height 760
+Set Height 700
 Set Theme "Gruvbox Light"
 Set FontFamily "JetBrains Mono"
 Set FontSize 16
@@ -28,7 +28,7 @@ Show
 Type `ml health -e dev`
 Enter
 Wait
-Sleep 2s
+Sleep 1s
 Type "ml health -e qa --watch -i 1"
 Enter
 Wait+Screen /UNHEALTHY/
@@ -44,13 +44,13 @@ Enter
 Sleep 12s
 Ctrl+C
 Wait
-Sleep 2s
+Sleep 1s
 Type "ml health --cluster -e cluster"
 Enter
 Wait
 Wait+Screen /UNHEALTHY 2\/3/
 Wait+Screen /ml_cluster_node3/
-Sleep 4s
+Sleep 3s
 
 Hide
 Set TypingSpeed 1ms
@@ -64,15 +64,15 @@ Type "ml health -e dev -e qa"
 Enter
 Wait
 Wait+Screen /dev.*qa/
-Sleep 3s
+Sleep 2s
 Up
 Ctrl+E
 Type " --watch -i 1 -o --lines 5"
 Enter
-Sleep 8s
+Sleep 7s
 Ctrl+C
 Wait
-Sleep 3s
+Sleep 2s
 
 Type "ml health --cluster -e dev -e cluster"
 Enter
@@ -80,4 +80,4 @@ Wait
 Wait+Screen /HEALTHY 1\/1/
 Wait+Screen /UNHEALTHY 2\/3/
 Wait+Screen /ml_cluster_node3/
-Sleep 5s
+Sleep 3s

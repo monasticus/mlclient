@@ -5,14 +5,16 @@ import re
 import httpx
 import pytest
 import respx
+from cleo.io.outputs.output import Verbosity
 from cleo.testers.command_tester import CommandTester
 from httpx import ConnectError
 
-from mlclient import MLClient
+from mlclient import AsyncMLClient, MLClient
 from mlclient.cli import MLCLIentApplication
 from mlclient.cli.commands import health
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
+from mlclient.models import ClusterHealth
 from tests.utils.ml_mockers import MLRespXMocker
 
 HEALTH_URL = "http://localhost:7997/"
@@ -333,10 +335,247 @@ def test_command_health_watch_rejects_invalid_lines(lines):
         tester.execute(f"-e test --watch --overwrite --lines {lines}")
 
 
-def _get_tester() -> CommandTester:
-    app = MLCLIentApplication()
-    command = app.find("health")
-    return CommandTester(command)
+_CLUSTER = {"host-c": True, "host-a": True, "host-b": True}
+_DEGRADED_CLUSTER = {"host-c": False, "host-a": True, "host-b": False}
+
+
+def test_command_health_cluster_reports_healthy_host_count(mocker):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test --cluster") == 0
+    assert tester.io.fetch_output() == "HEALTHY 3/3\n"
+
+
+def test_command_health_cluster_lists_unhealthy_hosts_sorted_by_name(mocker):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test --cluster") == 1
+    assert tester.io.fetch_output() == (
+        "UNHEALTHY 1/3\n  UNHEALTHY  host-b\n  UNHEALTHY  host-c\n"
+    )
+
+
+def test_command_health_cluster_verbose_lists_every_host_sorted_by_name(mocker):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test --cluster", verbosity=Verbosity.VERBOSE) == 1
+    assert tester.io.fetch_output() == (
+        "UNHEALTHY 1/3\n  HEALTHY    host-a\n  UNHEALTHY  host-b\n  UNHEALTHY  host-c\n"
+    )
+
+
+def test_command_health_cluster_sorts_numbers_in_host_names_by_value(mocker):
+    hosts = {"ip-10-0-0-121": False, "ip-10-0-0-5": False, "ip-10-0-0-34": False}
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=hosts),
+    )
+    tester = _get_tester()
+
+    tester.execute("-e test --cluster")
+
+    assert tester.io.fetch_output().splitlines()[1:] == [
+        "  UNHEALTHY  ip-10-0-0-5",
+        "  UNHEALTHY  ip-10-0-0-34",
+        "  UNHEALTHY  ip-10-0-0-121",
+    ]
+
+
+def test_command_health_cluster_verbose_lists_hosts_of_a_healthy_cluster(mocker):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test --cluster", verbosity=Verbosity.VERBOSE) == 0
+    assert tester.io.fetch_output() == (
+        "HEALTHY 3/3\n  HEALTHY    host-a\n  HEALTHY    host-b\n  HEALTHY    host-c\n"
+    )
+
+
+@pytest.mark.parametrize(
+    ("healthy", "expected_status", "expected_output"),
+    [
+        (True, 0, "HEALTHY (overall)\n"),
+        (False, 1, "UNHEALTHY (overall)\n"),
+    ],
+)
+def test_command_health_cluster_without_host_breakdown_reports_overall(
+    mocker,
+    healthy,
+    expected_status,
+    expected_output,
+):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=healthy, hosts=None),
+    )
+    tester = _get_tester()
+
+    assert (
+        tester.execute("-e test --cluster", verbosity=Verbosity.VERBOSE)
+        == expected_status
+    )
+    assert tester.io.fetch_output() == expected_output
+
+
+def test_command_health_cluster_colours_host_count_apart_from_status(mocker):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
+    tester = _get_tester()
+
+    tester.execute("-e test --cluster", decorated=True)
+
+    output = tester.io.fetch_output()
+    assert "\x1b[32;1mHEALTHY\x1b[39;22m" in output
+    assert "\x1b[36m3/3\x1b[39m" in output
+
+
+def test_command_health_cluster_does_not_probe_the_healthcheck_server(mocker):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
+    healthcheck = mocker.patch.object(MLClient, "healthcheck")
+    tester = _get_tester()
+
+    tester.execute("-e test --cluster")
+
+    healthcheck.assert_not_called()
+
+
+def test_command_health_cluster_watch_names_unhealthy_hosts(mocker):
+    mocker.patch.object(
+        MLClient,
+        "cluster_healthcheck",
+        side_effect=[
+            ClusterHealth(healthy=True, hosts=_CLUSTER),
+            ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+            httpx.ConnectError("connection refused"),
+            ClusterHealth(healthy=True, hosts=None),
+        ],
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.time.sleep",
+        side_effect=[None, None, None, KeyboardInterrupt],
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test --cluster --watch") == 0
+
+    lines = [
+        _TIMESTAMP.sub("<time>", line) for line in tester.io.fetch_output().splitlines()
+    ]
+    assert lines == [
+        "<time> HEALTHY 3/3",
+        "<time> UNHEALTHY 1/3 down: host-b, host-c",
+        "<time> UNREACHABLE",
+        "<time> HEALTHY (overall)",
+    ]
+
+
+def test_command_health_cluster_in_several_environments_shows_host_counts(mocker):
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test -e other --cluster") == 0
+
+    body = tester.io.fetch_output().splitlines()[3]
+    assert body.count("HEALTHY 3/3") == 2
+    assert "host-a" not in tester.io.fetch_output()
+
+
+@pytest.mark.parametrize("verbosity", [Verbosity.NORMAL, Verbosity.VERBOSE])
+def test_command_health_cluster_in_several_environments_fails_when_one_is_unhealthy(
+    mocker,
+    verbosity,
+):
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        side_effect=[
+            ClusterHealth(healthy=True, hosts=_CLUSTER),
+            ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+        ],
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test -e other --cluster", verbosity=verbosity) == 1
+
+    output = tester.io.fetch_output()
+    assert output.count("UNHEALTHY 1/3") == 1
+    assert "HEALTHY 3/3" in output
+    assert output.count("down: host-b, host-c") == 1
+    assert "host-a" not in output
+
+
+def test_command_health_cluster_in_several_environments_colours_host_count(mocker):
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=True, hosts=_CLUSTER),
+    )
+    tester = _get_tester()
+
+    tester.execute("-e test -e other --cluster", decorated=True)
+
+    assert "\x1b[36m3/3\x1b[39m" in tester.io.fetch_output()
+
+
+def test_command_health_cluster_watch_in_several_environments_adds_rows(mocker):
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        side_effect=[
+            ClusterHealth(healthy=True, hosts=_CLUSTER),
+            ClusterHealth(healthy=True, hosts=_CLUSTER),
+            ClusterHealth(healthy=False, hosts=None),
+            ClusterHealth(healthy=False, hosts=None),
+        ],
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.asyncio.sleep",
+        side_effect=[None, KeyboardInterrupt],
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e test -e other --cluster --watch") == 0
+
+    rows = [
+        line
+        for line in tester.io.fetch_output().splitlines()
+        if _TIMESTAMP.search(line)
+    ]
+    assert len(rows) == 2
+    assert rows[0].count("HEALTHY 3/3") == 2
+    assert rows[1].count("UNHEALTHY (overall)") == 2
 
 
 @pytest.mark.parametrize("overwrite", [False, True])
@@ -392,3 +631,102 @@ def test_command_health_multi_environment_reports_unreachable():
 
     assert tester.execute("-e first -e second") == 1
     assert tester.io.fetch_output().count("UNREACHABLE") == 2
+
+
+@respx.mock
+def test_command_health_multi_environment_escapes_configuration_error(mocker):
+    mocker.patch(
+        "mlclient.env.MLEnvironment.load",
+        side_effect=WrongParametersError("Missing environment <info>demo</info>"),
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second") == 1
+    assert tester.io.fetch_output().count("<info>demo</info>") == 2
+    assert not respx.calls
+
+
+@pytest.mark.parametrize("overwrite", [False, True])
+@pytest.mark.parametrize("decorated", [False, True])
+def test_command_health_cluster_multi_environment_watch_lists_unhealthy_hosts(
+    mocker,
+    overwrite,
+    decorated,
+):
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts=_DEGRADED_CLUSTER),
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.asyncio.sleep",
+        side_effect=KeyboardInterrupt,
+    )
+    tester = _get_tester()
+    options = " --overwrite --lines 2" if overwrite else ""
+
+    assert (
+        tester.execute(
+            f"-e first -e second --cluster --watch{options}",
+            decorated=decorated,
+        )
+        == 0
+    )
+    output = tester.io.fetch_output()
+    assert "UNHEALTHY" in output
+    assert "1/3" in output
+    assert "down: host-b, host-c" in output
+    assert "host-a" not in output
+
+
+def test_command_health_cluster_multi_environment_watch_wraps_long_hosts(mocker):
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(
+            healthy=False,
+            hosts={"ip-10-0-0-12.very-long-cluster-name.example.com": False},
+        ),
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.asyncio.sleep",
+        side_effect=KeyboardInterrupt,
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second --cluster --watch") == 0
+    output = tester.io.fetch_output()
+    lines = output.splitlines()
+    assert all(len(line) == len(lines[0]) for line in lines)
+    assert "down: ip-10-0-0-12" in output
+    assert "example.com" in output
+
+
+@pytest.mark.parametrize("watch", [False, True])
+def test_command_health_cluster_multi_environment_escapes_unhealthy_host_names(
+    mocker,
+    watch,
+):
+    mocker.patch.object(
+        AsyncMLClient,
+        "cluster_healthcheck",
+        return_value=ClusterHealth(healthy=False, hosts={"<info>host</info>": False}),
+    )
+    mocker.patch(
+        "mlclient.cli.commands.health.asyncio.sleep",
+        side_effect=KeyboardInterrupt,
+    )
+    tester = _get_tester()
+    option = " --watch" if watch else ""
+
+    assert tester.execute(
+        f"-e first -e second --cluster{option}",
+        decorated=True,
+    ) == (0 if watch else 1)
+    assert "<info>host</info>" in tester.io.fetch_output()
+
+
+def _get_tester() -> CommandTester:
+    app = MLCLIentApplication()
+    command = app.find("health")
+    return CommandTester(command)

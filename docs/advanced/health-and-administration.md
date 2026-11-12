@@ -45,6 +45,40 @@ values are preserved, including `timeout=None` to disable timeouts.
 True
 ```
 
+## Cluster health
+
+[healthcheck][mlclient.MLClient.healthcheck] probes only the host that the connection reaches - behind a load balancer, any one of them. [cluster_healthcheck][mlclient.MLClient.cluster_healthcheck] reports every host of the cluster and returns a [ClusterHealth][mlclient.models.ClusterHealth]: `healthy` is the cluster verdict and `hosts` maps each MarkLogic host name to its own verdict. Its truth value is `healthy`.
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     health = ml.cluster_healthcheck()
+>>> health.healthy
+True
+>>> health.hosts
+{'ip-10-0-0-14.ec2.internal': True, 'ip-10-0-0-91.ec2.internal': True}
+>>> if not health:
+...     print("cluster degraded")
+```
+
+Host probes run inside the cluster through the REST connection, so internal
+host names and HealthCheck ports do not need to be reachable from Python.
+This also applies to a single-host cluster; `health_config` affects only
+[healthcheck][mlclient.MLClient.healthcheck]. The probes require the eval and
+HTTP request (`xdmp:http-get`) privileges. A host that does not answer `200 OK`
+within five seconds is unhealthy. Both clients probe hosts concurrently; the
+synchronous client uses up to 32 workers. Connection limits and REST-server
+capacity can limit concurrency.
+
+If eval fails with a [MarkLogicError][mlclient.exceptions.MarkLogicError],
+MarkLogic 11 or later can fall back to the Management API health check
+(requires the manage privilege). It reports an overall verdict from the
+responding host, so `hosts` is `None`. On older servers, or if the version
+cannot be determined, the original eval error is raised. Transport failures
+and Management API HTTP errors propagate instead of being reported as an
+unhealthy cluster.
+
 ## Server version
 
 [version][mlclient.MLClient.version] returns an immutable [MarkLogicVersion][mlclient.models.MarkLogicVersion], resolved from `xdmp:version()` and cached after the first access. `str(version)` preserves the complete server version. `parts` is always a four-element tuple of numeric components in their original order, padded with `None` for missing components. Unpacking yields those same four values.

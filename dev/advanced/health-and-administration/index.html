@@ -1086,6 +1086,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cluster-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster health
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#server-version" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2844,6 +2855,8 @@
       
         
       
+        
+      
     
     
     
@@ -2927,6 +2940,34 @@
     
   
     Category
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/models/ClusterHealth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ClusterHealth
   
 
     
@@ -15736,6 +15777,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cluster-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster health
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#server-version" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15812,6 +15864,39 @@ values are preserved, including <code>timeout=None</code> to disable timeouts.</
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">healthcheck</span><span class="p">()</span>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="kc">True</span>
 </code></pre></div>
+<h2 id="cluster-health">Cluster health<a class="headerlink" href="#cluster-health" title="Permanent link">&para;</a></h2>
+<p><a class="autorefs autorefs-internal" title="healthcheck" href="../../reference/mlclient/MLClient/#mlclient.MLClient.healthcheck">healthcheck</a> probes only the host that the connection reaches - behind a load balancer, any one of them. <a class="autorefs autorefs-internal" title="cluster_healthcheck" href="../../reference/mlclient/MLClient/#mlclient.MLClient.cluster_healthcheck">cluster_healthcheck</a> reports every host of the cluster and returns a <a class="autorefs autorefs-internal" title="mlclient.models.ClusterHealth
+
+
+  
+      dataclass
+  " href="../../reference/mlclient/models/ClusterHealth/#mlclient.models.ClusterHealth">ClusterHealth</a>: <code>healthy</code> is the cluster verdict and <code>hosts</code> maps each MarkLogic host name to its own verdict. Its truth value is <code>healthy</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="o">...</span>     <span class="n">health</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">cluster_healthcheck</span><span class="p">()</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">health</span><span class="o">.</span><span class="n">healthy</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kc">True</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">health</span><span class="o">.</span><span class="n">hosts</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">{</span><span class="s1">&#39;ip-10-0-0-14.ec2.internal&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;ip-10-0-0-91.ec2.internal&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">health</span><span class="p">:</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="o">...</span>     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cluster degraded&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Host probes run inside the cluster through the REST connection, so internal
+host names and HealthCheck ports do not need to be reachable from Python.
+This also applies to a single-host cluster; <code>health_config</code> affects only
+<a class="autorefs autorefs-internal" title="healthcheck" href="../../reference/mlclient/MLClient/#mlclient.MLClient.healthcheck">healthcheck</a>. The probes require the eval and
+HTTP request (<code>xdmp:http-get</code>) privileges. A host that does not answer <code>200 OK</code>
+within five seconds is unhealthy. Both clients probe hosts concurrently; the
+synchronous client uses up to 32 workers. Connection limits and REST-server
+capacity can limit concurrency.</p>
+<p>If eval fails with a <a class="autorefs autorefs-internal" title="mlclient.exceptions.MarkLogicError" href="../../reference/mlclient/exceptions/MarkLogicError/#mlclient.exceptions.MarkLogicError">MarkLogicError</a>,
+MarkLogic 11 or later can fall back to the Management API health check
+(requires the manage privilege). It reports an overall verdict from the
+responding host, so <code>hosts</code> is <code>None</code>. On older servers, or if the version
+cannot be determined, the original eval error is raised. Transport failures
+and Management API HTTP errors propagate instead of being reported as an
+unhealthy cluster.</p>
 <h2 id="server-version">Server version<a class="headerlink" href="#server-version" title="Permanent link">&para;</a></h2>
 <p><a class="autorefs autorefs-internal" title="version
 
@@ -15825,54 +15910,54 @@ values are preserved, including <code>timeout=None</code> to disable timeouts.</
   
       dataclass
   " href="../../reference/mlclient/models/MarkLogicVersion/#mlclient.models.MarkLogicVersion">MarkLogicVersion</a>, resolved from <code>xdmp:version()</code> and cached after the first access. <code>str(version)</code> preserves the complete server version. <code>parts</code> is always a four-element tuple of numeric components in their original order, padded with <code>None</code> for missing components. Unpacking yields those same four values.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="o">...</span>     <span class="n">version</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">version</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="s1">&#39;12.0.1&#39;</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parts</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">third</span><span class="p">,</span> <span class="n">fourth</span> <span class="o">=</span> <span class="n">version</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">fourth</span> <span class="ow">is</span> <span class="kc">None</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="kc">True</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkLogicVersion</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">version</span> <span class="o">=</span> <span class="n">MarkLogicVersion</span><span class="p">(</span><span class="s2">&quot;10.0-9.5&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="s1">&#39;10.0-9.5&#39;</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parts</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="o">...</span>     <span class="n">version</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">version</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s1">&#39;12.0.1&#39;</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parts</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">third</span><span class="p">,</span> <span class="n">fourth</span> <span class="o">=</span> <span class="n">version</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">fourth</span> <span class="ow">is</span> <span class="kc">None</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="kc">True</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkLogicVersion</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">version</span> <span class="o">=</span> <span class="n">MarkLogicVersion</span><span class="p">(</span><span class="s2">&quot;10.0-9.5&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="s1">&#39;10.0-9.5&#39;</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parts</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 </code></pre></div>
 <p>When the connecting user lacks the eval privilege, the query fails and the Manage (<code>/manage/v2/properties</code>) then Admin (<code>/admin/v1/server-config</code>) endpoints are tried in turn. If none succeeds, the eval <a class="autorefs autorefs-internal" title="mlclient.exceptions.MarkLogicError" href="../../reference/mlclient/exceptions/MarkLogicError/#mlclient.exceptions.MarkLogicError">MarkLogicError</a> is re-raised. A connection error propagates from the eval attempt without trying auxiliary servers. Unavailable endpoints and malformed fallback responses are skipped.</p>
 <p>On <a class="autorefs autorefs-internal" title="mlclient.AsyncMLClient" href="../../reference/mlclient/AsyncMLClient/#mlclient.AsyncMLClient">AsyncMLClient</a> the version is an awaitable method rather than a cached property, because resolving it performs I/O:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncMLClient</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">():</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="o">...</span>     <span class="k">async</span> <span class="k">with</span> <span class="n">AsyncMLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="o">...</span>         <span class="k">return</span> <span class="p">(</span><span class="k">await</span> <span class="n">ml</span><span class="o">.</span><span class="n">version</span><span class="p">())</span><span class="o">.</span><span class="n">parts</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">get_version</span><span class="p">())</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncMLClient</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">():</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="o">...</span>     <span class="k">async</span> <span class="k">with</span> <span class="n">AsyncMLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="o">...</span>         <span class="k">return</span> <span class="p">(</span><span class="k">await</span> <span class="n">ml</span><span class="o">.</span><span class="n">version</span><span class="p">())</span><span class="o">.</span><span class="n">parts</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">get_version</span><span class="p">())</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="wait-for-a-restart">Wait for a restart<a class="headerlink" href="#wait-for-a-restart" title="Permanent link">&para;</a></h2>
 <p>Some Management and Admin API operations return <code>202 Accepted</code> together with <code>Location: /admin/v1/timestamp</code> and a <code>restart</code> payload body. That payload contains one or more <code>last-startup</code> entries keyed by <code>host-id</code>. This indicates that MarkLogic accepted the request and that callers should verify readiness through the Admin timestamp endpoint on port <code>8001</code> before issuing follow-up administrative requests.</p>
 <p>The timestamp endpoint is host-specific, not cluster-wide. MarkLogic documentation explicitly notes that if an operation restarts multiple hosts, the caller must iterate through the returned <code>host-id</code> and timestamp pairs and check each host separately. <code>MLClient.wait_for_restart()</code> does that internally: for multi-host restart responses it resolves host ids through <code>GET /manage/v2/hosts</code> and waits for all affected hosts in parallel. The current client host is probed immediately while the host mapping request is in flight, and the remaining host probes are started as soon as the mapping is available. If the current client host is one of the affected hosts, the method still waits for a timestamp newer than that host's own <code>last-startup</code> value before it returns.</p>
 <p>Use <a class="autorefs autorefs-internal" title="wait_for_restart" href="../../reference/mlclient/MLClient/#mlclient.MLClient.wait_for_restart">wait_for_restart</a> for this check:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">8002</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="o">...</span>     <span class="n">resp</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="o">...</span>         <span class="s2">&quot;/manage/v2/servers/TestServer&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="o">...</span>         <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;group-id&quot;</span><span class="p">:</span> <span class="s2">&quot;Default&quot;</span><span class="p">},</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="o">...</span>     <span class="p">)</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">wait_for_restart</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
-</code></pre></div>
-<p>If you call <a class="autorefs autorefs-internal" title="wait_for_restart" href="../../reference/mlclient/MLClient/#mlclient.MLClient.wait_for_restart">wait_for_restart</a> without a response, it performs a single readiness probe using a retry policy tuned for restart windows:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">wait_for_restart</span><span class="p">()</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">8002</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="o">...</span>     <span class="n">resp</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="o">...</span>         <span class="s2">&quot;/manage/v2/servers/TestServer&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="o">...</span>         <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;group-id&quot;</span><span class="p">:</span> <span class="s2">&quot;Default&quot;</span><span class="p">},</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="o">...</span>     <span class="p">)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">wait_for_restart</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+</code></pre></div>
+<p>If you call <a class="autorefs autorefs-internal" title="wait_for_restart" href="../../reference/mlclient/MLClient/#mlclient.MLClient.wait_for_restart">wait_for_restart</a> without a response, it performs a single readiness probe using a retry policy tuned for restart windows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">wait_for_restart</span><span class="p">()</span>
 </code></pre></div>
 <p>For multi-host restart responses, the method waits for all affected hosts before it returns.</p>
 

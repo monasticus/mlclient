@@ -28,6 +28,10 @@ URL rewriter. This isolated demo endpoint returns HTTP 503 for its first eight
 health requests, then HTTP 200. It demonstrates polling and recovery without
 changing the built-in HealthCheck service or stopping other applications.
 Use a fresh App Server for each health recording to reset the probe counter.
+The cluster examples additionally require ml_cluster_node1 and ml_cluster_node2
+running in their existing three-node cluster, with ml_cluster_node3 stopped.
+This produces a real UNHEALTHY 2/3 verdict with one unhealthy host. Restore the
+containers' original running/stopped states after recording.
 
 GET /orders.xqy once on port 8011 after the health recording. It creates a real,
 compact request log entry with xdmp:request-log-put. The logs tape reads it from

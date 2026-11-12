@@ -1668,6 +1668,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#cluster-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster health
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#options" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1717,6 +1728,17 @@
     <span class="md-ellipsis">
       
         --lines, -l
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-cluster-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --cluster, -c
       
     </span>
   </a>
@@ -2894,6 +2916,8 @@
       
         
       
+        
+      
     
     
     
@@ -2977,6 +3001,34 @@
     
   
     Category
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/models/ClusterHealth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ClusterHealth
   
 
     
@@ -15775,6 +15827,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#cluster-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster health
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#options" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15824,6 +15887,17 @@
     <span class="md-ellipsis">
       
         --lines, -l
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-cluster-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --cluster, -c
       
     </span>
   </a>
@@ -15888,6 +15962,29 @@
 </code></pre></div>
 <p>The command uses the environment's <code>health</code> connection and sends <code>HEAD /</code>;
 it does not require a REST App Server.</p>
+<p>Check every host of the cluster instead:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>health<span class="w"> </span>--cluster
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ml<span class="w"> </span>health<span class="w"> </span>--cluster<span class="w"> </span>-v
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ml<span class="w"> </span>health<span class="w"> </span>--cluster<span class="w"> </span>--watch
+</code></pre></div>
+<h2 id="cluster-health">Cluster health<a class="headerlink" href="#cluster-health" title="Permanent link">&para;</a></h2>
+<p>With <code>--cluster</code> the environment's first REST App Server evaluates a query that
+probes the HealthCheck server of every host from inside the cluster, so hosts
+with internal names are checked too. The status is followed by the number of
+healthy hosts out of all:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>UNHEALTHY 10/12
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  UNHEALTHY  ip-10-0-0-14.ec2.internal
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  UNHEALTHY  ip-10-0-0-91.ec2.internal
+</code></pre></div>
+<p>Unhealthy hosts are listed below the status by default; <code>-v</code> also lists healthy
+hosts. In watch mode the unhealthy hosts follow the status on its line
+(<code>UNHEALTHY 11/12 down: ip-10-0-0-14.ec2.internal</code>). With several environments,
+each column also lists its unhealthy hosts after <code>down:</code>. In watch mode these
+names wrap below the status within the same cell.</p>
+<p>The query needs the eval privilege. Without it, on MarkLogic 11 or later, the
+Management API health check is read instead: it gives a verdict for the whole
+cluster without per-host health, shown as <code>HEALTHY (overall)</code> or
+<code>UNHEALTHY (overall)</code>.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <h3 id="-watch-w"><code>--watch</code>, <code>-w</code><a class="headerlink" href="#-watch-w" title="Permanent link">&para;</a></h3>
 <p>Poll until interrupted with Ctrl-C. Each status includes a local timestamp.
@@ -15903,6 +16000,10 @@ normally instead of repainting.</p>
 <h3 id="-lines-l"><code>--lines</code>, <code>-l</code><a class="headerlink" href="#-lines-l" title="Permanent link">&para;</a></h3>
 <p>Number of statuses retained by <code>--overwrite</code>. Default: <code>3</code>; allowed range:
 <code>1</code>–<code>100</code>. Ignored without <code>--watch</code>.</p>
+<h3 id="-cluster-c"><code>--cluster</code>, <code>-c</code><a class="headerlink" href="#-cluster-c" title="Permanent link">&para;</a></h3>
+<p>Check every host of the cluster instead of the HealthCheck server the <code>health</code>
+connection reaches. Requires a REST App Server in the environment. See
+<a href="#cluster-health">Cluster health</a>.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
 <code>.mlclient/mlclient-dev.yaml</code>. Repeat the option to select several environments,
@@ -15928,6 +16029,18 @@ duplicates run only once, in their first-given order.</p>
 <tr>
 <td><code>UNREACHABLE</code></td>
 <td>A watch-mode probe could not connect or timed out</td>
+</tr>
+<tr>
+<td><code>HEALTHY 12/12</code></td>
+<td>With <code>--cluster</code>: every host is healthy</td>
+</tr>
+<tr>
+<td><code>UNHEALTHY 10/12</code></td>
+<td>With <code>--cluster</code>: some hosts are unhealthy</td>
+</tr>
+<tr>
+<td><code>HEALTHY (overall)</code></td>
+<td>With <code>--cluster</code>, without the eval privilege: the cluster reports itself healthy</td>
 </tr>
 </tbody>
 </table>

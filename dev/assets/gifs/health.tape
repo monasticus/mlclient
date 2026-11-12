@@ -5,7 +5,7 @@ Require docker
 
 Set Shell "bash"
 Set Width 860
-Set Height 580
+Set Height 700
 Set Theme "Gruvbox Light"
 Set FontFamily "JetBrains Mono"
 Set FontSize 16
@@ -19,7 +19,7 @@ Set TypingSpeed 50ms
 
 Hide
 Set TypingSpeed 1ms
-Type `unset NO_COLOR HISTIGNORE HISTCONTROL; HISTFILE=/dev/null; set -o history; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; cluster_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); dev_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); printf 'host: ml-dev.%s.nip.io\nusername: admin\npassword: admin\n' "$dev_host" > .mlclient/mlclient-dev.yaml; printf 'host: %s\napp-servers:\n  - id: health\n    port: 8011\n    auth: app\n' "$cluster_host" > .mlclient/mlclient-qa.yaml; clear`
+Type `unset NO_COLOR HISTIGNORE HISTCONTROL; HISTFILE=/dev/null; set -o history; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; health_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); dev_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); printf 'host: ml-dev.%s.nip.io\nusername: admin\npassword: admin\n' "$dev_host" > .mlclient/mlclient-dev.yaml; printf 'host: %s\napp-servers:\n  - id: health\n    port: 8011\n    auth: app\n' "$health_host" > .mlclient/mlclient-qa.yaml; cluster_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ml_cluster_node1); printf 'host: %s\nusername: admin\npassword: admin\n' "$cluster_host" > .mlclient/mlclient-cluster.yaml; clear`
 Enter
 Wait
 Sleep 500ms
@@ -28,7 +28,7 @@ Show
 Type `ml health -e dev`
 Enter
 Wait
-Sleep 2s
+Sleep 1s
 Type "ml health -e qa --watch -i 1"
 Enter
 Wait+Screen /UNHEALTHY/
@@ -44,7 +44,13 @@ Enter
 Sleep 12s
 Ctrl+C
 Wait
-Sleep 2s
+Sleep 1s
+Type "ml health --cluster -e cluster"
+Enter
+Wait
+Wait+Screen /UNHEALTHY 2\/3/
+Wait+Screen /ml_cluster_node3/
+Sleep 3s
 
 Hide
 Set TypingSpeed 1ms
@@ -58,12 +64,20 @@ Type "ml health -e dev -e qa"
 Enter
 Wait
 Wait+Screen /dev.*qa/
-Sleep 3s
+Sleep 2s
 Up
 Ctrl+E
 Type " --watch -i 1 -o --lines 5"
 Enter
-Sleep 8s
+Sleep 7s
 Ctrl+C
 Wait
+Sleep 2s
+
+Type "ml health --cluster -e dev -e cluster"
+Enter
+Wait
+Wait+Screen /HEALTHY 1\/1/
+Wait+Screen /UNHEALTHY 2\/3/
+Wait+Screen /ml_cluster_node3/
 Sleep 3s

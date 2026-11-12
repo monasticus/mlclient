@@ -1,0 +1,3 @@
+
+Logs are incomplete; missing hosts:
+  ml_cluster_node3: [500 Internal Server Error] (XDMP-HOSTOFFLINE) XDMP-HOSTOFFLINE: xdmp:data-directory(xs:unsignedLong("1574451722765232358")) -- Host is offline or not responding

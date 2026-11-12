@@ -1,4 +1,4 @@
-Getting logs list using REST App-Server http://ml_cluster_node1:8002
+Getting logs list using Manage App-Server http://ml_cluster_node1:8002
 
 ┌──────────────────────┬───────────────── MARKLOGIC LOG FILES (ml_cluster_node1) ────────────────────────────────────────┐
 │ FILENAME             │ URL                                                                                             │

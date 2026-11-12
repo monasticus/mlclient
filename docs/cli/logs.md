@@ -27,6 +27,7 @@ the configured port; unknown identifiers are rejected. `TaskServer` and `0` both
 select Task Server logs. With no selector, read the main server log.
 
 This selects whose logs to read, not the connection used for the request.
+Requests use the environment's Manage connection.
 
 ```sh
 ml logs -s app-services

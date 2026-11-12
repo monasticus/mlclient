@@ -1,4 +1,4 @@
-Getting logs list using REST App-Server http://localhost:8002
+Getting logs list using Manage App-Server http://localhost:8002
 
 ┌───────────────────────┬───────────── MARKLOGIC LOG FILES (localhost) ──────────────────────────────────────┐
 │ FILENAME              │ URL                                                                                │

@@ -109,7 +109,7 @@ def test_command_logs_basic():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002")
 
     assert tester.command.option("environment") == "test"
@@ -133,7 +133,7 @@ def test_command_logs_basic_without_app_server():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test")
 
     assert tester.command.option("environment") == "test"
@@ -157,7 +157,7 @@ def test_command_logs_basic_using_named_app_server():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s content")
 
     assert tester.command.option("environment") == "test"
@@ -181,7 +181,7 @@ def test_command_logs_custom_log_type_error():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -l error")
 
     assert tester.command.option("environment") == "test"
@@ -205,7 +205,7 @@ def test_command_logs_custom_log_type_access():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -l access")
 
     assert tester.command.option("environment") == "test"
@@ -229,7 +229,7 @@ def test_command_logs_custom_log_type_request():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -l request")
 
     assert tester.command.option("environment") == "test"
@@ -243,7 +243,7 @@ def test_command_logs_custom_log_type_request():
 
 
 def test_command_logs_custom_log_type_invalid():
-    tester = _get_tester("logs")
+    tester = _get_tester()
     with pytest.raises(InvalidLogTypeError) as err:
         tester.execute("-e test -s 8002 -l invalid")
 
@@ -263,7 +263,7 @@ def test_command_logs_from():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -f 1970-01-01")
 
     assert tester.command.option("environment") == "test"
@@ -288,7 +288,7 @@ def test_command_logs_to():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -t 1984-01-01")
 
     assert tester.command.option("environment") == "test"
@@ -313,7 +313,7 @@ def test_command_logs_regex():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -r you-will-not-find-it")
 
     assert tester.command.option("environment") == "test"
@@ -338,7 +338,7 @@ def test_command_logs_host():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -H some-host")
 
     assert tester.command.option("environment") == "test"
@@ -365,7 +365,7 @@ def test_command_logs_list():
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test --list")
 
     assert tester.command.option("environment") == "test"
@@ -397,7 +397,7 @@ def test_command_logs_output_for_error_logs():
     )
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002")
     command_output = tester.io.fetch_output()
 
@@ -406,7 +406,7 @@ def test_command_logs_output_for_error_logs():
     assert tester.command.option("log-type") == "error"
 
     expected_output_lines = [
-        "Getting 8002_ErrorLog.txt logs using REST App-Server http://localhost:8002\n",
+        "Getting 8002_ErrorLog.txt logs using Manage App-Server http://localhost:8002\n",
         "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1",
         "<time>2023-09-01T00:00:01Z <log-level>INFO: Log message 2",
         "<time>2023-09-01T00:00:02Z <log-level>INFO: Log message 3",
@@ -437,7 +437,7 @@ def test_command_logs_output_for_access_logs():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(logs))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -l access")
     command_output = tester.io.fetch_output()
 
@@ -446,7 +446,7 @@ def test_command_logs_output_for_access_logs():
     assert tester.command.option("log-type") == "access"
 
     expected_output_lines = [
-        "Getting 8002_AccessLog.txt logs using REST App-Server http://localhost:8002\n",
+        "Getting 8002_AccessLog.txt logs using Manage App-Server http://localhost:8002\n",
     ]
     expected_output_lines.extend(logs)
     assert command_output == "\n".join(expected_output_lines) + "\n"
@@ -508,7 +508,7 @@ def test_command_logs_output_for_request_logs():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(logs))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002 -l request")
     command_output = tester.io.fetch_output()
 
@@ -517,7 +517,7 @@ def test_command_logs_output_for_request_logs():
     assert tester.command.option("log-type") == "request"
 
     expected_output_lines = [
-        "Getting 8002_RequestLog.txt logs using REST App-Server http://localhost:8002\n",
+        "Getting 8002_RequestLog.txt logs using Manage App-Server http://localhost:8002\n",
     ]
     expected_output_lines.extend(logs)
     assert command_output == "\n".join(expected_output_lines) + "\n"
@@ -545,7 +545,7 @@ def test_command_logs_output_for_audit_logs():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(logs))
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -l audit")
     command_output = tester.io.fetch_output()
 
@@ -553,7 +553,7 @@ def test_command_logs_output_for_audit_logs():
     assert tester.command.option("log-type") == "audit"
 
     expected_output_lines = [
-        "Getting AuditLog.txt logs using REST App-Server http://localhost:8002\n",
+        "Getting AuditLog.txt logs using Manage App-Server http://localhost:8002\n",
     ]
     expected_output_lines.extend(logs)
     assert command_output == "\n".join(expected_output_lines) + "\n"
@@ -578,7 +578,7 @@ def test_command_logs_output_for_error_logs_without_app_port():
     )
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test")
     command_output = tester.io.fetch_output()
 
@@ -587,7 +587,7 @@ def test_command_logs_output_for_error_logs_without_app_port():
     assert tester.command.option("log-type") == "error"
 
     expected_output_lines = [
-        "Getting ErrorLog.txt logs using REST App-Server http://localhost:8002\n",
+        "Getting ErrorLog.txt logs using Manage App-Server http://localhost:8002\n",
         "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1",
         "<time>2023-09-01T00:00:01Z <log-level>INFO: Log message 2",
         "<time>2023-09-01T00:00:02Z <log-level>INFO: Log message 3",
@@ -597,54 +597,13 @@ def test_command_logs_output_for_error_logs_without_app_port():
 
 @respx.mock
 def test_command_logs_output_for_xml_logs():
-    xml_log_lines = [
-        (
-            "<error:error "
-            'xsi:schemaLocation="http://marklogic.com/xdmp/error error.xsd" '
-            'xmlns:error="http://marklogic.com/xdmp/error" '
-            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-        ),
-        "  <error:code>XDMP-CAST</error:code>",
-        "  <error:name>err:FORG0001</error:name>",
-        "  <error:xquery-version>1.0</error:xquery-version>",
-        "  <error:message>Invalid cast</error:message>",
-        (
-            "  <error:format-string>XDMP-CAST: (err:FORG0001) xs:date($date) "
-            '-- Invalid cast: "Asasdas" cast as xs:date</error:format-string>'
-        ),
-        "  <error:retryable>false</error:retryable>",
-        "  <error:expr>xs:date($date)</error:expr>",
-        "  <error:data>",
-        '    <error:datum>"Asasdas"</error:datum>',
-        "    <error:datum>xs:date</error:datum>",
-        "  </error:data>",
-        "  <error:stack>",
-        "    <error:frame>",
-        "      <error:uri>/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy</error:uri>",
-        "      <error:line>345</error:line>",
-        "      <error:column>19</error:column>",
-        '      <error:operation>functx:day-of-week("Asasdas")</error:operation>',
-        "      <error:variables>",
-        "        <error:variable>",
-        '          <error:name xmlns="http://www.functx.com">date</error:name>',
-        '          <error:value>"Asasdas"</error:value>',
-        "        </error:variable>",
-        "      </error:variables>",
-        "      <error:xquery-version>1.0</error:xquery-version>",
-        "    </error:frame>",
-        "    <error:frame>",
-        "      <error:line>8</error:line>",
-        "      <error:column>0</error:column>",
-        "      <error:operation>function() as item()*()</error:operation>",
-        "      <error:xquery-version>1.0-ml</error:xquery-version>",
-        "    </error:frame>",
-        "    <error:frame>",
-        "      <error:uri>/</error:uri>",
-        "      <error:xquery-version>1.0-ml</error:xquery-version>",
-        "    </error:frame>",
-        "  </error:stack>",
-        "</error:error>",
-    ]
+    xml_log = (
+        Path(
+            resources_utils.get_test_resource_path(__file__, "error-log-entry.xml"),
+        )
+        .read_text()
+        .rstrip("\n")
+    )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -654,13 +613,13 @@ def test_command_logs_output_for_xml_logs():
     ml_mocker.with_response_body(
         ml_mocker.error_logs_body(
             [
-                ("2023-09-01T00:00:00Z", "info", "\n".join(xml_log_lines)),
+                ("2023-09-01T00:00:00Z", "info", xml_log),
             ],
         ),
     )
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test -s 8002")
     command_output = tester.io.fetch_output()
 
@@ -669,8 +628,8 @@ def test_command_logs_output_for_xml_logs():
     assert tester.command.option("log-type") == "error"
 
     expected_output_lines = [
-        "Getting 8002_ErrorLog.txt logs using REST App-Server http://localhost:8002\n",
-        "<time>2023-09-01T00:00:00Z <log-level>INFO: " + "\n".join(xml_log_lines),
+        "Getting 8002_ErrorLog.txt logs using Manage App-Server http://localhost:8002\n",
+        "<time>2023-09-01T00:00:00Z <log-level>INFO: " + xml_log,
     ]
     assert command_output == "\n".join(expected_output_lines) + "\n"
 
@@ -761,7 +720,7 @@ def test_command_call_output_of_logs_list(args, host, response_path, output_path
     ml_mocker.with_response_body(logs_list_response)
     ml_mocker.mock_get()
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute(args)
     command_output = tester.io.fetch_output()
 
@@ -772,9 +731,23 @@ def test_command_call_output_of_logs_list(args, host, response_path, output_path
 
 @respx.mock
 def test_command_logs_all_hosts():
-    _mock_two_node_error_logs()
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/hosts",
+        params={"view": "default", "format": "json"},
+    ).respond(200, json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]))
+    for host, response_file in (
+        ("ml_cluster_node1", "node1-error-logs.json"),
+        ("ml_cluster_node2", "node2-error-logs.json"),
+    ):
+        respx.get(
+            "http://ml_cluster_node1:8002/manage/v2/logs",
+            params={"filename": "ErrorLog.txt", "format": "json", "host": host},
+        ).respond(
+            200,
+            json=resources_utils.get_test_resource_json(__file__, response_file),
+        )
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test-cluster --all-hosts")
     command_output = tester.io.fetch_output()
 
@@ -784,7 +757,7 @@ def test_command_logs_all_hosts():
 
     expected_output_lines = [
         "Getting error logs from every host using "
-        "REST App-Server http://ml_cluster_node1:8002\n",
+        "Manage App-Server http://ml_cluster_node1:8002\n",
         "<time>2023-09-01T00:00:00Z <log-level>INFO (ml_cluster_node1): "
         "node1 message A",
         "<time>2023-09-01T00:00:01Z <log-level>INFO (ml_cluster_node2): "
@@ -799,9 +772,23 @@ def test_command_logs_all_hosts():
 
 @respx.mock
 def test_command_logs_all_hosts_colors_hosts_on_decorated_output():
-    _mock_two_node_error_logs()
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/hosts",
+        params={"view": "default", "format": "json"},
+    ).respond(200, json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]))
+    for host, response_file in (
+        ("ml_cluster_node1", "node1-error-logs.json"),
+        ("ml_cluster_node2", "node2-error-logs.json"),
+    ):
+        respx.get(
+            "http://ml_cluster_node1:8002/manage/v2/logs",
+            params={"filename": "ErrorLog.txt", "format": "json", "host": host},
+        ).respond(
+            200,
+            json=resources_utils.get_test_resource_json(__file__, response_file),
+        )
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test-cluster --all-hosts", decorated=True)
     command_output = tester.io.fetch_output()
 
@@ -813,9 +800,23 @@ def test_command_logs_all_hosts_colors_hosts_on_decorated_output():
 
 @respx.mock
 def test_command_logs_all_hosts_omits_ansi_on_undecorated_output():
-    _mock_two_node_error_logs()
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/hosts",
+        params={"view": "default", "format": "json"},
+    ).respond(200, json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]))
+    for host, response_file in (
+        ("ml_cluster_node1", "node1-error-logs.json"),
+        ("ml_cluster_node2", "node2-error-logs.json"),
+    ):
+        respx.get(
+            "http://ml_cluster_node1:8002/manage/v2/logs",
+            params={"filename": "ErrorLog.txt", "format": "json", "host": host},
+        ).respond(
+            200,
+            json=resources_utils.get_test_resource_json(__file__, response_file),
+        )
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test-cluster --all-hosts", decorated=False)
     command_output = tester.io.fetch_output()
 
@@ -826,9 +827,23 @@ def test_command_logs_all_hosts_omits_ansi_on_undecorated_output():
 
 @respx.mock
 def test_command_logs_all_hosts_warns_when_unfiltered_across_hosts():
-    _mock_two_node_error_logs()
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/hosts",
+        params={"view": "default", "format": "json"},
+    ).respond(200, json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]))
+    for host, response_file in (
+        ("ml_cluster_node1", "node1-error-logs.json"),
+        ("ml_cluster_node2", "node2-error-logs.json"),
+    ):
+        respx.get(
+            "http://ml_cluster_node1:8002/manage/v2/logs",
+            params={"filename": "ErrorLog.txt", "format": "json", "host": host},
+        ).respond(
+            200,
+            json=resources_utils.get_test_resource_json(__file__, response_file),
+        )
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test-cluster --all-hosts")
 
     error_output = tester.io.fetch_error()
@@ -838,16 +853,35 @@ def test_command_logs_all_hosts_warns_when_unfiltered_across_hosts():
 
 @respx.mock
 def test_command_logs_all_hosts_no_warning_when_filtered():
-    _mock_two_node_error_logs(regex="node")
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/hosts",
+        params={"view": "default", "format": "json"},
+    ).respond(200, json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]))
+    for host, response_file in (
+        ("ml_cluster_node1", "node1-error-logs.json"),
+        ("ml_cluster_node2", "node2-error-logs.json"),
+    ):
+        respx.get(
+            "http://ml_cluster_node1:8002/manage/v2/logs",
+            params={
+                "filename": "ErrorLog.txt",
+                "format": "json",
+                "host": host,
+                "regex": "node",
+            },
+        ).respond(
+            200,
+            json=resources_utils.get_test_resource_json(__file__, response_file),
+        )
 
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test-cluster --all-hosts --regex node")
 
     assert "may return a large volume" not in tester.io.fetch_error()
 
 
 def test_command_logs_all_hosts_rejects_non_error_log_type():
-    tester = _get_tester("logs")
+    tester = _get_tester()
     with pytest.raises(WrongParametersError) as err:
         tester.execute("-e test-cluster --all-hosts -l access")
 
@@ -858,7 +892,7 @@ def test_command_logs_all_hosts_rejects_non_error_log_type():
 @pytest.mark.parametrize("option", ["--host node1", "--list"])
 @respx.mock
 def test_command_logs_all_hosts_rejects_conflicting_options(option):
-    tester = _get_tester("logs")
+    tester = _get_tester()
     with pytest.raises(WrongParametersError, match="cannot be combined"):
         tester.execute(f"-e test-cluster --all-hosts {option}")
     assert not respx.calls
@@ -878,7 +912,7 @@ def test_command_logs_all_hosts_reports_host_discovery_error():
         },
     )
     with pytest.raises(MarkLogicError, match="Insufficient privileges"):
-        _get_tester("logs").execute("-e test-cluster --all-hosts")
+        _get_tester().execute("-e test-cluster --all-hosts")
 
 
 @respx.mock
@@ -887,7 +921,7 @@ def test_command_logs_all_hosts_handles_empty_host_list():
         200,
         json={"host-default-list": {"list-items": {"list-count": {"value": 0}}}},
     )
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test-cluster --all-hosts")
     assert tester.status_code == 0
     assert tester.io.fetch_error() == ""
@@ -899,21 +933,29 @@ def test_command_logs_all_hosts_orders_instants_and_preserves_messages():
         200,
         json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
     )
-    _mock_host_error_logs(
-        "ml_cluster_node1",
-        [
-            ("2023-09-01T00:00:00.1Z", "info", "third"),
-            ("2023-09-01T00:00:00Z", "info", "<info>second</info>"),
-        ],
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/logs",
+        params={
+            "filename": "ErrorLog.txt",
+            "format": "json",
+            "host": "ml_cluster_node1",
+        },
+    ).respond(
+        200,
+        json=resources_utils.get_test_resource_json(__file__, "node1-offset-logs.json"),
     )
-    _mock_host_error_logs(
-        "ml_cluster_node2",
-        [
-            ("2023-09-01T01:00:00.2+01:00", "info", "fourth"),
-            ("2023-09-01T00:30:00+01:00", "info", "first"),
-        ],
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/logs",
+        params={
+            "filename": "ErrorLog.txt",
+            "format": "json",
+            "host": "ml_cluster_node2",
+        },
+    ).respond(
+        200,
+        json=resources_utils.get_test_resource_json(__file__, "node2-offset-logs.json"),
     )
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute("-e test-cluster --all-hosts")
     messages = [
         line.rsplit(": ", 1)[1]
@@ -951,7 +993,7 @@ def test_command_logs_all_hosts_forwards_filters_and_server(server, filename):
         ).respond(200, json={"logfile": {}})
         for host in ("ml_cluster_node1", "ml_cluster_node2")
     ]
-    tester = _get_tester("logs")
+    tester = _get_tester()
     tester.execute(
         f"-e test-cluster --all-hosts -s {server} "
         "--from 2023-09-01 --to 2023-09-02 --regex needle",
@@ -960,22 +1002,28 @@ def test_command_logs_all_hosts_forwards_filters_and_server(server, filename):
     assert tester.io.fetch_error() == ""
 
 
-@pytest.mark.parametrize("message", ["Host unavailable", ""])
+@pytest.mark.parametrize(
+    ("failure", "reason"),
+    [
+        (httpx.ReadTimeout("Host unavailable"), "Host unavailable"),
+        (httpx.ReadTimeout(""), "ReadTimeout"),
+        (httpx.ConnectError("Connection refused"), "Connection refused"),
+    ],
+)
 @respx.mock
-def test_command_logs_all_hosts_reports_host_timeout(mocker, message):
+def test_command_logs_all_hosts_reports_transport_error(mocker, failure, reason):
     mocker.patch("mlclient.http.DEFAULT_RETRY_STRATEGY", NO_RETRY_STRATEGY)
     respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
         200,
         json=_hosts_body(["ml_cluster_node1"]),
     )
     respx.get("http://ml_cluster_node1:8002/manage/v2/logs").mock(
-        side_effect=httpx.ReadTimeout(message),
+        side_effect=failure,
     )
-    tester = _get_tester("logs")
+    tester = _get_tester()
     assert tester.execute("-e test-cluster --all-hosts") == 1
     assert tester.io.fetch_error() == (
-        "\nLogs are incomplete; missing hosts:\n"
-        f"  ml_cluster_node1: {message or 'ReadTimeout'}\n"
+        f"\nLogs are incomplete; missing hosts:\n  ml_cluster_node1: {reason}\n"
     )
     assert "<log-level>" not in tester.io.fetch_output()
 
@@ -1007,7 +1055,7 @@ def test_command_logs_all_hosts_cancels_reads_before_disconnect(mocker):
         json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
     )
     respx.get("http://ml_cluster_node1:8002/manage/v2/logs").mock(side_effect=read_logs)
-    tester = _get_tester("logs")
+    tester = _get_tester()
     with pytest.raises(ValueError, match=r"^Invalid host response$") as error:
         tester.execute("-e test-cluster --all-hosts")
     assert str(error.value) == "Invalid host response"
@@ -1015,120 +1063,129 @@ def test_command_logs_all_hosts_cancels_reads_before_disconnect(mocker):
     assert "<log-level>" not in tester.io.fetch_output()
 
 
+@respx.mock
+def test_command_logs_all_hosts_returns_available_logs_when_host_is_offline():
+    params = {
+        "filename": "ErrorLog.txt",
+        "format": "json",
+        "start": "2026-11-11T00:00:00",
+        "regex": "Starting MarkLogic Server",
+    }
+    available = resources_utils.get_test_resource_json(
+        __file__, "ml_cluster_node1-starting-logs.json",
+    )
+    offline = resources_utils.get_test_resource_json(__file__, "host-offline.json")
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json=_hosts_body(["ml_cluster_node1", "ml_cluster_node3"]),
+    )
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/logs",
+        params={**params, "host": "ml_cluster_node1"},
+    ).respond(200, json=available)
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/logs",
+        params={**params, "host": "ml_cluster_node3"},
+    ).respond(500, json=offline)
+    tester = _get_tester()
+
+    status = tester.execute(
+        "-e test-cluster --all-hosts --from 2026-11-11 "
+        '--regex "Starting MarkLogic Server"',
+    )
+
+    assert status == 1
+    output = resources_utils.get_test_resource_path(
+        __file__, "output-partial-cluster.txt",
+    )
+    errors = resources_utils.get_test_resource_path(
+        __file__, "output-missing-host-offline.txt",
+    )
+    assert tester.io.fetch_output() == Path(output).read_text()
+    assert tester.io.fetch_error() == Path(errors).read_text()
+
+
 @pytest.mark.parametrize(
-    "failure",
-    ["offline", "timeout", "connection", "http", "denied"],
+    ("status_code", "response_file", "output_file"),
+    [
+        (503, "http-error-without-details.json", "output-missing-host-http.txt"),
+        (403, "host-forbidden.json", "output-missing-host-forbidden.txt"),
+    ],
 )
 @respx.mock
-def test_command_logs_all_hosts_keeps_available_logs_after_host_error(mocker, failure):
+def test_command_logs_all_hosts_reports_http_error(
+    mocker,
+    status_code,
+    response_file,
+    output_file,
+):
     mocker.patch("mlclient.http.DEFAULT_RETRY_STRATEGY", NO_RETRY_STRATEGY)
     respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
         200,
-        json={
-            "host-default-list": {
-                "list-items": {
-                    "list-item": [
-                        {"nameref": "ml_cluster_node1"},
-                        {"nameref": "ml_cluster_node2"},
-                        {"nameref": "ml_cluster_node3"},
-                    ],
-                },
-            },
-        },
+        json=_hosts_body(["ml_cluster_node3"]),
     )
-    offline = resources_utils.get_test_resource_json(__file__, "host-offline.json")
-    available = {
-        host: resources_utils.get_test_resource_json(
-            __file__,
-            f"{host}-starting-logs.json",
-        )
-        for host in ("ml_cluster_node1", "ml_cluster_node2")
-    }
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/logs",
+        params={"host": "ml_cluster_node3"},
+    ).respond(
+        status_code,
+        json=resources_utils.get_test_resource_json(__file__, response_file),
+    )
+    tester = _get_tester()
+
+    status = tester.execute(
+        "-e test-cluster --all-hosts --from 2026-11-11 "
+        '--regex "Starting MarkLogic Server"',
+    )
+
+    assert status == 1
+    assert (
+        tester.io.fetch_error()
+        == Path(
+            resources_utils.get_test_resource_path(__file__, output_file),
+        ).read_text()
+    )
+    assert "<log-level>" not in tester.io.fetch_output()
+
+
+@respx.mock
+def test_command_logs_all_hosts_waits_for_remaining_reads_after_timeout(mocker):
+    mocker.patch("mlclient.http.DEFAULT_RETRY_STRATEGY", NO_RETRY_STRATEGY)
     failed = asyncio.Event()
     completed = []
 
-    async def respond(request):
-        host = request.url.params["host"]
-        if host == "ml_cluster_node3":
-            failed.set()
-            if failure == "timeout":
-                msg = "Host request timed out"
-                raise httpx.ReadTimeout(msg)
-            if failure == "connection":
-                msg = "Host connection refused"
-                raise httpx.ConnectError(msg)
-            if failure == "http":
-                return httpx.Response(503, json={})
-            if failure == "denied":
-                return httpx.Response(
-                    403,
-                    json={
-                        "errorResponse": {
-                            "statusCode": "403",
-                            "status": "Forbidden",
-                            "messageCode": "SEC-PRIV",
-                            "message": "Insufficient privileges",
-                        },
-                    },
-                )
-            return httpx.Response(500, json=offline)
-        await failed.wait()
-        completed.append(host)
-        return httpx.Response(200, json=available[host])
+    async def fail(_request):
+        failed.set()
+        msg = "Host unavailable"
+        raise httpx.ReadTimeout(msg)
 
-    route = respx.get(
+    async def finish(_request):
+        await failed.wait()
+        await asyncio.sleep(0)
+        completed.append("ml_cluster_node2")
+        return httpx.Response(200, json={"logfile": {}})
+
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
+    )
+    respx.get(
         "http://ml_cluster_node1:8002/manage/v2/logs",
-        params={
-            "filename": "ErrorLog.txt",
-            "format": "json",
-            "regex": "Starting MarkLogic Server",
-            "start": "2026-11-11T00:00:00",
-        },
-    ).mock(
-        side_effect=respond,
+        params={"host": "ml_cluster_node1"},
+    ).mock(side_effect=fail)
+    respx.get(
+        "http://ml_cluster_node1:8002/manage/v2/logs",
+        params={"host": "ml_cluster_node2"},
+    ).mock(side_effect=finish)
+    tester = _get_tester()
+
+    status = tester.execute("-e test-cluster --all-hosts --regex missing")
+
+    assert status == 1
+    assert completed == ["ml_cluster_node2"]
+    assert tester.io.fetch_error() == (
+        "\nLogs are incomplete; missing hosts:\n  ml_cluster_node1: Host unavailable\n"
     )
-    tester = _get_tester("logs")
-    assert (
-        tester.execute(
-            "-e test-cluster --all-hosts --from 2026-11-11 "
-            '--regex "Starting MarkLogic Server"',
-        )
-        == 1
-    )
-    output = tester.io.fetch_output()
-    log_lines = [line for line in output.splitlines() if "<log-level>" in line]
-    assert len(log_lines) == sum(
-        len(body["logfile"]["log"]) for body in available.values()
-    )
-    for host, body in available.items():
-        for log in body["logfile"]["log"]:
-            assert (
-                f"<time>{log['timestamp']} <log-level>{log['level'].upper()} "
-                f"({host}): {log['message']}"
-            ) in log_lines
-    timestamps = [line.split()[0] for line in log_lines]
-    assert timestamps == sorted(timestamps)
-    reason = {
-        "offline": "[500 Internal Server Error] (XDMP-HOSTOFFLINE) "
-        'XDMP-HOSTOFFLINE: xdmp:data-directory(xs:unsignedLong("1574451722765232358")) '
-        "-- Host is offline or not responding",
-        "timeout": "Host request timed out",
-        "connection": "Host connection refused",
-        "denied": "[403 Forbidden] (SEC-PRIV) Insufficient privileges",
-    }
-    error_output = tester.io.fetch_error()
-    if failure == "http":
-        assert error_output.startswith(
-            "\nLogs are incomplete; missing hosts:\n"
-            "  ml_cluster_node3: Server error '503 Service Unavailable'",
-        )
-    else:
-        assert (
-            error_output == "\nLogs are incomplete; missing hosts:\n"
-            f"  ml_cluster_node3: {reason[failure]}\n"
-        )
-    assert set(completed) == {"ml_cluster_node1", "ml_cluster_node2"}
-    assert route.call_count == 3
 
 
 @pytest.mark.parametrize("decorated", [False, True])
@@ -1136,16 +1193,7 @@ def test_command_logs_all_hosts_keeps_available_logs_after_host_error(mocker, fa
 def test_command_logs_all_hosts_reports_multiple_missing_hosts_literally(decorated):
     respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
         200,
-        json={
-            "host-default-list": {
-                "list-items": {
-                    "list-item": [
-                        {"nameref": "<info>host1</info>"},
-                        {"nameref": "host2"},
-                    ],
-                },
-            },
-        },
+        json=_hosts_body(["<info>host1</info>", "host2"]),
     )
     for host in ("<info>host1</info>", "host2"):
         respx.get(
@@ -1155,7 +1203,7 @@ def test_command_logs_all_hosts_reports_multiple_missing_hosts_literally(decorat
             403,
             json={"errorResponse": {"message": "<info>Missing role</info>"}},
         )
-    tester = _get_tester("logs")
+    tester = _get_tester()
     assert (
         tester.execute(
             "-e test-cluster --all-hosts --regex needle",
@@ -1171,51 +1219,58 @@ def test_command_logs_all_hosts_reports_multiple_missing_hosts_literally(decorat
     assert "<log-level>" not in tester.io.fetch_output()
 
 
-def _mock_two_node_error_logs(regex: str | None = None):
-    hosts_mocker = MLRespXMocker(use_router=False)
-    hosts_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/hosts")
-    hosts_mocker.with_request_param("view", "default")
-    hosts_mocker.with_request_param("format", "json")
-    hosts_mocker.with_response_code(200)
-    hosts_mocker.with_response_content_type("application/json; charset=UTF-8")
-    hosts_mocker.with_response_body(
-        _hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
-    )
-    hosts_mocker.mock_get()
+@respx.mock
+def test_command_logs_reloads_environment_between_invocations(mocker):
+    for host in ("first.example.com", "second.example.com"):
+        environment = MLEnvironment(
+            **{
+                "app-name": "logs-test",
+                "host": host,
+                "username": "admin",
+                "password": "admin",
+                "protocol": "http",
+                "app-servers": [
+                    {"id": "manage", "port": 8002, "auth": "basic", "rest": True},
+                ],
+            },
+        )
+        mocker.patch("mlclient.env.MLEnvironment.load", return_value=environment)
+        route = respx.get(f"http://{host}:8002/manage/v2/logs").respond(
+            200,
+            json={"logfile": {}},
+        )
+        tester = _get_tester()
 
-    _mock_host_error_logs(
-        "ml_cluster_node1",
-        [
-            ("2023-09-01T00:00:00Z", "info", "node1 message A"),
-            ("2023-09-01T00:00:02Z", "warning", "node1 message B"),
-        ],
-        regex=regex,
-    )
-    _mock_host_error_logs(
-        "ml_cluster_node2",
-        [
-            ("2023-09-01T00:00:01Z", "info", "node2 message A"),
-            ("2023-09-01T00:00:03Z", "error", "node2 message B"),
-        ],
-        regex=regex,
-    )
+        assert tester.execute("-e reload-config --regex missing") == 0
+        assert route.call_count == 1
 
 
-def _mock_host_error_logs(
-    host: str,
-    logs: list[tuple],
-    regex: str | None = None,
-):
-    mocker = MLRespXMocker(use_router=False)
-    mocker.with_url(f"http://ml_cluster_node1:8002{ENDPOINT}")
-    mocker.with_request_param("format", "json")
-    mocker.with_request_param("filename", "ErrorLog.txt")
-    mocker.with_request_param("host", host)
-    mocker.with_request_param("regex", regex)
-    mocker.with_response_code(200)
-    mocker.with_response_content_type("application/json; charset=UTF-8")
-    mocker.with_response_body(mocker.error_logs_body(logs))
-    mocker.mock_get()
+@respx.mock
+def test_command_logs_list_links_use_manage_connection(mocker, logs_list_response):
+    environment = MLEnvironment(
+        **{
+            "app-name": "logs-test",
+            "host": "localhost",
+            "username": "admin",
+            "password": "admin",
+            "protocol": "http",
+            "app-servers": [
+                {"id": "app-services", "port": 8000, "auth": "basic", "rest": True},
+                {"id": "manage", "port": 8123, "auth": "basic"},
+            ],
+        },
+    )
+    mocker.patch("mlclient.env.MLEnvironment.load", return_value=environment)
+    respx.get("http://localhost:8123/manage/v2/logs").respond(
+        200,
+        json=logs_list_response,
+    )
+    tester = _get_tester()
+
+    assert tester.execute("-e separate-manage --list") == 0
+    output = tester.io.fetch_output()
+    assert "http://localhost:8123/manage/v2/logs?filename=ErrorLog.txt" in output
+    assert "http://localhost:8000" not in output
 
 
 def _hosts_body(
@@ -1230,10 +1285,8 @@ def _hosts_body(
     }
 
 
-def _get_tester(
-    command_name: str,
-):
+def _get_tester() -> CommandTester:
     """Returns a command tester."""
     app = MLCLIentApplication()
-    command = app.find(command_name)
+    command = app.find("logs")
     return CommandTester(command)

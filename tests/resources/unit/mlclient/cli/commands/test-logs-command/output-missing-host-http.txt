@@ -1,0 +1,4 @@
+
+Logs are incomplete; missing hosts:
+  ml_cluster_node3: Server error '503 Service Unavailable' for url 'http://ml_cluster_node1:8002/manage/v2/logs?format=json&filename=ErrorLog.txt&host=ml_cluster_node3&start=2026-11-11T00%3A00%3A00&regex=Starting%20MarkLogic%20Server'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503

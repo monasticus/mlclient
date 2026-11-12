@@ -1,0 +1,38 @@
+<error:error xsi:schemaLocation="http://marklogic.com/xdmp/error error.xsd" xmlns:error="http://marklogic.com/xdmp/error" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <error:code>XDMP-CAST</error:code>
+  <error:name>err:FORG0001</error:name>
+  <error:xquery-version>1.0</error:xquery-version>
+  <error:message>Invalid cast</error:message>
+  <error:format-string>XDMP-CAST: (err:FORG0001) xs:date($date) -- Invalid cast: "Asasdas" cast as xs:date</error:format-string>
+  <error:retryable>false</error:retryable>
+  <error:expr>xs:date($date)</error:expr>
+  <error:data>
+    <error:datum>"Asasdas"</error:datum>
+    <error:datum>xs:date</error:datum>
+  </error:data>
+  <error:stack>
+    <error:frame>
+      <error:uri>/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy</error:uri>
+      <error:line>345</error:line>
+      <error:column>19</error:column>
+      <error:operation>functx:day-of-week("Asasdas")</error:operation>
+      <error:variables>
+        <error:variable>
+          <error:name xmlns="http://www.functx.com">date</error:name>
+          <error:value>"Asasdas"</error:value>
+        </error:variable>
+      </error:variables>
+      <error:xquery-version>1.0</error:xquery-version>
+    </error:frame>
+    <error:frame>
+      <error:line>8</error:line>
+      <error:column>0</error:column>
+      <error:operation>function() as item()*()</error:operation>
+      <error:xquery-version>1.0-ml</error:xquery-version>
+    </error:frame>
+    <error:frame>
+      <error:uri>/</error:uri>
+      <error:xquery-version>1.0-ml</error:xquery-version>
+    </error:frame>
+  </error:stack>
+</error:error>

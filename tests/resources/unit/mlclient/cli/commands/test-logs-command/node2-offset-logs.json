@@ -1,0 +1,16 @@
+{
+  "logfile": {
+    "log": [
+      {
+        "timestamp": "2023-09-01T01:00:00.2+01:00",
+        "level": "info",
+        "message": "fourth"
+      },
+      {
+        "timestamp": "2023-09-01T00:30:00+01:00",
+        "level": "info",
+        "message": "first"
+      }
+    ]
+  }
+}

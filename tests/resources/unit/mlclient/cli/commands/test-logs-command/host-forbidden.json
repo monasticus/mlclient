@@ -1,0 +1,8 @@
+{
+  "errorResponse": {
+    "statusCode": "403",
+    "status": "Forbidden",
+    "messageCode": "SEC-PRIV",
+    "message": "Insufficient privileges"
+  }
+}

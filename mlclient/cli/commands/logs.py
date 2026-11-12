@@ -10,8 +10,7 @@ from __future__ import annotations
 import asyncio
 import heapq
 from collections.abc import Generator, Iterator
-from functools import lru_cache
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -19,12 +18,19 @@ from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 from dateutil.parser import isoparse
+from httpx import HTTPError
 
 from mlclient._manager import MLClientManager
-from mlclient.exceptions import WrongParametersError
+from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
 from mlclient.services.diagnostics.logs import AsyncLogsService, LogsService
+
+
+if TYPE_CHECKING:
+    from cleo.ui.table_separator import TableSeparator
+
+    from mlclient._client import AsyncMLClient
 
 
 class LogsCommand(Command):
@@ -151,6 +157,11 @@ class LogsCommand(Command):
     ) -> int:
         """Execute the selected log operation.
 
+        Returns
+        -------
+        int
+            0 for a complete result, 1 when all-host logs are incomplete.
+
         Raises
         ------
         WrongParametersError
@@ -164,106 +175,109 @@ class LogsCommand(Command):
         if self.option("list") is True:
             self._print_log_files()
         elif self.option("all-hosts") is True:
-            self._print_logs_all_hosts()
+            return self._print_logs_all_hosts()
         else:
             self._print_logs()
         return 0
 
     def _print_log_files(
         self,
-    ):
-        """Print MarkLogic log files in a table."""
-        logs_list = self._get_logs_list()
-        logs_hosts = sorted(host for host in logs_list["grouped"])
-        app_port = self._get_app_port()
+    ) -> None:
+        """Print MarkLogic log files and their Management API download URLs."""
+        manager = MLClientManager(self.option("environment"))
+        with manager.get_client("manage") as ml:
+            self.info(f"Getting logs list using Manage App-Server {ml.http.base_url}")
+            logs_list = LogsService(ml.manage).list(self.option("host"))
+            base_url = ml.http.base_url
+        app_port = self._get_app_port(manager)
         self.line("")
-        for logs_host in logs_hosts:
-            rows = list(self._get_log_files_rows(logs_list, logs_host, app_port))
-            self._render_log_files_table(logs_host, rows)
-
-    def _get_logs_list(
-        self,
-    ) -> dict:
-        """Retrieve logs list using the Logs service."""
-        host = self.option("host")
-        with _get_cached_client(self.option("environment")) as ml:
-            self.info(f"Getting logs list using REST App-Server {ml.http.base_url}")
-            return LogsService(ml.manage).list(host)
+        for host in sorted(logs_list["grouped"]):
+            rows = list(self._get_log_files_rows(logs_list, host, app_port, base_url))
+            self._render_log_files_table(host, rows)
 
     def _get_log_files_rows(
         self,
         logs_list: dict,
         host: str,
-        app_port: int | str,
-    ) -> Generator[list[str]]:
-        """Get rows to build a table with log files."""
-        grouped_logs = logs_list["grouped"]
+        app_port: int | str | None,
+        base_url: str,
+    ) -> Generator[list[str] | TableSeparator]:
+        """Build a host's file rows, keeping the server sections separated.
 
+        Parameters
+        ----------
+        logs_list : dict
+            Parsed source entries and grouped log files from the Logs service.
+        host : str
+            The host whose files to show.
+        app_port : int | str | None
+            Selected App Server port or TaskServer; None includes all servers.
+        base_url : str
+            Base URL of the connection used to retrieve the files.
+
+        Yields
+        ------
+        list[str] | TableSeparator
+            Filename and URL cells, with separators between server sections.
+        """
+        grouped_logs = logs_list["grouped"][host]
+        log_urls = {}
+        for log in logs_list["source"]:
+            if log["roleref"] == host:
+                log_urls.setdefault(log["nameref"], f"{base_url}{log['uriref']}")
         servers = sorted(
             server if server is not None else self._NONE_SERVER_KEY
-            for server in grouped_logs[host]
+            for server in grouped_logs
             if app_port is None or str(app_port) == server
         )
-        for server_index, server_key in enumerate(servers):
+        for index, server_key in enumerate(servers):
             server = None if server_key == self._NONE_SERVER_KEY else server_key
-            yield from self._populate_rows_from_server_lvl(logs_list, host, server)
-
-            if server_index < len(servers) - 1:
+            yield from self._get_server_log_rows(grouped_logs[server], log_urls)
+            if index < len(servers) - 1:
                 yield self.table_separator()
 
-    def _populate_rows_from_server_lvl(
-        self,
-        logs_list: dict,
-        host: str,
-        server: str | None,
+    @staticmethod
+    def _get_server_log_rows(
+        server_logs: dict,
+        log_urls: dict[str, str],
     ) -> Generator[list[str]]:
-        """Get rows with server log files."""
-        grouped_logs = logs_list["grouped"]
+        """Build a server's file rows, separating the log types with blank rows.
 
-        server_logs = grouped_logs[host][server]
-        log_types = sorted(server_logs.keys())
-        for log_type_index, log_type in enumerate(log_types):
-            yield from self._populate_rows_from_log_type_lvl(
-                logs_list,
-                host,
-                server,
-                log_type,
-            )
+        Parameters
+        ----------
+        server_logs : dict
+            Files grouped by log type and rotation day.
+        log_urls : dict[str, str]
+            Download URLs indexed by filename for the selected host.
 
-            if log_type_index < len(log_types) - 1:
+        Yields
+        ------
+        list[str]
+            Filename and URL cells, or a blank row between log types.
+        """
+        log_types = sorted(server_logs)
+        for index, log_type in enumerate(log_types):
+            files = server_logs[log_type]
+            for day in sorted(files):
+                filename = files[day]
+                yield [filename, log_urls[filename]]
+            if index < len(log_types) - 1:
                 yield ["", ""]
-
-    def _populate_rows_from_log_type_lvl(
-        self,
-        logs_list: dict,
-        host: str,
-        server: str | None,
-        log_type: LogType,
-    ) -> Generator[list[str]]:
-        """Get rows with server log files of a specific type."""
-        source_logs = logs_list["source"]
-        grouped_logs = logs_list["grouped"]
-
-        ml_url = _get_cached_client(self.option("environment")).http.base_url
-
-        server_logs = grouped_logs[host][server]
-        type_logs = server_logs[log_type]
-        for days in sorted(type_logs):
-            file_name = type_logs[days]
-            endpoint = next(
-                log["uriref"]
-                for log in source_logs
-                if log["nameref"] == file_name and log["roleref"] == host
-            )
-            url = f"{ml_url}{endpoint}"
-            yield [file_name, url]
 
     def _render_log_files_table(
         self,
         host: str,
-        rows: list[list[str]],
-    ):
-        """Render a table with MarkLogic log files."""
+        rows: list[list[str] | TableSeparator],
+    ) -> None:
+        """Render a host's file table or report that no matching files exist.
+
+        Parameters
+        ----------
+        host : str
+            Host name shown in the table title.
+        rows : list[list[str] | TableSeparator]
+            Filename/URL rows and separators between server sections.
+        """
         if len(rows) > 0:
             table = self.table()
             table.set_header_title(f"MARKLOGIC LOG FILES ({host})")
@@ -276,13 +290,18 @@ class LogsCommand(Command):
 
     def _print_logs_all_hosts(
         self,
-    ):
+    ) -> int:
         """Print error logs from every cluster host, merged by timestamp.
 
         Each host is shown in parentheses between the log level and the
         message, colored by host on a decorated output. Restricted to the
         error log type: access, request and audit logs are served as a single
         opaque message stream that carries no timestamp to merge on.
+
+        Returns
+        -------
+        int
+            0 when every host was read, 1 when some host logs are missing.
 
         Raises
         ------
@@ -292,7 +311,31 @@ class LogsCommand(Command):
         if self.option("log-type").lower() != "error":
             msg = "The --all-hosts option supports the error log type only"
             raise WrongParametersError(msg)
-        colors, per_host_logs = asyncio.run(self._collect_all_hosts_logs())
+        colors, per_host_logs, failures = asyncio.run(self._collect_all_hosts_logs())
+        self._write_merged_logs(colors, per_host_logs)
+        if failures:
+            self.line_error("\nLogs are incomplete; missing hosts:", style="fg=yellow")
+            for host, reason in failures.items():
+                self.line_error(
+                    f"  {Formatter.escape(host)}: {Formatter.escape(reason)}",
+                    style="fg=yellow",
+                )
+        return 1 if failures else 0
+
+    def _write_merged_logs(
+        self,
+        colors: dict[str, int],
+        per_host_logs: list[Iterator[dict]],
+    ) -> None:
+        """Write the available host logs as one timeline.
+
+        Parameters
+        ----------
+        colors : dict[str, int]
+            The color assigned to each host.
+        per_host_logs : list[Iterator[dict]]
+            Timestamp-sorted entries tagged with their host names.
+        """
         self.line("")
         for log_dict in heapq.merge(
             *per_host_logs,
@@ -307,24 +350,25 @@ class LogsCommand(Command):
 
     async def _collect_all_hosts_logs(
         self,
-    ) -> tuple[dict[str, int], list[Iterator[dict]]]:
-        """Fetch error logs from every cluster host concurrently.
+    ) -> tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]:
+        """Collect available host logs and reasons for missing hosts.
 
-        Cancel and await outstanding reads before closing the shared client,
-        including when a host fails or the operation is interrupted.
+        Expected host errors do not interrupt other reads. Unexpected failures
+        and cancellation still cancel and await outstanding requests before
+        closing the shared client.
 
         Returns
         -------
-        tuple[dict[str, int], list[Iterator[dict]]]
-            A host-to-color mapping and one per-host generator of error logs,
-            each already sorted by timestamp and tagged with its host name.
+        tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]
+            Host colors, sorted and host-tagged logs from successful reads,
+            and failed host names mapped to their error messages.
         """
-        env = self.option("environment")
-        app_port = self._get_app_port()
-        async with MLClientManager(env).get_async_client("manage") as ml:
+        manager = MLClientManager(self.option("environment"))
+        app_port = self._get_app_port(manager)
+        async with manager.get_async_client("manage") as ml:
             self.info(
                 f"Getting error logs from every host using "
-                f"REST App-Server {ml.http.base_url}",
+                f"Manage App-Server {ml.http.base_url}",
             )
             hosts = await self._get_hosts(ml)
             self._warn_if_unfiltered(hosts)
@@ -332,11 +376,19 @@ class LogsCommand(Command):
                 host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
                 for index, host in enumerate(hosts)
             }
-            return colors, await self._fetch_hosts_logs(ml, hosts, app_port)
+            results = await self._fetch_hosts_logs(ml, hosts, app_port)
+            per_host_logs = []
+            failures = {}
+            for host, result in zip(hosts, results):
+                if isinstance(result, (HTTPError, MarkLogicError)):
+                    failures[host] = str(result) or type(result).__name__
+                else:
+                    per_host_logs.append(result)
+            return colors, per_host_logs, failures
 
     @staticmethod
     async def _get_hosts(
-        ml,
+        ml: AsyncMLClient,
     ) -> list[str]:
         """Return every host name in the cluster.
 
@@ -364,7 +416,7 @@ class LogsCommand(Command):
     def _warn_if_unfiltered(
         self,
         hosts: list[str],
-    ):
+    ) -> None:
         """Warn when reading unfiltered error logs from more than one host.
 
         An unfiltered read fetches every error entry from every host, which can
@@ -389,11 +441,13 @@ class LogsCommand(Command):
 
     async def _fetch_hosts_logs(
         self,
-        ml,
+        ml: AsyncMLClient,
         hosts: list[str],
         app_port: int | str | None,
-    ) -> list[Iterator[dict]]:
-        """Read host logs concurrently, cancelling outstanding reads on failure.
+    ) -> list[Iterator[dict] | HTTPError | MarkLogicError]:
+        """Read hosts concurrently, retaining expected per-host errors.
+
+        Unexpected failures or cancellation cancel and await outstanding reads.
 
         Parameters
         ----------
@@ -406,8 +460,8 @@ class LogsCommand(Command):
 
         Returns
         -------
-        list[Iterator[dict]]
-            Sorted, host-tagged logs in the same order as the requested hosts.
+        list[Iterator[dict] | HTTPError | MarkLogicError]
+            Host-tagged logs or a request error, in requested host order.
 
         Raises
         ------
@@ -428,11 +482,11 @@ class LogsCommand(Command):
 
     async def _fetch_host_logs(
         self,
-        ml,
+        ml: AsyncMLClient,
         host: str,
         app_port: int | str | None,
-    ) -> Iterator[dict]:
-        """Fetch error logs from a single host, tagged with the host name.
+    ) -> Iterator[dict] | HTTPError | MarkLogicError:
+        """Fetch a host's tagged logs, retaining expected request failures.
 
         Parameters
         ----------
@@ -445,17 +499,20 @@ class LogsCommand(Command):
 
         Returns
         -------
-        Iterator[dict]
-            Error logs sorted by timestamp, each carrying a ``host`` key.
+        Iterator[dict] | HTTPError | MarkLogicError
+            Sorted, host-tagged logs, or the HTTP/MarkLogic error for this host.
         """
-        logs = await AsyncLogsService(ml.manage).get(
-            app_port,
-            LogType.ERROR,
-            start_time=self.option("from"),
-            end_time=self.option("to"),
-            regex=self.option("regex"),
-            host=host,
-        )
+        try:
+            logs = await AsyncLogsService(ml.manage).get(
+                app_port,
+                LogType.ERROR,
+                start_time=self.option("from"),
+                end_time=self.option("to"),
+                regex=self.option("regex"),
+                host=host,
+            )
+        except (HTTPError, MarkLogicError) as error:
+            return error
         return ({**log, "host": host} for log in logs)
 
     def _format_host(
@@ -490,33 +547,47 @@ class LogsCommand(Command):
 
     def _print_logs(
         self,
-    ):
+    ) -> None:
         """Print MarkLogic logs."""
         logs = self._get_logs()
-        parsed_logs = self._parse_logs(logs)
+        formatted_logs = self._format_logs(logs)
         self.line("")
-        for info, msg in parsed_logs:
+        for info, msg in formatted_logs:
             self._io.write(info)
             self._io.write(msg, new_line=True, type=Type.RAW)
 
     def _get_logs(
         self,
     ) -> Iterator[dict]:
-        """Retrieve logs using the Logs service."""
-        app_port = self._get_app_port()
+        """Retrieve parsed entries through the environment's Manage connection.
+
+        Returns
+        -------
+        Iterator[dict]
+            Entries parsed by the Logs service.
+
+        Raises
+        ------
+        HTTPError
+            If the HTTP request fails.
+        MarkLogicError
+            If MarkLogic rejects the log read.
+        """
+        manager = MLClientManager(self.option("environment"))
+        app_port = self._get_app_port(manager)
         log_type = LogType.get(self.option("log-type"))
         start_time = self.option("from")
         end_time = self.option("to")
         regex = self.option("regex")
         host = self.option("host")
 
-        with _get_cached_client(self.option("environment")) as ml:
+        with manager.get_client("manage") as ml:
             if app_port is None:
                 file_name = f"{log_type.value}.txt"
             else:
                 file_name = f"{app_port}_{log_type.value}.txt"
             self.info(
-                f"Getting {file_name} logs using REST App-Server {ml.http.base_url}",
+                f"Getting {file_name} logs using Manage App-Server {ml.http.base_url}",
             )
             return LogsService(ml.manage).get(
                 app_port,
@@ -527,11 +598,22 @@ class LogsCommand(Command):
                 host=host,
             )
 
-    def _parse_logs(
+    def _format_logs(
         self,
         logs: Iterator[dict],
     ) -> Iterator[tuple[str, str]]:
-        """Parse retrieved logs depending on the log type."""
+        """Format retrieved entries for terminal output.
+
+        Parameters
+        ----------
+        logs : Iterator[dict]
+            Entries already parsed by the Logs service.
+
+        Yields
+        ------
+        tuple[str, str]
+            The styled prefix and literal message to write.
+        """
         if self.option("log-type").lower() != "error":
             for log_dict in logs:
                 yield "", log_dict["message"]
@@ -544,22 +626,28 @@ class LogsCommand(Command):
 
     def _get_app_port(
         self,
+        manager: MLClientManager,
     ) -> int | str | None:
-        """Identify app port to be used."""
-        env = self.option("environment")
+        """Resolve the log target using this invocation's environment.
+
+        Parameters
+        ----------
+        manager : MLClientManager
+            The manager used for this command's connection and server lookup.
+
+        Returns
+        -------
+        int | str | None
+            Port, TaskServer or None for the main log.
+
+        Raises
+        ------
+        mlclient.exceptions.NoSuchAppServerError
+            If the selected server identifier is not configured.
+        """
         app_port = self.option("server")
-        mgr = MLClientManager(env)
         if app_port in {"0", "TaskServer"}:
             app_port = "TaskServer"
         elif app_port is not None and not app_port.isnumeric():
-            app_port = mgr.get_config(app_port).port
+            app_port = manager.get_config(app_port).port
         return app_port
-
-
-@lru_cache
-def _get_cached_client(
-    env_name: str,
-):
-    # Cached to avoid re-reading config and re-creating the client on every
-    # call -- _get_client() is invoked multiple times (e.g. in --list loops).
-    return MLClientManager(env_name).get_client()

@@ -1,0 +1,16 @@
+{
+  "logfile": {
+    "log": [
+      {
+        "timestamp": "2023-09-01T00:00:01Z",
+        "level": "info",
+        "message": "node2 message A"
+      },
+      {
+        "timestamp": "2023-09-01T00:00:03Z",
+        "level": "error",
+        "message": "node2 message B"
+      }
+    ]
+  }
+}

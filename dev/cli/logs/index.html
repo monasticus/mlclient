@@ -15990,7 +15990,8 @@
 <p>App Server identifier from the environment or its port. Identifiers resolve to
 the configured port; unknown identifiers are rejected. <code>TaskServer</code> and <code>0</code> both
 select Task Server logs. With no selector, read the main server log.</p>
-<p>This selects whose logs to read, not the connection used for the request.</p>
+<p>This selects whose logs to read, not the connection used for the request.
+Requests use the environment's Manage connection.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>logs<span class="w"> </span>-s<span class="w"> </span>app-services
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ml<span class="w"> </span>logs<span class="w"> </span>-s<span class="w"> </span>TaskServer
 </code></pre></div>
@@ -16017,8 +16018,11 @@ server operation; it does not replace the environment's connection hostname.</p>
 <p>Read error logs from every host in the cluster at once, merged into a single
 timeline by timestamp. The host is shown in parentheses between the log level
 and the message. The host list comes from <code>/manage/v2/hosts</code>, and each host is
-queried concurrently. If host discovery or any host read fails, the command
-fails without printing a partial timeline. Error logs only: <code>--all-hosts</code> with
+queried concurrently. If a host cannot be read, the available logs are still
+printed. A summary below the logs on stderr lists each missing host and its
+error; the command exits with <code>1</code> to indicate an incomplete result, including
+when every host read fails. Host discovery failures still stop the command.
+Error logs only: <code>--all-hosts</code> with
 any other log type is rejected. <code>--all-hosts</code> cannot be combined with <code>--host</code> or <code>--list</code>.</p>
 <p>Reading unfiltered error logs from every host can return a large volume and may
 time out, so a multi-host read with no <code>--from</code>, <code>--to</code> or <code>--regex</code> prints a

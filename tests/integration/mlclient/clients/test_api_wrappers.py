@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import re
 from time import sleep
 from typing import ClassVar
 from xml.etree import ElementTree
@@ -506,6 +507,27 @@ class TestLogsEndpoint:
         assert "message" not in logfile
         assert isinstance(logfile.get("log"), list) or len(logfile) == 6
         assert len(logfile["log"]) % self.TEST_LOGS_COUNT == 0
+
+    @pytest.mark.ml_access
+    def test_error_logs_as_text_contain_only_lines_matching_regex(
+        self,
+        ml_client: MLClient,
+    ):
+        self._produce_test_logs(ml_client)
+        sleep(1)
+
+        resp = ml_client.manage.logs.get(
+            filename=f"{ml_client.http.config.port}_ErrorLog.txt",
+            data_format="text",
+            start_time=str(datetime.date.today()),
+            regex="Test Log .{1,2}",
+        )
+
+        assert resp.status_code == httpx.codes.OK
+        assert resp.headers["Content-Type"].startswith("text/plain")
+        lines = resp.text.splitlines()
+        assert len(lines) >= self.TEST_LOGS_COUNT
+        assert all(re.search("Test Log .{1,2}", line) for line in lines)
 
     @pytest.mark.ml_access
     def test_access_logs_record_eval_requests(self, ml_client: MLClient):

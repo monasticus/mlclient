@@ -51,8 +51,8 @@ class LogsCall(ApiCall):
         filename : str
             The log file to be returned.
         data_format : str
-            The format of the data in the log file. The supported formats are xml, json
-            or html.
+            The format of the data in the log file. The supported formats are xml, json,
+            html or text.
         host : str
             The host from which to return the log data.
         start_time : str
@@ -93,8 +93,8 @@ class LogsCall(ApiCall):
         start_time: str,
         end_time: str,
     ):
-        if data_format and data_format not in ["xml", "json", "html"]:
-            msg = "The supported formats are xml, json or html!"
+        if data_format and data_format not in ["xml", "json", "html", "text"]:
+            msg = "The supported formats are xml, json, html or text!"
             raise exceptions.WrongParametersError(msg)
         cls._validate_datetime_param("start", start_time)
         cls._validate_datetime_param("end", end_time)

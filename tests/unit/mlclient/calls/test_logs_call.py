@@ -14,9 +14,9 @@ def default_logs_call():
 
 def test_validation_unsupported_format():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        LogsCall(filename="", data_format="text")
+        LogsCall(filename="", data_format="csv")
 
-    expected_msg = "The supported formats are xml, json or html!"
+    expected_msg = "The supported formats are xml, json, html or text!"
     assert err.value.args[0] == expected_msg
 
 
@@ -82,6 +82,21 @@ def test_headers_for_json_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="json")
     assert call.headers == {
         "Accept": "application/json",
+    }
+
+
+def test_headers_for_text_format():
+    call = LogsCall(filename="ErrorLog.txt", data_format="text")
+    assert call.headers == {
+        "Accept": "text/plain",
+    }
+
+
+def test_parameters_for_text_format():
+    call = LogsCall(filename="ErrorLog.txt", data_format="text")
+    assert call.params == {
+        "filename": "ErrorLog.txt",
+        "format": "text",
     }
 
 

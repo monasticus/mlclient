@@ -11,7 +11,8 @@ ml env show local host
 ```
 
 The command reads the nearest `.mlclient` directory in the current directory or
-its parents. Values come from the configuration file. Secrets are masked in the
+its parents, falling back to `.mlclient` in your home directory when none of
+them has one. Values come from the configuration file. Secrets are masked in the
 formatted output unless `--secrets` is passed.
 
 ## Arguments

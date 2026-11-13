@@ -21,6 +21,7 @@ def _work_dir(
     monkeypatch: pytest.MonkeyPatch,
 ) -> Path:
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(Path, "home", lambda: tmp_path / "home")
     return tmp_path
 
 
@@ -145,6 +146,29 @@ def test_flags_implicit_fall_through_to_global(
     assert tester.status_code == 0
     assert "home.example.com" in output
     assert str(home / ".mlclient") in output
+    assert "(global)" in output
+
+
+def test_flags_fall_back_to_global_outside_home(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    home = tmp_path / "home"
+    (home / ".mlclient").mkdir(parents=True)
+    (home / ".mlclient" / "mlclient-dev.yaml").write_text(
+        yaml.safe_dump({"host": "home.example.com"}),
+    )
+    monkeypatch.setattr(Path, "home", lambda: home)
+    outside_home = tmp_path / "elsewhere"
+    outside_home.mkdir()
+    monkeypatch.chdir(outside_home)
+
+    tester = _get_tester()
+    tester.execute("dev")
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert "home.example.com" in output
     assert "(global)" in output
 
 

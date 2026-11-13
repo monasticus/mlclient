@@ -24,6 +24,7 @@ def _work_dir(
     monkeypatch: pytest.MonkeyPatch,
 ) -> Path:
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(Path, "home", lambda: tmp_path / "home")
     return tmp_path
 
 

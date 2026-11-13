@@ -12,6 +12,7 @@ from prompt_toolkit.input import create_pipe_input
 from prompt_toolkit.output import DummyOutput
 
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.cli.commands.trace_events import _ACTIVATION_TOGGLE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import MarkLogicError
@@ -71,6 +72,38 @@ def test_shows_activation_and_every_enabled_event(mocker, ml_config):
     assert tester.io.fetch_output() == (
         "Group: Default\nTrace Events Activated: true\n\nA: on\nB: on\n"
     )
+
+
+@respx.mock
+def test_shows_a_waiting_indicator_on_a_terminal_stderr(mocker, ml_config):
+    mocker.patch("mlclient.env.MLEnvironment.load", return_value=ml_config)
+    fake = mocker.patch(
+        "mlclient.cli.commands.trace_events.TraceEventsService",
+    ).return_value
+    fake.get.return_value = TraceEvents(activated=False, events=())
+
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("-e test") == 0
+    assert tester.io.fetch_output() == "Group: Default\nTrace Events Activated: false\n"
+    error = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8002" in error
+    assert error.endswith(ERASE_LINE)
+
+
+@respx.mock
+def test_shows_no_waiting_indicator_when_stderr_is_not_a_terminal(mocker, ml_config):
+    mocker.patch("mlclient.env.MLEnvironment.load", return_value=ml_config)
+    fake = mocker.patch(
+        "mlclient.cli.commands.trace_events.TraceEventsService",
+    ).return_value
+    fake.get.return_value = TraceEvents(activated=False, events=())
+
+    tester = _get_tester()
+
+    assert tester.execute("-e test") == 0
+    assert tester.io.fetch_error() == ""
 
 
 @pytest.mark.parametrize("event_option", ["--event", "-E"])
@@ -454,6 +487,33 @@ def test_interactive_toggles_activation_and_removes_unchecked_events(mocker, ml_
     assert tester.io.fetch_output() == (
         "Group: Default\nTrace Events Activated: false\n\nA: on\n"
     )
+
+
+@respx.mock
+def test_interactive_hides_the_waiting_indicator_while_prompting(mocker, ml_config):
+    mocker.patch("mlclient.env.MLEnvironment.load", return_value=ml_config)
+    fake = mocker.patch(
+        "mlclient.cli.commands.trace_events.TraceEventsService",
+    ).return_value
+    fake.get.return_value = TraceEvents(activated=True, events=("A",))
+    fake.set_activated.return_value = TraceEvents(activated=False, events=("A",))
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+    error_at_prompt = []
+
+    def ask() -> list[str]:
+        error_at_prompt.append(tester.io.fetch_error())
+        return ["A"]
+
+    checkbox = mocker.patch("questionary.checkbox")
+    checkbox.return_value.ask.side_effect = ask
+
+    assert tester.execute("-e test -i") == 0
+    assert "Waiting for http://localhost:8002" in error_at_prompt[0]
+    assert error_at_prompt[0].endswith(ERASE_LINE)
+    error_after_prompt = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8002" in error_after_prompt
+    assert error_after_prompt.endswith(ERASE_LINE)
 
 
 @respx.mock

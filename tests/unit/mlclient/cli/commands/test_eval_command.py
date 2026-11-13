@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import pytest
 import respx
+from cleo.testers.application_tester import ApplicationTester
 from cleo.testers.command_tester import CommandTester
 
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -293,7 +295,6 @@ def test_command_eval_output():
     assert tester.command.option("xquery") is True
 
     expected_output_lines = [
-        "Evaluating code using REST App-Server http://localhost:8002\n",
         "2023-08-09T01:01:01.001Z",
         "1",
         "string-value",
@@ -317,7 +318,6 @@ def test_command_eval_formats_results_by_default():
     tester = _get_tester("eval")
     assert tester.execute(f"-x '{code}'") == 0
     assert tester.io.fetch_output() == (
-        "Evaluating code using REST App-Server http://localhost:8002\n\n"
         "<root>\n  <item>one</item>\n  <item>two</item>\n</root>\n"
     )
 
@@ -335,9 +335,70 @@ def test_command_eval_no_pretty_preserves_xml():
 
     tester = _get_tester("eval")
     assert tester.execute(f"-x '{code}' --no-pretty") == 0
-    assert tester.io.fetch_output() == (
-        "Evaluating code using REST App-Server http://localhost:8002\n\n" + code + "\n"
+    assert tester.io.fetch_output() == (code + "\n")
+
+
+# --- output streams ---
+
+
+@pytest.mark.usefixtures("mlclient_logger")
+@respx.mock
+def test_command_eval_reports_the_app_server_on_stderr_when_verbose():
+    _mock_eval_result("<root/>")
+    app = MLCLIentApplication()
+    app.auto_exits(False)
+    tester = ApplicationTester(app)
+
+    assert tester.execute("eval -x '<root/>' -v") == 0
+    assert tester.io.fetch_output() == "<root/>\n"
+    assert (
+        "Evaluating code using REST App-Server http://localhost:8002"
+        in tester.io.fetch_error()
     )
+
+
+@pytest.mark.usefixtures("mlclient_logger")
+@respx.mock
+def test_command_eval_hides_the_app_server_without_verbose():
+    _mock_eval_result("<root/>")
+    app = MLCLIentApplication()
+    app.auto_exits(False)
+    tester = ApplicationTester(app)
+
+    assert tester.execute("eval -x '<root/>'") == 0
+    assert tester.io.fetch_output() == "<root/>\n"
+    assert "Evaluating code" not in tester.io.fetch_error()
+
+
+@respx.mock
+def test_command_eval_shows_a_waiting_indicator_on_a_terminal_stderr():
+    _mock_eval_result("<root/>")
+    tester = _get_tester("eval")
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("-x '<root/>'") == 0
+    assert tester.io.fetch_output() == "<root/>\n"
+    error = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8002" in error
+    assert error.endswith(ERASE_LINE)
+
+
+@respx.mock
+def test_command_eval_shows_no_waiting_indicator_when_stderr_is_not_a_terminal():
+    _mock_eval_result("<root/>")
+    tester = _get_tester("eval")
+
+    assert tester.execute("-x '<root/>'") == 0
+    assert tester.io.fetch_output() == "<root/>\n"
+    assert tester.io.fetch_error() == ""
+
+
+def _mock_eval_result(result: str) -> None:
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", result)
+    ml_mocker.mock_post()
 
 
 def _get_tester(

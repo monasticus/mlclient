@@ -11,6 +11,7 @@ from cleo.testers.command_tester import CommandTester
 from httpx import HTTPStatusError, Response
 
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from tests.utils import resources as resources_utils
@@ -68,6 +69,38 @@ def test_command_http_get_writes_response_body():
     assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
     assert command_output == '{"host-default-list": {}}\n'
+
+
+@respx.mock
+def test_command_http_shows_a_waiting_indicator_on_a_terminal_stderr():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body('{"host-default-list": {}}')
+    ml_mocker.mock_get()
+
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("-e test GET /manage/v2/hosts") == 0
+    assert tester.io.fetch_output() == '{"host-default-list": {}}\n'
+    error = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8002" in error
+    assert error.endswith(ERASE_LINE)
+
+
+@respx.mock
+def test_command_http_shows_no_waiting_indicator_when_stderr_is_not_a_terminal():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body('{"host-default-list": {}}')
+    ml_mocker.mock_get()
+
+    tester = _get_tester()
+
+    assert tester.execute("-e test GET /manage/v2/hosts") == 0
+    assert tester.io.fetch_error() == ""
 
 
 @respx.mock
@@ -206,7 +239,8 @@ def test_command_http_include_flag_prints_response_before_raising():
 
 
 @pytest.mark.parametrize(
-    "content_type", ["application/json", "text/plain; charset=UTF-8", None],
+    "content_type",
+    ["application/json", "text/plain; charset=UTF-8", None],
 )
 @pytest.mark.parametrize("pretty_option", ["--pretty", "-p"])
 @respx.mock

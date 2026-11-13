@@ -5,6 +5,7 @@ import respx
 from cleo.testers.command_tester import CommandTester
 
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.env import MLEnvironment
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -55,6 +56,38 @@ def test_command_version_prints_complete_version(version):
     assert tester.io.fetch_output() == f"{version}\n"
     assert tester.command.option("environment") == ["test"]
     assert tester.command.option("connection") is None
+
+
+@respx.mock
+def test_command_version_shows_a_waiting_indicator_on_a_terminal_stderr():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "12.0.1")
+    ml_mocker.mock_post()
+
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("-e test") == 0
+    assert tester.io.fetch_output() == "12.0.1\n"
+    error = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8002" in error
+    assert error.endswith(ERASE_LINE)
+
+
+@respx.mock
+def test_command_version_shows_no_waiting_indicator_when_stderr_is_not_a_terminal():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "12.0.1")
+    ml_mocker.mock_post()
+
+    tester = _get_tester()
+
+    assert tester.execute("-e test") == 0
+    assert tester.io.fetch_error() == ""
 
 
 @respx.mock

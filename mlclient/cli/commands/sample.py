@@ -15,6 +15,7 @@ from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.cli.formatting import prettify
 from mlclient.exceptions import WrongParametersError
@@ -101,7 +102,10 @@ class SampleCommand(Command):
         if len(environments) > 1:
             return self._sample_in_environments(environments, expression)
         manager = MLClientManager(environments[0])
-        with get_client(manager, self.option("connection")) as ml:
+        with (
+            get_client(manager, self.option("connection")) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             results = ml.eval.expression(expression, output_type=str)
         for output in self._format(results):
             self._io.write(output, new_line=True, type=Type.RAW)

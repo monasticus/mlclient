@@ -90,6 +90,12 @@ The local MarkLogic 12.1 probes changed some details of the decision:
   and so did the async twin. The XML default works. A missing id returns 200 / `properties: null`. The docs
   snippet runs as written. `mkdocs build --strict` and `scripts/check_docs.py` pass.
 
+## Follow-up code review (2026-11-13)
+
+### Encode request URIs as a path segment
+
+RequestGetCall accepts an ID or URI but interpolated the URI into the path without encoding. Reserved characters could change the request path, query or fragment. Encode the one segment with urllib.parse.quote as ValuesGetCall already does; a regression failed before the fix and passes after it. TestRequestsManagement: 4 integration tests passed on both local MarkLogic 10.0-11 and 12.1.0, including describe view.
+
 ## Open points for the reviewer
 
 - `view="describe"` on the list endpoint is not documented but 12.1 accepts it. The integration test will show

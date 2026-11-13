@@ -10,6 +10,8 @@ from mlclient._options import UNSET
 from mlclient.calls.invoke import InvokeCall
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -19,7 +21,7 @@ class InvokeApi:
     Evaluate XQuery or server-side JavaScript modules installed in MarkLogic.
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
     def post(
@@ -29,7 +31,7 @@ class InvokeApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Evaluate an XQuery or server-side JavaScript module installed in MarkLogic.
 
@@ -82,7 +84,7 @@ class InvokeApi:
 class AsyncInvokeApi:
     """Async mid-level API for ``/v1/invoke`` endpoint."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
     async def post(
@@ -92,7 +94,7 @@ class AsyncInvokeApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Evaluate an XQuery or server-side JavaScript module installed in MarkLogic.
 

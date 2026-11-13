@@ -85,8 +85,8 @@ class _ConnectionMode(BaseModel):
 
 
 def _resolve_connection(
-    protocol,
-    port,
+    protocol: str | _Unset,
+    port: int | _Unset,
     ssl: SSLConfig | None,
     cloud: CloudConfig | None,
 ) -> _ConnectionMode:
@@ -135,8 +135,8 @@ def _resolve_connection(
 
 
 def _resolve_cloud_connection(
-    protocol,
-    port,
+    protocol: str | _Unset,
+    port: int | _Unset,
     ssl: SSLConfig | None,
     cloud: CloudConfig,
 ) -> _ConnectionMode:
@@ -155,7 +155,7 @@ def _resolve_cloud_connection(
     )
 
 
-def _concrete_port(port) -> int:
+def _concrete_port(port: int | _Unset) -> int:
     """Return the requested port, or the default when omitted."""
     return DEFAULT_PORT if isinstance(port, _Unset) else port
 

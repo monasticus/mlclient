@@ -14,6 +14,7 @@ from mlclient._options import UNSET
 from mlclient.calls.base import ApiCall
 
 if TYPE_CHECKING:
+    import httpx
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 from mlclient.api.databases import AsyncDatabasesApi, DatabasesApi
@@ -32,10 +33,15 @@ class ManageApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
-    def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> Response:
         """Send a custom ApiCall.
 
         Parameters
@@ -185,10 +191,15 @@ class ManageApi:
 class AsyncManageApi:
     """Async Management API group for /manage/v2/* endpoints."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
-    async def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    async def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> Response:
         """Send a custom ApiCall.
 
         Parameters

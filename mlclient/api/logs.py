@@ -10,6 +10,8 @@ from mlclient._options import UNSET
 from mlclient.calls.logs import LogsCall
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -21,7 +23,7 @@ class LogsApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
     def get(
@@ -33,7 +35,7 @@ class LogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the contents of a log file.
 
@@ -85,7 +87,7 @@ class LogsApi:
 class AsyncLogsApi:
     """Async mid-level API for ``/manage/v2/logs`` endpoint."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
     async def get(
@@ -97,7 +99,7 @@ class AsyncLogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the contents of a log file.
 

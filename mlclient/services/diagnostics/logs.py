@@ -17,6 +17,8 @@ from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.api.manage import AsyncManageApi, ManageApi
 
 
@@ -26,7 +28,7 @@ class LogsService:
     _LOG_TYPES_RE = "|".join(t.value[:-3] for t in LogType)
     _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
-    def __init__(self, manage: ManageApi):
+    def __init__(self, manage: ManageApi) -> None:
         self._manage = manage
 
     def get(
@@ -38,7 +40,7 @@ class LogsService:
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server.
 
@@ -94,7 +96,7 @@ class LogsService:
         self,
         host: str | None = None,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 
@@ -233,7 +235,7 @@ class LogsService:
 class AsyncLogsService(LogsService):
     """Async higher-level service for /manage/v2/logs endpoint."""
 
-    def __init__(self, manage: AsyncManageApi):
+    def __init__(self, manage: AsyncManageApi) -> None:
         self._manage = manage
 
     async def get(  # type: ignore[override]
@@ -245,7 +247,7 @@ class AsyncLogsService(LogsService):
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server.
 
@@ -301,7 +303,7 @@ class AsyncLogsService(LogsService):
         self,
         host: str | None = None,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 

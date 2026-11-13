@@ -31,7 +31,7 @@ class ExecutionService:
         self,
         rest: RestApi | AsyncRestApi,
         scope: ServiceScope | None = None,
-    ):
+    ) -> None:
         """Create a service on the supplied REST connection.
 
         Parameters

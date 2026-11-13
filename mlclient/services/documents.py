@@ -12,6 +12,7 @@ from mlclient import _constants as constants
 from mlclient._options import UNSET
 
 if TYPE_CHECKING:
+    import httpx
     from mlclient.api.rest import AsyncRestApi, RestApi
 
 from mlclient.models.document_parts import Category, DocumentsBodyPart
@@ -76,7 +77,7 @@ class DocumentsService:
     each port.
     """
 
-    def __init__(self, rest: RestApi, scope: ServiceScope | None = None):
+    def __init__(self, rest: RestApi, scope: ServiceScope | None = None) -> None:
         """Create a service on the supplied REST connection.
 
         Parameters
@@ -119,7 +120,7 @@ class DocumentsService:
         database: str | None = UNSET,
         temporal_collection: str | None = None,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
@@ -173,7 +174,7 @@ class DocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -227,7 +228,7 @@ class DocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -290,8 +291,8 @@ class DocumentsService:
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
         txid: str | None = UNSET,
-        timeout=UNSET,
-    ):
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> None:
         """Delete document(s) content or metadata in a MarkLogic database.
 
         URIs are transparently split into batches whose combined query string
@@ -429,7 +430,7 @@ class _DocumentsSender:
 class AsyncDocumentsService:
     """Async higher-level service for /v1/documents CRUD operations."""
 
-    def __init__(self, rest: AsyncRestApi, scope: ServiceScope | None = None):
+    def __init__(self, rest: AsyncRestApi, scope: ServiceScope | None = None) -> None:
         """Create a service on the supplied REST connection.
 
         Parameters
@@ -472,7 +473,7 @@ class AsyncDocumentsService:
         database: str | None = UNSET,
         temporal_collection: str | None = None,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
@@ -526,7 +527,7 @@ class AsyncDocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -582,7 +583,7 @@ class AsyncDocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> AsyncIterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -646,8 +647,8 @@ class AsyncDocumentsService:
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
         txid: str | None = UNSET,
-        timeout=UNSET,
-    ):
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> None:
         """Delete document(s) content or metadata in a MarkLogic database.
 
         URIs are transparently split into batches whose combined query string

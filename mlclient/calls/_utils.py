@@ -16,7 +16,7 @@ def validate_supported(
     plural_noun: str,
     *,
     required: bool = False,
-):
+) -> None:
     """Reject enumerated parameter values MarkLogic does not accept.
 
     Parameters

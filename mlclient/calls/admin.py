@@ -83,7 +83,7 @@ class TimestampHeadCall(ApiCall):
     _API_VERSION: int = 1
     _ENDPOINT: str = "/admin/v{}/timestamp"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize TimestampHeadCall instance."""
         super().__init__(method=constants.METHOD_HEAD)
 
@@ -156,7 +156,7 @@ class InitPostCall(ApiCall):
         self,
         body: str | dict | None = None,
         data_format: str | None = None,
-    ):
+    ) -> None:
         """Initialize InitPostCall instance.
 
         Parameters
@@ -198,7 +198,7 @@ class InitPostCall(ApiCall):
     def _validate_params(
         cls,
         data_format: str | None,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             data_format,
             cls._SUPPORTED_FORMATS,
@@ -237,7 +237,7 @@ class InstanceAdminPostCall(ApiCall):
         self,
         body: str | dict,
         data_format: str | None = None,
-    ):
+    ) -> None:
         """Initialize InstanceAdminPostCall instance.
 
         Parameters
@@ -276,7 +276,7 @@ class InstanceAdminPostCall(ApiCall):
     def _validate_params(
         cls,
         data_format: str | None,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             data_format,
             cls._SUPPORTED_FORMATS,
@@ -322,7 +322,7 @@ class ClusterConfigPostCall(ApiCall):
         group: str | None = None,
         zone: str | None = None,
         cluster_config: bytes | None = None,
-    ):
+    ) -> None:
         """Initialize ClusterConfigPostCall instance.
 
         Parameters
@@ -373,7 +373,7 @@ class ClusterConfigPostCall(ApiCall):
         group: str | None,
         zone: str | None,
         cluster_config: bytes | None,
-    ):
+    ) -> None:
         if server_config is None and cluster_config is None:
             msg = (
                 "You must include either the server_config "
@@ -456,7 +456,7 @@ class HostConfigDeleteCall(ApiCall):
     def __init__(
         self,
         remote_host: str | None = None,
-    ):
+    ) -> None:
         """Initialize HostConfigDeleteCall instance.
 
         Parameters

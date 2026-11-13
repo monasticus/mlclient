@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import importlib.resources as pkg_resources
 import json
-from typing import Any, TextIO
+from typing import TextIO
 
 from mlclient import _constants as constants
 from mlclient import exceptions
@@ -125,13 +125,13 @@ class _BiDict:
 
     def __init__(
         self,
-        input_dict: dict,
-    ):
+        input_dict: dict[str, str],
+    ) -> None:
         """Initialize a _BiDict instance.
 
         Parameters
         ----------
-        input_dict : dict
+        input_dict : dict[str, str]
             An input regular dictionary
         """
         self._origin = dict(input_dict)
@@ -139,21 +139,21 @@ class _BiDict:
 
     def get(
         self,
-        key: Any,
-        default: Any = None,
-    ) -> Any:
+        key: str,
+        default: str | None = None,
+    ) -> str | None:
         """Return a corresponding value for a key regardless direction.
 
         Parameters
         ----------
-        key : Any
+        key : str
             A dictionary key or value
-        default : Ant, default None
+        default : str | None, default None
             A default value
 
         Returns
         -------
-        Any
+        str | None
             A corresponding value from the dictionary
         """
         return self._origin.get(key, self._inverse.get(key, default))

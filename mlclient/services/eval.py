@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import aiofiles
 
@@ -15,6 +16,9 @@ from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersEr
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
 from mlclient.xquery.expressions import XqyExpression
+
+if TYPE_CHECKING:
+    import httpx
 
 _XQUERY_FILE_EXT = ("xq", "xql", "xqm", "xqu", "xquery", "xqy")
 _JAVASCRIPT_FILE_EXT = ("js", "sjs")
@@ -36,7 +40,7 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
@@ -101,8 +105,8 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -168,8 +172,8 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -235,8 +239,8 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -302,8 +306,8 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -369,8 +373,8 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -438,9 +442,9 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate code in a MarkLogic server (general-purpose).
 
         Dynamically resolves the code type from the provided parameters.
@@ -507,9 +511,9 @@ class EvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
         params = _get_eval_params(
@@ -527,7 +531,7 @@ def _validate_params(
     file: str | None,
     xq: str | None,
     js: str | None,
-):
+) -> None:
     """Validate parameters."""
     if file and xq:
         msg = "You cannot include both the file and the xquery parameter!"
@@ -608,7 +612,7 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
@@ -673,8 +677,8 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -740,8 +744,8 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -807,8 +811,8 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -874,8 +878,8 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -941,8 +945,8 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> (
         bytes
         | str
@@ -1010,9 +1014,9 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate code in a MarkLogic server (general-purpose).
 
         Dynamically resolves the code type from the provided parameters.
@@ -1079,9 +1083,9 @@ class AsyncEvalService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
         params = await _async_get_eval_params(

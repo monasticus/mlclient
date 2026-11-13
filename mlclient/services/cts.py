@@ -23,13 +23,33 @@ from mlclient.xquery.expressions import (
 from mlclient.xquery.expressions import xpath as xpath_expression
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from typing import TypedDict
+
+    import httpx
+    from typing_extensions import Unpack
+
     from mlclient.api.rest import AsyncRestApi, RestApi
+
+    class _ExecutionOptions(TypedDict, total=False):
+        database: str | None
+        txid: str | None
+        timeout: httpx.Timeout | float | None
+        namespaces: Mapping[str, str] | None
+
+    class _NativeExecutionOptions(_ExecutionOptions, total=False):
+        output_type: type[str | bytes] | None
 
 
 class CtsService(Cts):
     """Executes cts search, lexicon and estimate queries via ``/v1/eval``."""
 
-    def __init__(self, rest: RestApi, *, namespaces=None):
+    def __init__(
+        self,
+        rest: RestApi,
+        *,
+        namespaces: Mapping[str, str] | None = None,
+    ) -> None:
         """Create search utilities using the client's REST API.
 
         Parameters
@@ -54,7 +74,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         xpath: str | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:search`` via ``/v1/eval``.
 
@@ -208,7 +228,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:uris`` via ``/v1/eval``.
 
@@ -328,7 +348,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:values`` via ``/v1/eval``.
 
@@ -460,7 +480,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         maximum: float | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:estimate`` via ``/v1/eval``.
 
@@ -527,7 +547,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:aggregate`` via ``/v1/eval``.
 
@@ -628,7 +648,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:avg-aggregate`` via ``/v1/eval``.
 
@@ -685,7 +705,7 @@ class CtsService(Cts):
         *,
         options: XqyExpression | None = None,
         training_nodes: XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:classify`` via ``/v1/eval``.
 
@@ -755,7 +775,7 @@ class CtsService(Cts):
         nodes: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:cluster`` via ``/v1/eval``.
 
@@ -856,7 +876,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:collection-match`` via ``/v1/eval``.
 
@@ -977,7 +997,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:collections`` via ``/v1/eval``.
 
@@ -1087,7 +1107,12 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def confidence(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    def confidence(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:confidence`` via ``/v1/eval``.
 
         Returns the confidence of a node, or of the context node if no node is
@@ -1131,7 +1156,7 @@ class CtsService(Cts):
         self,
         nodes: XqyExpression | list[XqyExpression] | None,
         query: str | XqyExpression,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:contains`` via ``/v1/eval``.
 
@@ -1183,7 +1208,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:correlation`` via ``/v1/eval``.
 
@@ -1243,7 +1268,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:count-aggregate`` via ``/v1/eval``.
 
@@ -1301,7 +1326,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:covariance`` via ``/v1/eval``.
 
@@ -1363,7 +1388,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:covariance-p`` via ``/v1/eval``.
 
@@ -1417,7 +1442,11 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def deregister(self, id: int | XqyExpression, **kwargs) -> list:
+    def deregister(
+        self,
+        id: int | XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:deregister`` via ``/v1/eval``.
 
         Deregister a registered query, explicitly releasing the associated
@@ -1461,7 +1490,7 @@ class CtsService(Cts):
         nodes: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:distinctive-terms`` via ``/v1/eval``.
 
@@ -1602,7 +1631,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-boxes`` via ``/v1/eval``.
 
@@ -1752,7 +1781,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
 
@@ -1890,7 +1919,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-values`` via ``/v1/eval``.
 
@@ -2028,7 +2057,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-value-co-occurrences`` via ``/v1/eval``.
 
@@ -2191,7 +2220,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Build an ``element-attribute-value-geospatial-co-occurrences`` call.
 
@@ -2362,7 +2391,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-value-match`` via ``/v1/eval``.
 
@@ -2519,7 +2548,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-value-ranges`` via ``/v1/eval``.
 
@@ -2666,7 +2695,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-values`` via ``/v1/eval``.
 
@@ -2814,7 +2843,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-word-match`` via ``/v1/eval``.
 
@@ -2932,7 +2961,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-words`` via ``/v1/eval``.
 
@@ -3066,7 +3095,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-child-geospatial-boxes`` via ``/v1/eval``.
 
@@ -3215,7 +3244,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-child-geospatial-value-match`` via ``/v1/eval``.
 
@@ -3352,7 +3381,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-child-geospatial-values`` via ``/v1/eval``.
 
@@ -3499,7 +3528,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-geospatial-boxes`` via ``/v1/eval``.
 
@@ -3644,7 +3673,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-geospatial-value-match`` via ``/v1/eval``.
 
@@ -3777,7 +3806,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-geospatial-values`` via ``/v1/eval``.
 
@@ -3925,7 +3954,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-pair-geospatial-boxes`` via ``/v1/eval``.
 
@@ -4075,7 +4104,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-pair-geospatial-value-match`` via ``/v1/eval``.
 
@@ -4213,7 +4242,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-pair-geospatial-values`` via ``/v1/eval``.
 
@@ -4350,7 +4379,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-co-occurrences`` via ``/v1/eval``.
 
@@ -4505,7 +4534,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-geospatial-co-occurrences`` via ``/v1/eval``.
 
@@ -4676,7 +4705,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-match`` via ``/v1/eval``.
 
@@ -4828,7 +4857,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-ranges`` via ``/v1/eval``.
 
@@ -4971,7 +5000,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-values`` via ``/v1/eval``.
 
@@ -5111,7 +5140,7 @@ class CtsService(Cts):
         node: XqyExpression,
         element: StringInput,
         expr: XqyExpression | list[XqyExpression] | None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-walk`` via ``/v1/eval``.
 
@@ -5167,7 +5196,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-word-match`` via ``/v1/eval``.
 
@@ -5281,7 +5310,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-words`` via ``/v1/eval``.
 
@@ -5384,7 +5413,11 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def entity_dictionary_get(self, uri: str | XqyExpression, **kwargs) -> list:
+    def entity_dictionary_get(
+        self,
+        uri: str | XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:entity-dictionary-get`` via ``/v1/eval``.
 
         Retrieve an entity dictionary previously cached in the database.
@@ -5428,7 +5461,7 @@ class CtsService(Cts):
         expr: XqyExpression | list[XqyExpression] | None,
         *,
         dict: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:entity-highlight`` via ``/v1/eval``.
 
@@ -5483,7 +5516,7 @@ class CtsService(Cts):
         expr: XqyExpression | list[XqyExpression] | None,
         *,
         dict: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:entity-walk`` via ``/v1/eval``.
 
@@ -5542,7 +5575,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:field-value-co-occurrences`` via ``/v1/eval``.
 
@@ -5697,7 +5730,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-value-match`` via ``/v1/eval``.
 
@@ -5849,7 +5882,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:field-value-ranges`` via ``/v1/eval``.
 
@@ -5992,7 +6025,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-values`` via ``/v1/eval``.
 
@@ -6129,7 +6162,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-word-match`` via ``/v1/eval``.
 
@@ -6243,7 +6276,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-words`` via ``/v1/eval``.
 
@@ -6346,7 +6379,12 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def fitness(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    def fitness(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:fitness`` via ``/v1/eval``.
 
         Returns the fitness of a node, or of the context node if no node is
@@ -6386,7 +6424,11 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def frequency(self, value: XqyExpression, **kwargs) -> list:
+    def frequency(
+        self,
+        value: XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:frequency`` via ``/v1/eval``.
 
         Returns an integer representing the number of times in which a
@@ -6446,7 +6488,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:geospatial-boxes`` via ``/v1/eval``.
 
@@ -6594,7 +6636,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:geospatial-co-occurrences`` via ``/v1/eval``.
 
@@ -6783,7 +6825,7 @@ class CtsService(Cts):
         node: XqyExpression,
         query: str | XqyExpression,
         expr: XqyExpression | list[XqyExpression] | None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:highlight`` via ``/v1/eval``.
 
@@ -6841,7 +6883,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:json-property-word-match`` via ``/v1/eval``.
 
@@ -6955,7 +6997,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:json-property-words`` via ``/v1/eval``.
 
@@ -7065,7 +7107,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:linear-model`` via ``/v1/eval``.
 
@@ -7126,7 +7168,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:match-regions`` via ``/v1/eval``.
 
@@ -7226,7 +7268,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:max`` via ``/v1/eval``.
 
@@ -7279,7 +7321,7 @@ class CtsService(Cts):
     def median(
         self,
         arg: FloatInput,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:median`` via ``/v1/eval``.
 
@@ -7325,7 +7367,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:min`` via ``/v1/eval``.
 
@@ -7375,7 +7417,11 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def part_of_speech(self, token: XqyExpression, **kwargs) -> list:
+    def part_of_speech(
+        self,
+        token: XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:part-of-speech`` via ``/v1/eval``.
 
         Returns the part of speech for a cts:token, if any.
@@ -7426,7 +7472,7 @@ class CtsService(Cts):
         value: str | int | float | bool | XqyExpression,
         *,
         options: StringInput = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:percent-rank`` via ``/v1/eval``.
 
@@ -7480,7 +7526,7 @@ class CtsService(Cts):
         self,
         arg: FloatInput,
         p: FloatInput,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:percentile`` via ``/v1/eval``.
 
@@ -7526,7 +7572,7 @@ class CtsService(Cts):
         period_1: XqyExpression,
         operator: str | XqyExpression,
         period_2: XqyExpression,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:period-compare`` via ``/v1/eval``.
 
@@ -7573,7 +7619,12 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def quality(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    def quality(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:quality`` via ``/v1/eval``.
 
         Returns the quality of a node, or of the context node if no node is
@@ -7626,7 +7677,7 @@ class CtsService(Cts):
         value: str | int | float | bool | XqyExpression,
         *,
         options: StringInput = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:rank`` via ``/v1/eval``.
 
@@ -7675,7 +7726,11 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def register(self, query: str | XqyExpression, **kwargs) -> list:
+    def register(
+        self,
+        query: str | XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:register`` via ``/v1/eval``.
 
         Register a query for later use.
@@ -7718,7 +7773,7 @@ class CtsService(Cts):
         *,
         node: XqyExpression | None = None,
         output_kind: str | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:relevance-info`` via ``/v1/eval``.
 
@@ -7762,7 +7817,12 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def remainder(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    def remainder(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:remainder`` via ``/v1/eval``.
 
         Returns an estimated search result size for a node, or of the context
@@ -7804,7 +7864,12 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    def score(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    def score(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:score`` via ``/v1/eval``.
 
         Returns the score of a node, or of the context node if no node is
@@ -7851,7 +7916,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:stddev`` via ``/v1/eval``.
 
@@ -7909,7 +7974,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:stddev-p`` via ``/v1/eval``.
 
@@ -7966,7 +8031,7 @@ class CtsService(Cts):
         *,
         language: str | XqyExpression | None = None,
         part_of_speech: str | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:stem`` via ``/v1/eval``.
 
@@ -8018,7 +8083,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:sum-aggregate`` via ``/v1/eval``.
 
@@ -8074,7 +8139,7 @@ class CtsService(Cts):
         known_labels: XqyExpression | list[XqyExpression] | None,
         *,
         recall_weight: float | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:thresholds`` via ``/v1/eval``.
 
@@ -8134,7 +8199,7 @@ class CtsService(Cts):
         *,
         language: str | XqyExpression | None = None,
         field: str | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:tokenize`` via ``/v1/eval``.
 
@@ -8186,7 +8251,7 @@ class CtsService(Cts):
         labels: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:train`` via ``/v1/eval``.
 
@@ -8319,7 +8384,7 @@ class CtsService(Cts):
         | list[XqyExpression]
         | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:triple-value-statistics`` via ``/v1/eval``.
 
@@ -8393,7 +8458,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:triples`` via ``/v1/eval``.
 
@@ -8513,7 +8578,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:uri-match`` via ``/v1/eval``.
 
@@ -8629,7 +8694,7 @@ class CtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-document-patch-path`` via ``/v1/eval``.
 
@@ -8678,7 +8743,7 @@ class CtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-extract-path`` via ``/v1/eval``.
 
@@ -8726,7 +8791,7 @@ class CtsService(Cts):
         self,
         string: str | XqyExpression,
         ignorens: bool | XqyExpression,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-index-path`` via ``/v1/eval``.
 
@@ -8773,7 +8838,7 @@ class CtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-optic-path`` via ``/v1/eval``.
 
@@ -8822,7 +8887,7 @@ class CtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-tde-context`` via ``/v1/eval``.
 
@@ -8875,7 +8940,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:value-co-occurrences`` via ``/v1/eval``.
 
@@ -9010,7 +9075,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:value-match`` via ``/v1/eval``.
 
@@ -9151,7 +9216,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:value-ranges`` via ``/v1/eval``.
 
@@ -9281,7 +9346,7 @@ class CtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:value-tuples`` via ``/v1/eval``.
 
@@ -9406,7 +9471,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:variance`` via ``/v1/eval``.
 
@@ -9463,7 +9528,7 @@ class CtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:variance-p`` via ``/v1/eval``.
 
@@ -9519,7 +9584,7 @@ class CtsService(Cts):
         node: XqyExpression,
         query: str | XqyExpression,
         expr: XqyExpression | list[XqyExpression] | None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:walk`` via ``/v1/eval``.
 
@@ -9576,7 +9641,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:word-match`` via ``/v1/eval``.
 
@@ -9685,7 +9750,7 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:words`` via ``/v1/eval``.
 
@@ -9787,13 +9852,13 @@ class CtsService(Cts):
 
     def _execute_native(
         self,
-        expr,
+        expr: XqyExpression,
         *,
-        namespaces=None,
-        database=None,
-        txid=None,
-        output_type=None,
-        timeout=UNSET,
+        namespaces: Mapping[str, str] | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list:
         """Execute a native expression and retain its result sequence.
 
@@ -9847,14 +9912,14 @@ class CtsService(Cts):
 
     def _execute(
         self,
-        expr,
-        model,
+        expr: XqyExpression,
+        model: type[SearchHit | ValueHit],
         *,
-        namespaces=None,
-        database=None,
-        txid=None,
-        timeout=UNSET,
-    ):
+        namespaces: Mapping[str, str] | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> list[SearchHit] | list[ValueHit]:
         """Execute a service transport expression and decode its paired results.
 
         Parameters
@@ -9900,7 +9965,12 @@ class CtsService(Cts):
 class AsyncCtsService(Cts):
     """Async execution of cts search, lexicon and estimate queries via ``/v1/eval``."""
 
-    def __init__(self, rest: AsyncRestApi, *, namespaces=None):
+    def __init__(
+        self,
+        rest: AsyncRestApi,
+        *,
+        namespaces: Mapping[str, str] | None = None,
+    ) -> None:
         """Create async search utilities using the client's REST API.
 
         Parameters
@@ -9925,7 +9995,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         xpath: str | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:search`` via ``/v1/eval``.
 
@@ -10079,7 +10149,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:uris`` via ``/v1/eval``.
 
@@ -10199,7 +10269,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:values`` via ``/v1/eval``.
 
@@ -10331,7 +10401,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         maximum: float | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:estimate`` via ``/v1/eval``.
 
@@ -10398,7 +10468,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:aggregate`` via ``/v1/eval``.
 
@@ -10499,7 +10569,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:avg-aggregate`` via ``/v1/eval``.
 
@@ -10556,7 +10626,7 @@ class AsyncCtsService(Cts):
         *,
         options: XqyExpression | None = None,
         training_nodes: XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:classify`` via ``/v1/eval``.
 
@@ -10626,7 +10696,7 @@ class AsyncCtsService(Cts):
         nodes: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:cluster`` via ``/v1/eval``.
 
@@ -10727,7 +10797,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:collection-match`` via ``/v1/eval``.
 
@@ -10848,7 +10918,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:collections`` via ``/v1/eval``.
 
@@ -10958,7 +11028,12 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def confidence(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    async def confidence(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:confidence`` via ``/v1/eval``.
 
         Returns the confidence of a node, or of the context node if no node is
@@ -11002,7 +11077,7 @@ class AsyncCtsService(Cts):
         self,
         nodes: XqyExpression | list[XqyExpression] | None,
         query: str | XqyExpression,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:contains`` via ``/v1/eval``.
 
@@ -11054,7 +11129,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:correlation`` via ``/v1/eval``.
 
@@ -11114,7 +11189,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:count-aggregate`` via ``/v1/eval``.
 
@@ -11172,7 +11247,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:covariance`` via ``/v1/eval``.
 
@@ -11234,7 +11309,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:covariance-p`` via ``/v1/eval``.
 
@@ -11288,7 +11363,11 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def deregister(self, id: int | XqyExpression, **kwargs) -> list:
+    async def deregister(
+        self,
+        id: int | XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:deregister`` via ``/v1/eval``.
 
         Deregister a registered query, explicitly releasing the associated
@@ -11332,7 +11411,7 @@ class AsyncCtsService(Cts):
         nodes: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:distinctive-terms`` via ``/v1/eval``.
 
@@ -11473,7 +11552,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-boxes`` via ``/v1/eval``.
 
@@ -11623,7 +11702,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
 
@@ -11761,7 +11840,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-pair-geospatial-values`` via ``/v1/eval``.
 
@@ -11899,7 +11978,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-value-co-occurrences`` via ``/v1/eval``.
 
@@ -12062,7 +12141,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Build an ``element-attribute-value-geospatial-co-occurrences`` call.
 
@@ -12233,7 +12312,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-value-match`` via ``/v1/eval``.
 
@@ -12390,7 +12469,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-value-ranges`` via ``/v1/eval``.
 
@@ -12537,7 +12616,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-values`` via ``/v1/eval``.
 
@@ -12685,7 +12764,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-word-match`` via ``/v1/eval``.
 
@@ -12803,7 +12882,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-attribute-words`` via ``/v1/eval``.
 
@@ -12937,7 +13016,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-child-geospatial-boxes`` via ``/v1/eval``.
 
@@ -13086,7 +13165,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-child-geospatial-value-match`` via ``/v1/eval``.
 
@@ -13223,7 +13302,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-child-geospatial-values`` via ``/v1/eval``.
 
@@ -13370,7 +13449,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-geospatial-boxes`` via ``/v1/eval``.
 
@@ -13515,7 +13594,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-geospatial-value-match`` via ``/v1/eval``.
 
@@ -13648,7 +13727,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-geospatial-values`` via ``/v1/eval``.
 
@@ -13796,7 +13875,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-pair-geospatial-boxes`` via ``/v1/eval``.
 
@@ -13946,7 +14025,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-pair-geospatial-value-match`` via ``/v1/eval``.
 
@@ -14084,7 +14163,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-pair-geospatial-values`` via ``/v1/eval``.
 
@@ -14221,7 +14300,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-co-occurrences`` via ``/v1/eval``.
 
@@ -14376,7 +14455,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-geospatial-co-occurrences`` via ``/v1/eval``.
 
@@ -14547,7 +14626,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-match`` via ``/v1/eval``.
 
@@ -14699,7 +14778,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-value-ranges`` via ``/v1/eval``.
 
@@ -14842,7 +14921,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-values`` via ``/v1/eval``.
 
@@ -14982,7 +15061,7 @@ class AsyncCtsService(Cts):
         node: XqyExpression,
         element: StringInput,
         expr: XqyExpression | list[XqyExpression] | None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:element-walk`` via ``/v1/eval``.
 
@@ -15038,7 +15117,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-word-match`` via ``/v1/eval``.
 
@@ -15152,7 +15231,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:element-words`` via ``/v1/eval``.
 
@@ -15255,7 +15334,11 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def entity_dictionary_get(self, uri: str | XqyExpression, **kwargs) -> list:
+    async def entity_dictionary_get(
+        self,
+        uri: str | XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:entity-dictionary-get`` via ``/v1/eval``.
 
         Retrieve an entity dictionary previously cached in the database.
@@ -15299,7 +15382,7 @@ class AsyncCtsService(Cts):
         expr: XqyExpression | list[XqyExpression] | None,
         *,
         dict: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:entity-highlight`` via ``/v1/eval``.
 
@@ -15354,7 +15437,7 @@ class AsyncCtsService(Cts):
         expr: XqyExpression | list[XqyExpression] | None,
         *,
         dict: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:entity-walk`` via ``/v1/eval``.
 
@@ -15413,7 +15496,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:field-value-co-occurrences`` via ``/v1/eval``.
 
@@ -15568,7 +15651,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-value-match`` via ``/v1/eval``.
 
@@ -15720,7 +15803,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:field-value-ranges`` via ``/v1/eval``.
 
@@ -15863,7 +15946,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-values`` via ``/v1/eval``.
 
@@ -16000,7 +16083,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-word-match`` via ``/v1/eval``.
 
@@ -16114,7 +16197,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:field-words`` via ``/v1/eval``.
 
@@ -16217,7 +16300,12 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def fitness(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    async def fitness(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:fitness`` via ``/v1/eval``.
 
         Returns the fitness of a node, or of the context node if no node is
@@ -16257,7 +16345,11 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def frequency(self, value: XqyExpression, **kwargs) -> list:
+    async def frequency(
+        self,
+        value: XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:frequency`` via ``/v1/eval``.
 
         Returns an integer representing the number of times in which a
@@ -16317,7 +16409,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:geospatial-boxes`` via ``/v1/eval``.
 
@@ -16465,7 +16557,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:geospatial-co-occurrences`` via ``/v1/eval``.
 
@@ -16654,7 +16746,7 @@ class AsyncCtsService(Cts):
         node: XqyExpression,
         query: str | XqyExpression,
         expr: XqyExpression | list[XqyExpression] | None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:highlight`` via ``/v1/eval``.
 
@@ -16712,7 +16804,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:json-property-word-match`` via ``/v1/eval``.
 
@@ -16826,7 +16918,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:json-property-words`` via ``/v1/eval``.
 
@@ -16936,7 +17028,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:linear-model`` via ``/v1/eval``.
 
@@ -16997,7 +17089,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:match-regions`` via ``/v1/eval``.
 
@@ -17097,7 +17189,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:max`` via ``/v1/eval``.
 
@@ -17150,7 +17242,7 @@ class AsyncCtsService(Cts):
     async def median(
         self,
         arg: FloatInput,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:median`` via ``/v1/eval``.
 
@@ -17196,7 +17288,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:min`` via ``/v1/eval``.
 
@@ -17246,7 +17338,11 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def part_of_speech(self, token: XqyExpression, **kwargs) -> list:
+    async def part_of_speech(
+        self,
+        token: XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:part-of-speech`` via ``/v1/eval``.
 
         Returns the part of speech for a cts:token, if any.
@@ -17297,7 +17393,7 @@ class AsyncCtsService(Cts):
         value: str | int | float | bool | XqyExpression,
         *,
         options: StringInput = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:percent-rank`` via ``/v1/eval``.
 
@@ -17351,7 +17447,7 @@ class AsyncCtsService(Cts):
         self,
         arg: FloatInput,
         p: FloatInput,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:percentile`` via ``/v1/eval``.
 
@@ -17397,7 +17493,7 @@ class AsyncCtsService(Cts):
         period_1: XqyExpression,
         operator: str | XqyExpression,
         period_2: XqyExpression,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:period-compare`` via ``/v1/eval``.
 
@@ -17444,7 +17540,12 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def quality(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    async def quality(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:quality`` via ``/v1/eval``.
 
         Returns the quality of a node, or of the context node if no node is
@@ -17497,7 +17598,7 @@ class AsyncCtsService(Cts):
         value: str | int | float | bool | XqyExpression,
         *,
         options: StringInput = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:rank`` via ``/v1/eval``.
 
@@ -17546,7 +17647,11 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def register(self, query: str | XqyExpression, **kwargs) -> list:
+    async def register(
+        self,
+        query: str | XqyExpression,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:register`` via ``/v1/eval``.
 
         Register a query for later use.
@@ -17589,7 +17694,7 @@ class AsyncCtsService(Cts):
         *,
         node: XqyExpression | None = None,
         output_kind: str | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:relevance-info`` via ``/v1/eval``.
 
@@ -17633,7 +17738,12 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def remainder(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    async def remainder(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:remainder`` via ``/v1/eval``.
 
         Returns an estimated search result size for a node, or of the context
@@ -17675,7 +17785,12 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
-    async def score(self, *, node: XqyExpression | None = None, **kwargs) -> list:
+    async def score(
+        self,
+        *,
+        node: XqyExpression | None = None,
+        **kwargs: Unpack[_NativeExecutionOptions],
+    ) -> list:
         """Execute ``cts:score`` via ``/v1/eval``.
 
         Returns the score of a node, or of the context node if no node is
@@ -17722,7 +17837,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:stddev`` via ``/v1/eval``.
 
@@ -17780,7 +17895,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:stddev-p`` via ``/v1/eval``.
 
@@ -17837,7 +17952,7 @@ class AsyncCtsService(Cts):
         *,
         language: str | XqyExpression | None = None,
         part_of_speech: str | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:stem`` via ``/v1/eval``.
 
@@ -17889,7 +18004,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:sum-aggregate`` via ``/v1/eval``.
 
@@ -17945,7 +18060,7 @@ class AsyncCtsService(Cts):
         known_labels: XqyExpression | list[XqyExpression] | None,
         *,
         recall_weight: float | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:thresholds`` via ``/v1/eval``.
 
@@ -18005,7 +18120,7 @@ class AsyncCtsService(Cts):
         *,
         language: str | XqyExpression | None = None,
         field: str | XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:tokenize`` via ``/v1/eval``.
 
@@ -18057,7 +18172,7 @@ class AsyncCtsService(Cts):
         labels: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:train`` via ``/v1/eval``.
 
@@ -18190,7 +18305,7 @@ class AsyncCtsService(Cts):
         | list[XqyExpression]
         | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:triple-value-statistics`` via ``/v1/eval``.
 
@@ -18264,7 +18379,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:triples`` via ``/v1/eval``.
 
@@ -18384,7 +18499,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:uri-match`` via ``/v1/eval``.
 
@@ -18500,7 +18615,7 @@ class AsyncCtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-document-patch-path`` via ``/v1/eval``.
 
@@ -18549,7 +18664,7 @@ class AsyncCtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-extract-path`` via ``/v1/eval``.
 
@@ -18597,7 +18712,7 @@ class AsyncCtsService(Cts):
         self,
         string: str | XqyExpression,
         ignorens: bool | XqyExpression,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-index-path`` via ``/v1/eval``.
 
@@ -18644,7 +18759,7 @@ class AsyncCtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-optic-path`` via ``/v1/eval``.
 
@@ -18693,7 +18808,7 @@ class AsyncCtsService(Cts):
         string: str | XqyExpression,
         *,
         map: XqyExpression | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:valid-tde-context`` via ``/v1/eval``.
 
@@ -18746,7 +18861,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:value-co-occurrences`` via ``/v1/eval``.
 
@@ -18881,7 +18996,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:value-match`` via ``/v1/eval``.
 
@@ -19022,7 +19137,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:value-ranges`` via ``/v1/eval``.
 
@@ -19152,7 +19267,7 @@ class AsyncCtsService(Cts):
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:value-tuples`` via ``/v1/eval``.
 
@@ -19277,7 +19392,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:variance`` via ``/v1/eval``.
 
@@ -19334,7 +19449,7 @@ class AsyncCtsService(Cts):
         options: StringInput = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:variance-p`` via ``/v1/eval``.
 
@@ -19390,7 +19505,7 @@ class AsyncCtsService(Cts):
         node: XqyExpression,
         query: str | XqyExpression,
         expr: XqyExpression | list[XqyExpression] | None,
-        **kwargs,
+        **kwargs: Unpack[_NativeExecutionOptions],
     ) -> list:
         """Execute ``cts:walk`` via ``/v1/eval``.
 
@@ -19447,7 +19562,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:word-match`` via ``/v1/eval``.
 
@@ -19556,7 +19671,7 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs,
+        **kwargs: Unpack[_ExecutionOptions],
     ) -> list:
         """Execute ``cts:words`` via ``/v1/eval``.
 
@@ -19658,13 +19773,13 @@ class AsyncCtsService(Cts):
 
     async def _execute_native(
         self,
-        expr,
+        expr: XqyExpression,
         *,
-        namespaces=None,
-        database=None,
-        txid=None,
-        output_type=None,
-        timeout=UNSET,
+        namespaces: Mapping[str, str] | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list:
         """Execute a native expression and retain its result sequence.
 
@@ -19718,14 +19833,14 @@ class AsyncCtsService(Cts):
 
     async def _execute(
         self,
-        expr,
-        model,
+        expr: XqyExpression,
+        model: type[SearchHit | ValueHit],
         *,
-        namespaces=None,
-        database=None,
-        txid=None,
-        timeout=UNSET,
-    ):
+        namespaces: Mapping[str, str] | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> list[SearchHit] | list[ValueHit]:
         """Await a service transport expression and decode paired results.
 
         Parameters
@@ -19805,7 +19920,7 @@ class _ResultPairs(XqyExpression):
         xpath: str | None = None,
         *,
         options: str | list[str] | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Retain the selected expression and validate its XPath and lexicon options.
 
         Parameters
@@ -19863,7 +19978,10 @@ class _ResultPairs(XqyExpression):
         return source + pairs
 
 
-def _result_pairs(response, model: type):
+def _result_pairs(
+    response: httpx.Response,
+    model: type[SearchHit | ValueHit],
+) -> list[SearchHit] | list[ValueHit]:
     """Parse payload/measure pairs into a list of result objects.
 
     Parameters

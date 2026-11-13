@@ -449,7 +449,7 @@ class _WatchTable:
         environments: list[str],
         kept_rows: int | None,
         cell_width: int,
-    ):
+    ) -> None:
         self._output = output
         self._environments = environments
         self._kept_rows = kept_rows

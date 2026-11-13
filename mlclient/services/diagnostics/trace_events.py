@@ -15,6 +15,7 @@ from mlclient._options import UNSET
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
+    import httpx
     from httpx import Response
 
     from mlclient.api.rest import RestApi
@@ -48,7 +49,7 @@ class TraceEventsService:
     def __init__(
         self,
         rest: RestApi,
-    ):
+    ) -> None:
         """Initialize the service with a REST API handle.
 
         Parameters
@@ -62,7 +63,7 @@ class TraceEventsService:
         self,
         *,
         group: str = "Default",
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> TraceEvents:
         """Return the group's trace-events activation and enabled events.
 
@@ -101,7 +102,7 @@ class TraceEventsService:
         *,
         value: bool,
         group: str = "Default",
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> TraceEvents:
         """Turn the group's master trace-events switch on or off.
 
@@ -140,7 +141,7 @@ class TraceEventsService:
         *,
         enabled: bool,
         group: str = "Default",
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> TraceEvents:
         """Add or remove a single trace event from the group's enabled set.
 
@@ -180,7 +181,7 @@ class TraceEventsService:
         xquery: str,
         variables: dict,
         group: str,
-        timeout,
+        timeout: httpx.Timeout | float | None,
     ) -> TraceEvents:
         """Evaluate a config-saving mutation, then read the resulting state.
 
@@ -220,7 +221,7 @@ class TraceEventsService:
         self,
         xquery: str,
         variables: dict,
-        timeout,
+        timeout: httpx.Timeout | float | None,
     ) -> Response:
         """Evaluate a query and fail loudly when the server does not answer OK.
 

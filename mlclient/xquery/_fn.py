@@ -19,7 +19,7 @@ from mlclient.xquery.expressions import (
 )
 
 
-def _optional_call(name: str, *arguments) -> FunctionCall:
+def _optional_call(name: str, *arguments: object) -> FunctionCall:
     """Trim omitted trailing arguments; preserve explicit empty sequences.
 
     Parameters

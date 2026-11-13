@@ -115,7 +115,7 @@ class SearchScope:
     options: OptionsInput = UNSET
     timestamp: str | None = UNSET
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Freeze list restrictions to tuples and copy inline options.
 
         Raises
@@ -187,7 +187,7 @@ class SearchScope:
         }
 
 
-def _check_inline_options(options: dict):
+def _check_inline_options(options: dict) -> None:
     """Reject inline options still wrapped in their ``options`` object.
 
     Parameters

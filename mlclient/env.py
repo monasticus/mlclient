@@ -441,7 +441,8 @@ def find_mlclient_directory(
 ) -> Path:
     """Return the nearest .mlclient directory at path or in an ancestor.
 
-    Searches path and, failing there, each parent up to the root.
+    Searches path and each parent up to the root. When none of them has
+    a .mlclient directory, falls back to the global one in the home directory.
 
     Parameters
     ----------
@@ -456,22 +457,31 @@ def find_mlclient_directory(
     Raises
     ------
     MLClientDirectoryNotFoundError
-        If no .mlclient directory exists at path or any of its parents
+        If no .mlclient directory exists at path, any of its parents
+        or the home directory
     """
-    if path.as_posix() in (".", "/"):
-        msg = (
-            f"{constants.ML_CLIENT_DIR} directory has not been found in any of "
-            f"parent directories!"
+    start_dir = path.absolute()
+    for directory in (start_dir, *start_dir.parents):
+        mlclient_dir = directory / constants.ML_CLIENT_DIR
+        if mlclient_dir.is_dir():
+            logger.debug(
+                "MLClient configuration home directory found: [%s]",
+                mlclient_dir,
+            )
+            return mlclient_dir
+    global_mlclient_dir = Path.home() / constants.ML_CLIENT_DIR
+    if global_mlclient_dir.is_dir():
+        logger.debug(
+            "Using global configuration directory [%s]",
+            global_mlclient_dir,
         )
-        raise MLClientDirectoryNotFoundError(msg)
-    mlclient_dir = next(
-        (child for child in path.glob(constants.ML_CLIENT_DIR) if child.is_dir()),
-        None,
+        return global_mlclient_dir
+    msg = (
+        f"{constants.ML_CLIENT_DIR} directory has not been found in {start_dir} "
+        f"or any of its parents (nor in {global_mlclient_dir}). "
+        "Run 'ml env init' or 'ml env init --global'."
     )
-    if mlclient_dir:
-        logger.debug("MLClient configuration home directory found: [%s]", mlclient_dir)
-        return mlclient_dir
-    return find_mlclient_directory(path.parent)
+    raise MLClientDirectoryNotFoundError(msg)
 
 
 __all__ = [

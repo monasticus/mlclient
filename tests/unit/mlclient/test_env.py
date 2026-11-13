@@ -1,3 +1,4 @@
+import logging
 import shutil
 from pathlib import Path
 
@@ -179,14 +180,76 @@ def test_find_mlclient_directory_in_ancestor(monkeypatch):
 
 
 def test_find_mlclient_directory_non_existing(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
+    start_dir = tmp_path / "project"
+    start_dir.mkdir()
+    home_dir = tmp_path / "home"
+    monkeypatch.setattr(Path, "home", lambda: home_dir)
 
     with pytest.raises(MLClientDirectoryNotFoundError) as err:
-        find_mlclient_directory(Path.cwd())
+        find_mlclient_directory(start_dir)
     expected_msg = (
-        ".mlclient directory has not been found in any of parent directories!"
+        f".mlclient directory has not been found in {start_dir} or any of its "
+        f"parents (nor in {home_dir / '.mlclient'}). "
+        "Run 'ml env init' or 'ml env init --global'."
     )
     assert err.value.args[0] == expected_msg
+
+
+def test_find_mlclient_directory_falls_back_to_home(tmp_path, monkeypatch, caplog):
+    start_dir = tmp_path / "project"
+    start_dir.mkdir()
+    home_dir = tmp_path / "home"
+    (home_dir / ".mlclient").mkdir(parents=True)
+    monkeypatch.setattr(Path, "home", lambda: home_dir)
+
+    with caplog.at_level(logging.DEBUG, logger="mlclient.env"):
+        ml_client_dir = find_mlclient_directory(start_dir)
+
+    assert ml_client_dir == home_dir / ".mlclient"
+    assert f"Using global configuration directory [{ml_client_dir}]" in caplog.text
+
+
+def test_find_mlclient_directory_ignores_home_file_named_mlclient(
+    tmp_path,
+    monkeypatch,
+):
+    start_dir = tmp_path / "project"
+    start_dir.mkdir()
+    home_dir = tmp_path / "home"
+    home_dir.mkdir()
+    (home_dir / ".mlclient").touch()
+    monkeypatch.setattr(Path, "home", lambda: home_dir)
+
+    with pytest.raises(MLClientDirectoryNotFoundError):
+        find_mlclient_directory(start_dir)
+
+
+def test_find_mlclient_directory_prefers_ancestor_over_home(tmp_path, monkeypatch):
+    project_dir = tmp_path / "project"
+    start_dir = project_dir / "sub" / "dir"
+    start_dir.mkdir(parents=True)
+    (project_dir / ".mlclient").mkdir()
+    home_dir = tmp_path / "home"
+    (home_dir / ".mlclient").mkdir(parents=True)
+    monkeypatch.setattr(Path, "home", lambda: home_dir)
+
+    ml_client_dir = find_mlclient_directory(start_dir)
+
+    assert ml_client_dir == project_dir / ".mlclient"
+
+
+def test_find_mlclient_directory_relative_path_searches_above_cwd(
+    tmp_path,
+    monkeypatch,
+):
+    (tmp_path / ".mlclient").mkdir()
+    (tmp_path / "project").mkdir()
+    monkeypatch.chdir(tmp_path / "project")
+    monkeypatch.setattr(Path, "home", lambda: tmp_path / "home")
+
+    ml_client_dir = find_mlclient_directory(Path())
+
+    assert ml_client_dir == tmp_path / ".mlclient"
 
 
 def test_load_in_child_directory(monkeypatch):
@@ -205,14 +268,14 @@ def test_load_in_child_directory(monkeypatch):
 
 def test_load_in_parent_directory(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(Path, "home", lambda: tmp_path / "home")
 
     with pytest.raises(MLClientDirectoryNotFoundError) as err:
         MLEnvironment.load("test-default")
-    expected_msg = (
-        ".mlclient directory has not been found in any of parent directories!"
-    )
     actual_msg = err.value.args[0]
-    assert actual_msg == expected_msg
+    assert actual_msg.startswith(
+        f".mlclient directory has not been found in {tmp_path} or any of its parents",
+    )
 
 
 def test_rest_servers():

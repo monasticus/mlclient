@@ -35,6 +35,45 @@ def test_query_params_without_transform_params():
     assert utils.query_params({"view": "all"}, None) == {"view": "all"}
 
 
+def test_extension_params_add_the_rs_prefix():
+    assert utils.extension_params({"a": "x", "start": 0, "q": ""}) == {
+        "rs:a": "x",
+        "rs:start": "0",
+        "rs:q": "",
+    }
+
+
+def test_extension_params_keep_an_existing_rs_prefix():
+    assert utils.extension_params({"rs:a": "x"}) == {"rs:a": "x"}
+
+
+def test_extension_params_repeat_list_and_tuple_values():
+    assert utils.extension_params({"a": ["x", "y"], "b": (1, 2)}) == {
+        "rs:a": ["x", "y"],
+        "rs:b": ["1", "2"],
+    }
+
+
+def test_extension_params_serialize_booleans_in_lower_case():
+    assert utils.extension_params({"t": True, "f": False, "l": [True, False]}) == {
+        "rs:t": "true",
+        "rs:f": "false",
+        "rs:l": ["true", "false"],
+    }
+
+
+def test_extension_params_serialize_numbers_as_strings():
+    assert utils.extension_params({"i": 3, "f": 1.5}) == {"rs:i": "3", "rs:f": "1.5"}
+
+
+def test_extension_params_omit_none_values():
+    assert utils.extension_params({"a": None, "b": ["x", None]}) == {"rs:b": ["x"]}
+
+
+def test_extension_params_without_params():
+    assert utils.extension_params(None) == {}
+
+
 @pytest.mark.parametrize(
     ("body", "expected"),
     [

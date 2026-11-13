@@ -10,6 +10,7 @@ from mlclient.api.hosts import AsyncHostsApi, HostsApi
 from mlclient.api.invoke import AsyncInvokeApi, InvokeApi
 from mlclient.api.logs import AsyncLogsApi, LogsApi
 from mlclient.api.manage import AsyncManageApi, ManageApi
+from mlclient.api.resources import AsyncResourcesApi, ResourcesApi
 from mlclient.api.rest import AsyncRestApi, RestApi
 from mlclient.api.roles import AsyncRolesApi, RolesApi
 from mlclient.api.search import AsyncSearchApi, SearchApi
@@ -30,6 +31,7 @@ __all__ = [
     "AsyncInvokeApi",
     "AsyncLogsApi",
     "AsyncManageApi",
+    "AsyncResourcesApi",
     "AsyncRestApi",
     "AsyncRolesApi",
     "AsyncSearchApi",
@@ -46,6 +48,7 @@ __all__ = [
     "InvokeApi",
     "LogsApi",
     "ManageApi",
+    "ResourcesApi",
     "RestApi",
     "RolesApi",
     "SearchApi",

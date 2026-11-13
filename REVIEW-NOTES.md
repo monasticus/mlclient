@@ -78,3 +78,9 @@
 - After D4 merges, the docs note could point at `ml.manage.requests.get_list(seconds_min=...)`.
 - `--timeout -1` is parsed by cleo as an option; a negative value must be written `--timeout=-1` to reach the
   validation (cleo behaviour, not specific to this option).
+
+## Follow-up code review (2026-11-13)
+
+### Timeout reporting without transport metadata
+
+A generic TimeoutException, missing request/timeout metadata or a None limit crashed the error formatter. Keep the duration when known and otherwise use the same warning without a duration. Four new regression cases failed before the fix and pass after it. Full unit suite: 10464 passed, 100% coverage; Ruff and docs checks passed.

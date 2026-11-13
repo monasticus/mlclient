@@ -58,3 +58,28 @@ def test_timed_out_message_names_the_expired_component(error_type, seconds):
     assert message == (
         f"Request timed out after {seconds}s - it may still be running on the server"
     )
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        httpx.TimeoutException(
+            "expired",
+            request=httpx.Request("GET", "http://localhost"),
+        ),
+        httpx.ReadTimeout("expired", request=httpx.Request("GET", "http://localhost")),
+        httpx.ReadTimeout(
+            "expired",
+            request=httpx.Request(
+                "GET",
+                "http://localhost",
+                extensions={"timeout": {"read": None}},
+            ),
+        ),
+        httpx.ReadTimeout("expired"),
+    ],
+)
+def test_timeout_without_a_known_duration_still_reports_the_timeout(error):
+    assert timed_out_message(error) == (
+        "Request timed out - it may still be running on the server"
+    )

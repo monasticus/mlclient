@@ -87,15 +87,21 @@ def timed_out_message(
     Returns
     -------
     str
-        The seconds of the expired timeout component and a warning that the
-        request may still be running on the server.
+        The configured duration when available, and a warning that the request
+        may still be running on the server. Custom transports may omit the
+        request or its timeout metadata.
     """
     component = next(
-        name
-        for error_type, name in _EXPIRED_COMPONENTS.items()
-        if isinstance(error, error_type)
+        (
+            name
+            for error_type, name in _EXPIRED_COMPONENTS.items()
+            if isinstance(error, error_type)
+        ),
+        None,
     )
-    seconds = error.request.extensions["timeout"][component]
-    return (
-        f"Request timed out after {seconds:g}s - it may still be running on the server"
-    )
+    try:
+        seconds = error.request.extensions.get("timeout", {}).get(component)
+    except RuntimeError:
+        seconds = None
+    duration = f" after {seconds:g}s" if seconds is not None else ""
+    return f"Request timed out{duration} - it may still be running on the server"

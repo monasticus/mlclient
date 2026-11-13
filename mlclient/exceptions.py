@@ -42,7 +42,9 @@ class ConfigError(Exception):
 
     Raised at client creation time when connection and authentication settings
     form a combination MarkLogic cannot support (e.g. certificate auth without
-    a client certificate, or a Cloud connection mixed with explicit auth).
+    a client certificate, or a Cloud connection mixed with explicit auth), and
+    when an environment file cannot be loaded (empty, not a mapping, invalid
+    YAML or invalid settings).
     """
 
 

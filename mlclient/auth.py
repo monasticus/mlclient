@@ -37,11 +37,18 @@ from __future__ import annotations
 import base64
 import logging
 import ssl
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 from urllib.parse import urljoin
 
 import httpx
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    ValidationInfo,
+    field_validator,
+)
 
 _TokenVerify = Union[bool, str, ssl.SSLContext]
 
@@ -72,12 +79,31 @@ class AuthConfig(BaseModel):
       it only when the SPN was registered under a different service name.
     - ``hostname`` -- the hostname part of the Kerberos SPN; used only for
       ``"kerberos"``, defaulting to the request host when omitted.
+
+    Unknown fields are rejected, and ``"oauth"`` requires a non-empty token.
+    The token is a ``SecretStr``: read it with ``token.get_secret_value()``.
     """
 
-    method: str
-    token: Optional[str] = None
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+
+    method: Literal["oauth", "kerberos", "certificate"]
+    token: Optional[SecretStr] = Field(default=None, validate_default=True)
     service: str = "HTTP"
     hostname: Optional[str] = None
+
+    @field_validator("token")
+    @classmethod
+    def _require_oauth_token(
+        cls,
+        token: SecretStr | None,
+        info: ValidationInfo,
+    ) -> SecretStr | None:
+        """Reject a missing or empty token for the OAuth method."""
+        is_missing = token is None or not token.get_secret_value()
+        if info.data.get("method") == "oauth" and is_missing:
+            msg = "required for method 'oauth'"
+            raise ValueError(msg)
+        return token
 
 
 class OAuthBearerAuth(httpx.Auth):
@@ -347,7 +373,7 @@ def _build_auth(
     Raises
     ------
     ValueError
-        If a string shortcut or AuthConfig method is not recognized.
+        If a string shortcut is not recognized.
     TypeError
         If the auth parameter is of an unsupported type.
     """
@@ -399,18 +425,25 @@ def _build_from_shortcut(
     shortcuts (certificate, kerberos) select a method that needs no extra data
     and resolve through the same path as an ``AuthConfig`` with default fields.
     """
+    _require_known_shortcut(auth)
     if auth == "basic":
         return httpx.BasicAuth(username, password)
     if auth in ("digest", "digestbasic"):
         return httpx.DigestAuth(username, password)
-    if auth in _DEFAULTED_AUTH_SHORTCUTS:
-        return _build_from_config(AuthConfig(method=auth))
-    msg = (
-        f"Unknown auth shortcut: {auth!r}. "
-        f"Only {', '.join(repr(s) for s in _AUTH_SHORTCUTS)} "
-        f"are valid as strings."
-    )
-    raise ValueError(msg)
+    return _build_from_config(AuthConfig(method=auth))
+
+
+def _require_known_shortcut(
+    auth: str,
+) -> None:
+    """Raise ValueError unless ``auth`` names a string auth shortcut."""
+    if auth not in _AUTH_SHORTCUTS:
+        msg = (
+            f"Unknown auth shortcut: {auth!r}. "
+            f"Only {', '.join(repr(s) for s in _AUTH_SHORTCUTS)} "
+            f"are valid as strings."
+        )
+        raise ValueError(msg)
 
 
 def _build_from_config(
@@ -420,11 +453,8 @@ def _build_from_config(
     if config.method == "certificate":
         return None
     if config.method == "oauth":
-        return OAuthBearerAuth(token=config.token)
-    if config.method == "kerberos":
-        return _build_kerberos_auth(config)
-    msg = f"Unknown auth method: {config.method!r}"
-    raise ValueError(msg)
+        return OAuthBearerAuth(token=config.token.get_secret_value())
+    return _build_kerberos_auth(config)
 
 
 def _build_kerberos_auth(

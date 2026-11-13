@@ -8,6 +8,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
+from pydantic import ValidationError
 
 from mlclient._options import UNSET
 from mlclient.connection import (
@@ -158,6 +159,46 @@ def test_get_ssl_context_loads_client_cert(tmp_path):
     assert context is not None
 
 
+def test_get_ssl_context_unlocks_client_key_with_password(tmp_path):
+    cert_file, key_file = _write_client_cert(tmp_path, key_password=b"k3y-pass")
+    context = _get_ssl_context(
+        SSLConfig(
+            cert_file=str(cert_file),
+            key_file=str(key_file),
+            key_password="k3y-pass",
+        ),
+    )
+    assert context is not None
+
+
+@pytest.mark.parametrize(
+    ("config", "secret_field"),
+    [
+        (SSLConfig(key_password="k3y-pass"), "key_password"),
+        (CloudConfig(api_key="k3y-pass", base_path="/p"), "api_key"),
+    ],
+)
+def test_configs_hide_secrets(config, secret_field):
+    assert "k3y-pass" not in repr(config)
+    assert "k3y-pass" not in str(getattr(config, secret_field))
+    assert "k3y-pass" not in config.model_dump_json()
+    assert getattr(config, secret_field).get_secret_value() == "k3y-pass"
+
+
+@pytest.mark.parametrize(
+    ("model", "settings"),
+    [
+        (SSLConfig, {"key_password": "k3y-pass", "key_pasword": "x"}),
+        (CloudConfig, {"api-key": "k3y-pass", "base-path": "/p", "base_pth": "x"}),
+    ],
+)
+def test_configs_reject_unknown_setting_without_showing_input(model, settings):
+    with pytest.raises(ValidationError) as err:
+        model.model_validate(settings)
+    assert [issue["type"] for issue in err.value.errors()] == ["extra_forbidden"]
+    assert "k3y-pass" not in str(err.value)
+
+
 def test_validate_cloud_with_client_cert_raises():
     cloud = CloudConfig(api_key="mk-123", base_path="/p")
     ssl_config = SSLConfig(cert_file="/client.pem", key_file="/client-key.pem")
@@ -180,7 +221,7 @@ def _write_self_signed_ca(tmp_path):
     return ca_bundle
 
 
-def _write_client_cert(tmp_path):
+def _write_client_cert(tmp_path, key_password=None):
     """Write a self-signed client certificate and its key for the factory."""
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "mlclient-test-client")])
@@ -192,7 +233,11 @@ def _write_client_cert(tmp_path):
         key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption(),
+            encryption_algorithm=(
+                serialization.BestAvailableEncryption(key_password)
+                if key_password
+                else serialization.NoEncryption()
+            ),
         ),
     )
     return cert_file, key_file

@@ -8,6 +8,7 @@ import types
 
 import httpx
 import pytest
+from pydantic import ValidationError
 
 from mlclient.auth import (
     AuthConfig,
@@ -86,9 +87,9 @@ def test_build_auth_kerberos_string_uses_default_spn(monkeypatch):
     assert spnego.context.spn == "HTTP/ml.example.com"
 
 
-def test_build_auth_unknown_config_method():
-    with pytest.raises(ValueError, match="Unknown auth method"):
-        _build_auth(AuthConfig(method="saml"), "user", "pass")
+def test_auth_config_rejects_unknown_method():
+    with pytest.raises(ValidationError, match="method"):
+        AuthConfig(method="saml")
 
 
 def test_build_auth_wrong_type():
@@ -109,6 +110,40 @@ def test_oauth_bearer_sets_header():
     flow = auth.auth_flow(request)
     prepared = next(flow)
     assert prepared.headers["Authorization"] == "Bearer my-token"
+
+
+@pytest.mark.parametrize("token", [None, ""])
+def test_oauth_without_token_is_a_validation_error(token):
+    with pytest.raises(ValidationError) as err:
+        AuthConfig(method="oauth", token=token)
+    problems = [(issue["loc"], issue["msg"]) for issue in err.value.errors()]
+    assert problems == [(("token",), "Value error, required for method 'oauth'")]
+
+
+@pytest.mark.parametrize("method", ["kerberos", "certificate"])
+def test_token_not_required_for_other_methods(method):
+    assert AuthConfig(method=method).token is None
+
+
+def test_oauth_config_sends_bearer_token():
+    auth = _build_auth(AuthConfig(method="oauth", token="abc"), "user", "pass")
+    flow = auth.auth_flow(httpx.Request("GET", "http://localhost:8000/"))
+    assert next(flow).headers["Authorization"] == "Bearer abc"
+
+
+def test_auth_config_hides_token():
+    config = AuthConfig(method="oauth", token="t0p-s3cret")
+    assert "t0p-s3cret" not in repr(config)
+    assert "t0p-s3cret" not in str(config.token)
+    assert "t0p-s3cret" not in config.model_dump_json()
+    assert config.token.get_secret_value() == "t0p-s3cret"
+
+
+def test_auth_config_rejects_unknown_setting_without_showing_input():
+    with pytest.raises(ValidationError) as err:
+        AuthConfig(method="oauth", token="t0p-s3cret", tokn="x")
+    assert [issue["loc"] for issue in err.value.errors()] == [("tokn",)]
+    assert "t0p-s3cret" not in str(err.value)
 
 
 def test_kerberos_without_dependency_raises_install_hint(monkeypatch):

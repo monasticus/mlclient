@@ -15,14 +15,15 @@ See [Clients](../guides/clients.md) for the full tier map.
 
 ## Client services
 
-Documents, evaluation, module invocation, search and transactions are available directly on the
-client:
+Documents, evaluation, module invocation, REST extensions, search and transactions are available
+directly on the client:
 
 | Service | Access | Guide |
 | --- | --- | --- |
 | Documents | `ml.documents` | [Documents](../guides/documents.md) |
 | Evaluate code | `ml.eval` | [Evaluate code](../guides/eval.md) |
 | Invoke modules | `ml.invoke` | [Invoke modules](../guides/invoke.md) |
+| REST extensions | `ml.resources` | [REST extensions](../guides/rest-extensions.md) |
 | Search | `ml.search` | [Search](../guides/search.md) |
 | Transactions | `ml.transaction()` | [Transactions](../guides/transactions.md) |
 
@@ -36,7 +37,7 @@ with MLClient() as ml:
 
 ### Reuse a scoped service
 
-`ml.documents`, `ml.eval`, `ml.invoke` and `ml.search` start with an empty scope. Calling one
+`ml.documents`, `ml.eval`, `ml.invoke`, `ml.resources` and `ml.search` start with an empty scope. Calling one
 with settings, such as `ml.documents(database="catalog")`, returns a new service
 that uses those defaults for subsequent operations. Creating it sends no request
 and leaves the original service unchanged; both share the same connection.
@@ -46,6 +47,7 @@ and leaves the original service unchanged; both share the same connection.
 | Documents | `ml.documents` | `ml.documents(database="catalog")` | [ServiceScope][mlclient.services.ServiceScope] |
 | Evaluation | `ml.eval` | `ml.eval(database="catalog")` | [ServiceScope][mlclient.services.ServiceScope] |
 | Invocation | `ml.invoke` | `ml.invoke(database="catalog")` | [ServiceScope][mlclient.services.ServiceScope] |
+| REST extensions | `ml.resources` | `ml.resources(database="catalog")` | [ServiceScope][mlclient.services.ServiceScope] |
 | Search | `ml.search` | `ml.search(database="catalog", collection="products")` | [SearchScope][mlclient.services.SearchScope] |
 
 `ServiceScope` holds `database` and `txid`. `SearchScope` also supports search
@@ -62,7 +64,7 @@ with MLClient() as ml:
     uris = products.uris("coffee")
 ```
 
-On all four services, per-operation `database=` and `txid=` arguments override
+On all five services, per-operation `database=` and `txid=` arguments override
 the service defaults; `None` clears an inherited value. Transaction settings can
 also be unpacked with `**txn`, on the service (`ml.documents(**txn)`) or an
 operation (`ml.documents.read("/example.json", **txn)`). For search-specific

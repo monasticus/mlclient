@@ -88,16 +88,15 @@ class Document(metaclass=ABCMeta):
 
         Returns
         -------
-        bool
-            True if the subclass includes the content property
+        bool | NotImplementedType
+            Whether a concrete class implements the Document content properties.
+            Concrete document types defer to ordinary subclass checks.
         """
-        return (
-            "content" in subclass.__dict__
-            and not callable(subclass.content)
-            and "content_bytes" in subclass.__dict__
-            and not callable(subclass.content_bytes)
-            and "content_string" in subclass.__dict__
-            and not callable(subclass.content_string)
+        if cls is not Document:
+            return NotImplemented
+        return not getattr(subclass, "__abstractmethods__", ()) and all(
+            hasattr(subclass, name) and not callable(getattr(subclass, name))
+            for name in ("content", "content_bytes", "content_string")
         )
 
     @classmethod

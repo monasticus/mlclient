@@ -1321,3 +1321,19 @@ def _mock_head_documents(status_code: int, params: dict[str, str]) -> respx.Rout
         mocker.with_response_header("ML-Effective-Timestamp", "17945794362918270")
     mocker.with_empty_response_body()
     return mocker.mock_head()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exists_rejects_an_unexpected_success_status():
+    route = _mock_head_documents(204, {"uri": "/some/dir/doc2.json"})
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(httpx.HTTPStatusError, match="Expected HEAD") as raised:
+            await ml.documents.exists("/some/dir/doc2.json")
+
+    assert str(raised.value) == (
+        "Expected HEAD /v1/documents to return 200 or 404, got 204."
+    )
+    assert raised.value.response.status_code == 204
+    assert raised.value.request.url == route.calls.last.request.url

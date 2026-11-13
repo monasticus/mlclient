@@ -70,6 +70,12 @@
   - an unknown `database` makes the server answer 400, which raises `HTTPStatusError`
   - async client: same results for missing, existing and deleted
 
+## Follow-up code review (2026-11-13)
+
+### Reject unexpected successful HEAD statuses
+
+The agreed contract is 200=True, 404=False and every other status raises. An unexpected 204 previously returned True. One shared response interpreter now retains request/response in HTTPStatusError and rejects unexpected 2xx. Sync and async regression tests failed before the change; the affected service suites pass (185 tests). The stable-source full unit rerun passed: 10448 tests, 100% coverage; Ruff and docs checks passed. Live sync/async existence checks and transaction visibility passed on MarkLogic 10.0-11 and 12.1.0, with unique fixtures cleaned up.
+
 ## Open points for the reviewer
 
 - None.

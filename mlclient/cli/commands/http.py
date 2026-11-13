@@ -15,7 +15,7 @@ from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
-from httpx import Headers, Response
+from httpx import Headers, Response, TimeoutException
 
 from mlclient._manager import MLClientManager
 from mlclient.cli.commands._multi_env_common import (
@@ -25,6 +25,7 @@ from mlclient.cli.commands._multi_env_common import (
 )
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.cli.formatting import prettify
+from mlclient.cli.timeout import parse_timeout, timed_out_message, timeout_option
 from mlclient.clients.http import HttpClient
 from mlclient.exceptions import WrongParametersError
 
@@ -60,6 +61,10 @@ class HttpCommand(Command):
             Include the status line and response headers in the output
       -p, --pretty
             Pretty-print an XML or JSON body
+          --timeout=TIMEOUT
+            Seconds to wait for MarkLogic, 0 waits indefinitely (default: connect
+            5, read 60); a timed-out request may still run on the server and an
+            update may still commit
     """
 
     name: str = "http"
@@ -112,6 +117,7 @@ class HttpCommand(Command):
             "p",
             description="Pretty-print an XML or JSON body",
         ),
+        timeout_option(),
     ]
 
     def handle(self) -> int:
@@ -134,15 +140,20 @@ class HttpCommand(Command):
             "body": _read_body(self.option("body")),
             "params": query or None,
             "headers": headers or None,
+            "timeout": parse_timeout(self.option("timeout")),
         }
 
         environments = selected_environments(self)
         if len(environments) > 1:
             return self._request_in_environments(environments, request)
         mgr = MLClientManager(environments[0])
-        with get_client(mgr, self.option("connection")) as ml:
-            response = ml.http.request(**request)
-            output = self._render(method, response)
+        try:
+            with get_client(mgr, self.option("connection")) as ml:
+                response = ml.http.request(**request)
+                output = self._render(method, response)
+        except TimeoutException as error:
+            self.line_error(timed_out_message(error), style="error")
+            return 1
 
         self._io.write(output, new_line=True, type=Type.RAW)
         if response.is_error:

@@ -68,6 +68,25 @@ commit or roll back that transaction.
 Print each result without reformatting XML or JSON, for example when piping output
 to another tool. Plain text and other scalar results are always printed unchanged.
 
+### `--timeout`
+
+Seconds to wait for MarkLogic. A number sets all four HTTP timeout components
+(connect, read, write and pool) for this request; `0` disables the timeout.
+Without the option the client defaults apply: 5 seconds to connect, 60 seconds
+to read. See [Timeouts](../advanced/http/timeouts.md).
+
+A timeout only stops the client from waiting. MarkLogic keeps running the
+request, so an update may still commit after the command has failed. The command
+prints one line to stderr and exits with 1:
+
+```text
+Request timed out after 60s - it may still be running on the server
+```
+
+Before you run an update again, check on the server whether it is still running
+or has committed, for example in the Monitoring dashboard or with
+`xdmp:server-status`.
+
 ### `--environment`, `-e`
 
 Environment name. Defaults to `local`; use `-e dev` to load

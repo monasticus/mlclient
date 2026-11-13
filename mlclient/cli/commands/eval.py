@@ -7,6 +7,7 @@ It exports an implementation for 'eval' command:
 
 from __future__ import annotations
 
+import httpx
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
@@ -23,6 +24,7 @@ from mlclient.cli.commands._multi_env_common import (
     time_in_environments,
 )
 from mlclient.cli.connection import get_async_client, get_client
+from mlclient.cli.timeout import parse_timeout, timed_out_message, timeout_option
 from mlclient.exceptions import WrongParametersError
 
 
@@ -60,6 +62,10 @@ class EvalCommand(Command):
             The transaction identifier of the multi-statement transaction
           --no-pretty
             Print results without reformatting XML or JSON
+          --timeout=TIMEOUT
+            Seconds to wait for MarkLogic, 0 waits indefinitely (default: connect
+            5, read 60); a timed-out request may still run on the server and an
+            update may still commit
     """
 
     name: str = "eval"
@@ -118,6 +124,7 @@ class EvalCommand(Command):
             "no-pretty",
             description="Print results without reformatting XML or JSON",
         ),
+        timeout_option(),
     ]
 
     def handle(
@@ -128,7 +135,11 @@ class EvalCommand(Command):
         environments = selected_environments(self)
         if len(environments) > 1:
             return self._time_in_environments(environments, eval_params)
-        results = self._call_eval(environments[0], eval_params)
+        try:
+            results = self._call_eval(environments[0], eval_params)
+        except httpx.TimeoutException as error:
+            self.line_error(timed_out_message(error), style="error")
+            return 1
         write_results(self, results)
         return 0
 
@@ -149,6 +160,7 @@ class EvalCommand(Command):
             "output_type": str,
             "database": database,
             "txid": txid,
+            "timeout": parse_timeout(self.option("timeout")),
         }
         if xq_flag:
             params["xq"] = code

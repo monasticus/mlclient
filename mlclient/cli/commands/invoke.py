@@ -7,12 +7,14 @@ It exports an implementation for 'invoke' command:
 
 from __future__ import annotations
 
+import httpx
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
+from mlclient._options import _Unset
 from mlclient.cli.commands._execution_common import (
     format_results,
     parse_variables,
@@ -23,6 +25,7 @@ from mlclient.cli.commands._multi_env_common import (
     time_in_environments,
 )
 from mlclient.cli.connection import get_async_client, get_client
+from mlclient.cli.timeout import parse_timeout, timed_out_message, timeout_option
 
 
 class InvokeCommand(Command):
@@ -48,6 +51,10 @@ class InvokeCommand(Command):
             The transaction identifier of the multi-statement transaction
           --no-pretty
             Print results without reformatting XML or JSON
+          --timeout=TIMEOUT
+            Seconds to wait for MarkLogic, 0 waits indefinitely (default: connect
+            5, read 60); a timed-out request may still run on the server and an
+            update may still commit
     """
 
     name: str = "invoke"
@@ -96,6 +103,7 @@ class InvokeCommand(Command):
             "no-pretty",
             description="Print results without reformatting XML or JSON",
         ),
+        timeout_option(),
     ]
 
     def handle(
@@ -103,10 +111,15 @@ class InvokeCommand(Command):
     ) -> int:
         """Execute the command."""
         variables = parse_variables(self.option("var"))
+        timeout = parse_timeout(self.option("timeout"))
         environments = selected_environments(self)
         if len(environments) > 1:
-            return self._time_in_environments(environments, variables)
-        results = self._invoke_module(environments[0], variables)
+            return self._time_in_environments(environments, variables, timeout)
+        try:
+            results = self._invoke_module(environments[0], variables, timeout)
+        except httpx.TimeoutException as error:
+            self.line_error(timed_out_message(error), style="error")
+            return 1
         write_results(self, results)
         return 0
 
@@ -114,6 +127,7 @@ class InvokeCommand(Command):
         self,
         environment: str,
         variables: dict[str, str],
+        timeout: float | None | _Unset,
     ):
         """Invoke the module and get its results.
 
@@ -123,6 +137,8 @@ class InvokeCommand(Command):
             Environment in which to invoke the module.
         variables : dict[str, str]
             External variables to pass to the module.
+        timeout : float | None | _Unset
+            The per-request HTTP timeout; UNSET keeps the client default.
 
         Returns
         -------
@@ -140,12 +156,14 @@ class InvokeCommand(Command):
                 database=self.option("database"),
                 txid=self.option("txid"),
                 output_type=str,
+                timeout=timeout,
             )
 
     def _time_in_environments(
         self,
         environments: list[str],
         variables: dict[str, str],
+        timeout: float | None | _Unset,
     ) -> int:
         """Invoke the module concurrently and compare the results.
 
@@ -155,6 +173,9 @@ class InvokeCommand(Command):
             Environments in display order.
         variables : dict[str, str]
             External variables passed to every invocation.
+        timeout : float | None | _Unset
+            The per-request HTTP timeout of every invocation; UNSET keeps the
+            client default.
 
         Returns
         -------
@@ -173,6 +194,7 @@ class InvokeCommand(Command):
                     database=self.option("database"),
                     txid=self.option("txid"),
                     output_type=str,
+                    timeout=timeout,
                 )
 
         def describe(results: str | list[str]) -> str:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import httpx
 import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
@@ -7,6 +8,7 @@ from cleo.testers.command_tester import CommandTester
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
+from mlclient.http import DEFAULT_TIMEOUT
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -376,3 +378,83 @@ def test_command_eval_runs_in_each_selected_environment():
     assert "second" in output
     assert output.count("hello") == 2
     assert route.call_count == 2
+
+
+# --- timeout ---
+
+_TIMED_OUT = "Request timed out after 2s - it may still be running on the server\n"
+
+
+@pytest.mark.parametrize(
+    ("options", "timeout"),
+    [
+        ("--timeout 2", httpx.Timeout(2).as_dict()),
+        ("--timeout 0.5", httpx.Timeout(0.5).as_dict()),
+        ("--timeout 0", httpx.Timeout(None).as_dict()),
+        ("", DEFAULT_TIMEOUT.as_dict()),
+    ],
+)
+@respx.mock
+def test_command_eval_sends_the_requested_timeout(options, timeout):
+    sent_timeouts = []
+
+    def respond(request):
+        sent_timeouts.append(request.extensions["timeout"])
+        return httpx.Response(200)
+
+    respx.post("http://localhost:8002/v1/eval").mock(side_effect=respond)
+    tester = _get_tester("eval")
+
+    assert tester.execute(f"-x 1 {options}") == 0
+    assert sent_timeouts == [timeout]
+
+
+@respx.mock
+def test_command_eval_sends_the_requested_timeout_to_each_environment():
+    sent_timeouts = []
+
+    def respond(request):
+        sent_timeouts.append(request.extensions["timeout"])
+        return httpx.Response(200)
+
+    respx.post("http://localhost:8002/v1/eval").mock(side_effect=respond)
+    tester = _get_tester("eval")
+
+    assert tester.execute("-e first -e second -x 1 --timeout 2") == 0
+    assert sent_timeouts == [httpx.Timeout(2).as_dict()] * 2
+
+
+@respx.mock
+def test_command_eval_reports_a_timeout_in_one_line():
+    respx.post("http://localhost:8002/v1/eval").mock(side_effect=_time_out)
+    tester = _get_tester("eval")
+
+    assert tester.execute("-x 'xdmp:sleep(5000)' --timeout 2") == 1
+    assert tester.io.fetch_error() == _TIMED_OUT
+
+
+@respx.mock
+def test_command_eval_reports_a_timeout_in_the_environment_column():
+    respx.post("http://localhost:8002/v1/eval").mock(side_effect=_time_out)
+    tester = _get_tester("eval")
+
+    assert tester.execute("-e first -e second -x 1 --timeout 2") == 1
+    output = " ".join(tester.io.fetch_output().split())
+    assert output.count("Request timed out after 2s") == 2
+
+
+@respx.mock
+def test_command_eval_rejects_an_invalid_timeout_before_request():
+    tester = _get_tester("eval")
+
+    with pytest.raises(WrongParametersError, match="non-negative") as error:
+        tester.execute("-x 1 --timeout=-1")
+
+    expected = "--timeout must be a non-negative number of seconds, got: '-1'"
+    assert str(error.value) == expected
+    assert not respx.calls
+
+
+def _time_out(request):
+    msg = "The read operation timed out"
+    raise httpx.ReadTimeout(msg, request=request)

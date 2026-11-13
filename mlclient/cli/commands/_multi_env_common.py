@@ -16,8 +16,11 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
+import httpx
 from cleo.formatters.formatter import Formatter
 from cleo.ui.table import Table
+
+from mlclient.cli.timeout import timed_out_message
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
@@ -260,11 +263,32 @@ async def _run(
     except Exception as error:
         run.elapsed = time.perf_counter() - started
         run.error = error
-        run.output = str(error)
+        run.output = _describe_error(error)
         run.style = getattr(error, "style", _ERROR_STYLE)
     else:
         run.elapsed = time.perf_counter() - started
         run.output = output
+
+
+def _describe_error(
+    error: Exception,
+) -> str:
+    """Describe a failed request in the run output.
+
+    Parameters
+    ----------
+    error : Exception
+        The exception the request raised.
+
+    Returns
+    -------
+    str
+        The timeout message for an expired HTTP timeout, otherwise the
+        exception message.
+    """
+    if isinstance(error, httpx.TimeoutException):
+        return timed_out_message(error)
+    return str(error)
 
 
 def _render(

@@ -332,3 +332,19 @@ def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
         "txid": "transaction",
     }
     assert call.body is None
+
+
+def test_transform_params_preserve_false_zero_and_empty_values():
+    call = DocumentsGetCall(
+        uri="/a.json",
+        transform="tag",
+        transform_params={"flag": False, "limit": 0, "label": "", "omit": None},
+    )
+
+    assert call.params == {
+        "uri": "/a.json",
+        "transform": "tag",
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+    }

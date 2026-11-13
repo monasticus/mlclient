@@ -17,6 +17,7 @@ from typing import ClassVar
 from mlclient import _constants as constants
 from mlclient import _utils as utils
 from mlclient import exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 from mlclient.models.document_parts import Category, DocumentsBodyPart
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
@@ -43,7 +44,6 @@ class DocumentsGetCall(ApiCall):
     _TIMESTAMP_PARAM: str = "timestamp"
     _TRANSFORM_PARAM: str = "transform"
     _TXID_PARAM: str = "txid"
-    _TRANS_PARAM_PREFIX: str = "trans:"
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["json", "xml"]
     _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
@@ -112,10 +112,7 @@ class DocumentsGetCall(ApiCall):
         self.add_param(self._TIMESTAMP_PARAM, timestamp)
         self.add_param(self._TRANSFORM_PARAM, transform)
         self.add_param(self._TXID_PARAM, txid)
-        if transform_params:
-            for trans_param_name, value in transform_params.items():
-                param = self._TRANS_PARAM_PREFIX + trans_param_name
-                self.add_param(param, value)
+        self._params.update(call_utils.query_params({}, transform_params))
 
     @property
     def endpoint(
@@ -188,7 +185,6 @@ class DocumentsPostCall(ApiCall):
     _TXID_PARAM: str = "txid"
     _TEMPORAL_COLLECTION_PARAM: str = "temporal-collection"
     _SYSTEM_TIME_PARAM: str = "system-time"
-    _TRANS_PARAM_PREFIX: str = "trans:"
 
     def __init__(
         self,
@@ -239,10 +235,7 @@ class DocumentsPostCall(ApiCall):
         self.add_param(self._TXID_PARAM, txid)
         self.add_param(self._TEMPORAL_COLLECTION_PARAM, temporal_collection)
         self.add_param(self._SYSTEM_TIME_PARAM, system_time)
-        if transform_params:
-            for trans_param_name, value in transform_params.items():
-                param = self._TRANS_PARAM_PREFIX + trans_param_name
-                self.add_param(param, value)
+        self._params.update(call_utils.query_params({}, transform_params))
         body, content_type = self._build_body(body_parts)
         self.add_header(constants.HEADER_NAME_CONTENT_TYPE, content_type)
         self.body = body

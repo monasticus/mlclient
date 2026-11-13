@@ -10,7 +10,7 @@ jobs:
   integration-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    name: integration-tests (${{ matrix.marklogic-image }})
+    name: integration-tests (${{ matrix.marklogic-image }}${{ matrix.dependencies == 'lowest-direct' && ', lowest-direct' || '' }})
     strategy:
       fail-fast: false
       matrix:
@@ -18,6 +18,11 @@ jobs:
           - progressofficial/marklogic-db:10.0-11.1-ubi-2.2.4
           - progressofficial/marklogic-db:11.3.7-ubi-2.3.0
           - progressofficial/marklogic-db:12.1.0-ubi-2.3.0
+        dependencies: [locked]
+        include:
+          # Proves the lower bounds in pyproject.toml: every direct dependency at its lowest allowed version.
+          - marklogic-image: progressofficial/marklogic-db:12.1.0-ubi-2.3.0
+            dependencies: lowest-direct
 
     steps:
       - uses: actions/checkout@v5
@@ -34,6 +39,17 @@ jobs:
         run: |
           pip install poetry==2.2.0
           poetry install --extras kerberos
+
+      - name: Downgrade direct dependencies to their lowest allowed versions
+        if: matrix.dependencies == 'lowest-direct'
+        run: |
+          pip install uv==0.10.11
+          uv pip install --python "$(poetry env info --executable)" --resolution lowest-direct --upgrade -e ".[kerberos]"
+          uv pip list --python "$(poetry env info --executable)"
+
+      - name: Run unit tests on the lowest direct dependency versions
+        if: matrix.dependencies == 'lowest-direct'
+        run: poetry run pytest tests/unit/
 
       - name: Start MarkLogic and provision the connection matrix
         env:

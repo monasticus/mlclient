@@ -151,13 +151,14 @@ def test_compares_all_environments_by_default() -> None:
     assert "test.example.com" in output
 
 
-def test_excludes_named_environments_from_the_default_set() -> None:
+@pytest.mark.parametrize("flag", ["--exclude", "-x"])
+def test_excludes_named_environments_from_the_default_set(flag: str) -> None:
     _write_env("local", {"host": "local.example.com"})
     _write_env("dev", {"host": "dev.example.com"})
     _write_env("test", {"host": "test.example.com"})
 
     tester = _get_tester()
-    tester.execute("--exclude local")
+    tester.execute(f"{flag} local")
 
     output = tester.io.fetch_output()
     assert "local.example.com" not in output
@@ -239,12 +240,15 @@ def test_omits_settings_left_to_their_default_in_every_environment() -> None:
         assert shared_default not in output
 
 
-def test_defaults_flag_keeps_settings_default_across_every_environment() -> None:
+@pytest.mark.parametrize("flag", ["--defaults", "-D"])
+def test_defaults_flag_keeps_settings_default_across_every_environment(
+    flag: str,
+) -> None:
     _write_env("dev", {"host": "dev.example.com"})
     _write_env("test", {"host": "test.example.com"})
 
     tester = _get_tester()
-    tester.execute("dev test --defaults")
+    tester.execute(f"dev test {flag}")
 
     output = tester.io.fetch_output()
     assert "username" in output

@@ -74,7 +74,7 @@ normally instead of repainting.
 Number of statuses retained by `--overwrite`. Default: `3`; allowed range:
 `1`–`100`. Ignored without `--watch`.
 
-### `--cluster`, `-c`
+### `--cluster`, `-C`
 
 Check every host of the cluster instead of the HealthCheck server the `health`
 connection reaches. Requires a REST App Server in the environment. See

@@ -51,7 +51,7 @@ class EnvCopyCommand(Command):
             Copy within the home directory instead of the current directory
       -f, --force
             Overwrite the target when it already exists
-      -e, --edit
+          --edit
             Open the copy in your editor after copying
     """
 
@@ -76,7 +76,6 @@ class EnvCopyCommand(Command):
         ),
         option(
             "edit",
-            "e",
             description="Open the copy in your editor after copying",
         ),
     ]

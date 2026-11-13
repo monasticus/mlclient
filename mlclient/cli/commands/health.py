@@ -118,7 +118,7 @@ class HealthCommand(Command):
             Repaint poll output in place instead of scrolling
       -l, --lines=LINES
             Statuses to keep on screen in --overwrite mode [default: 3]
-      -c, --cluster
+      -C, --cluster
             Check every host of the cluster instead of the HealthCheck server
     """
 
@@ -162,7 +162,7 @@ class HealthCommand(Command):
         ),
         option(
             "cluster",
-            "c",
+            "C",
             description="Check every host of the cluster instead of the HealthCheck "
             "server",
         ),

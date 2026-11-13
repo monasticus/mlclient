@@ -317,9 +317,11 @@ def _transport_verify(connection: _ConnectionMode) -> ssl.SSLContext | bool:
 def _get_ssl_context(ssl_config: SSLConfig) -> ssl.SSLContext | None:
     """Return a cached SSL context for the given SSL configuration.
 
-    Returns ``None`` when verification is disabled, deferring to httpx's own
-    ``verify=False`` handling. Caching avoids re-reading the system CA bundle
-    from disk (~60-120 ms) on every transport creation.
+    Returns ``None`` when verification is disabled and no client certificate
+    is configured, deferring to httpx's own ``verify=False`` handling. With a
+    client certificate, verification is disabled in the returned context
+    instead, so the certificate is still presented. Caching avoids re-reading
+    the system CA bundle from disk (~60-120 ms) on every transport creation.
 
     Parameters
     ----------
@@ -330,9 +332,10 @@ def _get_ssl_context(ssl_config: SSLConfig) -> ssl.SSLContext | None:
     Returns
     -------
     ssl.SSLContext | None
-        A configured SSL context, or None when verification is disabled.
+        A configured SSL context, or None when verification is disabled and
+        no client certificate is configured.
     """
-    if ssl_config.verify is False:
+    if ssl_config.verify is False and not ssl_config.has_client_cert:
         return None
     return _build_ssl_context(
         ssl_config.verify,
@@ -358,6 +361,9 @@ def _build_ssl_context(
         context = ssl.create_default_context(cafile=verify)
     else:
         context = ssl.create_default_context()
+    if verify is False:
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
     if cert_file:
         context.load_cert_chain(cert_file, key_file, key_password)
     return context

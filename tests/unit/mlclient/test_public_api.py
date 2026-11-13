@@ -346,6 +346,7 @@ EXPECTED_EXPORTS = {
         "DatabasesPostCall",
         "DocumentsDeleteCall",
         "DocumentsGetCall",
+        "DocumentsHeadCall",
         "DocumentsPostCall",
         "EvalCall",
         "ForestDeleteCall",

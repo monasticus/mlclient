@@ -10,6 +10,7 @@ from mlclient._options import UNSET
 from mlclient.calls.documents import (
     DocumentsDeleteCall,
     DocumentsGetCall,
+    DocumentsHeadCall,
     DocumentsPostCall,
 )
 from mlclient.models.document_parts import DocumentsBodyPart
@@ -108,6 +109,55 @@ class DocumentsApi:
             transform_params=transform_params,
             txid=txid,
         )
+        return self._api.call(call, timeout=timeout)
+
+    def head(
+        self,
+        uri: str,
+        *,
+        database: str | None = None,
+        txid: str | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Get the headers a GET of one document's content would return.
+
+        The response has no body: status 200 (OK) when the document exists and
+        404 (Not Found) when it does not.
+
+        Documentation: https://docs.marklogic.com/REST/HEAD/v1/documents
+
+        Parameters
+        ----------
+        uri : str
+            The URI of a document in the database. MarkLogic accepts a single URI
+            per request.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response without a body, carrying the document's headers
+            (Content-Type, vnd.marklogic.document-format, ML-Effective-Timestamp)
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        call = DocumentsHeadCall(uri=uri, database=database, txid=txid)
         return self._api.call(call, timeout=timeout)
 
     def post(
@@ -346,6 +396,55 @@ class AsyncDocumentsApi:
             transform_params=transform_params,
             txid=txid,
         )
+        return await self._api.call(call, timeout=timeout)
+
+    async def head(
+        self,
+        uri: str,
+        *,
+        database: str | None = None,
+        txid: str | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Get the headers a GET of one document's content would return.
+
+        The response has no body: status 200 (OK) when the document exists and
+        404 (Not Found) when it does not.
+
+        Documentation: https://docs.marklogic.com/REST/HEAD/v1/documents
+
+        Parameters
+        ----------
+        uri : str
+            The URI of a document in the database. MarkLogic accepts a single URI
+            per request.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response without a body, carrying the document's headers
+            (Content-Type, vnd.marklogic.document-format, ML-Effective-Timestamp)
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        call = DocumentsHeadCall(uri=uri, database=database, txid=txid)
         return await self._api.call(call, timeout=timeout)
 
     async def post(

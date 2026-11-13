@@ -4,10 +4,10 @@
 [DocumentsService][mlclient.services.DocumentsService] for
 `/v1/documents`. It exposes three operations - `read`, `write` (create or update)
 and `delete` - that work with typed [`Document`][mlclient.models.Document] models instead of raw multipart
-bodies.
+bodies, and `exists` to check a single URI without downloading the document.
 
-Every operation accepts one URI or many, an optional `database`, and a `txid`
-to run inside a [transaction](transactions.md). `read` and `write` also carry
+`read`, `write` and `delete` accept one URI or many. Every operation takes an
+optional `database` and a `txid` to run inside a [transaction](transactions.md). `read` and `write` also carry
 metadata; `write` and `delete` also handle temporal collections.
 
 Before the operations, two models are worth knowing: [`Document`][mlclient.models.Document] (what `read`
@@ -225,6 +225,28 @@ network streaming. Both methods split long URI lists into request batches.
 ...     doc = ml.documents.read("/doc-1.xml", database="Documents")
 ```
 
+## Check that a document exists
+
+`exists` sends a `HEAD` request for one URI and returns `True` or `False` - no
+content is transferred. It accepts `database` and `txid` like `read`; inside a
+transaction, a document the transaction wrote but has not committed exists only
+when its `txid` is passed.
+
+```python
+>>> with MLClient() as ml:
+...     ml.documents.exists("/doc-1.xml")
+True
+
+>>> with MLClient() as ml:
+...     ml.documents.exists("/missing.xml")
+False
+```
+
+Any status other than 200 or 404 (a 401 or 403, for example) raises
+`httpx.HTTPStatusError`: a `HEAD` response carries no MarkLogic error body. To
+read the headers themselves (`Content-Type`, `vnd.marklogic.document-format`,
+`ML-Effective-Timestamp`), use `ml.rest.documents.head(uri)`.
+
 ## Reuse database and transaction settings
 
 Call the service to create a scoped copy without sending a request:
@@ -409,7 +431,7 @@ versions remain queryable:
 
 ## Within a transaction
 
-`read`, `write` and `delete` accept a `txid` to run inside an open
+`read`, `write`, `delete` and `exists` accept a `txid` to run inside an open
 multi-statement transaction. Pass the id explicitly, or spread a
 [`TransactionService`][mlclient.services.TransactionService] with `**` to carry both the `txid` and its database. See
 [Transactions](transactions.md) for the full lifecycle.

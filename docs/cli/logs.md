@@ -34,6 +34,12 @@ ml logs -s app-services
 ml logs -s TaskServer
 ```
 
+MarkLogic creates a log file only when the server first logs something, so a
+server that has not logged yet has no file to read. MarkLogic then answers
+`404 MANAGE-NOSUCHLOG`; the command prints that error, adds a hint to run
+`ml logs --list` to see the existing log files, and exits with `1`. With
+`--all-hosts`, the hint follows the list of missing hosts.
+
 ### `--log-type`, `-l`
 
 Log type: `error` (default), `access` or `request`.

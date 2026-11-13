@@ -121,6 +121,11 @@ class LogsCommand(Command):
 
     _NONE_SERVER_KEY: str = "AAA"
 
+    _MISSING_LOG_HINT: str = (
+        "No {file_name} yet - MarkLogic creates it when the server first logs "
+        "something. Run 'ml logs --list' to see the existing log files."
+    )
+
     # ANSI-256 codes (all >= 16, so disjoint from the app's named styles),
     # ordered for maximum contrast between adjacent hosts. Cycled when a
     # cluster has more hosts than colors.
@@ -160,7 +165,8 @@ class LogsCommand(Command):
         Returns
         -------
         int
-            0 for a complete result, 1 when all-host logs are incomplete.
+            0 for a complete result, 1 when the log file does not exist yet
+            or all-host logs are incomplete.
 
         Raises
         ------
@@ -177,7 +183,7 @@ class LogsCommand(Command):
         elif self.option("all-hosts") is True:
             return self._print_logs_all_hosts()
         else:
-            self._print_logs()
+            return self._print_logs()
         return 0
 
     def _print_log_files(
@@ -311,7 +317,11 @@ class LogsCommand(Command):
         if self.option("log-type").lower() != "error":
             msg = "The --all-hosts option supports the error log type only"
             raise WrongParametersError(msg)
-        colors, per_host_logs, failures = asyncio.run(self._collect_all_hosts_logs())
+        manager = MLClientManager(self.option("environment"))
+        app_port = self._get_app_port(manager)
+        colors, per_host_logs, failures = asyncio.run(
+            self._collect_all_hosts_logs(manager, app_port),
+        )
         self._write_merged_logs(colors, per_host_logs)
         if failures:
             self.line_error("\nLogs are incomplete; missing hosts:", style="fg=yellow")
@@ -320,6 +330,8 @@ class LogsCommand(Command):
                     f"  {Formatter.escape(host)}: {Formatter.escape(reason)}",
                     style="fg=yellow",
                 )
+        if any(self._is_missing_log(reason) for reason in failures.values()):
+            self._hint_missing_log(self._log_file_name(app_port, LogType.ERROR))
         return 1 if failures else 0
 
     def _write_merged_logs(
@@ -350,6 +362,8 @@ class LogsCommand(Command):
 
     async def _collect_all_hosts_logs(
         self,
+        manager: MLClientManager,
+        app_port: int | str | None,
     ) -> tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]:
         """Collect available host logs and reasons for missing hosts.
 
@@ -357,14 +371,19 @@ class LogsCommand(Command):
         and cancellation still cancel and await outstanding requests before
         closing the shared client.
 
+        Parameters
+        ----------
+        manager : MLClientManager
+            The manager used for this command's connection.
+        app_port : int | str | None
+            The resolved App Server port or TaskServer; None selects ErrorLog.txt.
+
         Returns
         -------
         tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]
             Host colors, sorted and host-tagged logs from successful reads,
             and failed host names mapped to their error messages.
         """
-        manager = MLClientManager(self.option("environment"))
-        app_port = self._get_app_port(manager)
         async with manager.get_async_client("manage") as ml:
             self.info(
                 f"Getting error logs from every host using "
@@ -547,19 +566,114 @@ class LogsCommand(Command):
 
     def _print_logs(
         self,
-    ) -> None:
-        """Print MarkLogic logs."""
-        logs = self._get_logs()
+    ) -> int:
+        """Print MarkLogic logs.
+
+        Returns
+        -------
+        int
+            0 when the logs were printed, 1 when the log file does not exist yet.
+
+        Raises
+        ------
+        HTTPError
+            If the HTTP request fails.
+        MarkLogicError
+            If MarkLogic rejects the log read for another reason than a missing
+            log file.
+        """
+        manager = MLClientManager(self.option("environment"))
+        app_port = self._get_app_port(manager)
+        file_name = self._log_file_name(app_port, LogType.get(self.option("log-type")))
+        try:
+            logs = self._get_logs(manager, app_port, file_name)
+        except MarkLogicError as error:
+            if not self._is_missing_log(str(error)):
+                raise
+            self.application.render_error(error, self._io)
+            self._hint_missing_log(file_name)
+            return 1
         formatted_logs = self._format_logs(logs)
         self.line("")
         for info, msg in formatted_logs:
             self._io.write(info)
             self._io.write(msg, new_line=True, type=Type.RAW)
+        return 0
+
+    @staticmethod
+    def _log_file_name(
+        app_port: int | str | None,
+        log_type: LogType,
+    ) -> str:
+        """Return the name of the log file to read.
+
+        Parameters
+        ----------
+        app_port : int | str | None
+            The resolved App Server port or TaskServer; None selects the main log.
+        log_type : LogType
+            The log type to read.
+
+        Returns
+        -------
+        str
+            The log file name, e.g. 8002_ErrorLog.txt.
+        """
+        if app_port is None:
+            return f"{log_type.value}.txt"
+        return f"{app_port}_{log_type.value}.txt"
+
+    @staticmethod
+    def _is_missing_log(
+        error_message: str,
+    ) -> bool:
+        """Return True for MarkLogic's 404 MANAGE-NOSUCHLOG error message.
+
+        Parameters
+        ----------
+        error_message : str
+            A MarkLogicError message.
+
+        Returns
+        -------
+        bool
+            True when the requested log file does not exist.
+        """
+        return (
+            error_message.startswith("[404 ") and "(MANAGE-NOSUCHLOG)" in error_message
+        )
+
+    def _hint_missing_log(
+        self,
+        file_name: str,
+    ) -> None:
+        """Explain on stderr that a missing log file is not an error of its own.
+
+        Parameters
+        ----------
+        file_name : str
+            The requested log file name.
+        """
+        self.line_error(
+            Formatter.escape(self._MISSING_LOG_HINT.format(file_name=file_name)),
+        )
 
     def _get_logs(
         self,
+        manager: MLClientManager,
+        app_port: int | str | None,
+        file_name: str,
     ) -> Iterator[dict]:
         """Retrieve parsed entries through the environment's Manage connection.
+
+        Parameters
+        ----------
+        manager : MLClientManager
+            The manager used for this command's connection.
+        app_port : int | str | None
+            The resolved App Server port or TaskServer; None selects the main log.
+        file_name : str
+            The log file name, shown in the progress message.
 
         Returns
         -------
@@ -573,8 +687,6 @@ class LogsCommand(Command):
         MarkLogicError
             If MarkLogic rejects the log read.
         """
-        manager = MLClientManager(self.option("environment"))
-        app_port = self._get_app_port(manager)
         log_type = LogType.get(self.option("log-type"))
         start_time = self.option("from")
         end_time = self.option("to")
@@ -582,10 +694,6 @@ class LogsCommand(Command):
         host = self.option("host")
 
         with manager.get_client("manage") as ml:
-            if app_port is None:
-                file_name = f"{log_type.value}.txt"
-            else:
-                file_name = f"{app_port}_{log_type.value}.txt"
             self.info(
                 f"Getting {file_name} logs using Manage App-Server {ml.http.base_url}",
             )

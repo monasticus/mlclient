@@ -1337,6 +1337,99 @@ def test_command_logs_list_links_use_manage_connection(mocker, logs_list_respons
     assert "http://localhost:8000" not in output
 
 
+@pytest.mark.parametrize(
+    ("args", "file_name"),
+    [
+        ("-s 8010", "8010_ErrorLog.txt"),
+        ("-s 8002 -l access", "8002_AccessLog.txt"),
+        ("", "ErrorLog.txt"),
+    ],
+)
+@respx.mock
+def test_command_logs_hints_at_missing_log_file(args, file_name):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("filename", file_name)
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(_no_such_log_body(file_name))
+    ml_mocker.mock_get()
+    tester = _get_tester()
+
+    status = tester.execute(f"-e test {args}")
+
+    assert status == 1
+    assert tester.io.fetch_error() == (
+        "\n"
+        "[404 Not Found] (MANAGE-NOSUCHLOG) MANAGE-NOSUCHLOG: (err:FOER0000) "
+        f"No such log: {file_name}\n"
+        f"No {file_name} yet - MarkLogic creates it when the server first logs "
+        "something. Run 'ml logs --list' to see the existing log files.\n"
+    )
+
+
+@respx.mock
+def test_command_logs_raises_other_marklogic_errors_without_hint():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(
+        resources_utils.get_test_resource_json(__file__, "host-forbidden.json"),
+    )
+    ml_mocker.mock_get()
+    tester = _get_tester()
+
+    with pytest.raises(MarkLogicError, match="Insufficient privileges"):
+        tester.execute("-e test -s 8010")
+    assert tester.io.fetch_error() == ""
+
+
+@respx.mock
+def test_command_logs_all_hosts_hints_once_at_missing_log_file():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/hosts")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]))
+    ml_mocker.mock_get()
+    ml_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/logs")
+    ml_mocker.with_request_param("filename", "8010_ErrorLog.txt")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(_no_such_log_body("8010_ErrorLog.txt"))
+    ml_mocker.mock_get()
+    tester = _get_tester()
+
+    status = tester.execute("-e test-cluster --all-hosts -s 8010 --regex needle")
+
+    assert status == 1
+    reason = (
+        "[404 Not Found] (MANAGE-NOSUCHLOG) MANAGE-NOSUCHLOG: (err:FOER0000) "
+        "No such log: 8010_ErrorLog.txt"
+    )
+    assert tester.io.fetch_error() == (
+        "\nLogs are incomplete; missing hosts:\n"
+        f"  ml_cluster_node1: {reason}\n"
+        f"  ml_cluster_node2: {reason}\n"
+        "No 8010_ErrorLog.txt yet - MarkLogic creates it when the server first "
+        "logs something. Run 'ml logs --list' to see the existing log files.\n"
+    )
+
+
+def _no_such_log_body(
+    file_name: str,
+) -> dict:
+    return {
+        "errorResponse": {
+            "statusCode": "404",
+            "status": "Not Found",
+            "messageCode": "MANAGE-NOSUCHLOG",
+            "message": f"MANAGE-NOSUCHLOG: (err:FOER0000) No such log: {file_name}",
+        },
+    }
+
+
 def _hosts_body(
     hosts: list[str],
 ) -> dict:

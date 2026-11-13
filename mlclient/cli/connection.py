@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from typing import TYPE_CHECKING
+
 from mlclient._client import AsyncMLClient, MLClient
 from mlclient._manager import MLClientManager
-from mlclient.exceptions import WrongParametersError
+from mlclient.exceptions import NoSuchAppServerError, WrongParametersError
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 _MAX_PORT = 65535
 
@@ -30,14 +36,16 @@ def get_client(manager: MLClientManager, connection: str | None) -> MLClient:
     WrongParametersError
         If a numeric port is outside the TCP range.
     NoSuchAppServerError
-        If an identifier is not configured.
+        If an identifier is not configured; the message lists the configured
+        identifiers and how to pass a port instead.
     ConfigError
         If the resolved connection settings are incompatible.
     """
     port = _port(connection)
     if port is not None:
         return manager.get_client(port=port)
-    return manager.get_client(connection)
+    with _connection_hint(manager):
+        return manager.get_client(connection)
 
 
 def get_async_client(
@@ -64,14 +72,35 @@ def get_async_client(
     WrongParametersError
         If a numeric port is outside the TCP range.
     NoSuchAppServerError
-        If an identifier is not configured.
+        If an identifier is not configured; the message lists the configured
+        identifiers and how to pass a port instead.
     ConfigError
         If the resolved connection settings are incompatible.
     """
     port = _port(connection)
     if port is not None:
         return manager.get_async_client(port=port)
-    return manager.get_async_client(connection)
+    with _connection_hint(manager):
+        return manager.get_async_client(connection)
+
+
+@contextmanager
+def _connection_hint(manager: MLClientManager) -> Iterator[None]:
+    """Extend an unknown-identifier error with how to select a connection.
+
+    The example port is the first configured server's effective port.
+    """
+    try:
+        yield
+    except NoSuchAppServerError as error:
+        environment = manager.config
+        first_server_id = environment.app_server_ids[0]
+        example_port = environment.provide_config_dict(first_server_id)["port"]
+        msg = (
+            f"{error}\n"
+            f"Pass a configured id or a port number to -c, e.g. -c {example_port}."
+        )
+        raise NoSuchAppServerError(msg) from None
 
 
 def _port(connection: str | None) -> int | None:

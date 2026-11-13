@@ -11,8 +11,8 @@ from __future__ import annotations
 from mlclient._client import AsyncMLClient, MLClient
 from mlclient._options import UNSET
 from mlclient.clients.http import AsyncHttpClient, HttpClient
-from mlclient.env import MLEnvironment
-from mlclient.exceptions import NoRestServerConfiguredError, NoSuchAppServerError
+from mlclient.env import MLEnvironment, _no_such_app_server_error
+from mlclient.exceptions import NoRestServerConfiguredError
 from mlclient.http import HTTPConfig
 
 
@@ -56,10 +56,9 @@ class MLClientManager:
             If the named environment file is missing.
         OSError
             If the environment file cannot be read.
-        yaml.YAMLError
-            If the environment file contains invalid YAML.
-        pydantic.ValidationError
-            If the environment data fails model validation.
+        ConfigError
+            If the environment file is empty, is not a YAML mapping or holds
+            invalid settings.
         """
         self._env_name = env_name
         self._overrides = overrides
@@ -505,8 +504,11 @@ class MLClientManager:
                 raise NoRestServerConfiguredError(msg)
             return self._config.rest_servers[0]
         if app_server_id not in self._config.app_server_ids:
-            msg = f"There's no [{app_server_id}] app server configuration!"
-            raise NoSuchAppServerError(msg)
+            raise _no_such_app_server_error(
+                self._config,
+                app_server_id,
+                self.env_name,
+            )
         return app_server_id
 
 

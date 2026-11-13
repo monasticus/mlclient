@@ -3,6 +3,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from pydantic import SecretStr, ValidationError
 
 from mlclient import MLClient
 from mlclient import _constants as constants
@@ -13,6 +14,7 @@ from mlclient.env import (
     find_mlclient_environment,
 )
 from mlclient.exceptions import (
+    ConfigError,
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
     NoSuchAppServerError,
@@ -40,7 +42,7 @@ def _environment(app_name, app_servers):
         "app_name": app_name,
         "host": "localhost",
         "username": "admin",
-        "password": "admin",
+        "password": SecretStr("admin"),
         "protocol": "http",
         "auth": "digest",
         "ssl": None,
@@ -239,9 +241,54 @@ def test_provide_config_non_existing_server():
     config = MLEnvironment.load("test")
     with pytest.raises(NoSuchAppServerError) as err:
         config.provide_config("non-existing")
-    expected_msg = "There's no [non-existing] app server configuration!"
+    expected_msg = (
+        "There's no [non-existing] app server configuration. Available: "
+        "manage (8002), content (8100), modules (8101), schemas (8102), "
+        "test (8103), app-services (8000), admin (8001), health (7997)."
+    )
     actual_msg = err.value.args[0]
     assert actual_msg == expected_msg
+
+
+def test_non_existing_server_lists_cloud_effective_ports():
+    config = MLEnvironment(
+        host="x.marklogic.cloud",
+        cloud={"api-key": "k", "base-path": "/p"},
+    )
+    with pytest.raises(NoSuchAppServerError, match=r"app-services \(443\)"):
+        config.provide_config("missing")
+
+
+def test_provide_config_unwraps_root_and_server_passwords():
+    config = MLEnvironment(
+        **{
+            "password": "root-s3cret",
+            "app-servers": [{"id": "content", "password": "server-s3cret"}],
+        },
+    )
+    assert config.provide_config("app-services").password == "root-s3cret"
+    assert config.provide_config("content").password == "server-s3cret"
+    assert config.provide_config_dict("content")["password"] == "server-s3cret"
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        MLEnvironment(password="s3cret-pw"),
+        MLServerConfig(id="content", password="s3cret-pw"),
+    ],
+)
+def test_environment_models_hide_password(model):
+    assert "s3cret-pw" not in repr(model)
+    assert "s3cret-pw" not in str(model.password)
+    assert "s3cret-pw" not in model.model_dump_json()
+    assert model.password.get_secret_value() == "s3cret-pw"
+
+
+def test_validation_error_does_not_show_password():
+    with pytest.raises(ValidationError) as err:
+        MLServerConfig(identifier="content", port=1, password="s3cret-pw")
+    assert "s3cret-pw" not in str(err.value)
 
 
 def test_default_servers_present_when_user_defines_own():
@@ -515,7 +562,7 @@ def test_cloud_config_in_provide_config():
         },
     )
     resolved = config.provide_config("content")
-    assert resolved.cloud.api_key == "mk-1"
+    assert resolved.cloud.api_key.get_secret_value() == "mk-1"
     assert resolved.cloud.base_path == "/ml/x/manage"
 
 
@@ -581,5 +628,108 @@ def test_provide_config_dict_are_independent_of_environment():
 
     later = environment.provide_config_dict("app-services")
     assert later["ssl"].verify == "root-ca.pem"
-    assert later["auth"].token == "original-token"
+    assert later["auth"].token.get_secret_value() == "original-token"
     assert later["host"] == "localhost"
+
+
+def test_load_file_reports_every_problem_with_file_name(tmp_path):
+    path = _write_env_file(
+        tmp_path,
+        "pasword: s3cret-pw\n"
+        "app-servers:\n"
+        "  - id: rest\n"
+        "    prot: 8010\n"
+        "    port: abc\n",
+    )
+    with pytest.raises(ConfigError) as err:
+        MLEnvironment.load_file(path)
+    assert str(err.value) == (
+        f"Invalid environment configuration in {path}:\n"
+        "  app-servers.0.port: Input should be a valid integer, "
+        "unable to parse string as an integer\n"
+        "  app-servers.0.prot: unknown setting\n"
+        "  pasword: unknown setting"
+    )
+    assert "s3cret-pw" not in str(err.value)
+    assert "pydantic.dev" not in str(err.value)
+    assert err.value.__cause__ is None
+
+
+@pytest.mark.parametrize(
+    ("auth", "problem"),
+    [
+        (
+            "digets",
+            "  auth: Unknown auth shortcut: 'digets'. Only 'basic', 'digest', "
+            "'digestbasic', 'certificate', 'kerberos' are valid as strings.",
+        ),
+        ("{method: oauth}", "  auth.token: required for method 'oauth'"),
+        ("{method: oauth, token: ''}", "  auth.token: required for method 'oauth'"),
+        (
+            "{method: saml}",
+            "  auth.method: Input should be 'oauth', 'kerberos' or 'certificate'",
+        ),
+        ("{method: oauth, token: t, tokn: x}", "  auth.tokn: unknown setting"),
+    ],
+)
+def test_load_file_validates_auth(tmp_path, auth, problem):
+    path = _write_env_file(tmp_path, f"auth: {auth}\n")
+    with pytest.raises(ConfigError) as err:
+        MLEnvironment.load_file(path)
+    assert str(err.value).splitlines()[1:] == [problem]
+
+
+def test_load_file_validates_server_auth(tmp_path):
+    path = _write_env_file(
+        tmp_path,
+        "app-servers:\n  - id: rest\n    auth: {method: oauth}\n",
+    )
+    with pytest.raises(ConfigError) as err:
+        MLEnvironment.load_file(path)
+    assert str(err.value).splitlines()[1:] == [
+        "  app-servers.0.auth.token: required for method 'oauth'",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("section", "setting"),
+    [
+        ("ssl", "key_pasword: s3cret-pw"),
+        ("cloud", "api_ky: s3cret-pw"),
+    ],
+)
+def test_load_file_rejects_unknown_nested_setting(tmp_path, section, setting):
+    path = _write_env_file(tmp_path, f"{section}:\n  {setting}\n")
+    with pytest.raises(ConfigError, match=rf"  {section}\.\w+: unknown setting") as err:
+        MLEnvironment.load_file(path)
+    assert "s3cret-pw" not in str(err.value)
+
+
+@pytest.mark.parametrize("content", ["", "# only a comment\n"])
+def test_load_file_rejects_empty_file(tmp_path, content):
+    path = _write_env_file(tmp_path, content)
+    with pytest.raises(ConfigError) as err:
+        MLEnvironment.load_file(path)
+    assert str(err.value) == f"Environment configuration file is empty: {path}"
+
+
+def test_load_file_rejects_non_mapping(tmp_path):
+    path = _write_env_file(tmp_path, "- host: localhost\n")
+    with pytest.raises(ConfigError) as err:
+        MLEnvironment.load_file(path)
+    assert str(err.value) == f"Environment configuration must be a mapping: {path}"
+
+
+def test_load_file_rejects_invalid_yaml_without_showing_content(tmp_path):
+    path = _write_env_file(tmp_path, "password: [s3cret-pw\n")
+    with pytest.raises(ConfigError) as err:
+        MLEnvironment.load_file(path)
+    assert str(err.value) == f"Invalid YAML in environment configuration file: {path}"
+    assert err.value.__cause__ is None
+    assert err.value.__suppress_context__
+
+
+def _write_env_file(directory, content):
+    path = directory / "mlclient-staging.yaml"
+    path.write_text(content)
+    return path.as_posix()

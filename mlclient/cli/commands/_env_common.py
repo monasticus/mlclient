@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import yaml
 from cleo.formatters.formatter import Formatter
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, SecretStr, ValidationError
 
 from mlclient import _constants as constants
 from mlclient.env import MLEnvironment, find_mlclient_directory
@@ -155,6 +155,7 @@ def effective_config(
         servers. No-auth remains the explicit YAML ``app`` alias. Transport
         validation and authentication handler construction are deferred until
         a client is created, so incomplete connection setups can be inspected.
+        Secrets hold their real values; rendering masks them.
 
     Raises
     ------
@@ -162,11 +163,12 @@ def effective_config(
         If fields cannot be validated, without including their input values.
     """
     environment = _validate_environment(path, raw)
-    root = environment.model_dump(
-        mode="json",
-        exclude={"app_servers"},
-        by_alias=True,
-        exclude_none=True,
+    root = _revealed(
+        environment.model_dump(
+            exclude={"app_servers"},
+            by_alias=True,
+            exclude_none=True,
+        ),
     )
     if environment.auth is None:
         root["auth"] = "app"
@@ -188,14 +190,26 @@ def _settings_values(settings: dict) -> dict:
         if field == "auth" and value is None:
             values[field] = "app"
         elif isinstance(value, BaseModel):
-            values[field] = value.model_dump(
-                mode="json",
-                by_alias=True,
-                exclude_none=True,
+            values[field] = _revealed(
+                value.model_dump(by_alias=True, exclude_none=True),
             )
         elif value is not None:
             values[field] = value
     return values
+
+
+def _revealed(dumped: dict) -> dict:
+    """Replace every SecretStr in a model dump with its plain value."""
+    return {key: _revealed_value(value) for key, value in dumped.items()}
+
+
+def _revealed_value(value: object) -> object:
+    """Return a SecretStr's plain value, recursing into nested model dumps."""
+    if isinstance(value, SecretStr):
+        return value.get_secret_value()
+    if isinstance(value, dict):
+        return _revealed(value)
+    return value
 
 
 def display_value(

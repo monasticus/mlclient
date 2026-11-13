@@ -88,7 +88,11 @@ For OAuth, configure MarkLogic as a JWT Resource Server and pass an access
 token through `AuthConfig(method="oauth", token=...)`. This setup requires
 MarkLogic 11.2 or later; see the
 [OAuth configuration guide](https://docs.progress.com/bundle/marklogic-server-secure-11/page/topics/external-security/oauth-based-authentication-and-authorization.html).
-Obtain the token from your identity provider before creating the client.
+Obtain the token from your identity provider before creating the client;
+`AuthConfig(method="oauth")` without a token, or with an empty one, raises a
+pydantic `ValidationError` when it is built. The token, like
+`SSLConfig.key_password` and `CloudConfig.api_key`, is stored as a pydantic
+`SecretStr` and masked in `repr()` and logs; read it with `get_secret_value()`.
 MLClient sends it as a Bearer token with each request; your application is
 responsible for replacing it when it expires.
 
@@ -162,6 +166,7 @@ and setup listed above, including MarkLogic 11.2+ for JWT Resource Server auth.
 | Mutual TLS + explicit `auth="digest"` | valid | double auth: certificate plus digest header |
 | Cloud + `auth=None` | valid | Cloud authenticates via its API key |
 | `certificate` without a client cert | rejected | certificate auth requires a client cert over HTTPS |
+| `AuthConfig(method="oauth")` without a token, or with an empty one | rejected (`ValidationError` when built) | OAuth has no default token |
 | client cert + `protocol="http"` | rejected | mutual TLS requires HTTPS |
 | Cloud + any explicit `auth` | rejected | Cloud handles authentication internally |
 | Cloud + `protocol="http"` or custom `port` | rejected | Cloud forces HTTPS on port 443 |

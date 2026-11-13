@@ -39,6 +39,53 @@ Each `app-servers` entry supports these keys:
 Use distinct identifiers. An identifier is a local connection label, not
 necessarily the App Server's name in MarkLogic.
 
+## Validation errors
+
+An environment file is validated completely when it is loaded. Unknown keys are
+rejected at every level (root, `app-servers` entries, `ssl`, `cloud` and `auth`
+mappings), so a typo such as `pasword` or `prot` is an error rather than a
+setting that is silently ignored. The `auth` method name, the `auth` mapping and
+OAuth's required `token` are checked at load time as well, not when a client is
+created.
+
+A failed load raises one [`ConfigError`][mlclient.exceptions.ConfigError] that
+names the file and lists one problem per line. Configured values are never
+included, so the message cannot reveal a password:
+
+```text
+Invalid environment configuration in /home/user/.mlclient/mlclient-staging.yaml:
+  app-servers.0.port: Input should be a valid integer, unable to parse string as an integer
+  app-servers.0.prot: unknown setting
+```
+
+An empty file, a file that is not a YAML mapping and invalid YAML raise
+`ConfigError` too. Selecting a connection id that does not exist lists the
+configured ids with their effective ports:
+
+```text
+There's no [restt] app server configuration in the [staging] environment. Available: rest (8010), app-services (8000), manage (8002), admin (8001), health (7997).
+```
+
+## Secrets
+
+`password` (root and per server), `ssl.key_password`, `cloud.api-key` and the
+`auth` mapping's `token` are stored as pydantic
+[`SecretStr`](https://docs.pydantic.dev/latest/api/types/#pydantic.types.SecretStr)
+values: `repr()`, `str()`, logs and `model_dump_json()` show `**********`.
+YAML files and constructors still take plain strings. Read the real value with
+`get_secret_value()`:
+
+```python
+>>> from mlclient.env import MLEnvironment
+>>> env = MLEnvironment(password="my-password")
+>>> env.password
+SecretStr('**********')
+>>> env.password.get_secret_value()
+'my-password'
+```
+
+`ml env show -s` and `ml env compare -s` still print the real values.
+
 ## Root defaults and server overrides
 
 Root settings apply to the environment's connections. An App Server entry can
@@ -339,8 +386,9 @@ For inspection before constructing authentication handlers, use
 arguments for `HTTPConfig.resolve`, including default ports and merged SSL
 settings. The mapping and its nested models are independent copies. It preserves
 explicit `auth=None` and does not need Kerberos tooling
-or local certificate files. The mapping contains unmasked credentials and model
-objects such as [`SSLConfig`][mlclient.connection.SSLConfig]; it is not a redacted display or a YAML serialization.
+or local certificate files. The mapping contains the plain `password` and model
+objects such as [`SSLConfig`][mlclient.connection.SSLConfig], whose secrets stay
+`SecretStr`; it is not a redacted display or a YAML serialization.
 Transport/authentication compatibility is checked by `provide_config()`.
 
 `provide_config()` resolves one server's YAML configuration. To also apply

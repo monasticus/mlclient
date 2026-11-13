@@ -12,7 +12,7 @@ import ssl
 from functools import lru_cache
 from typing import TYPE_CHECKING, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
 from mlclient._options import UNSET, _Unset
 from mlclient.auth import MarkLogicCloudAuth, _auth_method_name, _build_auth
@@ -37,12 +37,17 @@ DEFAULT_PORT = MARKLOGIC_APP_SERVICES_PORT
 
 
 class SSLConfig(BaseModel):
-    """SSL/TLS connection configuration."""
+    """SSL/TLS connection configuration.
+
+    ``key_password`` is a ``SecretStr``: read it with ``get_secret_value()``.
+    """
+
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
 
     verify: Union[bool, str] = True
     cert_file: Optional[str] = None
     key_file: Optional[str] = None
-    key_password: Optional[str] = None
+    key_password: Optional[SecretStr] = None
 
     @property
     def has_client_cert(self) -> bool:
@@ -51,11 +56,18 @@ class SSLConfig(BaseModel):
 
 
 class CloudConfig(BaseModel):
-    """MarkLogic Cloud connection configuration."""
+    """MarkLogic Cloud connection configuration.
 
-    model_config = ConfigDict(populate_by_name=True)
+    ``api_key`` is a ``SecretStr``: read it with ``get_secret_value()``.
+    """
 
-    api_key: str = Field(alias="api-key")
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="forbid",
+        hide_input_in_errors=True,
+    )
+
+    api_key: SecretStr = Field(alias="api-key")
     base_path: str = Field(alias="base-path")
     token_duration: int = Field(alias="token-duration", default=0)
 
@@ -287,7 +299,7 @@ def _build_connection_auth(
     if connection.cloud is not None:
         return MarkLogicCloudAuth(
             base_url=base_url,
-            api_key=connection.cloud.api_key,
+            api_key=connection.cloud.api_key.get_secret_value(),
             token_duration=connection.cloud.token_duration,
             verify=_transport_verify(connection),
         )
@@ -338,8 +350,13 @@ def _get_ssl_context(ssl_config: SSLConfig) -> ssl.SSLContext | None:
         ssl_config.verify,
         ssl_config.cert_file,
         ssl_config.key_file,
-        ssl_config.key_password,
+        _secret_value(ssl_config.key_password),
     )
+
+
+def _secret_value(secret: SecretStr | None) -> str | None:
+    """Return a secret's plain value, or None when it is not set."""
+    return secret.get_secret_value() if secret is not None else None
 
 
 @lru_cache(maxsize=8)

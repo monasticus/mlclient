@@ -14,6 +14,8 @@ from mlclient.calls.transactions import (
 )
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -25,7 +27,7 @@ class TransactionsApi:
     Requires a REST app server.
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
     def create(
@@ -34,7 +36,7 @@ class TransactionsApi:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Create a multi-statement transaction.
 
@@ -83,7 +85,7 @@ class TransactionsApi:
         *,
         data_format: str | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the status of the specified transaction.
 
@@ -129,7 +131,7 @@ class TransactionsApi:
         *,
         result: str,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Commit or roll back the specified transaction.
 
@@ -173,7 +175,7 @@ class TransactionsApi:
 class AsyncTransactionsApi:
     """Async mid-level API for ``/v1/transactions`` endpoints."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
     async def create(
@@ -182,7 +184,7 @@ class AsyncTransactionsApi:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Create a multi-statement transaction.
 
@@ -231,7 +233,7 @@ class AsyncTransactionsApi:
         *,
         data_format: str | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the status of the specified transaction.
 
@@ -277,7 +279,7 @@ class AsyncTransactionsApi:
         *,
         result: str,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Commit or roll back the specified transaction.
 

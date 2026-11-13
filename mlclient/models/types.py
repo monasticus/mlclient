@@ -60,6 +60,6 @@ class LogType(Enum):
     def __lt__(
         self,
         other: LogType,
-    ):
+    ) -> bool:
         """Compare LogTypes with LT operator."""
         return self.value < other.value

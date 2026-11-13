@@ -17,6 +17,8 @@ from mlclient.calls.roles import (
 )
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -28,7 +30,7 @@ class RolesApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
     def get_list(
@@ -36,7 +38,7 @@ class RolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the roles in the security database.
 
@@ -73,7 +75,7 @@ class RolesApi:
         self,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Create a new role in the security database.
 
@@ -110,7 +112,7 @@ class RolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified role.
 
@@ -150,7 +152,7 @@ class RolesApi:
         self,
         role: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Delete the specified role from the security database.
 
@@ -186,7 +188,7 @@ class RolesApi:
         role: str,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the properties of the specified role.
 
@@ -225,7 +227,7 @@ class RolesApi:
         role: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Update the properties for the specified role.
 
@@ -262,7 +264,7 @@ class RolesApi:
 class AsyncRolesApi:
     """Async mid-level API for ``/manage/v2/roles`` endpoints."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
     async def get_list(
@@ -270,7 +272,7 @@ class AsyncRolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the roles in the security database.
 
@@ -307,7 +309,7 @@ class AsyncRolesApi:
         self,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Create a new role in the security database.
 
@@ -344,7 +346,7 @@ class AsyncRolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified role.
 
@@ -384,7 +386,7 @@ class AsyncRolesApi:
         self,
         role: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Delete the specified role from the security database.
 
@@ -420,7 +422,7 @@ class AsyncRolesApi:
         role: str,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the properties of the specified role.
 
@@ -459,7 +461,7 @@ class AsyncRolesApi:
         role: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Update the properties for the specified role.
 

@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from functools import cached_property
 from types import TracebackType
+from typing import TYPE_CHECKING
 from xml.etree import ElementTree
 
 from httpx import Limits, RequestError, Response
@@ -57,6 +58,19 @@ from mlclient.services.transactions import (
     async_open_transaction,
     open_transaction,
 )
+
+if TYPE_CHECKING:
+    import httpx
+    from typing_extensions import Self
+
+    from mlclient.http import _HTTPConfigOverrides
+
+    class _MLClientOptions(_HTTPConfigOverrides, total=False):
+        config: HTTPConfig | None
+        manage_config: HTTPConfig | None
+        admin_config: HTTPConfig | None
+        health_config: HTTPConfig | None
+
 
 logger = logging.getLogger(__name__)
 
@@ -154,9 +168,9 @@ class MLClient:
 
     def __init__(
         self,
-        protocol=UNSET,
+        protocol: str = UNSET,
         host: str = "localhost",
-        port=UNSET,
+        port: int = UNSET,
         auth: AuthParam = UNSET,
         username: str = "admin",
         password: str = "admin",
@@ -164,13 +178,13 @@ class MLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: Limits | int | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
         health_config: HTTPConfig | None = None,
-    ):
+    ) -> None:
         """Initialize MLClient instance.
 
         The connection parameters describe the primary connection. The Manage
@@ -261,17 +275,17 @@ class MLClient:
             ),
         )
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """Connect and return self for use as a context manager."""
         self.connect()
         return self
 
     def __exit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on context manager exit."""
         self.disconnect()
 
@@ -335,7 +349,7 @@ class MLClient:
         """
         return AdminApi(ApiClient(self._admin_http))
 
-    def healthcheck(self, *, timeout=UNSET) -> bool:
+    def healthcheck(self, *, timeout: httpx.Timeout | float | None = UNSET) -> bool:
         """Report whether the HealthCheck app server (port 7997 by default) is healthy.
 
         Sends a HEAD request to ``/`` on the HealthCheck connection.
@@ -572,7 +586,7 @@ class MLClient:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> TransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
@@ -626,7 +640,7 @@ class MLClient:
             timeout=timeout,
         )
 
-    def connect(self):
+    def connect(self) -> None:
         """Open the primary local HTTP session.
 
         This allocates transport resources; it does not probe connectivity or
@@ -635,7 +649,7 @@ class MLClient:
         """
         self._http.connect()
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """Close the primary and auxiliary sessions owned by this client.
 
         Shared HTTP clients are closed once. Cached API/service wrappers are
@@ -783,9 +797,9 @@ class AsyncMLClient:
 
     def __init__(
         self,
-        protocol=UNSET,
+        protocol: str = UNSET,
         host: str = "localhost",
-        port=UNSET,
+        port: int = UNSET,
         auth: AuthParam = UNSET,
         username: str = "admin",
         password: str = "admin",
@@ -793,13 +807,13 @@ class AsyncMLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: Limits | int | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
         health_config: HTTPConfig | None = None,
-    ):
+    ) -> None:
         """Initialize AsyncMLClient instance.
 
         The connection parameters describe the primary connection. The Manage
@@ -896,17 +910,17 @@ class AsyncMLClient:
             return self._http
         return AsyncHttpClient(config=config, session_owner=self._http)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         """Connect and return self for use as an async context manager."""
         await self.connect()
         return self
 
     async def __aexit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on context manager exit."""
         await self.disconnect()
 
@@ -974,7 +988,11 @@ class AsyncMLClient:
         """
         return AsyncAdminApi(AsyncApiClient(self._admin_http))
 
-    async def healthcheck(self, *, timeout=UNSET) -> bool:
+    async def healthcheck(
+        self,
+        *,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> bool:
         """Report whether the HealthCheck app server (port 7997 by default) is healthy.
 
         Sends a HEAD request to ``/`` on the HealthCheck connection.
@@ -1212,7 +1230,7 @@ class AsyncMLClient:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> AsyncTransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
@@ -1267,7 +1285,7 @@ class AsyncMLClient:
             timeout=timeout,
         )
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Open the primary local HTTP session.
 
         This allocates transport resources; it does not probe connectivity or
@@ -1276,7 +1294,7 @@ class AsyncMLClient:
         """
         await self._http.connect()
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Close the primary and auxiliary sessions owned by this client.
 
         Shared HTTP clients are closed once. Cached API/service wrappers are

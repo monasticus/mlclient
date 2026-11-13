@@ -51,7 +51,7 @@ class _SearchCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Search call.
 
         Returns
@@ -69,7 +69,7 @@ class _SearchCall(ApiCall):
         data_format: str | None,
         *,
         multipart: bool,
-    ):
+    ) -> None:
         """Reject enumerated values and combinations MarkLogic does not accept.
 
         Parameters
@@ -150,7 +150,7 @@ class SearchGetCall(_SearchCall):
         timestamp: str | None = None,
         forest_name: str | list | None = None,
         multipart: bool = False,
-    ):
+    ) -> None:
         """Initialize SearchGetCall instance.
 
         Parameters
@@ -277,7 +277,7 @@ class SearchPostCall(_SearchCall):
         timestamp: str | None = None,
         forest_name: str | list | None = None,
         multipart: bool = False,
-    ):
+    ) -> None:
         """Initialize SearchPostCall instance.
 
         Parameters
@@ -400,7 +400,7 @@ class SearchDeleteCall(ApiCall):
         directory: str | None = None,
         *,
         clear_database: bool = False,
-    ):
+    ) -> None:
         """Initialize SearchDeleteCall instance.
 
         Without a collection or directory the request clears the whole content
@@ -444,7 +444,7 @@ class SearchDeleteCall(ApiCall):
         }
 
     @classmethod
-    def _validate_params(cls, params: dict, *, clear_database: bool):
+    def _validate_params(cls, params: dict, *, clear_database: bool) -> None:
         """Reject invalid filters before checking the destructive request scope.
 
         Parameters
@@ -479,7 +479,7 @@ class SearchDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Search call.
 
         Returns
@@ -495,7 +495,7 @@ def _validate_delete_scope(
     directory: str | None,
     *,
     clear_database: bool,
-):
+) -> None:
     """Require explicit confirmation before a DELETE clears the whole database.
 
     Parameters

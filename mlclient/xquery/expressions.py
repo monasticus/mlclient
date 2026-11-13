@@ -40,7 +40,7 @@ class XqyCompilationContext:
     values. XqyExpression.compile creates a fresh context for every invocation.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Create an empty context for one compilation."""
         self._variables: dict[str, str | bool] = {}
         self._paths: list[tuple[str, str]] = []
@@ -51,7 +51,7 @@ class XqyCompilationContext:
         """Return a copy of scalar bindings without exposing compiler state."""
         return self._variables.copy()
 
-    def bind(self, value, atomic_type: str = "xs:string") -> str:
+    def bind(self, value: str | bool, atomic_type: str = "xs:string") -> str:
         """Bind a JSON-compatible value and return its variable reference."""
         name = f"v{len(self._variables)}"
         self._variables[name] = value
@@ -141,7 +141,7 @@ class XqyCompilationContext:
         )
 
 
-def namespace_bindings(namespaces) -> dict[str, str]:
+def namespace_bindings(namespaces: Mapping[str, str] | None) -> dict[str, str]:
     """Copy namespace bindings and protect namespaces used by generated code.
 
     Parameters
@@ -201,7 +201,11 @@ class XqyExpression(ABC):
             XQuery body fragment. Runtime data must be bound, not interpolated.
         """
 
-    def compile(self, *, namespaces=None) -> tuple[str, dict]:
+    def compile(
+        self,
+        *,
+        namespaces: Mapping[str, str] | None = None,
+    ) -> tuple[str, dict]:
         """Return guarded XQuery source and external bindings.
 
         Parameters
@@ -339,7 +343,7 @@ class Index(XqyExpression):
     inner: XqyExpression
     position: int | XqyExpression
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the position when the predicate expression is created."""
         _validate_position(self.position)
 
@@ -363,7 +367,7 @@ class Range(XqyExpression):
     start: int | XqyExpression
     end: int | XqyExpression
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate both bounds and their literal order."""
         _validate_position(self.start)
         _validate_position(self.end)
@@ -391,7 +395,7 @@ class ResultXPath(XqyExpression):
     inner: XqyExpression
     source: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate result XPath input before sending a request.
 
         Raises
@@ -446,7 +450,7 @@ class FunctionCall(XqyExpression):
     args: tuple = ()
     optionals: tuple = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot arguments as expression objects."""
         object.__setattr__(self, "args", tuple(as_expr(arg) for arg in self.args))
         object.__setattr__(
@@ -480,7 +484,7 @@ class ModuleFunctionCall(XqyExpression):
         *,
         namespace: str,
         module_path: str,
-    ):
+    ) -> None:
         """Capture a module function and its arguments without performing I/O.
 
         Parameters
@@ -586,7 +590,7 @@ class Path(XqyExpression):
     source: str
     kind: str = "xpath"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Require non-empty path text before registering server-side validation.
 
         Raises
@@ -619,7 +623,9 @@ class NamespaceMap(XqyExpression):
         return _namespace_code(dict(self.bindings), ctx)
 
 
-def namespace_map(value):
+def namespace_map(
+    value: Mapping[str, str] | XqyExpression | None,
+) -> XqyExpression | None:
     """Convert Python namespace mappings while preserving native map expressions."""
     if isinstance(value, Mapping):
         return NamespaceMap(tuple(namespace_bindings(value).items()))
@@ -644,7 +650,7 @@ def as_searchable_expression(expression: str | XqyExpression) -> XqyExpression:
     return expression
 
 
-def as_expr(value, *, cast: str | None = None) -> XqyExpression:
+def as_expr(value: AtomicInput, *, cast: str | None = None) -> XqyExpression:
     """Snapshot Python values into immutable XQuery expressions.
 
     Parameters
@@ -754,7 +760,7 @@ def _xml_node_source(root: Element) -> str:
         return document.documentElement.toxml()
 
 
-def _validate_json_keys(value):
+def _validate_json_keys(value: object) -> None:
     """Require string object keys before encoding a Python JSON node.
 
     Parameters
@@ -779,7 +785,9 @@ def _validate_json_keys(value):
             _validate_json_keys(item)
 
 
-def as_qname(value) -> XqyExpression:
+def as_qname(
+    value: str | XqyExpression | Sequence[str | XqyExpression] | None,
+) -> XqyExpression:
     """Convert local-name strings, QName expressions or their sequences.
 
     Parameters
@@ -816,7 +824,7 @@ def _namespace_declarations(namespaces: dict[str, str]) -> str:
     return "".join(declarations)
 
 
-def _namespace_code(namespaces, ctx: XqyCompilationContext) -> str:
+def _namespace_code(namespaces: dict[str, str], ctx: XqyCompilationContext) -> str:
     """Render a namespace map with data bindings, never interpolated URIs."""
     entries = [
         f"map:entry({ctx.bind(prefix)}, {ctx.bind(uri)})"
@@ -843,7 +851,7 @@ def _validate_position(value: int | XqyExpression) -> None:
         raise TypeError(message)
 
 
-def _scalar(value) -> AtomicValue:
+def _scalar(value: AtomicScalar) -> AtomicValue:
     """Encode scalars without losing precision in the JSON transport."""
     if isinstance(value, bool):
         atom = AtomicValue(value, "xs:boolean")

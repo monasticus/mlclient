@@ -15,6 +15,8 @@ from mlclient.calls.documents import (
 from mlclient.models.document_parts import DocumentsBodyPart
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -24,7 +26,7 @@ class DocumentsApi:
     Create, read, update, and delete document content and metadata.
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
     def get(
@@ -38,7 +40,7 @@ class DocumentsApi:
         transform: str | None = None,
         transform_params: dict | None = None,
         txid: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve document content and/or metadata from the database.
 
@@ -121,7 +123,7 @@ class DocumentsApi:
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Insert or update content and/or metadata for multiple documents.
 
@@ -194,7 +196,7 @@ class DocumentsApi:
         temporal_collection: str | None = None,
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Remove documents, or reset document metadata.
 
@@ -267,7 +269,7 @@ class DocumentsApi:
 class AsyncDocumentsApi:
     """Async mid-level API for ``/v1/documents`` endpoints."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
     async def get(
@@ -281,7 +283,7 @@ class AsyncDocumentsApi:
         transform: str | None = None,
         transform_params: dict | None = None,
         txid: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve document content and/or metadata from the database.
 
@@ -364,7 +366,7 @@ class AsyncDocumentsApi:
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Insert or update content and/or metadata for multiple documents.
 
@@ -437,7 +439,7 @@ class AsyncDocumentsApi:
         temporal_collection: str | None = None,
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Remove documents, or reset document metadata.
 

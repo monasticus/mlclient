@@ -23,6 +23,7 @@ from mlclient.services._documents_parsing import DocumentsReader, normalize_cate
 from mlclient.services.scope import OptionsInput, SearchScope
 
 if TYPE_CHECKING:
+    import httpx
     from httpx import Response
 
     from mlclient.api.rest import AsyncRestApi, RestApi
@@ -80,7 +81,7 @@ class SearchService:
     request.
     """
 
-    def __init__(self, rest: RestApi, scope: SearchScope | None = None):
+    def __init__(self, rest: RestApi, scope: SearchScope | None = None) -> None:
         """Create the service using the client's REST API.
 
         Parameters
@@ -167,7 +168,7 @@ class SearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
 
@@ -255,7 +256,7 @@ class SearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
 
@@ -342,7 +343,7 @@ class SearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
 
@@ -420,7 +421,7 @@ class SearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
 
@@ -515,7 +516,7 @@ class SearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
 
@@ -620,7 +621,7 @@ class SearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
 
@@ -713,7 +714,7 @@ class SearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
 
@@ -807,7 +808,7 @@ class AsyncSearchService:
     request.
     """
 
-    def __init__(self, rest: AsyncRestApi, scope: SearchScope | None = None):
+    def __init__(self, rest: AsyncRestApi, scope: SearchScope | None = None) -> None:
         """Create the service using the client's REST API.
 
         Parameters
@@ -894,7 +895,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
 
@@ -982,7 +983,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
 
@@ -1069,7 +1070,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
 
@@ -1147,7 +1148,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
 
@@ -1242,7 +1243,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
 
@@ -1347,7 +1348,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
 
@@ -1440,7 +1441,7 @@ class AsyncSearchService:
         scope: SearchScope | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
 

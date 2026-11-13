@@ -7,7 +7,7 @@ responses; this module turns them into Document instances.
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from mlclient import _constants as constants
 from mlclient.models.document_parts import Category, DocumentsDisposition
@@ -16,6 +16,8 @@ from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
     from httpx import Response
+
+    from mlclient.models.results import ParsedValue
 
 
 def normalize_category(
@@ -277,7 +279,7 @@ class DocumentsReader:
     def _get_partial_data(
         cls,
         content_disp: DocumentsDisposition,
-        parsed_resp_body: Any,
+        parsed_resp_body: ParsedValue,
     ) -> dict:
         """Return the data one multipart part contributes to its Document.
 
@@ -285,7 +287,7 @@ class DocumentsReader:
         ----------
         content_disp : DocumentsDisposition
             The part's parsed Content-Disposition.
-        parsed_resp_body : Any
+        parsed_resp_body : ParsedValue
             The part's body.
 
         Returns

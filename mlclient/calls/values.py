@@ -47,7 +47,7 @@ class ValuesGetCall(ApiCall):
         database: str | None = None,
         data_format: str = "xml",
         options: str | None = None,
-    ):
+    ) -> None:
         """Initialize ValuesGetCall instance.
 
         Parameters
@@ -77,7 +77,7 @@ class ValuesGetCall(ApiCall):
         )
 
     @classmethod
-    def _validate_params(cls, data_format: str):
+    def _validate_params(cls, data_format: str) -> None:
         """Validate the values-list response format.
 
         Parameters
@@ -100,7 +100,7 @@ class ValuesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Values call.
 
         Returns
@@ -143,7 +143,7 @@ class _ValueCall(ApiCall):
     _SUPPORTED_DIRECTIONS: ClassVar[list] = ["ascending", "descending"]
     _SUPPORTED_FREQUENCIES: ClassVar[list] = ["item", "fragment"]
 
-    def __init__(self, name: str, **kwargs):
+    def __init__(self, name: str, **kwargs: str | dict | bytes | None) -> None:
         """Initialize the shared part of a /v1/values/{name} call.
 
         Parameters
@@ -159,7 +159,7 @@ class _ValueCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Value call.
 
         Returns
@@ -180,7 +180,7 @@ class _ValueCall(ApiCall):
         data_format: str,
         direction: str | None,
         frequency: str | None,
-    ):
+    ) -> None:
         """Reject a missing name and enumerated values MarkLogic does not accept.
 
         Parameters
@@ -259,7 +259,7 @@ class ValueGetCall(_ValueCall):
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-    ):
+    ) -> None:
         """Initialize ValueGetCall instance.
 
         Parameters
@@ -397,7 +397,7 @@ class ValuePostCall(_ValueCall):
         transform_params: dict | None = None,
         timestamp: str | None = None,
         forest_name: str | list | None = None,
-    ):
+    ) -> None:
         """Initialize ValuePostCall instance.
 
         Parameters

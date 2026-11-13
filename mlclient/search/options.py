@@ -166,7 +166,7 @@ class Range(QueryComponent):
     computed_buckets: Sequence[ComputedBucket] = ()
     anchors: Sequence[Anchor] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject a target or attribute the range cannot describe.
 
         Raises
@@ -320,7 +320,7 @@ class SearchOption(_OptionComponent):
     _definition: _Definition
 
     @abstractmethod
-    def __init__(self):
+    def __init__(self) -> None:
         """Create a concrete option from its typed parameters."""
         raise NotImplementedError
 
@@ -366,7 +366,7 @@ class SearchOptions(QueryComponent):
         self,
         *options: SearchOption | SearchOptions,
         namespaces: Mapping[str, str] | None = None,
-    ):
+    ) -> None:
         """Snapshot option composition while retaining immutable components.
 
         Parameters
@@ -537,7 +537,7 @@ class Values(SearchOption):
         style: Literal["default", "consistent"] | None = None,
         aggregates: Sequence[Aggregate] = (),
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named range, URI or collection lexicon.
 
         Parameters
@@ -629,7 +629,7 @@ class Tuples(SearchOption):
         style: Literal["default", "consistent"] | None = None,
         aggregates: Sequence[Aggregate] = (),
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define co-occurring values from two or more indexes or lexicons.
 
         Parameters
@@ -723,7 +723,7 @@ class RangeConstraint(SearchOption):
         facet: bool = True,
         options: str | Sequence[str] | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named range constraint and optional facet.
 
         Parameters
@@ -800,7 +800,7 @@ class WordConstraint(SearchOption):
         weight: float | None = None,
         annotation: str | None = None,
         collation: str | None = None,
-    ):
+    ) -> None:
         """Define a named word constraint on an element, JSON property or field.
 
         String queries use it as ``name:word``; WordConstraintQuery names it.
@@ -882,7 +882,7 @@ class ValueConstraint(SearchOption):
         fragment_scope: Literal["documents", "properties"] | None = None,
         weight: float | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named value constraint on an element, JSON property or field.
 
         String queries use it as ``name:value``; ValueConstraintQuery names it.
@@ -973,7 +973,7 @@ class CollectionConstraint(SearchOption):
         facet: bool = True,
         options: str | Sequence[str] | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named collection constraint and optional facet.
 
         String queries use it as ``name:collection``, matched after the prefix.
@@ -1038,7 +1038,7 @@ class ContainerConstraint(SearchOption):
         *,
         fragment_scope: Literal["documents", "properties"] | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named container constraint on an element or JSON property.
 
         ContainerConstraintQuery names it to match a query within the container.
@@ -1122,7 +1122,7 @@ class SortOrder(SearchOption):
         *,
         direction: Literal["ascending", "descending"] = "ascending",
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Append an index-based or native sort key in insertion order.
 
         Parameters
@@ -1199,7 +1199,7 @@ class Control(SearchOption):
     name: str
     value: str | int | float | bool
 
-    def __init__(self, name: str, value: str | int | float | bool):
+    def __init__(self, name: str, value: str | int | float | bool) -> None:
         """Set a scalar top-level option such as page-length or return-facets.
 
         A repeatable option such as search-option accumulates; any other
@@ -1247,7 +1247,7 @@ class NativeOption(SearchOption):
         If the native names, namespace or definition counts do not match.
     """
 
-    def __init__(self, definition: dict, element: XmlElement):
+    def __init__(self, definition: dict, element: XmlElement) -> None:
         """Snapshot the JSON value and corresponding XML element.
 
         Parameters
@@ -1304,7 +1304,7 @@ class NativeOptions(SearchOptions):
         If the native definitions do not have matching names and counts.
     """
 
-    def __init__(self, definition: dict, *elements: XmlElement):
+    def __init__(self, definition: dict, *elements: XmlElement) -> None:
         """Snapshot independent native forms for reuse in option compositions.
 
         Parameters
@@ -1334,7 +1334,7 @@ class PageLength(SearchOption):
 
     value: int
 
-    def __init__(self, value: int):
+    def __init__(self, value: int) -> None:
         """Create a typed page-length option.
 
         Parameters
@@ -1365,7 +1365,7 @@ class ReturnFacets(SearchOption):
 
     value: bool
 
-    def __init__(self, value: bool):
+    def __init__(self, value: bool) -> None:
         """Create a typed return-facets option.
 
         Parameters
@@ -1426,7 +1426,7 @@ class _Definition(QueryComponent):
     text_member: str | None = None
     namespaces: dict[str, str] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot mutable inputs without serializing nested components."""
         # Targets and ranges are immutable and already snapshot namespace mappings.
         for name in ("attributes", "value", "native", "namespaces"):
@@ -1715,7 +1715,7 @@ class _BooleanOption(SearchOption):
     value: bool
     _name: ClassVar[str]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the boolean before constructing either native format.
 
         Raises
@@ -1877,7 +1877,7 @@ class ConcurrencyLevel(SearchOption):
 
     value: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -1911,7 +1911,7 @@ class QualityWeight(SearchOption):
 
     value: float
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -1945,7 +1945,7 @@ class Forest(SearchOption):
 
     value: str | int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -1975,7 +1975,7 @@ class FragmentScope(SearchOption):
 
     value: Literal["documents", "properties"]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -2005,7 +2005,7 @@ class SearchOptionString(SearchOption):
 
     value: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -2112,7 +2112,7 @@ class Callback(_OptionComponent):
     ns: str | None = None
     at: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the function attributes in an immutable definition."""
         object.__setattr__(
             self,
@@ -2145,7 +2145,7 @@ class Bucket(_OptionComponent):
     ge: str | int | float | None = None
     lt: str | int | float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture bounds separately from the display label."""
         object.__setattr__(
             self,
@@ -2195,7 +2195,7 @@ class ComputedBucket(_OptionComponent):
     ge_anchor: str | None = None
     lt_anchor: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture duration offsets and anchor choices."""
         object.__setattr__(
             self,
@@ -2237,7 +2237,7 @@ class Heatmap(_OptionComponent):
     latitude_divisions: int
     longitude_divisions: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject non-finite coordinates and invalid grid dimensions.
 
         Raises
@@ -2289,7 +2289,7 @@ class Aggregate(_OptionComponent):
     apply: str
     udf: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the aggregate function and optional plugin."""
         object.__setattr__(
             self,
@@ -2325,7 +2325,7 @@ class Word(_OptionComponent):
     weight: float | None = None
     collation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the target and snapshot option strings.
 
         Raises
@@ -2383,7 +2383,7 @@ class Value(_OptionComponent):
     fragment_scope: Literal["documents", "properties"] | None = None
     weight: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the target and JSON node type before serialization.
 
         Raises
@@ -2437,7 +2437,7 @@ class Collection(_OptionComponent):
     facet: bool | None = None
     options: str | Sequence[str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture collection settings and snapshot facet options."""
         object.__setattr__(
             self,
@@ -2469,7 +2469,7 @@ class WordLexicon(_OptionComponent):
     collation: str | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture lexicon selection without checking database configuration.
 
         Raises
@@ -2501,7 +2501,7 @@ class ResultDecorator(SearchOption):
 
     callback: Callback
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the callback under the result-decorator member.
 
         Raises
@@ -2529,7 +2529,7 @@ class PreferredMatches(_OptionComponent):
 
     targets: Sequence[Element | JsonProperty]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot and validate the preferred targets.
 
         Raises
@@ -2580,7 +2580,7 @@ class TransformResults(SearchOption):
     max_snippet_chars: int | None = None
     parameters: Sequence[QueryComponent] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot custom data and capture the snippet settings.
 
         Raises
@@ -2647,7 +2647,7 @@ class SuggestionSource(SearchOption):
 
     _name: ClassVar[str] = "suggestion-source"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the inline source and capture suggestion options.
 
         Raises
@@ -2706,7 +2706,7 @@ class TermDefault(_OptionComponent):
     ref: str | None = None
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the default matching definition.
 
         Raises
@@ -2760,7 +2760,7 @@ class Term(SearchOption):
     fragment_scope: Literal["documents", "properties"] | None = None
     weight: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture default and empty-query behavior without invoking callbacks.
 
         Raises
@@ -2841,7 +2841,7 @@ class AdditionalQuery(SearchOption):
         """
         return "additional-query"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject objects that do not provide query serialization.
 
         Raises
@@ -2959,7 +2959,7 @@ class Starter(_OptionComponent):
     delimiter: str | None = None
     tokenize: Literal["word", "default"] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture operator attributes and its token label."""
         object.__setattr__(
             self,
@@ -3021,7 +3021,7 @@ class Joiner(_OptionComponent):
     consume: int | None = None
     tokenize: Literal["word", "default"] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the joiner token and native parser attributes."""
         object.__setattr__(
             self,
@@ -3068,7 +3068,7 @@ class Grammar(SearchOption):
     starters: Sequence[Starter] = ()
     joiners: Sequence[Joiner] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot operators and preserve their array cardinality.
 
         Raises
@@ -3116,7 +3116,7 @@ class OperatorState(_OptionComponent):
     name: str
     options: SearchOptions
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject options that are unavailable inside an operator state.
 
         Raises
@@ -3169,7 +3169,7 @@ class Operator(SearchOption):
     name: str
     states: Sequence[OperatorState]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot the state list while preserving its order."""
         for state in self.states:
             _require(state, OperatorState, "operator state")
@@ -3199,7 +3199,7 @@ class SearchableExpression(SearchOption):
 
     path: PathIndex
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reuse the public path component's two native forms."""
         _require(self.path, PathIndex, "searchable expression")
         object.__setattr__(
@@ -3229,7 +3229,7 @@ class ExtractDocumentData(SearchOption):
     )
     namespaces: Mapping[str, str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot path strings and namespace bindings.
 
         Raises
@@ -3297,7 +3297,7 @@ class _Geospatial(_OptionComponent):
         targets: tuple[QueryComponent, ...],
         *,
         coord: str | None = None,
-    ):
+    ) -> None:
         """Capture a concrete index's targets and shared settings.
 
         Parameters
@@ -3400,7 +3400,7 @@ class GeoElement(_Geospatial):
     parent: Element | Sequence[Element]
     element: Element | Sequence[Element]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3436,7 +3436,7 @@ class GeoElementPair(_Geospatial):
     lat: Element | Sequence[Element]
     lon: Element | Sequence[Element]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3475,7 +3475,7 @@ class GeoAttributePair(_Geospatial):
     lat: Attribute | Sequence[Attribute]
     lon: Attribute | Sequence[Attribute]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3511,7 +3511,7 @@ class GeoJsonProperty(_Geospatial):
     parent_property: JsonProperty | Sequence[JsonProperty]
     json_property: JsonProperty | Sequence[JsonProperty]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3547,7 +3547,7 @@ class GeoJsonPropertyPair(_Geospatial):
     lat_property: JsonProperty | Sequence[JsonProperty]
     lon_property: JsonProperty | Sequence[JsonProperty]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3580,7 +3580,7 @@ class GeoPath(_Geospatial):
 
     path_index: PathIndex | Sequence[PathIndex]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3608,7 +3608,7 @@ class GeoRegionPath(_Geospatial):
     path_index: PathIndex | Sequence[PathIndex]
     coord: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3649,7 +3649,7 @@ class GeoConstraint(SearchOption):
     )
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the index and name its native definition.
 
         Raises
@@ -3687,7 +3687,7 @@ class PropertiesConstraint(SearchOption):
     name: str
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Create the empty properties marker and optional annotation."""
         object.__setattr__(
             self,
@@ -3725,7 +3725,7 @@ class ElementQueryConstraint(SearchOption):
     fragment_scope: Literal["documents", "properties"] | None = None
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and describe the legacy element constraint.
 
         Raises
@@ -3782,7 +3782,7 @@ class CustomConstraint(SearchOption):
     term_options: str | Sequence[str] | None = None
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture callback identities and snapshot extension option strings.
 
         Raises
@@ -3846,7 +3846,7 @@ class Anchor(_OptionComponent):
     value: str | None = None
     callback: Callback | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the fixed value or custom anchor function.
 
         Raises
@@ -3908,7 +3908,7 @@ class Annotation(SearchOption):
 
     text: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture annotation text without interpreting markup."""
         object.__setattr__(
             self,
@@ -3932,7 +3932,7 @@ class MetadataQName(_OptionComponent):
     element: Element
     attribute: Attribute | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the metadata element and optional attribute names.
 
         Raises
@@ -3963,7 +3963,7 @@ class ConstraintValue(_OptionComponent):
 
     ref: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the referenced constraint name."""
         object.__setattr__(
             self,
@@ -3984,7 +3984,7 @@ class ExtractMetadata(SearchOption):
 
     sources: Sequence[MetadataQName | JsonProperty | ConstraintValue]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot and validate metadata selectors.
 
         Raises
@@ -4045,7 +4045,11 @@ def _namespace_bindings(bindings: Mapping[str, str]) -> Mapping[str, str]:
     return MappingProxyType(dict(bindings))
 
 
-def _require(value: object, expected: type | tuple[type, ...], description: str):
+def _require(
+    value: object,
+    expected: type | tuple[type, ...],
+    description: str,
+) -> None:
     """Validate a required component before it can be serialized.
 
     Parameters
@@ -4067,7 +4071,7 @@ def _require(value: object, expected: type | tuple[type, ...], description: str)
         raise TypeError(message)
 
 
-def _matching(fragment_scope: str | None, weight: float | None):
+def _matching(fragment_scope: str | None, weight: float | None) -> None:
     """Validate optional fragment selection and relevance weight.
 
     Parameters
@@ -4094,7 +4098,7 @@ def _matching(fragment_scope: str | None, weight: float | None):
         raise ValueError(message)
 
 
-def _style(style: str | None):
+def _style(style: str | None) -> None:
     """Validate the native values or tuples style.
 
     Parameters
@@ -4112,7 +4116,7 @@ def _style(style: str | None):
         raise ValueError(message)
 
 
-def _replace_list_children(node: XmlElement, name: str, values: list[str]):
+def _replace_list_children(node: XmlElement, name: str, values: list[str]) -> None:
     """Replace an inherited XML option list with the explicit list.
 
     Parameters

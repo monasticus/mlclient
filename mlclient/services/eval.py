@@ -18,7 +18,7 @@ from mlclient.xquery.expressions import XqyExpression
 
 _XQUERY_FILE_EXT = ("xq", "xql", "xqm", "xqu", "xquery", "xqy")
 _JAVASCRIPT_FILE_EXT = ("js", "sjs")
-_SUPPORTED_FILE_EXT = tuple(
+SUPPORTED_FILE_EXTENSIONS = tuple(
     extension
     for extensions in [_XQUERY_FILE_EXT, _JAVASCRIPT_FILE_EXT]
     for extension in extensions
@@ -592,7 +592,7 @@ def _file_language(file: str) -> str:
         return "xquery"
     if file.endswith(_JAVASCRIPT_FILE_EXT):
         return "javascript"
-    extensions = ", ".join(_SUPPORTED_FILE_EXT)
+    extensions = ", ".join(SUPPORTED_FILE_EXTENSIONS)
     msg = f"Unknown file extension! Supported extensions are: {extensions}"
     raise UnsupportedFileExtensionError(msg)
 

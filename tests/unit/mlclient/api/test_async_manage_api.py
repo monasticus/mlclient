@@ -2,7 +2,7 @@ import httpx
 import pytest
 import respx
 
-from mlclient import AsyncMLClient
+from mlclient import AsyncMLClient, exceptions
 from mlclient.calls import DatabasesGetCall
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -1236,3 +1236,153 @@ async def test_put_host_properties():
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_requests():
+    response_body = resources_utils.read_test_resource_bytes(
+        __file__,
+        "test-get-requests.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/requests")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_request_param("group-id", "Default")
+    ml_mocker.with_request_param("server-id", "scifinder")
+    ml_mocker.with_request_param("seconds-min", "1")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(response_body)
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.requests.get_list(
+            data_format="json",
+            group_id="Default",
+            server_id="scifinder",
+            seconds_min=1,
+        )
+
+    request = resp.json()["request-default-list"]["list-items"]["list-item"][0]
+    assert resp.status_code == httpx.codes.OK
+    assert request["idref"] == "3225691567503049654"
+    assert request["item-properties"]["request-text"] == (
+        'xdmp:sleep(15000), "mlclient-v1-18-slept"'
+    )
+
+
+@pytest.mark.parametrize("timeout", [None, 2, httpx.Timeout(5, read=7)])
+@respx.mock
+@pytest.mark.asyncio
+async def test_get_requests_forwards_parameters_and_timeout(timeout):
+    route = respx.get(
+        "http://localhost:8002/manage/v2/requests",
+        params={
+            "format": "xml",
+            "view": "describe",
+            "group-id": "Default",
+            "host-id": "ml-host.example.com",
+            "server-id": "App-Services",
+            "seconds-min": "0",
+            "fullrefs": "false",
+        },
+        headers={"Accept": "application/xml"},
+    ).respond(200, text="<request-describe-list/>")
+    async with AsyncMLClient() as ml:
+        response = await ml.manage.requests.get_list(
+            data_format="xml",
+            view="describe",
+            group_id="Default",
+            host_id="ml-host.example.com",
+            server_id="App-Services",
+            seconds_min=0,
+            full_refs=False,
+            timeout=timeout,
+        )
+    assert response.status_code == 200
+    assert (
+        route.calls.last.request.extensions["timeout"]
+        == httpx.Timeout(timeout).as_dict()
+    )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_requests_rejects_fractional_seconds_min():
+    route = respx.get("http://localhost:8002/manage/v2/requests")
+    async with AsyncMLClient() as ml:
+        with pytest.raises(exceptions.WrongParametersError) as err:
+            await ml.manage.requests.get_list(seconds_min=1.5)
+
+    expected_msg = "The seconds_min parameter must be a non-negative integer"
+    assert str(err.value) == expected_msg
+    assert not route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_requests_returns_raw_error_response():
+    respx.get("http://localhost:8002/manage/v2/requests").respond(
+        403,
+        json={"errorResponse": {"message": "Forbidden"}},
+    )
+    async with AsyncMLClient() as ml:
+        response = await ml.manage.requests.get_list()
+    assert response.status_code == 403
+    assert response.json() == {"errorResponse": {"message": "Forbidden"}}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_request():
+    response_body = resources_utils.read_test_resource_bytes(
+        __file__,
+        "test-get-request.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/requests/3225691567503049654")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(response_body)
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.requests.get("3225691567503049654", data_format="json")
+
+    properties = resp.json()["request-default"]["properties"]
+    assert resp.status_code == httpx.codes.OK
+    assert properties["request-kind"]["value"] == "eval"
+    assert properties["update"]["value"] is False
+
+
+@pytest.mark.parametrize("timeout", [None, 2, httpx.Timeout(5, read=7)])
+@respx.mock
+@pytest.mark.asyncio
+async def test_get_request_forwards_parameters_and_timeout(timeout):
+    route = respx.get(
+        "http://localhost:8002/manage/v2/requests/3225691567503049654",
+        params={
+            "format": "json",
+            "group-id": "Default",
+            "host-id": "ml-host.example.com",
+            "server-id": "App-Services",
+        },
+        headers={"Accept": "application/json"},
+    ).respond(200, json={})
+    async with AsyncMLClient() as ml:
+        response = await ml.manage.requests.get(
+            "3225691567503049654",
+            data_format="json",
+            group_id="Default",
+            host_id="ml-host.example.com",
+            server_id="App-Services",
+            timeout=timeout,
+        )
+    assert response.status_code == 200
+    assert (
+        route.calls.last.request.extensions["timeout"]
+        == httpx.Timeout(timeout).as_dict()
+    )

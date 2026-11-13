@@ -21,6 +21,7 @@ from mlclient.api.forests import AsyncForestsApi, ForestsApi
 from mlclient.api.groups import AsyncGroupsApi, GroupsApi
 from mlclient.api.hosts import AsyncHostsApi, HostsApi
 from mlclient.api.logs import AsyncLogsApi, LogsApi
+from mlclient.api.requests import AsyncRequestsApi, RequestsApi
 from mlclient.api.roles import AsyncRolesApi, RolesApi
 from mlclient.api.servers import AsyncServersApi, ServersApi
 from mlclient.api.users import AsyncUsersApi, UsersApi
@@ -135,6 +136,21 @@ class ManageApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return LogsApi(self._api)
+
+    @cached_property
+    def requests(self) -> RequestsApi:
+        """Access requests operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        RequestsApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return RequestsApi(self._api)
 
     @cached_property
     def roles(self) -> RolesApi:
@@ -288,6 +304,21 @@ class AsyncManageApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return AsyncLogsApi(self._api)
+
+    @cached_property
+    def requests(self) -> AsyncRequestsApi:
+        """Access requests operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        AsyncRequestsApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return AsyncRequestsApi(self._api)
 
     @cached_property
     def roles(self) -> AsyncRolesApi:

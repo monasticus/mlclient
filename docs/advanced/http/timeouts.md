@@ -80,6 +80,23 @@ settings such as a transaction's `time_limit` control that separately. In eval,
 `timeout` is a transport option; use `variables={"timeout": value}` if your query
 itself declares an external variable with that name.
 
+An expired HTTP timeout does not cancel the request either: MarkLogic may still
+be running it, and an update may still commit. List the requests that have run
+for at least a given number of seconds through the Manage server:
+
+```python
+with MLClient() as ml:
+    response = ml.manage.requests.get_list(data_format="json", seconds_min=10)
+    summary = response.json()["request-default-list"]["list-items"]
+    for request in summary.get("list-item", []):
+        properties = request["item-properties"]
+        print(request["idref"], properties["request-text"], properties["update"]["value"])
+```
+
+[`ml.manage.requests.get(idref)`][mlclient.api.RequestsApi.get] returns the
+details of one request. MarkLogic has no REST endpoint to cancel a request;
+`xdmp:request-cancel` through eval does that.
+
 Streaming, multiple requests, eligible retries and backoff can make an operation
 last longer than one HTTP timeout. It is not a total wall-clock deadline.
 

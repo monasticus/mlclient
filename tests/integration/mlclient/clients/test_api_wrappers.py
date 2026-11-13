@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from time import sleep
+from concurrent.futures import ThreadPoolExecutor
+from time import monotonic, sleep
 from typing import ClassVar
 from xml.etree import ElementTree
 from uuid import uuid4
@@ -484,6 +485,53 @@ class TestHostsManagement:
             "REST-INVALIDTYPE: (rest:INVALIDTYPE) "
             "Invalid type in failover: yes is not a value of type boolean"
         )
+
+
+class TestRequestsManagement:
+    SLEEP_MILLISECONDS: ClassVar[int] = 8000
+    LISTING_DEADLINE_SECONDS: ClassVar[float] = 6.0
+
+    @pytest.mark.ml_access
+    def test_running_request_is_listed_and_detailed(self, ml_client: MLClient):
+        marker = f"mlclient-requests-test-{uuid4().hex}"
+        request_text = f'xdmp:sleep({self.SLEEP_MILLISECONDS}), "{marker}"'
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            slow_eval = executor.submit(self._eval_in_own_client, request_text)
+            listed = self._wait_until_listed(ml_client, marker)
+            detail = ml_client.manage.requests.get(listed["idref"], data_format="json")
+            assert slow_eval.result() == marker
+
+        assert listed["item-properties"]["request-text"] == request_text
+        assert listed["item-properties"]["request-kind"]["value"] == "eval"
+        assert listed["item-properties"]["update"]["value"] is False
+        assert detail.status_code == httpx.codes.OK
+        properties = detail.json()["request-default"]["properties"]
+        assert properties["request-text"] == request_text
+
+    @pytest.mark.ml_access
+    @pytest.mark.parametrize("view", ["default", "schema", "describe"])
+    def test_supported_request_views(self, ml_client: MLClient, view: str):
+        response = ml_client.manage.requests.get_list(view=view)
+        assert response.status_code == httpx.codes.OK
+        assert "xml" in response.headers["content-type"]
+
+    @staticmethod
+    def _eval_in_own_client(request_text: str) -> str:
+        with MLClient() as ml:
+            return ml.eval.xquery(request_text)
+
+    @classmethod
+    def _wait_until_listed(cls, ml: MLClient, marker: str) -> dict:
+        deadline = monotonic() + cls.LISTING_DEADLINE_SECONDS
+        while monotonic() < deadline:
+            response = ml.manage.requests.get_list(data_format="json", seconds_min=1)
+            assert response.status_code == httpx.codes.OK
+            list_items = response.json()["request-default-list"]["list-items"]
+            for item in list_items.get("list-item", []):
+                if marker in item["item-properties"]["request-text"]:
+                    return item
+            sleep(0.5)
+        pytest.fail(f"The request {marker} was not listed as running")
 
 
 class TestLogsEndpoint:

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import zlib
+from uuid import uuid4
 from xml.etree.ElementTree import ElementTree, fromstring
 
+import pytest
+
 from mlclient import MLClient
+from mlclient.calls import ApiCall
 from mlclient.jobs import WriteDocumentsJob
 from mlclient.models import (
     BinaryDocument,
@@ -14,6 +18,31 @@ from mlclient.models import (
     XMLDocument,
 )
 from tests.utils import documents_client as docs_client_utils
+from tests.utils.resources import render_test_resource
+
+
+class TransformCall(ApiCall):
+    """Install or remove a uniquely named content transform."""
+
+    def __init__(self, name: str, method: str, body: str | None = None):
+        super().__init__(method=method, body=body, content_type="application/xquery")
+        self._name = name
+
+    @property
+    def endpoint(self):
+        return f"/v1/config/transforms/{self._name}"
+
+
+@pytest.fixture(scope="module")
+def tag_transform():
+    name = f"mlclient-documents-{uuid4().hex}"
+    body = render_test_resource(__file__, "tag-transform.xqy", name=name)
+    with MLClient() as ml:
+        ml.rest.call(TransformCall(name, "PUT", body)).raise_for_status()
+        try:
+            yield name
+        finally:
+            ml.rest.call(TransformCall(name, "DELETE")).raise_for_status()
 
 
 def test_create_read_and_remove_xml_document():
@@ -338,6 +367,83 @@ def test_write_within_transaction_rolled_back_is_discarded():
         docs_client_utils.assert_document_does_not_exist(uri)
     finally:
         docs_client_utils.delete_documents(uri)
+
+
+def test_read_single_document_with_transform(tag_transform):
+    uri = "/some/dir/transform-read.xml"
+
+    try:
+        docs_client_utils.write_documents(XMLDocument(b"<root>data</root>", uri))
+        with MLClient() as ml:
+            doc = ml.documents.read(
+                uri,
+                transform=tag_transform,
+                transform_params={"value": "read"},
+            )
+        assert doc.content.getroot().attrib == {"transformed": "read"}
+    finally:
+        docs_client_utils.delete_documents(uri)
+
+
+def test_read_multiple_documents_with_transform(tag_transform):
+    uris = ["/some/dir/transform-read-1.xml", "/some/dir/transform-read-2.xml"]
+
+    try:
+        docs_client_utils.write_documents(
+            [XMLDocument(b"<root>data</root>", uri) for uri in uris],
+        )
+        with MLClient() as ml:
+            docs = ml.documents.read(
+                uris,
+                transform=tag_transform,
+                transform_params={"value": "read"},
+            )
+        assert {uri: doc.content.getroot().attrib for uri, doc in docs.items()} == {
+            uri: {"transformed": "read"} for uri in uris
+        }
+    finally:
+        docs_client_utils.delete_documents(uris)
+
+
+def test_write_with_transform_stores_transformed_content(tag_transform):
+    uri = "/some/dir/transform-write.xml"
+
+    try:
+        with MLClient() as ml:
+            ml.documents.write(
+                XMLDocument(b"<root>data</root>", uri),
+                transform=tag_transform,
+                transform_params={"value": "write"},
+            )
+            doc = ml.documents.read(uri)
+        assert doc.content.getroot().attrib == {"transformed": "write"}
+    finally:
+        docs_client_utils.delete_documents(uri)
+
+
+def test_read_multiple_documents_at_earlier_timestamp():
+    uris = ["/some/dir/snapshot-1.xml", "/some/dir/snapshot-2.xml"]
+
+    try:
+        docs_client_utils.write_documents(
+            [XMLDocument(b"<root>old</root>", uri) for uri in uris],
+        )
+        with MLClient() as ml:
+            response = ml.rest.documents.get(uris[0])
+            timestamp = response.headers["ML-Effective-Timestamp"]
+            ml.documents.write([XMLDocument(b"<root>new</root>", uri) for uri in uris])
+
+            snapshot = ml.documents.read(uris, timestamp=timestamp)
+            current = ml.documents.read(uris)
+
+        assert {
+            uri: doc.content.getroot().text for uri, doc in snapshot.items()
+        } == dict.fromkeys(uris, "old")
+        assert {
+            uri: doc.content.getroot().text for uri, doc in current.items()
+        } == dict.fromkeys(uris, "new")
+    finally:
+        docs_client_utils.delete_documents(uris)
 
 
 def _open_transaction(ml: MLClient) -> str:

@@ -34,20 +34,30 @@ def test_validation_multiple_categories_param():
     assert err.value.args[0] == expected_msg
 
 
-def test_validation_format_param():
+@pytest.mark.parametrize("data_format", ["binary", "text", "html"])
+@pytest.mark.parametrize(
+    "category",
+    [None, "content", ["content"], "metadata", ["content", "collections"]],
+)
+def test_validation_format_param(category, data_format):
     with pytest.raises(exceptions.WrongParametersError) as err:
-        DocumentsGetCall(uri="/a.xml", data_format="html")
+        DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
 
-    expected_msg = "The supported formats are: binary, json, text, xml"
-    assert err.value.args[0] == expected_msg
+    expected_msg = (
+        "The format applies to metadata only; supported formats are: json, xml"
+    )
+    assert str(err.value) == expected_msg
 
 
-def test_validation_format_param_for_metadata_categories():
-    with pytest.raises(exceptions.WrongParametersError) as err:
-        DocumentsGetCall(uri="/a.xml", category="collections", data_format="text")
+@pytest.mark.parametrize("data_format", ["json", "xml"])
+@pytest.mark.parametrize(
+    "category",
+    [None, "content", ["content"], "metadata", ["content", "collections"]],
+)
+def test_validation_accepts_metadata_format_for_any_category(category, data_format):
+    call = DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
 
-    expected_msg = "The supported metadata formats are: json, xml"
-    assert err.value.args[0] == expected_msg
+    assert call.params["format"] == data_format
 
 
 def test_endpoint(default_documents_get_call):
@@ -107,6 +117,27 @@ def test_headers_for_single_uri_content_category_and_format():
         DocumentsGetCall(uri="/a.xml", category="content", data_format="json").headers
         == {}
     )
+
+
+def test_headers_for_single_uri_content_category_list_and_format():
+    assert (
+        DocumentsGetCall(
+            uri="/a.xml",
+            category=["content"],
+            data_format="json",
+        ).headers
+        == {}
+    )
+
+
+def test_headers_for_single_uri_single_metadata_category_list_and_format():
+    assert DocumentsGetCall(
+        uri="/a.xml",
+        category=["collections"],
+        data_format="xml",
+    ).headers == {
+        "Accept": "application/xml",
+    }
 
 
 def test_headers_for_single_uri_metadata_category_and_json_format():

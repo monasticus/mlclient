@@ -45,8 +45,7 @@ class DocumentsGetCall(ApiCall):
     _TXID_PARAM: str = "txid"
     _TRANS_PARAM_PREFIX: str = "trans:"
 
-    _SUPPORTED_FORMATS: ClassVar[list] = ["binary", "json", "text", "xml"]
-    _SUPPORTED_METADATA_FORMATS: ClassVar[list] = ["json", "xml"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["json", "xml"]
     _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
@@ -100,10 +99,11 @@ class DocumentsGetCall(ApiCall):
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
         """
-        self._validate_params(category, data_format)
+        categories = self._categories_list(category)
+        self._validate_params(categories, data_format)
 
         super().__init__(method="GET")
-        accept_header = self._get_accept_header(uri, category, data_format)
+        accept_header = self._get_accept_header(uri, categories, data_format)
         self.add_header(constants.HEADER_NAME_ACCEPT, accept_header)
         self.add_param(self._URI_PARAM, uri)
         self.add_param(self._DATABASE_PARAM, database)
@@ -130,42 +130,41 @@ class DocumentsGetCall(ApiCall):
         """
         return self._ENDPOINT.format(self._API_VERSION)
 
+    @staticmethod
+    def _categories_list(category: str | list | None) -> list:
+        if not category:
+            return [Category.CONTENT.value]
+        if isinstance(category, list):
+            return category
+        return [category]
+
     @classmethod
     def _validate_params(
         cls,
-        category: str | list | None,
-        data_format: str,
+        categories: list,
+        data_format: str | None,
     ):
-        categories = [category] if not isinstance(category, list) else category
-        if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
+        if any(cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
             joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
             msg = f"The supported categories are: {joined_supported_categories}"
             raise exceptions.WrongParametersError(msg)
         if data_format and data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
-        if (
-            category
-            and category != "content"
-            and data_format
-            and data_format not in cls._SUPPORTED_METADATA_FORMATS
-        ):
-            joined_supported_formats = ", ".join(cls._SUPPORTED_METADATA_FORMATS)
-            msg = f"The supported metadata formats are: {joined_supported_formats}"
+            msg = (
+                "The format applies to metadata only; "
+                f"supported formats are: {joined_supported_formats}"
+            )
             raise exceptions.WrongParametersError(msg)
 
     @staticmethod
     def _get_accept_header(
         uri: str | list,
-        category: str | list,
-        data_format: str,
+        categories: list,
+        data_format: str | None,
     ):
-        if (not isinstance(uri, str) and len(uri) > 1) or (
-            isinstance(category, list) and len(category) > 1
-        ):
+        if (not isinstance(uri, str) and len(uri) > 1) or len(categories) > 1:
             return constants.HEADER_MULTIPART_MIXED
-        if data_format and category and category != "content":
+        if data_format and categories != [Category.CONTENT.value]:
             return utils.get_accept_header_for_format(data_format)
         return None
 

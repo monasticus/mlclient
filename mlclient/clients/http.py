@@ -37,8 +37,8 @@ if TYPE_CHECKING:
         password: str
         ssl: SSLConfig | None
         cloud: CloudConfig | None
-        retry: Retry | None
-        limits: httpx.Limits | None
+        retry: Retry | int | None
+        limits: httpx.Limits | int | None
         timeout: httpx.Timeout | float | None
         config: HTTPConfig | None
         session_owner: HttpClient | AsyncHttpClient | None
@@ -90,8 +90,8 @@ class _HttpClientBase:
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
-        retry: Retry | None = None,
-        limits: httpx.Limits | None = None,
+        retry: Retry | int | None = None,
+        limits: httpx.Limits | int | None = None,
         timeout: httpx.Timeout | float | None = UNSET,
         config: HTTPConfig | None = None,
         session_owner: HttpClient | AsyncHttpClient | None = None,
@@ -118,10 +118,11 @@ class _HttpClientBase:
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
-            A retry strategy
-        limits : httpx.Limits | None, default None
-            Connection-pool limits; None defers to httpx's own default
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
+            A retry strategy; an int changes only the default policy's retry count
+        limits : httpx.Limits | int | None, default None
+            Connection-pool limits; None defers to httpx's own default; an int
+            is shorthand for httpx.Limits(max_connections=n)
         timeout : httpx.Timeout | float | None, default unset
             A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
             write=60, pool=5 seconds). None disables every HTTP timeout. A
@@ -281,10 +282,11 @@ class HttpClient(_HttpClientBase):
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
-            A retry strategy
-        limits : httpx.Limits | None, default None
-            Connection-pool limits; None defers to httpx's own default
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
+            A retry strategy; an int changes only the default policy's retry count
+        limits : httpx.Limits | int | None, default None
+            Connection-pool limits; None defers to httpx's own default; an int
+            is shorthand for httpx.Limits(max_connections=n)
         timeout : httpx.Timeout | float | None, default unset
             A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
             write=60, pool=5 seconds). None disables every HTTP timeout. A
@@ -676,10 +678,11 @@ class AsyncHttpClient(_HttpClientBase):
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
-            A retry strategy
-        limits : httpx.Limits | None, default None
-            Connection-pool limits; None defers to httpx's own default
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
+            A retry strategy; an int changes only the default policy's retry count
+        limits : httpx.Limits | int | None, default None
+            Connection-pool limits; None defers to httpx's own default; an int
+            is shorthand for httpx.Limits(max_connections=n)
         timeout : httpx.Timeout | float | None, default unset
             A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
             write=60, pool=5 seconds). None disables every HTTP timeout. A

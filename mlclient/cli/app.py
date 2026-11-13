@@ -39,6 +39,7 @@ from mlclient.cli.commands.sample import SampleCommand
 from mlclient.cli.commands.trace_events import TraceEventsCommand
 from mlclient.cli.commands.url import UrlCommand
 from mlclient.cli.commands.version import VersionCommand
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.logging import setup_logger
 
 
@@ -135,34 +136,47 @@ class CleoAppHandler(logging.Handler):
         verbosity = self._LEVELS[record.levelno]["verbosity"]
         style = self._LEVELS[record.levelno]["style"]
         styled_text = f"<{style}>{Formatter.escape(self.format(record))}</>"
-        self.io.write_line(styled_text, verbosity=verbosity)
+        if self.io.error_output.is_decorated():
+            # A waiting indicator may occupy the current line of a terminal.
+            styled_text = ERASE_LINE + styled_text
+        self.io.write_error_line(styled_text, verbosity=verbosity)
 
     @classmethod
     def setup_for(
         cls,
         io: IO,
     ):
-        """Set up MLClient logs handler and format for an IO."""
+        """Set up MLClient logs handler and format for an IO.
+
+        Logs go to the error output; their styles are registered on both
+        outputs because cleo keeps a separate formatter per stream.
+        """
         options = ["italic"]
-        formatter = io.output.formatter
-        formatter.set_style("mlclient_fine", Style(foreground="cyan", options=options))
-        formatter.set_style(
-            "mlclient_debug",
-            Style(foreground="light_cyan", options=options),
-        )
-        formatter.set_style(
-            "mlclient_info",
-            Style(foreground="light_green", options=options),
-        )
-        formatter.set_style(
-            "mlclient_warning",
-            Style(foreground="yellow", options=options),
-        )
-        formatter.set_style("mlclient_error", Style(foreground="red", options=options))
-        formatter.set_style(
-            "mlclient_critical",
-            Style(foreground="light_red", options=options),
-        )
+        for formatter in (io.output.formatter, io.error_output.formatter):
+            formatter.set_style(
+                "mlclient_fine",
+                Style(foreground="cyan", options=options),
+            )
+            formatter.set_style(
+                "mlclient_debug",
+                Style(foreground="light_cyan", options=options),
+            )
+            formatter.set_style(
+                "mlclient_info",
+                Style(foreground="light_green", options=options),
+            )
+            formatter.set_style(
+                "mlclient_warning",
+                Style(foreground="yellow", options=options),
+            )
+            formatter.set_style(
+                "mlclient_error",
+                Style(foreground="red", options=options),
+            )
+            formatter.set_style(
+                "mlclient_critical",
+                Style(foreground="light_red", options=options),
+            )
 
         logger = logging.getLogger("mlclient")
         origin_handler = next(h for h in logger.handlers if h.name == "console")

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import pytest
 import respx
+from cleo.testers.application_tester import ApplicationTester
 from cleo.testers.command_tester import CommandTester
 
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from tests.utils.ml_mockers import MLRespXMocker
@@ -184,10 +186,7 @@ def test_command_invoke_output():
     tester = _get_tester("invoke")
     tester.execute(f"-e test {MODULE} --var word1=hello --var word2=world")
 
-    assert tester.io.fetch_output() == (
-        "Invoking module using REST App-Server http://localhost:8002\n\n"
-        "hello\nworld\nhello world\n"
-    )
+    assert tester.io.fetch_output() == ("hello\nworld\nhello world\n")
 
 
 @respx.mock
@@ -204,7 +203,6 @@ def test_command_invoke_formats_results_by_default():
     tester = _get_tester("invoke")
     assert tester.execute(MODULE) == 0
     assert tester.io.fetch_output() == (
-        "Invoking module using REST App-Server http://localhost:8002\n\n"
         "<root>\n  <item>one</item>\n  <item>two</item>\n</root>\n"
     )
 
@@ -222,11 +220,57 @@ def test_command_invoke_no_pretty_preserves_xml():
 
     tester = _get_tester("invoke")
     assert tester.execute(f"{MODULE} --no-pretty") == 0
-    assert tester.io.fetch_output() == (
-        "Invoking module using REST App-Server http://localhost:8002\n\n"
-        + result
-        + "\n"
+    assert tester.io.fetch_output() == result + "\n"
+
+
+# --- output streams ---
+
+
+@pytest.mark.usefixtures("mlclient_logger")
+@respx.mock
+def test_command_invoke_reports_the_app_server_on_stderr_when_verbose():
+    _mock_invoke_result("hello")
+    app = MLCLIentApplication()
+    app.auto_exits(False)
+    tester = ApplicationTester(app)
+
+    assert tester.execute(f"invoke {MODULE} -v") == 0
+    assert tester.io.fetch_output() == "hello\n"
+    assert (
+        "Invoking module using REST App-Server http://localhost:8002"
+        in tester.io.fetch_error()
     )
+
+
+@respx.mock
+def test_command_invoke_shows_a_waiting_indicator_on_a_terminal_stderr():
+    _mock_invoke_result("hello")
+    tester = _get_tester("invoke")
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute(MODULE) == 0
+    assert tester.io.fetch_output() == "hello\n"
+    error = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8002" in error
+    assert error.endswith(ERASE_LINE)
+
+
+@respx.mock
+def test_command_invoke_shows_no_waiting_indicator_when_stderr_is_not_a_terminal():
+    _mock_invoke_result("hello")
+    tester = _get_tester("invoke")
+
+    assert tester.execute(MODULE) == 0
+    assert tester.io.fetch_output() == "hello\n"
+    assert tester.io.fetch_error() == ""
+
+
+def _mock_invoke_result(result: str) -> None:
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/invoke")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", result)
+    ml_mocker.mock_post()
 
 
 def _get_tester(
@@ -280,7 +324,8 @@ def test_command_invoke_compares_environments_and_preserves_variables(pretty_opt
 
 @respx.mock
 def test_command_invoke_keeps_successful_peers_when_environment_fails(
-    mocker, ml_config,
+    mocker,
+    ml_config,
 ):
     mocker.patch(
         "mlclient.env.MLEnvironment.load",

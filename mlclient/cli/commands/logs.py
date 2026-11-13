@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import heapq
+import logging
 from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING, ClassVar
 
@@ -21,16 +22,18 @@ from dateutil.parser import isoparse
 from httpx import HTTPError
 
 from mlclient._manager import MLClientManager
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
 from mlclient.services.diagnostics.logs import AsyncLogsService, LogsService
 
-
 if TYPE_CHECKING:
     from cleo.ui.table_separator import TableSeparator
 
     from mlclient._client import AsyncMLClient
+
+logger = logging.getLogger(__name__)
 
 
 class LogsCommand(Command):
@@ -186,11 +189,11 @@ class LogsCommand(Command):
         """Print MarkLogic log files and their Management API download URLs."""
         manager = MLClientManager(self.option("environment"))
         with manager.get_client("manage") as ml:
-            self.info(f"Getting logs list using Manage App-Server {ml.http.base_url}")
-            logs_list = LogsService(ml.manage).list(self.option("host"))
             base_url = ml.http.base_url
+            logger.info("Getting logs list using Manage App-Server %s", base_url)
+            with waiting_for(self.io, base_url):
+                logs_list = LogsService(ml.manage).list(self.option("host"))
         app_port = self._get_app_port(manager)
-        self.line("")
         for host in sorted(logs_list["grouped"]):
             rows = list(self._get_log_files_rows(logs_list, host, app_port, base_url))
             self._render_log_files_table(host, rows)
@@ -336,7 +339,6 @@ class LogsCommand(Command):
         per_host_logs : list[Iterator[dict]]
             Timestamp-sorted entries tagged with their host names.
         """
-        self.line("")
         for log_dict in heapq.merge(
             *per_host_logs,
             key=lambda log: isoparse(log["timestamp"]),
@@ -366,17 +368,19 @@ class LogsCommand(Command):
         manager = MLClientManager(self.option("environment"))
         app_port = self._get_app_port(manager)
         async with manager.get_async_client("manage") as ml:
-            self.info(
-                f"Getting error logs from every host using "
-                f"Manage App-Server {ml.http.base_url}",
+            logger.info(
+                "Getting error logs from every host using Manage App-Server %s",
+                ml.http.base_url,
             )
-            hosts = await self._get_hosts(ml)
+            with waiting_for(self.io, ml.http.base_url):
+                hosts = await self._get_hosts(ml)
             self._warn_if_unfiltered(hosts)
             colors = {
                 host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
                 for index, host in enumerate(hosts)
             }
-            results = await self._fetch_hosts_logs(ml, hosts, app_port)
+            with waiting_for(self.io, ml.http.base_url):
+                results = await self._fetch_hosts_logs(ml, hosts, app_port)
             per_host_logs = []
             failures = {}
             for host, result in zip(hosts, results):
@@ -551,7 +555,6 @@ class LogsCommand(Command):
         """Print MarkLogic logs."""
         logs = self._get_logs()
         formatted_logs = self._format_logs(logs)
-        self.line("")
         for info, msg in formatted_logs:
             self._io.write(info)
             self._io.write(msg, new_line=True, type=Type.RAW)
@@ -586,17 +589,20 @@ class LogsCommand(Command):
                 file_name = f"{log_type.value}.txt"
             else:
                 file_name = f"{app_port}_{log_type.value}.txt"
-            self.info(
-                f"Getting {file_name} logs using Manage App-Server {ml.http.base_url}",
+            logger.info(
+                "Getting %s logs using Manage App-Server %s",
+                file_name,
+                ml.http.base_url,
             )
-            return LogsService(ml.manage).get(
-                app_port,
-                log_type,
-                start_time=start_time,
-                end_time=end_time,
-                regex=regex,
-                host=host,
-            )
+            with waiting_for(self.io, ml.http.base_url):
+                return LogsService(ml.manage).get(
+                    app_port,
+                    log_type,
+                    start_time=start_time,
+                    end_time=end_time,
+                    regex=regex,
+                    host=host,
+                )
 
     def _format_logs(
         self,

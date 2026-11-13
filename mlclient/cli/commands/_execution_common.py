@@ -67,7 +67,6 @@ def write_results(
         One raw result, or a list of them, each printed on its own line.
     """
     results = format_results(results, pretty=not command.option("no-pretty"))
-    command.io.write("\n")
     command.io.write(results, new_line=True, type=Type.RAW)
 
 

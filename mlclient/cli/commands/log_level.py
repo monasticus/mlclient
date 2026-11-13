@@ -14,6 +14,7 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_client
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.services.diagnostics.log_level import LogLevelService
@@ -124,15 +125,20 @@ class LogLevelCommand(Command):
         with get_client(manager, self.option("connection")) as ml:
             service = LogLevelService(ml.rest, ml.manage)
             try:
-                if level is None:
-                    current = service.get(group=group, server=server, log_type=log_type)
-                else:
-                    current = service.set(
-                        level,
-                        group=group,
-                        server=server,
-                        log_type=log_type,
-                    )
+                with waiting_for(self.io, ml.http.base_url):
+                    if level is None:
+                        current = service.get(
+                            group=group,
+                            server=server,
+                            log_type=log_type,
+                        )
+                    else:
+                        current = service.set(
+                            level,
+                            group=group,
+                            server=server,
+                            log_type=log_type,
+                        )
             except (MarkLogicError, WrongParametersError) as exc:
                 self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
                 return 1

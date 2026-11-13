@@ -18,6 +18,7 @@ from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 
 if TYPE_CHECKING:
@@ -69,7 +70,10 @@ class VersionCommand(Command):
         if len(environments) > 1:
             return time_in_environments(self, environments, self._fetch_version)
         manager = MLClientManager(environments[0])
-        with get_client(manager, self.option("connection")) as ml:
+        with (
+            get_client(manager, self.option("connection")) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             version = ml.version
         self.line(str(version))
         return 0

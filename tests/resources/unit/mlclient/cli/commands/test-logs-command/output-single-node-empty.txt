@@ -1,2 +1,0 @@
-Getting logs list using Manage App-Server http://localhost:8002
-

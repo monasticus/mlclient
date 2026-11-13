@@ -1,4 +1,12 @@
-from mlclient.models import Document, DocumentType, Metadata, Permission
+from mlclient.models import (
+    Document,
+    DocumentType,
+    JSONDocument,
+    Metadata,
+    MetadataDocument,
+    Permission,
+    XMLDocument,
+)
 
 
 class DocumentTestImpl(Document):
@@ -202,3 +210,12 @@ def test_content_bytes():
 def test_content_string():
     document = DocumentTestImpl()
     assert document.content_string == ""
+
+
+def test_concrete_document_types_keep_their_own_identity():
+    document = JSONDocument({"id": 1})
+
+    assert isinstance(document, Document)
+    assert isinstance(document, JSONDocument)
+    assert not isinstance(document, XMLDocument)
+    assert not isinstance(document, MetadataDocument)

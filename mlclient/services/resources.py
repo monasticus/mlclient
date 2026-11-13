@@ -635,7 +635,7 @@ def _documents(body: ResourceBody) -> list[Document] | None:
         documents = body
     else:
         return None
-    if any(type(document) is MetadataDocument for document in documents):
+    if any(isinstance(document, MetadataDocument) for document in documents):
         msg = "A MetadataDocument has no content to send to a resource extension!"
         raise exceptions.WrongParametersError(msg)
     return documents

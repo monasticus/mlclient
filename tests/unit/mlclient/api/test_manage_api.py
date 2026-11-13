@@ -32,6 +32,25 @@ def test_get_logs():
 
 
 @respx.mock
+def test_get_logs_as_text():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/logs")
+    ml_mocker.with_request_param("format", "text")
+    ml_mocker.with_request_param("filename", "ErrorLog.txt")
+    ml_mocker.with_request_header("Accept", "text/plain")
+    ml_mocker.with_response_content_type("text/plain; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(b"2026-11-13 04:41:03.206 Info: Merged 78 MB\n")
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.manage.logs.get("ErrorLog.txt", data_format="text")
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.text == "2026-11-13 04:41:03.206 Info: Merged 78 MB\n"
+
+
+@respx.mock
 def test_get_databases():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://marklogic.com/rest-api">
+    <collections>
+        <collection>collection-1</collection>
+    </collections>
+    <permissions>
+        <permission>
+            <role-name>role-1</role-name>
+            <capability>read</capability>
+        </permission>
+    </permissions>
+    <properties xmlns="http://marklogic.com/xdmp/property" xmlns:custom="http://example.com/custom">
+        <prop-name-1 xmlns="">prop-value-1</prop-name-1>
+    </properties>
+    <quality>1</quality>
+    <metadata-values>
+        <metadata-value key="meta-name-1">meta-1</metadata-value>
+    </metadata-values>
+</metadata>

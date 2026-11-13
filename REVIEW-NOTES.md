@@ -63,6 +63,12 @@ A5 - Decision: do the full review (M) - the public API must be well typed, not o
   it passes. `with MLClient() as ml` reveals `MLClient`, `ml.eval.xquery(...)` reveals the parsed-value union,
   and `CtsService(...).uris(database=1)` is rejected (`Unpack` kwargs are checked).
 
+## Follow-up code review (2026-11-13)
+
+### Typing review: accepted integer shorthands
+
+The TypedDict for HttpClient/AsyncHttpClient incorrectly rejected the supported `retry=0` and `limits=10` shorthands. Match HTTPConfig in the TypedDict, base constructor and docstrings. No runtime change. Mypy consumer smoke: four errors before the fix, clean afterwards, including against the installed wheel outside the checkout. The wheel contains py.typed.
+
 ## Open points for the reviewer
 
 - `mypy mlclient` on the library itself is not clean (975 errors on `main` already, mostly `arg-type`,

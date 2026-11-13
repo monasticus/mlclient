@@ -8,6 +8,8 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Iterator
 from typing import TYPE_CHECKING
 
+import httpx
+
 from mlclient import _constants as constants
 from mlclient._options import UNSET
 
@@ -281,6 +283,61 @@ class DocumentsService:
             )
             MLResponseParser.raise_for_status(resp)
             yield from DocumentsReader.parse(resp, category, uris=batch)
+
+    def exists(
+        self,
+        uri: str,
+        *,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
+        timeout=UNSET,
+    ) -> bool:
+        """Return whether a document exists, without downloading its content.
+
+        Sends a single HEAD request for one URI.
+
+        Parameters
+        ----------
+        uri : str
+            The URI of a document in the database.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it. Inside a transaction, documents it wrote and has not
+            committed yet exist.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+
+        Returns
+        -------
+        bool
+            True when MarkLogic answers 200 (OK), False when it answers
+            404 (Not Found).
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        httpx.HTTPStatusError
+            If MarkLogic answers any other error status, such as 401 or 403;
+            a HEAD response carries no MarkLogic error body.
+        """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
+        resp = self._rest.documents.head(
+            uri,
+            database=params["database"],
+            txid=params["txid"],
+            timeout=timeout,
+        )
+        if resp.status_code == httpx.codes.NOT_FOUND:
+            return False
+        MLResponseParser.raise_for_status(resp)
+        return True
 
     def delete(
         self,
@@ -638,6 +695,61 @@ class AsyncDocumentsService:
             MLResponseParser.raise_for_status(resp)
             for doc in DocumentsReader.parse(resp, category, uris=batch):
                 yield doc
+
+    async def exists(
+        self,
+        uri: str,
+        *,
+        database: str | None = UNSET,
+        txid: str | None = UNSET,
+        timeout=UNSET,
+    ) -> bool:
+        """Return whether a document exists, without downloading its content.
+
+        Sends a single HEAD request for one URI.
+
+        Parameters
+        ----------
+        uri : str
+            The URI of a document in the database.
+        database : str | None, default unset
+            Content database; unset inherits the service scope and None clears it.
+        txid : str | None, default unset
+            Transaction identifier; unset inherits the service scope and
+            None clears it. Inside a transaction, documents it wrote and has not
+            committed yet exist.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+
+        Returns
+        -------
+        bool
+            True when MarkLogic answers 200 (OK), False when it answers
+            404 (Not Found).
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        httpx.HTTPStatusError
+            If MarkLogic answers any other error status, such as 401 or 403;
+            a HEAD response carries no MarkLogic error body.
+        """
+        scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
+        params = scope.request_params()
+        resp = await self._rest.documents.head(
+            uri,
+            database=params["database"],
+            txid=params["txid"],
+            timeout=timeout,
+        )
+        if resp.status_code == httpx.codes.NOT_FOUND:
+            return False
+        MLResponseParser.raise_for_status(resp)
+        return True
 
     async def delete(
         self,

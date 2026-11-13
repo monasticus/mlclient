@@ -138,6 +138,35 @@ async def test_get_documents():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_head_documents():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_param("uri", "/some/dir/doc1.json")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("txid", "12345")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=utf-8")
+    ml_mocker.with_response_header("vnd.marklogic.document-format", "json")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17945794362918270")
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.documents.head(
+            "/some/dir/doc1.json",
+            database="Documents",
+            txid="12345",
+            timeout=2,
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.headers["vnd.marklogic.document-format"] == "json"
+    assert resp.content == b""
+    assert route.calls.last.request.extensions["timeout"] == httpx.Timeout(2).as_dict()
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_post_documents():
     body_part = {
         "content-type": "application/json",

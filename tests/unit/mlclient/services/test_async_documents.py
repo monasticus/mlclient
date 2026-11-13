@@ -1233,3 +1233,91 @@ async def test_clearing_scope_on_service_copy_preserves_original_scope():
         cleared_scope_service = original_service(database=None, txid=None)
         await cleared_scope_service.delete("/some/dir/doc1.xml")
         await original_service.delete("/some/dir/doc1.xml")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exists_returns_true_for_existing_document():
+    _mock_head_documents(200, {"uri": "/some/dir/doc2.json"})
+
+    async with AsyncMLClient() as ml:
+        assert await ml.documents.exists("/some/dir/doc2.json") is True
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exists_returns_false_for_missing_document():
+    _mock_head_documents(404, {"uri": "/some/dir/doc5.json"})
+
+    async with AsyncMLClient() as ml:
+        assert await ml.documents.exists("/some/dir/doc5.json") is False
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exists_raises_for_other_statuses():
+    route = _mock_head_documents(401, {"uri": "/some/dir/doc2.json"})
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(httpx.HTTPStatusError) as raised:
+            await ml.documents.exists("/some/dir/doc2.json")
+
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 401
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exists_with_scope_kwargs_and_timeout():
+    route = _mock_head_documents(
+        200,
+        {"uri": "/some/dir/doc2.json", "database": "request-db", "txid": "request-tx"},
+    )
+
+    async with AsyncMLClient() as ml:
+        exists = await ml.documents.exists(
+            "/some/dir/doc2.json",
+            database="request-db",
+            txid="request-tx",
+            timeout=2,
+        )
+
+    assert exists is True
+    assert route.calls.last.request.extensions["timeout"] == httpx.Timeout(2).as_dict()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exists_inherits_service_scope():
+    _mock_head_documents(
+        200,
+        {"uri": "/some/dir/doc2.json", "database": "service-db", "txid": "service-tx"},
+    )
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        assert await documents.exists("/some/dir/doc2.json") is True
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_exists_scope_kwargs_clear_service_scope():
+    _mock_head_documents(200, {"uri": "/some/dir/doc2.json"})
+
+    async with AsyncMLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        assert await documents.exists("/some/dir/doc2.json", database=None, txid=None)
+
+
+def _mock_head_documents(status_code: int, params: dict[str, str]) -> respx.Route:
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    for name, value in params.items():
+        mocker.with_request_param(name, value)
+    mocker.with_response_code(status_code)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    if status_code == 200:
+        mocker.with_response_header("vnd.marklogic.document-format", "json")
+        mocker.with_response_header("ML-Effective-Timestamp", "17945794362918270")
+    mocker.with_empty_response_body()
+    return mocker.mock_head()

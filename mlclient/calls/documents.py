@@ -1,8 +1,10 @@
 """The ML Documents Api Calls module.
 
-It exports 3 classes:
+It exports 4 classes:
     * DocumentsGetCall
         A GET request to retrieve documents' content or metadata.
+    * DocumentsHeadCall
+        A HEAD request to get the headers a GET of one document would return.
     * DocumentsPostCall
         A POST request to insert or update documents' content or metadata.
     * DocumentsDeleteCall
@@ -168,6 +170,67 @@ class DocumentsGetCall(ApiCall):
         if data_format and category and category != "content":
             return utils.get_accept_header_for_format(data_format)
         return None
+
+
+class DocumentsHeadCall(ApiCall):
+    """A HEAD request to get the headers a GET of one document would return.
+
+    An ApiCall implementation representing a single HEAD request
+    to the /v1/documents endpoint.
+
+    Returns the same headers as an equivalent GET (content/metadata fetch)
+    on the /documents service, without a body: status 200 (OK) when the document
+    exists, 404 (Not Found) when it does not.
+    Documentation of the REST Resource API: https://docs.marklogic.com/REST/HEAD/v1/documents
+    """
+
+    _API_VERSION: int = 1
+
+    _ENDPOINT: str = "/v{}/documents"
+
+    _URI_PARAM: str = "uri"
+    _DATABASE_PARAM: str = "database"
+    _TXID_PARAM: str = "txid"
+
+    def __init__(
+        self,
+        uri: str,
+        database: str | None = None,
+        txid: str | None = None,
+    ):
+        """Initialize DocumentsHeadCall instance.
+
+        Parameters
+        ----------
+        uri : str
+            The URI of a document in the database. MarkLogic accepts a single URI
+            per request.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        """
+        super().__init__(method=constants.METHOD_HEAD)
+        self.add_param(self._URI_PARAM, uri)
+        self.add_param(self._DATABASE_PARAM, database)
+        self.add_param(self._TXID_PARAM, txid)
+
+    @property
+    def endpoint(
+        self,
+    ):
+        """An endpoint for the Documents call.
+
+        Returns
+        -------
+        str
+            A Documents call endpoint
+        """
+        return self._ENDPOINT.format(self._API_VERSION)
 
 
 class DocumentsPostCall(ApiCall):

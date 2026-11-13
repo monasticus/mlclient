@@ -22,6 +22,7 @@ from mlclient.calls.databases import (
 from mlclient.calls.documents import (
     DocumentsDeleteCall,
     DocumentsGetCall,
+    DocumentsHeadCall,
     DocumentsPostCall,
 )
 from mlclient.calls.eval import EvalCall
@@ -97,6 +98,7 @@ __all__ = [
     "DatabasesPostCall",
     "DocumentsDeleteCall",
     "DocumentsGetCall",
+    "DocumentsHeadCall",
     "DocumentsPostCall",
     "EvalCall",
     "ForestDeleteCall",

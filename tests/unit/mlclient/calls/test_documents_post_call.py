@@ -123,3 +123,18 @@ def test_fully_parametrized_call_for_multiple_uris_metadata(default_body_part):
     expected_body += '{"root": "data"}\r\n'
     expected_body += f"--{boundary}--\r\n"
     assert call.body == expected_body.encode("utf-8")
+
+
+def test_transform_params_preserve_false_zero_and_empty_values(default_body_part):
+    call = DocumentsPostCall(
+        body_parts=[default_body_part],
+        transform="tag",
+        transform_params={"flag": False, "limit": 0, "label": "", "omit": None},
+    )
+
+    assert call.params == {
+        "transform": "tag",
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+    }

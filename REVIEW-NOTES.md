@@ -125,6 +125,12 @@ both work. Write with transform: the transformed content is stored. Metadata-onl
 metadata returned. The three validation errors: all raised. Point-in-time reads work on the default database
 and are ignored with a non-default `database` (see above).
 
+## Follow-up code review (2026-11-13)
+
+### Preserve transform parameters with false, zero and empty values
+
+Both document Calls dropped falsy transform parameters through ApiCall.add_param. Reuse the existing query_params helper in GET and POST, omitting only None, shared by sync/async services and raw APIs. Two regression tests failed before the fix; affected suites: 254 passed. Full unit suite: 10472 passed, 100% coverage. Live MarkLogic 10.0-11 and 12.1.0: read with False/0/empty transform values, write transform False, and old/current snapshot reads passed, with uniquely named fixtures removed in finally.
+
 ## Open points for the reviewer
 
 - `timestamp` with a non-default `database` is ignored by MarkLogic 12.1 without any message. It is documented,

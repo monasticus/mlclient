@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import ssl
 
 import pytest
 from cryptography import x509
@@ -158,6 +159,36 @@ def test_get_ssl_context_loads_client_cert(tmp_path):
     assert context is not None
 
 
+def test_get_ssl_context_verify_false_with_client_cert_skips_server_checks(tmp_path):
+    cert_file, key_file = _write_client_cert(tmp_path)
+    ssl_config = SSLConfig(
+        verify=False,
+        cert_file=str(cert_file),
+        key_file=str(key_file),
+    )
+    context = _get_ssl_context(ssl_config)
+    assert context is not None
+    assert context.check_hostname is False
+    assert context.verify_mode == ssl.CERT_NONE
+    assert context is _get_ssl_context(ssl_config)
+
+
+def test_get_ssl_context_verify_false_presents_client_cert(tmp_path):
+    cert_file, key_file = _write_client_cert(tmp_path)
+    server_cert_file, server_key_file = _write_client_cert(tmp_path / "server")
+    client_context = _get_ssl_context(
+        SSLConfig(verify=False, cert_file=str(cert_file), key_file=str(key_file)),
+    )
+    server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server_context.load_cert_chain(server_cert_file, server_key_file)
+    server_context.verify_mode = ssl.CERT_REQUIRED
+    server_context.load_verify_locations(cert_file)
+
+    peer_cert = _handshake_in_memory(client_context, server_context)
+
+    assert peer_cert["subject"] == ((("commonName", "mlclient-test-client"),),)
+
+
 def test_validate_cloud_with_client_cert_raises():
     cloud = CloudConfig(api_key="mk-123", base_path="/p")
     ssl_config = SSLConfig(cert_file="/client.pem", key_file="/client-key.pem")
@@ -182,6 +213,7 @@ def _write_self_signed_ca(tmp_path):
 
 def _write_client_cert(tmp_path):
     """Write a self-signed client certificate and its key for the factory."""
+    tmp_path.mkdir(parents=True, exist_ok=True)
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "mlclient-test-client")])
     certificate = _self_signed_certificate(key, name)
@@ -210,3 +242,26 @@ def _self_signed_certificate(key, name):
         .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
         .sign(key, hashes.SHA256())
     )
+
+
+def _handshake_in_memory(client_context, server_context):
+    """Handshake over memory buffers; return the client cert the server received."""
+    client_in, client_out = ssl.MemoryBIO(), ssl.MemoryBIO()
+    server_in, server_out = ssl.MemoryBIO(), ssl.MemoryBIO()
+    client = client_context.wrap_bio(client_in, client_out, server_hostname="localhost")
+    server = server_context.wrap_bio(server_in, server_out, server_side=True)
+    client_done = server_done = False
+    while not (client_done and server_done):
+        client_done = client_done or _handshake_step(client)
+        server_in.write(client_out.read())
+        server_done = server_done or _handshake_step(server)
+        client_in.write(server_out.read())
+    return server.getpeercert()
+
+
+def _handshake_step(tls_object):
+    try:
+        tls_object.do_handshake()
+    except ssl.SSLWantReadError:
+        return False
+    return True

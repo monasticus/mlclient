@@ -76,8 +76,11 @@ MarkLogic 11 or later can fall back to the Management API health check
 (requires the manage privilege). It reports an overall verdict from the
 responding host, so `hosts` is `None`. On older servers, or if the version
 cannot be determined, the original eval error is raised. Transport failures
-and Management API HTTP errors propagate instead of being reported as an
-unhealthy cluster.
+and Management API errors propagate instead of being reported as an
+unhealthy cluster: an error MarkLogic describes (for example `SEC-PRIV` without
+the manage privilege) as [MarkLogicError][mlclient.exceptions.MarkLogicError],
+any other HTTP failure as
+[`httpx.HTTPStatusError`](https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError).
 
 ## Server version
 
@@ -149,3 +152,10 @@ If you call [wait_for_restart][mlclient.MLClient.wait_for_restart] without a res
 ```
 
 For multi-host restart responses, the method waits for all affected hosts before it returns.
+
+If MarkLogic does not report readiness before `timeout` expires, a `TimeoutError` is raised. A
+readiness probe that answers a non-retryable error status raises the server's answer instead:
+[MarkLogicError][mlclient.exceptions.MarkLogicError] when MarkLogic describes the error,
+[`httpx.HTTPStatusError`](https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError)
+otherwise. Either is chained from an [MLClientError][mlclient.exceptions.MLClientError] naming the
+host that was being waited for.

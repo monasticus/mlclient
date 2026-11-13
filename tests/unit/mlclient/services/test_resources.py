@@ -29,6 +29,10 @@ NOT_INSTALLED_ERROR = (
 )
 
 
+class CustomMetadataDocument(MetadataDocument):
+    """An application's metadata-only document subclass."""
+
+
 @pytest.fixture
 def ml() -> MLClient:
     with MLClient() as client:
@@ -345,9 +349,10 @@ def test_post_document_with_content_type_is_rejected(ml):
     assert str(err.value) == expected
 
 
-def test_post_metadata_document_is_rejected(ml):
+@pytest.mark.parametrize("metadata_type", [MetadataDocument, CustomMetadataDocument])
+def test_post_metadata_document_is_rejected(ml, metadata_type):
     with pytest.raises(WrongParametersError) as err:
-        ml.resources.post(NAME, [MetadataDocument("/a.json", '{"quality": 1}')])
+        ml.resources.post(NAME, [metadata_type("/a.json", '{"quality": 1}')])
 
     expected = "A MetadataDocument has no content to send to a resource extension!"
     assert str(err.value) == expected
@@ -456,3 +461,17 @@ def test_http_error_without_marklogic_payload_is_raised(ml):
 
     with pytest.raises(httpx.HTTPStatusError):
         ml.resources.get(NAME)
+
+
+@respx.mock
+def test_post_accepts_a_document_subclass(ml):
+    class ProductDocument(JSONDocument):
+        """A domain document inheriting its JSON content implementation."""
+
+    route = _mock_json_response("post", b'{"method":"post"}')
+
+    result = ml.resources.post(NAME, ProductDocument({"k": 1}))
+
+    assert _sent(route).content == b'{"k": 1}'
+    assert _sent(route).headers["Content-Type"] == "application/json"
+    assert result == {"method": "post"}

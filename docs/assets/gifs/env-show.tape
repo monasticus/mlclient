@@ -26,7 +26,7 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type "ml env show"
+Type "ml env list"
 Enter
 Wait
 Wait+Screen /qa/
@@ -41,7 +41,7 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type "ml env show local"
+Type "ml env show"
 Enter
 Wait
 Wait+Screen /bookstore/
@@ -56,7 +56,7 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type "ml env show local --raw"
+Type "ml env show --raw"
 Enter
 Wait
 Wait+Screen /demo-password/
@@ -71,13 +71,13 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type "ml env show local host"
+Type "ml env show host"
 Enter
 Wait
 Wait+Screen /localhost/
 Sleep 2s
 
-Type "ml env show local password --copy"
+Type "ml env show password --copy"
 Enter
 Wait
 Wait+Screen /Copied to clipboard/

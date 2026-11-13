@@ -2,7 +2,7 @@
 
 It exports an implementation for 'eval' command:
     * EvalCommand
-        Sends a POST request to the /v1/eval endpoint.
+        Runs XQuery or JavaScript code.
 """
 
 from __future__ import annotations
@@ -27,7 +27,9 @@ from mlclient.exceptions import WrongParametersError
 
 
 class EvalCommand(Command):
-    """Sends a POST request to the /v1/eval endpoint.
+    """Runs XQuery or JavaScript code.
+
+    Uses the /v1/eval endpoint of a REST App Server.
 
     With several environments the code runs in all of them at once and the
     results are shown in a table with one column per environment, wrapped to fit
@@ -63,7 +65,8 @@ class EvalCommand(Command):
     """
 
     name: str = "eval"
-    description: str = "Sends a POST request to the /v1/eval endpoint"
+    description: str = "Runs XQuery or JavaScript code"
+    help: str = "Uses the /v1/eval endpoint of a REST App Server."
     arguments: list[Argument] = [
         argument(
             "code",

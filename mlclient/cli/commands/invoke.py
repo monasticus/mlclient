@@ -2,7 +2,7 @@
 
 It exports an implementation for 'invoke' command:
     * InvokeCommand
-        Sends a POST request to the /v1/invoke endpoint.
+        Runs an XQuery or JavaScript module deployed on the server.
 """
 
 from __future__ import annotations
@@ -26,7 +26,9 @@ from mlclient.cli.connection import get_async_client, get_client
 
 
 class InvokeCommand(Command):
-    """Sends a POST request to the /v1/invoke endpoint.
+    """Runs an XQuery or JavaScript module deployed on the server.
+
+    Uses the /v1/invoke endpoint of a REST App Server.
 
     Usage:
       invoke [options] [--] <module>
@@ -51,7 +53,8 @@ class InvokeCommand(Command):
     """
 
     name: str = "invoke"
-    description: str = "Sends a POST request to the /v1/invoke endpoint"
+    description: str = "Runs an XQuery or JavaScript module deployed on the server"
+    help: str = "Uses the /v1/invoke endpoint of a REST App Server."
     arguments: list[Argument] = [
         argument(
             "module",

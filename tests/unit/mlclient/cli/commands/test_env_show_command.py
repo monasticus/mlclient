@@ -44,8 +44,8 @@ def _write_env(name: str, config: dict) -> Path:
     return path
 
 
-def test_lists_environments_when_no_name() -> None:
-    _write_env("local", {"host": "localhost"})
+def test_shows_local_environment_by_default() -> None:
+    _write_env("local", {"host": "localhost.example.com"})
     _write_env("dev", {"host": "dev.example.com"})
 
     tester = _get_tester()
@@ -53,35 +53,61 @@ def test_lists_environments_when_no_name() -> None:
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
-    assert "local" in output
-    assert "dev" in output
+    assert "localhost.example.com" in output
+    assert "dev.example.com" not in output
 
 
-def test_listing_ignores_copy(clipboard_process: Mock) -> None:
+@pytest.mark.parametrize("option", ["-e", "--environment"])
+def test_shows_environment_given_by_option(option: str) -> None:
+    _write_env("local", {"host": "localhost.example.com"})
+    _write_env("staging", {"host": "staging.example.com"})
+
+    tester = _get_tester()
+    tester.execute(f"{option} staging")
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert "staging.example.com" in output
+    assert "localhost.example.com" not in output
+
+
+def test_shows_setting_of_local_environment_by_default() -> None:
+    _write_env("local", {"host": "localhost.example.com"})
+
+    tester = _get_tester()
+    tester.execute("host")
+
+    assert tester.status_code == 0
+    assert tester.io.fetch_output() == "localhost.example.com\n"
+
+
+def test_reads_positional_argument_as_setting_not_environment() -> None:
+    _write_env("local", {"host": "localhost.example.com"})
+    _write_env("staging", {"host": "staging.example.com"})
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("staging")
+
+    assert str(error.value) == "No setting [staging]."
+
+
+def test_reports_missing_local_environment_by_default() -> None:
     _write_env("dev", {"host": "dev.example.com"})
     tester = _get_tester()
 
-    tester.execute("--copy")
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("")
 
-    assert tester.status_code == 0
-    assert "dev" in tester.io.fetch_output()
-    assert "only works for individual settings" in tester.io.fetch_error()
-    clipboard_process.assert_not_called()
-
-
-def test_reports_no_environments_when_directory_empty() -> None:
-    tester = _get_tester()
-    tester.execute("")
-
-    assert tester.status_code == 0
-    assert "No environments" in tester.io.fetch_output()
+    directory = Path.cwd() / ".mlclient"
+    assert str(error.value) == f"No environment [local] in {directory}. Available: dev."
 
 
 def test_omits_directory_note_when_in_cwd() -> None:
     _write_env("dev", {"host": "dev.example.com"})
 
     tester = _get_tester()
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     assert "Reading" not in tester.io.fetch_output()
 
@@ -96,7 +122,7 @@ def test_locates_mlclient_directory_in_ancestor(
     monkeypatch.chdir(nested)
 
     tester = _get_tester()
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -116,7 +142,7 @@ def test_reads_global_directory(
     monkeypatch.setattr(Path, "home", lambda: home)
 
     tester = _get_tester()
-    tester.execute("dev --global")
+    tester.execute("-e dev --global")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -139,7 +165,7 @@ def test_flags_implicit_fall_through_to_global(
     monkeypatch.chdir(nested)
 
     tester = _get_tester()
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -155,7 +181,7 @@ def test_renders_settings_and_masks_password() -> None:
     )
 
     tester = _get_tester()
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -169,7 +195,7 @@ def test_full_view_ignores_copy(clipboard_process: Mock) -> None:
     _write_env("dev", {"host": "dev.example.com", "password": "s3cret"})
     tester = _get_tester()
 
-    tester.execute("dev -c")
+    tester.execute("-e dev --copy")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -186,7 +212,7 @@ def test_renders_empty_environment(content: str) -> None:
     (Path.cwd() / ".mlclient" / "mlclient-dev.yaml").write_text(content)
     tester = _get_tester()
 
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     assert tester.status_code == 0
     assert "Setting" in tester.io.fetch_output()
@@ -205,7 +231,7 @@ def test_renders_app_servers() -> None:
     )
 
     tester = _get_tester()
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     output = tester.io.fetch_output()
     assert "app-services" in output
@@ -218,7 +244,7 @@ def test_renders_environment_without_app_servers(servers: object) -> None:
     _write_env("dev", {"host": "dev.example.com", "app-servers": servers})
     tester = _get_tester()
 
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     assert tester.status_code == 0
     assert "dev.example.com" in tester.io.fetch_output()
@@ -229,7 +255,7 @@ def test_full_view_omits_predefined_servers_absent_from_file() -> None:
     _write_env("dev", {"host": "dev.example.com"})
 
     tester = _get_tester()
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     output = tester.io.fetch_output()
     assert "manage" not in output
@@ -243,7 +269,7 @@ def test_masks_nested_secrets() -> None:
     )
 
     tester = _get_tester()
-    tester.execute("cloud")
+    tester.execute("-e cloud")
 
     output = tester.io.fetch_output()
     assert "topsecret" not in output
@@ -259,7 +285,7 @@ def test_masks_secrets_in_lists(secrets: bool) -> None:
     )
     tester = _get_tester()
 
-    tester.execute("dev" + (" --secrets" if secrets else ""))
+    tester.execute("-e dev" + (" --secrets" if secrets else ""))
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -277,7 +303,7 @@ def test_masks_app_server_secrets_in_lists(secrets: bool) -> None:
     )
     tester = _get_tester()
 
-    tester.execute("dev" + (" --secrets" if secrets else ""))
+    tester.execute("-e dev" + (" --secrets" if secrets else ""))
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -290,7 +316,7 @@ def test_show_secrets_reveals_password() -> None:
     _write_env("dev", {"host": "dev.example.com", "password": "s3cret"})
 
     tester = _get_tester()
-    tester.execute("dev --secrets")
+    tester.execute("-e dev --secrets")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -302,7 +328,7 @@ def test_raw_prints_file_verbatim_without_masking() -> None:
     _write_env("dev", {"host": "dev.example.com", "password": "s3cret"})
 
     tester = _get_tester()
-    tester.execute("dev --raw")
+    tester.execute("-e dev --raw")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -315,13 +341,16 @@ def test_raw_prints_invalid_yaml_without_parsing() -> None:
     (Path.cwd() / ".mlclient" / "mlclient-dev.yaml").write_text("host: [")
     tester = _get_tester()
 
-    tester.execute("dev --raw")
+    tester.execute("-e dev --raw")
 
     assert tester.status_code == 0
     assert tester.io.fetch_output() == "host: [\n"
 
 
-@pytest.mark.parametrize("arguments", ["dev --raw -c", "dev host --raw -c"])
+@pytest.mark.parametrize(
+    "arguments",
+    ["-e dev --raw --copy", "-e dev host --raw --copy"],
+)
 def test_raw_ignores_copy(arguments: str, clipboard_process: Mock) -> None:
     _write_env("dev", {"host": "dev.example.com"})
     tester = _get_tester()
@@ -339,7 +368,7 @@ def test_reports_unknown_environment() -> None:
     tester = _get_tester()
 
     with pytest.raises(WrongParametersError) as error:
-        tester.execute("prod")
+        tester.execute("-e prod")
 
     message = str(error.value)
     assert "prod" in message
@@ -354,7 +383,7 @@ def test_reports_non_mapping_environment(config: object) -> None:
     tester = _get_tester()
 
     with pytest.raises(WrongParametersError, match="must be a mapping"):
-        tester.execute("dev")
+        tester.execute("-e dev")
 
 
 @pytest.mark.parametrize("servers", [{}, "rest", 1, False])
@@ -363,7 +392,7 @@ def test_reports_non_list_app_servers(servers: object) -> None:
     tester = _get_tester()
 
     with pytest.raises(WrongParametersError, match="app-servers must be a list"):
-        tester.execute("dev")
+        tester.execute("-e dev")
 
 
 @pytest.mark.parametrize(
@@ -375,7 +404,7 @@ def test_reports_invalid_app_server(server: object) -> None:
     tester = _get_tester()
 
     with pytest.raises(WrongParametersError, match="non-empty string id"):
-        tester.execute("dev")
+        tester.execute("-e dev")
 
 
 def test_reports_invalid_yaml_without_revealing_contents() -> None:
@@ -385,7 +414,7 @@ def test_reports_invalid_yaml_without_revealing_contents() -> None:
     tester = _get_tester()
 
     with pytest.raises(WrongParametersError) as error:
-        tester.execute("dev")
+        tester.execute("-e dev")
 
     message = str(error.value)
     assert "Invalid YAML" in message
@@ -397,7 +426,7 @@ def test_setting_prints_root_scalar_value() -> None:
     _write_env("dev", {"host": "dev.example.com", "protocol": "https"})
 
     tester = _get_tester()
-    tester.execute("dev host")
+    tester.execute("-e dev host")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -405,7 +434,6 @@ def test_setting_prints_root_scalar_value() -> None:
     assert "Setting" not in output
 
 
-@pytest.mark.parametrize("flag", ["--copy", "-c"])
 @pytest.mark.parametrize(
     ("value", "text"),
     [
@@ -419,7 +447,6 @@ def test_setting_prints_root_scalar_value() -> None:
     ],
 )
 def test_setting_copies_simple_value(
-    flag: str,
     value: object,
     text: str,
     clipboard_process: Mock,
@@ -427,7 +454,7 @@ def test_setting_copies_simple_value(
     _write_env("dev", {"setting": value})
     tester = _get_tester()
 
-    tester.execute(f"dev setting {flag}")
+    tester.execute("-e dev setting --copy")
 
     assert tester.status_code == 0
     assert tester.io.fetch_output() == f"{text}\nCopied to clipboard.\n"
@@ -439,7 +466,7 @@ def test_copy_confirmation_is_green_and_italic(clipboard_process: Mock) -> None:
     _write_env("dev", {"host": "localhost"})
     tester = _get_tester()
 
-    tester.execute("dev host -c", decorated=True)
+    tester.execute("-e dev host --copy", decorated=True)
 
     assert tester.io.fetch_output() == (
         "localhost\n\x1b[32;3mCopied to clipboard.\x1b[39;23m\n"
@@ -450,13 +477,12 @@ def test_copy_confirmation_is_green_and_italic(clipboard_process: Mock) -> None:
 @pytest.mark.parametrize(
     ("arguments", "expected", "clipboard_failure"),
     [
-        ("--copy", "dev", False),
-        ("dev -c", "localhost", False),
-        ("dev --raw -c", "host: localhost", False),
-        ("dev host --raw -c", "host: localhost", False),
-        ("dev ssl -c", "verify=true", False),
-        ("dev app-services -c", "8000", False),
-        ("dev host -c", "localhost", True),
+        ("-e dev --copy", "localhost", False),
+        ("-e dev --raw --copy", "host: localhost", False),
+        ("-e dev host --raw --copy", "host: localhost", False),
+        ("-e dev ssl --copy", "verify=true", False),
+        ("-e dev app-services --copy", "8000", False),
+        ("-e dev host --copy", "localhost", True),
     ],
 )
 def test_copy_warning_is_dim_yellow_and_follows_output(
@@ -495,7 +521,7 @@ def test_setting_does_not_copy_without_flag(clipboard_process: Mock) -> None:
     _write_env("dev", {"host": "localhost"})
     tester = _get_tester()
 
-    tester.execute("dev host")
+    tester.execute("-e dev host")
 
     assert tester.io.fetch_output() == "localhost\n"
     clipboard_process.assert_not_called()
@@ -517,7 +543,7 @@ def test_setting_reports_clipboard_failure_without_failing_command(
     _write_env("dev", {"password": "s3cret"})
     tester = _get_tester()
 
-    tester.execute("dev password -c")
+    tester.execute("-e dev password --copy")
 
     output = tester.io.fetch_output()
     error = tester.io.fetch_error()
@@ -551,7 +577,7 @@ def test_setting_uses_platform_clipboard(
     _write_env("dev", {"password": "żółć"})
     tester = _get_tester()
 
-    tester.execute("dev password -c")
+    tester.execute("-e dev password --copy")
 
     assert tester.status_code == 0
     clipboard_process.assert_called_once_with(
@@ -568,7 +594,7 @@ def test_setting_masks_root_secret() -> None:
     _write_env("dev", {"host": "dev.example.com", "password": "s3cret"})
 
     tester = _get_tester()
-    tester.execute("dev password")
+    tester.execute("-e dev password")
 
     output = tester.io.fetch_output()
     assert "s3cret" not in output
@@ -580,7 +606,7 @@ def test_setting_copies_unmasked_secret(flag: str, clipboard_process: Mock) -> N
     _write_env("dev", {"password": "s3cret"})
     tester = _get_tester()
 
-    tester.execute(f"dev password --copy {flag}")
+    tester.execute(f"-e dev password --copy {flag}")
 
     displayed = "s3cret" if flag else "****"
     assert tester.status_code == 0
@@ -600,7 +626,7 @@ def test_setting_ignores_copy_for_non_simple_value(
     _write_env("dev", {"ssl": value})
     tester = _get_tester()
 
-    tester.execute("dev ssl -c")
+    tester.execute("-e dev ssl --copy")
 
     assert tester.status_code == 0
     assert tester.io.fetch_output() == f"{rendered}\n"
@@ -617,7 +643,7 @@ def test_setting_masks_secrets_in_lists(secrets: bool) -> None:
     )
     tester = _get_tester()
 
-    tester.execute("dev items" + (" --secrets" if secrets else ""))
+    tester.execute("-e dev items" + (" --secrets" if secrets else ""))
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -639,7 +665,7 @@ def test_setting_renders_app_server_table() -> None:
     )
 
     tester = _get_tester()
-    tester.execute("dev rest")
+    tester.execute("-e dev rest")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -657,7 +683,7 @@ def test_setting_masks_app_server_secrets_in_lists(secrets: bool) -> None:
     )
     tester = _get_tester()
 
-    tester.execute("dev rest" + (" --secrets" if secrets else ""))
+    tester.execute("-e dev rest" + (" --secrets" if secrets else ""))
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -682,7 +708,7 @@ def test_setting_renders_predefined_app_server_absent_from_file(
     _write_env("dev", {"host": "dev.example.com"})
 
     tester = _get_tester()
-    tester.execute(f"dev {server_id}")
+    tester.execute(f"-e dev {server_id}")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -698,7 +724,7 @@ def test_setting_ignores_copy_for_app_server(
     _write_env("dev", {"app-servers": [{"id": "rest", "port": 8010}]})
     tester = _get_tester()
 
-    tester.execute(f"dev {server} -c")
+    tester.execute(f"-e dev {server} --copy")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -713,7 +739,7 @@ def test_setting_prefers_configured_server_over_predefined_default() -> None:
     _write_env("dev", {"app-servers": [{"id": "manage", "port": 9002}]})
     tester = _get_tester()
 
-    tester.execute("dev manage")
+    tester.execute("-e dev manage")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -726,7 +752,7 @@ def test_reports_unknown_setting() -> None:
     tester = _get_tester()
 
     with pytest.raises(WrongParametersError) as error:
-        tester.execute("dev nope")
+        tester.execute("-e dev nope")
 
     assert "nope" in str(error.value)
 
@@ -735,7 +761,7 @@ def test_shows_only_written_settings_without_defaults() -> None:
     _write_env("dev", {"host": "dev.example.com"})
     tester = _get_tester()
 
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     output = tester.io.fetch_output()
     assert "dev.example.com" in output
@@ -743,11 +769,12 @@ def test_shows_only_written_settings_without_defaults() -> None:
     assert "manage" not in output
 
 
-def test_defaults_fills_in_inherited_settings_and_platform_servers() -> None:
+@pytest.mark.parametrize("flag", ["--defaults", "-D"])
+def test_defaults_fills_in_inherited_settings_and_platform_servers(flag: str) -> None:
     _write_env("dev", {"host": "dev.example.com"})
     tester = _get_tester()
 
-    tester.execute("dev --defaults")
+    tester.execute(f"-e dev {flag}")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
@@ -772,7 +799,7 @@ def test_masks_supported_secrets(flag, server):
     _write_env("dev", config)
 
     tester = _get_tester()
-    tester.execute(f"dev {flag}")
+    tester.execute(f"-e dev {flag}")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -789,7 +816,7 @@ def test_masks_cloud_api_key(flag):
     )
 
     tester = _get_tester()
-    tester.execute(f"dev {flag}")
+    tester.execute(f"-e dev {flag}")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -810,7 +837,7 @@ def test_preserves_literal_markup(decorated):
     )
 
     tester = _get_tester()
-    tester.execute("'<info>dev'", decorated=decorated)
+    tester.execute("-e '<info>dev'", decorated=decorated)
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -826,7 +853,7 @@ def test_show_copies_original_markup_without_escape_characters(mocker):
     copy = mocker.patch("mlclient.cli.commands.env_show.copy_to_clipboard")
 
     tester = _get_tester()
-    tester.execute("dev host --copy")
+    tester.execute("-e dev host --copy")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -844,7 +871,7 @@ def test_empty_environment_resolves_defaults(content):
     path.write_text(content)
 
     tester = _get_tester()
-    tester.execute("dev --defaults")
+    tester.execute("-e dev --defaults")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -860,7 +887,7 @@ def test_show_defaults_resolves_server_inheritance():
     resolved = MLEnvironment.model_validate(config).provide_config("content")
 
     tester = _get_tester()
-    tester.execute("dev content --defaults")
+    tester.execute("-e dev content --defaults")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -874,7 +901,7 @@ def test_show_defaults_preserves_explicit_no_auth(auth):
     _write_env("dev", {"auth": auth})
 
     tester = _get_tester()
-    tester.execute("dev auth --defaults")
+    tester.execute("-e dev auth --defaults")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -892,7 +919,7 @@ def test_show_defaults_merges_ssl_fields_without_loading_certificates():
     )
 
     tester = _get_tester()
-    tester.execute("dev content --defaults")
+    tester.execute("-e dev content --defaults")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -906,7 +933,7 @@ def test_show_defaults_does_not_require_kerberos_tooling(mocker):
     _write_env("dev", {"auth": "kerberos", "app-servers": [{"id": "content"}]})
 
     tester = _get_tester()
-    tester.execute("dev content --defaults")
+    tester.execute("-e dev content --defaults")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -921,7 +948,7 @@ def test_show_defaults_displays_cloud_gateway_defaults():
     )
 
     tester = _get_tester()
-    tester.execute("dev app-services --defaults")
+    tester.execute("-e dev app-services --defaults")
 
     assert tester.status_code == 0
     output = tester.io.fetch_output()
@@ -942,7 +969,7 @@ def test_invalid_config_errors_do_not_disclose_input(verbosity):
             "auth": {"method": "oauth", "token": "private-token", "hostname": []},
         },
     )
-    arguments = ["env", "show", "dev", "--no-ansi", "--defaults"]
+    arguments = ["env", "show", "-e", "dev", "--no-ansi", "--defaults"]
     if verbosity:
         arguments.append(verbosity)
 
@@ -973,6 +1000,7 @@ def test_invalid_yaml_errors_do_not_disclose_input_at_debug_verbosity():
             "from mlclient.cli import main; main()",
             "env",
             "show",
+            "-e",
             "dev",
             "--no-ansi",
             "-vvv",

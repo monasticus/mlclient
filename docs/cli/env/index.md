@@ -7,7 +7,8 @@ create databases or deploy a MarkLogic application.
 | Command | Use it to |
 | --- | --- |
 | [`ml env init`](init.md) | Create a template, import ml-gradle properties or discover App Servers from a host |
-| [`ml env show`](show.md) | List environments, inspect a configuration or copy a simple setting |
+| [`ml env list`](list.md) | List the available environments |
+| [`ml env show`](show.md) | Inspect a configuration or copy a simple setting |
 | [`ml env edit`](edit.md) | Open a configuration file in your editor |
 | [`ml env copy`](copy.md) | Clone a configuration under a new name, optionally editing it |
 | [`ml env remove`](remove.md) | Delete a configuration file, with confirmation |
@@ -17,7 +18,7 @@ create databases or deploy a MarkLogic application.
 
 ```sh
 ml env init
-ml env show local
+ml env show
 ```
 
 Review `.mlclient/mlclient-local.yaml` and fill in your connection settings

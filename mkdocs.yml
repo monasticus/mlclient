@@ -109,6 +109,7 @@ nav:
       - env:
           - Overview: cli/env/index.md
           - init: cli/env/init.md
+          - list: cli/env/list.md
           - show: cli/env/show.md
           - edit: cli/env/edit.md
           - copy: cli/env/copy.md

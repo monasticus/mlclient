@@ -20,8 +20,7 @@ with `--body`:
 ```sh
 ml http put /v1/documents uri=/doc.json \
   Content-Type:application/json -b '{"hello":"world"}'
-ml http put /v1/documents uri=/doc.xml \
-  Content-Type:application/xml -b @./doc.xml
+ml http put /v1/documents uri=/doc.xml -b @./doc.xml
 ml http delete /v1/documents uri=/doc.xml
 ```
 
@@ -54,6 +53,18 @@ the last value wins.
 ml http get /v1/documents uri=/one.xml uri=/two.xml Accept:application/xml
 ```
 
+MarkLogic parameter names with a colon are query parameters when the token
+contains `=`: `rs:`, `trans:`, `perm:`, `prop:`, `value:`, `bind:` and the
+extension method declarations `get:`, `put:`, `post:` and `delete:`. Every other
+token is split at its first `=` or `:`, so a header value may contain `=`.
+
+```sh
+ml http get /v1/resources/my-extension rs:name=value
+ml http get /v1/documents uri=/doc.json transform=my-transform trans:mode=draft
+ml http put /v1/documents uri=/doc.json perm:rest-reader=read -b @./doc.json
+ml http post /v1/documents Content-Type:'multipart/mixed; boundary=xyz' -b @./batch
+```
+
 ## Options
 
 ### `--body`, `-b`
@@ -61,7 +72,10 @@ ml http get /v1/documents uri=/one.xml uri=/two.xml Accept:application/xml
 Request body as literal text, an existing file path, or an explicit `@path`.
 Files are read as bytes, preserving binary content and line endings. An explicit
 `@path` must exist and be readable. Text, including JSON, is sent unchanged.
-Set the appropriate `Content-Type` header yourself.
+A file body gets the `Content-Type` of its extension from MarkLogic's mimetype
+table (for example `.json` is `application/json`, `.xml` is `application/xml`).
+A `Content-Type` header you give always wins. A literal body, or a file with an
+extension the table does not know, is sent without one; set it yourself.
 
 ### `--include`, `-i`
 
@@ -93,8 +107,10 @@ other settings. For example, `-c content` selects a named connection and
 
 ## Responses and errors
 
-Output is decoded response text. Responses are printed before a 4xx/5xx error is
-reported with a nonzero exit code. Redirect responses are displayed without
+Output is decoded response text. A 4xx/5xx response prints its body and exits
+with code 1. An error response without a body prints one line to stderr instead,
+for example `HTTP 503 Service Unavailable for http://localhost:8000/v1/ping`.
+With several environments, that line fills the environment's column. Redirect responses are displayed without
 following them and do not count as HTTP errors. With `--include`, the status line
 uses the actual HTTP protocol version.
 

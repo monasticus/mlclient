@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
-from httpx import HTTPStatusError, Response
+from httpx import Response
 
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
@@ -176,20 +176,34 @@ def test_command_http_displays_redirect_without_treating_it_as_failure():
 
 
 @respx.mock
-def test_command_http_error_status_raises():
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/nope")
-    ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body("")
-    ml_mocker.mock_get()
+def test_command_http_error_with_body_prints_body_and_exits_with_1():
+    respx.get("http://localhost:8002/v1/documents").respond(
+        404,
+        text='{"errorResponse": {"messageCode": "RESTAPI-NODOCUMENT"}}',
+    )
 
     tester = _get_tester()
-    with pytest.raises(HTTPStatusError):
-        tester.execute("-e test GET /manage/v2/nope")
+    assert tester.execute("GET /v1/documents uri=/missing.json") == 1
+    assert tester.io.fetch_output() == (
+        '{"errorResponse": {"messageCode": "RESTAPI-NODOCUMENT"}}\n'
+    )
+    assert tester.io.fetch_error() == ""
 
 
 @respx.mock
-def test_command_http_include_flag_prints_response_before_raising():
+def test_command_http_error_without_body_reports_status_line_on_stderr():
+    respx.get("http://localhost:8002/v1/ping").respond(404)
+
+    tester = _get_tester()
+    assert tester.execute("GET /v1/ping") == 1
+    assert tester.io.fetch_output() == ""
+    assert tester.io.fetch_error() == (
+        "HTTP 404 Not Found for http://localhost:8002/v1/ping\n"
+    )
+
+
+@respx.mock
+def test_command_http_include_flag_prints_error_response_only():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/nope")
     ml_mocker.with_response_code(404)
@@ -197,12 +211,25 @@ def test_command_http_include_flag_prints_response_before_raising():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    with pytest.raises(HTTPStatusError):
-        tester.execute("-e test -i GET /manage/v2/nope")
+    assert tester.execute("-e test -i GET /manage/v2/nope") == 1
 
     command_output = tester.io.fetch_output()
     assert command_output.startswith("HTTP/1.1 404 Not Found\n")
     assert '{"errorResponse": {}}' in command_output
+    assert tester.io.fetch_error() == ""
+
+
+@pytest.mark.parametrize("options", ["-i GET", "HEAD"])
+@respx.mock
+def test_command_http_error_without_body_keeps_status_line_of_protocol_output(
+    options,
+):
+    respx.route(url="http://localhost:8002/v1/ping").respond(401)
+
+    tester = _get_tester()
+    assert tester.execute(f"{options} /v1/ping") == 1
+    assert tester.io.fetch_output().startswith("HTTP/1.1 401 Unauthorized\n")
+    assert tester.io.fetch_error() == ""
 
 
 @pytest.mark.parametrize(
@@ -362,6 +389,61 @@ def test_command_http_reads_binary_body_without_decoding(tmp_path):
     assert _get_tester().execute(f"PUT /v1/documents -b @{path}") == 0
 
 
+@pytest.mark.parametrize("prefix", ["", "@"])
+@respx.mock
+def test_command_http_sets_content_type_from_body_file_extension(tmp_path, prefix):
+    path = tmp_path / "doc.json"
+    path.write_text('{"hello": "world"}')
+    route = respx.put("http://localhost:8002/v1/documents").respond(201)
+
+    assert (
+        _get_tester().execute(f"PUT /v1/documents uri=/doc.json -b {prefix}{path}") == 0
+    )
+    request = route.calls.last.request
+    assert request.headers["Content-Type"] == "application/json"
+    assert request.content == b'{"hello": "world"}'
+
+
+@pytest.mark.parametrize("header", ["Content-Type", "content-type"])
+@respx.mock
+def test_command_http_explicit_content_type_wins_over_body_file_extension(
+    tmp_path,
+    header,
+):
+    path = tmp_path / "doc.json"
+    path.write_text("{}")
+    route = respx.put("http://localhost:8002/v1/documents").respond(201)
+
+    assert (
+        _get_tester().execute(f"PUT /v1/documents {header}:text/plain -b @{path}") == 0
+    )
+    assert route.calls.last.request.headers.get_list("Content-Type") == ["text/plain"]
+
+
+@pytest.mark.parametrize("file_name", ["body.unknown-extension", "body"])
+@respx.mock
+def test_command_http_sends_no_content_type_for_unknown_body_file_extension(
+    tmp_path,
+    file_name,
+):
+    path = tmp_path / file_name
+    path.write_text("payload")
+    route = respx.put("http://localhost:8002/v1/documents").respond(201)
+
+    assert _get_tester().execute(f"PUT /v1/documents -b @{path}") == 0
+    assert "Content-Type" not in route.calls.last.request.headers
+
+
+@respx.mock
+def test_command_http_sends_no_content_type_for_literal_body():
+    route = respx.put("http://localhost:8002/v1/documents").respond(201)
+
+    assert _get_tester().execute("PUT /v1/documents -b '{\"a\":1}'") == 0
+    request = route.calls.last.request
+    assert "Content-Type" not in request.headers
+    assert request.content == b'{"a":1}'
+
+
 def test_command_http_reports_missing_explicit_file(tmp_path):
     with pytest.raises(WrongParametersError, match="Cannot read request body"):
         _get_tester().execute(f"PUT /v1/documents -b @{tmp_path / 'missing.xml'}")
@@ -435,6 +517,54 @@ def test_command_http_rejects_malformed_param():
 
     expected_msg = "'nonsense' is neither a key=value param nor a key:value header!"
     assert err.value.args[0] == expected_msg
+
+
+@pytest.mark.parametrize(
+    ("token", "name", "value"),
+    [
+        ("rs:view=versions", "rs:view", "versions"),
+        ("trans:name=value", "trans:name", "value"),
+        ("perm:rest-reader=read", "perm:rest-reader", "read"),
+        ("prop:status=draft", "prop:status", "draft"),
+        ("value:id=12", "value:id", "12"),
+        ("bind:limit:xs:integer=5", "bind:limit:xs:integer", "5"),
+        ("bind:label@en=hello", "bind:label@en", "hello"),
+        ("get:uri=xs:string", "get:uri", "xs:string"),
+        ("put:uri=xs:string", "put:uri", "xs:string"),
+        ("post:uri=xs:string", "post:uri", "xs:string"),
+        ("delete:uri=xs:string", "delete:uri", "xs:string"),
+    ],
+)
+@respx.mock
+def test_command_http_sends_known_prefixed_tokens_as_query_params(token, name, value):
+    route = respx.get("http://localhost:8002/v1/documents").respond(200)
+
+    assert _get_tester().execute(f"GET /v1/documents {token}") == 0
+    request = route.calls.last.request
+    assert request.url.params.get_list(name) == [value]
+    assert name.split(":", 1)[0] not in request.headers
+
+
+@pytest.mark.parametrize(
+    ("token", "name", "value"),
+    [
+        ("rs:value", "rs", "value"),
+        (
+            "Content-Type:multipart/mixed; boundary=xyz",
+            "content-type",
+            "multipart/mixed; boundary=xyz",
+        ),
+        ("X-Trace:rs:view=versions", "x-trace", "rs:view=versions"),
+    ],
+)
+@respx.mock
+def test_command_http_sends_other_colon_tokens_as_headers(token, name, value):
+    route = respx.get("http://localhost:8002/v1/documents").respond(200)
+
+    assert _get_tester().execute(f"GET /v1/documents '{token}'") == 0
+    request = route.calls.last.request
+    assert request.headers[name] == value
+    assert not request.url.params
 
 
 @pytest.mark.parametrize("token", ["=value", ":value"])
@@ -546,3 +676,13 @@ def test_command_http_multi_environment_pretty_detects_json_payload(content_type
     assert output.count('    "name": "orders"') == 2
     assert '[{"name":"orders"}]' not in output
     assert route.call_count == 2
+
+
+@respx.mock
+def test_command_http_multi_environment_shows_status_line_for_empty_error_body():
+    respx.get("http://localhost:8002/v1/ping").respond(404)
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second GET /v1/ping") == 1
+    output = tester.io.fetch_output()
+    assert output.count("HTTP 404 Not Found for") == 2

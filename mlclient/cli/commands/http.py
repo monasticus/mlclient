@@ -27,6 +27,20 @@ from mlclient.cli.connection import get_async_client, get_client
 from mlclient.cli.formatting import prettify
 from mlclient.clients.http import HttpClient
 from mlclient.exceptions import WrongParametersError
+from mlclient.models import Mimetypes
+
+_QUERY_PARAM_PREFIXES = (
+    "rs:",
+    "trans:",
+    "perm:",
+    "prop:",
+    "value:",
+    "bind:",
+    "get:",
+    "put:",
+    "post:",
+    "delete:",
+)
 
 
 class HttpCommand(Command):
@@ -37,6 +51,9 @@ class HttpCommand(Command):
     request took. An error response is shown as a failure, and the command
     exits with 1 if any environment failed.
 
+    An error response exits with 1 after printing its body; an empty error body
+    is reported as a status line with the URL instead.
+
     Usage:
       http [options] [--] <method> <endpoint> [<params>...]
 
@@ -46,7 +63,9 @@ class HttpCommand(Command):
       endpoint
             The REST endpoint to call (e.g. /v1/documents)
       params
-            Query params (key=value) and headers (key:value)
+            Query params (key=value) and headers (key:value); prefixed MarkLogic
+            params (rs:, trans:, perm:, prop:, value:, bind:, get:, put:, post:,
+            delete:) with = are query params, e.g. rs:view=versions
 
     Options:
       -e, --environment=ENVIRONMENT
@@ -55,7 +74,8 @@ class HttpCommand(Command):
       -c, --connection=CONNECTION
             Connection identifier from the environment or TCP port
       -b, --body=BODY
-            Request body: a raw string, a file path, or @file-path
+            Request body: a raw string, a file path, or @file-path; a file's
+            extension sets the default Content-Type
       -i, --include
             Include the status line and response headers in the output
       -p, --pretty
@@ -75,7 +95,9 @@ class HttpCommand(Command):
         ),
         argument(
             "params",
-            "Query params (key=value) and headers (key:value)",
+            "Query params (key=value) and headers (key:value); prefixed "
+            "MarkLogic params (rs:, trans:, perm:, prop:, value:, bind:, get:, "
+            "put:, post:, delete:) with = are query params, e.g. rs:view=versions",
             optional=True,
             multiple=True,
         ),
@@ -99,7 +121,8 @@ class HttpCommand(Command):
         option(
             "body",
             "b",
-            description="Request body: a raw string, a file path, or @file-path",
+            description="Request body: a raw string, a file path, or @file-path; "
+            "a file's extension sets the default Content-Type",
             flag=False,
         ),
         option(
@@ -128,10 +151,13 @@ class HttpCommand(Command):
         query = parse_qs(endpoint.query, keep_blank_values=True)
         for key, values in params.items():
             query.setdefault(key, []).extend(values)
+        body, body_mimetype = _read_body(self.option("body"))
+        if body_mimetype and "content-type" not in headers:
+            headers["Content-Type"] = body_mimetype
         request = {
             "method": method,
             "endpoint": "/" + endpoint.path.lstrip("/"),
-            "body": _read_body(self.option("body")),
+            "body": body,
             "params": query or None,
             "headers": headers or None,
         }
@@ -144,10 +170,11 @@ class HttpCommand(Command):
             response = ml.http.request(**request)
             output = self._render(method, response)
 
+        if response.is_error and not output:
+            self._io.write_error_line(_status_line(response), type=Type.RAW)
+            return 1
         self._io.write(output, new_line=True, type=Type.RAW)
-        if response.is_error:
-            response.raise_for_status()
-        return 0
+        return 1 if response.is_error else 0
 
     def _request_in_environments(
         self,
@@ -175,7 +202,8 @@ class HttpCommand(Command):
             async with get_async_client(manager, connection) as ml:
                 response = await ml.http.request(**request)
             if response.is_error:
-                raise UnsuccessfulAnswerError(self._render(request["method"], response))
+                output = self._render(request["method"], response)
+                raise UnsuccessfulAnswerError(output or _status_line(response))
             return response
 
         def describe(response: Response) -> str:
@@ -223,6 +251,9 @@ def _parse_params(
 ) -> tuple[dict[str, list[str]], Headers]:
     """Split tokens at their first separator, preserving repeated query values.
 
+    A token with a known MarkLogic parameter prefix (e.g. ``rs:view=versions``)
+    and a ``=`` is a query parameter despite the colon before the ``=``.
+
     Parameters
     ----------
     tokens : list[str]
@@ -243,7 +274,8 @@ def _parse_params(
     for token in tokens:
         eq = token.find("=")
         colon = token.find(":")
-        if eq != -1 and (colon == -1 or eq < colon):
+        is_prefixed_param = eq != -1 and token.startswith(_QUERY_PARAM_PREFIXES)
+        if is_prefixed_param or (eq != -1 and (colon == -1 or eq < colon)):
             key, value = token.split("=", 1)
             params.setdefault(key, []).append(value)
         elif colon != -1:
@@ -258,7 +290,7 @@ def _parse_params(
     return params, headers
 
 
-def _read_body(spec: str | None) -> str | bytes | None:
+def _read_body(spec: str | None) -> tuple[str | bytes | None, str | None]:
     """Read explicit or existing file paths as bytes; otherwise use literal text.
 
     Parameters
@@ -268,8 +300,10 @@ def _read_body(spec: str | None) -> str | bytes | None:
 
     Returns
     -------
-    str | bytes | None
-        Literal text or exact file bytes, without newline or encoding conversion
+    tuple[str | bytes | None, str | None]
+        Literal text or exact file bytes, without newline or encoding conversion,
+        and the MarkLogic mimetype of a file's extension (None for literal text
+        or an unknown extension)
 
     Raises
     ------
@@ -277,17 +311,33 @@ def _read_body(spec: str | None) -> str | bytes | None:
         If a selected file cannot be read
     """
     if spec is None:
-        return None
+        return None, None
     explicit = spec.startswith("@")
     path = Path(spec[1:] if explicit else spec)
     try:
         is_file = explicit or path.is_file()
     except OSError:
-        return spec
+        return spec, None
     if not is_file:
-        return spec
+        return spec, None
     try:
-        return path.read_bytes()
+        return path.read_bytes(), Mimetypes.get_mimetype(path.name)
     except OSError as exc:
         msg = f"Cannot read request body from {str(path)!r}: {exc.strerror}"
         raise WrongParametersError(msg) from exc
+
+
+def _status_line(response: Response) -> str:
+    """Describe an error response that has no body to show.
+
+    Parameters
+    ----------
+    response : Response
+        Received HTTP response
+
+    Returns
+    -------
+    str
+        The status code, reason phrase and request URL
+    """
+    return f"HTTP {response.status_code} {response.reason_phrase} for {response.url}"

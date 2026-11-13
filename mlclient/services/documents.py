@@ -334,10 +334,7 @@ class DocumentsService:
             txid=params["txid"],
             timeout=timeout,
         )
-        if resp.status_code == httpx.codes.NOT_FOUND:
-            return False
-        MLResponseParser.raise_for_status(resp)
-        return True
+        return _document_exists(resp)
 
     def delete(
         self,
@@ -746,10 +743,7 @@ class AsyncDocumentsService:
             txid=params["txid"],
             timeout=timeout,
         )
-        if resp.status_code == httpx.codes.NOT_FOUND:
-            return False
-        MLResponseParser.raise_for_status(resp)
-        return True
+        return _document_exists(resp)
 
     async def delete(
         self,
@@ -812,3 +806,33 @@ class AsyncDocumentsService:
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
+
+
+def _document_exists(response: httpx.Response) -> bool:
+    """Interpret the HEAD response without treating other 2xx statuses as existence.
+
+    Parameters
+    ----------
+    response : httpx.Response
+        The response to HEAD /v1/documents.
+
+    Returns
+    -------
+    bool
+        True for 200, False for 404.
+
+    Raises
+    ------
+    httpx.HTTPStatusError
+        If the server returns any other status.
+    """
+    if response.status_code == httpx.codes.NOT_FOUND:
+        return False
+    response.raise_for_status()
+    if response.status_code != httpx.codes.OK:
+        msg = (
+            "Expected HEAD /v1/documents to return 200 or 404, "
+            f"got {response.status_code}."
+        )
+        raise httpx.HTTPStatusError(msg, request=response.request, response=response)
+    return True

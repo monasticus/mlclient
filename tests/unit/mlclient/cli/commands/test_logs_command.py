@@ -1197,7 +1197,7 @@ def test_command_logs_all_hosts_reports_http_error(
 
     assert status == 1
     assert (
-        tester.io.fetch_error()
+        _with_query_spaces_percent_encoded(tester.io.fetch_error())
         == Path(
             resources_utils.get_test_resource_path(__file__, output_file),
         ).read_text()
@@ -1347,6 +1347,13 @@ def _hosts_body(
             },
         },
     }
+
+
+def _with_query_spaces_percent_encoded(
+    error_output: str,
+) -> str:
+    """Encode query spaces as httpx 0.27 does (``%20``); httpx 0.28 writes ``+``."""
+    return error_output.replace("+", "%20")
 
 
 def _get_tester() -> CommandTester:

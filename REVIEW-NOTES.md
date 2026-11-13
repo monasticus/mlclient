@@ -100,6 +100,12 @@ Verification against local MarkLogic 12.1.0 (App-Services, 8000), extension `mlc
 | JavaScript extension GET | 200 JSON, repeated params as an array |
 | `ml.resources` sync and async (`AsyncMLClient`) via the worktree code | results as expected, scoped `database` honoured |
 
+## Follow-up code review (2026-11-13)
+
+### Support inherited Document implementations
+
+The new Document body path revealed that Document.__subclasshook__ only inspected the immediate class dictionary and was inherited by concrete document types, confusing document identities. Honor inherited concrete properties in the Document check and use normal subclass checks for concrete types. Metadata-only body validation uses isinstance. Regression coverage includes custom JSONDocument bodies and MetadataDocument subclasses, sync and async, plus concrete document identity. Affected model/service suites: 331 passed. Existing 11 resource integration tests passed on both local MarkLogic 10.0-11 and 12.1.0; test extensions were removed afterwards. Full unit suite after the repair: 10581 passed, line coverage 100.00%. Ruff and the strict docs build plus check_docs.py passed (490 HTML pages validated).
+
 ## Open points for the reviewer
 
 - Management (`/v1/config/resources`) remains undecided and is not on this branch. The guide says the extension

@@ -111,3 +111,22 @@ def test_marklogic_error_from_a_raw_message_has_no_fields():
 def test_every_library_exception_is_an_mlclient_error(error):
     with pytest.raises(MLClientError):
         raise error
+
+
+def test_marklogic_error_converts_a_management_api_status_code():
+    error = MarkLogicError(
+        {
+            "errorResponse": {
+                "statusCode": "400",
+                "status": "Bad Request",
+                "messageCode": "REST-INVALIDTYPE",
+                "message": "REST-INVALIDTYPE: (rest:INVALIDTYPE) Invalid type in view",
+            },
+        },
+    )
+
+    assert error.status_code == 400
+    assert str(error) == (
+        "[400 Bad Request] (REST-INVALIDTYPE) "
+        "REST-INVALIDTYPE: (rest:INVALIDTYPE) Invalid type in view"
+    )

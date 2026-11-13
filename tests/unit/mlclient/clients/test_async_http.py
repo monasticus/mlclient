@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 import httpx
 import pytest
@@ -56,6 +57,131 @@ async def test_request_when_disconnected():
     assert resp.status_code == httpx.codes.OK
     assert resp.content == RESOURCES["test-get-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_request_when_disconnected_logs_ad_hoc_session_at_debug_only(
+    caplog: pytest.LogCaptureFixture,
+):
+    respx.get("http://localhost:8002/manage/v2/servers").mock(
+        return_value=httpx.Response(httpx.codes.OK),
+    )
+    client = AsyncHttpClient(port=8002)
+
+    with caplog.at_level(logging.DEBUG, logger="mlclient.clients.http"):
+        await client.get("/manage/v2/servers")
+
+    ad_hoc_records = [r for r in caplog.records if "ad-hoc" in r.message]
+    assert [r.levelno for r in ad_hoc_records] == [logging.DEBUG]
+    assert ad_hoc_records[0].getMessage() == (
+        "AsyncHttpClient is not connected -- "
+        "A request will be sent in an ad-hoc initialized session "
+        "(GET /manage/v2/servers)"
+    )
+    assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_digest_request_logs_debug_when_server_does_not_challenge(
+    caplog: pytest.LogCaptureFixture,
+):
+    route = respx.get("http://localhost:8000/v1/ping").mock(
+        return_value=httpx.Response(httpx.codes.OK),
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="mlclient.auth"):
+        async with AsyncHttpClient(
+            auth="digest",
+            username="user",
+            password="pass",
+        ) as client:
+            resp = await client.get("/v1/ping")
+
+    assert resp.status_code == httpx.codes.OK
+    assert "Authorization" not in route.calls.last.request.headers
+    assert _digest_without_credentials_messages(caplog) == [
+        "Digest credentials were not requested by the server - "
+        "the request ran without them (GET http://localhost:8000/v1/ping)",
+    ]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_digestbasic_request_logs_debug_when_server_does_not_challenge(
+    caplog: pytest.LogCaptureFixture,
+):
+    respx.get("http://localhost:8000/v1/ping").mock(
+        return_value=httpx.Response(httpx.codes.OK),
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="mlclient.auth"):
+        async with AsyncHttpClient(
+            auth="digestbasic",
+            username="user",
+            password="pass",
+        ) as client:
+            await client.get("/v1/ping")
+
+    assert len(_digest_without_credentials_messages(caplog)) == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_digest_request_logs_debug_for_every_unchallenged_request(
+    caplog: pytest.LogCaptureFixture,
+):
+    respx.get("http://localhost:8000/v1/ping").mock(
+        return_value=httpx.Response(httpx.codes.OK),
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="mlclient.auth"):
+        async with AsyncHttpClient(
+            auth="digest",
+            username="user",
+            password="pass",
+        ) as client:
+            await client.get("/v1/ping")
+            await client.get("/v1/ping")
+
+    assert len(_digest_without_credentials_messages(caplog)) == 2
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_digest_request_does_not_log_after_a_digest_challenge(
+    caplog: pytest.LogCaptureFixture,
+):
+    route = respx.get("http://localhost:8000/v1/ping").mock(
+        side_effect=[
+            httpx.Response(
+                httpx.codes.UNAUTHORIZED,
+                headers={"WWW-Authenticate": _DIGEST_CHALLENGE},
+            ),
+            httpx.Response(httpx.codes.OK),
+            httpx.Response(httpx.codes.OK),
+        ],
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="mlclient.auth"):
+        async with AsyncHttpClient(
+            auth="digest",
+            username="user",
+            password="pass",
+        ) as client:
+            first = await client.get("/v1/ping")
+            second = await client.get("/v1/ping")
+
+    assert first.status_code == httpx.codes.OK
+    assert second.status_code == httpx.codes.OK
+    authorizations = [
+        call.request.headers.get("Authorization", "") for call in route.calls
+    ]
+    assert not authorizations[0]
+    assert authorizations[1].startswith("Digest ")
+    assert authorizations[2].startswith("Digest ")
+    assert not _digest_without_credentials_messages(caplog)
 
 
 @pytest.mark.asyncio
@@ -704,3 +830,16 @@ async def test_unset_per_request_uses_config_default():
         "write": 60.0,
         "pool": 5.0,
     }
+
+
+_DIGEST_CHALLENGE = 'Digest realm="public", qop="auth", nonce="abc123", opaque="xyz"'
+
+
+def _digest_without_credentials_messages(
+    caplog: pytest.LogCaptureFixture,
+) -> list[str]:
+    return [
+        record.getMessage()
+        for record in caplog.records
+        if record.getMessage().startswith("Digest credentials were not requested")
+    ]

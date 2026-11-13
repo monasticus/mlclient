@@ -600,7 +600,7 @@ class HttpClient(_HttpClientBase):
         if self.is_connected():
             return self._client.request(method, url, **request)
 
-        logger.warning(
+        logger.debug(
             "HttpClient is not connected -- "
             "A request will be sent in an ad-hoc initialized session (%s %s)",
             method.upper(),
@@ -989,7 +989,7 @@ class AsyncHttpClient(_HttpClientBase):
         if self.is_connected():
             return await self._client.request(method, url, **request)
 
-        logger.warning(
+        logger.debug(
             "AsyncHttpClient is not connected -- "
             "A request will be sent in an ad-hoc initialized session (%s %s)",
             method.upper(),

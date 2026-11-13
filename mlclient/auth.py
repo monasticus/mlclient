@@ -37,11 +37,14 @@ from __future__ import annotations
 import base64
 import logging
 import ssl
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 from urllib.parse import urljoin
 
 import httpx
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 _TokenVerify = Union[bool, str, ssl.SSLContext]
 
@@ -402,7 +405,7 @@ def _build_from_shortcut(
     if auth == "basic":
         return httpx.BasicAuth(username, password)
     if auth in ("digest", "digestbasic"):
-        return httpx.DigestAuth(username, password)
+        return _ChallengeAwareDigestAuth(username, password)
     if auth in _DEFAULTED_AUTH_SHORTCUTS:
         return _build_from_config(AuthConfig(method=auth))
     msg = (
@@ -411,6 +414,49 @@ def _build_from_shortcut(
         f"are valid as strings."
     )
     raise ValueError(msg)
+
+
+class _ChallengeAwareDigestAuth(httpx.DigestAuth):
+    """Digest auth that reports when the server never asks for credentials.
+
+    Digest sends credentials only in answer to a ``401`` challenge. A server
+    that never challenges (an ``application-level`` App Server) runs every
+    request as its default user, so each such request is logged at DEBUG.
+    After the first challenge httpx sends ``Authorization`` pre-emptively, so a
+    digest server produces no log line.
+    """
+
+    def auth_flow(
+        self,
+        request: httpx.Request,
+    ) -> Generator[httpx.Request, httpx.Response, None]:
+        """Run the digest flow, logging requests that ran without credentials."""
+        digest_flow = super().auth_flow(request)
+        outgoing = next(digest_flow)
+        while True:
+            response = yield outgoing
+            if _ran_without_credentials(outgoing, response):
+                logger.debug(
+                    "Digest credentials were not requested by the server - "
+                    "the request ran without them (%s %s)",
+                    outgoing.method,
+                    outgoing.url,
+                )
+            try:
+                outgoing = digest_flow.send(response)
+            except StopIteration:
+                return
+
+
+def _ran_without_credentials(
+    request: httpx.Request,
+    response: httpx.Response,
+) -> bool:
+    """Whether a request without credentials was answered without a challenge."""
+    return (
+        "Authorization" not in request.headers
+        and response.status_code != httpx.codes.UNAUTHORIZED
+    )
 
 
 def _build_from_config(

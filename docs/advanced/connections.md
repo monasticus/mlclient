@@ -94,6 +94,8 @@ responsible for replacing it when it expires.
 
 `"certificate"` and `"kerberos"` are accepted as plain strings because they need no extra data: certificate identity comes from the `ssl` client cert, and Kerberos defaults to the `HTTP` service on the request host. Use [`AuthConfig`][mlclient.auth.AuthConfig] only to override the Kerberos SPN (`service` / `hostname`), or for OAuth, which has no default token.
 
+Digest (`"digest"`, `"digestbasic"`) sends credentials only in answer to a `401` challenge. An App Server with `application-level` authentication never sends one, so a digest client never sends its credentials there and every request runs as the server's default user - permission errors or unexpected results follow with nothing pointing at the cause. Such requests are logged at DEBUG on the `mlclient.auth` logger. Use `auth=None` on purpose for these servers, or `"basic"` when the credentials must be sent: basic sends them with every request.
+
 With mutual TLS, `auth` defaults to `"certificate"`, so it need not be set explicitly. Kerberos relies on the optional `pyspnego` dependency (`pip install mlclient[kerberos]`); the import is verified at client creation so a missing dependency fails early.
 
 ```python
@@ -210,7 +212,7 @@ connections - see [Clients](../guides/clients.md#server-tiers-and-ports) for the
 their ports and automatic routing. This section covers how those auxiliary
 connections derive from and share the primary session.
 
-`connect()` and entering a context open only the primary HTTP session. Auxiliary sessions open on their first request, not when accessing an API property. `disconnect()` and context exit close every opened session. Cached API objects can be reused after reconnecting. Outside a connected client's lifecycle, requests use short-lived sessions.
+`connect()` and entering a context open only the primary HTTP session. Auxiliary sessions open on their first request, not when accessing an API property. `disconnect()` and context exit close every opened session. Cached API objects can be reused after reconnecting. Outside a connected client's lifecycle, requests use short-lived sessions: each request opens a new connection and, with digest, a new auth handshake. Send many requests inside `with MLClient(...)` or between `connect()` and `disconnect()` to reuse one session.
 
 When startup and shutdown are managed separately, control the lifecycle explicitly.
 Inside an async function:

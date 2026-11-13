@@ -75,6 +75,65 @@ def query_params(params: dict, transform_params: dict | None) -> dict:
     }
 
 
+def extension_params(params: dict | None) -> dict:
+    """Return resource extension parameters as URL parameters with the ``rs:`` prefix.
+
+    Parameters
+    ----------
+    params : dict | None
+        Parameter names, with or without the ``rs:`` prefix, mapped to values.
+        A list or tuple is sent as repeated values, so the extension receives
+        a sequence. None is omitted, also inside a list.
+
+    Returns
+    -------
+    dict
+        Prefixed names mapped to the string values MarkLogic receives:
+        booleans as ``true`` / ``false``, other values through ``str``.
+    """
+    return {
+        _with_extension_prefix(name): _extension_param_value(value)
+        for name, value in (params or {}).items()
+        if value is not None
+    }
+
+
+def _with_extension_prefix(name: str) -> str:
+    """Return a parameter name with the ``rs:`` prefix, adding it when missing.
+
+    Parameters
+    ----------
+    name : str
+        A resource extension parameter name.
+
+    Returns
+    -------
+    str
+        The prefixed name.
+    """
+    return name if name.startswith("rs:") else f"rs:{name}"
+
+
+def _extension_param_value(value) -> str | list[str]:
+    """Serialize one resource extension parameter value.
+
+    Parameters
+    ----------
+    value
+        A single value, or a list or tuple of values.
+
+    Returns
+    -------
+    str | list[str]
+        The serialized value; a list or tuple becomes a list without None items.
+    """
+    if isinstance(value, (list, tuple)):
+        return [_extension_param_value(item) for item in value if item is not None]
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
+
+
 def request_body_with_content_type(
     body: str | dict | None,
     endpoint: str,

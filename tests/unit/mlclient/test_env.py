@@ -660,7 +660,7 @@ def test_load_file_reports_every_problem_with_file_name(tmp_path):
     [
         (
             "digets",
-            "  auth: Unknown auth shortcut: 'digets'. Only 'basic', 'digest', "
+            "  auth: Unknown auth shortcut. Only 'basic', 'digest', "
             "'digestbasic', 'certificate', 'kerberos' are valid as strings.",
         ),
         ("{method: oauth}", "  auth.token: required for method 'oauth'"),
@@ -733,3 +733,16 @@ def _write_env_file(directory, content):
     path = directory / "mlclient-staging.yaml"
     path.write_text(content)
     return path.as_posix()
+
+
+def test_invalid_auth_shortcut_does_not_reveal_its_input(tmp_path):
+    path = _write_env_file(tmp_path, "auth: accidentally-pasted-secret\n")
+
+    with pytest.raises(ConfigError, match="Unknown auth shortcut") as error:
+        MLEnvironment.load_file(path)
+
+    assert str(error.value) == (
+        f"Invalid environment configuration in {path}:\n"
+        "  auth: Unknown auth shortcut. Only 'basic', 'digest', "
+        "'digestbasic', 'certificate', 'kerberos' are valid as strings."
+    )

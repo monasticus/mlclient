@@ -162,6 +162,12 @@ with a real encrypted key only.
   `pasword` / `prot` / `port: abc`, an empty file and `auth: digets` each give the file-named
   `ConfigError` (exit code 1).
 
+## Follow-up code review (2026-11-13)
+
+### Do not echo invalid auth values
+
+hide_input_in_errors does not remove user values embedded in a custom ValueError message. The shared auth-shortcut validator now lists allowed values without echoing the invalid input; a full-message regression protects a mistakenly pasted secret. Shared helpers imported across modules have non-private names and remain outside __all__. Focused affected suites: 802 passed; full unit suite: 10458 passed, 100% coverage.
+
 ## Open points for the reviewer
 
 - No changelog exists in the repository; the breaking changes (five fields now `SecretStr`;

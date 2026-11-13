@@ -425,7 +425,7 @@ def _build_from_shortcut(
     shortcuts (certificate, kerberos) select a method that needs no extra data
     and resolve through the same path as an ``AuthConfig`` with default fields.
     """
-    _require_known_shortcut(auth)
+    require_known_auth_shortcut(auth)
     if auth == "basic":
         return httpx.BasicAuth(username, password)
     if auth in ("digest", "digestbasic"):
@@ -433,13 +433,13 @@ def _build_from_shortcut(
     return _build_from_config(AuthConfig(method=auth))
 
 
-def _require_known_shortcut(
+def require_known_auth_shortcut(
     auth: str,
 ) -> None:
     """Raise ValueError unless ``auth`` names a string auth shortcut."""
     if auth not in _AUTH_SHORTCUTS:
         msg = (
-            f"Unknown auth shortcut: {auth!r}. "
+            "Unknown auth shortcut. "
             f"Only {', '.join(repr(s) for s in _AUTH_SHORTCUTS)} "
             f"are valid as strings."
         )

@@ -350,11 +350,11 @@ def _get_ssl_context(ssl_config: SSLConfig) -> ssl.SSLContext | None:
         ssl_config.verify,
         ssl_config.cert_file,
         ssl_config.key_file,
-        _secret_value(ssl_config.key_password),
+        secret_value(ssl_config.key_password),
     )
 
 
-def _secret_value(secret: SecretStr | None) -> str | None:
+def secret_value(secret: SecretStr | None) -> str | None:
     """Return a secret's plain value, or None when it is not set."""
     return secret.get_secret_value() if secret is not None else None
 

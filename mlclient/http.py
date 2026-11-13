@@ -37,9 +37,23 @@ from mlclient.connection import (
     _validate_config,
 )
 
+# ReadTimeout and 504 are left out: the server is still running the request,
+# so a retry would run it again.
 DEFAULT_RETRY_STRATEGY = Retry(
     total=5,
     backoff_factor=0.5,
+    retry_on_exceptions=[
+        httpx.ConnectTimeout,
+        httpx.WriteTimeout,
+        httpx.PoolTimeout,
+        httpx.NetworkError,
+        httpx.RemoteProtocolError,
+    ],
+    status_forcelist=[
+        httpx.codes.TOO_MANY_REQUESTS,
+        httpx.codes.BAD_GATEWAY,
+        httpx.codes.SERVICE_UNAVAILABLE,
+    ],
 )
 
 DEFAULT_TIMEOUT = httpx.Timeout(

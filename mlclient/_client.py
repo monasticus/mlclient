@@ -201,7 +201,7 @@ class MLClient:
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration; forces HTTPS on port 443 and handles
             authentication via the API key
-        retry : Retry | int | None, default Retry(total=5, backoff_factor=0.5)
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
             A retry strategy; an int is shorthand for Retry(total=n)
         limits : httpx.Limits | int | None, default None
             Connection-pool limits; None defers to httpx's own default; an int
@@ -815,7 +815,7 @@ class AsyncMLClient:
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration; forces HTTPS on port 443 and handles
             authentication via the API key
-        retry : Retry | int | None, default Retry(total=5, backoff_factor=0.5)
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
             A retry strategy; an int is shorthand for Retry(total=n)
         limits : httpx.Limits | int | None, default None
             Connection-pool limits; None defers to httpx's own default; an int

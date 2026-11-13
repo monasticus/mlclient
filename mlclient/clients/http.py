@@ -96,7 +96,7 @@ class _HttpClientBase:
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
@@ -259,7 +259,7 @@ class HttpClient(_HttpClientBase):
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
@@ -648,7 +648,7 @@ class AsyncHttpClient(_HttpClientBase):
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default

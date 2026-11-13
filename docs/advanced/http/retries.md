@@ -26,9 +26,53 @@ Retry settings belong to the Python HTTP configuration, not environment YAML.
 ## Default policy
 
 `DEFAULT_RETRY_STRATEGY` allows up to five retries with a backoff factor of `0.5`.
-Eligibility depends on the method, response status or exception according to
-`httpx-retries`; a failed request is not automatically retried just because a
-retry budget remains.
+A failed request is retried only when all of these hold:
+
+- the method is idempotent - `HEAD`, `GET`, `PUT`, `DELETE`, `OPTIONS` or `TRACE`.
+  `POST` is never retried, so eval, invoke and `POST /v1/search` run once;
+- the request failed before the server could process it, or the connection was
+  aborted: `httpx.ConnectTimeout`, `httpx.WriteTimeout`, `httpx.PoolTimeout`,
+  `httpx.NetworkError` (`ConnectError`, `ReadError`, `WriteError`, `CloseError`)
+  or `httpx.RemoteProtocolError` (the server closed the connection without a
+  response), or the response status is `429`, `502` or `503`.
+
+A read timeout (`httpx.ReadTimeout`) and `504 Gateway Timeout` are **not**
+retried. In both cases the server got the request and is most likely still
+running it: the client stopped waiting, or a proxy in front of MarkLogic (an
+AWS ALB, nginx) gave up after its idle timeout - MarkLogic itself never returns
+`504`. A retry would start the same slow request again on the server and multiply
+the wait before the error. Raise the [timeout](timeouts.md) instead, or the
+proxy's idle timeout.
+
+A proxy can also return `504` when it could not reach MarkLogic at all, for
+example a node that is down but still registered behind an ALB. The default
+policy does not retry that either. To retry it, pass your own strategy:
+
+```python
+import httpx
+from httpx_retries import Retry
+from mlclient import MLClient
+
+retry = Retry(
+    total=5,
+    backoff_factor=0.5,
+    retry_on_exceptions=[
+        httpx.ConnectTimeout,
+        httpx.WriteTimeout,
+        httpx.PoolTimeout,
+        httpx.NetworkError,
+        httpx.RemoteProtocolError,
+    ],
+    status_forcelist=[429, 502, 503, 504],
+)
+with MLClient(retry=retry) as ml:
+    response = ml.http.get("/v1/documents", params={"uri": "/hello.json"})
+```
+
+Add `httpx.ReadTimeout` to `retry_on_exceptions` the same way to retry read
+timeouts. A `Retry` built without `retry_on_exceptions` or `status_forcelist`
+uses the `httpx-retries` defaults, which include both. The int shorthand is such a
+`Retry`: `retry=2` is `Retry(total=2)` and retries read timeouts and `504`.
 
 HealthCheck uses `NO_RETRY_STRATEGY` by default so a probe returns promptly.
 For an explicit `health_config`, an omitted retry strategy still resolves to no

@@ -114,7 +114,7 @@ class InvokeCommand(Command):
         self,
         environment: str,
         variables: dict[str, str],
-    ):
+    ) -> str | list[str]:
         """Invoke the module and get its results.
 
         Parameters

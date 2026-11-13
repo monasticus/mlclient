@@ -8,9 +8,12 @@ It exports 1 class:
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING
 
 from mlclient import _constants as constants
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class ApiCall(metaclass=ABCMeta):
@@ -24,7 +27,7 @@ class ApiCall(metaclass=ABCMeta):
         body: str | dict | bytes | None = None,
         accept: str | None = None,
         content_type: str | None = None,
-    ):
+    ) -> None:
         """Initialize ApiCall implementation instance.
 
         Parameters
@@ -54,13 +57,13 @@ class ApiCall(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(
         cls,
-        subclass: ApiCall,
-    ):
+        subclass: type,
+    ) -> bool:
         """Verify if a subclass implements all abstract methods.
 
         Parameters
         ----------
-        subclass : ApiCall
+        subclass : type
             An ApiCall subclass
 
         Returns
@@ -101,7 +104,7 @@ class ApiCall(metaclass=ABCMeta):
     def method(
         self,
         method: str,
-    ):
+    ) -> None:
         """Set a request method.
 
         Parameters
@@ -128,7 +131,7 @@ class ApiCall(metaclass=ABCMeta):
     def params(
         self,
         params: dict,
-    ):
+    ) -> None:
         """Set request parameters.
 
         Parameters
@@ -158,7 +161,7 @@ class ApiCall(metaclass=ABCMeta):
     def headers(
         self,
         headers: dict,
-    ):
+    ) -> None:
         """Set request headers.
 
         Parameters
@@ -192,7 +195,7 @@ class ApiCall(metaclass=ABCMeta):
     def body(
         self,
         body: str | dict | bytes,
-    ):
+    ) -> None:
         """Set a request body.
 
         Parameters
@@ -205,15 +208,20 @@ class ApiCall(metaclass=ABCMeta):
     def add_param(
         self,
         param_name: str,
-        param_value: Any,
-    ):
+        param_value: str
+        | int
+        | float
+        | bool
+        | Sequence[str | int | float | bool]
+        | None,
+    ) -> None:
         """Put a request parameter if it's name and value exist.
 
         Parameters
         ----------
         param_name : str
             a request parameter name
-        param_value : Any
+        param_value : str | int | float | bool | Sequence | None
             a request parameter value
         """
         if param_name and param_value:
@@ -222,15 +230,15 @@ class ApiCall(metaclass=ABCMeta):
     def add_header(
         self,
         header_name: str,
-        header_value: Any,
-    ):
+        header_value: str | None,
+    ) -> None:
         """Put a request header if it's name and value exist.
 
         Parameters
         ----------
         header_name : str
             a request header name
-        header_value : Any
+        header_value : str | None
             a request header value
         """
         if header_name and header_value:

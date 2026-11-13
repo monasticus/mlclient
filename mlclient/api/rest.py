@@ -14,6 +14,7 @@ from mlclient._options import UNSET
 from mlclient.calls.base import ApiCall
 
 if TYPE_CHECKING:
+    import httpx
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 from mlclient.api.documents import AsyncDocumentsApi, DocumentsApi
@@ -32,10 +33,15 @@ class RestApi:
     Requires a REST app server.
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
-    def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> Response:
         """Send a custom ApiCall.
 
         Parameters
@@ -158,10 +164,15 @@ class AsyncRestApi:
     Eval, invoke, documents, search, values and transactions.
     """
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
-    async def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    async def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> Response:
         """Send a custom ApiCall.
 
         Parameters

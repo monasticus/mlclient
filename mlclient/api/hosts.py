@@ -16,6 +16,8 @@ from mlclient.calls.hosts import (
 )
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -28,7 +30,7 @@ class HostsApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         """Bind host operations to a synchronous API client.
 
         Parameters
@@ -44,7 +46,7 @@ class HostsApi:
         data_format: str | None = None,
         group_id: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve data about the hosts in the cluster.
 
@@ -91,7 +93,7 @@ class HostsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified host.
 
@@ -135,7 +137,7 @@ class HostsApi:
         host: str,
         body: dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Restart or shut down the specified host.
 
@@ -179,7 +181,7 @@ class HostsApi:
         host: str,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified host.
 
@@ -219,7 +221,7 @@ class HostsApi:
         host: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified host.
 
@@ -257,7 +259,7 @@ class HostsApi:
 class AsyncHostsApi:
     """Async mid-level API for ``/manage/v2/hosts`` endpoints."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         """Bind host operations to an asynchronous API client.
 
         Parameters
@@ -273,7 +275,7 @@ class AsyncHostsApi:
         data_format: str | None = None,
         group_id: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve data about the hosts in the cluster.
 
@@ -320,7 +322,7 @@ class AsyncHostsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified host.
 
@@ -364,7 +366,7 @@ class AsyncHostsApi:
         host: str,
         body: dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Restart or shut down the specified host.
 
@@ -408,7 +410,7 @@ class AsyncHostsApi:
         host: str,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified host.
 
@@ -448,7 +450,7 @@ class AsyncHostsApi:
         host: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified host.
 

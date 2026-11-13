@@ -118,7 +118,7 @@ class Mimetypes:
     def _init_doc_type_mimetypes(
         cls,
         doc_type: DocumentType,
-    ):
+    ) -> None:
         """Initialize mimetypes in an internal dictionary entry for a document type.
 
         Parameters
@@ -135,7 +135,7 @@ class Mimetypes:
     @classmethod
     def _init_mimetypes(
         cls,
-    ):
+    ) -> None:
         """Initialize an internal list of mimetypes."""
         if cls._MIMETYPES is None:
             with utils.get_resource("mimetypes.yaml") as mimetypes_file:

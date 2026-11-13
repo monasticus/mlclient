@@ -53,7 +53,7 @@ class GroupsGetCall(ApiCall):
         self,
         data_format: str = "xml",
         view: str = "default",
-    ):
+    ) -> None:
         """Initialize GroupsGetCall instance.
 
         Parameters
@@ -79,7 +79,7 @@ class GroupsGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Groups call.
 
         Returns
@@ -94,7 +94,7 @@ class GroupsGetCall(ApiCall):
         cls,
         data_format: str,
         view: str,
-    ):
+    ) -> None:
         """Validate the response format and view.
 
         Parameters
@@ -140,7 +140,7 @@ class GroupsPostCall(ApiCall):
     def __init__(
         self,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize GroupsPostCall instance.
 
         Parameters
@@ -162,7 +162,7 @@ class GroupsPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Groups call.
 
         Returns
@@ -208,7 +208,7 @@ class GroupGetCall(ApiCall):
         group: str,
         data_format: str = "xml",
         view: str = "default",
-    ):
+    ) -> None:
         """Initialize GroupGetCall instance.
 
         Parameters
@@ -238,7 +238,7 @@ class GroupGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Group call.
 
         Returns
@@ -253,7 +253,7 @@ class GroupGetCall(ApiCall):
         cls,
         data_format: str,
         view: str,
-    ):
+    ) -> None:
         """Validate the response format and view.
 
         Parameters
@@ -302,7 +302,7 @@ class GroupPostCall(ApiCall):
         self,
         group: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize GroupPostCall instance.
 
         Parameters
@@ -327,7 +327,7 @@ class GroupPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Group call.
 
         Returns
@@ -357,7 +357,7 @@ class GroupDeleteCall(ApiCall):
     def __init__(
         self,
         group: str,
-    ):
+    ) -> None:
         """Initialize GroupDeleteCall instance.
 
         Parameters
@@ -371,7 +371,7 @@ class GroupDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Group call.
 
         Returns
@@ -406,7 +406,7 @@ class GroupPropertiesGetCall(ApiCall):
         self,
         group: str,
         data_format: str = "xml",
-    ):
+    ) -> None:
         """Initialize GroupPropertiesGetCall instance.
 
         Parameters
@@ -430,7 +430,7 @@ class GroupPropertiesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Group Properties call.
 
         Returns
@@ -444,7 +444,7 @@ class GroupPropertiesGetCall(ApiCall):
     def _validate_params(
         cls,
         data_format: str,
-    ):
+    ) -> None:
         """Validate the response format.
 
         Parameters
@@ -484,7 +484,7 @@ class GroupPropertiesPutCall(ApiCall):
         self,
         group: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize GroupPropertiesPutCall instance.
 
         Parameters
@@ -504,7 +504,7 @@ class GroupPropertiesPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Group Properties call.
 
         Returns

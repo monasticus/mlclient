@@ -17,7 +17,7 @@ from copy import deepcopy
 from dataclasses import dataclass, fields, replace
 from decimal import Decimal
 from io import StringIO
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, NoReturn
 from xml.dom import minidom
 from xml.etree.ElementTree import (
     Element,
@@ -31,6 +31,7 @@ from xml.parsers.expat import ExpatError
 
 from mlclient.search.base import SearchQuery, build_combined_query
 from mlclient.xquery.expressions import (
+    AtomicInput,
     AtomicValue,
     FunctionCall,
     NodeInput,
@@ -44,6 +45,8 @@ from mlclient.xquery.expressions import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from mlclient.search.options import SearchOptions
 
 CTS_NS_URI = "http://marklogic.com/cts"
@@ -332,7 +335,11 @@ class CtsQuery(SearchQuery, _NativeCall):
             qtext=qtext,
         )
 
-    def _native(self, members: list[_Member], output_format) -> dict | Element:
+    def _native(
+        self,
+        members: list[_Member],
+        output_format: Literal["json", "xml"],
+    ) -> dict | Element:
         """Render this query's native element from its described fields.
 
         Parameters
@@ -405,7 +412,7 @@ class Box(_Region):
         west: float | XqyExpression,
         north: float | XqyExpression,
         east: float | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot the box edges as doubles.
 
         The native signature declares xs:float edges, but MarkLogic keeps
@@ -460,7 +467,7 @@ class Circle(_Region):
     radius: XqyExpression
     center: XqyExpression
 
-    def __init__(self, radius: float | XqyExpression, center: XqyExpression):
+    def __init__(self, radius: float | XqyExpression, center: XqyExpression) -> None:
         """Snapshot the radius as a native double and the center.
 
         Parameters
@@ -509,7 +516,7 @@ class Period(_NativeCall):
         self,
         start: datetime.datetime | XqyExpression,
         end: datetime.datetime | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot the period bounds.
 
         Parameters
@@ -540,7 +547,7 @@ class Point(_Region):
         self,
         latitude_or_wkt: float | str | XqyExpression,
         longitude: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot the coordinates or the WKT text.
 
         Parameters
@@ -587,7 +594,7 @@ class Polygon(_Region):
 
     vertices: XqyExpression
 
-    def __init__(self, vertices: str | XqyExpression):
+    def __init__(self, vertices: str | XqyExpression) -> None:
         """Snapshot the vertices.
 
         Parameters
@@ -629,7 +636,7 @@ class AfterQuery(CtsQuery):
     def __init__(
         self,
         timestamp: int | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -642,7 +649,7 @@ class AfterQuery(CtsQuery):
             timestamp=as_expr(timestamp),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -680,7 +687,11 @@ class AndNotQuery(CtsQuery):
     positive_query: XqyExpression
     negative_query: XqyExpression
 
-    def __init__(self, positive_query: StringInput, negative_query: StringInput):
+    def __init__(
+        self,
+        positive_query: StringInput,
+        negative_query: StringInput,
+    ) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -695,7 +706,7 @@ class AndNotQuery(CtsQuery):
             negative_query=as_expr(negative_query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the positive and negative queries in native wrappers.
 
         Parameters
@@ -727,7 +738,7 @@ class AndQuery(CtsQuery):
     queries: XqyExpression
     options: XqyExpression | None
 
-    def __init__(self, queries: StringInput, *, options: StringInput = None):
+    def __init__(self, queries: StringInput, *, options: StringInput = None) -> None:
         """Snapshot the subqueries and optional ordering flags.
 
         Parameters
@@ -742,7 +753,7 @@ class AndQuery(CtsQuery):
             options=_choice_options_argument(options, _ORDER_OPTIONS, "and-query"),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the intersection with native child-query cardinality.
 
         Parameters
@@ -783,7 +794,7 @@ class BeforeQuery(CtsQuery):
     def __init__(
         self,
         timestamp: int | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -796,7 +807,7 @@ class BeforeQuery(CtsQuery):
             timestamp=as_expr(timestamp),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -834,7 +845,11 @@ class BoostQuery(CtsQuery):
     matching_query: XqyExpression
     boosting_query: XqyExpression
 
-    def __init__(self, matching_query: StringInput, boosting_query: StringInput):
+    def __init__(
+        self,
+        matching_query: StringInput,
+        boosting_query: StringInput,
+    ) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -849,7 +864,7 @@ class BoostQuery(CtsQuery):
             boosting_query=as_expr(boosting_query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the matching and boosting queries in native wrappers.
 
         Parameters
@@ -888,7 +903,7 @@ class CollectionQuery(CtsQuery):
 
     uris: XqyExpression
 
-    def __init__(self, uris: StringInput):
+    def __init__(self, uris: StringInput) -> None:
         """Snapshot collection URIs while retaining expression composition.
 
         Parameters
@@ -900,7 +915,7 @@ class CollectionQuery(CtsQuery):
             uris=as_expr(uris),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the collection URIs.
 
         Parameters
@@ -958,7 +973,7 @@ class ColumnRangeQuery(CtsQuery):
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
         column_id: int | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1047,7 +1062,7 @@ class ColumnRangeQuery(CtsQuery):
         """
         return replace(self, column_id=column_id)
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize as the native triple-range query over the TDE column.
 
         MarkLogic stores a column range query as a triple-range query whose
@@ -1100,7 +1115,7 @@ class DirectoryQuery(CtsQuery):
     uris: XqyExpression
     depth: XqyExpression | None
 
-    def __init__(self, uris: StringInput, depth: StringInput = "1"):
+    def __init__(self, uris: StringInput, depth: StringInput = "1") -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1116,7 +1131,7 @@ class DirectoryQuery(CtsQuery):
             depth=_depth_argument(depth),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the directory URIs and a non-default depth.
 
         Parameters
@@ -1163,7 +1178,7 @@ class DocumentFormatQuery(CtsQuery):
     def __init__(
         self,
         format: str | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1176,7 +1191,7 @@ class DocumentFormatQuery(CtsQuery):
             format=as_expr(format),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -1213,7 +1228,7 @@ class DocumentFragmentQuery(CtsQuery):
 
     query: XqyExpression
 
-    def __init__(self, query: StringInput):
+    def __init__(self, query: StringInput) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -1225,7 +1240,7 @@ class DocumentFragmentQuery(CtsQuery):
             query=as_expr(query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the nested query.
 
         Parameters
@@ -1258,7 +1273,7 @@ class DocumentPermissionQuery(CtsQuery):
         self,
         role: str | XqyExpression,
         capability: str | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1274,7 +1289,7 @@ class DocumentPermissionQuery(CtsQuery):
             capability=as_expr(capability),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -1312,7 +1327,7 @@ class DocumentQuery(CtsQuery):
 
     uris: XqyExpression
 
-    def __init__(self, uris: StringInput):
+    def __init__(self, uris: StringInput) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -1324,7 +1339,7 @@ class DocumentQuery(CtsQuery):
             uris=as_expr(uris),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the document URIs.
 
         Parameters
@@ -1355,7 +1370,7 @@ class DocumentRootQuery(CtsQuery):
     def __init__(
         self,
         root: str | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1367,7 +1382,7 @@ class DocumentRootQuery(CtsQuery):
             root=as_qname(root),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -1429,7 +1444,7 @@ class ElementAttributePairGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1502,7 +1517,7 @@ class ElementAttributePairGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -1573,7 +1588,7 @@ class ElementAttributeRangeQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1632,7 +1647,7 @@ class ElementAttributeRangeQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -1686,7 +1701,7 @@ class ElementAttributeValueQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1739,7 +1754,7 @@ class ElementAttributeValueQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -1792,7 +1807,7 @@ class ElementAttributeWordQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -1870,7 +1885,7 @@ class ElementAttributeWordQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -1931,7 +1946,7 @@ class ElementChildGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2004,7 +2019,7 @@ class ElementChildGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2055,7 +2070,7 @@ class ElementGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2121,7 +2136,7 @@ class ElementGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2183,7 +2198,7 @@ class ElementPairGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2256,7 +2271,7 @@ class ElementPairGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2303,7 +2318,7 @@ class ElementQuery(CtsQuery):
         self,
         element_name: StringInput,
         query: str | XqyExpression,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2320,7 +2335,7 @@ class ElementQuery(CtsQuery):
             query=as_expr(query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2377,7 +2392,7 @@ class ElementRangeQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2432,7 +2447,7 @@ class ElementRangeQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2483,7 +2498,7 @@ class ElementValueQuery(CtsQuery):
         text: StringInput = None,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2532,7 +2547,7 @@ class ElementValueQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2582,7 +2597,7 @@ class ElementWordQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2666,7 +2681,7 @@ class ElementWordQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2704,7 +2719,7 @@ class FalseQuery(CtsQuery):
     _FUNCTION: ClassVar[str] = "cts:false-query"
     _REQUIRED_ARGUMENTS: ClassVar[int] = 0
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the query, which has no arguments.
 
         Parameters
@@ -2748,7 +2763,7 @@ class FieldRangeQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2804,7 +2819,7 @@ class FieldRangeQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2862,7 +2877,7 @@ class FieldValueQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -2932,7 +2947,7 @@ class FieldValueQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -2980,9 +2995,9 @@ class FieldWordQuery(CtsQuery):
         field_name: StringInput,
         text: StringInput,
         *,
-        options=None,
-        weight=None,
-    ):
+        options: StringInput = None,
+        weight: float | XqyExpression | None = None,
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3066,7 +3081,7 @@ class FieldWordQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the field and its words; options are retained as supplied.
 
         Parameters
@@ -3111,7 +3126,7 @@ class GeospatialRegionQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3164,7 +3179,7 @@ class GeospatialRegionQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -3231,7 +3246,7 @@ class JsonPropertyChildGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3304,7 +3319,7 @@ class JsonPropertyChildGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -3355,7 +3370,7 @@ class JsonPropertyGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3422,7 +3437,7 @@ class JsonPropertyGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -3487,7 +3502,7 @@ class JsonPropertyPairGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3560,7 +3575,7 @@ class JsonPropertyPairGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -3621,7 +3636,7 @@ class JsonPropertyRangeQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3677,7 +3692,7 @@ class JsonPropertyRangeQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -3719,7 +3734,7 @@ class JsonPropertyScopeQuery(CtsQuery):
     property_name: XqyExpression
     query: XqyExpression
 
-    def __init__(self, property_name: StringInput, query: StringInput):
+    def __init__(self, property_name: StringInput, query: StringInput) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3736,7 +3751,7 @@ class JsonPropertyScopeQuery(CtsQuery):
             query=as_expr(query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the scoping properties and the nested query.
 
         Parameters
@@ -3784,7 +3799,7 @@ class JsonPropertyValueQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3835,7 +3850,7 @@ class JsonPropertyValueQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -3883,9 +3898,9 @@ class JsonPropertyWordQuery(CtsQuery):
         property_name: StringInput,
         text: StringInput,
         *,
-        options=None,
-        weight=None,
-    ):
+        options: StringInput = None,
+        weight: float | XqyExpression | None = None,
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -3969,7 +3984,7 @@ class JsonPropertyWordQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the properties and their words; options are retained as supplied.
 
         Parameters
@@ -4002,7 +4017,7 @@ class LocksFragmentQuery(CtsQuery):
 
     query: XqyExpression
 
-    def __init__(self, query: StringInput):
+    def __init__(self, query: StringInput) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -4014,7 +4029,7 @@ class LocksFragmentQuery(CtsQuery):
             query=as_expr(query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the nested query.
 
         Parameters
@@ -4052,7 +4067,7 @@ class LsqtQuery(CtsQuery):
         timestamp: datetime.datetime | XqyExpression | None = None,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -4091,7 +4106,7 @@ class LsqtQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -4142,10 +4157,10 @@ class NearQuery(CtsQuery):
         self,
         queries: StringInput,
         *,
-        distance=None,
-        options=None,
-        distance_weight=None,
-    ):
+        distance: float | XqyExpression | None = None,
+        options: StringInput = None,
+        distance_weight: float | XqyExpression | None = None,
+    ) -> None:
         """Snapshot proximity arguments.
 
         Parameters
@@ -4166,7 +4181,7 @@ class NearQuery(CtsQuery):
             distance_weight=_optional_double(distance_weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the queries with the distance MarkLogic reads back natively.
 
         Parameters
@@ -4212,7 +4227,11 @@ class NotInQuery(CtsQuery):
     positive_query: XqyExpression
     negative_query: XqyExpression
 
-    def __init__(self, positive_query: StringInput, negative_query: StringInput):
+    def __init__(
+        self,
+        positive_query: StringInput,
+        negative_query: StringInput,
+    ) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -4227,7 +4246,7 @@ class NotInQuery(CtsQuery):
             negative_query=as_expr(negative_query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the positive and negative queries in native wrappers.
 
         Parameters
@@ -4258,7 +4277,7 @@ class NotQuery(CtsQuery):
 
     query: XqyExpression
 
-    def __init__(self, query: StringInput):
+    def __init__(self, query: StringInput) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -4270,7 +4289,7 @@ class NotQuery(CtsQuery):
             query=as_expr(query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the negated query.
 
         Parameters
@@ -4299,7 +4318,7 @@ class OrQuery(CtsQuery):
     queries: XqyExpression
     options: XqyExpression | None
 
-    def __init__(self, queries: StringInput, *, options: StringInput = None):
+    def __init__(self, queries: StringInput, *, options: StringInput = None) -> None:
         """Snapshot the subqueries and optional ordering flags.
 
         Parameters
@@ -4314,7 +4333,7 @@ class OrQuery(CtsQuery):
             options=_choice_options_argument(options, _OR_OPTIONS, "or-query"),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the union with native child-query cardinality.
 
         Parameters
@@ -4362,7 +4381,7 @@ class PathGeospatialQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -4428,7 +4447,7 @@ class PathGeospatialQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -4491,7 +4510,7 @@ class PathRangeQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -4548,7 +4567,7 @@ class PathRangeQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -4603,7 +4622,7 @@ class PeriodCompareQuery(CtsQuery):
         axis_2: str | XqyExpression,
         *,
         options: StringInput = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -4662,7 +4681,7 @@ class PeriodCompareQuery(CtsQuery):
             options=_optional(options),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -4712,7 +4731,7 @@ class PeriodRangeQuery(CtsQuery):
         *,
         period: XqyExpression | list[XqyExpression] | None = None,
         options: StringInput = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -4779,7 +4798,7 @@ class PeriodRangeQuery(CtsQuery):
             options=_optional(options),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -4819,7 +4838,7 @@ class PropertiesFragmentQuery(CtsQuery):
 
     query: XqyExpression
 
-    def __init__(self, query: StringInput):
+    def __init__(self, query: StringInput) -> None:
         """Snapshot constructor arguments.
 
         Parameters
@@ -4831,7 +4850,7 @@ class PropertiesFragmentQuery(CtsQuery):
             query=as_expr(query),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the nested query.
 
         Parameters
@@ -4878,7 +4897,7 @@ class RangeQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -4927,7 +4946,7 @@ class RangeQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -4976,7 +4995,7 @@ class RegisteredQuery(CtsQuery):
         *,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -5014,7 +5033,7 @@ class RegisteredQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -5059,7 +5078,7 @@ class ReverseQuery(CtsQuery):
         nodes: NodeInput,
         *,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -5076,7 +5095,7 @@ class ReverseQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -5111,7 +5130,7 @@ class RuntimeQuery(CtsQuery):
 
     expression: XqyExpression
 
-    def __init__(self, expression: XqyExpression):
+    def __init__(self, expression: XqyExpression) -> None:
         """Retain the expression producing a query.
 
         Parameters
@@ -5147,7 +5166,7 @@ class RuntimeQuery(CtsQuery):
         """
         return self.expression.render(ctx)
 
-    def _serialize(self, _output_format):
+    def _serialize(self, _output_format: Literal["json", "xml"]) -> NoReturn:
         """Reject local serialization of a runtime-determined query.
 
         Parameters
@@ -5181,7 +5200,7 @@ class SimilarQuery(CtsQuery):
         *,
         weight: float | XqyExpression | None = None,
         options: NodeInput = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -5211,7 +5230,7 @@ class SimilarQuery(CtsQuery):
             options=_optional(options),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -5285,7 +5304,7 @@ class TripleRangeQuery(CtsQuery):
         operator: StringInput = None,
         options: StringInput = None,
         weight: float | XqyExpression | None = None,
-    ):
+    ) -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -5330,7 +5349,7 @@ class TripleRangeQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the native arguments in the requested format.
 
         Parameters
@@ -5370,7 +5389,7 @@ class TrueQuery(CtsQuery):
     _FUNCTION: ClassVar[str] = "cts:true-query"
     _REQUIRED_ARGUMENTS: ClassVar[int] = 0
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the query, which has no arguments.
 
         Parameters
@@ -5397,7 +5416,13 @@ class WordQuery(CtsQuery):
     options: XqyExpression | None
     weight: XqyExpression | None
 
-    def __init__(self, text: StringInput, *, options=None, weight=None):
+    def __init__(
+        self,
+        text: StringInput,
+        *,
+        options: StringInput = None,
+        weight: float | XqyExpression | None = None,
+    ) -> None:
         """Snapshot text, options and weight without changing native compilation.
 
         Parameters
@@ -5415,7 +5440,7 @@ class WordQuery(CtsQuery):
             weight=_optional_double(weight),
         )
 
-    def _serialize(self, output_format):
+    def _serialize(self, output_format: Literal["json", "xml"]) -> dict | Element:
         """Serialize the words; options are retained as supplied.
 
         Parameters
@@ -5438,7 +5463,7 @@ class WordQuery(CtsQuery):
         )
 
 
-def _near_options(options):
+def _near_options(options: list[str]) -> tuple[list[str], int]:
     """Normalize native near-query ordering and minimum distance.
 
     Parameters
@@ -5478,7 +5503,7 @@ def _near_options(options):
     return ordering, minimum[0] if minimum else 0
 
 
-def _near_distance(distance):
+def _near_distance(distance: XqyExpression) -> int:
     """Return the word distance MarkLogic stores for a near-query.
 
     Parameters
@@ -5501,7 +5526,10 @@ def _near_distance(distance):
     return math.floor(max(0, _number(distance)) + 0.5) % (2**32)
 
 
-def _subquery(expression, output_format):
+def _subquery(
+    expression: XqyExpression,
+    output_format: Literal["json", "xml"],
+) -> dict | Element:
     """Serialize one nested query in the format of its parent.
 
     A literal string stays a word query, as MarkLogic converts it implicitly.
@@ -5533,7 +5561,7 @@ def _subquery(expression, output_format):
     return expression.serialize(output_format)
 
 
-def _json_name(name):
+def _json_name(name: str) -> str:
     """Return the native JSON member name of a CTS XML local name.
 
     Parameters
@@ -5550,7 +5578,7 @@ def _json_name(name):
     return head + "".join(part.title() for part in tail)
 
 
-def _text_nodes(root, tag, values):
+def _text_nodes(root: Element, tag: str, values: list[str]) -> None:
     """Append one text child per value.
 
     Parameters
@@ -5567,7 +5595,7 @@ def _text_nodes(root, tag, values):
         child.text = value
 
 
-def _weight_text(weight):
+def _weight_text(weight: float) -> str:
     """Format a finite weight using the native double lexical form.
 
     Parameters
@@ -5590,7 +5618,7 @@ def _weight_text(weight):
     return f"{mantissa}E{int(exponent)}"
 
 
-def _sequence(expression):
+def _sequence(expression: XqyExpression | None) -> list[XqyExpression]:
     """Flatten public sequence values without evaluating expressions.
 
     Parameters
@@ -5610,7 +5638,7 @@ def _sequence(expression):
     return [expression]
 
 
-def _strings(expression):
+def _strings(expression: XqyExpression | None) -> list[str]:
     """Read literal string arguments through public expression fields.
 
     Parameters
@@ -5647,7 +5675,7 @@ def _strings(expression):
     return result
 
 
-def _number(expression):
+def _number(expression: XqyExpression) -> float:
     """Resolve a literal number, optionally wrapped in an xs:double or xs:float cast.
 
     Parameters
@@ -5690,7 +5718,11 @@ def _number(expression):
     raise TypeError(message)
 
 
-def _render(name, members, output_format):
+def _render(
+    name: str,
+    members: list[_Member],
+    output_format: Literal["json", "xml"],
+) -> dict | Element:
     """Render described members as one native CTS element.
 
     Parameters
@@ -6291,7 +6323,7 @@ class _ColumnMember(_Member):
         )
 
 
-def _qname_nodes(root, tag, qnames):
+def _qname_nodes(root: Element, tag: str, qnames: list[tuple[str, str]]) -> None:
     """Append one QName text child per name, declaring a prefix for a namespace.
 
     Parameters
@@ -6312,7 +6344,7 @@ def _qname_nodes(root, tag, qnames):
             child.text = local
 
 
-def _typed_node(root, tag, atomic_type, lexical):
+def _typed_node(root: Element, tag: str, atomic_type: str, lexical: str) -> None:
     """Append a range value child typed with xsi:type.
 
     Parameters
@@ -6332,7 +6364,12 @@ def _typed_node(root, tag, atomic_type, lexical):
     child.text = lexical
 
 
-def _json_value_node(root, tag, atomic_type, lexical):
+def _json_value_node(
+    root: Element,
+    tag: str,
+    atomic_type: str,
+    lexical: str,
+) -> None:
     """Append a JSON property value: strings untyped, numbers as xs:double.
 
     Parameters
@@ -6354,7 +6391,7 @@ def _json_value_node(root, tag, atomic_type, lexical):
         _typed_node(root, tag, "xs:double", lexical)
 
 
-def _clark(uri, local):
+def _clark(uri: str, local: str) -> str:
     """Return the native JSON form of a QName in Clark notation.
 
     Parameters
@@ -6372,7 +6409,7 @@ def _clark(uri, local):
     return f"{{{uri}}}{local}" if uri else local
 
 
-def _json_scalar(atomic_type, lexical):
+def _json_scalar(atomic_type: str, lexical: str) -> str | int | float | bool:
     """Return a JSON property value as the JSON scalar MarkLogic matches.
 
     MarkLogic compares JSON property numbers as doubles, so a decimal is sent
@@ -6408,7 +6445,11 @@ def _json_scalar(atomic_type, lexical):
     raise ValueError(message)
 
 
-def _texts_member(json_key, xml_tag, expression):
+def _texts_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _TextsMember:
     """Describe repeated literal strings.
 
     Parameters
@@ -6434,7 +6475,11 @@ def _texts_member(json_key, xml_tag, expression):
         return _TextsMember(json_key, xml_tag, _strings(expression))
 
 
-def _value_texts_member(json_key, xml_tag, expression):
+def _value_texts_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _TextsMember:
     """Describe value-query text; an omitted text matches any value ("*").
 
     Parameters
@@ -6461,7 +6506,11 @@ def _value_texts_member(json_key, xml_tag, expression):
         return _TextsMember(json_key, xml_tag, values)
 
 
-def _text_member(json_key, xml_tag, expression):
+def _text_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _TextMember:
     """Describe one literal string, rendered as a single JSON string.
 
     Parameters
@@ -6489,7 +6538,11 @@ def _text_member(json_key, xml_tag, expression):
         return _TextMember(json_key, xml_tag, _single(_strings(expression)))
 
 
-def _attribute_member(json_key, xml_tag, expression):
+def _attribute_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _AttributeMember:
     """Describe one literal string rendered as an XML attribute.
 
     Parameters
@@ -6517,7 +6570,11 @@ def _attribute_member(json_key, xml_tag, expression):
         return _AttributeMember(json_key, xml_tag, _single(_strings(expression)))
 
 
-def _weight_member(json_key, xml_tag, expression):
+def _weight_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _WeightMember:
     """Describe an explicitly supplied scoring weight.
 
     Parameters
@@ -6546,7 +6603,11 @@ def _weight_member(json_key, xml_tag, expression):
         return _WeightMember(json_key, xml_tag, values)
 
 
-def _lexical_member(json_key, xml_tag, expression):
+def _lexical_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _TextMember:
     """Describe one atomic value rendered by its lexical form, such as a timestamp.
 
     Parameters
@@ -6573,7 +6634,11 @@ def _lexical_member(json_key, xml_tag, expression):
         return _TextMember(json_key, xml_tag, values)
 
 
-def _lexicals_member(json_key, xml_tag, expression):
+def _lexicals_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _TextsMember:
     """Describe repeated atomic values rendered by their lexical forms.
 
     Parameters
@@ -6600,7 +6665,11 @@ def _lexicals_member(json_key, xml_tag, expression):
         return _TextsMember(json_key, xml_tag, values)
 
 
-def _qnames_member(json_key, xml_tag, expression):
+def _qnames_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _QNamesMember:
     """Describe repeated QNames.
 
     Parameters
@@ -6627,7 +6696,11 @@ def _qnames_member(json_key, xml_tag, expression):
         return _QNamesMember(json_key, xml_tag, values)
 
 
-def _qname_member(json_key, xml_tag, expression):
+def _qname_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _QNameMember:
     """Describe one QName, rendered as a single JSON string.
 
     Parameters
@@ -6656,7 +6729,11 @@ def _qname_member(json_key, xml_tag, expression):
         return _QNameMember(json_key, xml_tag, values)
 
 
-def _typed_member(json_key, xml_tag, expression):
+def _typed_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _TypedMember:
     """Describe range values with their XML Schema types.
 
     Parameters
@@ -6683,7 +6760,11 @@ def _typed_member(json_key, xml_tag, expression):
         return _TypedMember(json_key, xml_tag, values)
 
 
-def _json_values_member(json_key, xml_tag, expression):
+def _json_values_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _JsonValuesMember:
     """Describe JSON property values: strings, numbers and booleans.
 
     Parameters
@@ -6710,7 +6791,11 @@ def _json_values_member(json_key, xml_tag, expression):
         return _JsonValuesMember(json_key, xml_tag, values)
 
 
-def _regions_member(json_key, xml_tag, expression):
+def _regions_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _RegionsMember:
     """Describe geospatial regions by their native text forms.
 
     Parameters
@@ -6737,7 +6822,11 @@ def _regions_member(json_key, xml_tag, expression):
         return _RegionsMember(json_key, xml_tag, values)
 
 
-def _periods_member(json_key, xml_tag, expression):
+def _periods_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression | None,
+) -> _PeriodsMember:
     """Describe temporal periods by their start and end.
 
     Parameters
@@ -6764,7 +6853,11 @@ def _periods_member(json_key, xml_tag, expression):
         return _PeriodsMember(json_key, xml_tag, values)
 
 
-def _query_member(json_key, xml_tag, expression):
+def _query_member(
+    json_key: str,
+    xml_tag: str,
+    expression: XqyExpression,
+) -> _QueryMember:
     """Describe a nested query, serialized when the field is rendered.
 
     Parameters
@@ -6784,7 +6877,7 @@ def _query_member(json_key, xml_tag, expression):
     return _QueryMember(json_key, xml_tag, expression)
 
 
-def _single(values):
+def _single(values: list) -> object:
     """Return the only item of a resolved sequence.
 
     Parameters
@@ -6808,7 +6901,7 @@ def _single(values):
     return values[0]
 
 
-def _atomic(expression):
+def _atomic(expression: XqyExpression) -> tuple[str, str]:
     """Resolve a literal atomic value to its XML Schema type and lexical form.
 
     Parameters
@@ -6836,7 +6929,7 @@ def _atomic(expression):
     raise TypeError(message)
 
 
-def _qname(expression):
+def _qname(expression: XqyExpression) -> tuple[str, str]:
     """Resolve a QName argument to its namespace URI and local name.
 
     Parameters
@@ -6882,7 +6975,7 @@ def _qname(expression):
     raise TypeError(message)
 
 
-def _region(expression):
+def _region(expression: XqyExpression) -> tuple[str, str]:
     """Resolve a literal point, box, circle or polygon to its native text form.
 
     Parameters
@@ -6909,7 +7002,7 @@ def _region(expression):
     return expression.region_type, expression.to_text()
 
 
-def _point_text(expression):
+def _point_text(expression: XqyExpression) -> str:
     """Return the native ``latitude,longitude`` text of a literal point.
 
     Parameters
@@ -6936,7 +7029,7 @@ def _point_text(expression):
     return expression.to_text()
 
 
-def _coordinate(expression):
+def _coordinate(expression: XqyExpression) -> str:
     """Format a literal coordinate or radius without a redundant fraction.
 
     Parameters
@@ -6960,7 +7053,7 @@ def _coordinate(expression):
     return str(int(value)) if value.is_integer() else repr(value)
 
 
-def _period(expression):
+def _period(expression: XqyExpression) -> tuple[str, str]:
     """Resolve a literal period to its start and end lexical forms.
 
     Parameters
@@ -6987,7 +7080,7 @@ def _period(expression):
     return _atomic(expression.start)[1], _atomic(expression.end)[1]
 
 
-def _references_member(key, expression):
+def _references_member(key: str, expression: XqyExpression) -> _ReferencesMember:
     """Describe literal range-index references in their native vocabulary.
 
     Parameters
@@ -7014,7 +7107,7 @@ def _references_member(key, expression):
         return _ReferencesMember(key, "", references)
 
 
-def _reference(expression):
+def _reference(expression: XqyExpression) -> tuple[str, list[_Member]]:
     """Describe one literal reference without inferring its database index.
 
     Parameters
@@ -7096,7 +7189,7 @@ def _reference(expression):
     return name, members
 
 
-def _reference_options(name, options):
+def _reference_options(name: str, options: list[str]) -> list[_Member]:
     """Describe explicit reference options without resolving a database index.
 
     Parameters
@@ -7154,7 +7247,7 @@ def _reference_options(name, options):
     return members
 
 
-def _triples_member(tag, expression):
+def _triples_member(tag: str, expression: XqyExpression) -> _TriplesMember:
     """Describe RDF values, distinguishing IRIs from typed literals.
 
     Parameters
@@ -7191,7 +7284,7 @@ def _triples_member(tag, expression):
         return _TriplesMember(tag, tag, values)
 
 
-def _rdf_scalar(datatype, lexical):
+def _rdf_scalar(datatype: str, lexical: str) -> str | int | float | bool:
     """Keep JSON-native scalar types for RDF numeric and boolean literals.
 
     Parameters
@@ -7218,7 +7311,7 @@ def _rdf_scalar(datatype, lexical):
     return lexical
 
 
-def _triple_operators(expression):
+def _triple_operators(expression: XqyExpression | None) -> list[_AttributeMember]:
     """Describe one object operator or the subject, predicate and object ones.
 
     Parameters
@@ -7252,7 +7345,7 @@ def _triple_operators(expression):
     ]
 
 
-def _nodes_member(key, tag, expression):
+def _nodes_member(key: str, tag: str, expression: XqyExpression) -> _NodesMember:
     """Describe literal XML or JSON nodes given as xdmp:unquote calls.
 
     Parameters
@@ -7280,7 +7373,7 @@ def _nodes_member(key, tag, expression):
         return _NodesMember(key, tag, [_literal_node(x) for x in _sequence(expression)])
 
 
-def _literal_node(expression):
+def _literal_node(expression: XqyExpression) -> tuple[object, bool]:
     """Read literal XML or JSON data from an xdmp:unquote call.
 
     Parameters
@@ -7337,7 +7430,7 @@ def _literal_node(expression):
     return source, True
 
 
-def _xml_model_nodes(source):
+def _xml_model_nodes(source: str) -> list[Element]:
     """Parse XML model data without dropping prolog nodes or namespace bindings.
 
     Parameters
@@ -7379,7 +7472,7 @@ def _xml_model_nodes(source):
     return list(parsed.root)
 
 
-def _invalid_json_constant(value):
+def _invalid_json_constant(value: str) -> NoReturn:
     """Reject non-JSON numeric extensions accepted by the standard decoder.
 
     Parameters
@@ -7396,7 +7489,9 @@ def _invalid_json_constant(value):
     raise ValueError(message)
 
 
-def _distinctive_options_member(expression):
+def _distinctive_options_member(
+    expression: XqyExpression | None,
+) -> _DistinctiveOptionsMember:
     """Describe the literal distinctive-term options of a similar query.
 
     Parameters
@@ -7479,7 +7574,11 @@ _TEMPORAL_OPERATORS = frozenset(
 _DIRECTORY_DEPTHS = frozenset({"1", "infinity"})
 
 
-def _operator_argument(value, *, required: bool = True) -> XqyExpression | None:
+def _operator_argument(
+    value: str | XqyExpression | None,
+    *,
+    required: bool = True,
+) -> XqyExpression | None:
     """Validate a range comparison operator, preserving expression composition.
 
     Parameters
@@ -7510,7 +7609,7 @@ def _operator_argument(value, *, required: bool = True) -> XqyExpression | None:
 
 
 def _choice_options_argument(
-    options,
+    options: str | list[str] | XqyExpression | None,
     allowed: frozenset[str],
     query_name: str,
 ) -> XqyExpression | None:
@@ -7545,7 +7644,7 @@ def _check_choice_options(
     options: list[str],
     allowed: frozenset[str],
     query_name: str,
-):
+) -> None:
     """Reject options MarkLogic does not accept for a query (XDMP-OPTION).
 
     Parameters
@@ -7570,7 +7669,9 @@ def _check_choice_options(
         raise ValueError(message)
 
 
-def _near_options_argument(options) -> XqyExpression | None:
+def _near_options_argument(
+    options: str | list[str] | XqyExpression | None,
+) -> XqyExpression | None:
     """Validate literal near-query options.
 
     Parameters
@@ -7594,7 +7695,7 @@ def _near_options_argument(options) -> XqyExpression | None:
     return _optional(options)
 
 
-def _temporal_operator_argument(value) -> XqyExpression:
+def _temporal_operator_argument(value: str | XqyExpression) -> XqyExpression:
     """Validate a literal temporal operator; expressions stay composable.
 
     Parameters
@@ -7618,7 +7719,7 @@ def _temporal_operator_argument(value) -> XqyExpression:
     return as_expr(value)
 
 
-def _literal_strings(value) -> list[str] | None:
+def _literal_strings(value: object) -> list[str] | None:
     """Return literal option strings, or None for anything else.
 
     Parameters
@@ -7638,7 +7739,7 @@ def _literal_strings(value) -> list[str] | None:
     return None
 
 
-def _depth_argument(value) -> XqyExpression:
+def _depth_argument(value: str | XqyExpression) -> XqyExpression:
     """Validate a literal directory depth; expressions stay composable.
 
     Parameters
@@ -7664,7 +7765,7 @@ def _depth_argument(value) -> XqyExpression:
     return as_expr(value, cast="xs:string")
 
 
-def _optional(value) -> XqyExpression | None:
+def _optional(value: AtomicInput) -> XqyExpression | None:
     """Convert an optional argument; None marks it omitted.
 
     Parameters
@@ -7680,7 +7781,7 @@ def _optional(value) -> XqyExpression | None:
     return as_expr(value) if value is not None else None
 
 
-def _optional_double(value) -> XqyExpression | None:
+def _optional_double(value: float | XqyExpression | None) -> XqyExpression | None:
     """Convert an optional numeric argument to the native double type.
 
     Parameters
@@ -7697,7 +7798,7 @@ def _optional_double(value) -> XqyExpression | None:
 
 
 @contextmanager
-def _error_context(label: str):
+def _error_context(label: str) -> Iterator[None]:
     """Prefix serialization errors raised inside the block with where they arose.
 
     Parameters

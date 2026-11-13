@@ -46,7 +46,7 @@ class UnsuccessfulAnswerError(Exception):
         self,
         message: str,
         style: str = _ERROR_STYLE,
-    ):
+    ) -> None:
         super().__init__(message)
         self.style = style
 

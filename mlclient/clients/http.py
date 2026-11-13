@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Mapping
 from types import TracebackType
+from typing import TYPE_CHECKING
 
 import httpx
 from httpx import AsyncClient, AsyncHTTPTransport, Client, HTTPTransport, Response
@@ -21,6 +22,27 @@ from mlclient.connection import CloudConfig, SSLConfig
 from mlclient.http import HTTPConfig
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.types import DocumentType
+
+if TYPE_CHECKING:
+    from typing import TypedDict
+
+    from typing_extensions import Self, Unpack
+
+    class _HttpClientOptions(TypedDict, total=False):
+        protocol: str
+        host: str
+        port: int
+        auth: AuthParam
+        username: str
+        password: str
+        ssl: SSLConfig | None
+        cloud: CloudConfig | None
+        retry: Retry | None
+        limits: httpx.Limits | None
+        timeout: httpx.Timeout | float | None
+        config: HTTPConfig | None
+        session_owner: HttpClient | AsyncHttpClient | None
+
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +82,9 @@ class _HttpClientBase:
 
     def __init__(
         self,
-        protocol=UNSET,
+        protocol: str = UNSET,
         host: str = "localhost",
-        port=UNSET,
+        port: int = UNSET,
         auth: AuthParam = UNSET,
         username: str = "admin",
         password: str = "admin",
@@ -70,10 +92,10 @@ class _HttpClientBase:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: httpx.Limits | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
         config: HTTPConfig | None = None,
         session_owner: HttpClient | AsyncHttpClient | None = None,
-    ):
+    ) -> None:
         """Initialize _HttpClientBase instance.
 
         Parameters
@@ -177,7 +199,7 @@ class _HttpClientBase:
         method: str,
         endpoint: str,
         response: Response,
-    ):
+    ) -> None:
         """Log response details and restart warning, if applicable."""
         logger.debug("Response retrieved")
         logger.fine(cls.format_http_response(response))
@@ -238,7 +260,7 @@ class HttpClient(_HttpClientBase):
 
     _client: Client | None = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Unpack[_HttpClientOptions]) -> None:
         """Initialize HttpClient instance.
 
         Parameters
@@ -272,21 +294,21 @@ class HttpClient(_HttpClientBase):
         """
         super().__init__(**kwargs)
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """Connect and return self for use as a context manager."""
         self.connect()
         return self
 
     def __exit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on context manager exit."""
         self.disconnect()
 
-    def connect(self):
+    def connect(self) -> None:
         """Start an HTTP session unless already connected."""
         if self.is_connected():
             return
@@ -297,7 +319,7 @@ class HttpClient(_HttpClientBase):
             timeout=self.config.timeout,
         )
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """Close an HTTP session."""
         if self._client:
             logger.debug("Closing a connection")
@@ -320,7 +342,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send a GET request.
 
@@ -363,7 +385,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send a HEAD request.
 
@@ -407,7 +429,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send a POST request.
 
@@ -454,7 +476,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send a PUT request.
 
@@ -500,7 +522,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send a DELETE request.
 
@@ -545,7 +567,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send an HTTP request.
 
@@ -627,7 +649,7 @@ class AsyncHttpClient(_HttpClientBase):
 
     _client: AsyncClient | None = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Unpack[_HttpClientOptions]) -> None:
         """Initialize AsyncHttpClient instance.
 
         Parameters
@@ -661,21 +683,21 @@ class AsyncHttpClient(_HttpClientBase):
         """
         super().__init__(**kwargs)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         """Connect and return self for use as an async context manager."""
         await self.connect()
         return self
 
     async def __aexit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on async context manager exit."""
         await self.disconnect()
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Start an async HTTP session unless already connected."""
         if self.is_connected():
             return
@@ -686,7 +708,7 @@ class AsyncHttpClient(_HttpClientBase):
             timeout=self.config.timeout,
         )
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Close an async HTTP session."""
         if self._client:
             logger.debug("Closing a connection")
@@ -709,7 +731,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send an async GET request.
 
@@ -752,7 +774,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send an async HEAD request.
 
@@ -796,7 +818,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send an async POST request.
 
@@ -843,7 +865,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send an async PUT request.
 
@@ -889,7 +911,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send an async DELETE request.
 
@@ -934,7 +956,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Send an async HTTP request.
 

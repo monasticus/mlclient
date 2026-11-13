@@ -63,7 +63,7 @@ class DatabasesGetCall(ApiCall):
         self,
         data_format: str = "xml",
         view: str = "default",
-    ):
+    ) -> None:
         """Initialize DatabasesGetCall instance.
 
         Parameters
@@ -88,7 +88,7 @@ class DatabasesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Databases call.
 
         Returns
@@ -103,7 +103,7 @@ class DatabasesGetCall(ApiCall):
         cls,
         data_format: str,
         view: str,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -135,7 +135,7 @@ class DatabasesPostCall(ApiCall):
     def __init__(
         self,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize DatabasesPostCall instance.
 
         Parameters
@@ -152,7 +152,7 @@ class DatabasesPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Databases call.
 
         Returns
@@ -166,7 +166,7 @@ class DatabasesPostCall(ApiCall):
     def _validate_params(
         cls,
         body: str | dict,
-    ):
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/databases!"
             raise exceptions.WrongParametersError(msg)
@@ -209,7 +209,7 @@ class DatabaseGetCall(ApiCall):
         database: str,
         data_format: str = "xml",
         view: str = "default",
-    ):
+    ) -> None:
         """Initialize DatabaseGetCall instance.
 
         Parameters
@@ -239,7 +239,7 @@ class DatabaseGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Database call.
 
         Returns
@@ -254,7 +254,7 @@ class DatabaseGetCall(ApiCall):
         cls,
         data_format: str,
         view: str,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -290,7 +290,7 @@ class DatabasePostCall(ApiCall):
         self,
         database: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize DatabasePostCall instance.
 
         Parameters
@@ -310,7 +310,7 @@ class DatabasePostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Database call.
 
         Returns
@@ -324,7 +324,7 @@ class DatabasePostCall(ApiCall):
     def _validate_params(
         cls,
         body: str | dict,
-    ):
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/databases/{id|name}!"
             raise exceptions.WrongParametersError(msg)
@@ -353,7 +353,7 @@ class DatabaseDeleteCall(ApiCall):
         self,
         database: str,
         forest_delete: str | None = None,
-    ):
+    ) -> None:
         """Initialize DatabaseDeleteCall instance.
 
         Parameters
@@ -375,7 +375,7 @@ class DatabaseDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Database call.
 
         Returns
@@ -389,7 +389,7 @@ class DatabaseDeleteCall(ApiCall):
     def _validate_params(
         cls,
         forest_delete: str,
-    ):
+    ) -> None:
         if forest_delete and forest_delete not in cls._SUPPORTED_FOREST_DELETE_OPTS:
             joined_supported_opts = ", ".join(cls._SUPPORTED_FOREST_DELETE_OPTS)
             msg = f"The supported forest_delete options are: {joined_supported_opts}"
@@ -420,7 +420,7 @@ class DatabasePropertiesGetCall(ApiCall):
         self,
         database: str,
         data_format: str = "xml",
-    ):
+    ) -> None:
         """Initialize DatabasePropertiesGetCall instance.
 
         Parameters
@@ -444,7 +444,7 @@ class DatabasePropertiesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Database Properties call.
 
         Returns
@@ -458,7 +458,7 @@ class DatabasePropertiesGetCall(ApiCall):
     def _validate_params(
         cls,
         data_format: str,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -488,7 +488,7 @@ class DatabasePropertiesPutCall(ApiCall):
         self,
         database: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize DatabasePropertiesPutCall instance.
 
         Parameters
@@ -508,7 +508,7 @@ class DatabasePropertiesPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Database Properties call.
 
         Returns
@@ -522,7 +522,7 @@ class DatabasePropertiesPutCall(ApiCall):
     def _validate_params(
         cls,
         body: str | dict,
-    ):
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (
                 "No request body provided for "

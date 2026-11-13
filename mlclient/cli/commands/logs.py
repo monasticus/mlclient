@@ -26,7 +26,6 @@ from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
 from mlclient.services.diagnostics.logs import AsyncLogsService, LogsService
 
-
 if TYPE_CHECKING:
     from cleo.ui.table_separator import TableSeparator
 

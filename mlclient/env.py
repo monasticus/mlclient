@@ -54,7 +54,7 @@ from mlclient.http import HTTPConfig
 logger = logging.getLogger(__name__)
 
 
-def _normalize_auth(value):
+def _normalize_auth(value: object) -> object:
     """Resolve the environment's app alias to no HTTP auth."""
     return None if value == "app" else value
 

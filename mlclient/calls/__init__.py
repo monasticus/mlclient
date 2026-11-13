@@ -25,7 +25,6 @@ from mlclient.calls.documents import (
     DocumentsPostCall,
 )
 from mlclient.calls.eval import EvalCall
-from mlclient.calls.invoke import InvokeCall
 from mlclient.calls.forests import (
     ForestDeleteCall,
     ForestGetCall,
@@ -52,6 +51,7 @@ from mlclient.calls.hosts import (
     HostPropertiesPutCall,
     HostsGetCall,
 )
+from mlclient.calls.invoke import InvokeCall
 from mlclient.calls.logs import LogsCall
 from mlclient.calls.roles import (
     RoleDeleteCall,

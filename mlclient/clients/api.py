@@ -6,20 +6,30 @@ via ApiCall objects.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from httpx import Response
 
 from mlclient._options import UNSET
 from mlclient.calls.base import ApiCall
 from mlclient.clients.http import AsyncHttpClient, HttpClient
 
+if TYPE_CHECKING:
+    import httpx
+
 
 class ApiClient:
     """Mid-level client providing call() for ApiCall objects."""
 
-    def __init__(self, http: HttpClient):
+    def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> Response:
         """Send a request using an ApiCall object.
 
         Parameters
@@ -57,10 +67,15 @@ class ApiClient:
 class AsyncApiClient:
     """Async mid-level client providing call() for ApiCall objects."""
 
-    def __init__(self, http: AsyncHttpClient):
+    def __init__(self, http: AsyncHttpClient) -> None:
         self._http = http
 
-    async def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    async def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | None = UNSET,
+    ) -> Response:
         """Send a request using an ApiCall object.
 
         Parameters

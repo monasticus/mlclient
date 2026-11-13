@@ -5,9 +5,14 @@ Provides parsed evaluation of modules installed in MarkLogic.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from mlclient._options import UNSET
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class InvokeService(ExecutionService):
@@ -27,8 +32,8 @@ class InvokeService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> ParsedValue:
         """Invoke a module installed in MarkLogic and parse its result.
 
@@ -103,8 +108,8 @@ class AsyncInvokeService(ExecutionService):
         database: str | None = UNSET,
         txid: str | None = UNSET,
         output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        timeout: httpx.Timeout | float | None = UNSET,
+        **kwargs: object,
     ) -> ParsedValue:
         """Invoke a module installed in MarkLogic and parse its result.
 

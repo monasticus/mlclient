@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import NoReturn, Union
+from typing import TYPE_CHECKING, NoReturn, Union
 from xml.etree import ElementTree
 
 import httpx
@@ -15,6 +15,9 @@ from httpx_retries import Retry, RetryTransport
 
 from mlclient import _constants as const
 from mlclient.http import HTTPConfig
+
+if TYPE_CHECKING:
+    from collections.abc import Coroutine
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +36,7 @@ class _RestartWaiter:
         config: HTTPConfig,
         *,
         probe_timeout: float = 5.0,
-    ):
+    ) -> None:
         """Initialize _RestartWaiter instance.
 
         Parameters
@@ -227,7 +230,7 @@ class _RestartWaiter:
         return timestamps_by_host
 
     @staticmethod
-    def _run_async(coroutine) -> None:
+    def _run_async(coroutine: Coroutine[object, object, None]) -> None:
         """Run an async readiness workflow from a synchronous API."""
         try:
             asyncio.get_running_loop()

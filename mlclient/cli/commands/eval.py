@@ -132,7 +132,7 @@ class EvalCommand(Command):
         write_results(self, results)
         return 0
 
-    def _get_eval_params(self):
+    def _get_eval_params(self) -> dict:
         """Prepare parameters for an Eval service."""
         code = self.argument("code")
         variables = self.option("var")
@@ -198,7 +198,7 @@ class EvalCommand(Command):
         self,
         environment: str,
         eval_params: dict,
-    ):
+    ) -> str | list[str]:
         """Evaluate the code and get results."""
         rest_server = self.option("connection")
 

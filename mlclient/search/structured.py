@@ -141,7 +141,7 @@ class _Validated:
 
     _VALUE_FIELDS: ClassVar[frozenset[str]] = frozenset()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Freeze list arguments, then reject invalid ones.
 
         Raises
@@ -173,7 +173,7 @@ class _Validated:
                 raise ValueError(message)
         self._validate()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject invalid arguments; components without constraints accept all."""
 
 
@@ -279,7 +279,7 @@ class Element(QueryTarget):
     name: str
     ns: str = ""
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native element.
 
         Raises
@@ -325,7 +325,7 @@ class Attribute(QueryComponent, _Validated):
     name: str
     ns: str = ""
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native attribute.
 
         Raises
@@ -371,7 +371,7 @@ class Field(QueryTarget):
     name: str
     collation: str | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native field.
 
         Raises
@@ -413,7 +413,7 @@ class JsonProperty(QueryTarget):
 
     name: str
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native json-property.
 
         Raises
@@ -464,7 +464,7 @@ class PathIndex(QueryTarget):
         """
         return hash((self.path, frozenset(self.namespaces.items())))
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject prefixes that would rebind a namespace serialization relies on.
 
         Raises
@@ -521,7 +521,7 @@ class Query(StructuredQuery):
 
     queries: StructuredQuery | Sequence[StructuredQuery]
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native query.
 
         Raises
@@ -566,7 +566,7 @@ class AndQuery(StructuredQuery):
     queries: StructuredQuery | Sequence[StructuredQuery]
     ordered: bool | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native and-query.
 
         Raises
@@ -611,7 +611,7 @@ class OrQuery(StructuredQuery):
 
     queries: StructuredQuery | Sequence[StructuredQuery]
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native or-query.
 
         Raises
@@ -656,7 +656,7 @@ class AndNotQuery(StructuredQuery):
     positive: StructuredQuery
     negative: StructuredQuery
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native and-not-query.
 
         Raises
@@ -703,7 +703,7 @@ class NotInQuery(StructuredQuery):
     positive: StructuredQuery
     negative: StructuredQuery
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native not-in-query.
 
         Raises
@@ -750,7 +750,7 @@ class BoostQuery(StructuredQuery):
     matching: StructuredQuery
     boosting: StructuredQuery
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native boost-query.
 
         Raises
@@ -796,7 +796,7 @@ class _SubqueryWrapper(StructuredQuery):
 
     query: StructuredQuery
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject a subquery the native wrapper node cannot hold.
 
         Raises
@@ -930,7 +930,7 @@ class CollectionQuery(StructuredQuery):
 
     uris: str | Sequence[str]
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native collection-query.
 
         Raises
@@ -975,7 +975,7 @@ class DirectoryQuery(StructuredQuery):
     uris: str | Sequence[str]
     infinite: bool | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native directory-query.
 
         Raises
@@ -1023,7 +1023,7 @@ class DocumentQuery(StructuredQuery):
 
     uris: str | Sequence[str]
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native document-query.
 
         Raises
@@ -1077,7 +1077,7 @@ class NearQuery(StructuredQuery):
     distance_weight: float | None = None
     ordered: bool | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native near-query.
 
         Raises
@@ -1137,7 +1137,7 @@ class TermQuery(StructuredQuery):
     weight: float | None = None
     options: str | Sequence[str] = ()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native term-query.
 
         Raises
@@ -1194,7 +1194,7 @@ class ContainerQuery(StructuredQuery):
     query: StructuredQuery
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native container-query.
 
         Raises
@@ -1267,7 +1267,7 @@ class WordQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native word-query.
 
         Raises
@@ -1347,7 +1347,7 @@ class ValueQuery(StructuredQuery):
     fragment_scope: Literal["documents", "properties"] | None = None
     node_type: Literal["string", "boolean", "null", "number"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native value-query.
 
         Raises
@@ -1440,7 +1440,7 @@ class RangeQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native range-query.
 
         Raises
@@ -1516,7 +1516,7 @@ class CollectionConstraintQuery(StructuredQuery):
     constraint_name: str
     uris: str | Sequence[str] = ()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native collection-constraint-query.
 
         Raises
@@ -1565,7 +1565,7 @@ class ContainerConstraintQuery(StructuredQuery):
     constraint_name: str
     query: StructuredQuery
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native container-constraint-query.
 
         Raises
@@ -1614,7 +1614,7 @@ class ElementConstraintQuery(StructuredQuery):
     constraint_name: str
     query: StructuredQuery
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native element-constraint-query.
 
         Raises
@@ -1663,7 +1663,7 @@ class PropertiesConstraintQuery(StructuredQuery):
     constraint_name: str
     query: StructuredQuery
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native properties-constraint-query.
 
         Raises
@@ -1712,7 +1712,7 @@ class CustomConstraintQuery(StructuredQuery):
     constraint_name: str
     text: str | Sequence[str] = ()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native custom-constraint-query.
 
         Raises
@@ -1769,7 +1769,7 @@ class WordConstraintQuery(StructuredQuery):
     text: str | Sequence[str] = ()
     weight: float | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native word-constraint-query.
 
         Raises
@@ -1820,7 +1820,7 @@ class OperatorState(StructuredQuery):
     operator_name: str
     state_name: str
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native operator-state.
 
         Raises
@@ -1881,7 +1881,7 @@ class RangeConstraintQuery(StructuredQuery):
     operator: Literal["LT", "LE", "GT", "GE", "EQ", "NE"] | None = None
     options: str | Sequence[str] = ()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native range-constraint-query.
 
         Raises
@@ -1946,7 +1946,7 @@ class ValueConstraintQuery(StructuredQuery):
     text: _Scalar | Sequence[_Scalar] = ()
     weight: float | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native value-constraint-query.
 
         Raises
@@ -2001,7 +2001,7 @@ class Point(Region):
     latitude: float
     longitude: float
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native point.
 
         Raises
@@ -2059,7 +2059,7 @@ class Box(Region):
     north: float
     east: float
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native box.
 
         Raises
@@ -2115,7 +2115,7 @@ class Circle(Region):
     radius: float
     center: Point
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native circle.
 
         Raises
@@ -2166,7 +2166,7 @@ class Polygon(Region):
 
     points: Sequence[Point]
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native polygon.
 
         Raises
@@ -2213,7 +2213,7 @@ class Period(QueryComponent, _Validated):
     start: datetime | str
     end: datetime | str
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native period.
 
         Raises
@@ -2277,7 +2277,7 @@ class GeoElementQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-elem-query.
 
         Raises
@@ -2353,7 +2353,7 @@ class GeoElementPairQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-elem-pair-query.
 
         Raises
@@ -2431,7 +2431,7 @@ class GeoAttributePairQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-attr-pair-query.
 
         Raises
@@ -2503,7 +2503,7 @@ class GeoPathQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-path-query.
 
         Raises
@@ -2576,7 +2576,7 @@ class GeoJsonPropertyQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-json-property-query.
 
         Raises
@@ -2659,7 +2659,7 @@ class GeoJsonPropertyPairQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-json-property-pair-query.
 
         Raises
@@ -2749,7 +2749,7 @@ class GeoRegionPathQuery(StructuredQuery):
     weight: float | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-region-path-query.
 
         Raises
@@ -2827,7 +2827,7 @@ class GeospatialConstraintQuery(StructuredQuery):
     regions: Region | Sequence[Region]
     text: str | Sequence[str] = ()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geospatial-constraint-query.
 
         Raises
@@ -2891,7 +2891,7 @@ class GeoRegionConstraintQuery(StructuredQuery):
     operator: _GeospatialOperator | None = None
     weight: float | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native geo-region-constraint-query.
 
         Raises
@@ -2961,7 +2961,7 @@ class LsqtQuery(StructuredQuery):
     options: str | Sequence[str] = ()
     weight: float | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native lsqt-query.
 
         Raises
@@ -3030,7 +3030,7 @@ class PeriodCompareQuery(StructuredQuery):
     axis2: str
     options: str | Sequence[str] = ()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native period-compare-query.
 
         Raises
@@ -3097,7 +3097,7 @@ class PeriodRangeQuery(StructuredQuery):
     options: str | Sequence[str] = ()
     weight: float | None = None
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native period-range-query.
 
         Raises
@@ -3154,7 +3154,7 @@ class QtextQuery(StructuredQuery):
 
     text: str
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Reject arguments that cannot form a native qtext.
 
         Raises
@@ -3378,7 +3378,7 @@ def _regions(
     return [region.serialize(output_format) for region in _sequence(regions)]
 
 
-def _check_regions(regions: Region | Sequence[Region]):
+def _check_regions(regions: Region | Sequence[Region]) -> None:
     """Reject geographic criteria that are not regions.
 
     Parameters
@@ -3418,7 +3418,7 @@ def _constraint_name(
     return _children("constraint-name", name, output_format=output_format)
 
 
-def _check_constraint_name(name: str):
+def _check_constraint_name(name: str) -> None:
     """Reject a missing constraint name or several names.
 
     Parameters
@@ -3439,7 +3439,7 @@ def _check_constraint_name(name: str):
 def _check_range_values(
     value: _Scalar | Sequence[_Scalar],
     operator: str | None,
-):
+) -> None:
     """Reject a range comparison or value cardinality MarkLogic cannot evaluate.
 
     Parameters
@@ -3619,7 +3619,7 @@ def _subqueries(
     return [query.serialize(output_format) for query in _sequence(queries)]
 
 
-def _check_subqueries(queries: StructuredQuery | Sequence[StructuredQuery]):
+def _check_subqueries(queries: StructuredQuery | Sequence[StructuredQuery]) -> None:
     """Reject nested queries that cannot be children of another query.
 
     Parameters
@@ -3673,7 +3673,7 @@ def _check_targets(
     attribute: Attribute | Sequence[Attribute] | None = None,
     *,
     allow_path: bool = False,
-):
+) -> None:
     """Reject missing, mixed or unsupported target kinds and misplaced attributes.
 
     Parameters
@@ -3740,7 +3740,7 @@ def _scope(
     return _optional_children(fragment_scope=scope, output_format=output_format)
 
 
-def _check_scope(scope: str | None):
+def _check_scope(scope: str | None) -> None:
     """Reject a fragment scope the Search API does not support.
 
     Parameters
@@ -3901,7 +3901,7 @@ def _is_non_finite(value: object) -> bool:
     return False
 
 
-def _check_json_properties(*properties: JsonProperty | None):
+def _check_json_properties(*properties: JsonProperty | None) -> None:
     """Reject geospatial JSON property selectors that are not JsonProperty.
 
     Parameters
@@ -3947,7 +3947,7 @@ def _check_type(
     types: type | tuple[type, ...],
     *,
     optional: bool = False,
-):
+) -> None:
     """Reject an argument of a type the component cannot serialize.
 
     Parameters
@@ -3976,7 +3976,7 @@ def _check_type(
     raise TypeError(message)
 
 
-def _check_types(component: object, name: str, types: type | tuple[type, ...]):
+def _check_types(component: object, name: str, types: type | tuple[type, ...]) -> None:
     """Reject a value or sequence item of a type the component cannot serialize.
 
     Parameters
@@ -4008,7 +4008,7 @@ def _check_number(
     *,
     integer: bool = False,
     optional: bool = False,
-):
+) -> None:
     """Reject a numeric option that is not a number, or not an integer.
 
     Parameters
@@ -4047,7 +4047,7 @@ def _check_choice(
     description: str,
     *,
     optional: bool = False,
-):
+) -> None:
     """Reject an enumerated argument outside its native value set.
 
     Parameters

@@ -19,6 +19,7 @@ from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
+    import httpx
     from httpx import Response
 
     from mlclient.api.manage import ManageApi
@@ -59,7 +60,7 @@ class LogLevelService:
         self,
         rest: RestApi,
         manage: ManageApi,
-    ):
+    ) -> None:
         """Initialize the service with REST and Manage API handles.
 
         Parameters
@@ -78,7 +79,7 @@ class LogLevelService:
         group: str = "Default",
         server: str | None = None,
         log_type: str = "file",
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> str:
         """Return the current log level, falling back to Manage on privilege errors.
 
@@ -134,7 +135,7 @@ class LogLevelService:
         group: str = "Default",
         server: str | None = None,
         log_type: str = "file",
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> str:
         """Change the log level, falling back to Manage on privilege errors.
 
@@ -191,7 +192,7 @@ class LogLevelService:
         server: str | None,
         log_type: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> str:
         """Read a group or App Server log level through Management REST.
 
@@ -255,7 +256,7 @@ class LogLevelService:
         log_type: str,
         level: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> str:
         """Update only the requested log-level property through Management REST.
 
@@ -423,7 +424,7 @@ class LogLevelService:
         server: str | None,
         log_type: str,
         level: str | None,
-    ):
+    ) -> None:
         """Validate log selectors and any proposed level before making requests.
 
         Parameters

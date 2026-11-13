@@ -54,7 +54,7 @@ class RolesGetCall(ApiCall):
         self,
         data_format: str = "xml",
         view: str = "default",
-    ):
+    ) -> None:
         """Initialize RolesGetCall instance.
 
         Parameters
@@ -78,7 +78,7 @@ class RolesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Roles call.
 
         Returns
@@ -93,7 +93,7 @@ class RolesGetCall(ApiCall):
         cls,
         data_format: str,
         view: str,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -125,7 +125,7 @@ class RolesPostCall(ApiCall):
     def __init__(
         self,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize RolesPostCall instance.
 
         Parameters
@@ -142,7 +142,7 @@ class RolesPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Roles call.
 
         Returns
@@ -156,7 +156,7 @@ class RolesPostCall(ApiCall):
     def _validate_params(
         cls,
         body: str | dict,
-    ):
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/roles!"
             raise exceptions.WrongParametersError(msg)
@@ -187,7 +187,7 @@ class RoleGetCall(ApiCall):
         role: str,
         data_format: str = "xml",
         view: str = "default",
-    ):
+    ) -> None:
         """Initialize RoleGetCall instance.
 
         Parameters
@@ -215,7 +215,7 @@ class RoleGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Role call.
 
         Returns
@@ -230,7 +230,7 @@ class RoleGetCall(ApiCall):
         cls,
         data_format: str,
         view: str,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -262,7 +262,7 @@ class RoleDeleteCall(ApiCall):
     def __init__(
         self,
         role: str,
-    ):
+    ) -> None:
         """Initialize RoleDeleteCall instance.
 
         Parameters
@@ -276,7 +276,7 @@ class RoleDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Role call.
 
         Returns
@@ -310,7 +310,7 @@ class RolePropertiesGetCall(ApiCall):
         self,
         role: str,
         data_format: str = "xml",
-    ):
+    ) -> None:
         """Initialize RolePropertiesGetCall instance.
 
         Parameters
@@ -334,7 +334,7 @@ class RolePropertiesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Role Properties call.
 
         Returns
@@ -348,7 +348,7 @@ class RolePropertiesGetCall(ApiCall):
     def _validate_params(
         cls,
         data_format: str,
-    ):
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -376,7 +376,7 @@ class RolePropertiesPutCall(ApiCall):
         self,
         role: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize RolePropertiesPutCall instance.
 
         Parameters
@@ -396,7 +396,7 @@ class RolePropertiesPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Role Properties call.
 
         Returns
@@ -410,7 +410,7 @@ class RolePropertiesPutCall(ApiCall):
     def _validate_params(
         cls,
         body: str | dict,
-    ):
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (
                 "No request body provided for "

@@ -90,7 +90,7 @@ from mlclient.xquery.expressions import (
 xs = Xs()
 
 
-def _double(value) -> XqyExpression | None:
+def _double(value: AtomicInput) -> XqyExpression | None:
     """Cast an optional numeric value to the native double type."""
     return xs.double(value) if value is not None else None
 

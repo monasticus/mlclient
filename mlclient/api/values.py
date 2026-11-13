@@ -10,6 +10,8 @@ from mlclient._options import UNSET
 from mlclient.calls.values import ValueGetCall, ValuePostCall, ValuesGetCall
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -19,7 +21,7 @@ class ValuesApi:
     Query lexicon and range index values, co-occurrences and aggregates.
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
     def get_list(
@@ -28,7 +30,7 @@ class ValuesApi:
         database: str | None = None,
         data_format: str = "xml",
         options: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """List lexicon configurations available for use with GET /v1/values/{name}.
 
@@ -95,7 +97,7 @@ class ValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Query the values in a lexicon or range index, optionally aggregating them.
 
@@ -223,7 +225,7 @@ class ValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Query lexicon values with a query and/or query options in the POST body.
 
@@ -334,7 +336,7 @@ class AsyncValuesApi:
     Query lexicon and range index values, co-occurrences and aggregates.
     """
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
     async def get_list(
@@ -343,7 +345,7 @@ class AsyncValuesApi:
         database: str | None = None,
         data_format: str = "xml",
         options: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """List lexicon configurations available for use with GET /v1/values/{name}.
 
@@ -410,7 +412,7 @@ class AsyncValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Query the values in a lexicon or range index, optionally aggregating them.
 
@@ -538,7 +540,7 @@ class AsyncValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Query lexicon values with a query and/or query options in the POST body.
 

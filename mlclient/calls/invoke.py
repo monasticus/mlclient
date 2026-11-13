@@ -40,7 +40,7 @@ class InvokeCall(ApiCall):
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-    ):
+    ) -> None:
         """Initialize InvokeCall instance.
 
         Parameters
@@ -74,7 +74,7 @@ class InvokeCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Invoke call.
 
         Returns
@@ -88,7 +88,7 @@ class InvokeCall(ApiCall):
     def _validate_params(
         cls,
         module: str | None,
-    ):
+    ) -> None:
         """Reject a missing or blank module path.
 
         Parameters
@@ -110,7 +110,7 @@ class InvokeCall(ApiCall):
         cls,
         module: str,
         variables: dict | None,
-    ):
+    ) -> dict[str, str]:
         """Build the x-www-form-urlencoded body of the request.
 
         Parameters

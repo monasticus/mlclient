@@ -50,7 +50,7 @@ class MLCLIentApplication(Application):
 
     def __init__(
         self,
-    ):
+    ) -> None:
         """Initialize MLCLIentApplication instance."""
         super().__init__(self._APP_NAME, ml_client_version)
         self.set_display_name(self._DISPLAY_NAME)
@@ -122,7 +122,7 @@ class CleoAppHandler(logging.Handler):
         self,
         io: IO,
         level: int = logging.NOTSET,
-    ):
+    ) -> None:
         """Initialize CleoAppHandler instance."""
         super().__init__(level=level)
         self.io = io
@@ -130,7 +130,7 @@ class CleoAppHandler(logging.Handler):
     def emit(
         self,
         record: logging.LogRecord,
-    ):
+    ) -> None:
         """Emit a LogRecord."""
         verbosity = self._LEVELS[record.levelno]["verbosity"]
         style = self._LEVELS[record.levelno]["style"]
@@ -141,7 +141,7 @@ class CleoAppHandler(logging.Handler):
     def setup_for(
         cls,
         io: IO,
-    ):
+    ) -> None:
         """Set up MLClient logs handler and format for an IO."""
         options = ["italic"]
         formatter = io.output.formatter

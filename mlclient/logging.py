@@ -29,7 +29,7 @@ from mlclient.connection import SSLConfig
 from mlclient.exceptions import WrongParametersError
 
 
-def setup_logger():
+def setup_logger() -> None:
     """Set up MLClient logging configuration."""
     with utils.get_resource("logging.yaml") as config_file:
         config = yaml.safe_load(config_file.read())
@@ -108,15 +108,15 @@ class MLLogHandler(logging.Handler):
         environment: str | None = None,
         *,
         app_server: str | None = None,
-        host=None,
-        port=None,
-        protocol=None,
-        username=None,
-        password=None,
-        auth=None,
-        ssl=None,
+        host: str | None = None,
+        port: int | None = None,
+        protocol: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        auth: str | None = None,
+        ssl: dict | SSLConfig | None = None,
         level: int | str = logging.NOTSET,
-    ):
+    ) -> None:
         """Validate the connection choice and prepare a lazily started worker.
 
         The background thread is not started here; it starts on the first record
@@ -143,7 +143,7 @@ class MLLogHandler(logging.Handler):
         self._worker: threading.Thread | None = None
         self._worker_lock = threading.Lock()
 
-    def emit(self, record: logging.LogRecord):
+    def emit(self, record: logging.LogRecord) -> None:
         """Enqueue a formatted record for background forwarding.
 
         Records emitted on the worker thread are the client's own logging while
@@ -164,7 +164,7 @@ class MLLogHandler(logging.Handler):
         except Exception:
             self.handleError(record)
 
-    def close(self):
+    def close(self) -> None:
         """Flush the queue and stop the worker before closing the handler.
 
         Signals the worker to drain remaining records, then joins it so records
@@ -175,7 +175,7 @@ class MLLogHandler(logging.Handler):
             self._worker.join()
         super().close()
 
-    def _ensure_worker(self):
+    def _ensure_worker(self) -> None:
         """Start the forwarding thread once, on first use."""
         with self._worker_lock:
             if self._worker is None:
@@ -186,7 +186,7 @@ class MLLogHandler(logging.Handler):
                 )
                 self._worker.start()
 
-    def _forward_records(self):
+    def _forward_records(self) -> None:
         """Own one client and forward queued records until shutdown."""
         with ExitStack() as stack:
             client = None
@@ -205,7 +205,7 @@ class MLLogHandler(logging.Handler):
         record: logging.LogRecord,
         message: str,
         level: str,
-    ):
+    ) -> None:
         """Write one record to the server, reporting a failed send.
 
         Parameters
@@ -240,12 +240,12 @@ class MLLogHandler(logging.Handler):
 
 
 def setup_ml_logger(
-    config,
+    config: dict | str | Path,
     *,
-    environment=None,
-    app_server=None,
-    handler_id="marklogic",
-):
+    environment: str | None = None,
+    app_server: str | None = None,
+    handler_id: str = "marklogic",
+) -> None:
     """Apply a logging config, injecting the MarkLogic handler's connection.
 
     Keeps the handler definition declarative in a dictConfig document while the
@@ -271,7 +271,15 @@ def setup_ml_logger(
     logging.config.dictConfig(config)
 
 
-def _client_kwargs(host, port, protocol, username, password, auth, ssl) -> dict:
+def _client_kwargs(
+    host: str | None,
+    port: int | None,
+    protocol: str | None,
+    username: str | None,
+    password: str | None,
+    auth: str | None,
+    ssl: dict | SSLConfig | None,
+) -> dict:
     """Collect MLClient keyword arguments from set connection details.
 
     Unset details are omitted so MLClient applies its own defaults. An SSL
@@ -315,7 +323,7 @@ def _ml_log_level(levelno: int) -> str:
     return _ML_LOG_LEVELS[max(candidates)] if candidates else "fine"
 
 
-def _load_config(config):
+def _load_config(config: dict | str | Path) -> dict:
     """Return a dictConfig mapping from a dict or a YAML file path.
 
     A dict is deep-copied so the caller's object is not mutated.

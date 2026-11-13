@@ -105,7 +105,7 @@ class MarkLogicError(Exception):
     def __init__(
         self,
         error: dict | str,
-    ):
+    ) -> None:
         """Initialize MarkLogicError instance.
 
         Parameters
@@ -151,7 +151,7 @@ class ResourceNotFoundError(Exception):
     def __init__(
         self,
         resource_name: str,
-    ):
+    ) -> None:
         """Initialize ResourceNotFoundError exception with details.
 
         Extends Exception constructor with a custom message.
@@ -174,7 +174,7 @@ class EnvironmentFileExistsError(Exception):
     def __init__(
         self,
         file_path: str,
-    ):
+    ) -> None:
         """Initialize EnvironmentFileExistsError exception with details.
 
         Extends Exception constructor with a custom message.

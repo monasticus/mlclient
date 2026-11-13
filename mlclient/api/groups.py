@@ -18,6 +18,8 @@ from mlclient.calls.groups import (
 )
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -29,7 +31,7 @@ class GroupsApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         """Initialize the group API.
 
         Parameters
@@ -44,7 +46,7 @@ class GroupsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the groups in the cluster.
 
@@ -84,7 +86,7 @@ class GroupsApi:
         self,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Create a new group in the cluster.
 
@@ -126,7 +128,7 @@ class GroupsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified group.
 
@@ -170,7 +172,7 @@ class GroupsApi:
         group: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Restart or shut down a group.
 
@@ -212,7 +214,7 @@ class GroupsApi:
         self,
         group: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Delete the specified group from the cluster.
 
@@ -249,7 +251,7 @@ class GroupsApi:
         group: str,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified group.
 
@@ -285,7 +287,7 @@ class GroupsApi:
         group: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified group.
 
@@ -319,7 +321,7 @@ class GroupsApi:
 class AsyncGroupsApi:
     """Async mid-level API for ``/manage/v2/groups`` endpoints."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         """Initialize the asynchronous group API.
 
         Parameters
@@ -334,7 +336,7 @@ class AsyncGroupsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the groups in the cluster.
 
@@ -374,7 +376,7 @@ class AsyncGroupsApi:
         self,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Create a new group in the cluster.
 
@@ -416,7 +418,7 @@ class AsyncGroupsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified group.
 
@@ -460,7 +462,7 @@ class AsyncGroupsApi:
         group: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Restart or shut down a group.
 
@@ -502,7 +504,7 @@ class AsyncGroupsApi:
         self,
         group: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Delete the specified group from the cluster.
 
@@ -539,7 +541,7 @@ class AsyncGroupsApi:
         group: str,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified group.
 
@@ -575,7 +577,7 @@ class AsyncGroupsApi:
         group: str,
         body: str | dict,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified group.
 

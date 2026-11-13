@@ -32,7 +32,7 @@ import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Any, ClassVar, TextIO
+from typing import ClassVar, TextIO
 from xml.dom import minidom
 
 import xmltodict
@@ -53,7 +53,7 @@ class Document(metaclass=ABCMeta):
         doc_type: DocumentType | None = DocumentType.XML,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
-    ):
+    ) -> None:
         """Initialize Document instance.
 
         Parameters
@@ -77,13 +77,13 @@ class Document(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(
         cls,
-        subclass: Document,
-    ):
+        subclass: type,
+    ) -> bool:
         """Verify if a subclass implements all abstract methods.
 
         Parameters
         ----------
-        subclass : Document
+        subclass : type
             A Document subclass
 
         Returns
@@ -358,7 +358,7 @@ class Document(metaclass=ABCMeta):
     @abstractmethod
     def content(
         self,
-    ) -> Any:
+    ) -> ElemTree.ElementTree | dict | str | bytes | None:
         """A document content.
 
         Typed content-bearing implementations narrow this to a non-``None``
@@ -367,7 +367,7 @@ class Document(metaclass=ABCMeta):
 
         Returns
         -------
-        Any
+        ElemTree.ElementTree | dict | str | bytes | None
             A document's content, or ``None`` for metadata-only documents.
         """
         raise NotImplementedError
@@ -463,7 +463,7 @@ class JSONDocument(Document):
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
-    ):
+    ) -> None:
         if content is None:
             msg = (
                 "JSONDocument requires content; "
@@ -574,7 +574,7 @@ class XMLDocument(Document):
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
-    ):
+    ) -> None:
         if content is None:
             msg = (
                 "XMLDocument requires content; "
@@ -714,7 +714,7 @@ class TextDocument(Document):
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
-    ):
+    ) -> None:
         if content is None:
             msg = (
                 "TextDocument requires content; "
@@ -777,7 +777,7 @@ class BinaryDocument(Document):
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
-    ):
+    ) -> None:
         if content is None:
             msg = (
                 "BinaryDocument requires content; "
@@ -834,7 +834,7 @@ class MetadataDocument(Document):
         uri: str,
         metadata: Metadata | bytes | str,
         temporal_collection: str | None = None,
-    ):
+    ) -> None:
         super().__init__(
             uri,
             doc_type=None,
@@ -1113,7 +1113,7 @@ class Metadata:
         metadata_values: dict | None = None,
         *,
         raw: bytes | str | None = None,
-    ):
+    ) -> None:
         """Initialize Metadata instance.
 
         Parameters
@@ -1370,7 +1370,7 @@ class Metadata:
         self,
         name: str,
         value: str,
-    ):
+    ) -> None:
         """Assign a new property to document.
 
         Parameters
@@ -1388,7 +1388,7 @@ class Metadata:
         self,
         name: str,
         value: str,
-    ):
+    ) -> None:
         """Assign a new metadata value to document.
 
         Parameters
@@ -1597,7 +1597,7 @@ class Metadata:
     def _to_xml_collections(
         self,
         root: ElemTree.Element,
-    ):
+    ) -> None:
         """Add collections node to Metadata root."""
         parent = ElemTree.SubElement(root, self._COLLECTIONS_TAG)
         for collection in self.collections():
@@ -1607,7 +1607,7 @@ class Metadata:
     def _to_xml_permissions(
         self,
         root: ElemTree.Element,
-    ):
+    ) -> None:
         """Add permissions node to Metadata root."""
         permissions = ElemTree.SubElement(root, self._PERMISSIONS_TAG)
         for perm in self._permissions:
@@ -1621,7 +1621,7 @@ class Metadata:
     def _to_xml_properties(
         self,
         root: ElemTree.Element,
-    ):
+    ) -> None:
         """Add properties node to Metadata root."""
         attrs = {self._PROP_NS_PREFIX: self._PROP_NS_URI}
         properties = ElemTree.SubElement(root, self._PROPERTIES_TAG, attrib=attrs)
@@ -1632,7 +1632,7 @@ class Metadata:
     def _to_xml_quality(
         self,
         root: ElemTree.Element,
-    ):
+    ) -> None:
         """Add quality node to Metadata root."""
         quality = ElemTree.SubElement(root, self._QUALITY_TAG)
         quality.text = str(self.quality())
@@ -1640,7 +1640,7 @@ class Metadata:
     def _to_xml_metadata_values(
         self,
         root: ElemTree.Element,
-    ):
+    ) -> None:
         """Add metadata values node to Metadata root."""
         values = ElemTree.SubElement(root, self._METADATA_VALUES_TAG)
         for metadata_name, metadata_value in self.metadata_values().items():
@@ -1744,7 +1744,7 @@ class Permission:
         self,
         role_name: str,
         capabilities: set,
-    ):
+    ) -> None:
         """Initialize a Permission instance.
 
         Parameters

@@ -6,13 +6,22 @@ import logging
 from typing import Any
 
 
-def _logger_fine(logger: logging.Logger, message: object, *args: Any, **kwargs: Any):
+def _logger_fine(
+    logger: logging.Logger,
+    message: object,
+    *args: object,
+    **kwargs: Any,  # noqa: ANN401 - forwarded to Logger.log as its keyword options
+) -> None:
     """Log at FINE, forwarding logging options and identifying the caller."""
     kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1
     logger.log(logging.FINE, message, *args, **kwargs)
 
 
-def _root_fine(message: object, *args: Any, **kwargs: Any):
+def _root_fine(
+    message: object,
+    *args: object,
+    **kwargs: Any,  # noqa: ANN401 - forwarded to Logger.log as its keyword options
+) -> None:
     """Log at FINE through the root logger, preserving logging options."""
     kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1
     root = logging.getLogger()

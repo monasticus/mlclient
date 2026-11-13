@@ -8,12 +8,19 @@ It exports the following class:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from mlclient._client import AsyncMLClient, MLClient
 from mlclient._options import UNSET
 from mlclient.clients.http import AsyncHttpClient, HttpClient
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import NoRestServerConfiguredError, NoSuchAppServerError
 from mlclient.http import HTTPConfig
+
+if TYPE_CHECKING:
+    from typing_extensions import Unpack
+
+    from mlclient.http import _HTTPConfigOverrides
 
 
 class MLClientManager:
@@ -26,8 +33,8 @@ class MLClientManager:
     def __init__(
         self,
         env_name: str,
-        **overrides,
-    ):
+        **overrides: Unpack[_HTTPConfigOverrides],
+    ) -> None:
         """Load an environment and store HTTP defaults for clients created from it.
 
         The environment is loaded immediately. Overrides are applied and validated
@@ -98,7 +105,7 @@ class MLClientManager:
     def config(
         self,
         ml_configuration: MLEnvironment,
-    ):
+    ) -> None:
         """Replace the environment used for subsequent configuration requests.
 
         Parameters
@@ -115,7 +122,11 @@ class MLClientManager:
         """
         self._config = ml_configuration
 
-    def get_config(self, app_server_id: str, **overrides) -> HTTPConfig:
+    def get_config(
+        self,
+        app_server_id: str,
+        **overrides: Unpack[_HTTPConfigOverrides],
+    ) -> HTTPConfig:
         """Resolve HTTP settings for one server without creating a client.
 
         An explicit retry strategy from the manager or this call is preserved.
@@ -171,7 +182,11 @@ class MLClientManager:
             config = config.with_health_defaults()
         return config
 
-    def get_client(self, app_server_id: str | None = None, **overrides) -> MLClient:
+    def get_client(
+        self,
+        app_server_id: str | None = None,
+        **overrides: Unpack[_HTTPConfigOverrides],
+    ) -> MLClient:
         """Create a synchronous MarkLogic client for a configured App Server.
 
         The selected server is the primary HTTP endpoint. Selecting health,
@@ -233,7 +248,7 @@ class MLClientManager:
     def get_async_client(
         self,
         app_server_id: str | None = None,
-        **overrides,
+        **overrides: Unpack[_HTTPConfigOverrides],
     ) -> AsyncMLClient:
         """Create an asynchronous MarkLogic client for a configured App Server.
 
@@ -296,7 +311,7 @@ class MLClientManager:
     def get_async_http_client(
         self,
         app_server_id: str,
-        **overrides,
+        **overrides: Unpack[_HTTPConfigOverrides],
     ) -> AsyncHttpClient:
         """Create a raw asynchronous HTTP client for one configured server.
 
@@ -351,7 +366,11 @@ class MLClientManager:
         """
         return AsyncHttpClient(config=self.get_config(app_server_id, **overrides))
 
-    def get_http_client(self, app_server_id: str, **overrides) -> HttpClient:
+    def get_http_client(
+        self,
+        app_server_id: str,
+        **overrides: Unpack[_HTTPConfigOverrides],
+    ) -> HttpClient:
         """Create a raw synchronous HTTP client for one configured server.
 
         All requests target the selected server; no auxiliary API clients are
@@ -408,7 +427,7 @@ class MLClientManager:
     def _client_configs(
         self,
         app_server_id: str | None,
-        **overrides,
+        **overrides: Unpack[_HTTPConfigOverrides],
     ) -> dict[str, HTTPConfig]:
         """Build primary and auxiliary HTTP configurations for a MarkLogic client.
 

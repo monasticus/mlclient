@@ -9,7 +9,7 @@ Mixed XML content and `xml:space="preserve"` subtrees are not re-indented;
 the surrounding XML is still formatted with two-space indentation.
 
 ```sh
-ml eval -x '"Hello World!"'
+ml eval '"Hello World!"'
 ml eval -j '"Hello World!"'
 ml eval ./query.xqy
 ml eval -x '<root><item>one</item></root>' --no-pretty
@@ -26,18 +26,30 @@ ml eval -x 'declare variable $name external; concat("Hello, ", $name)' --var nam
 
 ### `code`
 
-Required. A file path by default; use `--xquery` or `--javascript` for inline code.
-The file extension determines the language when evaluating a file.
+Required. Without `--xquery` or `--javascript`, the argument is read as follows:
+
+| Argument | Evaluated as |
+|---|---|
+| `@path` | The file at `path`; an error if it does not exist |
+| An existing file with a code extension (`xq`, `xql`, `xqm`, `xqu`, `xquery`, `xqy`, `js`, `sjs`) | The file, in the language of its extension |
+| An existing file with another extension, e.g. `notes.txt` | An error: unknown file extension |
+| A name ending with a code extension that does not exist, e.g. `quer.xqy` | An error: file not found, so a mistyped file name never runs as code |
+| Anything else, e.g. `'1+1'` | Inline XQuery |
+
+With `--xquery` or `--javascript` the argument is always inline code, even when it
+names an existing file.
 
 ## Options
 
 ### `--xquery`, `-x`
 
-Treat `code` as inline XQuery. Cannot be combined with `--javascript`.
+Treat `code` as inline XQuery, even when it names an existing file.
+Cannot be combined with `--javascript`.
 
 ### `--javascript`, `-j`
 
-Treat `code` as inline JavaScript. Cannot be combined with `--xquery`.
+Treat `code` as inline JavaScript, even when it names an existing file.
+Cannot be combined with `--xquery`.
 
 ### `--var`
 

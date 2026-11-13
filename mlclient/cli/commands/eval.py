@@ -7,6 +7,8 @@ It exports an implementation for 'eval' command:
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
@@ -24,6 +26,7 @@ from mlclient.cli.commands._multi_env_common import (
 )
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.exceptions import WrongParametersError
+from mlclient.services.eval import SUPPORTED_FILE_EXTENSIONS
 
 
 class EvalCommand(Command):
@@ -40,7 +43,7 @@ class EvalCommand(Command):
 
     Arguments:
       code
-            The code to evaluate (a file path or raw xqy/js code)
+            XQuery code, a code file path, or @path to force a file
 
     Options:
       -e, --environment=ENVIRONMENT
@@ -67,7 +70,7 @@ class EvalCommand(Command):
     arguments: list[Argument] = [
         argument(
             "code",
-            "The code to evaluate (a file path or raw xqy/js code)",
+            "XQuery code, a code file path, or @path to force a file",
         ),
     ]
     options: list[Option] = [
@@ -152,10 +155,10 @@ class EvalCommand(Command):
         }
         if xq_flag:
             params["xq"] = code
-        if js_flag:
+        elif js_flag:
             params["js"] = code
-        if not xq_flag and not js_flag:
-            params["file"] = code
+        else:
+            params.update(_detect_code_source(code))
         if len(variables) > 0:
             params["variables"] = parse_variables(variables)
 
@@ -206,3 +209,55 @@ class EvalCommand(Command):
         with get_client(mgr, rest_server) as ml:
             self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
             return ml.eval.execute(**eval_params)
+
+
+def _detect_code_source(code: str) -> dict:
+    """Decide whether an argument given without -x/-j is a file or XQuery code.
+
+    Parameters
+    ----------
+    code : str
+        An @path, a path to an existing file, or inline XQuery code
+
+    Returns
+    -------
+    dict
+        Eval service keyword arguments: {"file": path} or {"xq": code}
+
+    Raises
+    ------
+    WrongParametersError
+        If an @path does not exist, or the argument ends with a code file extension
+        but no such file exists - a mistyped file name must not run as XQuery
+    """
+    if code.startswith("@"):
+        path = code[1:]
+        if not _is_file(path):
+            msg = f"File not found: {path!r}"
+            raise WrongParametersError(msg)
+        return {"file": path}
+    if _is_file(code):
+        return {"file": code}
+    if code.endswith(tuple(f".{extension}" for extension in SUPPORTED_FILE_EXTENSIONS)):
+        msg = f"File not found: {code!r}"
+        raise WrongParametersError(msg)
+    return {"xq": code}
+
+
+def _is_file(path: str) -> bool:
+    """Check whether a path names an existing file.
+
+    Parameters
+    ----------
+    path : str
+        A file path or inline code that may be too long to be a file name
+
+    Returns
+    -------
+    bool
+        True if the path names an existing file
+    """
+    try:
+        return Path(path).is_file()
+    except OSError:
+        return False

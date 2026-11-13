@@ -6,7 +6,7 @@ from cleo.testers.command_tester import CommandTester
 
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
-from mlclient.exceptions import WrongParametersError
+from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -376,3 +376,143 @@ def test_command_eval_runs_in_each_selected_environment():
     assert "second" in output
     assert output.count("hello") == 2
     assert route.call_count == 2
+
+
+@respx.mock
+def test_command_eval_treats_code_without_flag_as_xquery():
+    route = _mock_eval_post({"xquery": "1+1"})
+
+    tester = _get_tester("eval")
+
+    assert tester.execute("'1+1'") == 0
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_command_eval_treats_code_ending_like_an_extension_without_dot_as_xquery():
+    code = "let $objs := (1, 2) return $objs"
+    route = _mock_eval_post({"xquery": code})
+
+    tester = _get_tester("eval")
+
+    assert tester.execute(f"'{code}'") == 0
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_command_eval_treats_code_too_long_for_a_file_name_as_xquery():
+    code = f'"{"a" * 300}"'
+    route = _mock_eval_post({"xquery": code})
+
+    tester = _get_tester("eval")
+
+    assert tester.execute(f"'{code}'") == 0
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_command_eval_reads_an_existing_javascript_file(tmp_path, monkeypatch):
+    code = '"use strict"; 1 + 1'
+    (tmp_path / "query.sjs").write_text(code)
+    monkeypatch.chdir(tmp_path)
+    route = _mock_eval_post({"javascript": code})
+
+    tester = _get_tester("eval")
+
+    assert tester.execute("query.sjs") == 0
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_command_eval_reads_an_explicit_file(tmp_path):
+    code = "1 + 1"
+    file_path = tmp_path / "query.xqy"
+    file_path.write_text(code)
+    route = _mock_eval_post({"xquery": code})
+
+    tester = _get_tester("eval")
+
+    assert tester.execute(f"@{file_path}") == 0
+    assert route.call_count == 1
+
+
+@pytest.mark.parametrize("code", ["@missing.xqy", "@missing", "@"])
+@respx.mock
+def test_command_eval_rejects_a_missing_explicit_file(code, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    tester = _get_tester("eval")
+
+    with pytest.raises(WrongParametersError, match="File not found") as error:
+        tester.execute(f"'{code}'")
+
+    assert str(error.value) == f"File not found: {code[1:]!r}"
+    assert not respx.calls
+
+
+@pytest.mark.parametrize("code", ["quer.xqy", "./queries/report.sjs", "a.js"])
+@respx.mock
+def test_command_eval_rejects_a_missing_file_with_a_code_extension(
+    code,
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.chdir(tmp_path)
+    tester = _get_tester("eval")
+
+    with pytest.raises(WrongParametersError, match="File not found") as error:
+        tester.execute(f"'{code}'")
+
+    assert str(error.value) == f"File not found: {code!r}"
+    assert not respx.calls
+
+
+@pytest.mark.parametrize("code", ["notes.txt", "@notes.txt"])
+@respx.mock
+def test_command_eval_rejects_an_existing_file_with_another_extension(
+    code,
+    tmp_path,
+    monkeypatch,
+):
+    (tmp_path / "notes.txt").write_text("1 + 1")
+    monkeypatch.chdir(tmp_path)
+    tester = _get_tester("eval")
+
+    with pytest.raises(UnsupportedFileExtensionError, match="Unknown") as error:
+        tester.execute(code)
+
+    assert str(error.value) == (
+        "Unknown file extension! "
+        "Supported extensions are: xq, xql, xqm, xqu, xquery, xqy, js, sjs"
+    )
+    assert not respx.calls
+
+
+@pytest.mark.parametrize(
+    ("flag", "language"),
+    [("-x", "xquery"), ("-j", "javascript")],
+)
+@respx.mock
+def test_command_eval_with_flag_treats_a_file_path_as_code(
+    flag,
+    language,
+    tmp_path,
+    monkeypatch,
+):
+    (tmp_path / "query.xqy").write_text("1 + 1")
+    monkeypatch.chdir(tmp_path)
+    route = _mock_eval_post({language: "query.xqy"})
+
+    tester = _get_tester("eval")
+
+    assert tester.execute(f"{flag} query.xqy") == 0
+    assert route.call_count == 1
+
+
+def _mock_eval_post(body: dict):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(body)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    return ml_mocker.mock_post()

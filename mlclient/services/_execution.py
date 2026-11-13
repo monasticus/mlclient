@@ -140,5 +140,4 @@ class ExecutionService:
         httpx.HTTPStatusError
             If an HTTP failure has no recognized MarkLogic error payload.
         """
-        MLResponseParser.raise_for_status(response)
         return MLResponseParser.parse(response, output_type=output_type)

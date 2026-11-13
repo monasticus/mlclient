@@ -164,7 +164,6 @@ class DocumentsService:
             txid=params["txid"],
             timeout=timeout,
         )
-        MLResponseParser.raise_for_status(resp)
         return MLResponseParser.parse(resp)
 
     def read(
@@ -518,7 +517,6 @@ class AsyncDocumentsService:
             txid=params["txid"],
             timeout=timeout,
         )
-        MLResponseParser.raise_for_status(resp)
         return MLResponseParser.parse(resp)
 
     async def read(

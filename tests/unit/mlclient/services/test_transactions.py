@@ -346,3 +346,31 @@ def test_context_manager_rolls_back_on_error(ml):
 
     with pytest.raises(RuntimeError, match="boom"), ml.transaction():
         raise RuntimeError("boom")
+
+
+@respx.mock
+def test_transaction_raises_http_status_error_on_unstructured_open_error(ml):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions")
+    ml_mocker.with_response_code(401)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with pytest.raises(httpx.HTTPStatusError, match="401 Unauthorized"):
+        ml.transaction()
+
+
+@respx.mock
+def test_transaction_raises_on_open_without_a_redirect(ml):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with pytest.raises(MarkLogicError) as err:
+        ml.transaction()
+
+    assert str(err.value) == (
+        "Expected 303 See Other when opening a transaction, got 204."
+    )

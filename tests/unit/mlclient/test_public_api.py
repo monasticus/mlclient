@@ -594,6 +594,7 @@ EXPECTED_EXPORTS = {
         "DocumentStatusDetails",
     ],
     "mlclient.exceptions": [
+        "MLClientError",
         "WrongParametersError",
         "ConfigError",
         "UnsupportedFormatError",

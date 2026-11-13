@@ -12,6 +12,7 @@ It exports 2 classes:
 from __future__ import annotations
 
 from typing import ClassVar
+from urllib.parse import quote
 
 from mlclient import _constants as constants
 from mlclient import _utils as utils
@@ -251,4 +252,7 @@ class RequestGetCall(ApiCall):
         str
             A Request call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._request)
+        return self._ENDPOINT_TEMPLATE.format(
+            self._API_VERSION,
+            quote(self._request, safe=""),
+        )

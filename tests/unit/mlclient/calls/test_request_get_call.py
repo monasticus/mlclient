@@ -84,3 +84,11 @@ def test_fully_parametrized_call():
         "server-id": "App-Services",
     }
     assert call.body is None
+
+
+def test_request_uri_is_encoded_as_one_path_segment():
+    call = RequestGetCall(request="/reports/daily report.xqy?date=2026-11-13#main")
+
+    assert call.endpoint == (
+        "/manage/v2/requests/%2Freports%2Fdaily%20report.xqy%3Fdate%3D2026-11-13%23main"
+    )

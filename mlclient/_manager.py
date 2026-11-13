@@ -11,7 +11,7 @@ from __future__ import annotations
 from mlclient._client import AsyncMLClient, MLClient
 from mlclient._options import UNSET
 from mlclient.clients.http import AsyncHttpClient, HttpClient
-from mlclient.env import MLEnvironment, _no_such_app_server_error
+from mlclient.env import MLEnvironment, no_such_app_server_error
 from mlclient.exceptions import NoRestServerConfiguredError
 from mlclient.http import HTTPConfig
 
@@ -504,7 +504,7 @@ class MLClientManager:
                 raise NoRestServerConfiguredError(msg)
             return self._config.rest_servers[0]
         if app_server_id not in self._config.app_server_ids:
-            raise _no_such_app_server_error(
+            raise no_such_app_server_error(
                 self._config,
                 app_server_id,
                 self.env_name,

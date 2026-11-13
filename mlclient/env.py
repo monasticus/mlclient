@@ -41,7 +41,7 @@ from pydantic import (
 )
 
 from mlclient import _constants as constants
-from mlclient.auth import AuthConfig, _require_known_shortcut
+from mlclient.auth import AuthConfig, require_known_auth_shortcut
 from mlclient.connection import (
     CLOUD_PORT,
     CLOUD_PROTOCOL,
@@ -51,7 +51,7 @@ from mlclient.connection import (
     MARKLOGIC_MANAGE_PORT,
     CloudConfig,
     SSLConfig,
-    _secret_value,
+    secret_value,
 )
 from mlclient.exceptions import (
     ConfigError,
@@ -74,7 +74,7 @@ def _validate_auth(value):
     if value == "app":
         return None
     if isinstance(value, str):
-        _require_known_shortcut(value)
+        require_known_auth_shortcut(value)
     if isinstance(value, dict):
         return AuthConfig.model_validate(value)
     return value
@@ -307,7 +307,7 @@ class MLEnvironment(BaseModel):
             None,
         )
         if not app_server:
-            raise _no_such_app_server_error(self, app_server_id)
+            raise no_such_app_server_error(self, app_server_id)
         return app_server
 
     def _effective_port(
@@ -327,7 +327,7 @@ class MLEnvironment(BaseModel):
         overrides = {
             "protocol": app_server.protocol,
             "username": app_server.username,
-            "password": _secret_value(app_server.password),
+            "password": secret_value(app_server.password),
             "ssl": app_server.ssl,
         }
         overrides = {
@@ -538,7 +538,7 @@ def find_mlclient_directory(
     return find_mlclient_directory(path.parent)
 
 
-def _no_such_app_server_error(
+def no_such_app_server_error(
     environment: MLEnvironment,
     app_server_id: str,
     env_name: str | None = None,

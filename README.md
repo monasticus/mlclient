@@ -46,7 +46,7 @@ response = ml.rest.documents.get(uri="/example.json")
 response = ml.http.get("/v1/documents", params={"uri": "/example.json"})
 ```
 
-- Services for documents, search, eval, invoke and transactions, with composable queries.
+- Services for documents, search, eval, invoke, REST extensions and transactions, with composable queries.
 - REST, Manage and Admin APIs with explicit routing and raw responses.
 - HTTP/HTTPS, TLS client certificates, Cloud and configurable authentication.
 - Runtime retry, timeout and pool limits; independent auxiliary connections.

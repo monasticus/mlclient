@@ -9,7 +9,7 @@ using a layered composition architecture:
     - .healthcheck() -> HEAD / on the HealthCheck server (port 7997)
     - .cluster_healthcheck() -> health of every host in the cluster
     - .parser   -> MLResponseParser
-    - .documents, .eval, .invoke, .search -> higher-level services
+    - .documents, .eval, .invoke, .resources, .search -> higher-level services
     - .transaction() -> open a scoped transaction (context manager)
 """
 
@@ -50,6 +50,7 @@ from mlclient.responses import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
 from mlclient.services.invoke import AsyncInvokeService, InvokeService
+from mlclient.services.resources import AsyncResourcesService, ResourcesService
 from mlclient.services.search import AsyncSearchService, SearchService
 from mlclient.services.transactions import (
     AsyncTransactionService,
@@ -85,6 +86,7 @@ class MLClient:
       ``ml.search(database=...)`` narrows its scope
     - ``ml.eval.xquery("1+1")`` -- higher-level, parsed results
     - ``ml.invoke.module("/ext/report.xqy")`` -- invoke an installed module
+    - ``ml.resources.get("report", {"year": 2026})`` -- call a REST extension
     - ``ml.version`` -- complete MarkLogic version with four numeric parts
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
 
@@ -503,6 +505,24 @@ class MLClient:
         return InvokeService(self.rest)
 
     @cached_property
+    def resources(self) -> ResourcesService:
+        """Call resource service extensions (REST extensions) and parse their results.
+
+        Uses the primary REST connection, whose REST API instance has the
+        extensions installed. The service is cached per client, not the
+        results: every call sends a new request. Accessing this property alone
+        performs no network I/O. Call it, as in
+        ``ml.resources(database="catalog")``, for a service with a narrower
+        ServiceScope.
+
+        Returns
+        -------
+        ResourcesService
+            The connection-bound API or service object.
+        """
+        return ResourcesService(self.rest)
+
+    @cached_property
     def version(self) -> MarkLogicVersion:
         """Complete MarkLogic version with four unpackable numeric parts.
 
@@ -762,6 +782,7 @@ class AsyncMLClient:
       ``ml.search(database=...)`` narrows its scope
     - ``ml.eval.xquery("1+1")`` -- higher-level, parsed results
     - ``ml.invoke.module("/ext/report.xqy")`` -- invoke an installed module
+    - ``ml.resources.get("report", {"year": 2026})`` -- call a REST extension
     - ``await ml.version()`` -- complete MarkLogic version with four numeric parts
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
     """
@@ -1129,6 +1150,25 @@ class AsyncMLClient:
             The connection-bound API or service object.
         """
         return AsyncInvokeService(self.rest)
+
+    @cached_property
+    def resources(self) -> AsyncResourcesService:
+        """Call resource service extensions (REST extensions) and parse their results.
+
+        Uses the primary REST connection, whose REST API instance has the
+        extensions installed. The service is cached per client, not the
+        results: every call sends a new request. Accessing this property alone
+        performs no network I/O. Call it, as in
+        ``ml.resources(database="catalog")``, for a service with a narrower
+        ServiceScope. Access this property normally;
+        asynchronous methods run when awaited.
+
+        Returns
+        -------
+        AsyncResourcesService
+            The connection-bound API or service object.
+        """
+        return AsyncResourcesService(self.rest)
 
     async def version(self) -> MarkLogicVersion:
         """Complete MarkLogic version with four unpackable numeric parts.

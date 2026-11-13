@@ -86,6 +86,7 @@ nav:
       - Documents: guides/documents.md
       - Evaluate code: guides/eval.md
       - Invoke modules: guides/invoke.md
+      - REST extensions: guides/rest-extensions.md
       - Search: guides/search.md
       - Transactions: guides/transactions.md
       - Environments: guides/environments.md

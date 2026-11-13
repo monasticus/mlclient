@@ -25,6 +25,10 @@ URIS_VALUES_RESPONSE = resources_utils.get_test_resource_json(
     "uris-values-response.json",
 )
 VALUES_ERROR = resources_utils.get_test_resource_json(__file__, "values-error.json")
+RESOURCE_NOT_FOUND_ERROR = resources_utils.get_test_resource_json(
+    __file__,
+    "resource-not-found-error.json",
+)
 
 
 @pytest.fixture
@@ -427,3 +431,130 @@ def test_post_values():
 
     assert resp.status_code == httpx.codes.OK
     assert resp.json() == URIS_VALUES_RESPONSE
+
+
+ECHO_URL = "http://localhost:8000/v1/resources/mlclient-echo"
+
+
+@respx.mock
+def test_get_resource():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(ECHO_URL)
+    ml_mocker.with_request_param("rs:a", "x")
+    ml_mocker.with_request_param("rs:a", "y")
+    ml_mocker.with_request_param("rs:flag", "true")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_header("Content-Type", "application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        b'{"method":"get", "params":{"flag":"true", "a":["x", "y"]}}',
+    )
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.rest.resources.get(
+            "mlclient-echo",
+            params={"a": ["x", "y"], "flag": True},
+            accept="application/json",
+            database="Documents",
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json() == {"method": "get", "params": {"flag": "true", "a": ["x", "y"]}}
+
+
+@respx.mock
+def test_get_resource_of_an_unknown_extension():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/resources/mlclient-missing")
+    ml_mocker.with_response_code(500)
+    ml_mocker.with_response_body(RESOURCE_NOT_FOUND_ERROR)
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.rest.resources.get("mlclient-missing")
+
+    assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
+    assert resp.json() == RESOURCE_NOT_FOUND_ERROR
+
+
+@respx.mock
+def test_post_resource():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(ECHO_URL)
+    ml_mocker.with_request_param("rs:a", "x")
+    ml_mocker.with_request_param("txid", "12345")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"k": 1})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_header("Content-Type", "application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        b'{"method":"post", "input-count":1, "params":{"a":"x"}, '
+        b'"input-types":["application/json"]}',
+    )
+    ml_mocker.mock_post()
+
+    with MLClient() as ml:
+        resp = ml.rest.resources.post(
+            "mlclient-echo",
+            params={"a": "x"},
+            body={"k": 1},
+            txid="12345",
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["input-types"] == ["application/json"]
+
+
+@respx.mock
+def test_put_resource():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(ECHO_URL)
+    ml_mocker.with_request_param("rs:a", "x")
+    ml_mocker.with_request_content_type("application/xml")
+    ml_mocker.with_request_body("<a/>")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_header("Content-Type", "application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        b'{"method":"put", "input-count":1, "params":{"a":"x"}, '
+        b'"input-types":["application/xml"]}',
+    )
+    ml_mocker.mock_put()
+
+    with MLClient() as ml:
+        resp = ml.rest.resources.put(
+            "mlclient-echo",
+            params={"a": "x"},
+            body="<a/>",
+            content_type="application/xml",
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["input-types"] == ["application/xml"]
+
+
+def test_put_resource_str_body_without_content_type_is_rejected():
+    with MLClient() as ml, pytest.raises(WrongParametersError) as err:
+        ml.rest.resources.put("mlclient-echo", body="<a/>")
+
+    assert str(err.value) == "A str or bytes body requires a content_type!"
+
+
+@respx.mock
+def test_delete_resource():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(ECHO_URL)
+    ml_mocker.with_request_param("rs:a", "x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_header("Content-Type", "application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        b'{"method":"delete", "input-count":0, "params":{"a":"x"}, "input-types":[]}',
+    )
+    ml_mocker.mock_delete()
+
+    with MLClient() as ml:
+        resp = ml.rest.resources.delete("mlclient-echo", params={"a": "x"})
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["method"] == "delete"

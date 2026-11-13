@@ -1,4 +1,7 @@
-"""Shared base of the services that run code on MarkLogic (eval and invoke)."""
+"""Shared base of the services that run code on MarkLogic.
+
+Eval, invoke and resource extensions.
+"""
 
 from __future__ import annotations
 
@@ -20,11 +23,11 @@ ScopedService = TypeVar("ScopedService", bound="ExecutionService")
 class ExecutionService:
     """Base of the sync and async services that run code on MarkLogic.
 
-    Eval and invoke send code to different endpoints, but share the database
-    and transaction scope, the way external variables are combined and the
-    parsing of the multipart response, which both endpoints return in the
-    XDBC format. None of these perform I/O, so one base serves sync and async
-    services alike.
+    Eval, invoke and resource extensions use different endpoints, but share
+    the database and transaction scope and the parsing of the response into
+    Python values; eval and invoke also combine external variables the same
+    way. None of these perform I/O, so one base serves sync and async services
+    alike.
     """
 
     def __init__(

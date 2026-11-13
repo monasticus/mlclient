@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 from mlclient.api.documents import AsyncDocumentsApi, DocumentsApi
 from mlclient.api.eval import AsyncEvalApi, EvalApi
 from mlclient.api.invoke import AsyncInvokeApi, InvokeApi
+from mlclient.api.resources import AsyncResourcesApi, ResourcesApi
 from mlclient.api.search import AsyncSearchApi, SearchApi
 from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
 from mlclient.api.values import AsyncValuesApi, ValuesApi
@@ -27,7 +28,8 @@ from mlclient.api.values import AsyncValuesApi, ValuesApi
 class RestApi:
     """REST API group for /v1/* endpoints.
 
-    Eval, invoke, documents, search, values and transactions.
+    Eval, invoke, documents, search, values, transactions and resource
+    extensions.
 
     Requires a REST app server.
     """
@@ -151,11 +153,27 @@ class RestApi:
         """
         return TransactionsApi(self._api)
 
+    @cached_property
+    def resources(self) -> ResourcesApi:
+        """Access resource service extensions through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        ResourcesApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return ResourcesApi(self._api)
+
 
 class AsyncRestApi:
     """Async REST API group for /v1/* endpoints.
 
-    Eval, invoke, documents, search, values and transactions.
+    Eval, invoke, documents, search, values, transactions and resource
+    extensions.
     """
 
     def __init__(self, api: AsyncApiClient):
@@ -276,3 +294,18 @@ class AsyncRestApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return AsyncTransactionsApi(self._api)
+
+    @cached_property
+    def resources(self) -> AsyncResourcesApi:
+        """Access resource service extensions through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        AsyncResourcesApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return AsyncResourcesApi(self._api)

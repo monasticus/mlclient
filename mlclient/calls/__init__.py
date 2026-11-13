@@ -53,6 +53,12 @@ from mlclient.calls.hosts import (
     HostsGetCall,
 )
 from mlclient.calls.logs import LogsCall
+from mlclient.calls.resources import (
+    ResourceDeleteCall,
+    ResourceGetCall,
+    ResourcePostCall,
+    ResourcePutCall,
+)
 from mlclient.calls.roles import (
     RoleDeleteCall,
     RoleGetCall,
@@ -124,6 +130,10 @@ __all__ = [
     "InstanceAdminPostCall",
     "InvokeCall",
     "LogsCall",
+    "ResourceDeleteCall",
+    "ResourceGetCall",
+    "ResourcePostCall",
+    "ResourcePutCall",
     "RoleDeleteCall",
     "RoleGetCall",
     "RolePropertiesGetCall",

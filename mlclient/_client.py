@@ -393,9 +393,11 @@ class MLClient:
         ------
         MarkLogicError
             If the eval fails and the server is older than MarkLogic 11,
-            or its version cannot be determined
+            or its version cannot be determined, or the Management API
+            health check answers with an error MarkLogic described
         httpx.HTTPStatusError
             If the Management API health check answers with an error status
+            without a MarkLogic error body
         RequestError
             If a request fails at the HTTP transport level
         ValueError
@@ -678,6 +680,17 @@ class MLClient:
             Delay between readiness probes.
         retry : Retry | None
             Retry strategy for readiness probes.
+
+        Raises
+        ------
+        TimeoutError
+            If MarkLogic does not report readiness before ``timeout`` expires.
+        MarkLogicError
+            If a readiness probe answers a non-retryable error MarkLogic
+            described, chained from an MLClientError naming the host.
+        httpx.HTTPStatusError
+            If a readiness probe answers a non-retryable error status without a
+            MarkLogic error body, chained the same way.
         """
         waiter = self._get_restart_waiter()
         waiter.wait_for_restart_completion(
@@ -1016,9 +1029,11 @@ class AsyncMLClient:
         ------
         MarkLogicError
             If the eval fails and the server is older than MarkLogic 11,
-            or its version cannot be determined
+            or its version cannot be determined, or the Management API
+            health check answers with an error MarkLogic described
         httpx.HTTPStatusError
             If the Management API health check answers with an error status
+            without a MarkLogic error body
         RequestError
             If a request fails at the HTTP transport level
         ValueError
@@ -1304,6 +1319,17 @@ class AsyncMLClient:
             Delay between readiness probes.
         retry : Retry | None
             Retry strategy for readiness probes.
+
+        Raises
+        ------
+        TimeoutError
+            If MarkLogic does not report readiness before ``timeout`` expires.
+        MarkLogicError
+            If a readiness probe answers a non-retryable error MarkLogic
+            described, chained from an MLClientError naming the host.
+        httpx.HTTPStatusError
+            If a readiness probe answers a non-retryable error status without a
+            MarkLogic error body, chained the same way.
         """
         waiter = self._get_restart_waiter()
         await waiter.async_wait_for_restart_completion(
@@ -1391,8 +1417,16 @@ def _cluster_health_from_status(response: Response) -> ClusterHealth:
     The cluster is healthy when it is not starting, restarting or shutting
     down, has a quorum, and reports every server, background process and
     database healthy. Database entries carry ``healthy`` as a string.
+
+    Raises
+    ------
+    MarkLogicError
+        If the health check answers with an error MarkLogic described
+    httpx.HTTPStatusError
+        If the health check answers with an error status without a MarkLogic
+        error body
     """
-    response.raise_for_status()
+    MLResponseParser.raise_for_status(response)
     status = response.json()
     components = (
         status["serverHealthStatus"]

@@ -14,7 +14,9 @@ from httpx import AsyncClient, AsyncHTTPTransport, Response
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import _constants as const
+from mlclient.exceptions import MarkLogicError, MLClientError
 from mlclient.http import HTTPConfig
+from mlclient.responses import MLResponseParser
 
 logger = logging.getLogger(__name__)
 
@@ -110,8 +112,15 @@ class _RestartWaiter:
         TimeoutError
             If a recognized restart response is provided but MarkLogic does not
             report a new startup timestamp before ``timeout`` expires.
-        AssertionError
-            If the readiness probe does not return ``200 OK``.
+        MarkLogicError
+            If the readiness probe answers a non-retryable error MarkLogic
+            described. It is chained from an MLClientError naming the host.
+        httpx.HTTPStatusError
+            If the readiness probe answers a non-retryable error status without
+            a MarkLogic error body, chained the same way.
+        MLClientError
+            If the readiness probe answers a non-retryable success status other
+            than ``200 OK``.
         """
         restart_timestamps = self._get_last_startup_by_host(response)
         self._run_async(
@@ -487,7 +496,7 @@ class _RestartWaiter:
             ):
                 return current_timestamp
         elif not retry.is_retryable_status_code(response.status_code):
-            self._raise_unexpected_timestamp_status(host, response.status_code)
+            self._raise_unexpected_timestamp_status(host, response)
 
         self._raise_wait_timeout_if_needed(
             host,
@@ -573,11 +582,19 @@ class _RestartWaiter:
     @staticmethod
     def _raise_unexpected_timestamp_status(
         host: str,
-        status_code: int,
+        response: Response,
     ) -> NoReturn:
-        """Raise when the timestamp endpoint returns a non-retryable status."""
-        msg = (
-            "Expected /admin/v1/timestamp to return 200 OK, "
-            f"got {status_code} for host [{host}]."
+        """Raise the server's answer to a non-retryable timestamp probe.
+
+        The server's error is chained from an MLClientError naming the host,
+        so the traceback shows both the answer and what was being waited for.
+        """
+        waiting_for = MLClientError(
+            f"While waiting for MarkLogic host [{host}] to restart, "
+            f"/admin/v1/timestamp answered {response.status_code} instead of 200 OK.",
         )
-        raise AssertionError(msg)
+        try:
+            MLResponseParser.raise_for_status(response)
+        except (MarkLogicError, httpx.HTTPStatusError) as error:
+            raise error from waiting_for
+        raise waiting_for

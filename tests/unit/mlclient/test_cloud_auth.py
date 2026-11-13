@@ -5,6 +5,7 @@ import pytest
 import respx
 
 from mlclient.auth import MarkLogicCloudAuth
+from mlclient.exceptions import MarkLogicError
 
 BASE_URL = "https://example.marklogic.cloud"
 TOKEN_URL = f"{BASE_URL}/token"
@@ -129,3 +130,28 @@ async def test_async_token_refreshed_on_401():
 
     assert token_route.call_count == 2
     assert response.request.headers["Authorization"] == "Bearer tok-2"
+
+
+@respx.mock
+def test_token_fetch_rejected_with_a_marklogic_error_raises_it():
+    """A synthetic token-endpoint rejection in the MarkLogic error format."""
+    respx.post(TOKEN_URL).mock(
+        return_value=httpx.Response(
+            401,
+            json={
+                "errorResponse": {
+                    "statusCode": 401,
+                    "status": "Unauthorized",
+                    "message": "Invalid API key",
+                },
+            },
+        ),
+    )
+
+    with (
+        httpx.Client(auth=_cloud_auth()) as client,
+        pytest.raises(MarkLogicError) as raised,
+    ):
+        client.get(RESOURCE_URL)
+
+    assert str(raised.value) == "[401 Unauthorized] Invalid API key"

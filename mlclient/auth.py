@@ -43,6 +43,8 @@ from urllib.parse import urljoin
 import httpx
 from pydantic import BaseModel
 
+from mlclient.responses import MLResponseParser
+
 _TokenVerify = Union[bool, str, ssl.SSLContext]
 
 logger = logging.getLogger(__name__)
@@ -316,8 +318,17 @@ class MarkLogicCloudAuth(httpx.Auth):
     def _access_token(
         response: httpx.Response,
     ) -> str:
-        """Return the access token from a token-exchange response."""
-        response.raise_for_status()
+        """Return the access token from a token-exchange response.
+
+        Raises
+        ------
+        MarkLogicError
+            If the token exchange answers with an error MarkLogic described
+        httpx.HTTPStatusError
+            If the token exchange answers with an error status without a
+            MarkLogic error body
+        """
+        MLResponseParser.raise_for_status(response)
         return response.json()["access_token"]
 
 

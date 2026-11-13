@@ -12,6 +12,7 @@ from pytest_mock import MockerFixture
 from mlclient.clients._restart import _RestartWaiter
 from mlclient.clients.http import _RESTART_RETRY_STRATEGY
 from mlclient.connection import MARKLOGIC_ADMIN_PORT, MARKLOGIC_MANAGE_PORT
+from mlclient.exceptions import MarkLogicError, MLClientError
 from mlclient.http import HTTPConfig
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -452,22 +453,96 @@ def test_wait_for_restart_completion_falls_back_when_hosts_endpoint_unavailable(
 
 
 @respx.mock
-def test_wait_for_restart_completion_raises_on_non_retryable_admin_status(
+def test_wait_for_restart_completion_raises_described_admin_error(
     waiter: _RestartWaiter,
     ml_mocker: MLRespXMocker,
 ):
     ml_mocker.with_url(_admin_timestamp_url())
-    ml_mocker.with_response_code(418)
-    ml_mocker.with_empty_response_body()
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        {
+            "errorResponse": {
+                "statusCode": "403",
+                "status": "Forbidden",
+                "messageCode": "SEC-PRIV",
+                "message": "SEC-PRIV: Need privilege: "
+                "http://marklogic.com/xdmp/privileges/manage",
+            },
+        },
+    )
     ml_mocker.mock_get()
 
-    with pytest.raises(AssertionError, match="got 418"):
+    with pytest.raises(MarkLogicError) as raised:
         waiter.wait_for_restart_completion(
             response=None,
             timeout=FAST_TIMEOUT,
             poll_interval=FAST_POLL_INTERVAL,
             retry=_RESTART_RETRY_STRATEGY,
         )
+
+    assert raised.value.message_code == "SEC-PRIV"
+    assert str(raised.value) == (
+        "[403 Forbidden] (SEC-PRIV) SEC-PRIV: Need privilege: "
+        "http://marklogic.com/xdmp/privileges/manage"
+    )
+    assert isinstance(raised.value.__cause__, MLClientError)
+    assert str(raised.value.__cause__) == (
+        "While waiting for MarkLogic host [localhost] to restart, "
+        "/admin/v1/timestamp answered 403 instead of 200 OK."
+    )
+
+
+@respx.mock
+def test_wait_for_restart_completion_raises_undescribed_admin_error(
+    waiter: _RestartWaiter,
+    ml_mocker: MLRespXMocker,
+):
+    ml_mocker.with_url(_admin_timestamp_url())
+    ml_mocker.with_response_code(401)
+    ml_mocker.with_response_content_type("text/html; charset=utf-8")
+    ml_mocker.with_response_body(
+        "<html><head><title>401 Unauthorized</title></head>"
+        "<body><h1>401 Unauthorized</h1></body></html>",
+    )
+    ml_mocker.mock_get()
+
+    with pytest.raises(httpx.HTTPStatusError, match="401 Unauthorized") as raised:
+        waiter.wait_for_restart_completion(
+            response=None,
+            timeout=FAST_TIMEOUT,
+            poll_interval=FAST_POLL_INTERVAL,
+            retry=_RESTART_RETRY_STRATEGY,
+        )
+
+    assert str(raised.value.__cause__) == (
+        "While waiting for MarkLogic host [localhost] to restart, "
+        "/admin/v1/timestamp answered 401 instead of 200 OK."
+    )
+
+
+@respx.mock
+def test_wait_for_restart_completion_raises_on_unexpected_admin_success_status(
+    waiter: _RestartWaiter,
+    ml_mocker: MLRespXMocker,
+):
+    ml_mocker.with_url(_admin_timestamp_url())
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+
+    with pytest.raises(MLClientError) as raised:
+        waiter.wait_for_restart_completion(
+            response=None,
+            timeout=FAST_TIMEOUT,
+            poll_interval=FAST_POLL_INTERVAL,
+            retry=_RESTART_RETRY_STRATEGY,
+        )
+
+    assert str(raised.value) == (
+        "While waiting for MarkLogic host [localhost] to restart, "
+        "/admin/v1/timestamp answered 204 instead of 200 OK."
+    )
 
 
 @respx.mock

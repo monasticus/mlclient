@@ -38,6 +38,16 @@ HEALTHY_CLUSTER_STATUS = {
     "databaseHealthStatus": [{"databaseId": "4444444444444444444", "healthy": "true"}],
 }
 
+MANAGE_PRIVILEGE_ERROR = {
+    "errorResponse": {
+        "statusCode": "403",
+        "status": "Forbidden",
+        "messageCode": "SEC-PRIV",
+        "message": "SEC-PRIV: Need privilege: "
+        "http://marklogic.com/xdmp/privileges/manage",
+    },
+}
+
 
 def test_properties_delegate_to_http_client():
     ml = MLClient(
@@ -847,6 +857,31 @@ def test_cluster_healthcheck_raises_when_manage_status_is_forbidden_too():
 
     with MLClient() as ml, pytest.raises(httpx.HTTPStatusError):
         ml.cluster_healthcheck()
+
+
+@respx.mock
+def test_cluster_healthcheck_raises_marklogic_error_from_manage_status():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"version": "12.1.0"})
+    ml_mocker.mock_get()
+    ml_mocker.with_url(CLUSTER_STATUS_URL)
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(MANAGE_PRIVILEGE_ERROR)
+    ml_mocker.mock_get()
+
+    with MLClient() as ml, pytest.raises(MarkLogicError) as raised:
+        ml.cluster_healthcheck()
+
+    assert raised.value.message_code == "SEC-PRIV"
 
 
 @pytest.mark.parametrize("port", [8000, 7997])

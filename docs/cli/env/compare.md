@@ -42,17 +42,17 @@ exist fails, listing the available names.
 
 Read `.mlclient` in your home directory instead of searching the project.
 
-### `--exclude`, `-e`
+### `--exclude`, `-x`
 
 Leave an environment out of the comparison. Repeatable, and most useful without
-`names`: `ml env compare -e local` compares every environment except `local`.
+`names`: `ml env compare -x local` compares every environment except `local`.
 
 ### `--secrets`, `-s`
 
 Reveal secrets in the table. Without this option, passwords, OAuth tokens, API
 keys and TLS key passwords are masked, including values inside mappings.
 
-### `--defaults`, `-d`
+### `--defaults`, `-D`
 
 Keep a setting even when every environment leaves it to the same default, and
 render the always-present platform app servers.

@@ -2,7 +2,7 @@
 
 It exports an implementation for 'env show' command:
     * EnvShowCommand
-        Lists MLClient environments, or renders one environment's settings.
+        Renders one MLClient environment's settings.
 """
 
 from __future__ import annotations
@@ -24,7 +24,6 @@ from mlclient.cli.commands._env_common import (
     announce_source,
     display_value,
     effective_config,
-    env_names,
     header,
     is_secret,
     key,
@@ -50,45 +49,37 @@ _PREDEFINED_SERVERS = {
 class EnvShowCommand(Command):
     """Command reading .mlclient environment files.
 
-    With no name it lists the environments found in the .mlclient directory;
-    with a name it renders that environment's settings as a table, with the app
-    servers in a second table, masking secrets. A second argument narrows the
-    view to a single root setting (its value is printed) or a single app server
-    (rendered as a key/value table). ``--global`` reads the home directory
-    instead of the current one.
+    Renders the settings of one environment (``local`` unless ``-e`` names
+    another) as a table, with the app servers in a second table, masking
+    secrets. The optional argument narrows the view to a single root setting
+    (its value is printed) or a single app server (rendered as a key/value
+    table). ``--global`` reads the home directory instead of the current one.
 
     Usage:
-      env show [options] [--] [<name>] [<setting>]
+      env show [options] [--] [<setting>]
 
     Arguments:
-      name
-            The environment name. Omit to list the available environments.
       setting
             A root setting name (host, protocol, ...) or an app server id.
 
     Options:
+      -e, --environment=ENVIRONMENT
+            The ML Client environment name [default: "local"]
       -g, --global
             Read from the home directory instead of the current directory
           --raw
             Print the raw configuration file instead of a rendered table
       -s, --secrets
             Reveal secret values instead of masking them
-      -d, --defaults
+      -D, --defaults
             Fill in inherited defaults and the always-present app servers
-      -c, --copy
+          --copy
             Copy a simple setting value to the clipboard, including secrets
     """
 
     name: str = "env show"
-    description: str = (
-        "Lists MLClient environments, or renders one environment's settings"
-    )
+    description: str = "Renders one MLClient environment's settings"
     arguments: list[Argument] = [
-        argument(
-            "name",
-            "The environment name. Omit to list the available environments.",
-            optional=True,
-        ),
         argument(
             "setting",
             "A root setting name (host, protocol, ...) or an app server id.",
@@ -96,6 +87,13 @@ class EnvShowCommand(Command):
         ),
     ]
     options: list[Option] = [
+        option(
+            "environment",
+            "e",
+            description="The ML Client environment name",
+            flag=False,
+            default="local",
+        ),
         option(
             "global",
             "g",
@@ -112,14 +110,13 @@ class EnvShowCommand(Command):
         ),
         option(
             "defaults",
-            "d",
+            "D",
             description=(
                 "Fill in inherited defaults and the always-present app servers"
             ),
         ),
         option(
             "copy",
-            "c",
             description=(
                 "Copy a simple setting value to the clipboard, including secrets"
             ),
@@ -130,8 +127,7 @@ class EnvShowCommand(Command):
         self,
     ) -> int:
         """Execute the command."""
-        name = self.argument("name")
-        status = self._show(name) if name else self._list()
+        status = self._show(self.option("environment"))
         if self.option("copy") and (not self.argument("setting") or self.option("raw")):
             self.line_error(
                 "--copy only works for individual settings without --raw; "
@@ -139,21 +135,6 @@ class EnvShowCommand(Command):
                 style="fg=yellow;options=dark",
             )
         return status
-
-    def _list(
-        self,
-    ) -> int:
-        """Print the environment names found in the .mlclient directory."""
-        directory = resolve_env_dir(self)
-        names = env_names(directory)
-        if not names:
-            directory_name = Formatter.escape(str(directory))
-            self.line(f"No environments found in <info>{directory_name}</info>")
-            return 0
-        announce_source(self, directory, directory)
-        for name in names:
-            self.line(Formatter.escape(name))
-        return 0
 
     def _show(
         self,

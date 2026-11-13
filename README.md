@@ -90,7 +90,8 @@ Import Gradle settings, check health and version, then open Query Console.
 
 ```sh
 ml env init                               # Create and review project configuration
-ml env show                               # Inspect environments
+ml env list                               # List environments
+ml env show                               # Inspect the local environment
 ml env copy local dev                     # Copy a configuration
 ml env edit dev                           # Edit it locally
 ml env compare local dev                  # Compare inherited settings

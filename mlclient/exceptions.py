@@ -122,7 +122,8 @@ class MarkLogicError(MLClientError):
     Attributes
     ----------
     status_code : int | None
-        The HTTP status code MarkLogic reported, e.g. ``404``
+        The HTTP status code MarkLogic reported, e.g. ``404``; the Management
+        API reports it as a string, which is converted
     status : str | None
         The HTTP status text MarkLogic reported, e.g. ``"Not Found"``
     message_code : str | None
@@ -167,17 +168,18 @@ class MarkLogicError(MLClientError):
         self.message: str | None = None
         if isinstance(error, dict):
             error = error.get("errorResponse", error)
-            self.status_code = error.get("statusCode")
+            status_code = error.get("statusCode")
+            self.status_code = int(status_code) if str(status_code).isdigit() else None
             self.status = error.get("status")
             self.message_code = error.get("messageCode")
             self.message = error.get("message")
             if self.message_code:
                 error_msg = (
-                    f"[{self.status_code} {self.status}] "
+                    f"[{status_code} {self.status}] "
                     f"({self.message_code}) {self.message}"
                 )
             else:
-                error_msg = f"[{self.status_code} {self.status}] {self.message}"
+                error_msg = f"[{status_code} {self.status}] {self.message}"
         else:
             error_msg = error
         super().__init__(error_msg)

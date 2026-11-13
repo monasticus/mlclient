@@ -9,7 +9,7 @@ import pytest
 import respx
 
 from mlclient import MLClient
-from mlclient.exceptions import MarkLogicError
+from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.models import (
     BinaryDocument,
     Category,
@@ -1187,6 +1187,76 @@ def test_read_forwards_txid(ml):
     ml.documents.read(uri, txid="txn-123")
 
 
+@respx.mock
+def test_read_forwards_transform_and_timestamp(ml):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("transform", "tag")
+    mocker.with_request_param("trans:tag", "x")
+    mocker.with_request_param("timestamp", "17945705371973500")
+    mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+    doc = ml.documents.read(
+        uri,
+        transform="tag",
+        transform_params={"tag": "x"},
+        timestamp="17945705371973500",
+    )
+
+    assert doc.uri == uri
+
+
+def test_read_rejects_timestamp_with_txid(ml):
+    with pytest.raises(WrongParametersError) as err:
+        ml.documents.read(
+            "/some/dir/doc1.xml",
+            timestamp="17945705371973500",
+            txid="txn-123",
+        )
+
+    expected_msg = "timestamp cannot be combined with txid"
+    assert str(err.value) == expected_msg
+
+
+def test_read_rejects_timestamp_with_scoped_txid(ml):
+    documents = ml.documents(txid="txn-123")
+
+    with pytest.raises(WrongParametersError) as err:
+        documents.read("/some/dir/doc1.xml", timestamp="17945705371973500")
+
+    expected_msg = "timestamp cannot be combined with txid"
+    assert str(err.value) == expected_msg
+
+
+@respx.mock
+def test_read_accepts_timestamp_when_scoped_txid_is_cleared(ml):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("timestamp", "17945705371973500")
+    mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+    documents = ml.documents(txid="txn-123")
+    doc = documents.read(uri, timestamp="17945705371973500", txid=None)
+
+    assert doc.uri == uri
+
+
+def test_read_rejects_transform_params_without_transform(ml):
+    with pytest.raises(WrongParametersError) as err:
+        ml.documents.read("/some/dir/doc1.xml", transform_params={"tag": "x"})
+
+    expected_msg = "transform_params require transform"
+    assert str(err.value) == expected_msg
+
+
 @ml_mocker.router
 def test_create_xml_document_from_bytes(ml):
     uri = "/some/dir/doc1.xml"
@@ -1697,6 +1767,49 @@ def test_create_document_with_temporal_collection(ml):
 
 
 @respx.mock
+def test_write_forwards_transform_and_system_time(ml):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("transform", "tag")
+    mocker.with_request_param("trans:tag", "w")
+    mocker.with_request_param("temporal-collection", "temporal-collection")
+    mocker.with_request_param("system-time", "2026-11-13T00:00:00Z")
+    mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+
+    resp = ml.documents.write(
+        doc,
+        transform="tag",
+        transform_params={"tag": "w"},
+        temporal_collection="temporal-collection",
+        system_time="2026-11-13T00:00:00Z",
+    )
+
+    assert resp["documents"][0]["uri"] == "/some/dir/doc1.xml"
+
+
+def test_write_rejects_system_time_without_temporal_collection(ml):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    with pytest.raises(WrongParametersError) as err:
+        ml.documents.write(doc, system_time="2026-11-13T00:00:00Z")
+
+    expected_msg = "system_time requires temporal_collection"
+    assert str(err.value) == expected_msg
+
+
+def test_write_rejects_transform_params_without_transform(ml):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    with pytest.raises(WrongParametersError) as err:
+        ml.documents.write(doc, transform_params={"tag": "w"})
+
+    expected_msg = "transform_params require transform"
+    assert str(err.value) == expected_msg
+
+
+@respx.mock
 def test_delete_preserves_bodyless_http_failure(ml):
     route = respx.delete(
         "http://localhost:8000/v1/documents",
@@ -2014,6 +2127,44 @@ def test_read_stream_many_uris_are_batched(ml):
 
     assert len(docs) == 2000
     assert ml_mocker.router.calls.call_count > 1
+
+
+@ml_mocker.router
+def test_read_stream_sends_transform_and_timestamp_with_every_batch(ml):
+    uris = [f"/some/dir/doc{i:04d}.xml" for i in range(2000)]
+    with ml_doc_mocker.scoped():
+        ml_doc_mocker.mock_document(*(test_data.xml_doc_body_part(uri) for uri in uris))
+
+        docs = list(
+            ml.documents.read_stream(
+                uris,
+                transform="tag",
+                transform_params={"tag": "x"},
+                timestamp="17945705371973500",
+            ),
+        )
+
+    assert len(docs) == 2000
+    assert ml_mocker.router.calls.call_count > 1
+    for call in ml_mocker.router.calls:
+        params = call.request.url.params
+        assert params["timestamp"] == "17945705371973500"
+        assert params["transform"] == "tag"
+        assert params["trans:tag"] == "x"
+
+
+def test_read_stream_rejects_timestamp_with_txid(ml):
+    stream = ml.documents.read_stream(
+        ["/some/dir/doc1.xml"],
+        timestamp="17945705371973500",
+        txid="txn-123",
+    )
+
+    with pytest.raises(WrongParametersError) as err:
+        next(stream)
+
+    expected_msg = "timestamp cannot be combined with txid"
+    assert str(err.value) == expected_msg
 
 
 @ml_mocker.router

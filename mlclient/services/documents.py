@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from mlclient import _constants as constants
 from mlclient._options import UNSET
+from mlclient.exceptions import WrongParametersError
 
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
@@ -116,8 +117,11 @@ class DocumentsService:
         self,
         data: Document | Metadata | list[Document | Metadata],
         *,
+        transform: str | None = None,
+        transform_params: dict | None = None,
         database: str | None = UNSET,
         temporal_collection: str | None = None,
+        system_time: str | None = None,
         txid: str | None = UNSET,
         timeout=UNSET,
     ) -> dict:
@@ -127,10 +131,19 @@ class DocumentsService:
         ----------
         data : Document | Metadata | list[Document | Metadata]
             One or more document or default metadata.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content parts only and stores its output.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
+        system_time : str | None, default None
+            System start time (an ISO 8601 dateTime) overriding the one set by
+            MarkLogic; requires temporal_collection and the
+            ``temporal-statement-set-system-time`` privilege.
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
@@ -153,15 +166,27 @@ class DocumentsService:
             configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If system_time is given without temporal_collection, or
+            transform_params without transform.
         """
+        _validate_write_params(
+            transform=transform,
+            transform_params=transform_params,
+            temporal_collection=temporal_collection,
+            system_time=system_time,
+        )
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
         body_parts = _DocumentsSender.parse(data)
         resp = self._rest.documents.post(
             body_parts,
             database=params["database"],
-            temporal_collection=temporal_collection,
+            transform=transform,
+            transform_params=transform_params,
             txid=params["txid"],
+            temporal_collection=temporal_collection,
+            system_time=system_time,
             timeout=timeout,
         )
         return MLResponseParser.parse(resp)
@@ -171,6 +196,9 @@ class DocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
         timeout=UNSET,
@@ -186,6 +214,18 @@ class DocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -210,10 +250,16 @@ class DocumentsService:
             configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
         """
         docs = self.read_stream(
             uris,
             category=category,
+            transform=transform,
+            transform_params=transform_params,
+            timestamp=timestamp,
             database=database,
             txid=txid,
             timeout=timeout,
@@ -225,6 +271,9 @@ class DocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
         timeout=UNSET,
@@ -241,6 +290,18 @@ class DocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -265,9 +326,19 @@ class DocumentsService:
             configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
+            Raised when iteration starts, before any request.
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
+        _validate_read_params(
+            transform=transform,
+            transform_params=transform_params,
+            timestamp=timestamp,
+            txid=params["txid"],
+        )
         category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = self._rest.documents.get(
@@ -275,6 +346,9 @@ class DocumentsService:
                 category=category,
                 database=params["database"],
                 data_format="json",
+                timestamp=timestamp,
+                transform=transform,
+                transform_params=transform_params,
                 txid=params["txid"],
                 timeout=timeout,
             )
@@ -469,8 +543,11 @@ class AsyncDocumentsService:
         self,
         data: Document | Metadata | list[Document | Metadata],
         *,
+        transform: str | None = None,
+        transform_params: dict | None = None,
         database: str | None = UNSET,
         temporal_collection: str | None = None,
+        system_time: str | None = None,
         txid: str | None = UNSET,
         timeout=UNSET,
     ) -> dict:
@@ -480,10 +557,19 @@ class AsyncDocumentsService:
         ----------
         data : Document | Metadata | list[Document | Metadata]
             One or more document or default metadata.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content parts only and stores its output.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
+        system_time : str | None, default None
+            System start time (an ISO 8601 dateTime) overriding the one set by
+            MarkLogic; requires temporal_collection and the
+            ``temporal-statement-set-system-time`` privilege.
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
@@ -506,15 +592,27 @@ class AsyncDocumentsService:
             configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If system_time is given without temporal_collection, or
+            transform_params without transform.
         """
+        _validate_write_params(
+            transform=transform,
+            transform_params=transform_params,
+            temporal_collection=temporal_collection,
+            system_time=system_time,
+        )
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
         body_parts = _DocumentsSender.parse(data)
         resp = await self._rest.documents.post(
             body_parts,
             database=params["database"],
-            temporal_collection=temporal_collection,
+            transform=transform,
+            transform_params=transform_params,
             txid=params["txid"],
+            temporal_collection=temporal_collection,
+            system_time=system_time,
             timeout=timeout,
         )
         return MLResponseParser.parse(resp)
@@ -524,6 +622,9 @@ class AsyncDocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
         timeout=UNSET,
@@ -539,6 +640,18 @@ class AsyncDocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -563,10 +676,16 @@ class AsyncDocumentsService:
             configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
         """
         stream = self.read_stream(
             uris,
             category=category,
+            transform=transform,
+            transform_params=transform_params,
+            timestamp=timestamp,
             database=database,
             txid=txid,
             timeout=timeout,
@@ -580,6 +699,9 @@ class AsyncDocumentsService:
         uris: str | list[str] | tuple[str] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | None = UNSET,
         txid: str | None = UNSET,
         timeout=UNSET,
@@ -596,6 +718,18 @@ class AsyncDocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -620,9 +754,19 @@ class AsyncDocumentsService:
             configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
+            Raised when iteration starts, before any request.
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
+        _validate_read_params(
+            transform=transform,
+            transform_params=transform_params,
+            timestamp=timestamp,
+            txid=params["txid"],
+        )
         category = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = await self._rest.documents.get(
@@ -630,6 +774,9 @@ class AsyncDocumentsService:
                 category=category,
                 database=params["database"],
                 data_format="json",
+                timestamp=timestamp,
+                transform=transform,
+                transform_params=transform_params,
                 txid=params["txid"],
                 timeout=timeout,
             )
@@ -698,3 +845,61 @@ class AsyncDocumentsService:
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
+
+
+def _validate_read_params(
+    *,
+    transform: str | None,
+    transform_params: dict | None,
+    timestamp: str | None,
+    txid: str | None,
+):
+    """Reject read parameters that MarkLogic cannot combine.
+
+    A point-in-time read inside a transaction fails on the server with a 500
+    ``XDMP-UPDATETIMESTAMP`` error, so it is rejected before any request.
+
+    Raises
+    ------
+    WrongParametersError
+        If timestamp is combined with txid, or transform_params are given
+        without transform.
+    """
+    if timestamp is not None and txid is not None:
+        msg = "timestamp cannot be combined with txid"
+        raise WrongParametersError(msg)
+    _validate_transform_params(transform, transform_params)
+
+
+def _validate_write_params(
+    *,
+    transform: str | None,
+    transform_params: dict | None,
+    temporal_collection: str | None,
+    system_time: str | None,
+):
+    """Reject write parameters that MarkLogic would ignore.
+
+    Raises
+    ------
+    WrongParametersError
+        If system_time is given without temporal_collection, or
+        transform_params without transform.
+    """
+    if system_time is not None and temporal_collection is None:
+        msg = "system_time requires temporal_collection"
+        raise WrongParametersError(msg)
+    _validate_transform_params(transform, transform_params)
+
+
+def _validate_transform_params(transform: str | None, transform_params: dict | None):
+    """Reject transform parameters sent without a transform to receive them.
+
+    Raises
+    ------
+    WrongParametersError
+        If transform_params are given without transform.
+    """
+    if transform_params and transform is None:
+        msg = "transform_params require transform"
+        raise WrongParametersError(msg)

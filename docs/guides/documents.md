@@ -8,7 +8,9 @@ bodies.
 
 Every operation accepts one URI or many, an optional `database`, and a `txid`
 to run inside a [transaction](transactions.md). `read` and `write` also carry
-metadata; `write` and `delete` also handle temporal collections.
+metadata and apply [content transforms](#transforms); `read` can read
+[at a point in time](#point-in-time-reads); `write` and `delete` also handle
+temporal collections.
 
 Before the operations, two models are worth knowing: [`Document`][mlclient.models.Document] (what `read`
 returns and `write` accepts) and [`Metadata`][mlclient.models.Metadata].
@@ -371,6 +373,55 @@ removed or reset to their defaults:
 ...     ml.documents.delete("/doc-1.xml", database="Documents")
 ```
 
+## Transforms
+
+`read`, `read_stream` and `write` take `transform` - the name of a transform
+installed through `/v1/config/transforms` - and `transform_params`, a `dict`
+sent as `trans:{name}` request parameters. MarkLogic applies the transform to
+content only: on `read` every returned document is transformed while metadata
+comes back unchanged, and on `write` the transformed content is what gets
+stored. `transform_params` without `transform` raises `WrongParametersError`
+before any request.
+
+```python
+>>> with MLClient() as ml:
+...     doc = ml.documents.read(
+...         "/doc-1.xml",
+...         transform="add-tag",
+...         transform_params={"tag": "reviewed"},
+...     )
+...     ml.documents.write(doc, transform="add-tag", transform_params={"tag": "stored"})
+```
+
+## Point-in-time reads
+
+`read` and `read_stream` take `timestamp` to read documents as they were at an
+earlier point in time. Pass the `ML-Effective-Timestamp` of an earlier response,
+for example a search report's `effective_timestamp`, to read the documents a
+search found from the same snapshot even while other requests update them:
+
+```python
+>>> with MLClient() as ml:
+...     report = ml.search().report("coffee", pos=[1, 100])
+...     uris = [result["uri"] for result in report.results]
+...     docs = ml.documents.read(uris, timestamp=report.effective_timestamp)
+```
+
+The same `timestamp` goes to every request of the operation, so a long URI list
+split into several batches is still read from one snapshot. Without
+`timestamp` each batch reads the latest state; the service does not pin a
+snapshot on its own.
+
+- The server must still retain that version. Once a merge removes it, the read
+  fails with `XDMP-OLDSTAMP` - keep old versions with the database's merge
+  timestamp when a snapshot has to outlive merges.
+- A point-in-time read cannot run inside a transaction: `timestamp` together with
+  a `txid` (passed or inherited from the service scope) raises
+  `WrongParametersError` before any request.
+- The timestamp applies to the REST server's default content database. MarkLogic
+  12.1 ignores it when `database` names another database and returns the latest
+  state.
+
 ## Temporal documents
 
 `write` and `delete` take `temporal_collection` to operate on a
@@ -382,6 +433,22 @@ removed or reset to their defaults:
 >>> doc = Document.create("/doc-1.xml", "<root><child>data</child></root>")
 >>> with MLClient() as ml:
 ...     ml.documents.write(doc, temporal_collection="temporal-collection")
+```
+
+### Set the system time
+
+`system_time` (an ISO 8601 dateTime) overrides the system start time MarkLogic
+would set for the insert or update. It requires `temporal_collection` - MarkLogic
+ignores it otherwise, so the service raises `WrongParametersError` - and the
+`temporal-statement-set-system-time` privilege.
+
+```python
+>>> with MLClient() as ml:
+...     ml.documents.write(
+...         doc,
+...         temporal_collection="temporal-collection",
+...         system_time="2026-01-01T00:00:00Z",
+...     )
 ```
 
 ### Delete (close) a temporal document

@@ -53,9 +53,10 @@ the last value wins.
 ml http get /v1/documents uri=/one.xml uri=/two.xml Accept:application/xml
 ```
 
-MarkLogic-prefixed parameters such as `rs:name=value` and `trans:mode=draft`
-are query parameters. Other tokens are split at their first `=` or `:`, so a
-header value may contain `=`.
+MarkLogic parameter names with a colon are query parameters when the token
+contains `=`: `rs:`, `trans:`, `perm:`, `prop:`, `value:`, `bind:` and the
+extension method declarations `get:`, `put:`, `post:` and `delete:`. Every other
+token is split at its first `=` or `:`, so a header value may contain `=`.
 
 ```sh
 ml http get /v1/resources/my-extension rs:name=value

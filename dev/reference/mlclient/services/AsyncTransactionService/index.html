@@ -14683,6 +14683,8 @@
       
         
       
+        
+      
     
     
     
@@ -14878,6 +14880,34 @@
     
   
     MLClientEnvironmentNotFoundError
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exceptions/MLClientError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MLClientError
   
 
     
@@ -15940,23 +15970,23 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/services/transactions.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-225">225</a></span>
-<span class="normal"><a href="#__codelineno-0-226">226</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-226">226</a></span>
 <span class="normal"><a href="#__codelineno-0-227">227</a></span>
 <span class="normal"><a href="#__codelineno-0-228">228</a></span>
 <span class="normal"><a href="#__codelineno-0-229">229</a></span>
 <span class="normal"><a href="#__codelineno-0-230">230</a></span>
 <span class="normal"><a href="#__codelineno-0-231">231</a></span>
 <span class="normal"><a href="#__codelineno-0-232">232</a></span>
-<span class="normal"><a href="#__codelineno-0-233">233</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-225" name="__codelineno-0-225"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-226" name="__codelineno-0-226"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="n">api</span><span class="p">:</span> <span class="n">AsyncTransactionsApi</span><span class="p">,</span>
-<a id="__codelineno-0-228" name="__codelineno-0-228"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-229" name="__codelineno-0-229"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="p">):</span>
-<a id="__codelineno-0-231" name="__codelineno-0-231"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_api</span> <span class="o">=</span> <span class="n">api</span>
-<a id="__codelineno-0-232" name="__codelineno-0-232"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_txid</span> <span class="o">=</span> <span class="n">txid</span>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_database</span> <span class="o">=</span> <span class="n">database</span>
+<span class="normal"><a href="#__codelineno-0-233">233</a></span>
+<span class="normal"><a href="#__codelineno-0-234">234</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-226" name="__codelineno-0-226"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a>    <span class="n">api</span><span class="p">:</span> <span class="n">AsyncTransactionsApi</span><span class="p">,</span>
+<a id="__codelineno-0-229" name="__codelineno-0-229"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-230" name="__codelineno-0-230"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="p">):</span>
+<a id="__codelineno-0-232" name="__codelineno-0-232"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_api</span> <span class="o">=</span> <span class="n">api</span>
+<a id="__codelineno-0-233" name="__codelineno-0-233"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_txid</span> <span class="o">=</span> <span class="n">txid</span>
+<a id="__codelineno-0-234" name="__codelineno-0-234"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_database</span> <span class="o">=</span> <span class="n">database</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16460,8 +16490,7 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/transactions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-261">261</a></span>
-<span class="normal"><a href="#__codelineno-0-262">262</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-262">262</a></span>
 <span class="normal"><a href="#__codelineno-0-263">263</a></span>
 <span class="normal"><a href="#__codelineno-0-264">264</a></span>
 <span class="normal"><a href="#__codelineno-0-265">265</a></span>
@@ -16493,39 +16522,38 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-291">291</a></span>
 <span class="normal"><a href="#__codelineno-0-292">292</a></span>
 <span class="normal"><a href="#__codelineno-0-293">293</a></span>
-<span class="normal"><a href="#__codelineno-0-294">294</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">):</span>
-<a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the status of the transaction.</span>
-<a id="__codelineno-0-263" name="__codelineno-0-263"></a>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">    data_format : str, default &quot;json&quot;</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">        The format of the returned status; either json or xml</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">        A per-request HTTP timeout for the status request. Unset uses the</span>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">        client&#39;s configured timeout; None disables every HTTP timeout; a</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">        number sets all four components to that many seconds; an</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">        httpx.Timeout overrides them. This bounds the HTTP request only and</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">        is unrelated to the transaction&#39;s server-side time_limit.</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    The parsed transaction status</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_txid</span><span class="p">,</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>        <span class="n">database</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="p">,</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="p">)</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">):</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the status of the transaction.</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">    data_format : str, default &quot;json&quot;</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">        The format of the returned status; either json or xml</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">        A per-request HTTP timeout for the status request. Unset uses the</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">        client&#39;s configured timeout; None disables every HTTP timeout; a</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">        number sets all four components to that many seconds; an</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">        httpx.Timeout overrides them. This bounds the HTTP request only and</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">        is unrelated to the transaction&#39;s server-side time_limit.</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    The parsed transaction status</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_txid</span><span class="p">,</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="n">database</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="p">,</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="p">)</span>
 <a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="k">return</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

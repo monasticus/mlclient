@@ -14661,6 +14661,8 @@
       
         
       
+        
+      
     
     
     
@@ -14856,6 +14858,34 @@
     
   
     MLClientEnvironmentNotFoundError
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exceptions/MLClientError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MLClientError
   
 
     
@@ -15948,7 +15978,8 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/services/documents.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-433">433</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-432">432</a></span>
+<span class="normal"><a href="#__codelineno-0-433">433</a></span>
 <span class="normal"><a href="#__codelineno-0-434">434</a></span>
 <span class="normal"><a href="#__codelineno-0-435">435</a></span>
 <span class="normal"><a href="#__codelineno-0-436">436</a></span>
@@ -15958,19 +15989,18 @@
 <span class="normal"><a href="#__codelineno-0-440">440</a></span>
 <span class="normal"><a href="#__codelineno-0-441">441</a></span>
 <span class="normal"><a href="#__codelineno-0-442">442</a></span>
-<span class="normal"><a href="#__codelineno-0-443">443</a></span>
-<span class="normal"><a href="#__codelineno-0-444">444</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rest</span><span class="p">:</span> <span class="n">AsyncRestApi</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ServiceScope</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a service on the supplied REST connection.</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">    rest : AsyncRestApi</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        REST transport shared by this service and its scoped copies.</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">    scope : ServiceScope | None, default None</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">        Database and transaction defaults; None uses an empty scope.</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span> <span class="o">=</span> <span class="n">rest</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span> <span class="o">=</span> <span class="n">ServiceScope</span><span class="p">()</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-443">443</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rest</span><span class="p">:</span> <span class="n">AsyncRestApi</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ServiceScope</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a service on the supplied REST connection.</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">    rest : AsyncRestApi</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">        REST transport shared by this service and its scoped copies.</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">    scope : ServiceScope | None, default None</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">        Database and transaction defaults; None uses an empty scope.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span> <span class="o">=</span> <span class="n">rest</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span> <span class="o">=</span> <span class="n">ServiceScope</span><span class="p">()</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16190,7 +16220,9 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-642">642</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-640">640</a></span>
+<span class="normal"><a href="#__codelineno-0-641">641</a></span>
+<span class="normal"><a href="#__codelineno-0-642">642</a></span>
 <span class="normal"><a href="#__codelineno-0-643">643</a></span>
 <span class="normal"><a href="#__codelineno-0-644">644</a></span>
 <span class="normal"><a href="#__codelineno-0-645">645</a></span>
@@ -16248,69 +16280,67 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-697">697</a></span>
 <span class="normal"><a href="#__codelineno-0-698">698</a></span>
 <span class="normal"><a href="#__codelineno-0-699">699</a></span>
-<span class="normal"><a href="#__codelineno-0-700">700</a></span>
-<span class="normal"><a href="#__codelineno-0-701">701</a></span>
-<span class="normal"><a href="#__codelineno-0-702">702</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-642" name="__codelineno-0-642"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span>
-<a id="__codelineno-0-643" name="__codelineno-0-643"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-644" name="__codelineno-0-644"></a>    <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-<a id="__codelineno-0-645" name="__codelineno-0-645"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-646" name="__codelineno-0-646"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-647" name="__codelineno-0-647"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-648" name="__codelineno-0-648"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-649" name="__codelineno-0-649"></a>    <span class="n">wipe_temporal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-650" name="__codelineno-0-650"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-651" name="__codelineno-0-651"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-652" name="__codelineno-0-652"></a><span class="p">):</span>
-<a id="__codelineno-0-653" name="__codelineno-0-653"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete document(s) content or metadata in a MarkLogic database.</span>
-<a id="__codelineno-0-654" name="__codelineno-0-654"></a>
-<a id="__codelineno-0-655" name="__codelineno-0-655"></a><span class="sd">    URIs are transparently split into batches whose combined query string</span>
-<a id="__codelineno-0-656" name="__codelineno-0-656"></a><span class="sd">    stays below the httpx URL length limit; each batch is a separate</span>
-<a id="__codelineno-0-657" name="__codelineno-0-657"></a><span class="sd">    HTTP request.</span>
-<a id="__codelineno-0-658" name="__codelineno-0-658"></a>
-<a id="__codelineno-0-659" name="__codelineno-0-659"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-660" name="__codelineno-0-660"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-661" name="__codelineno-0-661"></a><span class="sd">    uris : str | list[str] | tuple[str] | set[str]</span>
-<a id="__codelineno-0-662" name="__codelineno-0-662"></a><span class="sd">        The URI of a document to delete.</span>
-<a id="__codelineno-0-663" name="__codelineno-0-663"></a><span class="sd">    category : Category | str | list[Category | str] | None, default None</span>
-<a id="__codelineno-0-664" name="__codelineno-0-664"></a><span class="sd">        The category of data to remove/reset.</span>
-<a id="__codelineno-0-665" name="__codelineno-0-665"></a><span class="sd">    database : str | None, default unset</span>
-<a id="__codelineno-0-666" name="__codelineno-0-666"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
-<a id="__codelineno-0-667" name="__codelineno-0-667"></a><span class="sd">    temporal_collection : str | None, default None</span>
-<a id="__codelineno-0-668" name="__codelineno-0-668"></a><span class="sd">        Temporal collection name.</span>
-<a id="__codelineno-0-669" name="__codelineno-0-669"></a><span class="sd">    wipe_temporal : bool | None, default None</span>
-<a id="__codelineno-0-670" name="__codelineno-0-670"></a><span class="sd">        Remove all versions of a temporal document.</span>
-<a id="__codelineno-0-671" name="__codelineno-0-671"></a><span class="sd">    txid : str | None, default unset</span>
-<a id="__codelineno-0-672" name="__codelineno-0-672"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
-<a id="__codelineno-0-673" name="__codelineno-0-673"></a><span class="sd">        None clears it.</span>
-<a id="__codelineno-0-674" name="__codelineno-0-674"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-675" name="__codelineno-0-675"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
-<a id="__codelineno-0-676" name="__codelineno-0-676"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
-<a id="__codelineno-0-677" name="__codelineno-0-677"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
-<a id="__codelineno-0-678" name="__codelineno-0-678"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
-<a id="__codelineno-0-679" name="__codelineno-0-679"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
-<a id="__codelineno-0-680" name="__codelineno-0-680"></a>
-<a id="__codelineno-0-681" name="__codelineno-0-681"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-682" name="__codelineno-0-682"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-683" name="__codelineno-0-683"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-684" name="__codelineno-0-684"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-685" name="__codelineno-0-685"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-686" name="__codelineno-0-686"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-687" name="__codelineno-0-687"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-688" name="__codelineno-0-688"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-689" name="__codelineno-0-689"></a>    <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">ServiceScope</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">))</span>
-<a id="__codelineno-0-690" name="__codelineno-0-690"></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">request_params</span><span class="p">()</span>
-<a id="__codelineno-0-691" name="__codelineno-0-691"></a>    <span class="n">category</span> <span class="o">=</span> <span class="n">normalize_category</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
-<a id="__codelineno-0-692" name="__codelineno-0-692"></a>    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">_batched_uris</span><span class="p">(</span><span class="n">uris</span><span class="p">):</span>
-<a id="__codelineno-0-693" name="__codelineno-0-693"></a>        <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
-<a id="__codelineno-0-694" name="__codelineno-0-694"></a>            <span class="n">batch</span><span class="p">,</span>
-<a id="__codelineno-0-695" name="__codelineno-0-695"></a>            <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
-<a id="__codelineno-0-696" name="__codelineno-0-696"></a>            <span class="n">database</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-697" name="__codelineno-0-697"></a>            <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
-<a id="__codelineno-0-698" name="__codelineno-0-698"></a>            <span class="n">wipe_temporal</span><span class="o">=</span><span class="n">wipe_temporal</span><span class="p">,</span>
-<a id="__codelineno-0-699" name="__codelineno-0-699"></a>            <span class="n">txid</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;txid&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-700" name="__codelineno-0-700"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-701" name="__codelineno-0-701"></a>        <span class="p">)</span>
-<a id="__codelineno-0-702" name="__codelineno-0-702"></a>        <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-700">700</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-640" name="__codelineno-0-640"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a>    <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-646" name="__codelineno-0-646"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-647" name="__codelineno-0-647"></a>    <span class="n">wipe_temporal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-648" name="__codelineno-0-648"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-649" name="__codelineno-0-649"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-650" name="__codelineno-0-650"></a><span class="p">):</span>
+<a id="__codelineno-0-651" name="__codelineno-0-651"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete document(s) content or metadata in a MarkLogic database.</span>
+<a id="__codelineno-0-652" name="__codelineno-0-652"></a>
+<a id="__codelineno-0-653" name="__codelineno-0-653"></a><span class="sd">    URIs are transparently split into batches whose combined query string</span>
+<a id="__codelineno-0-654" name="__codelineno-0-654"></a><span class="sd">    stays below the httpx URL length limit; each batch is a separate</span>
+<a id="__codelineno-0-655" name="__codelineno-0-655"></a><span class="sd">    HTTP request.</span>
+<a id="__codelineno-0-656" name="__codelineno-0-656"></a>
+<a id="__codelineno-0-657" name="__codelineno-0-657"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-658" name="__codelineno-0-658"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-659" name="__codelineno-0-659"></a><span class="sd">    uris : str | list[str] | tuple[str] | set[str]</span>
+<a id="__codelineno-0-660" name="__codelineno-0-660"></a><span class="sd">        The URI of a document to delete.</span>
+<a id="__codelineno-0-661" name="__codelineno-0-661"></a><span class="sd">    category : Category | str | list[Category | str] | None, default None</span>
+<a id="__codelineno-0-662" name="__codelineno-0-662"></a><span class="sd">        The category of data to remove/reset.</span>
+<a id="__codelineno-0-663" name="__codelineno-0-663"></a><span class="sd">    database : str | None, default unset</span>
+<a id="__codelineno-0-664" name="__codelineno-0-664"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
+<a id="__codelineno-0-665" name="__codelineno-0-665"></a><span class="sd">    temporal_collection : str | None, default None</span>
+<a id="__codelineno-0-666" name="__codelineno-0-666"></a><span class="sd">        Temporal collection name.</span>
+<a id="__codelineno-0-667" name="__codelineno-0-667"></a><span class="sd">    wipe_temporal : bool | None, default None</span>
+<a id="__codelineno-0-668" name="__codelineno-0-668"></a><span class="sd">        Remove all versions of a temporal document.</span>
+<a id="__codelineno-0-669" name="__codelineno-0-669"></a><span class="sd">    txid : str | None, default unset</span>
+<a id="__codelineno-0-670" name="__codelineno-0-670"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
+<a id="__codelineno-0-671" name="__codelineno-0-671"></a><span class="sd">        None clears it.</span>
+<a id="__codelineno-0-672" name="__codelineno-0-672"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
+<a id="__codelineno-0-674" name="__codelineno-0-674"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
+<a id="__codelineno-0-675" name="__codelineno-0-675"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
+<a id="__codelineno-0-676" name="__codelineno-0-676"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
+<a id="__codelineno-0-677" name="__codelineno-0-677"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
+<a id="__codelineno-0-678" name="__codelineno-0-678"></a>
+<a id="__codelineno-0-679" name="__codelineno-0-679"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-681" name="__codelineno-0-681"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-682" name="__codelineno-0-682"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-683" name="__codelineno-0-683"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-684" name="__codelineno-0-684"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-685" name="__codelineno-0-685"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-686" name="__codelineno-0-686"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-687" name="__codelineno-0-687"></a>    <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">ServiceScope</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">))</span>
+<a id="__codelineno-0-688" name="__codelineno-0-688"></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">request_params</span><span class="p">()</span>
+<a id="__codelineno-0-689" name="__codelineno-0-689"></a>    <span class="n">category</span> <span class="o">=</span> <span class="n">normalize_category</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+<a id="__codelineno-0-690" name="__codelineno-0-690"></a>    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">_batched_uris</span><span class="p">(</span><span class="n">uris</span><span class="p">):</span>
+<a id="__codelineno-0-691" name="__codelineno-0-691"></a>        <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+<a id="__codelineno-0-692" name="__codelineno-0-692"></a>            <span class="n">batch</span><span class="p">,</span>
+<a id="__codelineno-0-693" name="__codelineno-0-693"></a>            <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+<a id="__codelineno-0-694" name="__codelineno-0-694"></a>            <span class="n">database</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-695" name="__codelineno-0-695"></a>            <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
+<a id="__codelineno-0-696" name="__codelineno-0-696"></a>            <span class="n">wipe_temporal</span><span class="o">=</span><span class="n">wipe_temporal</span><span class="p">,</span>
+<a id="__codelineno-0-697" name="__codelineno-0-697"></a>            <span class="n">txid</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;txid&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-698" name="__codelineno-0-698"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-699" name="__codelineno-0-699"></a>        <span class="p">)</span>
+<a id="__codelineno-0-700" name="__codelineno-0-700"></a>        <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16508,7 +16538,9 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-524">524</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-522">522</a></span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
 <span class="normal"><a href="#__codelineno-0-525">525</a></span>
 <span class="normal"><a href="#__codelineno-0-526">526</a></span>
 <span class="normal"><a href="#__codelineno-0-527">527</a></span>
@@ -16560,63 +16592,61 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-573">573</a></span>
 <span class="normal"><a href="#__codelineno-0-574">574</a></span>
 <span class="normal"><a href="#__codelineno-0-575">575</a></span>
-<span class="normal"><a href="#__codelineno-0-576">576</a></span>
-<span class="normal"><a href="#__codelineno-0-577">577</a></span>
-<span class="normal"><a href="#__codelineno-0-578">578</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>    <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Document</span><span class="p">]:</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document(s) content or metadata from a MarkLogic database.</span>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="sd">    When uris is a string it returns a single Document instance. Otherwise,</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">    result is a dict mapping URI to Document.</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">    uris : str | list[str] | tuple[str] | set[str]</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">        One or more URIs for documents in the database.</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">    category : Category | str | list[Category | str] | None, default None</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">        The category of data to fetch about the requested document.</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    database : str | None, default unset</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">    txid : str | None, default unset</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">        None clears it.</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">    Document | dict[str, Document]</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">        A single document when uris is a string, otherwise a dict keyed by URI.</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a>    <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_stream</span><span class="p">(</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a>        <span class="n">uris</span><span class="p">,</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a>        <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a>        <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a>    <span class="p">)</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a>        <span class="k">return</span> <span class="k">await</span> <span class="n">stream</span><span class="o">.</span><span class="fm">__anext__</span><span class="p">()</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a>    <span class="k">return</span> <span class="p">{</span><span class="n">doc</span><span class="o">.</span><span class="n">uri</span><span class="p">:</span> <span class="n">doc</span> <span class="k">async</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">}</span>
+<span class="normal"><a href="#__codelineno-0-576">576</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>    <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Document</span><span class="p">]:</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document(s) content or metadata from a MarkLogic database.</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">    When uris is a string it returns a single Document instance. Otherwise,</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="sd">    result is a dict mapping URI to Document.</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">    uris : str | list[str] | tuple[str] | set[str]</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">        One or more URIs for documents in the database.</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">    category : Category | str | list[Category | str] | None, default None</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">        The category of data to fetch about the requested document.</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">    database : str | None, default unset</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    txid : str | None, default unset</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">        None clears it.</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    Document | dict[str, Document]</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">        A single document when uris is a string, otherwise a dict keyed by URI.</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>    <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_stream</span><span class="p">(</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>        <span class="n">uris</span><span class="p">,</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>        <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a>        <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a>    <span class="p">)</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a>        <span class="k">return</span> <span class="k">await</span> <span class="n">stream</span><span class="o">.</span><span class="fm">__anext__</span><span class="p">()</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>    <span class="k">return</span> <span class="p">{</span><span class="n">doc</span><span class="o">.</span><span class="n">uri</span><span class="p">:</span> <span class="n">doc</span> <span class="k">async</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16815,7 +16845,9 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-580">580</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-578">578</a></span>
+<span class="normal"><a href="#__codelineno-0-579">579</a></span>
+<span class="normal"><a href="#__codelineno-0-580">580</a></span>
 <span class="normal"><a href="#__codelineno-0-581">581</a></span>
 <span class="normal"><a href="#__codelineno-0-582">582</a></span>
 <span class="normal"><a href="#__codelineno-0-583">583</a></span>
@@ -16873,69 +16905,67 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-635">635</a></span>
 <span class="normal"><a href="#__codelineno-0-636">636</a></span>
 <span class="normal"><a href="#__codelineno-0-637">637</a></span>
-<span class="normal"><a href="#__codelineno-0-638">638</a></span>
-<span class="normal"><a href="#__codelineno-0-639">639</a></span>
-<span class="normal"><a href="#__codelineno-0-640">640</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_stream</span><span class="p">(</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a>    <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="n">Document</span><span class="p">]:</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document(s) as an iterator, suitable for batch processing.</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">    Unlike read(), does not materialize results into a dict. URIs are</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">    transparently split into batches whose combined query string stays below</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="sd">    the httpx URL length limit; each batch is a separate HTTP request.</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    uris : str | list[str] | tuple[str] | set[str]</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        One or more URIs for documents in the database.</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a><span class="sd">    category : Category | str | list[Category | str] | None, default None</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a><span class="sd">        The category of data to fetch about the requested document.</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a><span class="sd">    database : str | None, default unset</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a><span class="sd">    txid : str | None, default unset</span>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a><span class="sd">        None clears it.</span>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
-<a id="__codelineno-0-610" name="__codelineno-0-610"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
-<a id="__codelineno-0-611" name="__codelineno-0-611"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
-<a id="__codelineno-0-612" name="__codelineno-0-612"></a>
-<a id="__codelineno-0-613" name="__codelineno-0-613"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a><span class="sd">    AsyncIterator[Document]</span>
-<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="sd">        Documents from the database.</span>
-<a id="__codelineno-0-617" name="__codelineno-0-617"></a>
-<a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-619" name="__codelineno-0-619"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-626" name="__codelineno-0-626"></a>    <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">ServiceScope</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">))</span>
-<a id="__codelineno-0-627" name="__codelineno-0-627"></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">request_params</span><span class="p">()</span>
-<a id="__codelineno-0-628" name="__codelineno-0-628"></a>    <span class="n">category</span> <span class="o">=</span> <span class="n">normalize_category</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
-<a id="__codelineno-0-629" name="__codelineno-0-629"></a>    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">_batched_uris</span><span class="p">(</span><span class="n">uris</span><span class="p">):</span>
-<a id="__codelineno-0-630" name="__codelineno-0-630"></a>        <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-<a id="__codelineno-0-631" name="__codelineno-0-631"></a>            <span class="n">batch</span><span class="p">,</span>
-<a id="__codelineno-0-632" name="__codelineno-0-632"></a>            <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
-<a id="__codelineno-0-633" name="__codelineno-0-633"></a>            <span class="n">database</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-634" name="__codelineno-0-634"></a>            <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a>            <span class="n">txid</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;txid&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-636" name="__codelineno-0-636"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-637" name="__codelineno-0-637"></a>        <span class="p">)</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a>        <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a>        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">DocumentsReader</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">uris</span><span class="o">=</span><span class="n">batch</span><span class="p">):</span>
-<a id="__codelineno-0-640" name="__codelineno-0-640"></a>            <span class="k">yield</span> <span class="n">doc</span>
+<span class="normal"><a href="#__codelineno-0-638">638</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_stream</span><span class="p">(</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>    <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Category</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="n">Document</span><span class="p">]:</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document(s) as an iterator, suitable for batch processing.</span>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">    Unlike read(), does not materialize results into a dict. URIs are</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">    transparently split into batches whose combined query string stays below</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">    the httpx URL length limit; each batch is a separate HTTP request.</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">    uris : str | list[str] | tuple[str] | set[str]</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a><span class="sd">        One or more URIs for documents in the database.</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    category : Category | str | list[Category | str] | None, default None</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        The category of data to fetch about the requested document.</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a><span class="sd">    database : str | None, default unset</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a><span class="sd">    txid : str | None, default unset</span>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a><span class="sd">        None clears it.</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
+<a id="__codelineno-0-607" name="__codelineno-0-607"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a><span class="sd">    AsyncIterator[Document]</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a><span class="sd">        Documents from the database.</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a>    <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">ServiceScope</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">))</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">request_params</span><span class="p">()</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a>    <span class="n">category</span> <span class="o">=</span> <span class="n">normalize_category</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a>    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">_batched_uris</span><span class="p">(</span><span class="n">uris</span><span class="p">):</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a>        <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a>            <span class="n">batch</span><span class="p">,</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a>            <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a>            <span class="n">database</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>            <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a>            <span class="n">txid</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;txid&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a>        <span class="p">)</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>        <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a>        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">DocumentsReader</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">uris</span><span class="o">=</span><span class="n">batch</span><span class="p">):</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a>            <span class="k">yield</span> <span class="n">doc</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17128,7 +17158,8 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-469">469</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-468">468</a></span>
+<span class="normal"><a href="#__codelineno-0-469">469</a></span>
 <span class="normal"><a href="#__codelineno-0-470">470</a></span>
 <span class="normal"><a href="#__codelineno-0-471">471</a></span>
 <span class="normal"><a href="#__codelineno-0-472">472</a></span>
@@ -17179,62 +17210,59 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-517">517</a></span>
 <span class="normal"><a href="#__codelineno-0-518">518</a></span>
 <span class="normal"><a href="#__codelineno-0-519">519</a></span>
-<span class="normal"><a href="#__codelineno-0-520">520</a></span>
-<span class="normal"><a href="#__codelineno-0-521">521</a></span>
-<span class="normal"><a href="#__codelineno-0-522">522</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a>    <span class="n">data</span><span class="p">:</span> <span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span><span class="p">],</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Write (create or update) document(s) content or metadata.</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">    data : Document | Metadata | list[Document | Metadata]</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="sd">        One or more document or default metadata.</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">    database : str | None, default unset</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">    temporal_collection : str | None, default None</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="sd">        Temporal collection name.</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">    txid : str | None, default unset</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">        None clears it.</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    dict</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        An origin response from a MarkLogic server.</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a>    <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">ServiceScope</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">))</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">request_params</span><span class="p">()</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a>    <span class="n">body_parts</span> <span class="o">=</span> <span class="n">_DocumentsSender</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a>        <span class="n">body_parts</span><span class="p">,</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="n">database</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="n">txid</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;txid&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="p">)</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a>    <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>    <span class="k">return</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>    <span class="n">data</span><span class="p">:</span> <span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span><span class="p">],</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Write (create or update) document(s) content or metadata.</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">    data : Document | Metadata | list[Document | Metadata]</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">        One or more document or default metadata.</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="sd">    database : str | None, default unset</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">        Content database; unset inherits the service scope and None clears it.</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">    temporal_collection : str | None, default None</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">        Temporal collection name.</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="sd">    txid : str | None, default unset</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">        Transaction identifier; unset inherits the service scope and</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">        None clears it.</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="sd">        A per-request HTTP timeout. Unset uses the client&#39;s configured</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">        timeout; None disables every HTTP timeout; a number sets all four</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">        components to that many seconds; an httpx.Timeout overrides them.</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">        When the operation issues several requests it applies to each of</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">        them independently, not as a shared budget, and is not persisted.</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    dict</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        An origin response from a MarkLogic server.</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a>    <span class="n">scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scope</span><span class="o">.</span><span class="n">overridden_by</span><span class="p">(</span><span class="n">ServiceScope</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">))</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>    <span class="n">params</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">request_params</span><span class="p">()</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a>    <span class="n">body_parts</span> <span class="o">=</span> <span class="n">_DocumentsSender</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rest</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a>        <span class="n">body_parts</span><span class="p">,</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a>        <span class="n">database</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="n">txid</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;txid&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="p">)</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="k">return</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

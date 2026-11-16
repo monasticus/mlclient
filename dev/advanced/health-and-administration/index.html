@@ -14646,6 +14646,8 @@
       
         
       
+        
+      
     
     
     
@@ -14841,6 +14843,34 @@
     
   
     MLClientEnvironmentNotFoundError
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/exceptions/MLClientError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MLClientError
   
 
     
@@ -15895,8 +15925,11 @@ MarkLogic 11 or later can fall back to the Management API health check
 (requires the manage privilege). It reports an overall verdict from the
 responding host, so <code>hosts</code> is <code>None</code>. On older servers, or if the version
 cannot be determined, the original eval error is raised. Transport failures
-and Management API HTTP errors propagate instead of being reported as an
-unhealthy cluster.</p>
+and Management API errors propagate instead of being reported as an
+unhealthy cluster: an error MarkLogic describes (for example <code>SEC-PRIV</code> without
+the manage privilege) as <a class="autorefs autorefs-internal" title="mlclient.exceptions.MarkLogicError" href="../../reference/mlclient/exceptions/MarkLogicError/#mlclient.exceptions.MarkLogicError">MarkLogicError</a>,
+any other HTTP failure as
+<a href="https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError"><code>httpx.HTTPStatusError</code></a>.</p>
 <h2 id="server-version">Server version<a class="headerlink" href="#server-version" title="Permanent link">&para;</a></h2>
 <p><a class="autorefs autorefs-internal" title="version
 
@@ -15960,6 +15993,12 @@ unhealthy cluster.</p>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">wait_for_restart</span><span class="p">()</span>
 </code></pre></div>
 <p>For multi-host restart responses, the method waits for all affected hosts before it returns.</p>
+<p>If MarkLogic does not report readiness before <code>timeout</code> expires, a <code>TimeoutError</code> is raised. A
+readiness probe that answers a non-retryable error status raises the server's answer instead:
+<a class="autorefs autorefs-internal" title="mlclient.exceptions.MarkLogicError" href="../../reference/mlclient/exceptions/MarkLogicError/#mlclient.exceptions.MarkLogicError">MarkLogicError</a> when MarkLogic describes the error,
+<a href="https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError"><code>httpx.HTTPStatusError</code></a>
+otherwise. Either is chained from an <a class="autorefs autorefs-internal" title="mlclient.exceptions.MLClientError" href="../../reference/mlclient/exceptions/MLClientError/#mlclient.exceptions.MLClientError">MLClientError</a> naming the
+host that was being waited for.</p>
 
 
 

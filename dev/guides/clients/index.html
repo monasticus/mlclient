@@ -517,6 +517,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pick-a-task" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14690,6 +14701,8 @@
       
         
       
+        
+      
     
     
     
@@ -14885,6 +14898,34 @@
     
   
     MLClientEnvironmentNotFoundError
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/exceptions/MLClientError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MLClientError
   
 
     
@@ -15876,6 +15917,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pick-a-task" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -16111,6 +16163,67 @@ and so on - hand it to <code>ml.parser</code>:</p>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">parsed</span>
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="s1">&#39;Documents&#39;</span>
 </code></pre></div>
+<p>The shape of the result follows the number of parts in the body, not its content type:</p>
+<table>
+<thead>
+<tr>
+<th>Response body</th>
+<th><code>parse()</code></th>
+<th><code>parse_with_headers()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain body (for example Manage JSON)</td>
+<td>The value</td>
+<td><code>(headers, value)</code></td>
+</tr>
+<tr>
+<td>Multipart with one part (for example eval of <code>1 + 1</code>)</td>
+<td>The value of that part</td>
+<td><code>(headers, value)</code></td>
+</tr>
+<tr>
+<td>Multipart with several parts</td>
+<td>A list of values</td>
+<td>A list of <code>(headers, value)</code></td>
+</tr>
+<tr>
+<td>Empty body</td>
+<td><code>[]</code></td>
+<td><code>(headers, [])</code></td>
+</tr>
+</tbody>
+</table>
+<p>A multipart with a single part is unwrapped to its item, so calls that expect one
+answer - an eval returning one value, a read of one document - stay simple. Code
+that iterates over a multipart result whose item count varies must handle a
+single item and <code>[]</code> as well as a list.</p>
+<p><code>ml.parser</code> parses success responses only. For a non-success response it raises,
+like the services do: <a class="autorefs autorefs-internal" title="mlclient.exceptions.MarkLogicError" href="../../reference/mlclient/exceptions/MarkLogicError/#mlclient.exceptions.MarkLogicError"><code>MarkLogicError</code></a> when MarkLogic
+described the error, and <a href="https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError"><code>httpx.HTTPStatusError</code></a>
+with the original response for anything else - an empty body, a page from a proxy
+or a malformed payload. <code>MarkLogicError</code> keeps the error fields as attributes, so
+you can branch on the MarkLogic error code instead of matching the message:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkLogicError</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="o">...</span>     <span class="n">resp</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">rest</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="s2">&quot;/missing.json&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="o">...</span>     <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="o">...</span>         <span class="n">ml</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="o">...</span>     <span class="k">except</span> <span class="n">MarkLogicError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="o">...</span>         <span class="nb">print</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">message_code</span><span class="p">)</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="mi">404</span> <span class="n">RESTAPI</span><span class="o">-</span><span class="n">NODOCUMENT</span>
+</code></pre></div>
+<p><code>status_code</code>, <code>status</code>, <code>message_code</code> and <code>message</code> are <code>None</code> when the error
+came as a raw message rather than a structured MarkLogic error.</p>
+<h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h2>
+<p>Every exception mlclient raises itself derives from
+<a class="autorefs autorefs-internal" title="mlclient.exceptions.MLClientError" href="../../reference/mlclient/exceptions/MLClientError/#mlclient.exceptions.MLClientError"><code>MLClientError</code></a>, so <code>except MLClientError</code>
+catches all of them. Transport failures (connection, timeout) and HTTP status
+errors without a MarkLogic error body come from httpx unwrapped; their common base
+is <a href="https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPError"><code>httpx.HTTPError</code></a>.</p>
 <h2 id="pick-a-task">Pick a task<a class="headerlink" href="#pick-a-task" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../documents/">Documents</a>: content types, metadata, reading, writing and deletion.</li>

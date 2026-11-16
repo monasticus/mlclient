@@ -14557,6 +14557,8 @@
       
         
       
+        
+      
     
     
     
@@ -14752,6 +14754,34 @@
     
   
     MLClientEnvironmentNotFoundError
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="MLClientError/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MLClientError
   
 
     
@@ -15723,31 +15753,41 @@
     <div class="doc doc-contents first">
 
         <p>The ML Client Exceptions module.</p>
-<p>It contains all custom exceptions related to ML Client:
-    * WrongParametersError
-        A custom Exception class for wrong parameters.
-    * UnsupportedFormatError
-        A custom Exception class for an unsupported format.
-    * MLClientDirectoryNotFoundError
-        A custom Exception class for a non-existing MLClient configuration directory.
-    * MLClientEnvironmentNotFoundError
-        A custom Exception class for a non-existing MLClient environment.
-    * NoSuchAppServerError
-        A custom Exception class for a non-existing app server configuration.
-    * NotARestServerError
-        A custom Exception class for a regular App-Server used as a REST Server.
-    * NoRestServerConfiguredError
-        A custom Exception class for no REST Server configured when required.
-    * MarkLogicError
-        A custom Exception class representing MarkLogic errors.
-    * UnsupportedFileExtensionError
-        A custom Exception class for an unsupported file extension.
-    * InvalidMetadataError
-        A custom Exception class for invalid metadata XML.
-    * ResourceNotFoundError
-        A custom Exception class for a not found resource.
-    * ConfigError
-        A custom Exception class for invalid connection/authentication config.</p>
+<p>It contains all custom exceptions related to ML Client. Each of them subclasses
+MLClientError, so <code>except MLClientError</code> catches every error mlclient raises
+itself. Transport and HTTP status failures come from httpx unwrapped; their common
+base is <code>httpx.HTTPError</code>.</p>
+<div class="highlight"><pre><span></span><code>* MLClientError
+    The base class of every ML Client exception.
+* WrongParametersError
+    A custom Exception class for wrong parameters.
+* UnsupportedFormatError
+    A custom Exception class for an unsupported format.
+* MLClientDirectoryNotFoundError
+    A custom Exception class for a non-existing MLClient configuration directory.
+* MLClientEnvironmentNotFoundError
+    A custom Exception class for a non-existing MLClient environment.
+* NoSuchAppServerError
+    A custom Exception class for a non-existing app server configuration.
+* NotARestServerError
+    A custom Exception class for a regular App-Server used as a REST Server.
+* NoRestServerConfiguredError
+    A custom Exception class for no REST Server configured when required.
+* InvalidLogTypeError
+    A custom Exception class for an invalid log type.
+* MarkLogicError
+    A custom Exception class representing MarkLogic errors.
+* UnsupportedFileExtensionError
+    A custom Exception class for an unsupported file extension.
+* InvalidMetadataError
+    A custom Exception class for invalid metadata XML.
+* ResourceNotFoundError
+    A custom Exception class for a not found resource.
+* ConfigError
+    A custom Exception class for invalid connection/authentication config.
+* EnvironmentFileExistsError
+    A custom Exception class for an already existing environment file.
+</code></pre></div>
 
 
 

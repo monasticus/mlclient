@@ -121,6 +121,14 @@ class MLResponseParser:
     ) -> ParsedValue:
         """Parse MarkLogic HTTP Response.
 
+        The result follows the number of parts in the body, not its content
+        type. A plain body (e.g. Manage JSON) gives one value. A multipart body
+        gives a list, except that a multipart with a single part is unwrapped
+        to its item, so calls expecting one answer (an eval returning one
+        value, a documents read of one document) stay simple. An empty body
+        gives ``[]``. Code iterating over a multipart result whose item count
+        varies must handle a single item and ``[]`` as well as a list.
+
         Parameters
         ----------
         response : Response
@@ -134,18 +142,20 @@ class MLResponseParser:
             A parsed response body. xs:decimal retains precision as Decimal;
             xs:float and xs:double become float. Empty results return [],
             singletons return their item, and multiple items return a list.
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic answered a non-success status with an error it described
+        HTTPStatusError
+            If a non-success status carried no MarkLogic error body
         """
+        cls.raise_for_status(response)
         logger.debug("Attempt to parse a response")
-        if response.is_success and not response.content:
+        if not response.content:
             logger.fine("No content to parse")
             return []
-
-        if output_type is str:
-            return cls._parse_text(response)
-        if output_type is bytes:
-            return cls._parse_bytes(response)
-
-        return cls._parse(response)
+        return cls._parse(response, output_type)
 
     @classmethod
     def parse_with_headers(
@@ -154,6 +164,13 @@ class MLResponseParser:
         output_type: type | None = None,
     ) -> tuple | list[tuple]:
         """Parse MarkLogic HTTP Response and get headers.
+
+        The result follows the number of parts in the body, like ``parse()``:
+        a plain body or a multipart with a single part gives one
+        ``(headers, value)`` tuple, a multipart with several parts gives a list
+        of them, and an empty body gives ``(headers, [])``. Code iterating over
+        a multipart result whose part count varies must handle a single tuple
+        as well as a list.
 
         Parameters
         ----------
@@ -164,20 +181,22 @@ class MLResponseParser:
 
         Returns
         -------
-        tuple
-            A parsed response body with headers
+        tuple | list[tuple]
+            A parsed response body with headers, one tuple per part
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic answered a non-success status with an error it described
+        HTTPStatusError
+            If a non-success status carried no MarkLogic error body
         """
+        cls.raise_for_status(response)
         logger.debug("Attempt to parse a response")
-        if response.is_success and not response.content:
+        if not response.content:
             logger.fine("No content to parse")
             return response.headers, []
-
-        if output_type is str:
-            return cls._parse_text(response, with_headers=True)
-        if output_type is bytes:
-            return cls._parse_bytes(response, with_headers=True)
-
-        return cls._parse(response, with_headers=True)
+        return cls._parse(response, output_type, with_headers=True)
 
     @classmethod
     def parse_atomic(
@@ -232,23 +251,9 @@ class MLResponseParser:
         """
         if response.is_success:
             return
-        try:
-            error = cls._parse(response)
-        except (ValueError, TypeError, AttributeError, ElemTree.ParseError):
-            # Invalid error payloads must not hide the original HTTP failure.
-            error = None
-        if isinstance(error, dict):
-            error = error.get("errorResponse", error)
-            if not isinstance(error, dict) or not any(
-                isinstance(error.get(key), str) and error[key]
-                for key in ("messageCode", "message")
-            ):
-                error = None
-        elif response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "").startswith(
-            const.HEADER_JSON,
-        ):
-            error = None
+        error = cls._parse_error(response)
         if error:
+            logger.debug("MarkLogic error occurred [%s]", error)
             raise MarkLogicError(error)
         response.raise_for_status()
 
@@ -256,6 +261,7 @@ class MLResponseParser:
     def _parse(
         cls,
         response: Response,
+        output_type: type | None = None,
         with_headers: bool = False,
     ) -> (
         bytes
@@ -270,205 +276,179 @@ class MLResponseParser:
         | list
         | tuple
     ):
-        """Parse MarkLogic HTTP Response.
+        """Parse a successful MarkLogic HTTP Response.
 
         Parameters
         ----------
         response : Response
-            An HTTP response taken from MarkLogic instance
+            A success HTTP response taken from MarkLogic instance
+        output_type : type | None , default None
+            A raw output type (supported: str, bytes)
+        with_headers : bool, default False
+            Return a (headers, parsed_content) tuple per part when enabled.
 
         Returns
         -------
         bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
-            A parsed response body. xs:decimal retains precision as Decimal;
-            xs:float and xs:double become float. Empty results return [],
-            singletons return their item, and multiple items return a list.
+            A parsed response body. Singletons return their item, and multiple
+            items return a list.
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
-        if not response.is_success:
-            if content_type.startswith(const.HEADER_JSON):
-                error = response.json()
-            elif content_type.startswith(const.HEADER_XML):
-                error = cls._parse_xml_error(response)
-            else:
-                error = cls._parse_html_error(response)
-            if error:
-                logger.debug("MarkLogic error occurred [%s]", error)
-            if with_headers:
-                return response.headers, error
-            return error
-
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            body_parts = decode_multipart_mixed(
-                response.content,
-                response.headers.get(const.HEADER_NAME_CONTENT_TYPE),
-            )
+            body_parts = decode_multipart_mixed(response.content, content_type)
         else:
             body_parts = [response]
 
         parsed_parts = [
-            cls._parse_part(body_part, None, with_headers) for body_part in body_parts
+            cls._parse_part(body_part, output_type, with_headers)
+            for body_part in body_parts
         ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
 
     @classmethod
-    def _parse_text(
+    def _parse_error(
         cls,
         response: Response,
-        with_headers: bool = False,
-    ) -> str | tuple | list:
-        """Parse MarkLogic HTTP Response to string.
+    ) -> dict | str | None:
+        """Extract the error MarkLogic described in a non-success response.
 
         Parameters
         ----------
         response : Response
-            An HTTP response taken from MarkLogic instance
+            A non-success HTTP response
 
         Returns
         -------
-        str | tuple | list
-            A parsed response body in string format
+        dict | str | None
+            The error object of a JSON or XML error, the error terms of an
+            XHTML error page, or None when the body describes no MarkLogic
+            error (empty, malformed or produced by a proxy).
         """
-        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.is_success:
-            if content_type.startswith(const.HEADER_JSON):
-                json_error = response.json()
-                error = json.dumps(json_error)
-            elif content_type.startswith(const.HEADER_XML):
-                json_error = cls._parse_xml_error(response)
-                error = json.dumps(json_error)
-            else:
-                error = cls._parse_html_error(response)
-            if error:
-                logger.debug("MarkLogic error occurred [%s]", error)
-            if with_headers:
-                return response.headers, error
-            return error
-
-        if content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            body_parts = decode_multipart_mixed(
-                response.content,
-                response.headers.get(const.HEADER_NAME_CONTENT_TYPE),
-            )
-        else:
-            body_parts = [response]
-
-        parsed_parts = [
-            cls._parse_part(body_part, str, with_headers) for body_part in body_parts
-        ]
-        if len(parsed_parts) == 1:
-            return parsed_parts[0]
-        return parsed_parts
+        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
+        if content_type.startswith(const.HEADER_JSON):
+            return cls._parse_json_error(response)
+        if content_type.startswith(const.HEADER_XML):
+            return cls._parse_xml_error(response)
+        return cls._parse_html_error(response)
 
     @classmethod
-    def _parse_bytes(
+    def _parse_json_error(
         cls,
         response: Response,
-        with_headers: bool = False,
-    ) -> bytes | tuple | list:
-        """Parse MarkLogic HTTP Response to bytes.
+    ) -> dict | None:
+        """Extract a MarkLogic JSON error response.
 
         Parameters
         ----------
         response : Response
-            An HTTP response taken from MarkLogic instance
+            A non-success HTTP response with a JSON content type
 
         Returns
         -------
-        bytes | tuple | list
-            A parsed response body in bytes format
+        dict | None
+            The error object, or None when the body is not a MarkLogic error
         """
-        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.is_success:
-            if content_type.startswith(const.HEADER_JSON):
-                json_error = response.json()
-                error = json.dumps(json_error).encode("utf-8")
-            elif content_type.startswith(const.HEADER_XML):
-                json_error = cls._parse_xml_error(response)
-                error = json.dumps(json_error).encode("utf-8")
-            else:
-                error = cls._parse_html_error(response).encode("utf-8")
-            if error:
-                logger.debug("MarkLogic error occurred [%s]", error)
-            if with_headers:
-                return response.headers, error
-            return error
-
-        if content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            body_parts = decode_multipart_mixed(
-                response.content,
-                response.headers.get(const.HEADER_NAME_CONTENT_TYPE),
-            )
-        else:
-            body_parts = [response]
-
-        parsed_parts = [
-            cls._parse_part(body_part, bytes, with_headers) for body_part in body_parts
-        ]
-        if len(parsed_parts) == 1:
-            return parsed_parts[0]
-        return parsed_parts
+        try:
+            body = response.json()
+        except ValueError:
+            return None
+        return cls._described_error(body)
 
     @classmethod
     def _parse_xml_error(
         cls,
         response: Response,
-    ) -> dict:
-        """Parse MarkLogic XML error response to JSON.
+    ) -> dict | None:
+        """Extract a MarkLogic XML error response as a JSON error object.
 
         Parameters
         ----------
         response : Response
-            A non-OK HTTP response taken from MarkLogic instance
+            A non-success HTTP response with an XML content type
 
         Returns
         -------
-        dict
-            A parsed JSON error
+        dict | None
+            The error object, or None when the body is not a MarkLogic error
         """
-        xml = ElemTree.fromstring(response.text)
-        status_code = xml.find("{http://marklogic.com/xdmp/error}status-code")
-        status = xml.find("{http://marklogic.com/xdmp/error}status")
-        msg_code = xml.find("{http://marklogic.com/xdmp/error}message-code")
-        msg = xml.find("{http://marklogic.com/xdmp/error}message")
-        return {
-            "errorResponse": {
-                "statusCode": int(status_code.text),
-                "status": status.text,
-                "messageCode": msg_code.text,
-                "message": msg.text,
+        try:
+            xml = ElemTree.fromstring(response.text)
+        except ElemTree.ParseError:
+            return None
+        status_code = xml.findtext("{http://marklogic.com/xdmp/error}status-code")
+        return cls._described_error(
+            {
+                "statusCode": int(status_code)
+                if status_code and status_code.isdigit()
+                else None,
+                "status": xml.findtext("{http://marklogic.com/xdmp/error}status"),
+                "messageCode": xml.findtext(
+                    "{http://marklogic.com/xdmp/error}message-code",
+                ),
+                "message": xml.findtext("{http://marklogic.com/xdmp/error}message"),
             },
-        }
+        )
 
     @classmethod
     def _parse_html_error(
         cls,
         response: Response,
-    ) -> str:
-        """Parse MarkLogic HTML error response.
+    ) -> str | None:
+        """Extract the error terms of a MarkLogic XHTML error page.
 
         Parameters
         ----------
         response : Response
-            A non-OK HTTP response taken from MarkLogic instance
+            A non-success HTTP response
 
         Returns
         -------
-        str
-            A parsed error description
+        str | None
+            The error terms joined by new lines, or None when the body is not
+            a MarkLogic error page
         """
-        html = ElemTree.fromstring(response.text)
+        try:
+            html = ElemTree.fromstring(response.text)
+        except ElemTree.ParseError:
+            return None
         terms = html.findall(
             "{http://www.w3.org/1999/xhtml}body/"
             "{http://www.w3.org/1999/xhtml}span/"
             "{http://www.w3.org/1999/xhtml}dl/"
             "{http://www.w3.org/1999/xhtml}dt",
         )
-        return "\n".join(term.text for term in terms)
+        return "\n".join(term.text for term in terms if term.text) or None
+
+    @staticmethod
+    def _described_error(
+        body: object,
+    ) -> dict | None:
+        """Return a MarkLogic error object when the body describes one.
+
+        Parameters
+        ----------
+        body : object
+            A decoded error body, with or without the ``errorResponse`` envelope
+
+        Returns
+        -------
+        dict | None
+            The error object when it carries a message code or a message,
+            otherwise None
+        """
+        if not isinstance(body, dict):
+            return None
+        error = body.get("errorResponse", body)
+        if isinstance(error, dict) and any(
+            isinstance(error.get(key), str) and error[key]
+            for key in ("messageCode", "message")
+        ):
+            return error
+        return None
 
     @classmethod
     def _parse_part(

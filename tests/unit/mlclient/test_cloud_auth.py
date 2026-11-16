@@ -5,6 +5,8 @@ import pytest
 import respx
 
 from mlclient.auth import MarkLogicCloudAuth
+from mlclient.exceptions import MarkLogicError
+from tests.utils.ml_mockers import MLRespXMocker
 
 BASE_URL = "https://example.marklogic.cloud"
 TOKEN_URL = f"{BASE_URL}/token"
@@ -21,10 +23,16 @@ def _cloud_auth(token_duration: int = 0) -> MarkLogicCloudAuth:
 
 @respx.mock
 def test_token_fetched_on_first_request():
-    token_route = respx.post(TOKEN_URL).mock(
-        return_value=httpx.Response(200, json={"access_token": "tok-1"}),
-    )
-    respx.get(RESOURCE_URL).mock(return_value=httpx.Response(200))
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    mocker.with_response_code(200)
+    mocker.with_response_body({"access_token": "tok-1"})
+    token_route = mocker.mock_post()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(RESOURCE_URL)
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_get()
 
     with httpx.Client(auth=_cloud_auth()) as client:
         response = client.get(RESOURCE_URL)
@@ -35,10 +43,16 @@ def test_token_fetched_on_first_request():
 
 @respx.mock
 def test_token_reused_across_requests():
-    token_route = respx.post(TOKEN_URL).mock(
-        return_value=httpx.Response(200, json={"access_token": "tok-1"}),
-    )
-    respx.get(RESOURCE_URL).mock(return_value=httpx.Response(200))
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    mocker.with_response_code(200)
+    mocker.with_response_body({"access_token": "tok-1"})
+    token_route = mocker.mock_post()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(RESOURCE_URL)
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_get()
 
     auth = _cloud_auth()
     with httpx.Client(auth=auth) as client:
@@ -50,15 +64,17 @@ def test_token_reused_across_requests():
 
 @respx.mock
 def test_token_refreshed_on_401():
-    token_route = respx.post(TOKEN_URL).mock(
-        side_effect=[
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    token_route = mocker.with_post_side_effect(
+        [
             httpx.Response(200, json={"access_token": "tok-1"}),
             httpx.Response(200, json={"access_token": "tok-2"}),
         ],
     )
-    respx.get(RESOURCE_URL).mock(
-        side_effect=[httpx.Response(401), httpx.Response(200)],
-    )
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(RESOURCE_URL)
+    mocker.with_get_side_effect([httpx.Response(401), httpx.Response(200)])
 
     auth = _cloud_auth()
     with httpx.Client(auth=auth) as client:
@@ -71,10 +87,17 @@ def test_token_refreshed_on_401():
 
 @respx.mock
 def test_custom_duration_passed_to_token_endpoint():
-    token_route = respx.post(TOKEN_URL).mock(
-        return_value=httpx.Response(200, json={"access_token": "tok-1"}),
-    )
-    respx.get(RESOURCE_URL).mock(return_value=httpx.Response(200))
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    mocker.with_response_code(200)
+    mocker.with_response_body({"access_token": "tok-1"})
+    mocker.with_request_param("duration", "3600")
+    token_route = mocker.mock_post()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(RESOURCE_URL)
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_get()
 
     with httpx.Client(auth=_cloud_auth(token_duration=3600)) as client:
         client.get(RESOURCE_URL)
@@ -84,8 +107,16 @@ def test_custom_duration_passed_to_token_endpoint():
 
 @respx.mock
 def test_token_fetch_failure_raises():
-    respx.post(TOKEN_URL).mock(return_value=httpx.Response(500))
-    respx.get(RESOURCE_URL).mock(return_value=httpx.Response(200))
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    mocker.with_response_code(500)
+    mocker.with_empty_response_body()
+    mocker.mock_post()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(RESOURCE_URL)
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_get()
 
     with (
         httpx.Client(auth=_cloud_auth()) as client,
@@ -99,10 +130,16 @@ def test_token_fetch_failure_raises():
 @pytest.mark.asyncio
 @respx.mock
 async def test_async_token_fetched_on_first_request():
-    token_route = respx.post(TOKEN_URL).mock(
-        return_value=httpx.Response(200, json={"access_token": "tok-1"}),
-    )
-    respx.get(RESOURCE_URL).mock(return_value=httpx.Response(200))
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    mocker.with_response_code(200)
+    mocker.with_response_body({"access_token": "tok-1"})
+    token_route = mocker.mock_post()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(RESOURCE_URL)
+    mocker.with_response_code(200)
+    mocker.with_empty_response_body()
+    mocker.mock_get()
 
     async with httpx.AsyncClient(auth=_cloud_auth()) as client:
         response = await client.get(RESOURCE_URL)
@@ -114,18 +151,46 @@ async def test_async_token_fetched_on_first_request():
 @pytest.mark.asyncio
 @respx.mock
 async def test_async_token_refreshed_on_401():
-    token_route = respx.post(TOKEN_URL).mock(
-        side_effect=[
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    token_route = mocker.with_post_side_effect(
+        [
             httpx.Response(200, json={"access_token": "tok-1"}),
             httpx.Response(200, json={"access_token": "tok-2"}),
         ],
     )
-    respx.get(RESOURCE_URL).mock(
-        side_effect=[httpx.Response(401), httpx.Response(200)],
-    )
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(RESOURCE_URL)
+    mocker.with_get_side_effect([httpx.Response(401), httpx.Response(200)])
 
     async with httpx.AsyncClient(auth=_cloud_auth()) as client:
         response = await client.get(RESOURCE_URL)
 
     assert token_route.call_count == 2
     assert response.request.headers["Authorization"] == "Bearer tok-2"
+
+
+@respx.mock
+def test_token_fetch_rejected_with_a_marklogic_error_raises_it():
+    """A synthetic token-endpoint rejection in the MarkLogic error format."""
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(TOKEN_URL)
+    mocker.with_response_code(401)
+    mocker.with_response_body(
+        {
+            "errorResponse": {
+                "statusCode": 401,
+                "status": "Unauthorized",
+                "message": "Invalid API key",
+            },
+        },
+    )
+    mocker.mock_post()
+
+    with (
+        httpx.Client(auth=_cloud_auth()) as client,
+        pytest.raises(MarkLogicError) as raised,
+    ):
+        client.get(RESOURCE_URL)
+
+    assert str(raised.value) == "[401 Unauthorized] Invalid API key"

@@ -1843,7 +1843,6 @@ def _parse_documents_with_report(
     MarkLogicError
         If MarkLogic returned an error.
     """
-    MLResponseParser.raise_for_status(resp)
     parts = MLResponseParser.parse_with_headers(resp, output_type=bytes)
     if not isinstance(parts, list):
         parts = [parts]

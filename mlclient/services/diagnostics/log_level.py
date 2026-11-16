@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
-from xml.etree.ElementTree import ParseError
 
-from httpx import RequestError
+from httpx import HTTPStatusError, RequestError
 
 from mlclient._options import UNSET
 from mlclient.exceptions import MarkLogicError, WrongParametersError
@@ -460,7 +459,7 @@ class LogLevelService:
             raise WrongParametersError(msg)
 
 
-def _error_body(resp: Response) -> dict | str:
+def _error_body(resp: Response) -> MarkLogicError:
     """Decode a MarkLogic error, retaining raw text for unstructured failures.
 
     Parameters
@@ -470,31 +469,29 @@ def _error_body(resp: Response) -> dict | str:
 
     Returns
     -------
-    dict | str
-        The MarkLogic error object or the original response text
+    MarkLogicError
+        The error MarkLogic described in a JSON or XML body, or one carrying
+        the original response text
     """
     content_type = resp.headers.get("content-type", "")
-    if "json" not in content_type and "xml" not in content_type:
-        return resp.text
-    try:
-        parsed = MLResponseParser.parse(resp)
-    except (ValueError, ParseError, AttributeError):
-        return resp.text
-    if isinstance(parsed, dict):
-        error = parsed.get("errorResponse", parsed)
-        if isinstance(error, dict):
+    if "json" in content_type or "xml" in content_type:
+        try:
+            MLResponseParser.raise_for_status(resp)
+        except MarkLogicError as error:
             return error
-    return resp.text
+        except HTTPStatusError:
+            pass
+    return MarkLogicError(resp.text)
 
 
-def _is_privilege_error(resp: Response, error: dict | str) -> bool:
+def _is_privilege_error(resp: Response, error: MarkLogicError) -> bool:
     """Identify authorization errors by HTTP status or MarkLogic message code.
 
     Parameters
     ----------
     resp : Response
         Failed HTTP response
-    error : dict | str
+    error : MarkLogicError
         Decoded MarkLogic error or raw response text
 
     Returns
@@ -502,8 +499,9 @@ def _is_privilege_error(resp: Response, error: dict | str) -> bool:
     bool
         Whether the response indicates missing authentication or privileges
     """
-    return resp.status_code in _PRIVILEGE_STATUS_CODES or (
-        isinstance(error, dict) and error.get("messageCode") in _PRIVILEGE_MESSAGE_CODES
+    return (
+        resp.status_code in _PRIVILEGE_STATUS_CODES
+        or error.message_code in _PRIVILEGE_MESSAGE_CODES
     )
 
 
@@ -527,7 +525,7 @@ def _raise_unless_privilege_error(resp: Response) -> None:
             resp.status_code,
             error,
         )
-        raise MarkLogicError(error)
+        raise error
     logger.debug(
         "Log-level eval authorization failure (HTTP %s); falling back to Manage: %s",
         resp.status_code,
@@ -562,7 +560,7 @@ def _raise_if_manage_failed(resp: Response, *, role: str) -> None:
     if _is_privilege_error(resp, error):
         msg = (
             f"Log-level access denied. The Manage fallback requires '{role}' "
-            f"or equivalent privileges. Manage responded: {MarkLogicError(error)}"
+            f"or equivalent privileges. Manage responded: {error}"
         )
         raise MarkLogicError(msg)
-    raise MarkLogicError(error)
+    raise error

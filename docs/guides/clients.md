@@ -154,6 +154,51 @@ and so on - hand it to `ml.parser`:
 'Documents'
 ```
 
+The shape of the result follows the number of parts in the body, not its content type:
+
+| Response body | `parse()` | `parse_with_headers()` |
+| ------------- | --------- | ---------------------- |
+| Plain body (for example Manage JSON) | The value | `(headers, value)` |
+| Multipart with one part (for example eval of `1 + 1`) | The value of that part | `(headers, value)` |
+| Multipart with several parts | A list of values | A list of `(headers, value)` |
+| Empty body | `[]` | `(headers, [])` |
+
+A multipart with a single part is unwrapped to its item, so calls that expect one
+answer - an eval returning one value, a read of one document - stay simple. Code
+that iterates over a multipart result whose item count varies must handle a
+single item and `[]` as well as a list.
+
+`ml.parser` parses success responses only. For a non-success response it raises,
+like the services do: [`MarkLogicError`][mlclient.exceptions.MarkLogicError] when MarkLogic
+described the error, and [`httpx.HTTPStatusError`](https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPStatusError)
+with the original response for anything else - an empty body, a page from a proxy
+or a malformed payload. `MarkLogicError` keeps the error fields as attributes, so
+you can branch on the MarkLogic error code instead of matching the message:
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.exceptions import MarkLogicError
+
+>>> with MLClient() as ml:
+...     resp = ml.rest.documents.get(uri="/missing.json")
+...     try:
+...         ml.parser.parse(resp)
+...     except MarkLogicError as error:
+...         print(error.status_code, error.message_code)
+404 RESTAPI-NODOCUMENT
+```
+
+`status_code`, `status`, `message_code` and `message` are `None` when the error
+came as a raw message rather than a structured MarkLogic error.
+
+## Errors
+
+Every exception mlclient raises itself derives from
+[`MLClientError`][mlclient.exceptions.MLClientError], so `except MLClientError`
+catches all of them. Transport failures (connection, timeout) and HTTP status
+errors without a MarkLogic error body come from httpx unwrapped; their common base
+is [`httpx.HTTPError`](https://www.python-httpx.org/exceptions/#exception-classes:~:text=class%20httpx.HTTPError).
+
 ## Pick a task
 
 - [Documents](documents.md): content types, metadata, reading, writing and deletion.

@@ -851,57 +851,18 @@ ml_mocker.mock_post()
 
 @ml_mock
 @pytest.mark.parametrize("with_headers", [False, True])
-@pytest.mark.parametrize(
-    ("output_type", "expected_type", "expected"),
-    [
-        (
-            None,
-            str,
-            (
-                "XDMP-BADCHAR: (err:XPST0003) Unexpected character "
-                "found ''' (0x0027)\nin /eval, at 1:0 [1.0-ml]"
-            ),
-        ),
-        (
-            str,
-            str,
-            (
-                "XDMP-BADCHAR: (err:XPST0003) Unexpected character "
-                "found ''' (0x0027)\nin /eval, at 1:0 [1.0-ml]"
-            ),
-        ),
-        (
-            bytes,
-            bytes,
-            (
-                b"XDMP-BADCHAR: (err:XPST0003) Unexpected character "
-                b"found ''' (0x0027)\nin /eval, at 1:0 [1.0-ml]"
-            ),
-        ),
-    ],
-)
-def test_parse_error_response_html(
-    ml,
-    output_type,
-    expected_type,
-    expected,
-    with_headers,
-):
+@pytest.mark.parametrize("output_type", [None, str, bytes])
+def test_parse_error_response_html(ml, output_type, with_headers):
     resp = ml.rest.eval.post(xquery="'missing-quote")
-    if with_headers:
-        headers, parsed_resp = MLResponseParser.parse_with_headers(
-            resp,
-            output_type=output_type,
-        )
-        assert headers == {
-            "Content-Type": "text/html; charset=utf-8",
-            "Content-Length": "1014",
-        }
-    else:
-        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
 
-    assert isinstance(parsed_resp, expected_type)
-    assert parsed_resp == expected
+    with pytest.raises(MarkLogicError, match="XDMP-BADCHAR") as raised:
+        _parse(resp, output_type=output_type, with_headers=with_headers)
+
+    assert str(raised.value) == (
+        "XDMP-BADCHAR: (err:XPST0003) Unexpected character "
+        "found ''' (0x0027)\nin /eval, at 1:0 [1.0-ml]"
+    )
+    assert raised.value.message_code is None
 
 
 ml_mocker.with_name("xml-error")
@@ -920,69 +881,22 @@ ml_mocker.mock_delete()
 
 @ml_mock
 @pytest.mark.parametrize("with_headers", [False, True])
-@pytest.mark.parametrize(
-    ("output_type", "expected_type", "expected"),
-    [
-        (
-            None,
-            dict,
-            {
-                "errorResponse": {
-                    "statusCode": 400,
-                    "status": "Bad Request",
-                    "messageCode": "XDMP-NOSUCHDB",
-                    "message": "XDMP-NOSUCHDB: No such database Document",
-                },
-            },
-        ),
-        (
-            str,
-            str,
-            (
-                '{"errorResponse": {"statusCode": 400, "status'
-                '": "Bad Request", "messageCode": "XDMP-NOSUCH'
-                'DB", "message": "XDMP-NOSUCHDB: No such datab'
-                'ase Document"}}'
-            ),
-        ),
-        (
-            bytes,
-            bytes,
-            (
-                b'{"errorResponse": {"statusCode": 400, "status'
-                b'": "Bad Request", "messageCode": "XDMP-NOSUCH'
-                b'DB", "message": "XDMP-NOSUCHDB: No such datab'
-                b'ase Document"}}'
-            ),
-        ),
-    ],
-)
-def test_parse_error_response_xml(
-    ml,
-    output_type,
-    expected_type,
-    expected,
-    with_headers,
-):
+@pytest.mark.parametrize("output_type", [None, str, bytes])
+def test_parse_error_response_xml(ml, output_type, with_headers):
     resp = ml.http.delete(
         "/v1/documents",
         params={"uri": "/mlclient-response-parser/doc1.xml", "database": "Document"},
         headers={"Accept": "application/xml"},
     )
-    if with_headers:
-        headers, parsed_resp = MLResponseParser.parse_with_headers(
-            resp,
-            output_type=output_type,
-        )
-        assert headers == {
-            "Content-type": "application/xml; charset=UTF-8",
-            "Content-Length": "246",
-        }
-    else:
-        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
 
-    assert isinstance(parsed_resp, expected_type)
-    assert parsed_resp == expected
+    with pytest.raises(MarkLogicError, match="XDMP-NOSUCHDB") as raised:
+        _parse(resp, output_type=output_type, with_headers=with_headers)
+
+    assert str(raised.value) == (
+        "[400 Bad Request] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
+    )
+    assert raised.value.status_code == 400
+    assert raised.value.message_code == "XDMP-NOSUCHDB"
 
 
 ml_mocker.with_name("json-error")
@@ -999,73 +913,20 @@ ml_mocker.mock_get()
 
 @ml_mock
 @pytest.mark.parametrize("with_headers", [False, True])
-@pytest.mark.parametrize(
-    ("output_type", "expected_type", "expected"),
-    [
-        (
-            None,
-            dict,
-            {
-                "errorResponse": {
-                    "statusCode": 404,
-                    "status": "Not Found",
-                    "messageCode": "RESTAPI-NODOCUMENT",
-                    "message": (
-                        "RESTAPI-NODOCUMENT: (err:FOER0000) Resource o"
-                        "r document does not exist:  category: content"
-                        " message: /mlclient-response-parser/doc.xml"
-                    ),
-                },
-            },
-        ),
-        (
-            str,
-            str,
-            (
-                '{"errorResponse": {"statusCode": 404, "status'
-                '": "Not Found", "messageCode": "RESTAPI-NODOC'
-                'UMENT", "message": "RESTAPI-NODOCUMENT: (err:'
-                "FOER0000) Resource or document does not exist"
-                ":  category: content message: /mlclient-respo"
-                'nse-parser/doc.xml"}}'
-            ),
-        ),
-        (
-            bytes,
-            bytes,
-            (
-                b'{"errorResponse": {"statusCode": 404, "status'
-                b'": "Not Found", "messageCode": "RESTAPI-NODOC'
-                b'UMENT", "message": "RESTAPI-NODOCUMENT: (err:'
-                b"FOER0000) Resource or document does not exist"
-                b":  category: content message: /mlclient-respo"
-                b'nse-parser/doc.xml"}}'
-            ),
-        ),
-    ],
-)
-def test_parse_error_response_json(
-    ml,
-    output_type,
-    expected_type,
-    expected,
-    with_headers,
-):
+@pytest.mark.parametrize("output_type", [None, str, bytes])
+def test_parse_error_response_json(ml, output_type, with_headers):
     resp = ml.rest.documents.get("/mlclient-response-parser/doc.xml")
-    if with_headers:
-        headers, parsed_resp = MLResponseParser.parse_with_headers(
-            resp,
-            output_type=output_type,
-        )
-        assert headers == {
-            "Content-type": "application/json; charset=UTF-8",
-            "Content-Length": "241",
-        }
-    else:
-        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
 
-    assert isinstance(parsed_resp, expected_type)
-    assert parsed_resp == expected
+    with pytest.raises(MarkLogicError, match="RESTAPI-NODOCUMENT") as raised:
+        _parse(resp, output_type=output_type, with_headers=with_headers)
+
+    assert str(raised.value) == (
+        "[404 Not Found] (RESTAPI-NODOCUMENT) RESTAPI-NODOCUMENT: (err:FOER0000) "
+        "Resource or document does not exist:  category: content message: "
+        "/mlclient-response-parser/doc.xml"
+    )
+    assert raised.value.status_code == 404
+    assert raised.value.message_code == "RESTAPI-NODOCUMENT"
 
 
 ml_mocker.with_name("non-multipart-mixed-xml")
@@ -2278,28 +2139,83 @@ def test_parse_multiple_responses(ml, output_type, expected_items, with_headers)
         assert value == expected
 
 
+_ERROR_REQUEST = httpx.Request("POST", "http://localhost:8000/v1/eval")
+
+
+@pytest.mark.parametrize("with_headers", [False, True])
+@pytest.mark.parametrize("output_type", [None, str, bytes])
 @pytest.mark.parametrize(
-    ("output_type", "expected"),
+    ("status", "headers", "body"),
     [
-        (None, ""),
-        (str, ""),
-        (bytes, b""),
+        (401, {}, b""),
+        (503, {}, b"Service Unavailable"),
+        (500, {"Content-Type": "application/json"}, b"{broken"),
+        (
+            504,
+            {"Content-Type": "text/html"},
+            b"<html><head><title>504 Gateway Time-out</title></head></html>",
+        ),
+        (
+            502,
+            {"Content-Type": "application/xml"},
+            b"<error><reason>Bad Gateway</reason></error>",
+        ),
+    ],
+    ids=[
+        "empty-without-content-type",
+        "text-without-content-type",
+        "invalid-json",
+        "proxy-html-page",
+        "non-marklogic-xml",
     ],
 )
-def test_parse_non_marklogic_error_response_yields_empty(output_type, expected):
-    """A synthetic proxy error has no MarkLogic result body."""
-    resp = httpx.Response(
-        503,
-        headers={"Content-Type": "text/html"},
-        content=(
-            b"<html><head><title>503 Service Temporarily Un"
-            b"available</title></head></html>"
-        ),
-        request=httpx.Request("POST", "http://localhost:8000/v1/eval"),
-    )
-    parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
+def test_parse_raises_http_status_error_without_a_marklogic_error(
+    status,
+    headers,
+    body,
+    output_type,
+    with_headers,
+):
+    """Synthetic proxy and transport failures keep the original response."""
+    resp = httpx.Response(status, headers=headers, content=body, request=_ERROR_REQUEST)
 
-    assert parsed_resp == expected
+    with pytest.raises(httpx.HTTPStatusError, match=str(status)) as raised:
+        _parse(resp, output_type=output_type, with_headers=with_headers)
+
+    assert raised.value.response is resp
+
+
+@pytest.mark.parametrize("with_headers", [False, True])
+@pytest.mark.parametrize("output_type", [None, str, bytes])
+def test_parse_raises_marklogic_error_for_an_xml_error_without_message_code(
+    output_type,
+    with_headers,
+):
+    """A synthetic MarkLogic XML error lacking the optional message code."""
+    resp = httpx.Response(
+        500,
+        headers={"Content-Type": "application/xml; charset=UTF-8"},
+        content=(
+            b'<error-response xmlns="http://marklogic.com/xdmp/error">'
+            b"<status-code>500</status-code>"
+            b"<status>Internal Server Error</status>"
+            b"<message>Server failure</message>"
+            b"</error-response>"
+        ),
+        request=_ERROR_REQUEST,
+    )
+
+    with pytest.raises(MarkLogicError, match="Server failure") as raised:
+        _parse(resp, output_type=output_type, with_headers=with_headers)
+
+    assert str(raised.value) == "[500 Internal Server Error] Server failure"
+    assert raised.value.message_code is None
+
+
+def _parse(response, *, output_type, with_headers):
+    if with_headers:
+        return MLResponseParser.parse_with_headers(response, output_type=output_type)
+    return MLResponseParser.parse(response, output_type=output_type)
 
 
 @ml_mock

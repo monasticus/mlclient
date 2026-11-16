@@ -96,7 +96,6 @@ class TransactionService:
             database=self._database,
             timeout=timeout,
         )
-        MLResponseParser.raise_for_status(resp)
         return MLResponseParser.parse(resp)
 
     def commit(self, *, timeout=UNSET) -> None:
@@ -206,7 +205,9 @@ def open_transaction(
         If an HTTP connect, read, write or pool timeout expires after any
         configured retries are exhausted.
     MarkLogicError
-        If MarkLogic returns an error
+        If MarkLogic returns an error, or opening answers an unexpected success
+    httpx.HTTPStatusError
+        If an HTTP failure has no recognized MarkLogic error payload
     """
     transactions = TransactionsApi(api)
     resp = transactions.create(
@@ -290,7 +291,6 @@ class AsyncTransactionService:
             database=self._database,
             timeout=timeout,
         )
-        MLResponseParser.raise_for_status(resp)
         return MLResponseParser.parse(resp)
 
     async def commit(self, *, timeout=UNSET) -> None:
@@ -400,7 +400,9 @@ async def async_open_transaction(
         If an HTTP connect, read, write or pool timeout expires after any
         configured retries are exhausted.
     MarkLogicError
-        If MarkLogic returns an error
+        If MarkLogic returns an error, or opening answers an unexpected success
+    httpx.HTTPStatusError
+        If an HTTP failure has no recognized MarkLogic error payload
     """
     transactions = AsyncTransactionsApi(api)
     resp = await transactions.create(
@@ -415,6 +417,10 @@ async def async_open_transaction(
 
 def _txid_or_raise(resp: httpx.Response) -> str:
     if resp.status_code != httpx.codes.SEE_OTHER:
-        resp_body = MLResponseParser.parse(resp)
-        raise MarkLogicError(resp_body["errorResponse"])
+        MLResponseParser.raise_for_status(resp)
+        msg = (
+            "Expected 303 See Other when opening a transaction, "
+            f"got {resp.status_code}."
+        )
+        raise MarkLogicError(msg)
     return resp.headers["Location"].rsplit("/", 1)[-1]

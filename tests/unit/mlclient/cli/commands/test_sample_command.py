@@ -8,6 +8,7 @@ from cleo.testers.command_tester import CommandTester
 
 from mlclient import MLClientManager
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from mlclient.services import EvalService
@@ -58,6 +59,36 @@ def test_command_sample_sends_search_request():
 
     assert tester.execute("order --limit 2 -c content") == 0
     assert tester.io.fetch_output() == ""
+
+
+@respx.mock
+def test_command_sample_shows_a_waiting_indicator_on_a_terminal_stderr():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8100/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", "<order/>")
+    ml_mocker.mock_post()
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("order") == 0
+    assert tester.io.fetch_output() == "<order/>\n"
+    error = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8100" in error
+    assert error.endswith(ERASE_LINE)
+
+
+@respx.mock
+def test_command_sample_shows_no_waiting_indicator_when_stderr_is_not_a_terminal():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8100/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", "<order/>")
+    ml_mocker.mock_post()
+    tester = _get_tester()
+
+    assert tester.execute("order") == 0
+    assert tester.io.fetch_error() == ""
 
 
 @respx.mock

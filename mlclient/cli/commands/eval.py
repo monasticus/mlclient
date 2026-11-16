@@ -22,6 +22,7 @@ from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.exceptions import WrongParametersError
 
@@ -206,6 +207,8 @@ class EvalCommand(Command):
         rest_server = self.option("connection")
 
         mgr = MLClientManager(environment)
-        with get_client(mgr, rest_server) as ml:
-            self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
+        with (
+            get_client(mgr, rest_server) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             return ml.eval.execute(**eval_params)

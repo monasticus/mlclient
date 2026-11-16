@@ -16,6 +16,7 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_client
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.services.diagnostics.trace_events import TraceEvents, TraceEventsService
@@ -172,8 +173,9 @@ class TraceEventsCommand(Command):
             service = TraceEventsService(ml.rest)
             try:
                 if self.option("interactive"):
-                    return self._interactive(service, group)
-                result = self._run(service, group, event, enabled)
+                    return self._interactive(service, group, ml.http.base_url)
+                with waiting_for(self.io, ml.http.base_url):
+                    result = self._run(service, group, event, enabled)
             except (MarkLogicError, WrongParametersError, httpx.HTTPError) as exc:
                 self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
                 return 1
@@ -207,6 +209,7 @@ class TraceEventsCommand(Command):
         self,
         service: TraceEventsService,
         group: str,
+        url: str,
     ) -> int:
         """Prompt for the activation switch and enabled events, then apply changes.
 
@@ -221,28 +224,24 @@ class TraceEventsCommand(Command):
             The service bound to the connected REST App-Server
         group : str
             The group to target
+        url : str
+            The URL of the REST App-Server, shown while waiting for it
 
         Returns
         -------
         int
             0 on success, 1 when the prompt is cancelled
         """
-        current = service.get(group=group)
+        with waiting_for(self.io, url):
+            current = service.get(group=group)
         selected = self._ask_selection(current)
         if selected is None:
             self.line_error("Cancelled.")
             return 1
 
         selected = set(selected)
-        activated = _ACTIVATION_TOGGLE in selected
-        result = current
-        if current.activated and not activated:
-            result = service.set_activated(value=False, group=group)
-        for event in current.events:
-            if event not in selected:
-                result = service.set_event(event, enabled=False, group=group)
-        if activated and not current.activated:
-            result = service.set_activated(value=True, group=group)
+        with waiting_for(self.io, url):
+            result = self._apply_selection(service, group, current, selected)
 
         self._print(group, None, result, list_all=True)
         return 0
@@ -280,6 +279,42 @@ class TraceEventsCommand(Command):
             pointer="❯",  # noqa: RUF001
             instruction="(space toggles, enter confirms)",
         ).ask()
+
+    @staticmethod
+    def _apply_selection(
+        service: TraceEventsService,
+        group: str,
+        current: TraceEvents,
+        selected: set[object],
+    ) -> TraceEvents:
+        """Save the changes between the current state and the selection.
+
+        Parameters
+        ----------
+        service : TraceEventsService
+            The service bound to the connected REST App-Server
+        group : str
+            The group to target
+        current : TraceEvents
+            The state the selection was made from
+        selected : set[object]
+            The selected event names and activation sentinel
+
+        Returns
+        -------
+        TraceEvents
+            The resulting trace-event state
+        """
+        activated = _ACTIVATION_TOGGLE in selected
+        result = current
+        if current.activated and not activated:
+            result = service.set_activated(value=False, group=group)
+        for event in current.events:
+            if event not in selected:
+                result = service.set_event(event, enabled=False, group=group)
+        if activated and not current.activated:
+            result = service.set_activated(value=True, group=group)
+        return result
 
     @staticmethod
     def _run(

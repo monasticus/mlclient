@@ -105,6 +105,18 @@ Server commands default to the `local` environment; `-e / --environment` selects
 `-e / --environment`, `-c / --connection` and `-d / --database` mean the same in every command that takes them, including `env show -e`. Other short flags are specific to their command.
 
 
+
+## Output streams
+
+stdout carries only the command's result: eval and invoke results, the response
+body of `http`, the MarkLogic log lines of `logs`, and so on. Everything about
+the tool itself goes to stderr: warnings and errors. A result can be redirected or piped without extra lines:
+
+```bash
+ml eval -x 'fn:current-dateTime()' > now.txt
+ml http get /v1/documents uri=/orders/1.json | jq .
+```
+
 ## Global options
 
 These options apply to every command. Command-specific flags are described on
@@ -126,7 +138,8 @@ Suppress command output.
 
 ### `--verbose`, `-v`
 
-Increase verbosity; repeat as `-vv` or `-vvv` for more detail.
+Increase verbosity; repeat as `-vv` or `-vvv` for more detail. `-v` also prints on
+stderr which App Server a request is sent to.
 
 ### `--ansi` and `--no-ansi`
 

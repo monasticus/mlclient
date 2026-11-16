@@ -23,6 +23,7 @@ from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.cli.formatting import prettify
 from mlclient.clients.http import HttpClient
@@ -140,9 +141,12 @@ class HttpCommand(Command):
         if len(environments) > 1:
             return self._request_in_environments(environments, request)
         mgr = MLClientManager(environments[0])
-        with get_client(mgr, self.option("connection")) as ml:
+        with (
+            get_client(mgr, self.option("connection")) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             response = ml.http.request(**request)
-            output = self._render(method, response)
+        output = self._render(method, response)
 
         self._io.write(output, new_line=True, type=Type.RAW)
         if response.is_error:

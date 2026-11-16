@@ -2,7 +2,7 @@
 
 It exports an implementation for 'logs' command:
     * LogsCommand
-        Sends a GET request to the /manage/v2/logs endpoint.
+        Prints MarkLogic log lines or lists log files.
 """
 
 from __future__ import annotations
@@ -34,7 +34,9 @@ if TYPE_CHECKING:
 
 
 class LogsCommand(Command):
-    """Sends a GET request to the /manage/v2/logs endpoint.
+    """Prints MarkLogic log lines or lists log files.
+
+    Uses the /manage/v2/logs endpoint of the Manage App Server.
 
     Usage:
       logs [options]
@@ -62,7 +64,8 @@ class LogsCommand(Command):
     """
 
     name: str = "logs"
-    description: str = "Sends a GET request to the /manage/v2/logs endpoint"
+    description: str = "Prints MarkLogic log lines or lists log files"
+    help: str = "Uses the /manage/v2/logs endpoint of the Manage App Server."
     options: list[Option] = [
         option(
             "environment",

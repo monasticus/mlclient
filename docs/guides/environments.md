@@ -93,7 +93,7 @@ See [async support](async.md) for running async code and
 Commands use `local` by default:
 
 ```sh
-ml env show local
+ml env show
 ml eval -x '"Hello World!"'
 ml logs
 ```

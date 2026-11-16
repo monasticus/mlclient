@@ -44,7 +44,7 @@ searching the project.
 
 Overwrite the target file when it already exists.
 
-### `--edit`, `-e`
+### `--edit`
 
 Open the copy in your editor after copying, as if by [`env edit`](edit.md). The
 editor is taken from `$VISUAL`, then `$EDITOR`, falling back to `vi`.

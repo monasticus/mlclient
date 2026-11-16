@@ -13,11 +13,13 @@ It exports a single class and single function:
 from __future__ import annotations
 
 import logging
+import sys
 from typing import ClassVar
 
 from cleo.application import Application
 from cleo.formatters.formatter import Formatter
 from cleo.formatters.style import Style
+from cleo.io.inputs.argv_input import ArgvInput
 from cleo.io.inputs.input import Input
 from cleo.io.io import IO
 from cleo.io.outputs.output import Output, Verbosity
@@ -27,6 +29,7 @@ from mlclient.cli.commands.env_compare import EnvCompareCommand
 from mlclient.cli.commands.env_copy import EnvCopyCommand
 from mlclient.cli.commands.env_edit import EnvEditCommand
 from mlclient.cli.commands.env_init import EnvInitCommand
+from mlclient.cli.commands.env_list import EnvListCommand
 from mlclient.cli.commands.env_remove import EnvRemoveCommand
 from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
@@ -60,6 +63,7 @@ class MLCLIentApplication(Application):
         self.add(HttpCommand())
         self.add(SampleCommand())
         self.add(EnvInitCommand())
+        self.add(EnvListCommand())
         self.add(EnvShowCommand())
         self.add(EnvEditCommand())
         self.add(EnvCopyCommand())
@@ -178,7 +182,18 @@ class CleoAppHandler(logging.Handler):
 def main() -> int:
     """Run an MLCLIent Application."""
     setup_logger()
-    return MLCLIentApplication().run()
+    return MLCLIentApplication().run(_command_line_input())
+
+
+def _command_line_input() -> ArgvInput:
+    """Read the command line, running ``list`` for a bare ``-h`` or ``--help``.
+
+    cleo would print the help of the ``list`` command instead of the list itself.
+    """
+    script, *arguments = sys.argv
+    if arguments in (["-h"], ["--help"]):
+        arguments = ["list"]
+    return ArgvInput([script, *arguments])
 
 
 if __name__ == "__main__":

@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime
 from time import sleep
 from typing import ClassVar
-from xml.etree import ElementTree
 from uuid import uuid4
+from xml.etree import ElementTree
 
 import httpx
 import pytest
@@ -246,7 +246,7 @@ class TestAdministration:
     ):
         resp = ml.admin.post_instance_admin(cls.ADMIN_USER, data_format="json")
         assert resp.status_code == httpx.codes.BAD_REQUEST
-        error = MLResponseParser.parse(resp)["errorResponse"]
+        error = resp.json()["errorResponse"]
         assert error["message"] == "Initialization cannot be repeated."
 
     @classmethod
@@ -297,8 +297,14 @@ class TestAdministration:
         message_code: str,
     ):
         assert resp.status_code == status_code
-        error = MLResponseParser.parse(resp)["errorResponse"]
-        assert error["messageCode"] == message_code
+        if "json" in resp.headers["content-type"]:
+            actual_code = resp.json()["errorResponse"]["messageCode"]
+        else:
+            error = ElementTree.fromstring(resp.content)
+            actual_code = error.findtext(
+                "{http://marklogic.com/xdmp/error}message-code",
+            )
+        assert actual_code == message_code
 
 
 class TestTransactionsEndpoint:
@@ -333,7 +339,7 @@ class TestTransactionsEndpoint:
         status_resp = ml_client.rest.transactions.get(txid, data_format="json")
 
         assert status_resp.status_code == httpx.codes.BAD_REQUEST
-        error = MLResponseParser.parse(status_resp)["errorResponse"]
+        error = status_resp.json()["errorResponse"]
         assert error["messageCode"] == "REST-INVALIDPARAM"
 
     @classmethod
@@ -478,9 +484,12 @@ class TestHostsManagement:
     ):
         resp = ml.manage.hosts.post(host, {"state": "restart", "failover": "yes"})
         assert resp.status_code == httpx.codes.BAD_REQUEST
-        err = MLResponseParser.parse(resp)["errorResponse"]
-        assert err["messageCode"] == "REST-INVALIDTYPE"
-        assert err["message"] == (
+        err = ElementTree.fromstring(resp.content)
+        namespace = {"err": "http://marklogic.com/xdmp/error"}
+        assert (
+            err.findtext("err:message-code", namespaces=namespace) == "REST-INVALIDTYPE"
+        )
+        assert err.findtext("err:message", namespaces=namespace) == (
             "REST-INVALIDTYPE: (rest:INVALIDTYPE) "
             "Invalid type in failover: yes is not a value of type boolean"
         )

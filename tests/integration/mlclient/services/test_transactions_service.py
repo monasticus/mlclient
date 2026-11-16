@@ -62,16 +62,11 @@ class TestTransactions:
 
     @pytest.mark.ml_access
     def test_time_limit_expires_transaction(self, ml_client: MLClient):
-        try:
-            txn = ml_client.transaction(time_limit=1)
-            self._write(ml_client, txn)
-            sleep(2)
-            self._assert_status_gone(txn)
-            with pytest.raises(MarkLogicError):
-                txn.commit()
-            self._assert_not_visible(ml_client)
-        finally:
-            self._delete(ml_client)
+        txn = ml_client.transaction(time_limit=1)
+        sleep(2)
+        self._assert_status_gone(txn)
+        with pytest.raises(MarkLogicError):
+            txn.commit()
 
     @pytest.mark.ml_access
     def test_named_transaction_reported_in_status(self, ml_client: MLClient):

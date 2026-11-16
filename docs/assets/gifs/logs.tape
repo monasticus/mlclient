@@ -25,7 +25,7 @@ Set TypingSpeed 1ms
 Type `unset NO_COLOR; demo_dir=$(mktemp -d /tmp/mlclient-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT`
 Enter
 Wait
-Type `cluster_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ml_cluster_node1); mkdir .mlclient; printf 'host: %s\nusername: admin\npassword: admin\nauth: digest\nprotocol: http\napp-servers:\n  - id: app\n    port: 8010\n    rest: true\n' "$cluster_host" > .mlclient/mlclient-local.yaml`
+Type `cluster_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ml_cluster_node1); mkdir .mlclient; printf 'host: %s\nusername: admin\npassword: admin\nauth: digest\nprotocol: http\napp-servers:\n  - id: app\n    port: 8010\n    rest: true\n' "$cluster_host" > .mlclient/mlclient-local.yaml; dev_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlclient_cts_query_12); printf 'host: %s\nusername: admin\npassword: admin\n' "$dev_host" > .mlclient/mlclient-dev.yaml`
 Enter
 Wait
 Type "clear"
@@ -35,7 +35,7 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type `ml logs -s app --from 17:00 --regex "Bookstore: request"`
+Type `ml logs -s app --from 17:19 --regex "Bookstore: request"`
 Enter
 Wait
 Wait+Screen /Bookstore:/
@@ -50,7 +50,7 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type `ml logs -s 8010 --all-hosts --from 17:00 --regex 'Bookstore: request'`
+Type `ml logs -s 8010 --all-hosts --from 17:19 --regex 'Bookstore: request'`
 Enter
 Wait
 Wait+Screen /ml_cluster_node1/
@@ -79,7 +79,7 @@ Wait
 Sleep 500ms
 Set TypingSpeed 50ms
 Show
-Type "ml logs -s 8011 --log-type request"
+Type "ml logs -e dev -s 8011 --log-type request"
 Enter
 Wait
 Sleep 4s

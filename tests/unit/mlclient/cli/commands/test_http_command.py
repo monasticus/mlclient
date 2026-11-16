@@ -236,6 +236,24 @@ def test_command_http_error_without_body_reports_status_line_on_stderr():
 
 
 @respx.mock
+def test_command_http_clears_waiting_indicator_before_reporting_an_empty_error():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/ping")
+    ml_mocker.with_response_code(404)
+    ml_mocker.mock_get()
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("GET /v1/ping") == 1
+    assert tester.io.fetch_output() == ""
+    error = tester.io.fetch_error()
+    assert "Waiting for http://localhost:8002" in error
+    assert error.endswith(
+        ERASE_LINE + "HTTP 404 Not Found for http://localhost:8002/v1/ping\n",
+    )
+
+
+@respx.mock
 def test_command_http_include_flag_prints_error_response_only():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/nope")

@@ -1047,9 +1047,14 @@ class Metadata:
                 cls._RAPI_NS_URI: None,
                 cls._PROP_NS_URI: None,
             },
+            postprocessor=cls._skip_namespace_declarations,
         )
         metadata_node = parsed["metadata"] or {}
-        raw_metadata = {k: v for k, v in metadata_node.items() if v is not None}
+        raw_metadata = {
+            k: v
+            for k, v in metadata_node.items()
+            if v is not None and not k.startswith("@")
+        }
         for items, item in cls._XML_FILE_MAPPINGS.items():
             if items in raw_metadata:
                 values = raw_metadata[items][item]
@@ -1081,6 +1086,17 @@ class Metadata:
         if "quality" in raw_metadata:
             raw_metadata["quality"] = int(raw_metadata["quality"])
         return raw_metadata
+
+    @staticmethod
+    def _skip_namespace_declarations(
+        _path: list,
+        key: str,
+        value: Any,
+    ) -> tuple[str, Any] | None:
+        """Drop the ``@xmlns`` key xmltodict 1.x adds for namespace declarations."""
+        if key == "@xmlns":
+            return None
+        return key, value
 
     @classmethod
     def _validate_xml_metadata(

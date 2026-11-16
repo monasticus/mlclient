@@ -1085,6 +1085,19 @@ def test_xml_with_only_root_element():
     assert metadata.metadata_values() == {}
 
 
+def test_xml_namespace_declarations_are_not_read_as_properties():
+    raw = (
+        f'<rapi:metadata xmlns:rapi="{_RAPI_NS}">'
+        f'<prop:properties xmlns:prop="{_PROP_NS}">'
+        "<color>red</color>"
+        "</prop:properties>"
+        "</rapi:metadata>"
+    ).encode()
+    metadata = Metadata(raw=raw)
+
+    assert metadata.properties() == {"color": "red"}
+
+
 def _assert_expected_alternative_lines_in_string(
     string_value: str,
     expected_alternative_lines: list[list[str]],

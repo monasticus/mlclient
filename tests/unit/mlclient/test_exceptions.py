@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 from mlclient.exceptions import (
@@ -130,3 +132,19 @@ def test_marklogic_error_converts_a_management_api_status_code():
         "[400 Bad Request] (REST-INVALIDTYPE) "
         "REST-INVALIDTYPE: (rest:INVALIDTYPE) Invalid type in view"
     )
+
+
+@pytest.mark.parametrize("field", ["status_code", "status", "message_code", "message"])
+def test_marklogic_error_details_are_read_only(field):
+    error = MarkLogicError("raw error")
+
+    expected = (
+        f"can't set attribute '{field}'"
+        if sys.version_info < (3, 11)
+        else f"property '{field}' of 'MarkLogicError' object has no setter"
+    )
+    with pytest.raises(AttributeError, match=field) as raised:
+        setattr(error, field, None)
+
+    assert str(raised.value) == expected
+    assert getattr(error, field) is None

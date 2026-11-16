@@ -162,27 +162,71 @@ class MarkLogicError(MLClientError):
             An error response object, with or without the ``errorResponse``
             envelope, or a raw error message
         """
-        self.status_code: int | None = None
-        self.status: str | None = None
-        self.message_code: str | None = None
-        self.message: str | None = None
+        self._status_code: int | None = None
+        self._status: str | None = None
+        self._message_code: str | None = None
+        self._message: str | None = None
         if isinstance(error, dict):
             error = error.get("errorResponse", error)
             status_code = error.get("statusCode")
-            self.status_code = int(status_code) if str(status_code).isdigit() else None
-            self.status = error.get("status")
-            self.message_code = error.get("messageCode")
-            self.message = error.get("message")
-            if self.message_code:
+            self._status_code = int(status_code) if str(status_code).isdigit() else None
+            self._status = error.get("status")
+            self._message_code = error.get("messageCode")
+            self._message = error.get("message")
+            if self._message_code:
                 error_msg = (
-                    f"[{status_code} {self.status}] "
-                    f"({self.message_code}) {self.message}"
+                    f"[{status_code} {self._status}] "
+                    f"({self._message_code}) {self._message}"
                 )
             else:
-                error_msg = f"[{status_code} {self.status}] {self.message}"
+                error_msg = f"[{status_code} {self._status}] {self._message}"
         else:
             error_msg = error
         super().__init__(error_msg)
+
+    @property
+    def status_code(self) -> int | None:
+        """HTTP status code reported by MarkLogic.
+
+        Returns
+        -------
+        int | None
+            The value extracted from the error response, or None for a raw message.
+        """
+        return self._status_code
+
+    @property
+    def status(self) -> str | None:
+        """HTTP status text reported by MarkLogic.
+
+        Returns
+        -------
+        str | None
+            The value extracted from the error response, or None for a raw message.
+        """
+        return self._status
+
+    @property
+    def message_code(self) -> str | None:
+        """MarkLogic error code, when present.
+
+        Returns
+        -------
+        str | None
+            The value extracted from the error response, or None for a raw message.
+        """
+        return self._message_code
+
+    @property
+    def message(self) -> str | None:
+        """MarkLogic error message, when present.
+
+        Returns
+        -------
+        str | None
+            The value extracted from the error response, or None for a raw message.
+        """
+        return self._message
 
 
 class UnsupportedFileExtensionError(MLClientError):

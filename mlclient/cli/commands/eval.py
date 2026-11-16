@@ -7,7 +7,6 @@ It exports an implementation for 'eval' command:
 
 from __future__ import annotations
 
-import logging
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
@@ -26,8 +25,6 @@ from mlclient.cli.commands._multi_env_common import (
 from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.exceptions import WrongParametersError
-
-logger = logging.getLogger(__name__)
 
 
 class EvalCommand(Command):
@@ -207,7 +204,8 @@ class EvalCommand(Command):
         rest_server = self.option("connection")
 
         mgr = MLClientManager(environment)
-        with get_client(mgr, rest_server) as ml:
-            logger.info("Evaluating code using REST App-Server %s", ml.http.base_url)
-            with waiting_for(self.io, ml.http.base_url):
-                return ml.eval.execute(**eval_params)
+        with (
+            get_client(mgr, rest_server) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
+            return ml.eval.execute(**eval_params)

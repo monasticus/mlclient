@@ -141,10 +141,12 @@ class HttpCommand(Command):
         if len(environments) > 1:
             return self._request_in_environments(environments, request)
         mgr = MLClientManager(environments[0])
-        with get_client(mgr, self.option("connection")) as ml:
-            with waiting_for(self.io, ml.http.base_url):
-                response = ml.http.request(**request)
-            output = self._render(method, response)
+        with (
+            get_client(mgr, self.option("connection")) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
+            response = ml.http.request(**request)
+        output = self._render(method, response)
 
         self._io.write(output, new_line=True, type=Type.RAW)
         if response.is_error:

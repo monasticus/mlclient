@@ -105,19 +105,12 @@ Server commands default to the `local` environment; `-e / --environment` selects
 
 stdout carries only the command's result: eval and invoke results, the response
 body of `http`, the MarkLogic log lines of `logs`, and so on. Everything about
-the tool itself goes to stderr: warnings, errors and, with `-v`, which App Server
-a request is sent to. A result can be redirected or piped without extra lines:
+the tool itself goes to stderr: warnings and errors. A result can be redirected or piped without extra lines:
 
 ```bash
 ml eval -x 'fn:current-dateTime()' > now.txt
 ml http get /v1/documents uri=/orders/1.json | jq .
 ```
-
-While a single-environment command waits for MarkLogic, stderr shows a waiting
-indicator with the URL and the seconds waited, erased before the result is
-printed. It appears only when stderr is a terminal, so `2> file`, CI jobs and
-scripts never see it. `url` sends no request and shows none.
-
 
 ## Global options
 

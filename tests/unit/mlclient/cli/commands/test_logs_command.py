@@ -1345,7 +1345,7 @@ def _hosts_body(
 
 @pytest.mark.usefixtures("mlclient_logger")
 @respx.mock
-def test_command_logs_reports_the_log_file_on_stderr_when_verbose():
+def test_command_logs_keeps_verbose_output_free_of_announcements():
     _mock_error_logs()
     app = MLCLIentApplication()
     app.auto_exits(False)
@@ -1353,10 +1353,9 @@ def test_command_logs_reports_the_log_file_on_stderr_when_verbose():
 
     assert tester.execute("logs -e test -s 8002 -v") == 0
     assert tester.io.fetch_output() == ("2023-09-01T00:00:00Z INFO: Log message 1\n")
-    assert (
-        "Getting 8002_ErrorLog.txt logs using Manage App-Server http://localhost:8002"
-        in tester.io.fetch_error()
-    )
+    error = tester.io.fetch_error()
+    assert "Sending a request... GET /manage/v2/logs" in error
+    assert "Getting 8002_ErrorLog.txt" not in error
 
 
 @respx.mock

@@ -228,7 +228,7 @@ def test_command_invoke_no_pretty_preserves_xml():
 
 @pytest.mark.usefixtures("mlclient_logger")
 @respx.mock
-def test_command_invoke_reports_the_app_server_on_stderr_when_verbose():
+def test_command_invoke_keeps_verbose_output_free_of_announcements():
     _mock_invoke_result("hello")
     app = MLCLIentApplication()
     app.auto_exits(False)
@@ -236,10 +236,9 @@ def test_command_invoke_reports_the_app_server_on_stderr_when_verbose():
 
     assert tester.execute(f"invoke {MODULE} -v") == 0
     assert tester.io.fetch_output() == "hello\n"
-    assert (
-        "Invoking module using REST App-Server http://localhost:8002"
-        in tester.io.fetch_error()
-    )
+    error = tester.io.fetch_error()
+    assert "Sending a request... POST /v1/invoke" in error
+    assert "Invoking module" not in error
 
 
 @respx.mock

@@ -6,9 +6,9 @@ from cleo.testers.application_tester import ApplicationTester
 from cleo.testers.command_tester import CommandTester
 
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
-from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -343,7 +343,7 @@ def test_command_eval_no_pretty_preserves_xml():
 
 @pytest.mark.usefixtures("mlclient_logger")
 @respx.mock
-def test_command_eval_reports_the_app_server_on_stderr_when_verbose():
+def test_command_eval_keeps_verbose_output_free_of_announcements():
     _mock_eval_result("<root/>")
     app = MLCLIentApplication()
     app.auto_exits(False)
@@ -351,10 +351,9 @@ def test_command_eval_reports_the_app_server_on_stderr_when_verbose():
 
     assert tester.execute("eval -x '<root/>' -v") == 0
     assert tester.io.fetch_output() == "<root/>\n"
-    assert (
-        "Evaluating code using REST App-Server http://localhost:8002"
-        in tester.io.fetch_error()
-    )
+    error = tester.io.fetch_error()
+    assert "Sending a request... POST /v1/eval" in error
+    assert "Evaluating code" not in error
 
 
 @pytest.mark.usefixtures("mlclient_logger")

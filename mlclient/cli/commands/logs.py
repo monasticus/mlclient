@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import asyncio
 import heapq
-import logging
 from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING, ClassVar
 
@@ -32,8 +31,6 @@ if TYPE_CHECKING:
     from cleo.ui.table_separator import TableSeparator
 
     from mlclient._client import AsyncMLClient
-
-logger = logging.getLogger(__name__)
 
 
 class LogsCommand(Command):
@@ -188,11 +185,12 @@ class LogsCommand(Command):
     ) -> None:
         """Print MarkLogic log files and their Management API download URLs."""
         manager = MLClientManager(self.option("environment"))
-        with manager.get_client("manage") as ml:
+        with (
+            manager.get_client("manage") as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             base_url = ml.http.base_url
-            logger.info("Getting logs list using Manage App-Server %s", base_url)
-            with waiting_for(self.io, base_url):
-                logs_list = LogsService(ml.manage).list(self.option("host"))
+            logs_list = LogsService(ml.manage).list(self.option("host"))
         app_port = self._get_app_port(manager)
         for host in sorted(logs_list["grouped"]):
             rows = list(self._get_log_files_rows(logs_list, host, app_port, base_url))
@@ -368,10 +366,6 @@ class LogsCommand(Command):
         manager = MLClientManager(self.option("environment"))
         app_port = self._get_app_port(manager)
         async with manager.get_async_client("manage") as ml:
-            logger.info(
-                "Getting error logs from every host using Manage App-Server %s",
-                ml.http.base_url,
-            )
             with waiting_for(self.io, ml.http.base_url):
                 hosts = await self._get_hosts(ml)
             self._warn_if_unfiltered(hosts)
@@ -584,25 +578,18 @@ class LogsCommand(Command):
         regex = self.option("regex")
         host = self.option("host")
 
-        with manager.get_client("manage") as ml:
-            if app_port is None:
-                file_name = f"{log_type.value}.txt"
-            else:
-                file_name = f"{app_port}_{log_type.value}.txt"
-            logger.info(
-                "Getting %s logs using Manage App-Server %s",
-                file_name,
-                ml.http.base_url,
+        with (
+            manager.get_client("manage") as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
+            return LogsService(ml.manage).get(
+                app_port,
+                log_type,
+                start_time=start_time,
+                end_time=end_time,
+                regex=regex,
+                host=host,
             )
-            with waiting_for(self.io, ml.http.base_url):
-                return LogsService(ml.manage).get(
-                    app_port,
-                    log_type,
-                    start_time=start_time,
-                    end_time=end_time,
-                    regex=regex,
-                    host=host,
-                )
 
     def _format_logs(
         self,

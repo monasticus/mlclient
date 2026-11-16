@@ -1,5 +1,7 @@
 # env list
 
+![Environment list demonstration](../../assets/gifs/env-list.gif)
+
 List the environments of the nearest `.mlclient` directory, one name per line.
 
 ```sh

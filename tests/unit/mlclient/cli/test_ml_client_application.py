@@ -21,14 +21,15 @@ def _restore_mlclient_logger():
     logger.handlers, logger.level = handlers, level
 
 
-def test_main_sys_exit_1():
+def test_main_sys_exit_1(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["ml", "--unknown-option"])
     with pytest.raises(SystemExit) as err:
         main()
     assert err.value.args[0] == 1
 
 
-def test_main_sys_exit_0():
-    sys.argv = ["ml"]
+def test_main_sys_exit_0(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["ml"])
     with pytest.raises(SystemExit) as err:
         main()
     assert err.value.args[0] == 0

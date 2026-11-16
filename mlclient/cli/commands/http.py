@@ -63,9 +63,7 @@ class HttpCommand(Command):
       endpoint
             The REST endpoint to call (e.g. /v1/documents)
       params
-            Query params (key=value) and headers (key:value); prefixed MarkLogic
-            params (rs:, trans:, perm:, prop:, value:, bind:, get:, put:, post:,
-            delete:) with = are query params, e.g. rs:view=versions
+            Query params (key=value, e.g. rs:view=versions) and headers (key:value)
 
     Options:
       -e, --environment=ENVIRONMENT
@@ -95,9 +93,7 @@ class HttpCommand(Command):
         ),
         argument(
             "params",
-            "Query params (key=value) and headers (key:value); prefixed "
-            "MarkLogic params (rs:, trans:, perm:, prop:, value:, bind:, get:, "
-            "put:, post:, delete:) with = are query params, e.g. rs:view=versions",
+            "Query params (key=value, e.g. rs:view=versions) and headers (key:value)",
             optional=True,
             multiple=True,
         ),

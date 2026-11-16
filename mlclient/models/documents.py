@@ -1050,7 +1050,11 @@ class Metadata:
             postprocessor=cls._skip_namespace_declarations,
         )
         metadata_node = parsed["metadata"] or {}
-        raw_metadata = {k: v for k, v in metadata_node.items() if v is not None}
+        raw_metadata = {
+            k: v
+            for k, v in metadata_node.items()
+            if v is not None and not k.startswith("@")
+        }
         for items, item in cls._XML_FILE_MAPPINGS.items():
             if items in raw_metadata:
                 values = raw_metadata[items][item]

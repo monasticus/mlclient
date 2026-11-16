@@ -35,10 +35,11 @@ def test_from_json_file():
     assert not diff
 
 
-def test_from_xml_file():
+@pytest.mark.parametrize("filename", ["metadata.xml", "metadata-server-response.xml"])
+def test_from_xml_file(filename):
     metadata_file_path = resources_utils.get_test_resource_path(
         __file__,
-        "metadata.xml",
+        filename,
     )
 
     actual_metadata = Metadata.from_file(metadata_file_path)

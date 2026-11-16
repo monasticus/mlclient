@@ -1,7 +1,7 @@
 """A waiting indicator for commands that send a request to one environment.
 
 While the request runs, stderr shows a spinner with the URL and the seconds
-waited so far, e.g. ``- Waiting for http://localhost:8002 2.4 s``. It is shown
+waited so far, e.g. ``●·· Waiting for http://localhost:8002 2.4 s``. It is shown
 only when stderr is decorated (a terminal), so redirected output, CI and
 scripts never see it, and it is erased before the command prints its result.
 """
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
     from cleo.io.io import IO
 
-_REFRESH_INTERVAL_SECONDS = 0.1
+_REFRESH_INTERVAL_SECONDS = 0.15
 ERASE_LINE = "\r\x1b[2K"
 
 
@@ -49,7 +49,12 @@ def waiting_for(
     if not output.is_decorated():
         yield
         return
-    indicator = ProgressIndicator(output, fmt="{indicator} {message}", interval=0)
+    indicator = ProgressIndicator(
+        output,
+        fmt="{indicator} {message}",
+        interval=0,
+        values=["●··", "·●·", "··●", "·●·"],
+    )
     started = time.perf_counter()
     indicator.start(_waiting_message(url, 0.0))
     stopped = threading.Event()

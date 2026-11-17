@@ -190,7 +190,7 @@ def test_flags_fall_back_to_global_outside_home(
     monkeypatch.chdir(outside_home)
 
     tester = _get_tester()
-    tester.execute("dev")
+    tester.execute("-e dev")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0

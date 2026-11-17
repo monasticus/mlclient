@@ -1377,7 +1377,7 @@ def test_command_logs_shows_a_waiting_indicator_on_a_terminal_stderr():
     )
     error = tester.io.fetch_error()
     assert "Waiting for http://localhost:8002" in error
-    assert error.endswith(ERASE_LINE)
+    assert error.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
 
 
 @respx.mock
@@ -1414,7 +1414,7 @@ def test_command_logs_list_shows_a_waiting_indicator_on_a_terminal_stderr():
     assert tester.io.fetch_output() == Path(expected_output_path).read_text()
     error = tester.io.fetch_error()
     assert "Waiting for http://localhost:8002" in error
-    assert error.endswith(ERASE_LINE)
+    assert error.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
 
 
 @respx.mock
@@ -1445,7 +1445,7 @@ def test_command_logs_all_hosts_shows_a_waiting_indicator_on_a_terminal_stderr()
     )
     error = tester.io.fetch_error()
     assert error.count("Waiting for http://ml_cluster_node1:8002") >= 2
-    assert error.endswith(ERASE_LINE)
+    assert error.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
 
 
 def _mock_error_logs() -> None:

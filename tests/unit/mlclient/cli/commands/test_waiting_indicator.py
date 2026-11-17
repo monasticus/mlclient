@@ -22,22 +22,28 @@ def test_waiting_for_shows_the_url_on_a_decorated_stderr():
     assert io.fetch_output() == ""
 
 
-def test_waiting_for_erases_its_line_when_the_block_ends():
+def test_waiting_for_leaves_elapsed_time_when_the_block_ends(monkeypatch):
+    readings = iter([10.0])
+    monkeypatch.setattr(time, "perf_counter", lambda: next(readings, 10.3))
     io = BufferedIO(decorated=True)
 
     with waiting_for(io, URL):
         pass
 
-    assert io.fetch_error().endswith(ERASE_LINE)
+    assert io.fetch_error().endswith(ERASE_LINE + "Elapsed: 0.300 s\n")
 
 
-def test_waiting_for_erases_its_line_when_the_block_raises():
+def test_waiting_for_leaves_elapsed_time_when_the_block_raises(monkeypatch):
+    readings = iter([10.0])
+    monkeypatch.setattr(time, "perf_counter", lambda: next(readings, 10.3))
     io = BufferedIO(decorated=True)
 
-    with pytest.raises(RuntimeError), waiting_for(io, URL):
-        raise RuntimeError
+    with pytest.raises(RuntimeError, match="boom") as error, waiting_for(io, URL):
+        raise RuntimeError("boom")
 
-    assert io.fetch_error().endswith(ERASE_LINE)
+    assert str(error.value) == "boom"
+
+    assert io.fetch_error().endswith(ERASE_LINE + "Elapsed: 0.300 s\n")
 
 
 def test_waiting_for_counts_the_seconds_waited():

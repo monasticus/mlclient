@@ -70,7 +70,7 @@ def test_command_log_level_shows_a_waiting_indicator_on_a_terminal_stderr():
     assert tester.io.fetch_output() == "Group: Default\nFile Log Level: info\n"
     error = tester.io.fetch_error()
     assert "Waiting for http://localhost:8002" in error
-    assert error.endswith(ERASE_LINE)
+    assert error.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
 
 
 @respx.mock

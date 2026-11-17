@@ -3,7 +3,8 @@
 While the request runs, stderr shows a spinner with the URL and the seconds
 waited so far, e.g. ``●·· Waiting for http://localhost:8002 2.4 s``. It is shown
 only when stderr is decorated (a terminal), so redirected output, CI and
-scripts never see it, and it is erased before the command prints its result.
+scripts never see it. When waiting ends, the line shows the elapsed time
+before the command prints its result or reports an error.
 """
 
 from __future__ import annotations
@@ -43,7 +44,7 @@ def waiting_for(
     ------
     None
         Control to the block that sends the request. The indicator line is
-        erased when the block ends, also when it raises.
+        replaced with the elapsed time when the block ends, also when it raises.
     """
     output = io.error_output
     if not output.is_decorated():
@@ -71,7 +72,9 @@ def waiting_for(
     finally:
         stopped.set()
         spinner.join()
+        elapsed = time.perf_counter() - started
         output.write(ERASE_LINE)
+        output.write_line(f"Elapsed: {elapsed:.3f} s")
 
 
 def _waiting_message(

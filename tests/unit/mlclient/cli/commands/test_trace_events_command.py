@@ -89,7 +89,7 @@ def test_shows_a_waiting_indicator_on_a_terminal_stderr(mocker, ml_config):
     assert tester.io.fetch_output() == "Group: Default\nTrace Events Activated: false\n"
     error = tester.io.fetch_error()
     assert "Waiting for http://localhost:8002" in error
-    assert error.endswith(ERASE_LINE)
+    assert error.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
 
 
 @respx.mock
@@ -510,10 +510,10 @@ def test_interactive_hides_the_waiting_indicator_while_prompting(mocker, ml_conf
 
     assert tester.execute("-e test -i") == 0
     assert "Waiting for http://localhost:8002" in error_at_prompt[0]
-    assert error_at_prompt[0].endswith(ERASE_LINE)
+    assert error_at_prompt[0].rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
     error_after_prompt = tester.io.fetch_error()
     assert "Waiting for http://localhost:8002" in error_after_prompt
-    assert error_after_prompt.endswith(ERASE_LINE)
+    assert error_after_prompt.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
 
 
 @respx.mock

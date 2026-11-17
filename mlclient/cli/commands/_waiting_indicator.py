@@ -1,7 +1,7 @@
 """A waiting indicator for commands that send a request to one environment.
 
 While the request runs, stderr shows a spinner with the URL and the seconds
-waited so far, e.g. ``●·· Request to http://localhost:8002 2.4 s``. It is shown
+waited so far, e.g. ``●·· Request to http://localhost:8002 | 2.4 s``. It is shown
 only when stderr is decorated (a terminal), so redirected output, CI and
 scripts never see it. When waiting ends, the line shows the elapsed time
 before the command prints its result or reports an error.
@@ -61,13 +61,13 @@ def waiting_for(
         values=["●··", "·●·", "··●", "·●·"],
     )
     started = time.perf_counter()
-    indicator.start(f"{_request_message(url, progress)} 0.0 s")
+    indicator.start(f"{_request_message(url, progress)} | 0.0 s")
     stopped = threading.Event()
 
     def spin() -> None:
         while not stopped.wait(_REFRESH_INTERVAL_SECONDS):
             indicator.set_message(
-                f"{_request_message(url, progress)} "
+                f"{_request_message(url, progress)} | "
                 f"{time.perf_counter() - started:.1f} s",
             )
             indicator.advance()
@@ -82,7 +82,7 @@ def waiting_for(
         elapsed = time.perf_counter() - started
         output.write(ERASE_LINE)
         output.write_line(
-            f"<fg=blue>    {_request_message(url, progress)} "
+            f"<fg=blue>●●● {_request_message(url, progress)} | "
             f"Elapsed: {elapsed:.3f} s</>",
         )
 

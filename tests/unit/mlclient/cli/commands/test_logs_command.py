@@ -1506,7 +1506,7 @@ def test_all_hosts_progress_counts_completed_reads_and_has_one_total_time(
     assert "(discovering hosts)" in error
     assert "(1/2 hosts)" in error
     assert error.count("Elapsed: ") == 1
-    assert "(2/2 hosts) Elapsed: " in error
+    assert "(2/2 hosts) | Elapsed: " in error
     assert attempts == retries + 1
     assert "\x1b[34m" in error
     assert "ml_cluster_node1" in tester.io.fetch_output()

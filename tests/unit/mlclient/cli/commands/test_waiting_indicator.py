@@ -32,7 +32,7 @@ def test_waiting_for_leaves_elapsed_time_when_the_block_ends(monkeypatch):
         pass
 
     assert io.fetch_error().endswith(
-        ERASE_LINE + f"\x1b[34m    Request to {URL} Elapsed: 0.300 s\x1b[39m\n",
+        ERASE_LINE + f"\x1b[34m●●● Request to {URL} | Elapsed: 0.300 s\x1b[39m\n",
     )
 
 
@@ -47,7 +47,7 @@ def test_waiting_for_leaves_elapsed_time_when_the_block_raises(monkeypatch):
     assert str(error.value) == "boom"
 
     assert io.fetch_error().endswith(
-        ERASE_LINE + f"\x1b[34m    Request to {URL} Elapsed: 0.300 s\x1b[39m\n",
+        ERASE_LINE + f"\x1b[34m●●● Request to {URL} | Elapsed: 0.300 s\x1b[39m\n",
     )
 
 

@@ -85,8 +85,8 @@ def test_command_http_shows_a_waiting_indicator_on_a_terminal_stderr():
     assert tester.execute("-e test GET /manage/v2/hosts") == 0
     assert tester.io.fetch_output() == '{"host-default-list": {}}\n'
     error = tester.io.fetch_error()
-    assert "Waiting for http://localhost:8002" in error
-    assert error.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
+    assert "Request to http://localhost:8002" in error
+    assert "Elapsed: " in error.rsplit(ERASE_LINE, 1)[-1]
 
 
 @respx.mock
@@ -247,7 +247,7 @@ def test_command_http_clears_waiting_indicator_before_reporting_an_empty_error()
     assert tester.execute("GET /v1/ping") == 1
     assert tester.io.fetch_output() == ""
     error = tester.io.fetch_error()
-    assert "Waiting for http://localhost:8002" in error
+    assert "Request to http://localhost:8002" in error
     assert error.endswith("HTTP 404 Not Found for http://localhost:8002/v1/ping\n")
     assert "Elapsed: " in error
     assert error.rfind("Elapsed: ") < error.rfind("HTTP 404 Not Found")

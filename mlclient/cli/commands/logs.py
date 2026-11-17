@@ -21,7 +21,7 @@ from dateutil.parser import isoparse
 from httpx import HTTPError
 
 from mlclient._manager import MLClientManager
-from mlclient.cli.commands._waiting_indicator import waiting_for
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE, waiting_for
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
@@ -368,16 +368,51 @@ class LogsCommand(Command):
         """
         manager = MLClientManager(self.option("environment"))
         app_port = self._get_app_port(manager)
+        hosts = None
+        completed = 0
+
+        async def read_host(host: str) -> Iterator[dict] | HTTPError | MarkLogicError:
+            """Read one host and count its terminal response, including request errors.
+
+            Parameters
+            ----------
+            host : str
+                The cluster host name.
+
+            Returns
+            -------
+            Iterator[dict] | HTTPError | MarkLogicError
+                Host-tagged logs or the expected request failure.
+            """
+            nonlocal completed
+            result = await self._fetch_host_logs(ml, host, app_port)
+            completed += 1
+            return result
+
         async with manager.get_async_client("manage") as ml:
-            with waiting_for(self.io, ml.http.base_url):
+            with waiting_for(
+                self.io,
+                ml.http.base_url,
+                progress=lambda: (
+                    "(discovering hosts)"
+                    if hosts is None
+                    else f"({completed}/{len(hosts)} hosts)"
+                ),
+            ):
                 hosts = await self._get_hosts(ml)
-            self._warn_if_unfiltered(hosts)
-            colors = {
-                host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
-                for index, host in enumerate(hosts)
-            }
-            with waiting_for(self.io, ml.http.base_url):
-                results = await self._fetch_hosts_logs(ml, hosts, app_port)
+                self._warn_if_unfiltered(hosts)
+                colors = {
+                    host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
+                    for index, host in enumerate(hosts)
+                }
+                tasks = [asyncio.create_task(read_host(host)) for host in hosts]
+                try:
+                    results = await asyncio.gather(*tasks)
+                except BaseException:
+                    for task in tasks:
+                        task.cancel()
+                    await asyncio.gather(*tasks, return_exceptions=True)
+                    raise
             per_host_logs = []
             failures = {}
             for host, result in zip(hosts, results):
@@ -433,53 +468,14 @@ class LogsCommand(Command):
             self.option(name) is not None for name in ("from", "to", "regex")
         )
         if len(hosts) > 1 and not has_filter:
+            if self.io.error_output.is_decorated():
+                self.io.error_output.write(ERASE_LINE)
             self.line_error(
                 f"Reading unfiltered error logs from {len(hosts)} hosts may "
                 "return a large volume and can time out. Consider narrowing "
                 "with --from, --to or --regex.",
                 style="fg=yellow;options=dark",
             )
-
-    async def _fetch_hosts_logs(
-        self,
-        ml: AsyncMLClient,
-        hosts: list[str],
-        app_port: int | str | None,
-    ) -> list[Iterator[dict] | HTTPError | MarkLogicError]:
-        """Read hosts concurrently, retaining expected per-host errors.
-
-        Unexpected failures or cancellation cancel and await outstanding reads.
-
-        Parameters
-        ----------
-        ml : AsyncMLClient
-            The connected client shared by all reads.
-        hosts : list[str]
-            The hosts to read error logs from.
-        app_port : int | str | None
-            The resolved App Server port or TaskServer; None selects ErrorLog.txt.
-
-        Returns
-        -------
-        list[Iterator[dict] | HTTPError | MarkLogicError]
-            Host-tagged logs or a request error, in requested host order.
-
-        Raises
-        ------
-        BaseException
-            Propagates the original failure or cancellation after awaiting cleanup.
-        """
-        tasks = [
-            asyncio.create_task(self._fetch_host_logs(ml, host, app_port))
-            for host in hosts
-        ]
-        try:
-            return await asyncio.gather(*tasks)
-        except BaseException:
-            for task in tasks:
-                task.cancel()
-            await asyncio.gather(*tasks, return_exceptions=True)
-            raise
 
     async def _fetch_host_logs(
         self,

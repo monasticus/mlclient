@@ -33,7 +33,7 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type `ml logs -s app --from 12:11 --regex "Bookstore: request"`
+Type `ml logs -s app --from 13:18 --regex "Bookstore: request"`
 Enter
 Wait
 Wait+Screen /Bookstore:/
@@ -48,7 +48,7 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type `ml logs -s 8010 --all-hosts --from 12:11 --regex 'Bookstore: request'`
+Type `ml logs -s 8010 --all-hosts --from 13:18 --regex 'Bookstore: request'`
 Enter
 Wait
 Wait+Screen /ml_cluster_node1/

@@ -74,8 +74,8 @@ def test_command_sample_shows_a_waiting_indicator_on_a_terminal_stderr():
     assert tester.execute("order") == 0
     assert tester.io.fetch_output() == "<order/>\n"
     error = tester.io.fetch_error()
-    assert "Waiting for http://localhost:8100" in error
-    assert error.rsplit(ERASE_LINE, 1)[-1].startswith("Elapsed: ")
+    assert "Request to http://localhost:8100" in error
+    assert "Elapsed: " in error.rsplit(ERASE_LINE, 1)[-1]
 
 
 @respx.mock

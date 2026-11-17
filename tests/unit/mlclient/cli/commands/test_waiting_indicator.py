@@ -18,7 +18,8 @@ def test_waiting_for_shows_the_url_on_a_decorated_stderr():
         pass
 
     error = io.fetch_error()
-    assert f"Waiting for {URL}" in error
+    assert f"Request to {URL}" in error
+    assert "\x1b[34m" in error
     assert io.fetch_output() == ""
 
 
@@ -30,7 +31,9 @@ def test_waiting_for_leaves_elapsed_time_when_the_block_ends(monkeypatch):
     with waiting_for(io, URL):
         pass
 
-    assert io.fetch_error().endswith(ERASE_LINE + "Elapsed: 0.300 s\n")
+    assert io.fetch_error().endswith(
+        ERASE_LINE + f"\x1b[34m    Request to {URL} Elapsed: 0.300 s\x1b[39m\n",
+    )
 
 
 def test_waiting_for_leaves_elapsed_time_when_the_block_raises(monkeypatch):
@@ -43,7 +46,9 @@ def test_waiting_for_leaves_elapsed_time_when_the_block_raises(monkeypatch):
 
     assert str(error.value) == "boom"
 
-    assert io.fetch_error().endswith(ERASE_LINE + "Elapsed: 0.300 s\n")
+    assert io.fetch_error().endswith(
+        ERASE_LINE + f"\x1b[34m    Request to {URL} Elapsed: 0.300 s\x1b[39m\n",
+    )
 
 
 def test_waiting_for_counts_the_seconds_waited():

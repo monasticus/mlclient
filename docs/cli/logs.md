@@ -74,7 +74,10 @@ server operation; it does not replace the environment's connection hostname.
 Read error logs from every host in the cluster at once, merged into a single
 timeline by timestamp. The host is shown in parentheses between the log level
 and the message. The host list comes from `/manage/v2/hosts`, and each host is
-queried concurrently. If a host cannot be read, the available logs are still
+queried concurrently. In a terminal, one blue indicator covers discovery and
+all host reads, with completed reads shown as `(2/3 hosts)`. A final error counts
+as completed; pending retries do not advance the counter. One total elapsed
+time is shown. If a host cannot be read, the available logs are still
 printed. A summary below the logs on stderr lists each missing host and its
 error; the command exits with `1` to indicate an incomplete result, including
 when every host read fails. Host discovery failures still stop the command.

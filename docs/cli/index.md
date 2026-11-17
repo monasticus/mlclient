@@ -109,7 +109,8 @@ Server commands default to the `local` environment; `-e / --environment` selects
 ## Output streams
 
 In a terminal, requests show a waiting indicator on stderr. When waiting ends,
-it leaves an `Elapsed: 0.800 s` line before the result or error. Redirected stderr,
+the blue request label stays in place with `Elapsed: 0.800 s` before the result
+or error. Redirected stderr,
 `--no-ansi` and quiet mode suppress the indicator and timing line.
 
 stdout carries only the command's result: eval and invoke results, the response

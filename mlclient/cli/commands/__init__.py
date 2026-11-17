@@ -13,6 +13,8 @@ It contains all CLI commands modules:
         The Sample Command module.
     * env_init
         The Env Init Command module.
+    * env_list
+        The Env List Command module.
     * env_show
         The Env Show Command module.
     * env_edit
@@ -34,19 +36,21 @@ It contains all CLI commands modules:
 
 It exports the following commands:
     * EvalCommand
-        Sends a GET request to the /v1/eval endpoint.
+        Runs XQuery or JavaScript code.
     * InvokeCommand
-        Sends a POST request to the /v1/invoke endpoint.
+        Runs an XQuery or JavaScript module deployed on the server.
     * LogsCommand
-        Sends a GET request to the /manage/v2/logs endpoint.
+        Prints MarkLogic log lines or lists log files.
     * HttpCommand
         Sends a raw HTTP request to any REST endpoint.
     * SampleCommand
         Prints sample XML or JSON content from the database.
     * EnvInitCommand
         Scaffolds an MLClient environment configuration file.
+    * EnvListCommand
+        Lists MLClient environments.
     * EnvShowCommand
-        Lists MLClient environments, or renders one environment's settings.
+        Renders one MLClient environment's settings.
     * EnvEditCommand
         Opens an MLClient environment file in the user's editor.
     * EnvCopyCommand
@@ -69,6 +73,7 @@ from mlclient.cli.commands.env_compare import EnvCompareCommand
 from mlclient.cli.commands.env_copy import EnvCopyCommand
 from mlclient.cli.commands.env_edit import EnvEditCommand
 from mlclient.cli.commands.env_init import EnvInitCommand
+from mlclient.cli.commands.env_list import EnvListCommand
 from mlclient.cli.commands.env_remove import EnvRemoveCommand
 from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
@@ -86,6 +91,7 @@ __all__ = [
     "EnvCopyCommand",
     "EnvEditCommand",
     "EnvInitCommand",
+    "EnvListCommand",
     "EnvRemoveCommand",
     "EnvShowCommand",
     "EvalCommand",

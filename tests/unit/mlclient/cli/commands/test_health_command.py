@@ -339,7 +339,8 @@ _CLUSTER = {"host-c": True, "host-a": True, "host-b": True}
 _DEGRADED_CLUSTER = {"host-c": False, "host-a": True, "host-b": False}
 
 
-def test_command_health_cluster_reports_healthy_host_count(mocker):
+@pytest.mark.parametrize("flag", ["--cluster", "-C"])
+def test_command_health_cluster_reports_healthy_host_count(mocker, flag):
     mocker.patch.object(
         MLClient,
         "cluster_healthcheck",
@@ -347,7 +348,7 @@ def test_command_health_cluster_reports_healthy_host_count(mocker):
     )
     tester = _get_tester()
 
-    assert tester.execute("-e test --cluster") == 0
+    assert tester.execute(f"-e test {flag}") == 0
     assert tester.io.fetch_output() == "HEALTHY 3/3\n"
 
 

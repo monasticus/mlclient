@@ -2,15 +2,19 @@ from __future__ import annotations
 
 import asyncio
 import re
+import threading
 from pathlib import Path
 
 import httpx
 import pytest
 import respx
+from cleo.testers.application_tester import ApplicationTester
 from cleo.testers.command_tester import CommandTester
+from httpx_retries import Retry
 
 from mlclient import AsyncMLClient
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import (
     InvalidLogTypeError,
@@ -406,7 +410,6 @@ def test_command_logs_output_for_error_logs():
     assert tester.command.option("log-type") == "error"
 
     expected_output_lines = [
-        "Getting 8002_ErrorLog.txt logs using Manage App-Server http://localhost:8002\n",
         "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1",
         "<time>2023-09-01T00:00:01Z <log-level>INFO: Log message 2",
         "<time>2023-09-01T00:00:02Z <log-level>INFO: Log message 3",
@@ -445,9 +448,7 @@ def test_command_logs_output_for_access_logs():
     assert tester.command.option("server") == "8002"
     assert tester.command.option("log-type") == "access"
 
-    expected_output_lines = [
-        "Getting 8002_AccessLog.txt logs using Manage App-Server http://localhost:8002\n",
-    ]
+    expected_output_lines = []
     expected_output_lines.extend(logs)
     assert command_output == "\n".join(expected_output_lines) + "\n"
 
@@ -516,9 +517,7 @@ def test_command_logs_output_for_request_logs():
     assert tester.command.option("server") == "8002"
     assert tester.command.option("log-type") == "request"
 
-    expected_output_lines = [
-        "Getting 8002_RequestLog.txt logs using Manage App-Server http://localhost:8002\n",
-    ]
+    expected_output_lines = []
     expected_output_lines.extend(logs)
     assert command_output == "\n".join(expected_output_lines) + "\n"
 
@@ -552,9 +551,7 @@ def test_command_logs_output_for_audit_logs():
     assert tester.command.option("environment") == "test"
     assert tester.command.option("log-type") == "audit"
 
-    expected_output_lines = [
-        "Getting AuditLog.txt logs using Manage App-Server http://localhost:8002\n",
-    ]
+    expected_output_lines = []
     expected_output_lines.extend(logs)
     assert command_output == "\n".join(expected_output_lines) + "\n"
 
@@ -587,7 +584,6 @@ def test_command_logs_output_for_error_logs_without_app_port():
     assert tester.command.option("log-type") == "error"
 
     expected_output_lines = [
-        "Getting ErrorLog.txt logs using Manage App-Server http://localhost:8002\n",
         "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1",
         "<time>2023-09-01T00:00:01Z <log-level>INFO: Log message 2",
         "<time>2023-09-01T00:00:02Z <log-level>INFO: Log message 3",
@@ -628,7 +624,6 @@ def test_command_logs_output_for_xml_logs():
     assert tester.command.option("log-type") == "error"
 
     expected_output_lines = [
-        "Getting 8002_ErrorLog.txt logs using Manage App-Server http://localhost:8002\n",
         "<time>2023-09-01T00:00:00Z <log-level>INFO: " + xml_log,
     ]
     assert command_output == "\n".join(expected_output_lines) + "\n"
@@ -763,8 +758,6 @@ def test_command_logs_all_hosts():
     assert tester.command.option("all-hosts") is True
 
     expected_output_lines = [
-        "Getting error logs from every host using "
-        "Manage App-Server http://ml_cluster_node1:8002\n",
         "<time>2023-09-01T00:00:00Z <log-level>INFO (ml_cluster_node1): "
         "node1 message A",
         "<time>2023-09-01T00:00:01Z <log-level>INFO (ml_cluster_node2): "
@@ -1354,6 +1347,183 @@ def _with_query_spaces_percent_encoded(
 ) -> str:
     """Encode query spaces as httpx 0.27 does (``%20``); httpx 0.28 writes ``+``."""
     return error_output.replace("+", "%20")
+
+
+# --- output streams ---
+
+
+@pytest.mark.usefixtures("mlclient_logger")
+@respx.mock
+def test_command_logs_keeps_verbose_output_free_of_announcements():
+    _mock_error_logs()
+    app = MLCLIentApplication()
+    app.auto_exits(False)
+    tester = ApplicationTester(app)
+
+    assert tester.execute("logs -e test -s 8002 -v") == 0
+    assert tester.io.fetch_output() == ("2023-09-01T00:00:00Z INFO: Log message 1\n")
+    error = tester.io.fetch_error()
+    assert "Sending a request... GET /manage/v2/logs" in error
+    assert "Getting 8002_ErrorLog.txt" not in error
+
+
+@respx.mock
+def test_command_logs_shows_a_waiting_indicator_on_a_terminal_stderr():
+    _mock_error_logs()
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("-e test -s 8002") == 0
+    assert tester.io.fetch_output() == (
+        "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1\n"
+    )
+    error = tester.io.fetch_error()
+    assert "Request to http://localhost:8002" in error
+    assert "Elapsed: " in error.rsplit(ERASE_LINE, 1)[-1]
+
+
+@respx.mock
+def test_command_logs_shows_no_waiting_indicator_when_stderr_is_not_a_terminal():
+    _mock_error_logs()
+    tester = _get_tester()
+
+    assert tester.execute("-e test -s 8002") == 0
+    assert tester.io.fetch_error() == ""
+
+
+@respx.mock
+def test_command_logs_list_shows_a_waiting_indicator_on_a_terminal_stderr():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        resources_utils.get_test_resource_json(
+            __file__,
+            "logs-list-response-single-node.json",
+        ),
+    )
+    ml_mocker.mock_get()
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("-e test --list") == 0
+    expected_output_path = resources_utils.get_test_resource_path(
+        __file__,
+        "output-single-node-full.txt",
+    )
+    assert tester.io.fetch_output() == Path(expected_output_path).read_text()
+    error = tester.io.fetch_error()
+    assert "Request to http://localhost:8002" in error
+    assert "Elapsed: " in error.rsplit(ERASE_LINE, 1)[-1]
+
+
+@respx.mock
+def test_command_logs_all_hosts_shows_a_waiting_indicator_on_a_terminal_stderr():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/hosts")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(_hosts_body(["ml_cluster_node1"]))
+    ml_mocker.mock_get()
+    ml_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/logs")
+    ml_mocker.with_request_param("host", "ml_cluster_node1")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(
+        resources_utils.get_test_resource_json(__file__, "node1-error-logs.json"),
+    )
+    ml_mocker.mock_get()
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+
+    assert tester.execute("-e test-cluster --all-hosts") == 0
+    assert tester.io.fetch_output() == (
+        "<time>2023-09-01T00:00:00Z <log-level>INFO (ml_cluster_node1): "
+        "node1 message A\n"
+        "<time>2023-09-01T00:00:02Z <log-level>WARNING (ml_cluster_node1): "
+        "node1 message B\n"
+    )
+    error = tester.io.fetch_error()
+    assert error.count("Elapsed: ") == 1
+    assert "(1/1 hosts)" in error
+    assert "Elapsed: " in error.rsplit(ERASE_LINE, 1)[-1]
+
+
+@pytest.mark.parametrize(
+    ("missing_host", "retries"),
+    [(False, 0), (True, 0), (False, 1), (True, 1)],
+)
+@respx.mock
+def test_all_hosts_progress_counts_completed_reads_and_has_one_total_time(
+    mocker,
+    missing_host,
+    retries,
+):
+    mocker.patch(
+        "mlclient.http.DEFAULT_RETRY_STRATEGY",
+        Retry(total=retries, backoff_factor=0),
+    )
+    attempts = 0
+    messages = []
+    frame_seen = threading.Event()
+    tester = _get_tester()
+    tester.io.error_output.decorated(True)
+    write = tester.io.error_output.write
+
+    def observe(message, *args, **kwargs):
+        messages.append(message)
+        write(message, *args, **kwargs)
+        if "(1/2 hosts)" in message:
+            frame_seen.set()
+
+    mocker.patch.object(tester.io.error_output, "write", side_effect=observe)
+    body = resources_utils.get_test_resource_json(__file__, "node1-error-logs.json")
+
+    async def read_logs(request):
+        nonlocal attempts
+        if request.url.params["host"] == "ml_cluster_node2":
+            attempts += 1
+            assert await asyncio.to_thread(frame_seen.wait, 5)
+            assert not any("(2/2 hosts)" in message for message in messages)
+            if missing_host or (retries and attempts == 1):
+                return httpx.Response(503)
+        return httpx.Response(200, json=body)
+
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/hosts")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]))
+    ml_mocker.mock_get()
+    ml_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/logs")
+    ml_mocker.with_get_side_effect(read_logs)
+    ml_mocker.mock_get()
+
+    assert tester.execute("-e test-cluster --all-hosts") == int(missing_host)
+    error = tester.io.fetch_error()
+    assert "(discovering hosts)" in error
+    assert "(1/2 hosts)" in error
+    assert error.count("Elapsed: ") == 1
+    assert "(2/2 hosts) | Elapsed: " in error
+    assert attempts == retries + 1
+    assert "\x1b[34m" in error
+    assert "ml_cluster_node1" in tester.io.fetch_output()
+    if missing_host:
+        assert "Logs are incomplete; missing hosts:" in error
+
+
+def _mock_error_logs() -> None:
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body([("2023-09-01T00:00:00Z", "info", "Log message 1")]),
+    )
+    ml_mocker.mock_get()
 
 
 def _get_tester() -> CommandTester:

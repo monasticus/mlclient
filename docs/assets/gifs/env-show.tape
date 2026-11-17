@@ -19,7 +19,7 @@ Set TypingSpeed 50ms
 
 Hide
 Set TypingSpeed 1ms
-Type `unset NO_COLOR WAYLAND_DISPLAY; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; printf 'app-name: bookstore\nprotocol: http\nhost: localhost\nusername: reader\npassword: demo-password\nauth: digest\napp-servers:\n  - id: app-services\n    port: 8000\n    rest: true\n  - id: bookstore\n    port: 8010\n    rest: true\n' > .mlclient/mlclient-local.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-dev.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-qa.yaml; clear`
+Type `unset NO_COLOR WAYLAND_DISPLAY; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; trap 'rm -rf "$demo_dir"' EXIT; mkdir .mlclient; printf 'app-name: bookstore\nprotocol: http\nhost: localhost\nusername: reader\npassword: demo-password\nauth: digest\napp-servers:\n  - id: app-services\n    port: 8000\n    rest: true\n  - id: bookstore\n    port: 8010\n    rest: true\n' > .mlclient/mlclient-local.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-staging.yaml; sed -i 's/bookstore/bookstore-staging/g' .mlclient/mlclient-staging.yaml; clear`
 Enter
 Wait
 Sleep 500ms
@@ -27,21 +27,6 @@ Set TypingSpeed 50ms
 Show
 
 Type "ml env show"
-Enter
-Wait
-Wait+Screen /qa/
-Sleep 2s
-
-Hide
-Set TypingSpeed 1ms
-Type `clear`
-Enter
-Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
-
-Type "ml env show local"
 Enter
 Wait
 Wait+Screen /bookstore/
@@ -56,7 +41,22 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type "ml env show local --raw"
+Type "ml env show -e staging"
+Enter
+Wait
+Wait+Screen /bookstore-staging/
+Sleep 3s
+
+Hide
+Set TypingSpeed 1ms
+Type `clear`
+Enter
+Wait
+Sleep 500ms
+Set TypingSpeed 50ms
+Show
+
+Type "ml env show -e staging --raw"
 Enter
 Wait
 Wait+Screen /demo-password/
@@ -71,13 +71,13 @@ Sleep 500ms
 Set TypingSpeed 50ms
 Show
 
-Type "ml env show local host"
+Type "ml env show host"
 Enter
 Wait
 Wait+Screen /localhost/
 Sleep 2s
 
-Type "ml env show local password --copy"
+Type "ml env show password --copy"
 Enter
 Wait
 Wait+Screen /Copied to clipboard/

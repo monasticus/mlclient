@@ -2,7 +2,7 @@
 
 It exports an implementation for 'eval' command:
     * EvalCommand
-        Sends a POST request to the /v1/eval endpoint.
+        Runs XQuery or JavaScript code.
 """
 
 from __future__ import annotations
@@ -22,12 +22,15 @@ from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.exceptions import WrongParametersError
 
 
 class EvalCommand(Command):
-    """Sends a POST request to the /v1/eval endpoint.
+    """Runs XQuery or JavaScript code.
+
+    Uses the /v1/eval endpoint of a REST App Server.
 
     With several environments the code runs in all of them at once and the
     results are shown in a table with one column per environment, wrapped to fit
@@ -63,7 +66,8 @@ class EvalCommand(Command):
     """
 
     name: str = "eval"
-    description: str = "Sends a POST request to the /v1/eval endpoint"
+    description: str = "Runs XQuery or JavaScript code"
+    help: str = "Uses the /v1/eval endpoint of a REST App Server."
     arguments: list[Argument] = [
         argument(
             "code",
@@ -203,6 +207,8 @@ class EvalCommand(Command):
         rest_server = self.option("connection")
 
         mgr = MLClientManager(environment)
-        with get_client(mgr, rest_server) as ml:
-            self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
+        with (
+            get_client(mgr, rest_server) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             return ml.eval.execute(**eval_params)

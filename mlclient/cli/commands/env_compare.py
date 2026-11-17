@@ -66,9 +66,9 @@ class EnvCompareCommand(Command):
             Read from the home directory instead of the current directory
       -s, --secrets
             Reveal secret values instead of masking them
-      -d, --defaults
+      -D, --defaults
             Keep settings left to their default in every environment
-      -e, --exclude
+      -x, --exclude
             Environment to leave out of the comparison
     """
 
@@ -95,12 +95,12 @@ class EnvCompareCommand(Command):
         ),
         option(
             "defaults",
-            "d",
+            "D",
             description="Keep settings left to their default in every environment",
         ),
         option(
             "exclude",
-            "e",
+            "x",
             description="Environment to leave out of the comparison",
             flag=False,
             multiple=True,

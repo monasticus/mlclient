@@ -34,8 +34,8 @@ This produces a real UNHEALTHY 2/3 verdict with one unhealthy host. Restore the
 containers' original running/stopped states after recording.
 
 GET /orders.xqy once on port 8011 after the health recording. It creates a real,
-compact request log entry with xdmp:request-log-put. The logs tape reads it from
-8011_RequestLog.txt; the other log scenes read the bookstore REST server on 8010.
+compact request log entry with xdmp:request-log-put. The logs tape reads it through the dev environment from
+8011_RequestLog.txt on MarkLogic 12; the other log scenes read the bookstore REST server on 8010.
 
 After recording, restore the saved trace configuration and log levels. Delete
 the vhs-health App Server and its temporary filesystem directory. Delete only

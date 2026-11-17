@@ -2,7 +2,7 @@
 
 It exports an implementation for 'invoke' command:
     * InvokeCommand
-        Sends a POST request to the /v1/invoke endpoint.
+        Runs an XQuery or JavaScript module deployed on the server.
 """
 
 from __future__ import annotations
@@ -22,11 +22,14 @@ from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
+from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 
 
 class InvokeCommand(Command):
-    """Sends a POST request to the /v1/invoke endpoint.
+    """Runs an XQuery or JavaScript module deployed on the server.
+
+    Uses the /v1/invoke endpoint of a REST App Server.
 
     Usage:
       invoke [options] [--] <module>
@@ -51,7 +54,8 @@ class InvokeCommand(Command):
     """
 
     name: str = "invoke"
-    description: str = "Sends a POST request to the /v1/invoke endpoint"
+    description: str = "Runs an XQuery or JavaScript module deployed on the server"
+    help: str = "Uses the /v1/invoke endpoint of a REST App Server."
     arguments: list[Argument] = [
         argument(
             "module",
@@ -132,8 +136,10 @@ class InvokeCommand(Command):
         rest_server = self.option("connection")
 
         mgr = MLClientManager(environment)
-        with get_client(mgr, rest_server) as ml:
-            self.info(f"Invoking module using REST App-Server {ml.http.base_url}")
+        with (
+            get_client(mgr, rest_server) as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             return ml.invoke.module(
                 self.argument("module"),
                 variables=variables,

@@ -2,7 +2,7 @@
 
 It exports an implementation for 'logs' command:
     * LogsCommand
-        Sends a GET request to the /manage/v2/logs endpoint.
+        Prints MarkLogic log lines or lists log files.
 """
 
 from __future__ import annotations
@@ -21,11 +21,11 @@ from dateutil.parser import isoparse
 from httpx import HTTPError
 
 from mlclient._manager import MLClientManager
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE, waiting_for
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
 from mlclient.services.diagnostics.logs import AsyncLogsService, LogsService
-
 
 if TYPE_CHECKING:
     from cleo.ui.table_separator import TableSeparator
@@ -34,7 +34,9 @@ if TYPE_CHECKING:
 
 
 class LogsCommand(Command):
-    """Sends a GET request to the /manage/v2/logs endpoint.
+    """Prints MarkLogic log lines or lists log files.
+
+    Uses the /manage/v2/logs endpoint of the Manage App Server.
 
     Usage:
       logs [options]
@@ -62,7 +64,8 @@ class LogsCommand(Command):
     """
 
     name: str = "logs"
-    description: str = "Sends a GET request to the /manage/v2/logs endpoint"
+    description: str = "Prints MarkLogic log lines or lists log files"
+    help: str = "Uses the /manage/v2/logs endpoint of the Manage App Server."
     options: list[Option] = [
         option(
             "environment",
@@ -185,12 +188,13 @@ class LogsCommand(Command):
     ) -> None:
         """Print MarkLogic log files and their Management API download URLs."""
         manager = MLClientManager(self.option("environment"))
-        with manager.get_client("manage") as ml:
-            self.info(f"Getting logs list using Manage App-Server {ml.http.base_url}")
-            logs_list = LogsService(ml.manage).list(self.option("host"))
+        with (
+            manager.get_client("manage") as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             base_url = ml.http.base_url
+            logs_list = LogsService(ml.manage).list(self.option("host"))
         app_port = self._get_app_port(manager)
-        self.line("")
         for host in sorted(logs_list["grouped"]):
             rows = list(self._get_log_files_rows(logs_list, host, app_port, base_url))
             self._render_log_files_table(host, rows)
@@ -336,7 +340,6 @@ class LogsCommand(Command):
         per_host_logs : list[Iterator[dict]]
             Timestamp-sorted entries tagged with their host names.
         """
-        self.line("")
         for log_dict in heapq.merge(
             *per_host_logs,
             key=lambda log: isoparse(log["timestamp"]),
@@ -365,18 +368,51 @@ class LogsCommand(Command):
         """
         manager = MLClientManager(self.option("environment"))
         app_port = self._get_app_port(manager)
+        hosts = None
+        completed = 0
+
+        async def read_host(host: str) -> Iterator[dict] | HTTPError | MarkLogicError:
+            """Read one host and count its terminal response, including request errors.
+
+            Parameters
+            ----------
+            host : str
+                The cluster host name.
+
+            Returns
+            -------
+            Iterator[dict] | HTTPError | MarkLogicError
+                Host-tagged logs or the expected request failure.
+            """
+            nonlocal completed
+            result = await self._fetch_host_logs(ml, host, app_port)
+            completed += 1
+            return result
+
         async with manager.get_async_client("manage") as ml:
-            self.info(
-                f"Getting error logs from every host using "
-                f"Manage App-Server {ml.http.base_url}",
-            )
-            hosts = await self._get_hosts(ml)
-            self._warn_if_unfiltered(hosts)
-            colors = {
-                host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
-                for index, host in enumerate(hosts)
-            }
-            results = await self._fetch_hosts_logs(ml, hosts, app_port)
+            with waiting_for(
+                self.io,
+                ml.http.base_url,
+                progress=lambda: (
+                    "(discovering hosts)"
+                    if hosts is None
+                    else f"({completed}/{len(hosts)} hosts)"
+                ),
+            ):
+                hosts = await self._get_hosts(ml)
+                self._warn_if_unfiltered(hosts)
+                colors = {
+                    host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
+                    for index, host in enumerate(hosts)
+                }
+                tasks = [asyncio.create_task(read_host(host)) for host in hosts]
+                try:
+                    results = await asyncio.gather(*tasks)
+                except BaseException:
+                    for task in tasks:
+                        task.cancel()
+                    await asyncio.gather(*tasks, return_exceptions=True)
+                    raise
             per_host_logs = []
             failures = {}
             for host, result in zip(hosts, results):
@@ -432,53 +468,14 @@ class LogsCommand(Command):
             self.option(name) is not None for name in ("from", "to", "regex")
         )
         if len(hosts) > 1 and not has_filter:
+            if self.io.error_output.is_decorated():
+                self.io.error_output.write(ERASE_LINE)
             self.line_error(
                 f"Reading unfiltered error logs from {len(hosts)} hosts may "
                 "return a large volume and can time out. Consider narrowing "
                 "with --from, --to or --regex.",
                 style="fg=yellow;options=dark",
             )
-
-    async def _fetch_hosts_logs(
-        self,
-        ml: AsyncMLClient,
-        hosts: list[str],
-        app_port: int | str | None,
-    ) -> list[Iterator[dict] | HTTPError | MarkLogicError]:
-        """Read hosts concurrently, retaining expected per-host errors.
-
-        Unexpected failures or cancellation cancel and await outstanding reads.
-
-        Parameters
-        ----------
-        ml : AsyncMLClient
-            The connected client shared by all reads.
-        hosts : list[str]
-            The hosts to read error logs from.
-        app_port : int | str | None
-            The resolved App Server port or TaskServer; None selects ErrorLog.txt.
-
-        Returns
-        -------
-        list[Iterator[dict] | HTTPError | MarkLogicError]
-            Host-tagged logs or a request error, in requested host order.
-
-        Raises
-        ------
-        BaseException
-            Propagates the original failure or cancellation after awaiting cleanup.
-        """
-        tasks = [
-            asyncio.create_task(self._fetch_host_logs(ml, host, app_port))
-            for host in hosts
-        ]
-        try:
-            return await asyncio.gather(*tasks)
-        except BaseException:
-            for task in tasks:
-                task.cancel()
-            await asyncio.gather(*tasks, return_exceptions=True)
-            raise
 
     async def _fetch_host_logs(
         self,
@@ -551,7 +548,6 @@ class LogsCommand(Command):
         """Print MarkLogic logs."""
         logs = self._get_logs()
         formatted_logs = self._format_logs(logs)
-        self.line("")
         for info, msg in formatted_logs:
             self._io.write(info)
             self._io.write(msg, new_line=True, type=Type.RAW)
@@ -581,14 +577,10 @@ class LogsCommand(Command):
         regex = self.option("regex")
         host = self.option("host")
 
-        with manager.get_client("manage") as ml:
-            if app_port is None:
-                file_name = f"{log_type.value}.txt"
-            else:
-                file_name = f"{app_port}_{log_type.value}.txt"
-            self.info(
-                f"Getting {file_name} logs using Manage App-Server {ml.http.base_url}",
-            )
+        with (
+            manager.get_client("manage") as ml,
+            waiting_for(self.io, ml.http.base_url),
+        ):
             return LogsService(ml.manage).get(
                 app_port,
                 log_type,

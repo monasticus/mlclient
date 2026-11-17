@@ -20,7 +20,7 @@ For a running server, discovery can populate connections from its App Servers:
 
 ```sh
 ml env init local --from-host=localhost:8002 --interactive
-ml env show local
+ml env show
 ```
 
 Supply the host's credentials when prompted. Discovery uses the Manage API and
@@ -31,6 +31,7 @@ See [env init](env/init.md) for discovery filters and configuration details.
 Manage the configuration files with the [env commands](env/index.md):
 
 ```sh
+ml env list
 ml env copy local dev
 ml env edit dev
 ml env compare local dev
@@ -90,8 +91,8 @@ Explicit names replace `local` and repeated names are used once.
 | Check server health, once or continuously | [`ml health`](health.md) |
 | Read the MarkLogic version | [`ml version`](version.md) |
 
-Use `ml --help` for global options and `ml env init --help` (or another command)
-for its arguments. The pages above explain workflows, defaults and examples.
+Use `ml` or `ml --help` to list the commands and global options, and
+`ml env init --help` (or another command) for its arguments. The pages above explain workflows, defaults and examples.
 
 ## Connection and target selection
 
@@ -101,6 +102,26 @@ for its arguments. The pages above explain workflows, defaults and examples.
 
 Server commands default to the `local` environment; `-e / --environment` selects another environment.
 
+`-e / --environment`, `-c / --connection` and `-d / --database` mean the same in every command that takes them, including `env show -e`. Other short flags are specific to their command.
+
+
+
+## Output streams
+
+In a terminal, requests show a waiting indicator on stderr. When waiting ends,
+the blue request label stays in place with three solid dots and a separated
+time, for example `●●● Request to http://localhost:8000 | Elapsed: 0.800 s`,
+before the result or error. Redirected stderr,
+`--no-ansi` and quiet mode suppress the indicator and timing line.
+
+stdout carries only the command's result: eval and invoke results, the response
+body of `http`, the MarkLogic log lines of `logs`, and so on. Everything about
+the tool itself goes to stderr: warnings and errors. A result can be redirected or piped without extra lines:
+
+```bash
+ml eval -x 'fn:current-dateTime()' > now.txt
+ml http get /v1/documents uri=/orders/1.json | jq .
+```
 
 ## Global options
 
@@ -109,7 +130,8 @@ the corresponding command page.
 
 ### `--help`, `-h`
 
-Display help for a command, for example `ml env init --help`.
+Display help for a command, for example `ml env init --help`. Alone, `ml --help`
+lists the commands, like `ml`.
 
 ### `--version`, `-V`
 
@@ -122,7 +144,8 @@ Suppress command output.
 
 ### `--verbose`, `-v`
 
-Increase verbosity; repeat as `-vv` or `-vvv` for more detail.
+Increase verbosity; repeat as `-vv` or `-vvv` for more detail. `-v` also prints on
+stderr which App Server a request is sent to.
 
 ### `--ansi` and `--no-ansi`
 

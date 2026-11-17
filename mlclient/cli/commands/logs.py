@@ -578,7 +578,7 @@ class LogsCommand(Command):
         app_port = self._get_app_port(manager)
         file_name = self._log_file_name(app_port, LogType.get(self.option("log-type")))
         try:
-            logs = self._get_logs(manager, app_port, file_name)
+            logs = self._get_logs(manager, app_port)
         except MarkLogicError as error:
             if not self._is_missing_log(str(error)):
                 raise
@@ -653,7 +653,6 @@ class LogsCommand(Command):
         self,
         manager: MLClientManager,
         app_port: int | str | None,
-        file_name: str,
     ) -> Iterator[dict]:
         """Retrieve parsed entries through the environment's Manage connection.
 
@@ -663,8 +662,6 @@ class LogsCommand(Command):
             The manager used for this command's connection.
         app_port : int | str | None
             The resolved App Server port or TaskServer; None selects the main log.
-        file_name : str
-            The log file name, shown in the progress message.
 
         Returns
         -------

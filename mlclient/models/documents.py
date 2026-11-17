@@ -1091,8 +1091,8 @@ class Metadata:
     def _skip_namespace_declarations(
         _path: list,
         key: str,
-        value: Any,
-    ) -> tuple[str, Any] | None:
+        value: object,
+    ) -> tuple[str, object] | None:
         """Drop the ``@xmlns`` key xmltodict 1.x adds for namespace declarations."""
         if key == "@xmlns":
             return None

@@ -1180,6 +1180,8 @@
       
         
       
+        
+      
     
     
     
@@ -1244,6 +1246,34 @@
     
   
     init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="env/list/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    list
   
 
     
@@ -15760,6 +15790,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#output-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#global-options" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15875,17 +15916,18 @@ For an ml-gradle project, import the properties already present:</p>
 it does not run Gradle or deploy the project.</p>
 <p>For a running server, discovery can populate connections from its App Servers:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ml<span class="w"> </span>env<span class="w"> </span>init<span class="w"> </span><span class="nb">local</span><span class="w"> </span>--from-host<span class="o">=</span>localhost:8002<span class="w"> </span>--interactive
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show
 </code></pre></div>
 <p>Supply the host's credentials when prompted. Discovery uses the Manage API and
 needs permission to read server configuration. One environment can contain many
 App Server entries; review the discovered identifiers before using them.
 See <a href="env/init/">env init</a> for discovery filters and configuration details.</p>
 <p>Manage the configuration files with the <a href="env/">env commands</a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>env<span class="w"> </span>copy<span class="w"> </span><span class="nb">local</span><span class="w"> </span>dev
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ml<span class="w"> </span>env<span class="w"> </span>edit<span class="w"> </span>dev
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ml<span class="w"> </span>env<span class="w"> </span>compare<span class="w"> </span><span class="nb">local</span><span class="w"> </span>dev
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>ml<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>dev
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>env<span class="w"> </span>list
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ml<span class="w"> </span>env<span class="w"> </span>copy<span class="w"> </span><span class="nb">local</span><span class="w"> </span>dev
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ml<span class="w"> </span>env<span class="w"> </span>edit<span class="w"> </span>dev
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>ml<span class="w"> </span>env<span class="w"> </span>compare<span class="w"> </span><span class="nb">local</span><span class="w"> </span>dev
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>ml<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>dev
 </code></pre></div>
 <p>These commands work on local files; they do not deploy or change a MarkLogic
 server. Removal asks for confirmation.</p>
@@ -15969,24 +16011,39 @@ Explicit names replace <code>local</code> and repeated names are used once.</p>
 </tr>
 </tbody>
 </table>
-<p>Use <code>ml --help</code> for global options and <code>ml env init --help</code> (or another command)
-for its arguments. The pages above explain workflows, defaults and examples.</p>
+<p>Use <code>ml</code> or <code>ml --help</code> to list the commands and global options, and
+<code>ml env init --help</code> (or another command) for its arguments. The pages above explain workflows, defaults and examples.</p>
 <h2 id="connection-and-target-selection">Connection and target selection<a class="headerlink" href="#connection-and-target-selection" title="Permanent link">&para;</a></h2>
 <p><code>http</code>, <code>eval</code>, <code>invoke</code>, <code>sample</code>, <code>version</code>, <code>log-level</code> and <code>trace-events</code> use <code>-c / --connection</code> to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.</p>
 <p><code>logs -s / --server</code> selects whose logs to read by an environment identifier or port. <code>log-level -s / --server</code> instead takes the actual App Server name in MarkLogic. It does not select the connection used for the request.</p>
 <p>Server commands default to the <code>local</code> environment; <code>-e / --environment</code> selects another environment.</p>
+<p><code>-e / --environment</code>, <code>-c / --connection</code> and <code>-d / --database</code> mean the same in every command that takes them, including <code>env show -e</code>. Other short flags are specific to their command.</p>
+<h2 id="output-streams">Output streams<a class="headerlink" href="#output-streams" title="Permanent link">&para;</a></h2>
+<p>In a terminal, requests show a waiting indicator on stderr. When waiting ends,
+the blue request label stays in place with three solid dots and a separated
+time, for example <code>●●● Request to http://localhost:8000 | Elapsed: 0.800 s</code>,
+before the result or error. Redirected stderr,
+<code>--no-ansi</code> and quiet mode suppress the indicator and timing line.</p>
+<p>stdout carries only the command's result: eval and invoke results, the response
+body of <code>http</code>, the MarkLogic log lines of <code>logs</code>, and so on. Everything about
+the tool itself goes to stderr: warnings and errors. A result can be redirected or piped without extra lines:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;fn:current-dateTime()&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>now.txt
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/orders/1.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>.
+</code></pre></div>
 <h2 id="global-options">Global options<a class="headerlink" href="#global-options" title="Permanent link">&para;</a></h2>
 <p>These options apply to every command. Command-specific flags are described on
 the corresponding command page.</p>
 <h3 id="-help-h"><code>--help</code>, <code>-h</code><a class="headerlink" href="#-help-h" title="Permanent link">&para;</a></h3>
-<p>Display help for a command, for example <code>ml env init --help</code>.</p>
+<p>Display help for a command, for example <code>ml env init --help</code>. Alone, <code>ml --help</code>
+lists the commands, like <code>ml</code>.</p>
 <h3 id="-version-v"><code>--version</code>, <code>-V</code><a class="headerlink" href="#-version-v" title="Permanent link">&para;</a></h3>
 <p>Print the MLClient package version. Use <a href="version/"><code>ml version</code></a> for the
 MarkLogic Server version.</p>
 <h3 id="-quiet-q"><code>--quiet</code>, <code>-q</code><a class="headerlink" href="#-quiet-q" title="Permanent link">&para;</a></h3>
 <p>Suppress command output.</p>
 <h3 id="-verbose-v"><code>--verbose</code>, <code>-v</code><a class="headerlink" href="#-verbose-v" title="Permanent link">&para;</a></h3>
-<p>Increase verbosity; repeat as <code>-vv</code> or <code>-vvv</code> for more detail.</p>
+<p>Increase verbosity; repeat as <code>-vv</code> or <code>-vvv</code> for more detail. <code>-v</code> also prints on
+stderr which App Server a request is sent to.</p>
 <h3 id="-ansi-and-no-ansi"><code>--ansi</code> and <code>--no-ansi</code><a class="headerlink" href="#-ansi-and-no-ansi" title="Permanent link">&para;</a></h3>
 <p>Force or disable terminal styling. Disabling ANSI also prevents in-place
 repainting in <a href="health/"><code>ml health</code></a>.</p>

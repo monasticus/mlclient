@@ -3,8 +3,8 @@ Require ml
 Require docker
 
 Set Shell "bash"
-Set Width 800
-Set Height 360
+Set Width 860
+Set Height 420
 Set Theme "Gruvbox Light"
 Set FontFamily "JetBrains Mono"
 Set FontSize 16

@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://monasticus.github.io/mlclient/dev/cli/env/show/">
       
       
-        <link rel="prev" href="../init/">
+        <link rel="prev" href="../list/">
       
       
         <link rel="next" href="../edit/">
@@ -1182,6 +1182,8 @@
       
         
       
+        
+      
     
     
     
@@ -1246,6 +1248,34 @@
     
   
     init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../list/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    list
   
 
     
@@ -1338,17 +1368,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#name" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        name
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#setting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1375,6 +1394,17 @@
   
     <nav class="md-nav" aria-label="Options">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-environment-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --environment, -e
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#-global-g" class="md-nav__link">
@@ -1413,7 +1443,7 @@
   <a href="#-defaults-d" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --defaults, -d
+        --defaults, -D
       
     </span>
   </a>
@@ -1421,10 +1451,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-copy-c" class="md-nav__link">
+  <a href="#-copy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --copy, -c
+        --copy
       
     </span>
   </a>
@@ -15888,17 +15918,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#name" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        name
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#setting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15925,6 +15944,17 @@
   
     <nav class="md-nav" aria-label="Options">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-environment-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --environment, -e
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#-global-g" class="md-nav__link">
@@ -15963,7 +15993,7 @@
   <a href="#-defaults-d" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --defaults, -d
+        --defaults, -D
       
     </span>
   </a>
@@ -15971,10 +16001,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-copy-c" class="md-nav__link">
+  <a href="#-copy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --copy, -c
+        --copy
       
     </span>
   </a>
@@ -16019,59 +16049,63 @@
 
 <h1 id="env-show">env show<a class="headerlink" href="#env-show" title="Permanent link">&para;</a></h1>
 <p><img alt="Environment show demonstration" src="../../../assets/gifs/env-show.gif" /></p>
-<p>List environments, inspect their settings or copy one value.</p>
+<p>Inspect one environment's settings or copy one value. To list the available
+environments, use <a href="../list/"><code>env list</code></a>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>host
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>-e<span class="w"> </span>staging
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>-e<span class="w"> </span>staging<span class="w"> </span>host
 </code></pre></div>
 <p>The command reads the nearest <code>.mlclient</code> directory in the current directory or
 its parents. Values come from the configuration file. Secrets are masked in the
 formatted output unless <code>--secrets</code> is passed.</p>
 <h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
-<h3 id="name"><code>name</code><a class="headerlink" href="#name" title="Permanent link">&para;</a></h3>
-<p>Environment name. Omit it to list available names, one per line. For example,
-<code>local</code> selects <code>mlclient-local.yaml</code>.</p>
 <h3 id="setting"><code>setting</code><a class="headerlink" href="#setting" title="Permanent link">&para;</a></h3>
 <p>Optional root setting or App Server identifier. A root setting prints its value;
 an App Server renders a table of that server's settings.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>host
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>app-services
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>host
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>-e<span class="w"> </span>staging<span class="w"> </span>app-services
 </code></pre></div>
+<p>The only positional argument is the setting: <code>ml env show staging</code> looks for a
+setting named <code>staging</code> in the <code>local</code> environment. Use <code>-e staging</code> to select
+the environment.</p>
 <p>Predefined servers (<code>app-services</code>, <code>manage</code>, <code>admin</code>, <code>health</code>) can be inspected
 even when the file does not list them; in that case their defaults are shown.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
+<h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
+<p>Environment name. Defaults to <code>local</code>; <code>-e staging</code> selects
+<code>mlclient-staging.yaml</code>.</p>
 <h3 id="-global-g"><code>--global</code>, <code>-g</code><a class="headerlink" href="#-global-g" title="Permanent link">&para;</a></h3>
 <p>Read <code>.mlclient</code> in your home directory instead of searching the project.</p>
 <h3 id="-raw"><code>--raw</code><a class="headerlink" href="#-raw" title="Permanent link">&para;</a></h3>
 <p>Print the configuration file verbatim, including secret values. No formatting,
 masking or YAML validation is applied.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>--raw
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>--raw
 </code></pre></div>
 <h3 id="-secrets-s"><code>--secrets</code>, <code>-s</code><a class="headerlink" href="#-secrets-s" title="Permanent link">&para;</a></h3>
 <p>Reveal secrets in formatted output. Without this option, passwords, OAuth tokens,
 API keys and TLS key passwords are masked, including values inside mappings and
 lists.</p>
-<h3 id="-defaults-d"><code>--defaults</code>, <code>-d</code><a class="headerlink" href="#-defaults-d" title="Permanent link">&para;</a></h3>
+<h3 id="-defaults-d"><code>--defaults</code>, <code>-D</code><a class="headerlink" href="#-defaults-d" title="Permanent link">&para;</a></h3>
 <p>Fill in root defaults and resolve server inheritance, including default ports,
 fieldwise SSL settings and the always-present platform app servers. Explicit
 <code>auth: null</code> and <code>auth: app</code> display as <code>app</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>content<span class="w"> </span>--defaults
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>content<span class="w"> </span>--defaults
 </code></pre></div>
 <p>This inspects configuration without connecting, loading certificate files or
 requiring Kerberos tooling. Transport/authentication compatibility is validated
 when creating a client. Without <code>--defaults</code>, the command keeps showing the raw
 fields, including incomplete configurations and unknown keys.</p>
-<h3 id="-copy-c"><code>--copy</code>, <code>-c</code><a class="headerlink" href="#-copy-c" title="Permanent link">&para;</a></h3>
+<h3 id="-copy"><code>--copy</code><a class="headerlink" href="#-copy" title="Permanent link">&para;</a></h3>
 <p>Copy a simple setting while also printing it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>host<span class="w"> </span>--copy
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>password<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>host<span class="w"> </span>--copy
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>-e<span class="w"> </span>staging<span class="w"> </span>password<span class="w"> </span>--copy
 </code></pre></div>
 <p>Text, numbers and booleans are supported. The clipboard receives the original
 value, <strong>including an unmasked password even without <code>--secrets</code></strong>. Terminal
 output remains masked. A successful copy is followed by <em>Copied to clipboard.</em>
 in green. Copied text has no formatting or trailing newline; booleans use
 <code>true</code> or <code>false</code>.</p>
-<p>For a whole environment, environment list, mapping, list, null, App Server table
+<p>For a whole environment, mapping, list, null, App Server table
 or <code>--raw</code> output, the command displays the result and then warns that copying
 was skipped. A missing clipboard utility or session also produces a warning
 without failing the command.</p>

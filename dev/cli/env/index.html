@@ -1182,6 +1182,8 @@
       
         
       
+        
+      
     
     
     
@@ -1246,6 +1248,34 @@
     
   
     init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="list/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    list
   
 
     
@@ -15754,8 +15784,12 @@ create databases or deploy a MarkLogic application.</p>
 <td>Create a template, import ml-gradle properties or discover App Servers from a host</td>
 </tr>
 <tr>
+<td><a href="list/"><code>ml env list</code></a></td>
+<td>List the available environments</td>
+</tr>
+<tr>
 <td><a href="show/"><code>ml env show</code></a></td>
-<td>List environments, inspect a configuration or copy a simple setting</td>
+<td>Inspect a configuration or copy a simple setting</td>
 </tr>
 <tr>
 <td><a href="edit/"><code>ml env edit</code></a></td>
@@ -15777,7 +15811,7 @@ create databases or deploy a MarkLogic application.</p>
 </table>
 <h2 id="create-and-inspect-a-configuration">Create and inspect a configuration<a class="headerlink" href="#create-and-inspect-a-configuration" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span>env<span class="w"> </span>init
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show
 </code></pre></div>
 <p>Review <code>.mlclient/mlclient-local.yaml</code> and fill in your connection settings
 before sending requests. Other commands use <code>local</code> by default; <code>-e dev</code> selects

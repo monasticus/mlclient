@@ -22,56 +22,21 @@ Set TypingSpeed 1ms
 Type `unset NO_COLOR HISTIGNORE HISTCONTROL; HISTSIZE=100; HISTFILE=/dev/null; set -o history; demo_dir=$(mktemp -d /tmp/ml-demo.XXXXXX); cd "$demo_dir"; mkdir .mlclient; printf 'host: localhost\nusername: admin\npassword: admin\napp-servers:\n  - id: app-services\n    port: 18008\n    rest: true\n' > .mlclient/mlclient-local.yaml; cp .mlclient/mlclient-local.yaml .mlclient/mlclient-dev.yaml; sed s/18008/18009/ .mlclient/mlclient-local.yaml > .mlclient/mlclient-qa.yaml`
 Enter
 Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
-
-Hide
-Set TypingSpeed 1ms
 Type `test "$(ml eval -d vhs-docs-demo-modules -x 'empty((doc("/ext/mlclient-demo/greeting.xqy"), doc("/ext/monthly-report.sjs")))' | tail -n 1)" = true || exit 1`
 Enter
 Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
-
-Hide
-Set TypingSpeed 1ms
 Type `cleanup() { for uri in /ext/mlclient-demo/greeting.xqy /ext/monthly-report.sjs; do ml http delete /v1/documents database=vhs-docs-demo-modules uri="$uri" >/dev/null; done; ml http delete /v1/documents -e qa database=vhs-docs-qa-modules uri=/ext/monthly-report.sjs >/dev/null; rm -rf "$demo_dir"; }; trap cleanup EXIT`
 Enter
 Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
-
-Hide
-Set TypingSpeed 1ms
 Type `ml http put /v1/documents database=vhs-docs-demo-modules uri=/ext/mlclient-demo/greeting.xqy Content-Type:application/xquery -b 'xquery version "1.0-ml"; declare variable $name external; <greeting><name>{$name}</name><message>Hello, {$name}!</message></greeting>'`
 Enter
 Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
-
-Hide
-Set TypingSpeed 1ms
 Type `ml http put /v1/documents database=vhs-docs-demo-modules uri=/ext/monthly-report.sjs Content-Type:application/javascript -b '({month: month, sales: {orders: 24, revenue: "718.00"}, currency: "EUR"})'`
 Enter
 Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
-Hide
-Set TypingSpeed 1ms
 Type `ml http put /v1/documents -e qa database=vhs-docs-qa-modules uri=/ext/monthly-report.sjs Content-Type:application/javascript -b '({month: month, orders: 24, revenue: "718.00", currency: "EUR"})'`
 Enter
 Wait
-Sleep 500ms
-Set TypingSpeed 50ms
-Show
-
-Hide
-Set TypingSpeed 1ms
 Type `clear`
 Enter
 Wait

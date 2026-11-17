@@ -1180,6 +1180,8 @@
       
         
       
+        
+      
     
     
     
@@ -1244,6 +1246,34 @@
     
   
     init
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../env/list/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    list
   
 
     
@@ -16052,9 +16082,8 @@ case-insensitive.</p>
 with <code>--body</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ml<span class="w"> </span>http<span class="w"> </span>put<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.json<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>Content-Type:application/json<span class="w"> </span>-b<span class="w"> </span><span class="s1">&#39;{&quot;hello&quot;:&quot;world&quot;}&#39;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ml<span class="w"> </span>http<span class="w"> </span>put<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.xml<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>Content-Type:application/xml<span class="w"> </span>-b<span class="w"> </span>@./doc.xml
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>ml<span class="w"> </span>http<span class="w"> </span>delete<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.xml
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ml<span class="w"> </span>http<span class="w"> </span>put<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.xml<span class="w"> </span>-b<span class="w"> </span>@./doc.xml
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>ml<span class="w"> </span>http<span class="w"> </span>delete<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.xml
 </code></pre></div>
 <p>To use the Manage API, select its configured connection explicitly:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/manage/v2/hosts<span class="w"> </span>-c<span class="w"> </span>manage<span class="w"> </span><span class="nv">view</span><span class="o">=</span>status<span class="w"> </span><span class="nv">format</span><span class="o">=</span>json
@@ -16073,12 +16102,24 @@ Repeated query keys preserve every value. Header names are case-insensitive;
 the last value wins.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/one.xml<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/two.xml<span class="w"> </span>Accept:application/xml
 </code></pre></div>
+<p>MarkLogic parameter names with a colon are query parameters when the token
+contains <code>=</code>: <code>rs:</code>, <code>trans:</code>, <code>perm:</code>, <code>prop:</code>, <code>value:</code>, <code>bind:</code> and the
+extension method declarations <code>get:</code>, <code>put:</code>, <code>post:</code> and <code>delete:</code>. Every other
+token is split at its first <code>=</code> or <code>:</code>, so a header value may contain <code>=</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/resources/my-extension<span class="w"> </span>rs:name<span class="o">=</span>value
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>ml<span class="w"> </span>http<span class="w"> </span>get<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.json<span class="w"> </span><span class="nv">transform</span><span class="o">=</span>my-transform<span class="w"> </span>trans:mode<span class="o">=</span>draft
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>ml<span class="w"> </span>http<span class="w"> </span>put<span class="w"> </span>/v1/documents<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>/doc.json<span class="w"> </span>perm:rest-reader<span class="o">=</span><span class="nb">read</span><span class="w"> </span>-b<span class="w"> </span>@./doc.json
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>ml<span class="w"> </span>http<span class="w"> </span>post<span class="w"> </span>/v1/documents<span class="w"> </span>Content-Type:<span class="s1">&#39;multipart/mixed; boundary=xyz&#39;</span><span class="w"> </span>-b<span class="w"> </span>@./batch
+</code></pre></div>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <h3 id="-body-b"><code>--body</code>, <code>-b</code><a class="headerlink" href="#-body-b" title="Permanent link">&para;</a></h3>
 <p>Request body as literal text, an existing file path, or an explicit <code>@path</code>.
 Files are read as bytes, preserving binary content and line endings. An explicit
 <code>@path</code> must exist and be readable. Text, including JSON, is sent unchanged.
-Set the appropriate <code>Content-Type</code> header yourself.</p>
+A file body gets the <code>Content-Type</code> of its extension from MarkLogic's mimetype
+table (for example <code>.json</code> is <code>application/json</code>, <code>.xml</code> is <code>application/xml</code>).
+A <code>Content-Type</code> header you give always wins. A literal body, or a file with an
+extension the table does not know, is sent without one; set it yourself.</p>
 <h3 id="-include-i"><code>--include</code>, <code>-i</code><a class="headerlink" href="#-include-i" title="Permanent link">&para;</a></h3>
 <p>Print the HTTP status line and response headers before the body. A <code>head</code> request
 always prints them because it has no response body.</p>
@@ -16100,8 +16141,10 @@ default REST connection. A port changes that connection's port and retains its
 other settings. For example, <code>-c content</code> selects a named connection and
 <code>-c 8100</code> uses port 8100.</p>
 <h2 id="responses-and-errors">Responses and errors<a class="headerlink" href="#responses-and-errors" title="Permanent link">&para;</a></h2>
-<p>Output is decoded response text. Responses are printed before a 4xx/5xx error is
-reported with a nonzero exit code. Redirect responses are displayed without
+<p>Output is decoded response text. A 4xx/5xx response prints its body and exits
+with code 1. An error response without a body prints one line to stderr instead,
+for example <code>HTTP 503 Service Unavailable for http://localhost:8000/v1/ping</code>.
+With several environments, that line fills the environment's column. Redirect responses are displayed without
 following them and do not count as HTTP errors. With <code>--include</code>, the status line
 uses the actual HTTP protocol version.</p>
 <p>See also <a href="../#global-options">global options</a>.</p>

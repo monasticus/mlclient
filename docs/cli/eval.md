@@ -59,9 +59,9 @@ Values are supplied as strings; convert them in your query as needed.
 For an XQuery variable in a namespace, use its expanded name:
 
 ```sh
-ml eval 'declare namespace local="https://monasticus.com/mlclient/examples/example";
-  declare variable $local:days external;
-  xs:integer($local:days) + 1' --var '{https://monasticus.com/mlclient/examples/example}days=5'
+ml eval 'declare namespace params="https://monasticus.com/mlclient/examples/example";
+  declare variable $params:days external;
+  xs:integer($params:days) + 1' --var '{https://monasticus.com/mlclient/examples/example}days=5'
 ```
 
 ### `--database`, `-d`

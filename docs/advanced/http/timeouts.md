@@ -46,6 +46,22 @@ with MLClient(timeout=10) as ml:
 `None` disables all HTTP timeouts. Omitting the parameter inherits the client
 setting. An override does not change later calls.
 
+## Command line
+
+`ml eval`, `ml invoke` and `ml http` take `--timeout SECONDS` for one run: a
+number sets all four components, `0` disables the timeout and the defaults below
+apply without it. A timed-out request may still be running on the server, and an
+update may still commit; see [`ml eval --timeout`](../../cli/eval.md#-timeout).
+
+Connection and pool timeouts identify the stage that expired. Read, write and
+generic timeouts warn that the request may still be running on MarkLogic.
+
+With the default retry policy, `ml http` retries a `ReadTimeout` up to five times
+for `GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS` and `TRACE`. Total waiting time
+includes retries and backoff and can therefore exceed `--timeout`. The duration
+in the timeout error describes one attempt; the terminal's `Elapsed` line
+reports the total time. See [Retry policy](retries.md).
+
 ## Defaults
 
 | Connection | Connect | Read | Write | Pool |

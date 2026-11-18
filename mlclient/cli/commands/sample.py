@@ -18,6 +18,7 @@ from mlclient.cli.commands._multi_env_common import (
 from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
 from mlclient.cli.formatting import prettify
+from mlclient.cli.options import connection_option, environment_option, no_pretty_option
 from mlclient.exceptions import WrongParametersError
 from mlclient.xquery import cts
 
@@ -60,21 +61,14 @@ class SampleCommand(Command):
         argument("path", "Root name or XPath to sample", optional=True, default="/"),
     ]
     options: list[Option] = [
-        option(
-            "environment",
-            "e",
-            description="The ML Client environment name; repeat it to sample "
-            "several environments",
-            flag=False,
+        environment_option(
+            description=(
+                "The ML Client environment name; repeat it to sample several "
+                "environments"
+            ),
             multiple=True,
-            default=["local"],
         ),
-        option(
-            "connection",
-            "c",
-            description="Connection identifier from the environment or TCP port",
-            flag=False,
-        ),
+        connection_option(),
         option(
             "limit",
             "l",
@@ -87,7 +81,7 @@ class SampleCommand(Command):
             "j",
             description="Sample JSON documents instead of XML documents",
         ),
-        option("no-pretty", description="Print sample content without pretty-printing"),
+        no_pretty_option(description="Print sample content without pretty-printing"),
     ]
 
     def handle(self) -> int:

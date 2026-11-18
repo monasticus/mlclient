@@ -5,6 +5,7 @@ import errno
 import os
 from pathlib import Path
 
+import httpx
 import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
@@ -14,6 +15,7 @@ from mlclient.cli import MLCLIentApplication
 from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
+from mlclient.http import DEFAULT_TIMEOUT
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -738,3 +740,119 @@ def test_command_http_multi_environment_shows_status_line_for_empty_error_body()
     assert tester.execute("-e first -e second GET /v1/ping") == 1
     output = tester.io.fetch_output()
     assert output.count("HTTP 404 Not Found for") == 2
+
+
+# --- timeout ---
+
+_TIMED_OUT = "Request timed out after 2s - it may still be running on the server\n"
+
+
+@pytest.mark.parametrize(
+    ("options", "timeout"),
+    [
+        ("--timeout 2", httpx.Timeout(2).as_dict()),
+        ("--timeout 0", httpx.Timeout(None).as_dict()),
+        ("", DEFAULT_TIMEOUT.as_dict()),
+    ],
+)
+@respx.mock
+def test_command_http_sends_the_requested_timeout(options, timeout):
+    sent_timeouts = []
+
+    def respond(request):
+        sent_timeouts.append(request.extensions["timeout"])
+        return httpx.Response(200)
+
+    respx.get("http://localhost:8002/v1/ping").mock(side_effect=respond)
+    tester = _get_tester()
+
+    assert tester.execute(f"get /v1/ping {options}") == 0
+    assert sent_timeouts == [timeout]
+
+
+@respx.mock
+def test_command_http_sends_the_requested_timeout_to_each_environment():
+    sent_timeouts = []
+
+    def respond(request):
+        sent_timeouts.append(request.extensions["timeout"])
+        return httpx.Response(200)
+
+    respx.get("http://localhost:8002/v1/ping").mock(side_effect=respond)
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second get /v1/ping --timeout 2") == 0
+    assert sent_timeouts == [httpx.Timeout(2).as_dict()] * 2
+
+
+@respx.mock
+def test_command_http_reports_a_timeout_in_one_line():
+    respx.post("http://localhost:8002/v1/eval").mock(side_effect=_time_out)
+    tester = _get_tester()
+
+    assert tester.execute("post /v1/eval --timeout 2") == 1
+    assert tester.io.fetch_error() == _TIMED_OUT
+    assert tester.io.fetch_output() == ""
+
+
+@respx.mock
+def test_command_http_reports_a_timeout_in_the_environment_column():
+    respx.post("http://localhost:8002/v1/eval").mock(side_effect=_time_out)
+    tester = _get_tester()
+
+    assert tester.execute("-e first -e second post /v1/eval --timeout 2") == 1
+    output = " ".join(tester.io.fetch_output().split())
+    assert output.count("Request timed out after 2s") == 2
+
+
+@respx.mock
+def test_command_http_rejects_an_invalid_timeout_before_request():
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError, match="non-negative") as error:
+        tester.execute("get /v1/ping --timeout=nan")
+
+    expected = "--timeout must be a non-negative number of seconds, got: 'nan'"
+    assert str(error.value) == expected
+    assert not respx.calls
+
+
+def _time_out(request):
+    msg = "The read operation timed out"
+    raise httpx.ReadTimeout(msg, request=request)
+
+
+@pytest.mark.parametrize(
+    ("error_type", "expected"),
+    [
+        (httpx.ConnectTimeout, "Connection timed out after 1s\n"),
+        (
+            httpx.ReadTimeout,
+            "Request timed out after 60s - it may still be running on the server\n",
+        ),
+        (
+            httpx.WriteTimeout,
+            "Request timed out after 2.5s - it may still be running on the server\n",
+        ),
+        (httpx.PoolTimeout, "Connection pool timed out after 4s\n"),
+        (
+            httpx.TimeoutException,
+            "Request timed out - it may still be running on the server\n",
+        ),
+    ],
+)
+@respx.mock
+def test_command_http_reports_timeout_stage(mocker, error_type, expected):
+    timeout = httpx.Timeout(connect=1, read=60, write=2.5, pool=4)
+    mocker.patch("mlclient.http.DEFAULT_TIMEOUT", timeout)
+
+    def time_out(request):
+        assert request.extensions["timeout"] == timeout.as_dict()
+        raise error_type("expired", request=request)
+
+    respx.post("http://localhost:8002/v1/eval").mock(side_effect=time_out)
+    tester = _get_tester()
+
+    assert tester.execute("post /v1/eval") == 1
+    assert tester.io.fetch_error() == expected
+    assert tester.io.fetch_output() == ""

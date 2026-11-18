@@ -14,6 +14,9 @@ while IFS= read -r -d '' path; do
       docs=true ;;
     README.md|LICENSE|.gitignore|meta/*)
       ;;
+    # CLI and check-selection changes do not exercise MarkLogic integration.
+    mlclient/cli/*|.github/scripts/select-checks.sh)
+      unit=true; lint=true; docs=true ;;
     mlclient/*)
       unit=true; integration=true; lint=true; docs=true ;;
     tests/unit/*|tests/resources/unit/*)

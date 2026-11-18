@@ -91,6 +91,33 @@ Invalid JSON/XML is left unchanged. Mixed XML content and `xml:space="preserve"`
 subtrees are not re-indented; the surrounding XML is still formatted.
 An existing XML declaration is preserved verbatim; none is added when absent.
 
+### `--timeout`
+
+Seconds to wait for MarkLogic. A number sets all four HTTP timeout components
+(connect, read, write and pool) for this request; `0` disables the timeout.
+Without the option the client defaults apply: 5 seconds to connect, 60 seconds
+to read. See [Timeouts](../advanced/http/timeouts.md).
+
+For `GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS` and `TRACE`, the default retry
+policy can retry a read timeout up to five times. Retries and backoff can make
+the total wait longer than `--timeout`; the error reports the per-attempt limit.
+See [retry details](../advanced/http/timeouts.md#command-line).
+
+A read or write timeout only stops the client from waiting. MarkLogic may keep
+running the request, so an update may still commit after the command has failed. The command
+prints one line to stderr and exits with 1:
+
+```text
+Request timed out after 60s - it may still be running on the server
+```
+
+Connection and pool timeouts identify the expired connection stage instead of
+warning that the request may still be running.
+
+Before you run an update again, check on the server whether it is still running
+or has committed, for example in the Monitoring dashboard or with
+`xdmp:server-status`.
+
 ### `--environment`, `-e`
 
 Environment name. Defaults to `local`; use `-e dev` to load

@@ -32,6 +32,7 @@ from mlclient.cli.commands._env_common import (
     title,
     unknown_env_message,
 )
+from mlclient.cli.options import environment_option
 from mlclient.connection import MARKLOGIC_APP_SERVICES_PORT
 from mlclient.env import DEFAULT_APP_SERVER_SETTINGS
 from mlclient.exceptions import WrongParametersError
@@ -87,13 +88,7 @@ class EnvShowCommand(Command):
         ),
     ]
     options: list[Option] = [
-        option(
-            "environment",
-            "e",
-            description="The ML Client environment name",
-            flag=False,
-            default="local",
-        ),
+        environment_option(),
         option(
             "global",
             "g",

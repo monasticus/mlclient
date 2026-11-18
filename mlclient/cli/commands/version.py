@@ -10,7 +10,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from cleo.commands.command import Command
-from cleo.helpers import option
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
@@ -20,6 +19,7 @@ from mlclient.cli.commands._multi_env_common import (
 )
 from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_async_client, get_client
+from mlclient.cli.options import connection_option, environment_option
 
 if TYPE_CHECKING:
     from mlclient.models import MarkLogicVersion
@@ -47,21 +47,13 @@ class VersionCommand(Command):
     name: str = "version"
     description: str = "Reports the MarkLogic version of an environment"
     options: list[Option] = [
-        option(
-            "environment",
-            "e",
-            description="The ML Client environment name; repeat it to ask several "
-            "environments",
-            flag=False,
+        environment_option(
+            description=(
+                "The ML Client environment name; repeat it to ask several environments"
+            ),
             multiple=True,
-            default=["local"],
         ),
-        option(
-            "connection",
-            "c",
-            description="Connection identifier from the environment or TCP port",
-            flag=False,
-        ),
+        connection_option(),
     ]
 
     def handle(self) -> int:

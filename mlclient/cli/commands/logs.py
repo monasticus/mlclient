@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import heapq
 from collections.abc import Generator, Iterator
+from http import HTTPStatus
 from typing import TYPE_CHECKING, ClassVar
 
 from cleo.commands.command import Command
@@ -330,7 +331,7 @@ class LogsCommand(Command):
                     f"  {Formatter.escape(host)}: {Formatter.escape(reason)}",
                     style="fg=yellow",
                 )
-        if any(self._is_missing_log(str(error)) for error in failures.values()):
+        if any(self._is_missing_log(error) for error in failures.values()):
             self._hint_missing_log(self._log_file_name(app_port, LogType.ERROR))
         return 1 if failures else 0
 
@@ -364,7 +365,9 @@ class LogsCommand(Command):
         manager: MLClientManager,
         app_port: int | str | None,
     ) -> tuple[
-        dict[str, int], list[Iterator[dict]], dict[str, HTTPError | MarkLogicError],
+        dict[str, int],
+        list[Iterator[dict]],
+        dict[str, HTTPError | MarkLogicError],
     ]:
         """Collect available host logs and reasons for missing hosts.
 
@@ -586,7 +589,7 @@ class LogsCommand(Command):
         try:
             logs = self._get_logs(manager, app_port)
         except MarkLogicError as error:
-            if not self._is_missing_log(str(error)):
+            if not self._is_missing_log(error):
                 raise
             self.application.render_error(error, self._io)
             self._hint_missing_log(file_name)
@@ -622,29 +625,31 @@ class LogsCommand(Command):
 
     @staticmethod
     def _is_missing_log(
-        error_message: str,
+        error: HTTPError | MarkLogicError,
     ) -> bool:
-        """Return True for MarkLogic's 404 MANAGE-NOSUCHLOG error message.
+        """Identify a missing log from MarkLogic's structured error fields.
 
         Parameters
         ----------
-        error_message : str
-            A MarkLogicError message.
+        error : HTTPError | MarkLogicError
+            The log-read failure, retained until rendering.
 
         Returns
         -------
         bool
-            True when the requested log file does not exist.
+            True for status 404 and the MANAGE-NOSUCHLOG message code.
         """
         return (
-            error_message.startswith("[404 ") and "(MANAGE-NOSUCHLOG)" in error_message
+            isinstance(error, MarkLogicError)
+            and error.status_code == HTTPStatus.NOT_FOUND
+            and error.message_code == "MANAGE-NOSUCHLOG"
         )
 
     def _hint_missing_log(
         self,
         file_name: str,
     ) -> None:
-        """Explain on stderr that a missing log file is not an error of its own.
+        """Explain when MarkLogic creates the requested log file.
 
         Parameters
         ----------

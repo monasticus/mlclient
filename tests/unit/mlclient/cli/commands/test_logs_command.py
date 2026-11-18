@@ -1373,8 +1373,9 @@ def test_command_logs_raises_other_marklogic_errors_without_hint():
     ml_mocker.mock_get()
     tester = _get_tester()
 
-    with pytest.raises(MarkLogicError, match="Insufficient privileges"):
+    with pytest.raises(MarkLogicError, match="Insufficient privileges") as error:
         tester.execute("-e test -s 8010")
+    assert str(error.value) == "[403 Forbidden] (SEC-PRIV) Insufficient privileges"
     assert tester.io.fetch_error() == ""
 
 
@@ -1624,3 +1625,72 @@ def _get_tester() -> CommandTester:
     app = MLCLIentApplication()
     command = app.find("logs")
     return CommandTester(command)
+
+
+@pytest.mark.parametrize("all_hosts", [False, True])
+@respx.mock
+def test_command_logs_uses_missing_log_metadata_when_message_format_changes(
+    mocker,
+    all_hosts,
+):
+    error = MarkLogicError(_no_such_log_body("8010_ErrorLog.txt"))
+    mocker.patch.object(MarkLogicError, "__str__", return_value="Log unavailable")
+    if all_hosts:
+        respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+            200,
+            json=_hosts_body(["ml_cluster_node1"]),
+        )
+        service = "mlclient.services.diagnostics.logs.AsyncLogsService.get"
+        args = "-e test-cluster --all-hosts -s 8010 --regex needle"
+        prefix = (
+            "\nLogs are incomplete; missing hosts:\n"
+            "  ml_cluster_node1: Log unavailable\n"
+        )
+    else:
+        service = "mlclient.services.diagnostics.logs.LogsService.get"
+        args = "-e test -s 8010"
+        prefix = "\nLog unavailable\n"
+    mocker.patch(service, side_effect=error)
+    tester = _get_tester()
+
+    assert tester.execute(args) == 1
+    assert tester.io.fetch_error() == (
+        prefix
+        + "No 8010_ErrorLog.txt yet - MarkLogic creates it when the server first "
+        "logs something. Run 'ml logs --list' to see the existing log files.\n"
+    )
+    assert tester.io.fetch_output() == ""
+
+
+@pytest.mark.parametrize("all_hosts", [False, True])
+@respx.mock
+def test_command_logs_does_not_infer_missing_log_from_a_raw_message(mocker, all_hosts):
+    message = (
+        "[404 Not Found] (MANAGE-NOSUCHLOG) MANAGE-NOSUCHLOG: (err:FOER0000) "
+        "No such log: 8010_ErrorLog.txt"
+    )
+    error = MarkLogicError(message)
+    if all_hosts:
+        respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+            200,
+            json=_hosts_body(["ml_cluster_node1"]),
+        )
+        service = "mlclient.services.diagnostics.logs.AsyncLogsService.get"
+        args = "-e test-cluster --all-hosts -s 8010 --regex needle"
+    else:
+        service = "mlclient.services.diagnostics.logs.LogsService.get"
+        args = "-e test -s 8010"
+    mocker.patch(service, side_effect=error)
+    tester = _get_tester()
+
+    if all_hosts:
+        assert tester.execute(args) == 1
+        assert tester.io.fetch_error() == (
+            f"\nLogs are incomplete; missing hosts:\n  ml_cluster_node1: {message}\n"
+        )
+    else:
+        with pytest.raises(MarkLogicError, match="MANAGE-NOSUCHLOG") as caught:
+            tester.execute(args)
+        assert str(caught.value) == message
+        assert tester.io.fetch_error() == ""
+    assert tester.io.fetch_output() == ""

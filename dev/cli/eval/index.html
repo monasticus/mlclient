@@ -16096,33 +16096,65 @@ XML and JSON results are formatted with two-space indentation by default.
 An existing XML declaration is preserved verbatim; none is added when absent.
 Mixed XML content and <code>xml:space="preserve"</code> subtrees are not re-indented;
 the surrounding XML is still formatted with two-space indentation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-j<span class="w"> </span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./query.xqy
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;&lt;root&gt;&lt;item&gt;one&lt;/item&gt;&lt;/root&gt;&#39;</span><span class="w"> </span>--no-pretty
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./query.xqy
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span><span class="s1">&#39;&quot;Server time: &quot; || fn:current-time()&#39;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-j<span class="w"> </span><span class="s1">&#39;`Server time: ${fn.currentTime()}`&#39;</span>
 </code></pre></div>
 <p>Use <code>-d</code> to select a content database, or pass external variables with <code>--var</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./query.xqy<span class="w"> </span>-d<span class="w"> </span>Documents
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;declare variable $name external; concat(&quot;Hello, &quot;, $name)&#39;</span><span class="w"> </span>--var<span class="w"> </span><span class="nv">name</span><span class="o">=</span>Tom
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span><span class="s1">&#39;declare variable $name external; &quot;Hello, &quot; || $name&#39;</span><span class="w"> </span>--var<span class="w"> </span><span class="nv">name</span><span class="o">=</span>Tom
 </code></pre></div>
 <h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
 <h3 id="code"><code>code</code><a class="headerlink" href="#code" title="Permanent link">&para;</a></h3>
-<p>Required. A file path by default; use <code>--xquery</code> or <code>--javascript</code> for inline code.
-The file extension determines the language when evaluating a file.</p>
+<p>Required. Without <code>--xquery</code> or <code>--javascript</code>, the argument is read as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Evaluated as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@path</code></td>
+<td>The file at <code>path</code>; an error if it does not exist</td>
+</tr>
+<tr>
+<td>An existing file with a code extension (<code>xq</code>, <code>xql</code>, <code>xqm</code>, <code>xqu</code>, <code>xquery</code>, <code>xqy</code>, <code>js</code>, <code>sjs</code>)</td>
+<td>The file, in the language of its extension</td>
+</tr>
+<tr>
+<td>An existing file with another extension, e.g. <code>notes.txt</code></td>
+<td>An error: unknown file extension</td>
+</tr>
+<tr>
+<td>A name ending with a code extension that does not exist, e.g. <code>quer.xqy</code></td>
+<td>An error: file not found, so a mistyped file name never runs as code</td>
+</tr>
+<tr>
+<td>Anything else, e.g. <code>'1+1'</code></td>
+<td>Inline XQuery</td>
+</tr>
+</tbody>
+</table>
+<p>With <code>--xquery</code> or <code>--javascript</code> the argument is always inline code, even when it
+names an existing file.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
 <h3 id="-xquery-x"><code>--xquery</code>, <code>-x</code><a class="headerlink" href="#-xquery-x" title="Permanent link">&para;</a></h3>
-<p>Treat <code>code</code> as inline XQuery. Cannot be combined with <code>--javascript</code>.</p>
+<p>Treat <code>code</code> as inline XQuery, even when it names an existing file.
+Cannot be combined with <code>--javascript</code>.</p>
 <h3 id="-javascript-j"><code>--javascript</code>, <code>-j</code><a class="headerlink" href="#-javascript-j" title="Permanent link">&para;</a></h3>
-<p>Treat <code>code</code> as inline JavaScript. Cannot be combined with <code>--xquery</code>.</p>
+<p>Treat <code>code</code> as inline JavaScript, even when it names an existing file.
+Cannot be combined with <code>--xquery</code>.</p>
 <h3 id="-var"><code>--var</code><a class="headerlink" href="#-var" title="Permanent link">&para;</a></h3>
 <p>Bind an external variable using <code>name=value</code>. Repeat the option for several
 variables. Names cannot be empty or whitespace only. Values may be empty;
 only the first <code>=</code> separates the name, so a value may contain <code>=</code>.
 Values are supplied as strings; convert them in your query as needed.
 For an XQuery variable in a namespace, use its expanded name:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;declare namespace local=&quot;https://monasticus.com/mlclient/examples/example&quot;;</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="s1">  declare variable $local:days external;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="s1">  xs:integer($local:days) + 1&#39;</span><span class="w"> </span>--var<span class="w"> </span><span class="s1">&#39;{https://monasticus.com/mlclient/examples/example}days=5&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span><span class="nb">eval</span><span class="w"> </span><span class="s1">&#39;declare namespace params=&quot;https://monasticus.com/mlclient/examples/example&quot;;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="s1">  declare variable $params:days external;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="s1">  xs:integer($params:days) + 1&#39;</span><span class="w"> </span>--var<span class="w"> </span><span class="s1">&#39;{https://monasticus.com/mlclient/examples/example}days=5&#39;</span>
 </code></pre></div>
 <h3 id="-database-d"><code>--database</code>, <code>-d</code><a class="headerlink" href="#-database-d" title="Permanent link">&para;</a></h3>
 <p>Content database in which to evaluate the code. When omitted, use the REST

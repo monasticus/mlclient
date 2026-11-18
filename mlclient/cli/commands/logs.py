@@ -324,12 +324,13 @@ class LogsCommand(Command):
         self._write_merged_logs(colors, per_host_logs)
         if failures:
             self.line_error("\nLogs are incomplete; missing hosts:", style="fg=yellow")
-            for host, reason in failures.items():
+            for host, error in failures.items():
+                reason = str(error) or type(error).__name__
                 self.line_error(
                     f"  {Formatter.escape(host)}: {Formatter.escape(reason)}",
                     style="fg=yellow",
                 )
-        if any(self._is_missing_log(reason) for reason in failures.values()):
+        if any(self._is_missing_log(str(error)) for error in failures.values()):
             self._hint_missing_log(self._log_file_name(app_port, LogType.ERROR))
         return 1 if failures else 0
 
@@ -362,7 +363,9 @@ class LogsCommand(Command):
         self,
         manager: MLClientManager,
         app_port: int | str | None,
-    ) -> tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]:
+    ) -> tuple[
+        dict[str, int], list[Iterator[dict]], dict[str, HTTPError | MarkLogicError],
+    ]:
         """Collect available host logs and reasons for missing hosts.
 
         Expected host errors do not interrupt other reads. Unexpected failures
@@ -378,9 +381,12 @@ class LogsCommand(Command):
 
         Returns
         -------
-        tuple[dict[str, int], list[Iterator[dict]], dict[str, str]]
-            Host colors, sorted and host-tagged logs from successful reads,
-            and failed host names mapped to their error messages.
+        colors : dict[str, int]
+            The color assigned to each host.
+        per_host_logs : list[Iterator[dict]]
+            Sorted, host-tagged logs from successful reads.
+        failures : dict[str, HTTPError | MarkLogicError]
+            Failed hosts mapped to their request exceptions.
         """
         hosts = None
         completed = 0
@@ -431,7 +437,7 @@ class LogsCommand(Command):
             failures = {}
             for host, result in zip(hosts, results):
                 if isinstance(result, (HTTPError, MarkLogicError)):
-                    failures[host] = str(result) or type(result).__name__
+                    failures[host] = result
                 else:
                     per_host_logs.append(result)
             return colors, per_host_logs, failures

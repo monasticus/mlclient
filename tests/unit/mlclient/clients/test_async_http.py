@@ -17,6 +17,7 @@ from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 RESOURCES = resources_utils.get_test_resources(__file__)
+_DIGEST_CHALLENGE = 'Digest realm="public", qop="auth", nonce="abc123", opaque="xyz"'
 
 
 @pytest.mark.asyncio
@@ -840,9 +841,6 @@ async def test_unset_per_request_uses_config_default():
         "write": 60.0,
         "pool": 5.0,
     }
-
-
-_DIGEST_CHALLENGE = 'Digest realm="public", qop="auth", nonce="abc123", opaque="xyz"'
 
 
 def _digest_without_credentials_messages(

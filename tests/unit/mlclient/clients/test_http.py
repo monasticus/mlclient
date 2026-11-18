@@ -17,6 +17,7 @@ from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 RESOURCES = resources_utils.get_test_resources(__file__)
+_DIGEST_CHALLENGE = 'Digest realm="public", qop="auth", nonce="abc123", opaque="xyz"'
 
 
 def test_connection():
@@ -785,9 +786,6 @@ def test_format_http_response_preserves_protocol_and_reason():
 
     assert formatted.startswith("HTTP/2 200 Custom reason\n")
     assert formatted.endswith("\n\nbody")
-
-
-_DIGEST_CHALLENGE = 'Digest realm="public", qop="auth", nonce="abc123", opaque="xyz"'
 
 
 def _digest_without_credentials_messages(

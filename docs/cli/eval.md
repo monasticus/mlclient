@@ -10,7 +10,7 @@ the surrounding XML is still formatted with two-space indentation.
 
 ```sh
 ml eval ./query.xqy
-ml eval 'fn:concat("Server time: ", fn:current-time())'
+ml eval '"Server time: " || fn:current-time()'
 ml eval -j '`Server time: ${fn.currentTime()}`'
 ```
 
@@ -18,7 +18,7 @@ Use `-d` to select a content database, or pass external variables with `--var`:
 
 ```sh
 ml eval ./query.xqy -d Documents
-ml eval -x 'declare variable $name external; concat("Hello, ", $name)' --var name=Tom
+ml eval 'declare variable $name external; "Hello, " || $name' --var name=Tom
 ```
 
 ## Arguments

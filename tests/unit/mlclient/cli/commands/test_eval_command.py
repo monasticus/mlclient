@@ -587,12 +587,21 @@ def test_command_eval_treats_code_ending_like_an_extension_without_dot_as_xquery
     assert route.call_count == 1
 
 
+@pytest.mark.parametrize("file_check_fails", [False, True])
 @respx.mock
-def test_command_eval_treats_code_too_long_for_a_file_name_as_xquery():
+def test_command_eval_treats_code_too_long_for_a_file_name_as_xquery(
+    mocker,
+    file_check_fails,
+):
     code = f'"{"a" * 300}"'
     route = _mock_eval_post({"xquery": code})
 
     tester = _get_tester("eval")
+    if file_check_fails:
+        mocker.patch(
+            "mlclient.cli.commands.eval.Path.is_file",
+            side_effect=OSError("File name too long"),
+        )
 
     assert tester.execute(f"'{code}'") == 0
     assert route.call_count == 1

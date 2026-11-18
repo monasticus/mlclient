@@ -60,7 +60,7 @@ Values are supplied as strings; convert them in your query as needed.
 For an XQuery variable in a namespace, use its expanded name:
 
 ```sh
-ml eval -x 'declare namespace local="https://monasticus.com/mlclient/examples/example";
+ml eval 'declare namespace local="https://monasticus.com/mlclient/examples/example";
   declare variable $local:days external;
   xs:integer($local:days) + 1' --var '{https://monasticus.com/mlclient/examples/example}days=5'
 ```

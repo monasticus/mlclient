@@ -15899,7 +15899,8 @@
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/v1/documents&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;/hello.json&quot;</span><span class="p">})</span>
 </code></pre></div>
 <p>An int is shorthand for the retry count: <code>retry=2</code> allows up to two retries and
-<code>retry=0</code> disables them. Use <code>httpx_retries.Retry</code> to also configure backoff and
+<code>retry=0</code> disables them. It preserves the default policy's backoff, methods,
+exceptions and statuses. Use <code>httpx_retries.Retry</code> to configure backoff and
 eligibility:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">httpx_retries</span><span class="w"> </span><span class="kn">import</span> <span class="n">Retry</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
@@ -15910,29 +15911,69 @@ eligibility:</p>
 <p>Retry settings belong to the Python HTTP configuration, not environment YAML.</p>
 <h2 id="default-policy">Default policy<a class="headerlink" href="#default-policy" title="Permanent link">&para;</a></h2>
 <p><code>DEFAULT_RETRY_STRATEGY</code> allows up to five retries with a backoff factor of <code>0.5</code>.
-Eligibility depends on the method, response status or exception according to
-<code>httpx-retries</code>; a failed request is not automatically retried just because a
-retry budget remains.</p>
+A failed request is retried only when all of these hold:</p>
+<ul>
+<li>the method is idempotent - <code>HEAD</code>, <code>GET</code>, <code>PUT</code>, <code>DELETE</code>, <code>OPTIONS</code> or <code>TRACE</code>.
+  <code>POST</code> is never retried, so eval, invoke and <code>POST /v1/search</code> run once;</li>
+<li>the request failed before the server could process it, or the connection was
+  aborted: <code>httpx.ConnectTimeout</code>, <code>httpx.WriteTimeout</code>, <code>httpx.PoolTimeout</code>,
+  <code>httpx.NetworkError</code> (<code>ConnectError</code>, <code>ReadError</code>, <code>WriteError</code>, <code>CloseError</code>)
+  or <code>httpx.RemoteProtocolError</code> (the server closed the connection without a
+  response), or the response status is <code>429</code>, <code>502</code> or <code>503</code>.</li>
+</ul>
+<p>A read timeout (<code>httpx.ReadTimeout</code>) and <code>504 Gateway Timeout</code> are <strong>not</strong>
+retried. In both cases the server got the request and is most likely still
+running it: the client stopped waiting, or a proxy in front of MarkLogic (an
+AWS ALB, nginx) gave up after its idle timeout - MarkLogic itself never returns
+<code>504</code>. A retry would start the same slow request again on the server and multiply
+the wait before the error. Raise the <a href="../timeouts/">timeout</a> instead, or the
+proxy's idle timeout.</p>
+<p>A proxy can also return <code>504</code> when it could not reach MarkLogic at all, for
+example a node that is down but still registered behind an ALB. The default
+policy does not retry that either. To retry it, pass your own strategy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">httpx_retries</span><span class="w"> </span><span class="kn">import</span> <span class="n">Retry</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">retry</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">total</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">backoff_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">retry_on_exceptions</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="n">httpx</span><span class="o">.</span><span class="n">ConnectTimeout</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">httpx</span><span class="o">.</span><span class="n">WriteTimeout</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="n">httpx</span><span class="o">.</span><span class="n">PoolTimeout</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="n">httpx</span><span class="o">.</span><span class="n">NetworkError</span><span class="p">,</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        <span class="n">httpx</span><span class="o">.</span><span class="n">RemoteProtocolError</span><span class="p">,</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="p">],</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">status_forcelist</span><span class="o">=</span><span class="p">[</span><span class="mi">429</span><span class="p">,</span> <span class="mi">502</span><span class="p">,</span> <span class="mi">503</span><span class="p">,</span> <span class="mi">504</span><span class="p">],</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">)</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="k">with</span> <span class="n">MLClient</span><span class="p">(</span><span class="n">retry</span><span class="o">=</span><span class="n">retry</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/v1/documents&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;/hello.json&quot;</span><span class="p">})</span>
+</code></pre></div>
+<p>Add <code>httpx.ReadTimeout</code> to <code>retry_on_exceptions</code> the same way to retry read
+timeouts. A <code>Retry</code> built without <code>retry_on_exceptions</code> or <code>status_forcelist</code>
+uses the <code>httpx-retries</code> defaults, which include both. The int shorthand keeps
+MLClient's default policy, so <code>retry=2</code> does not retry read timeouts or <code>504</code>.</p>
 <p>HealthCheck uses <code>NO_RETRY_STRATEGY</code> by default so a probe returns promptly.
 For an explicit <code>health_config</code>, an omitted retry strategy still resolves to no
 retries; an explicitly supplied strategy is preserved.</p>
 <h2 id="disable-retries">Disable retries<a class="headerlink" href="#disable-retries" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_RETRY_STRATEGY</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">with</span> <span class="n">MLClient</span><span class="p">(</span><span class="n">retry</span><span class="o">=</span><span class="n">NO_RETRY_STRATEGY</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/v1/documents&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;/hello.json&quot;</span><span class="p">})</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_RETRY_STRATEGY</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">with</span> <span class="n">MLClient</span><span class="p">(</span><span class="n">retry</span><span class="o">=</span><span class="n">NO_RETRY_STRATEGY</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/v1/documents&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;/hello.json&quot;</span><span class="p">})</span>
 </code></pre></div>
 <p>Passing <code>retry=None</code> restores the default policy; it does <strong>not</strong> disable retries.</p>
 <h2 id="set-a-manager-policy">Set a manager policy<a class="headerlink" href="#set-a-manager-policy" title="Permanent link">&para;</a></h2>
 <p>A manager's explicit policy applies to every connection, including Health.
 Override it when requesting an individual client:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">httpx_retries</span><span class="w"> </span><span class="kn">import</span> <span class="n">Retry</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">MLClientManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="n">Retry</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_client</span><span class="p">(</span><span class="s2">&quot;health&quot;</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">healthy</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">healthcheck</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">httpx_retries</span><span class="w"> </span><span class="kn">import</span> <span class="n">Retry</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">MLClientManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="n">Retry</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_client</span><span class="p">(</span><span class="s2">&quot;health&quot;</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">healthy</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">healthcheck</span><span class="p">()</span>
 </code></pre></div>
 <p>Here <code>retry=None</code> restores Health's no-retry default. For another server kind,
 it restores <code>DEFAULT_RETRY_STRATEGY</code>. Per-call overrides do not change later

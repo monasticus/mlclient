@@ -16256,7 +16256,7 @@
               </div>
             </td>
             <td>
-                  <code>Retry(total=5, backoff_factor=0.5)</code>
+                  <code>DEFAULT_RETRY_STRATEGY</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -16360,7 +16360,7 @@ given, takes precedence over this argument.</p>
 <a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="sd">        SSL/TLS configuration</span>
 <a id="__codelineno-0-260" name="__codelineno-0-260"></a><span class="sd">    cloud : CloudConfig | None, default None</span>
 <a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="sd">        MarkLogic Cloud configuration</span>
-<a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="sd">    retry : Retry | None, default Retry(total=5, backoff_factor=0.5)</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="sd">    retry : Retry | None, default DEFAULT_RETRY_STRATEGY</span>
 <a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">        A retry strategy</span>
 <a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">    limits : httpx.Limits | None, default None</span>
 <a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">        Connection-pool limits; None defers to httpx&#39;s own default</span>

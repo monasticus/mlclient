@@ -16492,11 +16492,11 @@ authentication via the API key</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A retry strategy; an int is shorthand for Retry(total=n)</p>
+                <p>A retry strategy; an int changes only the default policy's retry count</p>
               </div>
             </td>
             <td>
-                  <code>Retry(total=5, backoff_factor=0.5)</code>
+                  <code>DEFAULT_RETRY_STRATEGY</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -16777,8 +16777,8 @@ preserved</p>
 <a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="sd">    cloud : CloudConfig | None, default None</span>
 <a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">        MarkLogic Cloud configuration; forces HTTPS on port 443 and handles</span>
 <a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">        authentication via the API key</span>
-<a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    retry : Retry | int | None, default Retry(total=5, backoff_factor=0.5)</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">        A retry strategy; an int is shorthand for Retry(total=n)</span>
+<a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">        A retry strategy; an int changes only the default policy&#39;s retry count</span>
 <a id="__codelineno-0-206" name="__codelineno-0-206"></a><span class="sd">    limits : httpx.Limits | int | None, default None</span>
 <a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">        Connection-pool limits; None defers to httpx&#39;s own default; an int</span>
 <a id="__codelineno-0-208" name="__codelineno-0-208"></a><span class="sd">        is shorthand for httpx.Limits(max_connections=n)</span>

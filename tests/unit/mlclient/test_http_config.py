@@ -366,3 +366,16 @@ def test_session_sharing_ignores_timeout_explicitness_when_values_match():
 def test_session_sharing_shares_default_timeout():
     config = HTTPConfig.resolve()
     assert config.can_share_session(HTTPConfig.resolve())
+
+
+@pytest.mark.parametrize("total", [0, 2])
+def test_scalar_retry_preserves_default_policy(total):
+    strategy = HTTPConfig.resolve(retry=total).retry
+
+    assert strategy.total == total
+    assert strategy.backoff_factor == DEFAULT_RETRY_STRATEGY.backoff_factor
+    assert strategy.allowed_methods == DEFAULT_RETRY_STRATEGY.allowed_methods
+    assert strategy.status_forcelist == DEFAULT_RETRY_STRATEGY.status_forcelist
+    assert strategy.retryable_exceptions == DEFAULT_RETRY_STRATEGY.retryable_exceptions
+    assert not strategy.is_retryable_exception(httpx.ReadTimeout("timed out"))
+    assert not strategy.is_retryable_status_code(504)

@@ -37,9 +37,23 @@ from mlclient.connection import (
     _validate_config,
 )
 
+# ReadTimeout and 504 are left out: the server is still running the request,
+# so a retry would run it again.
 DEFAULT_RETRY_STRATEGY = Retry(
     total=5,
     backoff_factor=0.5,
+    retry_on_exceptions=[
+        httpx.ConnectTimeout,
+        httpx.WriteTimeout,
+        httpx.PoolTimeout,
+        httpx.NetworkError,
+        httpx.RemoteProtocolError,
+    ],
+    status_forcelist=[
+        httpx.codes.TOO_MANY_REQUESTS,
+        httpx.codes.BAD_GATEWAY,
+        httpx.codes.SERVICE_UNAVAILABLE,
+    ],
 )
 
 DEFAULT_TIMEOUT = httpx.Timeout(
@@ -71,13 +85,19 @@ def _normalize_retry(retry):
     """Turn a retry argument into None or a Retry.
 
     None leaves the strategy unspecified, so DEFAULT_RETRY_STRATEGY applies to
-    ordinary requests. An int is shorthand for the retry count, Retry(total=n);
+    ordinary requests. An int changes only the default policy's retry count;
     0 disables retries. A Retry passes through unchanged, preserving its
     identity so separately built configs still compare by object.
     """
     if retry is None or isinstance(retry, Retry):
         return retry
-    return Retry(total=retry)
+    return Retry(
+        total=retry,
+        backoff_factor=DEFAULT_RETRY_STRATEGY.backoff_factor,
+        allowed_methods=DEFAULT_RETRY_STRATEGY.allowed_methods,
+        status_forcelist=DEFAULT_RETRY_STRATEGY.status_forcelist,
+        retry_on_exceptions=DEFAULT_RETRY_STRATEGY.retryable_exceptions,
+    )
 
 
 def _normalize_limits(limits):
@@ -176,7 +196,7 @@ class HTTPConfig:
         retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
             The retry strategy for transport creation. None leaves the strategy
             unspecified, using DEFAULT_RETRY_STRATEGY for ordinary requests. An
-            int is shorthand for the retry count, Retry(total=n); 0 disables
+            int changes only the default policy's retry count; 0 disables
             retries.
         limits : httpx.Limits | int | None, default None
             The connection-pool limits for transport creation. None leaves the

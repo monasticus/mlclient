@@ -36,6 +36,7 @@ from mlclient.cli.commands._multi_env_common import (
     selected_environments,
     time_in_environments,
 )
+from mlclient.cli.options import environment_option
 from mlclient.exceptions import WrongParametersError
 
 if TYPE_CHECKING:
@@ -127,14 +128,12 @@ class HealthCommand(Command):
         "Reports whether a MarkLogic environment's HealthCheck server is up"
     )
     options: list[Option] = [
-        option(
-            "environment",
-            "e",
-            description="The ML Client environment name; repeat it to check several "
-            "environments",
-            flag=False,
+        environment_option(
+            description=(
+                "The ML Client environment name; repeat it to check several "
+                "environments"
+            ),
             multiple=True,
-            default=["local"],
         ),
         option(
             "watch",

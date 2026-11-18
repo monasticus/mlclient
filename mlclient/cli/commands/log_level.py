@@ -16,6 +16,7 @@ from cleo.io.inputs.option import Option
 from mlclient._manager import MLClientManager
 from mlclient.cli.commands._waiting_indicator import waiting_for
 from mlclient.cli.connection import get_client
+from mlclient.cli.options import connection_option, environment_option
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.services.diagnostics.log_level import LogLevelService
 
@@ -79,19 +80,8 @@ class LogLevelCommand(Command):
         ),
     ]
     options: list[Option] = [
-        option(
-            "environment",
-            "e",
-            description="The ML Client environment name",
-            flag=False,
-            default="local",
-        ),
-        option(
-            "connection",
-            "c",
-            description="Connection identifier from the environment or TCP port",
-            flag=False,
-        ),
+        environment_option(),
+        connection_option(),
         option(
             "type",
             "t",

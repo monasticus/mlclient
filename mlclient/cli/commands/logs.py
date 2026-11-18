@@ -22,6 +22,7 @@ from httpx import HTTPError
 
 from mlclient._manager import MLClientManager
 from mlclient.cli.commands._waiting_indicator import ERASE_LINE, waiting_for
+from mlclient.cli.options import environment_option
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
@@ -67,13 +68,7 @@ class LogsCommand(Command):
     description: str = "Prints MarkLogic log lines or lists log files"
     help: str = "Uses the /manage/v2/logs endpoint of the Manage App Server."
     options: list[Option] = [
-        option(
-            "environment",
-            "e",
-            description="The ML Client environment name",
-            flag=False,
-            default="local",
-        ),
+        environment_option(),
         option(
             "server",
             "s",

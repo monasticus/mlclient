@@ -19,6 +19,7 @@ from cleo.ui.table import Table
 
 from mlclient.cli.clipboard import copy_to_clipboard
 from mlclient.cli.commands._multi_env_common import selected_environments
+from mlclient.cli.options import environment_option
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 
@@ -69,14 +70,11 @@ class UrlCommand(Command):
         ),
     ]
     options: list[Option] = [
-        option(
-            "environment",
-            "e",
-            description="The ML Client environment name; repeat it to show "
-            "several environments",
-            flag=False,
+        environment_option(
+            description=(
+                "The ML Client environment name; repeat it to show several environments"
+            ),
             multiple=True,
-            default=["local"],
         ),
         option(
             "open",

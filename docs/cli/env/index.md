@@ -14,6 +14,11 @@ create databases or deploy a MarkLogic application.
 | [`ml env remove`](remove.md) | Delete a configuration file, with confirmation |
 | [`ml env compare`](compare.md) | Compare settings across environments side by side |
 
+Except for `env init`, these commands search the current directory and its
+parents for `.mlclient`, stopping before the filesystem root. If none has one,
+they use `~/.mlclient` when home was not already searched. `--global` selects
+the home directory directly.
+
 ## Create and inspect a configuration
 
 ```sh

@@ -10,7 +10,8 @@ with MLClient(retry=2) as ml:
 ```
 
 An int is shorthand for the retry count: `retry=2` allows up to two retries and
-`retry=0` disables them. Use `httpx_retries.Retry` to also configure backoff and
+`retry=0` disables them. It preserves the default policy's backoff, methods,
+exceptions and statuses. Use `httpx_retries.Retry` to configure backoff and
 eligibility:
 
 ```python
@@ -71,8 +72,8 @@ with MLClient(retry=retry) as ml:
 
 Add `httpx.ReadTimeout` to `retry_on_exceptions` the same way to retry read
 timeouts. A `Retry` built without `retry_on_exceptions` or `status_forcelist`
-uses the `httpx-retries` defaults, which include both. The int shorthand is such a
-`Retry`: `retry=2` is `Retry(total=2)` and retries read timeouts and `504`.
+uses the `httpx-retries` defaults, which include both. The int shorthand keeps
+MLClient's default policy, so `retry=2` does not retry read timeouts or `504`.
 
 HealthCheck uses `NO_RETRY_STRATEGY` by default so a probe returns promptly.
 For an explicit `health_config`, an omitted retry strategy still resolves to no

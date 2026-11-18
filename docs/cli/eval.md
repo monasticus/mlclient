@@ -9,10 +9,9 @@ Mixed XML content and `xml:space="preserve"` subtrees are not re-indented;
 the surrounding XML is still formatted with two-space indentation.
 
 ```sh
-ml eval '"Hello World!"'
-ml eval -j '"Hello World!"'
 ml eval ./query.xqy
-ml eval -x '<root><item>one</item></root>' --no-pretty
+ml eval '<root><item>one</item></root>'
+ml eval -j '`Server time: ${fn.currentTime()}`'
 ```
 
 Use `-d` to select a content database, or pass external variables with `--var`:

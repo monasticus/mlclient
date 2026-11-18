@@ -10,7 +10,7 @@ the surrounding XML is still formatted with two-space indentation.
 
 ```sh
 ml eval ./query.xqy
-ml eval '<root><item>one</item></root>'
+ml eval 'fn:concat("Server time: ", fn:current-time())'
 ml eval -j '`Server time: ${fn.currentTime()}`'
 ```
 

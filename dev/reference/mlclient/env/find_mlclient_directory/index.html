@@ -15839,7 +15839,9 @@
     <div class="doc doc-contents first">
 
         <p>Return the nearest .mlclient directory at path or in an ancestor.</p>
-<p>Searches path and, failing there, each parent up to the root.</p>
+<p>Searches path and its parents, excluding the filesystem root. When no
+.mlclient directory is found, checks home only if it was not already on
+the search path.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -15911,7 +15913,8 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If no .mlclient directory exists at path or any of its parents</p>
+                <p>If no .mlclient directory exists at path, any of its parents
+or the home directory</p>
               </div>
             </td>
           </tr>
@@ -15956,42 +15959,72 @@
 <span class="normal"><a href="#__codelineno-0-471">471</a></span>
 <span class="normal"><a href="#__codelineno-0-472">472</a></span>
 <span class="normal"><a href="#__codelineno-0-473">473</a></span>
-<span class="normal"><a href="#__codelineno-0-474">474</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_mlclient_directory</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span>
+<span class="normal"><a href="#__codelineno-0-479">479</a></span>
+<span class="normal"><a href="#__codelineno-0-480">480</a></span>
+<span class="normal"><a href="#__codelineno-0-481">481</a></span>
+<span class="normal"><a href="#__codelineno-0-482">482</a></span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span>
+<span class="normal"><a href="#__codelineno-0-484">484</a></span>
+<span class="normal"><a href="#__codelineno-0-485">485</a></span>
+<span class="normal"><a href="#__codelineno-0-486">486</a></span>
+<span class="normal"><a href="#__codelineno-0-487">487</a></span>
+<span class="normal"><a href="#__codelineno-0-488">488</a></span>
+<span class="normal"><a href="#__codelineno-0-489">489</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_mlclient_directory</span><span class="p">(</span>
 <a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
 <a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the nearest .mlclient directory at path or in an ancestor.</span>
 <a id="__codelineno-0-443" name="__codelineno-0-443"></a>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">    Searches path and, failing there, each parent up to the root.</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">    path : Path</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">        A path to start the search from</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">    Path</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">        The located .mlclient directory</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">    MLClientDirectoryNotFoundError</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        If no .mlclient directory exists at path or any of its parents</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a>    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">constants</span><span class="o">.</span><span class="n">ML_CLIENT_DIR</span><span class="si">}</span><span class="s2"> directory has not been found in any of &quot;</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="sa">f</span><span class="s2">&quot;parent directories!&quot;</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="p">)</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>        <span class="k">raise</span> <span class="n">MLClientDirectoryNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>    <span class="n">mlclient_dir</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a>        <span class="p">(</span><span class="n">child</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">ML_CLIENT_DIR</span><span class="p">)</span> <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()),</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>        <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>    <span class="p">)</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a>    <span class="k">if</span> <span class="n">mlclient_dir</span><span class="p">:</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MLClient configuration home directory found: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">mlclient_dir</span><span class="p">)</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a>        <span class="k">return</span> <span class="n">mlclient_dir</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="k">return</span> <span class="n">find_mlclient_directory</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">    Searches path and its parents, excluding the filesystem root. When no</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">    .mlclient directory is found, checks home only if it was not already on</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">    the search path.</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">    path : Path</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">        A path to start the search from</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">    Path</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        The located .mlclient directory</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">    MLClientDirectoryNotFoundError</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        If no .mlclient directory exists at path, any of its parents</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">        or the home directory</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>    <span class="n">start_dir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a>    <span class="n">directories</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">start_dir</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>        <span class="k">if</span> <span class="n">directory</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">directory</span><span class="p">:</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="k">break</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>        <span class="n">mlclient_dir</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">ML_CLIENT_DIR</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="k">if</span> <span class="n">mlclient_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>                <span class="s2">&quot;MLClient configuration home directory found: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>                <span class="n">mlclient_dir</span><span class="p">,</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>            <span class="p">)</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="k">return</span> <span class="n">mlclient_dir</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="n">home_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>    <span class="n">global_mlclient_dir</span> <span class="o">=</span> <span class="n">home_dir</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">ML_CLIENT_DIR</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>    <span class="k">if</span> <span class="n">home_dir</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">directories</span> <span class="ow">and</span> <span class="n">global_mlclient_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>            <span class="s2">&quot;Using global configuration directory [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a>            <span class="n">global_mlclient_dir</span><span class="p">,</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="p">)</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>        <span class="k">return</span> <span class="n">global_mlclient_dir</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">constants</span><span class="o">.</span><span class="n">ML_CLIENT_DIR</span><span class="si">}</span><span class="s2"> directory has not been found in </span><span class="si">{</span><span class="n">start_dir</span><span class="si">}</span><span class="s2"> &quot;</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>        <span class="sa">f</span><span class="s2">&quot;or any of its parents (nor in </span><span class="si">{</span><span class="n">global_mlclient_dir</span><span class="si">}</span><span class="s2">). &quot;</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="s2">&quot;Run &#39;ml env init&#39; or &#39;ml env init --global&#39;.&quot;</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="p">)</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="k">raise</span> <span class="n">MLClientDirectoryNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

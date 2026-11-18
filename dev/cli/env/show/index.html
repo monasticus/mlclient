@@ -16056,7 +16056,8 @@ environments, use <a href="../list/"><code>env list</code></a>.</p>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span>-e<span class="w"> </span>staging<span class="w"> </span>host
 </code></pre></div>
 <p>The command reads the nearest <code>.mlclient</code> directory in the current directory or
-its parents. Values come from the configuration file. Secrets are masked in the
+its parents before the filesystem root, falling back to <code>.mlclient</code> in your
+home directory when none of them has one. See <a href="../">environment lookup</a>. Values come from the configuration file. Secrets are masked in the
 formatted output unless <code>--secrets</code> is passed.</p>
 <h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
 <h3 id="setting"><code>setting</code><a class="headerlink" href="#setting" title="Permanent link">&para;</a></h3>

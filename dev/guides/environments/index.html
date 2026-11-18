@@ -16004,7 +16004,9 @@ Select a connection by the <code>id</code> from the YAML:</p>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">ml</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">xquery</span><span class="p">(</span><span class="s1">&#39;&quot;Hello World!&quot;&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>The manager searches for <code>.mlclient</code> in the current directory and its parents,
-so the same code works from a project subdirectory.</p>
+stopping before the filesystem root. When none has one, it uses <code>~/.mlclient</code>
+if home was not already searched. This is the global directory
+<code>ml env init --global</code> creates.</p>
 <p>Omit the identifier to select the first connection marked <code>rest: true</code> - here,
 <code>content</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>

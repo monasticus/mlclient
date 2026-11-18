@@ -15809,6 +15809,10 @@ create databases or deploy a MarkLogic application.</p>
 </tr>
 </tbody>
 </table>
+<p>Except for <code>env init</code>, these commands search the current directory and its
+parents for <code>.mlclient</code>, stopping before the filesystem root. If none has one,
+they use <code>~/.mlclient</code> when home was not already searched. <code>--global</code> selects
+the home directory directly.</p>
 <h2 id="create-and-inspect-a-configuration">Create and inspect a configuration<a class="headerlink" href="#create-and-inspect-a-configuration" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ml<span class="w"> </span>env<span class="w"> </span>init
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show

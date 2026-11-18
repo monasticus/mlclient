@@ -1608,6 +1608,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-environment-e" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -16021,6 +16032,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-environment-e" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -16111,6 +16133,24 @@ commit or roll back that transaction.</p>
 <h3 id="-no-pretty"><code>--no-pretty</code><a class="headerlink" href="#-no-pretty" title="Permanent link">&para;</a></h3>
 <p>Print each result without reformatting XML or JSON, for example when piping output
 to another tool. Plain text and other scalar results are always printed unchanged.</p>
+<h3 id="-timeout"><code>--timeout</code><a class="headerlink" href="#-timeout" title="Permanent link">&para;</a></h3>
+<p>Seconds to wait for MarkLogic. A number sets all four HTTP timeout components
+(connect, read, write and pool) for this request; <code>0</code> disables the timeout.
+Without the option the client defaults apply: 5 seconds to connect, 60 seconds
+to read. See <a href="../../advanced/http/timeouts/">Timeouts</a>.</p>
+<p>This command sends <code>POST</code> requests, which the default retry policy does not
+retry. See <a href="../../advanced/http/timeouts/#command-line">timeout and retry details</a>
+for how the per-attempt limit relates to total waiting time.</p>
+<p>A read or write timeout only stops the client from waiting. MarkLogic may keep
+running the request, so an update may still commit after the command has failed. The command
+prints one line to stderr and exits with 1:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Request timed out after 60s - it may still be running on the server
+</code></pre></div>
+<p>Connection and pool timeouts identify the expired connection stage instead of
+warning that the request may still be running.</p>
+<p>Before you run an update again, check on the server whether it is still running
+or has committed, for example in the Monitoring dashboard or with
+<code>xdmp:server-status</code>.</p>
 <h3 id="-environment-e"><code>--environment</code>, <code>-e</code><a class="headerlink" href="#-environment-e" title="Permanent link">&para;</a></h3>
 <p>Environment name. Defaults to <code>local</code>; use <code>-e dev</code> to load
 <code>.mlclient/mlclient-dev.yaml</code>. Repeat the option to select several environments,

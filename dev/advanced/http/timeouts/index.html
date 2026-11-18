@@ -1007,6 +1007,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command line
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#defaults" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15861,6 +15872,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command line
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#defaults" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -15966,6 +15988,18 @@
 </code></pre></div>
 <p><code>None</code> disables all HTTP timeouts. Omitting the parameter inherits the client
 setting. An override does not change later calls.</p>
+<h2 id="command-line">Command line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h2>
+<p><code>ml eval</code>, <code>ml invoke</code> and <code>ml http</code> take <code>--timeout SECONDS</code> for one run: a
+number sets all four components, <code>0</code> disables the timeout and the defaults below
+apply without it. A timed-out request may still be running on the server, and an
+update may still commit; see <a href="../../../cli/eval/#-timeout"><code>ml eval --timeout</code></a>.</p>
+<p>Connection and pool timeouts identify the stage that expired. Read, write and
+generic timeouts warn that the request may still be running on MarkLogic.</p>
+<p>With the default retry policy, <code>ml http</code> retries a <code>ReadTimeout</code> up to five times
+for <code>GET</code>, <code>HEAD</code>, <code>PUT</code>, <code>DELETE</code>, <code>OPTIONS</code> and <code>TRACE</code>. Total waiting time
+includes retries and backoff and can therefore exceed <code>--timeout</code>. The duration
+in the timeout error describes one attempt; the terminal's <code>Elapsed</code> line
+reports the total time. See <a href="../retries/">Retry policy</a>.</p>
 <h2 id="defaults">Defaults<a class="headerlink" href="#defaults" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

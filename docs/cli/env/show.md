@@ -12,8 +12,8 @@ ml env show -e staging host
 ```
 
 The command reads the nearest `.mlclient` directory in the current directory or
-its parents, falling back to `.mlclient` in your home directory when none of
-them has one. Values come from the configuration file. Secrets are masked in the
+its parents before the filesystem root, falling back to `.mlclient` in your
+home directory when none of them has one. See [environment lookup](index.md). Values come from the configuration file. Secrets are masked in the
 formatted output unless `--secrets` is passed.
 
 ## Arguments

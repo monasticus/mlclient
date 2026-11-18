@@ -441,8 +441,9 @@ def find_mlclient_directory(
 ) -> Path:
     """Return the nearest .mlclient directory at path or in an ancestor.
 
-    Searches path and each parent up to the root. When none of them has
-    a .mlclient directory, falls back to the global one in the home directory.
+    Searches path and its parents, excluding the filesystem root. When no
+    .mlclient directory is found, checks home only if it was not already on
+    the search path.
 
     Parameters
     ----------
@@ -461,7 +462,10 @@ def find_mlclient_directory(
         or the home directory
     """
     start_dir = path.absolute()
-    for directory in (start_dir, *start_dir.parents):
+    directories = (start_dir, *start_dir.parents)
+    for directory in directories:
+        if directory.parent == directory:
+            break
         mlclient_dir = directory / constants.ML_CLIENT_DIR
         if mlclient_dir.is_dir():
             logger.debug(
@@ -469,8 +473,9 @@ def find_mlclient_directory(
                 mlclient_dir,
             )
             return mlclient_dir
-    global_mlclient_dir = Path.home() / constants.ML_CLIENT_DIR
-    if global_mlclient_dir.is_dir():
+    home_dir = Path.home()
+    global_mlclient_dir = home_dir / constants.ML_CLIENT_DIR
+    if home_dir not in directories and global_mlclient_dir.is_dir():
         logger.debug(
             "Using global configuration directory [%s]",
             global_mlclient_dir,

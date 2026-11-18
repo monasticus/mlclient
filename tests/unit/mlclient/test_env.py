@@ -252,6 +252,54 @@ def test_find_mlclient_directory_relative_path_searches_above_cwd(
     assert ml_client_dir == tmp_path / ".mlclient"
 
 
+@pytest.mark.parametrize("start_at_root", [False, True])
+def test_find_mlclient_directory_skips_filesystem_root(
+    tmp_path,
+    monkeypatch,
+    start_at_root,
+):
+    root = Path(tmp_path.anchor)
+    home = tmp_path / "home"
+    start = root if start_at_root else tmp_path / "project"
+    inspected = []
+
+    def is_directory(path):
+        inspected.append(path)
+        return path in (root / ".mlclient", home / ".mlclient")
+
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.setattr(Path, "is_dir", is_directory)
+
+    assert find_mlclient_directory(start) == home / ".mlclient"
+    assert root / ".mlclient" not in inspected
+
+
+def test_find_mlclient_directory_does_not_search_home_twice(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    start = home / "project"
+    inspected = []
+
+    def is_directory(path):
+        inspected.append(path)
+        return False
+
+    monkeypatch.setattr(Path, "home", lambda: home)
+    monkeypatch.setattr(Path, "is_dir", is_directory)
+
+    with pytest.raises(
+        MLClientDirectoryNotFoundError, match="has not been found",
+    ) as error:
+        find_mlclient_directory(start)
+
+    assert str(error.value) == (
+        f".mlclient directory has not been found in {start} or any of its "
+        f"parents (nor in {home / '.mlclient'}). "
+        "Run 'ml env init' or 'ml env init --global'."
+    )
+    assert inspected.count(home / ".mlclient") == 1
+    assert Path(start.anchor) / ".mlclient" not in inspected
+
+
 def test_load_in_child_directory(monkeypatch):
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step

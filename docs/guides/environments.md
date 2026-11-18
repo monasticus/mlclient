@@ -41,8 +41,9 @@ with manager.get_client("content") as ml:
 ```
 
 The manager searches for `.mlclient` in the current directory and its parents,
-so the same code works from a project subdirectory. When none of them has one,
-it uses `~/.mlclient`, the global directory `ml env init --global` creates.
+stopping before the filesystem root. When none has one, it uses `~/.mlclient`
+if home was not already searched. This is the global directory
+`ml env init --global` creates.
 
 Omit the identifier to select the first connection marked `rest: true` - here,
 `content`:

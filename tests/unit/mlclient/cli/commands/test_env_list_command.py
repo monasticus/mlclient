@@ -91,3 +91,15 @@ def test_reads_global_directory(
 
     assert tester.status_code == 0
     assert tester.io.fetch_output() == "home-env\n"
+
+
+def test_reads_global_directory_when_outside_home(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    _write_env(home / ".mlclient", "global-env")
+    monkeypatch.setattr(Path, "home", lambda: home)
+    tester = _get_tester()
+
+    assert tester.execute("") == 0
+    assert tester.io.fetch_output() == (
+        f"Reading {home / '.mlclient'} (global)\n\nglobal-env\n"
+    )

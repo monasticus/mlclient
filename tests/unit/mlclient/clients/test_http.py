@@ -60,9 +60,11 @@ def test_request_when_disconnected():
 def test_request_when_disconnected_logs_ad_hoc_session_at_debug_only(
     caplog: pytest.LogCaptureFixture,
 ):
-    respx.get("http://localhost:8002/manage/v2/servers").mock(
-        return_value=httpx.Response(httpx.codes.OK),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(httpx.codes.OK)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
     client = HttpClient(port=8002)
 
     with caplog.at_level(logging.DEBUG, logger="mlclient.clients.http"):
@@ -82,9 +84,11 @@ def test_request_when_disconnected_logs_ad_hoc_session_at_debug_only(
 def test_digest_request_logs_debug_when_server_does_not_challenge(
     caplog: pytest.LogCaptureFixture,
 ):
-    route = respx.get("http://localhost:8000/v1/ping").mock(
-        return_value=httpx.Response(httpx.codes.OK),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/ping")
+    ml_mocker.with_response_code(httpx.codes.OK)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_get()
 
     with (
         caplog.at_level(logging.DEBUG, logger="mlclient.auth"),
@@ -104,9 +108,11 @@ def test_digest_request_logs_debug_when_server_does_not_challenge(
 def test_digestbasic_request_logs_debug_when_server_does_not_challenge(
     caplog: pytest.LogCaptureFixture,
 ):
-    respx.get("http://localhost:8000/v1/ping").mock(
-        return_value=httpx.Response(httpx.codes.OK),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/ping")
+    ml_mocker.with_response_code(httpx.codes.OK)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
 
     with (
         caplog.at_level(logging.DEBUG, logger="mlclient.auth"),
@@ -121,9 +127,11 @@ def test_digestbasic_request_logs_debug_when_server_does_not_challenge(
 def test_digest_request_logs_debug_for_every_unchallenged_request(
     caplog: pytest.LogCaptureFixture,
 ):
-    respx.get("http://localhost:8000/v1/ping").mock(
-        return_value=httpx.Response(httpx.codes.OK),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/ping")
+    ml_mocker.with_response_code(httpx.codes.OK)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
 
     with (
         caplog.at_level(logging.DEBUG, logger="mlclient.auth"),
@@ -139,8 +147,10 @@ def test_digest_request_logs_debug_for_every_unchallenged_request(
 def test_digest_request_does_not_log_after_a_digest_challenge(
     caplog: pytest.LogCaptureFixture,
 ):
-    route = respx.get("http://localhost:8000/v1/ping").mock(
-        side_effect=[
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/ping")
+    route = ml_mocker.with_get_side_effect(
+        [
             httpx.Response(
                 httpx.codes.UNAUTHORIZED,
                 headers={"WWW-Authenticate": _DIGEST_CHALLENGE},

@@ -44,8 +44,8 @@ class LogsApi:
         filename : str
             The log file to be returned.
         data_format : str
-            The format of the data in the log file. The supported formats are xml, json
-            or html.
+            The format of the data in the log file. The supported formats are xml, json,
+            html or text.
         host : str
             The host from which to return the log data.
         start_time : str
@@ -108,8 +108,8 @@ class AsyncLogsApi:
         filename : str
             The log file to be returned.
         data_format : str
-            The format of the data in the log file. The supported formats are xml, json
-            or html.
+            The format of the data in the log file. The supported formats are xml, json,
+            html or text.
         host : str
             The host from which to return the log data.
         start_time : str

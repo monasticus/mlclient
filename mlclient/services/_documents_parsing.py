@@ -53,7 +53,7 @@ class DocumentsReader:
         resp: Response,
         category: str | list[str] | None,
         *,
-        uris: str | list[str] | tuple[str] | set[str] | None = None,
+        uris: str | list[str] | tuple[str, ...] | set[str] | None = None,
     ) -> Iterator[Document]:
         """Parse a single-document or multipart/mixed response to Documents.
 
@@ -63,7 +63,7 @@ class DocumentsReader:
             The MarkLogic response.
         category : str | list[str] | None
             The categories requested; None means content only.
-        uris : str | list[str] | tuple[str] | set[str] | None, default None
+        uris : str | list[str] | tuple[str, ...] | set[str] | None, default None
             The requested URIs; a single-document response carries no URI, so
             it takes the first one. Multipart responses name every part.
 
@@ -130,7 +130,7 @@ class DocumentsReader:
         cls,
         parsed_resp: list[tuple],
         is_multipart: bool,
-        uris: str | list[str] | tuple[str] | set[str] | None,
+        uris: str | list[str] | tuple[str, ...] | set[str] | None,
         category: str | list[str] | None,
     ) -> Iterator[dict]:
         """Prepare document data from multipart or single-document parts.
@@ -141,7 +141,7 @@ class DocumentsReader:
             The ``(headers, body)`` pairs.
         is_multipart : bool
             Whether the response is multipart/mixed.
-        uris : str | list[str] | tuple[str] | set[str] | None
+        uris : str | list[str] | tuple[str, ...] | set[str] | None
             The requested URIs, used only for a single-document response.
         category : str | list[str] | None
             The categories requested.
@@ -197,7 +197,7 @@ class DocumentsReader:
     def _pre_format_document(
         cls,
         parsed_resp: list[tuple],
-        origin_uris: str | list[str] | tuple[str] | set[str] | None,
+        origin_uris: str | list[str] | tuple[str, ...] | set[str] | None,
         origin_category: str | list[str] | None,
     ) -> Iterator[dict]:
         """Prepare a single-document response, named by the requested URI.
@@ -206,7 +206,7 @@ class DocumentsReader:
         ----------
         parsed_resp : list[tuple]
             The single ``(headers, body)`` pair.
-        origin_uris : str | list[str] | tuple[str] | set[str] | None
+        origin_uris : str | list[str] | tuple[str, ...] | set[str] | None
             The requested URI, or a list whose first item is used.
         origin_category : str | list[str] | None
             The categories requested.

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.roles import (
     RoleDeleteCall,
     RoleGetCall,
@@ -38,7 +38,7 @@ class RolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the roles in the security database.
 
@@ -75,7 +75,7 @@ class RolesApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new role in the security database.
 
@@ -112,7 +112,7 @@ class RolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified role.
 
@@ -152,7 +152,7 @@ class RolesApi:
         self,
         role: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified role from the security database.
 
@@ -188,7 +188,7 @@ class RolesApi:
         role: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the properties of the specified role.
 
@@ -227,7 +227,7 @@ class RolesApi:
         role: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Update the properties for the specified role.
 
@@ -272,7 +272,7 @@ class AsyncRolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the roles in the security database.
 
@@ -309,7 +309,7 @@ class AsyncRolesApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new role in the security database.
 
@@ -346,7 +346,7 @@ class AsyncRolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified role.
 
@@ -386,7 +386,7 @@ class AsyncRolesApi:
         self,
         role: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified role from the security database.
 
@@ -422,7 +422,7 @@ class AsyncRolesApi:
         role: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the properties of the specified role.
 
@@ -461,7 +461,7 @@ class AsyncRolesApi:
         role: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Update the properties for the specified role.
 

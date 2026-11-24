@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
 
@@ -29,10 +29,10 @@ class InvokeService(ExecutionService):
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
         """Invoke a module installed in MarkLogic and parse its result.
@@ -106,10 +106,10 @@ class AsyncInvokeService(ExecutionService):
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
         """Invoke a module installed in MarkLogic and parse its result.

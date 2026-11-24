@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.users import (
     UserDeleteCall,
     UserGetCall,
@@ -38,7 +38,7 @@ class UsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the users in the cluster.
 
@@ -75,7 +75,7 @@ class UsersApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new user in the security database.
 
@@ -112,7 +112,7 @@ class UsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified user.
 
@@ -152,7 +152,7 @@ class UsersApi:
         self,
         user: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified user from the security database.
 
@@ -188,7 +188,7 @@ class UsersApi:
         user: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the properties of the specified user.
 
@@ -227,7 +227,7 @@ class UsersApi:
         user: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Update the properties for the specified user.
 
@@ -272,7 +272,7 @@ class AsyncUsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the users in the cluster.
 
@@ -309,7 +309,7 @@ class AsyncUsersApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new user in the security database.
 
@@ -346,7 +346,7 @@ class AsyncUsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified user.
 
@@ -386,7 +386,7 @@ class AsyncUsersApi:
         self,
         user: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified user from the security database.
 
@@ -422,7 +422,7 @@ class AsyncUsersApi:
         user: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the properties of the specified user.
 
@@ -461,7 +461,7 @@ class AsyncUsersApi:
         user: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Update the properties for the specified user.
 

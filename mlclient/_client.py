@@ -27,7 +27,7 @@ from xml.etree import ElementTree
 from httpx import Limits, RequestError, Response
 from httpx_retries import Retry
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient._utils import get_resource
 from mlclient.api.admin import AdminApi, AsyncAdminApi
 from mlclient.api.manage import AsyncManageApi, ManageApi
@@ -168,17 +168,17 @@ class MLClient:
 
     def __init__(
         self,
-        protocol: str = UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port: int = UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: Limits | int | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -349,7 +349,11 @@ class MLClient:
         """
         return AdminApi(ApiClient(self._admin_http))
 
-    def healthcheck(self, *, timeout: httpx.Timeout | float | None = UNSET) -> bool:
+    def healthcheck(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> bool:
         """Report whether the HealthCheck app server (port 7997 by default) is healthy.
 
         Sends a HEAD request to ``/`` on the HealthCheck connection.
@@ -586,7 +590,7 @@ class MLClient:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> TransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
@@ -797,17 +801,17 @@ class AsyncMLClient:
 
     def __init__(
         self,
-        protocol: str = UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port: int = UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: Limits | int | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -991,7 +995,7 @@ class AsyncMLClient:
     async def healthcheck(
         self,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> bool:
         """Report whether the HealthCheck app server (port 7997 by default) is healthy.
 
@@ -1230,7 +1234,7 @@ class AsyncMLClient:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> AsyncTransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 

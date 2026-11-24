@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.databases import (
     DatabaseDeleteCall,
     DatabaseGetCall,
@@ -39,7 +39,7 @@ class DatabasesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the databases in the cluster.
 
@@ -77,7 +77,7 @@ class DatabasesApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new database in the cluster.
 
@@ -114,7 +114,7 @@ class DatabasesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified database.
 
@@ -159,7 +159,7 @@ class DatabasesApi:
         database: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Clear or configure the specified database.
 
@@ -200,7 +200,7 @@ class DatabasesApi:
         database: str,
         *,
         forest_delete: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified database from the cluster.
 
@@ -242,7 +242,7 @@ class DatabasesApi:
         database: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified database.
 
@@ -281,7 +281,7 @@ class DatabasesApi:
         database: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified database.
 
@@ -326,7 +326,7 @@ class AsyncDatabasesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve a summary of the databases in the cluster.
 
@@ -364,7 +364,7 @@ class AsyncDatabasesApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new database in the cluster.
 
@@ -401,7 +401,7 @@ class AsyncDatabasesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified database.
 
@@ -446,7 +446,7 @@ class AsyncDatabasesApi:
         database: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Clear or configure the specified database.
 
@@ -487,7 +487,7 @@ class AsyncDatabasesApi:
         database: str,
         *,
         forest_delete: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified database from the cluster.
 
@@ -529,7 +529,7 @@ class AsyncDatabasesApi:
         database: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified database.
 
@@ -568,7 +568,7 @@ class AsyncDatabasesApi:
         database: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified database.
 

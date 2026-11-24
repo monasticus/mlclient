@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
@@ -63,7 +63,7 @@ class TraceEventsService:
         self,
         *,
         group: str = "Default",
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> TraceEvents:
         """Return the group's trace-events activation and enabled events.
 
@@ -102,7 +102,7 @@ class TraceEventsService:
         *,
         value: bool,
         group: str = "Default",
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> TraceEvents:
         """Turn the group's master trace-events switch on or off.
 
@@ -141,7 +141,7 @@ class TraceEventsService:
         *,
         enabled: bool,
         group: str = "Default",
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> TraceEvents:
         """Add or remove a single trace event from the group's enabled set.
 
@@ -181,7 +181,7 @@ class TraceEventsService:
         xquery: str,
         variables: dict,
         group: str,
-        timeout: httpx.Timeout | float | None,
+        timeout: httpx.Timeout | float | UnsetType | None,
     ) -> TraceEvents:
         """Evaluate a config-saving mutation, then read the resulting state.
 
@@ -197,8 +197,9 @@ class TraceEventsService:
             External variables the mutation query requires.
         group : str
             The group to read back after the mutation.
-        timeout : httpx.Timeout | float | None
-            Per-request HTTP timeout for both requests.
+        timeout : httpx.Timeout | float | UnsetType | None
+            Per-request HTTP timeout for both requests; UNSET keeps the
+            client's configured timeout.
 
         Returns
         -------
@@ -221,7 +222,7 @@ class TraceEventsService:
         self,
         xquery: str,
         variables: dict,
-        timeout: httpx.Timeout | float | None,
+        timeout: httpx.Timeout | float | UnsetType | None,
     ) -> Response:
         """Evaluate a query and fail loudly when the server does not answer OK.
 
@@ -231,8 +232,9 @@ class TraceEventsService:
             The query to evaluate.
         variables : dict
             External variables the query requires.
-        timeout : httpx.Timeout | float | None
-            Per-request HTTP timeout.
+        timeout : httpx.Timeout | float | UnsetType | None
+            Per-request HTTP timeout; UNSET keeps the client's configured
+            timeout.
 
         Returns
         -------

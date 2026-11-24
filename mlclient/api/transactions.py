@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.transactions import (
     TransactionGetCall,
     TransactionPostCall,
@@ -36,7 +36,7 @@ class TransactionsApi:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a multi-statement transaction.
 
@@ -85,7 +85,7 @@ class TransactionsApi:
         *,
         data_format: str | None = None,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the status of the specified transaction.
 
@@ -131,7 +131,7 @@ class TransactionsApi:
         *,
         result: str,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Commit or roll back the specified transaction.
 
@@ -184,7 +184,7 @@ class AsyncTransactionsApi:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a multi-statement transaction.
 
@@ -233,7 +233,7 @@ class AsyncTransactionsApi:
         *,
         data_format: str | None = None,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the status of the specified transaction.
 
@@ -279,7 +279,7 @@ class AsyncTransactionsApi:
         *,
         result: str,
         database: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Commit or roll back the specified transaction.
 

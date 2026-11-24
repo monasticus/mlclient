@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.servers import (
     ServerDeleteCall,
     ServerGetCall,
@@ -40,7 +40,7 @@ class ServersApi:
         group_id: str | None = None,
         view: str | None = None,
         full_refs: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about the App Servers in the cluster.
 
@@ -96,7 +96,7 @@ class ServersApi:
         *,
         group_id: str | None = None,
         server_type: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new App Server in the specified group.
 
@@ -147,7 +147,7 @@ class ServersApi:
         host_id: str | None = None,
         full_refs: bool | None = None,
         modules: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about a specific App Server.
 
@@ -217,7 +217,7 @@ class ServersApi:
         server: str,
         group_id: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified App Server from the specified group.
 
@@ -257,7 +257,7 @@ class ServersApi:
         group_id: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified App Server.
 
@@ -304,7 +304,7 @@ class ServersApi:
         group_id: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified App Server.
 
@@ -354,7 +354,7 @@ class AsyncServersApi:
         group_id: str | None = None,
         view: str | None = None,
         full_refs: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about the App Servers in the cluster.
 
@@ -410,7 +410,7 @@ class AsyncServersApi:
         *,
         group_id: str | None = None,
         server_type: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new App Server in the specified group.
 
@@ -461,7 +461,7 @@ class AsyncServersApi:
         host_id: str | None = None,
         full_refs: bool | None = None,
         modules: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about a specific App Server.
 
@@ -531,7 +531,7 @@ class AsyncServersApi:
         server: str,
         group_id: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete the specified App Server from the specified group.
 
@@ -571,7 +571,7 @@ class AsyncServersApi:
         group_id: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified App Server.
 
@@ -618,7 +618,7 @@ class AsyncServersApi:
         group_id: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified App Server.
 

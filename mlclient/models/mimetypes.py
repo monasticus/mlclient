@@ -35,7 +35,7 @@ class Mimetypes:
     def get_mimetypes(
         cls,
         doc_type: DocumentType,
-    ) -> tuple[str]:
+    ) -> tuple[str, ...]:
         """Return all known mimetypes linked to a specific document type.
 
         Parameters
@@ -45,7 +45,7 @@ class Mimetypes:
 
         Returns
         -------
-        tuple[str]
+        tuple[str, ...]
             A tuple of mimetypes linked to a specific document type
         """
         cls._init_doc_type_mimetypes(doc_type)

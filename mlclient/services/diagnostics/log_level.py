@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 
 from httpx import HTTPStatusError, RequestError
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.responses import MLResponseParser
 
@@ -78,7 +78,7 @@ class LogLevelService:
         group: str = "Default",
         server: str | None = None,
         log_type: str = "file",
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Return the current log level, falling back to Manage on privilege errors.
 
@@ -134,7 +134,7 @@ class LogLevelService:
         group: str = "Default",
         server: str | None = None,
         log_type: str = "file",
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Change the log level, falling back to Manage on privilege errors.
 
@@ -191,7 +191,7 @@ class LogLevelService:
         server: str | None,
         log_type: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Read a group or App Server log level through Management REST.
 
@@ -255,7 +255,7 @@ class LogLevelService:
         log_type: str,
         level: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Update only the requested log-level property through Management REST.
 

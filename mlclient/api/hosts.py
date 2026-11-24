@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.hosts import (
     HostGetCall,
     HostPostCall,
@@ -46,7 +46,7 @@ class HostsApi:
         data_format: str | None = None,
         group_id: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about the hosts in the cluster.
 
@@ -94,7 +94,7 @@ class HostsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified host.
 
@@ -139,7 +139,7 @@ class HostsApi:
         host: str,
         body: dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Restart or shut down the specified host.
 
@@ -184,7 +184,7 @@ class HostsApi:
         host: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified host.
 
@@ -225,7 +225,7 @@ class HostsApi:
         host: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified host.
 
@@ -280,7 +280,7 @@ class AsyncHostsApi:
         data_format: str | None = None,
         group_id: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about the hosts in the cluster.
 
@@ -328,7 +328,7 @@ class AsyncHostsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve information on the specified host.
 
@@ -373,7 +373,7 @@ class AsyncHostsApi:
         host: str,
         body: dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Restart or shut down the specified host.
 
@@ -418,7 +418,7 @@ class AsyncHostsApi:
         host: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified host.
 
@@ -459,7 +459,7 @@ class AsyncHostsApi:
         host: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the properties of the specified host.
 

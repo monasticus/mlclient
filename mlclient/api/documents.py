@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.documents import (
     DocumentsDeleteCall,
     DocumentsGetCall,
@@ -40,7 +40,7 @@ class DocumentsApi:
         transform: str | None = None,
         transform_params: dict | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve document content and/or metadata from the database.
 
@@ -123,7 +123,7 @@ class DocumentsApi:
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Insert or update content and/or metadata for multiple documents.
 
@@ -196,7 +196,7 @@ class DocumentsApi:
         temporal_collection: str | None = None,
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Remove documents, or reset document metadata.
 
@@ -283,7 +283,7 @@ class AsyncDocumentsApi:
         transform: str | None = None,
         transform_params: dict | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve document content and/or metadata from the database.
 
@@ -366,7 +366,7 @@ class AsyncDocumentsApi:
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Insert or update content and/or metadata for multiple documents.
 
@@ -439,7 +439,7 @@ class AsyncDocumentsApi:
         temporal_collection: str | None = None,
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Remove documents, or reset document metadata.
 

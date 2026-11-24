@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 import httpx
 from httpx_retries import Retry
 
-from mlclient._options import UNSET, _Unset
+from mlclient._options import UNSET, UnsetType
 from mlclient.auth import AuthParam
 from mlclient.connection import (
     CloudConfig,
@@ -44,17 +44,17 @@ if TYPE_CHECKING:
     from typing_extensions import Unpack
 
     class _HTTPConfigOverrides(TypedDict, total=False):
-        protocol: str
+        protocol: str | UnsetType
         host: str
-        port: int
-        auth: AuthParam
+        port: int | UnsetType
+        auth: AuthParam | UnsetType
         username: str
         password: str
         ssl: SSLConfig | None
         cloud: CloudConfig | None
         retry: Retry | int | None
         limits: httpx.Limits | int | None
-        timeout: httpx.Timeout | float | None
+        timeout: httpx.Timeout | float | UnsetType | None
 
 
 # ReadTimeout and 504 are left out: the server is still running the request,
@@ -89,8 +89,8 @@ NO_RETRY_STRATEGY = Retry(total=0)
 
 
 def _normalize_timeout(
-    timeout: httpx.Timeout | float | _Unset | None,
-) -> httpx.Timeout | _Unset:
+    timeout: httpx.Timeout | float | UnsetType | None,
+) -> httpx.Timeout | UnsetType:
     """Turn a timeout argument into UNSET or a comparable httpx.Timeout.
 
     UNSET stays UNSET (no explicit value). None disables every HTTP timeout.
@@ -158,7 +158,7 @@ class HTTPConfig:
         password: str,
         retry: Retry | int | None,
         limits: httpx.Limits | int | None,
-        timeout: httpx.Timeout | float | _Unset | None,
+        timeout: httpx.Timeout | float | UnsetType | None,
     ) -> None:
         """Initialize HTTPConfig from already-resolved parts.
 
@@ -179,17 +179,17 @@ class HTTPConfig:
     def resolve(
         cls,
         *,
-        protocol: str = UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port: int = UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: httpx.Limits | int | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> HTTPConfig:
         """Resolve connection and auth parameters into an HTTPConfig.
 
@@ -470,4 +470,5 @@ __all__ = [
     "NO_RETRY_STRATEGY",
     "UNSET",
     "HTTPConfig",
+    "UnsetType",
 ]

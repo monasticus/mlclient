@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.values import ValueGetCall, ValuePostCall, ValuesGetCall
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ class ValuesApi:
         database: str | None = None,
         data_format: str = "xml",
         options: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """List lexicon configurations available for use with GET /v1/values/{name}.
 
@@ -98,7 +98,7 @@ class ValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Query the values in a lexicon or range index, optionally aggregating them.
 
@@ -227,7 +227,7 @@ class ValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Query lexicon values with a query and/or query options in the POST body.
 
@@ -348,7 +348,7 @@ class AsyncValuesApi:
         database: str | None = None,
         data_format: str = "xml",
         options: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """List lexicon configurations available for use with GET /v1/values/{name}.
 
@@ -416,7 +416,7 @@ class AsyncValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Query the values in a lexicon or range index, optionally aggregating them.
 
@@ -545,7 +545,7 @@ class AsyncValuesApi:
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Query lexicon values with a query and/or query options in the POST body.
 

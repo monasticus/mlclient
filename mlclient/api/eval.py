@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.eval import EvalCall
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ class EvalApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
 
@@ -100,7 +100,7 @@ class AsyncEvalApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
 

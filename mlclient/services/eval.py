@@ -5,13 +5,12 @@ Provides parsed code evaluation on MarkLogic.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ElemTree
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import aiofiles
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
@@ -37,10 +36,10 @@ class EvalService(ExecutionService):
         expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
@@ -102,22 +101,12 @@ class EvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -146,7 +135,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -170,22 +161,12 @@ class EvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -214,7 +195,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -238,22 +221,12 @@ class EvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -282,7 +255,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -306,22 +281,12 @@ class EvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -350,7 +315,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -374,22 +341,12 @@ class EvalService(ExecutionService):
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate code from a file in MarkLogic (auto-detect language).
 
         Parameters
@@ -418,7 +375,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -444,10 +403,10 @@ class EvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
         """Evaluate code in a MarkLogic server (general-purpose).
@@ -485,7 +444,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -514,10 +475,10 @@ class EvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
         """Execute eval and return parsed result."""
@@ -615,10 +576,10 @@ class AsyncEvalService(ExecutionService):
         expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
@@ -680,22 +641,12 @@ class AsyncEvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -724,7 +675,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -748,22 +701,12 @@ class AsyncEvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -792,7 +735,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -816,22 +761,12 @@ class AsyncEvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -860,7 +795,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -884,22 +821,12 @@ class AsyncEvalService(ExecutionService):
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -928,7 +855,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -952,22 +881,12 @@ class AsyncEvalService(ExecutionService):
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+    ) -> ParsedValue:
         """Evaluate code from a file in MarkLogic (auto-detect language).
 
         Parameters
@@ -996,7 +915,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -1022,10 +943,10 @@ class AsyncEvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
         """Evaluate code in a MarkLogic server (general-purpose).
@@ -1063,7 +984,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -1092,10 +1015,10 @@ class AsyncEvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
         output_type: type | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
         """Execute eval and return parsed result."""

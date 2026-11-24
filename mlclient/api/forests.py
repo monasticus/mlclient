@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.forests import (
     ForestDeleteCall,
     ForestGetCall,
@@ -44,7 +44,7 @@ class ForestsApi:
         group: str | None = None,
         host: str | None = None,
         full_refs: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about the forests in the cluster.
 
@@ -107,7 +107,7 @@ class ForestsApi:
         body: str | dict,
         *,
         wait_for_forest_to_mount: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new forest, including replicas if specified.
 
@@ -151,7 +151,7 @@ class ForestsApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Perform an operation on one or more forests.
 
@@ -191,7 +191,7 @@ class ForestsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve information about a forest.
 
@@ -235,7 +235,7 @@ class ForestsApi:
         forest: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Initiate a state change on a forest, such as a merge, restart, or attach.
 
@@ -276,7 +276,7 @@ class ForestsApi:
         *,
         level: str,
         replicas: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete a forest.
 
@@ -321,7 +321,7 @@ class ForestsApi:
         forest: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of a forest.
 
@@ -360,7 +360,7 @@ class ForestsApi:
         forest: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the configuration of a forest.
 
@@ -409,7 +409,7 @@ class AsyncForestsApi:
         group: str | None = None,
         host: str | None = None,
         full_refs: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve data about the forests in the cluster.
 
@@ -472,7 +472,7 @@ class AsyncForestsApi:
         body: str | dict,
         *,
         wait_for_forest_to_mount: bool | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Create a new forest, including replicas if specified.
 
@@ -516,7 +516,7 @@ class AsyncForestsApi:
         self,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Perform an operation on one or more forests.
 
@@ -556,7 +556,7 @@ class AsyncForestsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve information about a forest.
 
@@ -600,7 +600,7 @@ class AsyncForestsApi:
         forest: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Initiate a state change on a forest, such as a merge, restart, or attach.
 
@@ -641,7 +641,7 @@ class AsyncForestsApi:
         *,
         level: str,
         replicas: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Delete a forest.
 
@@ -686,7 +686,7 @@ class AsyncForestsApi:
         forest: str,
         *,
         data_format: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of a forest.
 
@@ -725,7 +725,7 @@ class AsyncForestsApi:
         forest: str,
         body: str | dict,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Modify the configuration of a forest.
 

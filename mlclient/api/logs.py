@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.logs import LogsCall
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ class LogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the contents of a log file.
 
@@ -100,7 +100,7 @@ class AsyncLogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Retrieve the contents of a log file.
 

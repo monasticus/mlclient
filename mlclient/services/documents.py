@@ -9,7 +9,7 @@ from collections.abc import AsyncIterator, Iterator
 from typing import TYPE_CHECKING
 
 from mlclient import _constants as constants
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 
 if TYPE_CHECKING:
     import httpx
@@ -35,7 +35,7 @@ _URI_PARAM_OVERHEAD = len("&uri=")
 
 
 def _batched_uris(
-    uris: str | list[str] | tuple[str] | set[str],
+    uris: str | list[str] | tuple[str, ...] | set[str],
     max_query_bytes: int = _MAX_QUERY_BYTES,
 ) -> Iterator[str | list[str]]:
     """Split URIs into batches whose combined query length stays under a limit.
@@ -93,8 +93,8 @@ class DocumentsService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
     ) -> DocumentsService:
         """Return a scoped copy without opening a connection or a transaction.
 
@@ -117,10 +117,10 @@ class DocumentsService:
         self,
         data: Document | Metadata | list[Document | Metadata],
         *,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
@@ -170,12 +170,12 @@ class DocumentsService:
 
     def read(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -184,7 +184,7 @@ class DocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -225,12 +225,12 @@ class DocumentsService:
 
     def read_stream(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -240,7 +240,7 @@ class DocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -287,14 +287,14 @@ class DocumentsService:
 
     def delete(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> None:
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -304,7 +304,7 @@ class DocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             The URI of a document to delete.
         category : Category | str | list[Category | str] | None, default None
             The category of data to remove/reset.
@@ -450,8 +450,8 @@ class AsyncDocumentsService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
     ) -> AsyncDocumentsService:
         """Return a scoped copy without opening a connection or a transaction.
 
@@ -474,10 +474,10 @@ class AsyncDocumentsService:
         self,
         data: Document | Metadata | list[Document | Metadata],
         *,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
@@ -527,12 +527,12 @@ class AsyncDocumentsService:
 
     async def read(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -541,7 +541,7 @@ class AsyncDocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -584,12 +584,12 @@ class AsyncDocumentsService:
 
     async def read_stream(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> AsyncIterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -599,7 +599,7 @@ class AsyncDocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -647,14 +647,14 @@ class AsyncDocumentsService:
 
     async def delete(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> None:
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -664,7 +664,7 @@ class AsyncDocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             The URI of a document to delete.
         category : Category | str | list[Category | str] | None, default None
             The category of data to remove/reset.

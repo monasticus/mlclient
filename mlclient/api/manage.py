@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.base import ApiCall
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ class ManageApi:
         self,
         call_: ApiCall,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a custom ApiCall.
 
@@ -199,7 +199,7 @@ class AsyncManageApi:
         self,
         call_: ApiCall,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a custom ApiCall.
 

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from dateutil.parser import isoparse
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.types import LogType
 from mlclient.responses import MLResponseParser
@@ -40,7 +40,7 @@ class LogsService:
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server.
 
@@ -97,7 +97,7 @@ class LogsService:
         self,
         host: str | None = None,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 
@@ -249,7 +249,7 @@ class AsyncLogsService(LogsService):
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server.
 
@@ -306,7 +306,7 @@ class AsyncLogsService(LogsService):
         self,
         host: str | None = None,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 

@@ -5,9 +5,9 @@ Builders compose expressions; services execute through the common evaluator.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar, cast
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.models.results import SearchHit, ValueHit
 from mlclient.responses import MLResponseParser
 from mlclient.xquery import Cts
@@ -34,11 +34,14 @@ if TYPE_CHECKING:
     class _ExecutionOptions(TypedDict, total=False):
         database: str | None
         txid: str | None
-        timeout: httpx.Timeout | float | None
+        timeout: httpx.Timeout | float | UnsetType | None
         namespaces: Mapping[str, str] | None
 
     class _NativeExecutionOptions(_ExecutionOptions, total=False):
         output_type: type[str | bytes] | None
+
+
+_HitT = TypeVar("_HitT", SearchHit, ValueHit)
 
 
 class CtsService(Cts):
@@ -75,7 +78,7 @@ class CtsService(Cts):
         pos: Position | PositionRange | None = None,
         xpath: str | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[SearchHit]:
         """Execute ``cts:search`` via ``/v1/eval``.
 
         Returns a relevance-ordered sequence of nodes specified by a given
@@ -187,7 +190,7 @@ class CtsService(Cts):
 
         Returns
         -------
-        list
+        list[SearchHit]
             Always a list; empty sequences return [] and singletons return [item].
 
         Raises
@@ -302,7 +305,7 @@ class CtsService(Cts):
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
         kwargs : dict
-            Execution options: database, txid, timeout and namespaces.
+            Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
 
         Returns
@@ -349,7 +352,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:values`` via ``/v1/eval``.
 
         Returns values from the specified value lexicon(s).
@@ -439,7 +442,7 @@ class CtsService(Cts):
 
         Returns
         -------
-        list
+        list[ValueHit]
             Always a list; empty sequences return [] and singletons return [item].
 
         Raises
@@ -877,7 +880,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:collection-match`` via ``/v1/eval``.
 
         Returns values from the collection lexicon that match the specified
@@ -998,7 +1001,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:collections`` via ``/v1/eval``.
 
         Returns values from the collection lexicon.
@@ -1632,7 +1635,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-pair-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -1782,7 +1785,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
 
         Returns values from the specified element attribute pair geospatial
@@ -1920,7 +1923,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-pair-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element-attribute-pair geospatial
@@ -2392,7 +2395,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element-attribute value lexicon(s)
@@ -2696,7 +2699,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-values`` via ``/v1/eval``.
 
         Returns values from the specified element-attribute value lexicon(s).
@@ -2844,7 +2847,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-word-match`` via ``/v1/eval``.
 
         Returns words from the specified element-attribute word lexicon(s) that
@@ -2962,7 +2965,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-words`` via ``/v1/eval``.
 
         Returns words from the specified element-attribute word lexicon(s).
@@ -3096,7 +3099,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-child-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -3245,7 +3248,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-child-geospatial-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element child geospatial value
@@ -3382,7 +3385,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-child-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element-child geospatial value
@@ -3529,7 +3532,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -3674,7 +3677,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-geospatial-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element geospatial value lexicon(s)
@@ -3807,7 +3810,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element geospatial value lexicon(s).
@@ -3955,7 +3958,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-pair-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -4105,7 +4108,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-pair-geospatial-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element pair geospatial value
@@ -4243,7 +4246,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-pair-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element-pair geospatial value
@@ -4706,7 +4709,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element value lexicon(s) that match
@@ -5001,7 +5004,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-values`` via ``/v1/eval``.
 
         Returns values from the specified element value lexicon(s).
@@ -5197,7 +5200,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-word-match`` via ``/v1/eval``.
 
         Returns words from the specified element word lexicon(s) that match a
@@ -5311,7 +5314,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-words`` via ``/v1/eval``.
 
         Returns words from the specified element word lexicon.
@@ -5731,7 +5734,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-value-match`` via ``/v1/eval``.
 
         Returns values from the specified field value lexicon(s) that match the
@@ -6026,7 +6029,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-values`` via ``/v1/eval``.
 
         Returns values from the specified field value lexicon(s).
@@ -6163,7 +6166,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-word-match`` via ``/v1/eval``.
 
         Returns words from the specified field word lexicon(s) that match a
@@ -6277,7 +6280,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-words`` via ``/v1/eval``.
 
         Returns words from the specified field word lexicon.
@@ -6489,7 +6492,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified point lexicon(s).
@@ -6884,7 +6887,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:json-property-word-match`` via ``/v1/eval``.
 
         Returns words from the specified JSON property word lexicon(s) that
@@ -6998,7 +7001,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:json-property-words`` via ``/v1/eval``.
 
         Returns words from the specified JSON property word lexicon.
@@ -8654,7 +8657,7 @@ class CtsService(Cts):
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
         kwargs : dict
-            Execution keywords: database, txid, timeout and namespaces.
+            Execution keywords: database, txid, output_type, timeout and namespaces.
 
         Returns
         -------
@@ -9076,7 +9079,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:value-match`` via ``/v1/eval``.
 
         Returns values from the specified value lexicon(s) that match the
@@ -9642,7 +9645,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:word-match`` via ``/v1/eval``.
 
         Returns words from the word lexicon that match the wildcard pattern.
@@ -9751,7 +9754,7 @@ class CtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:words`` via ``/v1/eval``.
 
         Returns words from the word lexicon.
@@ -9858,7 +9861,7 @@ class CtsService(Cts):
         database: str | None = None,
         txid: str | None = None,
         output_type: type[str | bytes] | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list:
         """Execute a native expression and retain its result sequence.
 
@@ -9913,20 +9916,20 @@ class CtsService(Cts):
     def _execute(
         self,
         expr: XqyExpression,
-        model: type[SearchHit | ValueHit],
+        model: type[_HitT],
         *,
         namespaces: Mapping[str, str] | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
-    ) -> list[SearchHit] | list[ValueHit]:
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> list[_HitT]:
         """Execute a service transport expression and decode its paired results.
 
         Parameters
         ----------
         expr : XqyExpression
             Service expression producing payload/integer pairs.
-        model : type
+        model : type[SearchHit] | type[ValueHit]
             SearchHit or ValueHit.
         namespaces : dict | None
             Effective namespace declarations for path validation and execution.
@@ -9996,7 +9999,7 @@ class AsyncCtsService(Cts):
         pos: Position | PositionRange | None = None,
         xpath: str | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[SearchHit]:
         """Execute ``cts:search`` via ``/v1/eval``.
 
         Returns a relevance-ordered sequence of nodes specified by a given
@@ -10108,7 +10111,7 @@ class AsyncCtsService(Cts):
 
         Returns
         -------
-        list
+        list[SearchHit]
             Always a list; empty sequences return [] and singletons return [item].
 
         Raises
@@ -10223,7 +10226,7 @@ class AsyncCtsService(Cts):
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
         kwargs : dict
-            Execution options: database, txid, timeout and namespaces.
+            Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
 
         Returns
@@ -10270,7 +10273,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:values`` via ``/v1/eval``.
 
         Returns values from the specified value lexicon(s).
@@ -10360,7 +10363,7 @@ class AsyncCtsService(Cts):
 
         Returns
         -------
-        list
+        list[ValueHit]
             Always a list; empty sequences return [] and singletons return [item].
 
         Raises
@@ -10798,7 +10801,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:collection-match`` via ``/v1/eval``.
 
         Returns values from the collection lexicon that match the specified
@@ -10919,7 +10922,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:collections`` via ``/v1/eval``.
 
         Returns values from the collection lexicon.
@@ -11553,7 +11556,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-pair-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -11703,7 +11706,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
 
         Returns values from the specified element attribute pair geospatial
@@ -11841,7 +11844,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-pair-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element-attribute-pair geospatial
@@ -12313,7 +12316,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element-attribute value lexicon(s)
@@ -12617,7 +12620,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-values`` via ``/v1/eval``.
 
         Returns values from the specified element-attribute value lexicon(s).
@@ -12765,7 +12768,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-word-match`` via ``/v1/eval``.
 
         Returns words from the specified element-attribute word lexicon(s) that
@@ -12883,7 +12886,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-attribute-words`` via ``/v1/eval``.
 
         Returns words from the specified element-attribute word lexicon(s).
@@ -13017,7 +13020,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-child-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -13166,7 +13169,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-child-geospatial-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element child geospatial value
@@ -13303,7 +13306,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-child-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element-child geospatial value
@@ -13450,7 +13453,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -13595,7 +13598,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-geospatial-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element geospatial value lexicon(s)
@@ -13728,7 +13731,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element geospatial value lexicon(s).
@@ -13876,7 +13879,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-pair-geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -14026,7 +14029,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-pair-geospatial-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element pair geospatial value
@@ -14164,7 +14167,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-pair-geospatial-values`` via ``/v1/eval``.
 
         Returns values from the specified element-pair geospatial value
@@ -14627,7 +14630,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-value-match`` via ``/v1/eval``.
 
         Returns values from the specified element value lexicon(s) that match
@@ -14922,7 +14925,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-values`` via ``/v1/eval``.
 
         Returns values from the specified element value lexicon(s).
@@ -15118,7 +15121,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-word-match`` via ``/v1/eval``.
 
         Returns words from the specified element word lexicon(s) that match a
@@ -15232,7 +15235,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:element-words`` via ``/v1/eval``.
 
         Returns words from the specified element word lexicon.
@@ -15652,7 +15655,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-value-match`` via ``/v1/eval``.
 
         Returns values from the specified field value lexicon(s) that match the
@@ -15947,7 +15950,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-values`` via ``/v1/eval``.
 
         Returns values from the specified field value lexicon(s).
@@ -16084,7 +16087,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-word-match`` via ``/v1/eval``.
 
         Returns words from the specified field word lexicon(s) that match a
@@ -16198,7 +16201,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:field-words`` via ``/v1/eval``.
 
         Returns words from the specified field word lexicon.
@@ -16410,7 +16413,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:geospatial-boxes`` via ``/v1/eval``.
 
         Returns boxes derived from the specified point lexicon(s).
@@ -16805,7 +16808,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:json-property-word-match`` via ``/v1/eval``.
 
         Returns words from the specified JSON property word lexicon(s) that
@@ -16919,7 +16922,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:json-property-words`` via ``/v1/eval``.
 
         Returns words from the specified JSON property word lexicon.
@@ -18575,7 +18578,7 @@ class AsyncCtsService(Cts):
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
         kwargs : dict
-            Execution keywords: database, txid, timeout and namespaces.
+            Execution keywords: database, txid, output_type, timeout and namespaces.
 
         Returns
         -------
@@ -18997,7 +19000,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:value-match`` via ``/v1/eval``.
 
         Returns values from the specified value lexicon(s) that match the
@@ -19563,7 +19566,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:word-match`` via ``/v1/eval``.
 
         Returns words from the word lexicon that match the wildcard pattern.
@@ -19672,7 +19675,7 @@ class AsyncCtsService(Cts):
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
         **kwargs: Unpack[_ExecutionOptions],
-    ) -> list:
+    ) -> list[ValueHit]:
         """Execute ``cts:words`` via ``/v1/eval``.
 
         Returns words from the word lexicon.
@@ -19779,7 +19782,7 @@ class AsyncCtsService(Cts):
         database: str | None = None,
         txid: str | None = None,
         output_type: type[str | bytes] | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list:
         """Execute a native expression and retain its result sequence.
 
@@ -19834,20 +19837,20 @@ class AsyncCtsService(Cts):
     async def _execute(
         self,
         expr: XqyExpression,
-        model: type[SearchHit | ValueHit],
+        model: type[_HitT],
         *,
         namespaces: Mapping[str, str] | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
-    ) -> list[SearchHit] | list[ValueHit]:
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> list[_HitT]:
         """Await a service transport expression and decode paired results.
 
         Parameters
         ----------
         expr : XqyExpression
             Service expression producing payload/integer pairs.
-        model : type
+        model : type[SearchHit] | type[ValueHit]
             SearchHit or ValueHit.
         namespaces : dict | None
             Effective namespace declarations for path validation and execution.
@@ -19883,12 +19886,12 @@ class AsyncCtsService(Cts):
         return _result_pairs(response, model)
 
 
-def _check_lexicon_options(options: str | list[str] | XqyExpression | None) -> bool:
+def _check_lexicon_options(options: StringInput) -> bool:
     """Reject literal map output and report whether options require runtime checking.
 
     Parameters
     ----------
-    options : str | list[str] | XqyExpression | None
+    options : StringInput
         Native lexicon options, possibly containing nested XQuery expressions.
 
     Returns
@@ -19919,7 +19922,7 @@ class _ResultPairs(XqyExpression):
         model: type,
         xpath: str | None = None,
         *,
-        options: str | list[str] | XqyExpression | None = None,
+        options: StringInput = None,
     ) -> None:
         """Retain the selected expression and validate its XPath and lexicon options.
 
@@ -19931,7 +19934,7 @@ class _ResultPairs(XqyExpression):
             SearchHit or ValueHit determines score versus frequency extraction.
         xpath : str | None
             Optional validated XPath applied to original search hits.
-        options : str | list[str] | XqyExpression | None
+        options : StringInput
             Lexicon options; literal map output is rejected before compilation.
 
         Raises
@@ -19980,15 +19983,15 @@ class _ResultPairs(XqyExpression):
 
 def _result_pairs(
     response: httpx.Response,
-    model: type[SearchHit | ValueHit],
-) -> list[SearchHit] | list[ValueHit]:
+    model: type[_HitT],
+) -> list[_HitT]:
     """Parse payload/measure pairs into a list of result objects.
 
     Parameters
     ----------
     response : httpx.Response
         Eval response produced by the service's paired expression.
-    model : type
+    model : type[SearchHit] | type[ValueHit]
         SearchHit or ValueHit to construct from each pair.
 
     Returns
@@ -20012,8 +20015,9 @@ def _result_pairs(
     if isinstance(parts, tuple) or len(parts) % 2:
         message = "CTS response is missing a score/frequency partner"
         raise ValueError(message)
-    results = []
+    results: list[SearchHit | ValueHit] = []
     for (headers, content), (_, measure) in zip(parts[::2], parts[1::2]):
+        result: SearchHit | ValueHit
         if model is SearchHit:
             result = SearchHit(
                 content,
@@ -20027,7 +20031,7 @@ def _result_pairs(
                 frequency=measure,
             )
         results.append(result)
-    return results
+    return cast("list[_HitT]", results)
 
 
 def _positioned(
@@ -20038,20 +20042,25 @@ def _positioned(
     return expr.pos(pos)
 
 
-def _execution_options(default_namespaces: dict[str, str], options: dict) -> dict:
+def _execution_options(
+    default_namespaces: dict[str, str],
+    options: _ExecutionOptions,
+) -> _ExecutionOptions:
     """Merge per-call namespace overrides without changing service defaults.
 
     Parameters
     ----------
     default_namespaces : dict[str, str]
         Namespace declarations owned by the CTS service.
-    options : dict
-        Per-call evaluator options, optionally including namespaces.
+    options : _ExecutionOptions
+        Per-call evaluator options, optionally including namespaces and, for
+        native operations, output_type.
 
     Returns
     -------
-    dict
-        Independent options with namespace overrides applied by prefix.
+    _ExecutionOptions
+        Independent options with namespace overrides applied by prefix; every
+        other option, output_type included, is kept.
     """
     return {
         **options,

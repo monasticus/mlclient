@@ -248,6 +248,7 @@ EXPECTED_EXPORTS = {
         "DEFAULT_RETRY_STRATEGY",
         "NO_RETRY_STRATEGY",
         "UNSET",
+        "UnsetType",
     ],
     "mlclient.auth": [
         "AuthConfig",

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
 from mlclient.exceptions import MarkLogicError
 from mlclient.responses import MLResponseParser
@@ -74,7 +74,7 @@ class TransactionService:
         self,
         *,
         data_format: str = "json",
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue:
         """Return the status of the transaction.
 
@@ -91,7 +91,8 @@ class TransactionService:
 
         Returns
         -------
-        The parsed transaction status
+        ParsedValue
+            The parsed transaction status.
 
         Raises
         ------
@@ -110,7 +111,11 @@ class TransactionService:
         )
         return MLResponseParser.parse(resp)
 
-    def commit(self, *, timeout: httpx.Timeout | float | None = UNSET) -> None:
+    def commit(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Commit the transaction.
 
         Parameters
@@ -133,7 +138,11 @@ class TransactionService:
         """
         self._finish("commit", timeout=timeout)
 
-    def rollback(self, *, timeout: httpx.Timeout | float | None = UNSET) -> None:
+    def rollback(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Roll back the transaction.
 
         Parameters
@@ -160,7 +169,7 @@ class TransactionService:
         self,
         result: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> None:
         resp = self._api.post(
             self._txid,
@@ -191,7 +200,7 @@ def open_transaction(
     name: str | None = None,
     time_limit: int | None = None,
     database: str | None = None,
-    timeout: httpx.Timeout | float | None = UNSET,
+    timeout: httpx.Timeout | float | UnsetType | None = UNSET,
 ) -> TransactionService:
     """Open a multi-statement transaction and return a service scoped to it.
 
@@ -283,7 +292,7 @@ class AsyncTransactionService:
         self,
         *,
         data_format: str = "json",
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue:
         """Return the status of the transaction.
 
@@ -300,7 +309,8 @@ class AsyncTransactionService:
 
         Returns
         -------
-        The parsed transaction status
+        ParsedValue
+            The parsed transaction status.
 
         Raises
         ------
@@ -319,7 +329,11 @@ class AsyncTransactionService:
         )
         return MLResponseParser.parse(resp)
 
-    async def commit(self, *, timeout: httpx.Timeout | float | None = UNSET) -> None:
+    async def commit(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Commit the transaction.
 
         Parameters
@@ -342,7 +356,11 @@ class AsyncTransactionService:
         """
         await self._finish("commit", timeout=timeout)
 
-    async def rollback(self, *, timeout: httpx.Timeout | float | None = UNSET) -> None:
+    async def rollback(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Roll back the transaction.
 
         Parameters
@@ -369,7 +387,7 @@ class AsyncTransactionService:
         self,
         result: str,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> None:
         resp = await self._api.post(
             self._txid,
@@ -400,7 +418,7 @@ async def async_open_transaction(
     name: str | None = None,
     time_limit: int | None = None,
     database: str | None = None,
-    timeout: httpx.Timeout | float | None = UNSET,
+    timeout: httpx.Timeout | float | UnsetType | None = UNSET,
 ) -> AsyncTransactionService:
     """Open a multi-statement transaction and return a service scoped to it.
 

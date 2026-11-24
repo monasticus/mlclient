@@ -125,13 +125,13 @@ class _BiDict:
 
     def __init__(
         self,
-        input_dict: dict[str, str],
+        input_dict: dict[str | None, str | None],
     ) -> None:
         """Initialize a _BiDict instance.
 
         Parameters
         ----------
-        input_dict : dict[str, str]
+        input_dict : dict[str | None, str | None]
             An input regular dictionary
         """
         self._origin = dict(input_dict)
@@ -139,14 +139,14 @@ class _BiDict:
 
     def get(
         self,
-        key: str,
+        key: str | None,
         default: str | None = None,
     ) -> str | None:
         """Return a corresponding value for a key regardless direction.
 
         Parameters
         ----------
-        key : str
+        key : str | None
             A dictionary key or value
         default : str | None, default None
             A default value

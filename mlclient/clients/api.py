@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.base import ApiCall
 from mlclient.clients.http import AsyncHttpClient, HttpClient
 
@@ -28,7 +28,7 @@ class ApiClient:
         self,
         call_: ApiCall,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a request using an ApiCall object.
 
@@ -75,7 +75,7 @@ class AsyncApiClient:
         self,
         call_: ApiCall,
         *,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a request using an ApiCall object.
 

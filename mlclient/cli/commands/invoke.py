@@ -14,7 +14,7 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient._manager import MLClientManager
-from mlclient._options import _Unset
+from mlclient._options import UnsetType
 from mlclient.cli.commands._execution_common import (
     format_results,
     parse_variables,
@@ -116,7 +116,7 @@ class InvokeCommand(Command):
         self,
         environment: str,
         variables: dict[str, str],
-        timeout: float | None | _Unset,
+        timeout: float | UnsetType | None,
     ) -> str | list[str]:
         """Invoke the module and get its results.
 
@@ -126,7 +126,7 @@ class InvokeCommand(Command):
             Environment in which to invoke the module.
         variables : dict[str, str]
             External variables to pass to the module.
-        timeout : float | None | _Unset
+        timeout : float | UnsetType | None
             The per-request HTTP timeout; UNSET keeps the client default.
 
         Returns
@@ -154,7 +154,7 @@ class InvokeCommand(Command):
         self,
         environments: list[str],
         variables: dict[str, str],
-        timeout: float | None | _Unset,
+        timeout: float | UnsetType | None,
     ) -> int:
         """Invoke the module concurrently and compare the results.
 
@@ -164,7 +164,7 @@ class InvokeCommand(Command):
             Environments in display order.
         variables : dict[str, str]
             External variables passed to every invocation.
-        timeout : float | None | _Unset
+        timeout : float | UnsetType | None
             The per-request HTTP timeout of every invocation; UNSET keeps the
             client default.
 

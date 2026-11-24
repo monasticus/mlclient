@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.search import SearchDeleteCall, SearchGetCall, SearchPostCall
 
 if TYPE_CHECKING:
@@ -44,7 +44,7 @@ class SearchApi:
         timestamp: str | None = None,
         forest_name: str | list | None = None,
         multipart: bool = False,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Search the database using a string query, structured query, or cts:query.
 
@@ -157,7 +157,7 @@ class SearchApi:
         timestamp: str | None = None,
         forest_name: str | list | None = None,
         multipart: bool = False,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Search the database using a query or combined query in the POST body.
 
@@ -258,7 +258,7 @@ class SearchApi:
         collection: str | None = None,
         directory: str | None = None,
         clear_database: bool = False,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Remove documents in a collection or directory, or clear the database.
 
@@ -341,7 +341,7 @@ class AsyncSearchApi:
         timestamp: str | None = None,
         forest_name: str | list | None = None,
         multipart: bool = False,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Search the database using a string query, structured query, or cts:query.
 
@@ -454,7 +454,7 @@ class AsyncSearchApi:
         timestamp: str | None = None,
         forest_name: str | list | None = None,
         multipart: bool = False,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Search the database using a query or combined query in the POST body.
 
@@ -555,7 +555,7 @@ class AsyncSearchApi:
         collection: str | None = None,
         directory: str | None = None,
         clear_database: bool = False,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Remove documents in a collection or directory, or clear the database.
 

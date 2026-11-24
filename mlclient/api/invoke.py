@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.invoke import InvokeCall
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ class InvokeApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Evaluate an XQuery or server-side JavaScript module installed in MarkLogic.
 
@@ -95,7 +95,7 @@ class AsyncInvokeApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Evaluate an XQuery or server-side JavaScript module installed in MarkLogic.
 

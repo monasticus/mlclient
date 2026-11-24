@@ -15,7 +15,7 @@ from httpx import AsyncClient, AsyncHTTPTransport, Client, HTTPTransport, Respon
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import _constants as const
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.auth import AuthParam
 from mlclient.clients._restart import _RestartWaiter
 from mlclient.connection import CloudConfig, SSLConfig
@@ -24,22 +24,11 @@ from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.types import DocumentType
 
 if TYPE_CHECKING:
-    from typing import TypedDict
-
     from typing_extensions import Self, Unpack
 
-    class _HttpClientOptions(TypedDict, total=False):
-        protocol: str
-        host: str
-        port: int
-        auth: AuthParam
-        username: str
-        password: str
-        ssl: SSLConfig | None
-        cloud: CloudConfig | None
-        retry: Retry | int | None
-        limits: httpx.Limits | int | None
-        timeout: httpx.Timeout | float | None
+    from mlclient.http import _HTTPConfigOverrides
+
+    class _HttpClientOptions(_HTTPConfigOverrides, total=False):
         config: HTTPConfig | None
         session_owner: HttpClient | AsyncHttpClient | None
 
@@ -82,17 +71,17 @@ class _HttpClientBase:
 
     def __init__(
         self,
-        protocol: str = UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port: int = UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: httpx.Limits | int | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         config: HTTPConfig | None = None,
         session_owner: HttpClient | AsyncHttpClient | None = None,
     ) -> None:
@@ -344,7 +333,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a GET request.
 
@@ -388,7 +377,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a HEAD request.
 
@@ -433,7 +422,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a POST request.
 
@@ -481,7 +470,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a PUT request.
 
@@ -528,7 +517,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a DELETE request.
 
@@ -574,7 +563,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an HTTP request.
 
@@ -740,7 +729,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async GET request.
 
@@ -784,7 +773,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async HEAD request.
 
@@ -829,7 +818,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async POST request.
 
@@ -877,7 +866,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async PUT request.
 
@@ -924,7 +913,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async DELETE request.
 
@@ -970,7 +959,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout: httpx.Timeout | float | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async HTTP request.
 

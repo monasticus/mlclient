@@ -60,6 +60,11 @@ connection limits and cleanup remain owned by the parent client. A per-request
 separate configured client when the application lives on another host or needs
 different credentials.
 
+`timeout=UNSET` keeps the client's configured timeout, while `timeout=None`
+disables it. To type the forwarding parameter, import
+[`UnsetType`][mlclient.http.UnsetType] together with `UNSET` from `mlclient.http`
+and annotate it as `timeout: httpx.Timeout | float | UnsetType | None = UNSET`.
+
 The async version shares the same Call, since a Call performs no I/O. Only the
 sending and service methods become async. Inside a coroutine:
 

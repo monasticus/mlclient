@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Literal
 from xml.etree import ElementTree
 
 from mlclient import _constants as constants
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.models.document_parts import Category, DocumentsDisposition
 from mlclient.models.results import ParsedValue, SearchReport, TupleHit, ValueHit
 from mlclient.responses import MLResponseParser
@@ -98,13 +98,13 @@ class SearchService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        collection: str | list[str] | None = UNSET,
-        directory: str | None = UNSET,
-        forest_name: str | list[str] | None = UNSET,
-        options: OptionsInput = UNSET,
-        timestamp: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        collection: str | list[str] | UnsetType | None = UNSET,
+        directory: str | UnsetType | None = UNSET,
+        forest_name: str | list[str] | UnsetType | None = UNSET,
+        options: OptionsInput | UnsetType = UNSET,
+        timestamp: str | UnsetType | None = UNSET,
     ) -> SearchService:
         """Return a service whose operations use a narrower scope.
 
@@ -166,9 +166,9 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
 
@@ -254,9 +254,9 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
 
@@ -341,9 +341,9 @@ class SearchService:
         *,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
 
@@ -419,9 +419,9 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
 
@@ -514,9 +514,9 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
 
@@ -619,9 +619,9 @@ class SearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
 
@@ -712,9 +712,9 @@ class SearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
 
@@ -825,13 +825,13 @@ class AsyncSearchService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        collection: str | list[str] | None = UNSET,
-        directory: str | None = UNSET,
-        forest_name: str | list[str] | None = UNSET,
-        options: OptionsInput = UNSET,
-        timestamp: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        collection: str | list[str] | UnsetType | None = UNSET,
+        directory: str | UnsetType | None = UNSET,
+        forest_name: str | list[str] | UnsetType | None = UNSET,
+        options: OptionsInput | UnsetType = UNSET,
+        timestamp: str | UnsetType | None = UNSET,
     ) -> AsyncSearchService:
         """Return a service whose operations use a narrower scope.
 
@@ -893,9 +893,9 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
 
@@ -981,9 +981,9 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
 
@@ -1068,9 +1068,9 @@ class AsyncSearchService:
         *,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
 
@@ -1146,9 +1146,9 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
 
@@ -1241,9 +1241,9 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
 
@@ -1346,9 +1346,9 @@ class AsyncSearchService:
         limit: int | None = None,
         pos: PositionInput = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
 
@@ -1439,9 +1439,9 @@ class AsyncSearchService:
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout: httpx.Timeout | float | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
 
@@ -1523,8 +1523,8 @@ def _request_params(
     scope: SearchScope | None,
     *,
     lexicon: bool = False,
-    database: str | None = UNSET,
-    txid: str | None = UNSET,
+    database: str | UnsetType | None = UNSET,
+    txid: str | UnsetType | None = UNSET,
 ) -> dict:
     """Build the combined-query POST arguments with their scope and paging.
 
@@ -1578,10 +1578,10 @@ def _request_params(
 
 def _criteria(
     query: SearchInput,
-    options: OptionsInput,
+    options: OptionsInput | UnsetType,
     *,
     lexicon: bool = False,
-    operation_options: OptionsInput = UNSET,
+    operation_options: OptionsInput | UnsetType = UNSET,
 ) -> tuple[dict, dict]:
     """Carry a query and options in a combined-query body.
 
@@ -1592,7 +1592,7 @@ def _criteria(
     ----------
     query : SearchQuery | dict | str | None
         Search criteria, serialized locally.
-    options : str | dict | SearchOptions | None
+    options : str | dict | SearchOptions | UnsetType | None
         Installed name, inline options members or composition, or unset.
     lexicon : bool, default False
         Use additional-query for inline CTS restrictions: ML10/ML12 ignore

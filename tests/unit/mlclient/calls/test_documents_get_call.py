@@ -49,6 +49,14 @@ def test_validation_format_param(category, data_format):
     assert str(err.value) == expected_msg
 
 
+def test_validation_timestamp_with_txid():
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsGetCall(uri="/a.xml", timestamp="16692287403272560", txid="tx")
+
+    expected_msg = "timestamp cannot be combined with txid"
+    assert err.value.args[0] == expected_msg
+
+
 @pytest.mark.parametrize("data_format", ["json", "xml"])
 @pytest.mark.parametrize(
     "category",
@@ -222,7 +230,6 @@ def test_fully_parametrized_call_for_single_uri_content():
             "custom-param-1": "custom-value-1",
             "custom-param-2": "custom-value-2",
         },
-        txid="transaction",
     )
     assert call.method == "GET"
     assert call.headers == {}
@@ -233,7 +240,6 @@ def test_fully_parametrized_call_for_single_uri_content():
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
-        "txid": "transaction",
     }
     assert call.body is None
 
@@ -244,7 +250,6 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         database="Documents",
         category="properties",
         data_format="xml",
-        timestamp="16692287403272560",
         transform="custom-transformation",
         transform_params={
             "custom-param-1": "custom-value-1",
@@ -261,7 +266,6 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         "database": "Documents",
         "category": "properties",
         "format": "xml",
-        "timestamp": "16692287403272560",
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
@@ -282,7 +286,6 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
             "custom-param-1": "custom-value-1",
             "custom-param-2": "custom-value-2",
         },
-        txid="transaction",
     )
     assert call.method == "GET"
     assert call.headers == {
@@ -297,7 +300,6 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
-        "txid": "transaction",
     }
     assert call.body is None
 
@@ -308,7 +310,6 @@ def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
         database="Documents",
         category=["collections", "properties"],
         data_format="xml",
-        timestamp="16692287403272560",
         transform="custom-transformation",
         transform_params={
             "custom-param-1": "custom-value-1",
@@ -325,7 +326,6 @@ def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
         "database": "Documents",
         "category": ["collections", "properties"],
         "format": "xml",
-        "timestamp": "16692287403272560",
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",

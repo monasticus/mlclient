@@ -85,7 +85,7 @@ class DocumentsGetCall(ApiCall):
         timestamp : str
             A timestamp returned in the ML-Effective-Timestamp header of a previous
             request. Use this parameter to fetch documents based on the contents
-            of the database at a fixed point-in-time.
+            of the database at a fixed point-in-time. Cannot be combined with txid.
         transform : str
             Names a content transformation previously installed via
             the /config/transforms service. The service applies the transformation
@@ -100,7 +100,7 @@ class DocumentsGetCall(ApiCall):
             multi-statement transactions.
         """
         categories = self._categories_list(category)
-        self._validate_params(categories, data_format)
+        self._validate_params(categories, data_format, timestamp, txid)
 
         super().__init__(method="GET")
         accept_header = self._get_accept_header(uri, categories, data_format)
@@ -129,6 +129,19 @@ class DocumentsGetCall(ApiCall):
 
     @staticmethod
     def _categories_list(category: str | list | None) -> list:
+        """Return the requested categories as a list.
+
+        Parameters
+        ----------
+        category : str | list | None
+            One category or several, as passed to the constructor.
+
+        Returns
+        -------
+        list
+            The categories; None, an empty string and an empty list mean content,
+            the server default.
+        """
         if not category:
             return [Category.CONTENT.value]
         if isinstance(category, list):
@@ -140,17 +153,45 @@ class DocumentsGetCall(ApiCall):
         cls,
         categories: list[str],
         data_format: str | None,
+        timestamp: str | None,
+        txid: str | None,
     ) -> None:
-        if any(cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
-            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
-            msg = f"The supported categories are: {joined_supported_categories}"
-            raise exceptions.WrongParametersError(msg)
+        """Reject parameters and combinations MarkLogic does not accept.
+
+        A point-in-time read inside a transaction fails on the server with a 500
+        ``XDMP-UPDATETIMESTAMP`` error, so it is rejected before any request.
+
+        Parameters
+        ----------
+        categories : list
+            The requested categories.
+        data_format : str | None
+            The metadata format; None leaves it to the server.
+        timestamp : str | None
+            The point in time to read at.
+        txid : str | None
+            The multi-statement transaction identifier.
+
+        Raises
+        ------
+        WrongParametersError
+            If a category is not supported, the format is neither json nor xml,
+            or timestamp is combined with txid.
+        """
+        call_utils.validate_supported(
+            categories,
+            cls._SUPPORTED_CATEGORIES,
+            "categories",
+        )
         if data_format and data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = (
                 "The format applies to metadata only; "
                 f"supported formats are: {joined_supported_formats}"
             )
+            raise exceptions.WrongParametersError(msg)
+        if timestamp is not None and txid is not None:
+            msg = "timestamp cannot be combined with txid"
             raise exceptions.WrongParametersError(msg)
 
     @staticmethod
@@ -159,6 +200,23 @@ class DocumentsGetCall(ApiCall):
         categories: list[str],
         data_format: str | None,
     ) -> str | None:
+        """Return the Accept header for the requested documents and categories.
+
+        Parameters
+        ----------
+        uri : str | list
+            One or more document URIs.
+        categories : list
+            The requested categories.
+        data_format : str | None
+            The metadata format.
+
+        Returns
+        -------
+        str | None
+            multipart/mixed for several documents or categories, the format's
+            MIME type for metadata of a single document, otherwise None.
+        """
         if (not isinstance(uri, str) and len(uri) > 1) or len(categories) > 1:
             return constants.HEADER_MULTIPART_MIXED
         if data_format and categories != [Category.CONTENT.value]:
@@ -208,8 +266,9 @@ class DocumentsPostCall(ApiCall):
             Using an alternative database requires the "eval-in" privilege.
         transform : str
             Names a content transformation previously installed via
-            the /config/transforms service. The service applies the transformation
-            to all documents prior to constructing the response.
+            the /config/transforms service. Transforms are applied only to content
+            parts: the transform is applied to the content of a part prior to
+            updating or inserting the document.
         transform_params : dict
             A transform parameter names and values. For example, { "myparam": 1 }.
             Transform parameters are passed to the transform named in the transform

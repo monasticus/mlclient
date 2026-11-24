@@ -228,6 +228,9 @@ class DocumentsService:
             Every request of the operation uses it, so all documents come from
             one snapshot. The server must still retain that version
             (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -309,6 +312,9 @@ class DocumentsService:
             Every request of the operation uses it, so all documents come from
             one snapshot. The server must still retain that version
             (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -669,6 +675,9 @@ class AsyncDocumentsService:
             Every request of the operation uses it, so all documents come from
             one snapshot. The server must still retain that version
             (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -748,6 +757,9 @@ class AsyncDocumentsService:
             Every request of the operation uses it, so all documents come from
             one snapshot. The server must still retain that version
             (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -879,6 +891,17 @@ def _validate_read_params(
     A point-in-time read inside a transaction fails on the server with a 500
     ``XDMP-UPDATETIMESTAMP`` error, so it is rejected before any request.
 
+    Parameters
+    ----------
+    transform : str | None
+        Name of an installed transform.
+    transform_params : dict | None
+        Parameters for the transform.
+    timestamp : str | None
+        Point in time to read at.
+    txid : str | None
+        The effective transaction identifier, after scope resolution.
+
     Raises
     ------
     WrongParametersError
@@ -900,13 +923,24 @@ def _validate_write_params(
 ) -> None:
     """Reject write parameters that MarkLogic would ignore.
 
+    Parameters
+    ----------
+    transform : str | None
+        Name of an installed transform.
+    transform_params : dict | None
+        Parameters for the transform.
+    temporal_collection : str | None
+        Temporal collection name.
+    system_time : str | None
+        System start time for the insert or update.
+
     Raises
     ------
     WrongParametersError
         If system_time is given without temporal_collection, or
         transform_params without transform.
     """
-    if system_time is not None and temporal_collection is None:
+    if system_time is not None and not temporal_collection:
         msg = "system_time requires temporal_collection"
         raise WrongParametersError(msg)
     _validate_transform_params(transform, transform_params)
@@ -918,11 +952,18 @@ def _validate_transform_params(
 ) -> None:
     """Reject transform parameters sent without a transform to receive them.
 
+    Parameters
+    ----------
+    transform : str | None
+        Name of an installed transform.
+    transform_params : dict | None
+        Parameters for the transform.
+
     Raises
     ------
     WrongParametersError
         If transform_params are given without transform.
     """
-    if transform_params and transform is None:
+    if transform_params and not transform:
         msg = "transform_params require transform"
         raise WrongParametersError(msg)

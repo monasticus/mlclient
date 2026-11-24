@@ -311,6 +311,7 @@ async def test_read_forwards_transform_and_timestamp(svc):
 
 
 @pytest.mark.asyncio
+@respx.mock
 async def test_read_rejects_timestamp_with_txid(svc):
     with pytest.raises(WrongParametersError) as err:
         await svc.read(
@@ -324,6 +325,7 @@ async def test_read_rejects_timestamp_with_txid(svc):
 
 
 @pytest.mark.asyncio
+@respx.mock
 async def test_read_rejects_timestamp_with_scoped_txid(svc):
     documents = svc(txid="txn-123")
 
@@ -352,10 +354,16 @@ async def test_read_accepts_timestamp_when_scoped_txid_is_cleared(svc):
     assert doc.uri == uri
 
 
+@pytest.mark.parametrize("transform", [None, ""])
 @pytest.mark.asyncio
-async def test_read_rejects_transform_params_without_transform(svc):
+@respx.mock
+async def test_read_rejects_transform_params_without_transform(svc, transform):
     with pytest.raises(WrongParametersError) as err:
-        await svc.read("/some/dir/doc1.xml", transform_params={"tag": "x"})
+        await svc.read(
+            "/some/dir/doc1.xml",
+            transform=transform,
+            transform_params={"tag": "x"},
+        )
 
     expected_msg = "transform_params require transform"
     assert str(err.value) == expected_msg
@@ -519,23 +527,34 @@ async def test_write_forwards_transform_and_system_time(svc):
     assert resp["documents"][0]["uri"] == "/some/dir/doc1.xml"
 
 
+@pytest.mark.parametrize("temporal_collection", [None, ""])
 @pytest.mark.asyncio
-async def test_write_rejects_system_time_without_temporal_collection(svc):
+@respx.mock
+async def test_write_rejects_system_time_without_temporal_collection(
+    svc,
+    temporal_collection,
+):
     doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
 
     with pytest.raises(WrongParametersError) as err:
-        await svc.write(doc, system_time="2026-11-13T00:00:00Z")
+        await svc.write(
+            doc,
+            temporal_collection=temporal_collection,
+            system_time="2026-11-13T00:00:00Z",
+        )
 
     expected_msg = "system_time requires temporal_collection"
     assert str(err.value) == expected_msg
 
 
+@pytest.mark.parametrize("transform", [None, ""])
 @pytest.mark.asyncio
-async def test_write_rejects_transform_params_without_transform(svc):
+@respx.mock
+async def test_write_rejects_transform_params_without_transform(svc, transform):
     doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
 
     with pytest.raises(WrongParametersError) as err:
-        await svc.write(doc, transform_params={"tag": "w"})
+        await svc.write(doc, transform=transform, transform_params={"tag": "w"})
 
     expected_msg = "transform_params require transform"
     assert str(err.value) == expected_msg
@@ -835,6 +854,7 @@ async def test_read_stream_sends_transform_and_timestamp_with_every_batch(svc):
 
 
 @pytest.mark.asyncio
+@respx.mock
 async def test_read_stream_rejects_timestamp_with_txid(svc):
     stream = svc.read_stream(
         ["/some/dir/doc1.xml"],

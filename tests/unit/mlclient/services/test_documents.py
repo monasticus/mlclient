@@ -1210,6 +1210,7 @@ def test_read_forwards_transform_and_timestamp(ml):
     assert doc.uri == uri
 
 
+@respx.mock
 def test_read_rejects_timestamp_with_txid(ml):
     with pytest.raises(WrongParametersError) as err:
         ml.documents.read(
@@ -1222,6 +1223,7 @@ def test_read_rejects_timestamp_with_txid(ml):
     assert str(err.value) == expected_msg
 
 
+@respx.mock
 def test_read_rejects_timestamp_with_scoped_txid(ml):
     documents = ml.documents(txid="txn-123")
 
@@ -1249,9 +1251,15 @@ def test_read_accepts_timestamp_when_scoped_txid_is_cleared(ml):
     assert doc.uri == uri
 
 
-def test_read_rejects_transform_params_without_transform(ml):
+@pytest.mark.parametrize("transform", [None, ""])
+@respx.mock
+def test_read_rejects_transform_params_without_transform(ml, transform):
     with pytest.raises(WrongParametersError) as err:
-        ml.documents.read("/some/dir/doc1.xml", transform_params={"tag": "x"})
+        ml.documents.read(
+            "/some/dir/doc1.xml",
+            transform=transform,
+            transform_params={"tag": "x"},
+        )
 
     expected_msg = "transform_params require transform"
     assert str(err.value) == expected_msg
@@ -1789,21 +1797,29 @@ def test_write_forwards_transform_and_system_time(ml):
     assert resp["documents"][0]["uri"] == "/some/dir/doc1.xml"
 
 
-def test_write_rejects_system_time_without_temporal_collection(ml):
+@pytest.mark.parametrize("temporal_collection", [None, ""])
+@respx.mock
+def test_write_rejects_system_time_without_temporal_collection(ml, temporal_collection):
     doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
 
     with pytest.raises(WrongParametersError) as err:
-        ml.documents.write(doc, system_time="2026-11-13T00:00:00Z")
+        ml.documents.write(
+            doc,
+            temporal_collection=temporal_collection,
+            system_time="2026-11-13T00:00:00Z",
+        )
 
     expected_msg = "system_time requires temporal_collection"
     assert str(err.value) == expected_msg
 
 
-def test_write_rejects_transform_params_without_transform(ml):
+@pytest.mark.parametrize("transform", [None, ""])
+@respx.mock
+def test_write_rejects_transform_params_without_transform(ml, transform):
     doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
 
     with pytest.raises(WrongParametersError) as err:
-        ml.documents.write(doc, transform_params={"tag": "w"})
+        ml.documents.write(doc, transform=transform, transform_params={"tag": "w"})
 
     expected_msg = "transform_params require transform"
     assert str(err.value) == expected_msg
@@ -2153,6 +2169,7 @@ def test_read_stream_sends_transform_and_timestamp_with_every_batch(ml):
         assert params["trans:tag"] == "x"
 
 
+@respx.mock
 def test_read_stream_rejects_timestamp_with_txid(ml):
     stream = ml.documents.read_stream(
         ["/some/dir/doc1.xml"],

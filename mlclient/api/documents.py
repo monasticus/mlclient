@@ -139,8 +139,9 @@ class DocumentsApi:
             Using an alternative database requires the "eval-in" privilege.
         transform : str
             Names a content transformation previously installed via
-            the /config/transforms service. The service applies the transformation
-            to all documents prior to constructing the response.
+            the /config/transforms service. Transforms are applied only to content
+            parts: the transform is applied to the content of a part prior to
+            updating or inserting the document.
         transform_params : dict
             A transform parameter names and values. For example, { "myparam": 1 }.
             Transform parameters are passed to the transform named in the transform
@@ -382,8 +383,9 @@ class AsyncDocumentsApi:
             Using an alternative database requires the "eval-in" privilege.
         transform : str
             Names a content transformation previously installed via
-            the /config/transforms service. The service applies the transformation
-            to all documents prior to constructing the response.
+            the /config/transforms service. Transforms are applied only to content
+            parts: the transform is applied to the content of a part prior to
+            updating or inserting the document.
         transform_params : dict
             A transform parameter names and values. For example, { "myparam": 1 }.
             Transform parameters are passed to the transform named in the transform

@@ -131,6 +131,23 @@ and are ignored with a non-default `database` (see above).
 
 Both document Calls dropped falsy transform parameters through ApiCall.add_param. Reuse the existing query_params helper in GET and POST, omitting only None, shared by sync/async services and raw APIs. Two regression tests failed before the fix; affected suites: 254 passed. Full unit suite: 10472 passed, 100% coverage. Live MarkLogic 10.0-11 and 12.1.0: read with False/0/empty transform values, write transform False, and old/current snapshot reads passed, with uniquely named fixtures removed in finally.
 
+## Rebase onto main and second review (2026-11-24)
+
+Rebased onto main `e8d9959ba` (#317-#324). The unit suite runs in a virtualenv built only from `poetry.lock`: a virtualenv that also sees user site packages fails 16 caplog tests for reasons outside this branch.
+
+- `DocumentsGetCall` rejects `timestamp` with `txid` itself (the server answers 500
+  `XDMP-UPDATETIMESTAMP`), so `ml.rest.documents.get` gets the same error; the service keeps its check,
+  which also covers an empty URI list and the scoped txid.
+- `transform=""` and `temporal_collection=""` count as missing in the service checks, so `trans:` and
+  `system-time` are never sent unpaired.
+- Category validation reuses `validate_supported`; the POST `transform` docstring follows the POST
+  reference (content parts only); the `timestamp` docstrings carry the `database` caveat this section's
+  report mentions.
+- Validation tests mock HTTP, so a regression cannot write to a real server.
+- Verification: 10723 unit tests passed, 100% line coverage; 21 integration tests passed on local
+  MarkLogic 12.1.
+- Still open: document reads do not return `ML-Effective-Timestamp` (the search report does).
+
 ## Open points for the reviewer
 
 - `timestamp` with a non-default `database` is ignored by MarkLogic 12.1 without any message. It is documented,

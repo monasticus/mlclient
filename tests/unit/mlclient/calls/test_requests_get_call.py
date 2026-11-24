@@ -70,6 +70,13 @@ def test_headers_for_html_format():
     }
 
 
+def test_headers_for_xml_format():
+    call = RequestsGetCall(data_format="xml")
+    assert call.headers == {
+        "Accept": "application/xml",
+    }
+
+
 def test_headers_for_json_format():
     call = RequestsGetCall(data_format="json")
     assert call.headers == {
@@ -102,7 +109,7 @@ def test_full_refs_param(full_refs, expected):
 def test_fully_parametrized_call():
     call = RequestsGetCall(
         data_format="json",
-        view="default",
+        view="describe",
         group_id="Default",
         host_id="ml-host.example.com",
         server_id="App-Services",
@@ -115,7 +122,7 @@ def test_fully_parametrized_call():
     }
     assert call.params == {
         "format": "json",
-        "view": "default",
+        "view": "describe",
         "group-id": "Default",
         "host-id": "ml-host.example.com",
         "server-id": "App-Services",

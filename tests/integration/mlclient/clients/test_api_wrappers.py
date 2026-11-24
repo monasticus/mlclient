@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import re
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from time import monotonic, sleep
 from typing import ClassVar
 from uuid import uuid4
@@ -507,7 +507,7 @@ class TestRequestsManagement:
         request_text = f'xdmp:sleep({self.SLEEP_MILLISECONDS}), "{marker}"'
         with ThreadPoolExecutor(max_workers=1) as executor:
             slow_eval = executor.submit(self._eval_in_own_client, request_text)
-            listed = self._wait_until_listed(ml_client, marker)
+            listed = self._wait_until_listed(ml_client, marker, slow_eval)
             detail = ml_client.manage.requests.get(listed["idref"], data_format="json")
             assert slow_eval.result() == marker
 
@@ -531,9 +531,14 @@ class TestRequestsManagement:
             return ml.eval.xquery(request_text)
 
     @classmethod
-    def _wait_until_listed(cls, ml: MLClient, marker: str) -> dict:
+    def _wait_until_listed(
+        cls,
+        ml: MLClient,
+        marker: str,
+        slow_eval: Future,
+    ) -> dict:
         deadline = monotonic() + cls.LISTING_DEADLINE_SECONDS
-        while monotonic() < deadline:
+        while monotonic() < deadline and not slow_eval.done():
             response = ml.manage.requests.get_list(data_format="json", seconds_min=1)
             assert response.status_code == httpx.codes.OK
             list_items = response.json()["request-default-list"]["list-items"]
@@ -541,7 +546,10 @@ class TestRequestsManagement:
                 if marker in item["item-properties"]["request-text"]:
                     return item
             sleep(0.5)
-        pytest.fail(f"The request {marker} was not listed as running")
+        eval_error = slow_eval.exception() if slow_eval.done() else None
+        if eval_error is not None:
+            raise eval_error
+        pytest.fail(f"The request {marker} was not listed while running")
 
 
 class TestLogsEndpoint:

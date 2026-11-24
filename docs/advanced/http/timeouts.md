@@ -105,8 +105,8 @@ have run for at least a given number of seconds through the Manage server:
 ```python
 with MLClient() as ml:
     response = ml.manage.requests.get_list(data_format="json", seconds_min=10)
-    summary = response.json()["request-default-list"]["list-items"]
-    for request in summary.get("list-item", []):
+    list_items = response.json()["request-default-list"]["list-items"]
+    for request in list_items.get("list-item", []):
         properties = request["item-properties"]
         print(request["idref"], properties["request-text"], properties["update"]["value"])
 ```

@@ -53,6 +53,13 @@ def test_headers_for_html_format():
     }
 
 
+def test_headers_for_xml_format():
+    call = RequestGetCall(request="3420663636851293586", data_format="xml")
+    assert call.headers == {
+        "Accept": "application/xml",
+    }
+
+
 def test_headers_for_json_format():
     call = RequestGetCall(request="3420663636851293586", data_format="json")
     assert call.headers == {

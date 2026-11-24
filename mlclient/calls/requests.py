@@ -203,7 +203,8 @@ class RequestGetCall(ApiCall):
         Parameters
         ----------
         request : str
-            A request identifier. The request can be identified either by id or URI.
+            A request identifier. MarkLogic documents an id or URI, but 12.1
+            accepts only a numeric id and answers 500 XDMP-CAST otherwise.
         data_format : str
             The format of the returned data. Can be either html, json, or xml (default).
             This value overrides the Accept header if both are present.

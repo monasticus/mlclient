@@ -124,12 +124,13 @@ class ExecutionService(Generic[_RestT]):
         response: Response,
         output_type: type | None,
     ) -> ParsedValue:
-        """Raise for a failed response, otherwise parse its multipart result.
+        """Raise for a failed response, otherwise parse its result.
 
         Parameters
         ----------
         response : Response
-            An eval or invoke response.
+            An eval, invoke or resource extension response; a plain body is
+            one item, a multipart body one item per part.
         output_type : type | None
             A raw output type (``str`` or ``bytes``); None parses each item.
 

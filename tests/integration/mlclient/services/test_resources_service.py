@@ -94,6 +94,13 @@ class TestResourcesService:
         assert result["input-types"] == ["application/json"]
 
     @pytest.mark.ml_access
+    def test_post_without_a_body_runs_the_extension(self, ml_client: MLClient):
+        result = ml_client.resources.post(self.XQUERY_EXTENSION, params={"a": "x"})
+
+        assert result["method"] == "post"
+        assert result["params"] == {"a": "x"}
+
+    @pytest.mark.ml_access
     def test_post_sends_documents_as_multipart(self, ml_client: MLClient):
         result = ml_client.resources.post(
             self.XQUERY_EXTENSION,

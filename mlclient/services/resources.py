@@ -73,8 +73,9 @@ class ResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
@@ -143,15 +144,16 @@ class ResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
         WrongParametersError
             If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, or a content_type accompanies
-            Documents.
+            bytes body has no content_type, a content_type accompanies
+            Documents, or a Document is a MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -217,15 +219,16 @@ class ResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
         WrongParametersError
             If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, or a content_type accompanies
-            Documents.
+            bytes body has no content_type, a content_type accompanies
+            Documents, or a Document is a MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -281,8 +284,9 @@ class ResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
@@ -349,8 +353,9 @@ class AsyncResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
@@ -419,15 +424,16 @@ class AsyncResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
         WrongParametersError
             If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, or a content_type accompanies
-            Documents.
+            bytes body has no content_type, a content_type accompanies
+            Documents, or a Document is a MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -493,15 +499,16 @@ class AsyncResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
         WrongParametersError
             If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, or a content_type accompanies
-            Documents.
+            bytes body has no content_type, a content_type accompanies
+            Documents, or a Document is a MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -557,8 +564,9 @@ class AsyncResourcesService(ExecutionService):
         Returns
         -------
         ParsedValue
-            JSON as dict or list, XML as an element tree, text as str. Several
-            documents return a list, no content returns [].
+            JSON as dict or list, XML as an element tree, text as str and
+            binary content as bytes. Several documents return a list, no
+            content returns [].
 
         Raises
         ------
@@ -636,15 +644,15 @@ def _documents(body: ResourceBody) -> list[Document] | None:
     Raises
     ------
     WrongParametersError
-        If a Document has no content.
+        If a Document has no content, or a list mixes Documents with other
+        values.
     """
     if isinstance(body, Document):
         documents = [body]
-    elif (
-        isinstance(body, list)
-        and body
-        and all(isinstance(item, Document) for item in body)
-    ):
+    elif isinstance(body, list) and any(isinstance(item, Document) for item in body):
+        if not all(isinstance(item, Document) for item in body):
+            msg = "A list body must hold only Documents or only JSON values!"
+            raise exceptions.WrongParametersError(msg)
         documents = body
     else:
         return None

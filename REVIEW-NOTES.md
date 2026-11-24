@@ -106,6 +106,30 @@ Verification against local MarkLogic 12.1.0 (App-Services, 8000), extension `mlc
 
 The new Document body path revealed that Document.__subclasshook__ only inspected the immediate class dictionary and was inherited by concrete document types, confusing document identities. Honor inherited concrete properties in the Document check and use normal subclass checks for concrete types. Metadata-only body validation uses isinstance. Regression coverage includes custom JSONDocument bodies and MetadataDocument subclasses, sync and async, plus concrete document identity. Affected model/service suites: 331 passed. Existing 11 resource integration tests passed on both local MarkLogic 10.0-11 and 12.1.0; test extensions were removed afterwards. Full unit suite after the repair: 10581 passed, line coverage 100.00%. Ruff and the strict docs build plus check_docs.py passed (490 HTML pages validated).
 
+## Rebase onto main and second review (2026-11-24)
+
+Rebased onto main `e8d9959ba` (#317-#324). The unit suite runs in a virtualenv built only from
+`poetry.lock`: a virtualenv that also sees user site packages fails 16 caplog tests for reasons
+outside this branch.
+
+- Alignment with main: the guide has a "Timeouts and retries" section. The default policy of #322
+  retries `get`, `put` and `delete` after 429 / 502 / 503 or a dropped connection, and never `post`
+  (httpx-retries 0.4.6 retries only idempotent methods).
+- A parameter value must be a single value or a list of single values, and a name may not be given
+  both with and without `rs:`: a dict was sent as its Python repr, and the duplicate silently kept
+  the last value. A list body mixing Documents with JSON values raises `WrongParametersError` instead
+  of a `TypeError` from `json.dumps`.
+- Tests: scope routing for every method with strict parameter matching, a timeout forwarding test,
+  a 403 instead of a retried 502 for the error without a body (35 s less), a new integration test of
+  `post` without a body.
+- Docstrings and guide list `bytes` for binary results and the `MetadataDocument` rejection.
+- No longer true above: "37 each" (42 tests per service module now); the error without a body was
+  never a captured response.
+- Verification: 10838 unit tests passed, 100% line coverage; 12 integration tests passed on local
+  MarkLogic 12.1.
+- Still open: `output_type` (and `accept`) on the service for parity with eval and invoke; whether
+  "Who the extension runs as" belongs in the guide or in an admonition.
+
 ## Open points for the reviewer
 
 - Management (`/v1/config/resources`) remains undecided and is not on this branch. The guide says the extension

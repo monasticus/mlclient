@@ -21,9 +21,9 @@ extension must already be installed; mlclient only calls it. Select the
 [connection](clients.md) whose REST App Server has it installed.
 
 The result is parsed by its content type: JSON becomes a `dict` or `list`, XML an
-element tree, text a `str`. An extension returning several documents answers
-with `multipart/mixed`, which becomes a list with one item per document; no
-content becomes `[]`.
+element tree, text a `str` and binary content `bytes`. An extension returning
+several documents answers with `multipart/mixed`, which becomes a list with one
+item per document; no content becomes `[]`.
 
 Calling requires the `rest-reader` privilege, and `rest-writer` for `post`,
 `put` and `delete`.
@@ -41,6 +41,10 @@ already starts with `rs:`, for example copied from a URL, is sent unchanged.
 | `{"tag": ["a", "b"]}` | `rs:tag=a&rs:tag=b` | the sequence `("a", "b")` |
 | `{"rs:year": 2026}` | `rs:year=2026` | `"2026"` |
 | `{"year": None}` | nothing | no value |
+
+A value is a single value or a list of single values: a dict, a set or a nested
+list, and a name given both with and without `rs:`, raise
+[`WrongParametersError`][mlclient.exceptions.WrongParametersError].
 
 ```python
 >>> from mlclient import MLClient
@@ -61,6 +65,8 @@ third:
 | a [`Document`][mlclient.models.Document] | its content, with the content type of its URI extension, or of its document type when the URI is missing |
 | a list of `Document`s | `multipart/mixed`, one part per document |
 | `None` (default) | no body; the extension still runs |
+
+A list holds either `Document`s or JSON values, not both.
 
 ```python
 >>> from mlclient import MLClient

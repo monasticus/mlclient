@@ -28,6 +28,7 @@ RESOURCE_NOT_FOUND_ERROR = resources_utils.get_test_resource_json(
     __file__,
     "resource-not-found-error.json",
 )
+ECHO_URL = "http://localhost:8000/v1/resources/mlclient-echo"
 
 
 @pytest.mark.asyncio
@@ -526,9 +527,6 @@ async def test_post_values():
     assert resp.json() == URIS_VALUES_RESPONSE
 
 
-ECHO_URL = "http://localhost:8000/v1/resources/mlclient-echo"
-
-
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_resource():
@@ -632,12 +630,20 @@ async def test_put_resource():
 
 
 @pytest.mark.asyncio
+@respx.mock
 async def test_put_resource_str_body_without_content_type_is_rejected():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(ECHO_URL)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_put()
+
     async with AsyncMLClient() as ml:
         with pytest.raises(WrongParametersError) as err:
             await ml.rest.resources.put("mlclient-echo", body="<a/>")
 
     assert str(err.value) == "A str or bytes body requires a content_type!"
+    assert not route.called
 
 
 @pytest.mark.asyncio

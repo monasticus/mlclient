@@ -74,6 +74,28 @@ def test_extension_params_without_params():
     assert utils.extension_params(None) == {}
 
 
+def test_extension_params_reject_a_name_given_with_and_without_the_prefix():
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        utils.extension_params({"a": 1, "rs:a": 2})
+
+    assert str(err.value) == "The parameter rs:a is given twice!"
+
+
+@pytest.mark.parametrize(
+    ("value", "type_name"),
+    [({"k": 1}, "dict"), ({1}, "set"), ([["x"]], "list"), ([("x",)], "tuple")],
+)
+def test_extension_params_reject_values_that_are_not_single_values(value, type_name):
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        utils.extension_params({"a": value})
+
+    expected_msg = (
+        "A resource extension parameter value must be a single value "
+        f"or a list of single values, got {type_name}"
+    )
+    assert str(err.value) == expected_msg
+
+
 @pytest.mark.parametrize(
     ("body", "expected"),
     [

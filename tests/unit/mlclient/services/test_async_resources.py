@@ -40,23 +40,6 @@ async def ml() -> AsyncMLClient:
         yield client
 
 
-def _mock_json_response(method: str, body: bytes, **request) -> respx.Route:
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(URL)
-    for name, value in request.get("params", []):
-        ml_mocker.with_request_param(name, value)
-    if "content_type" in request:
-        ml_mocker.with_request_content_type(request["content_type"])
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
-    ml_mocker.with_response_body(body)
-    return getattr(ml_mocker, f"mock_{method}")()
-
-
-def _sent(route: respx.Route) -> httpx.Request:
-    return route.calls.last.request
-
-
 # --- parameters ---
 
 
@@ -128,10 +111,14 @@ async def test_get_without_params(ml):
 
 @pytest.mark.asyncio
 async def test_blank_name_is_rejected_before_any_request(ml):
-    with pytest.raises(WrongParametersError) as err:
+    with (
+        respx.mock(assert_all_called=False) as router,
+        pytest.raises(WrongParametersError) as err,
+    ):
         await ml.resources.get(" ")
 
     assert str(err.value) == "No resource name provided for /v1/resources/{name}!"
+    assert router.calls.call_count == 0
 
 
 # --- results ---
@@ -289,6 +276,14 @@ async def test_post_unsupported_body_is_rejected(ml):
     assert str(err.value) == "The body must be a dict, list, str or bytes, got int"
 
 
+@pytest.mark.asyncio
+async def test_post_list_mixing_documents_and_json_values_is_rejected(ml):
+    with pytest.raises(WrongParametersError) as err:
+        await ml.resources.post(NAME, [JSONDocument({"k": 1}, "/a.json"), {"k": 2}])
+
+    assert str(err.value) == "A list body must hold only Documents or only JSON values!"
+
+
 @pytest.mark.parametrize(
     ("document", "content_type", "content"),
     [
@@ -343,6 +338,21 @@ async def test_post_sends_a_document_without_a_known_uri_by_document_type(
         "method": "post",
         "input-count": 1,
     }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_post_accepts_a_document_subclass(ml):
+    class ProductDocument(JSONDocument):
+        """A domain document inheriting its JSON content implementation."""
+
+    route = _mock_json_response("post", b'{"method":"post"}')
+
+    result = await ml.resources.post(NAME, ProductDocument({"k": 1}))
+
+    assert _sent(route).content == b'{"k": 1}'
+    assert _sent(route).headers["Content-Type"] == "application/json"
+    assert result == {"method": "post"}
 
 
 @pytest.mark.asyncio
@@ -415,49 +425,152 @@ async def test_put_sends_documents_as_multipart(ml):
     assert [part.content for part in parts] == [b"a", b"b"]
 
 
-# --- scope ---
+# --- database and transaction scope ---
 
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_operation_database_and_txid(ml):
-    route = _mock_json_response("get", b'{"method":"get", "params":{}}')
+async def test_get_with_scope_kwargs(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url(URL)
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"get", "params":{}}')
+    mocker.mock_get()
 
-    await ml.resources.get(NAME, database="Documents", txid="123")
+    result = await ml.resources.get(NAME, database="request-db", txid="request-tx")
 
-    assert dict(_sent(route).url.params) == {"database": "Documents", "txid": "123"}
-
-
-@pytest.mark.asyncio
-@respx.mock
-async def test_scoped_service_sends_its_database_and_txid(ml):
-    route = _mock_json_response("delete", b'{"method":"delete", "params":{}}')
-
-    await ml.resources(database="Documents", txid="123").delete(NAME)
-
-    assert dict(_sent(route).url.params) == {"database": "Documents", "txid": "123"}
+    assert result == {"method": "get", "params": {}}
 
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_operation_overrides_and_clears_the_scope(ml):
-    route = _mock_json_response("post", b'{"method":"post", "input-count":1}')
+async def test_post_inherits_service_scope(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url(URL)
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"post", "input-count":1}')
+    mocker.mock_post()
 
-    await ml.resources(database="Documents", txid="123").post(
+    result = await ml.resources(database="service-db", txid="service-tx").post(NAME)
+
+    assert result == {"method": "post", "input-count": 1}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_put_scope_kwargs_override_service_scope(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url(URL)
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_request_content_type("application/json")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"put", "input-count":1}')
+    mocker.mock_put()
+
+    result = await ml.resources(database="service-db", txid="service-tx").put(
         NAME,
-        database="Modules",
+        {"k": 1},
+        database="request-db",
+        txid="request-tx",
+    )
+
+    assert result == {"method": "put", "input-count": 1}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_scope_kwargs_clear_service_database(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url(URL)
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"delete", "params":{}}')
+    mocker.mock_delete()
+
+    result = await ml.resources(database="service-db", txid="service-tx").delete(
+        NAME,
+        database=None,
+    )
+
+    assert result == {"method": "delete", "params": {}}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_scope_kwargs_clear_service_transaction(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url(URL)
+    mocker.with_request_param("database", "service-db")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"get", "params":{}}')
+    mocker.mock_get()
+
+    result = await ml.resources(database="service-db", txid="service-tx").get(
+        NAME,
         txid=None,
     )
 
-    assert dict(_sent(route).url.params) == {"database": "Modules"}
+    assert result == {"method": "get", "params": {}}
 
 
 @pytest.mark.asyncio
-async def test_scoped_copy_leaves_the_original_unchanged(ml):
-    scoped = ml.resources(database="Documents")
+@respx.mock
+async def test_overriding_scope_on_service_copy_preserves_original_scope(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url(URL)
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-2")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"get", "params":{}}')
+    mocker.mock_get()
+    mocker.with_url(URL)
+    mocker.with_request_param("database", "catalog")
+    mocker.with_request_param("txid", "tx-1")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"get", "params":{}}')
+    mocker.mock_get()
 
-    assert scoped is not ml.resources
-    assert type(scoped) is type(ml.resources)
+    original_service = ml.resources(database="catalog", txid="tx-1")
+    overridden_scope_service = original_service(txid="tx-2")
+    await overridden_scope_service.get(NAME)
+    await original_service.get(NAME)
+
+
+# --- timeout ---
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_timeout_reaches_transport_and_is_not_an_extension_param(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url(URL)
+    mocker.with_request_param("rs:timeout", "30")
+    mocker.with_response_code(200)
+    mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    mocker.with_response_body(b'{"method":"get", "params":{"timeout":"30"}}')
+    route = mocker.mock_get()
+
+    result = await ml.resources.get(NAME, {"timeout": 30}, timeout=2)
+
+    assert result == {"method": "get", "params": {"timeout": "30"}}
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }
 
 
 # --- errors ---
@@ -489,27 +602,33 @@ async def test_marklogic_error_is_raised(ml):
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_http_error_without_marklogic_payload_is_raised(ml):
+async def test_bodyless_http_failure_is_raised_with_its_response(ml):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(URL)
-    ml_mocker.with_response_code(502)
+    ml_mocker.with_response_code(403)
     ml_mocker.with_empty_response_body()
-    ml_mocker.mock_get()
+    route = ml_mocker.mock_get()
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(httpx.HTTPStatusError) as raised:
         await ml.resources.get(NAME)
 
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
 
-@pytest.mark.asyncio
-@respx.mock
-async def test_post_accepts_a_document_subclass(ml):
-    class ProductDocument(JSONDocument):
-        """A domain document inheriting its JSON content implementation."""
 
-    route = _mock_json_response("post", b'{"method":"post"}')
+def _mock_json_response(method: str, body: bytes, **request) -> respx.Route:
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(URL)
+    for name, value in request.get("params", []):
+        ml_mocker.with_request_param(name, value)
+    if "content_type" in request:
+        ml_mocker.with_request_content_type(request["content_type"])
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_header("Content-Type", JSON_CONTENT_TYPE)
+    ml_mocker.with_response_body(body)
+    return getattr(ml_mocker, f"mock_{method}")()
 
-    result = await ml.resources.post(NAME, ProductDocument({"k": 1}))
 
-    assert _sent(route).content == b'{"k": 1}'
-    assert _sent(route).headers["Content-Type"] == "application/json"
-    assert result == {"method": "post"}
+def _sent(route: respx.Route) -> httpx.Request:
+    return route.calls.last.request

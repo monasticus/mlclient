@@ -90,12 +90,23 @@ def extension_params(params: dict | None) -> dict:
     dict
         Prefixed names mapped to the string values MarkLogic receives:
         booleans as ``true`` / ``false``, other values through ``str``.
+
+    Raises
+    ------
+    WrongParametersError
+        If a name is given both with and without the ``rs:`` prefix, or a value
+        is a dict, a set or a nested list.
     """
-    return {
-        _with_extension_prefix(name): _extension_param_value(value)
-        for name, value in (params or {}).items()
-        if value is not None
-    }
+    prefixed_params = {}
+    for name, value in (params or {}).items():
+        if value is None:
+            continue
+        prefixed_name = _with_extension_prefix(name)
+        if prefixed_name in prefixed_params:
+            msg = f"The parameter {prefixed_name} is given twice!"
+            raise exceptions.WrongParametersError(msg)
+        prefixed_params[prefixed_name] = _extension_param_value(value)
+    return prefixed_params
 
 
 def _with_extension_prefix(name: str) -> str:
@@ -114,21 +125,55 @@ def _with_extension_prefix(name: str) -> str:
     return name if name.startswith("rs:") else f"rs:{name}"
 
 
-def _extension_param_value(value) -> str | list[str]:
+def _extension_param_value(value: object) -> str | list[str]:
     """Serialize one resource extension parameter value.
 
     Parameters
     ----------
-    value
-        A single value, or a list or tuple of values.
+    value : object
+        A single value, or a list or tuple of single values.
 
     Returns
     -------
     str | list[str]
         The serialized value; a list or tuple becomes a list without None items.
+
+    Raises
+    ------
+    WrongParametersError
+        If the value, or an item of a list or tuple, is a dict, a set, a list
+        or a tuple.
     """
     if isinstance(value, (list, tuple)):
-        return [_extension_param_value(item) for item in value if item is not None]
+        return [_extension_param_item(item) for item in value if item is not None]
+    return _extension_param_item(value)
+
+
+def _extension_param_item(value: object) -> str:
+    """Serialize a single resource extension parameter value.
+
+    Parameters
+    ----------
+    value : object
+        A str, number, boolean or other value with a meaningful ``str``.
+
+    Returns
+    -------
+    str
+        Booleans as ``true`` / ``false``, other values through ``str``.
+
+    Raises
+    ------
+    WrongParametersError
+        If the value is a dict, a set, a list or a tuple: MarkLogic receives
+        each parameter value as one string.
+    """
+    if isinstance(value, (dict, set, frozenset, list, tuple)):
+        msg = (
+            "A resource extension parameter value must be a single value "
+            f"or a list of single values, got {type(value).__name__}"
+        )
+        raise exceptions.WrongParametersError(msg)
     if isinstance(value, bool):
         return "true" if value else "false"
     return str(value)

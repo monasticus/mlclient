@@ -148,6 +148,23 @@ Rebased onto main `e8d9959ba` (#317-#324). The unit suite runs in a virtualenv b
   MarkLogic 12.1.
 - Still open: document reads do not return `ML-Effective-Timestamp` (the search report does).
 
+## Stacked on v1-13 (2026-11-25)
+
+The branch now sits on `feature/v1-13-config-validation-secrets` instead of main. Merge order: v1-00,
+v1-02, v1-13, v1-15, v1-17, v1-18, v1-19.
+
+- Rebase: conflicts with v1-02's annotations in `DocumentsGetCall._validate_params` /
+  `_get_accept_header` and in the service signatures. This branch's parameters keep v1-02's types
+  (`-> None`, `-> str | None`, `UnsetType` on `database` / `txid` / `timeout`). v1-00 already imports
+  `call_utils` in `calls/documents.py` and validates `DocumentsDeleteCall` categories with
+  `validate_supported`, as this branch does for `DocumentsGetCall`.
+- Typing from v1-02: `_validate_read_params`, `_validate_write_params` and `_validate_transform_params`
+  return `None` (the `ANN` rule failed on them). mypy reports three fewer errors in the documents modules
+  than on v1-13, and no new one.
+- Folded into the commits that added the code.
+- Verification: 10770 unit tests passed, 100% line coverage; `ruff check`, `ruff format --check`, the strict
+  docs build and `check_docs.py` pass; 26 documents integration tests passed on local MarkLogic 12.1.
+
 ## Open points for the reviewer
 
 - `timestamp` with a non-default `database` is ignored by MarkLogic 12.1 without any message. It is documented,

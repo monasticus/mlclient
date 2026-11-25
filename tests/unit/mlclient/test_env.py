@@ -287,7 +287,8 @@ def test_find_mlclient_directory_does_not_search_home_twice(tmp_path, monkeypatc
     monkeypatch.setattr(Path, "is_dir", is_directory)
 
     with pytest.raises(
-        MLClientDirectoryNotFoundError, match="has not been found",
+        MLClientDirectoryNotFoundError,
+        match="has not been found",
     ) as error:
         find_mlclient_directory(start)
 

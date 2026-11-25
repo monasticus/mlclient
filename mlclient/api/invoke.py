@@ -67,8 +67,9 @@ class InvokeApi:
         WrongParametersError
             If the module path is missing or blank.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = InvokeCall(
             module=module,
@@ -130,8 +131,9 @@ class AsyncInvokeApi:
         WrongParametersError
             If the module path is missing or blank.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = InvokeCall(
             module=module,

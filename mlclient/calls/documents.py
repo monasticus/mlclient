@@ -17,6 +17,7 @@ from typing import ClassVar
 from mlclient import _constants as constants
 from mlclient import _utils as utils
 from mlclient import exceptions
+from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
 from mlclient.models.document_parts import Category, DocumentsBodyPart
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
@@ -365,8 +366,17 @@ class DocumentsDeleteCall(ApiCall):
             Remove all versions of a temporal document rather than performing
             a temporal delete. You can only use this parameter when you also specify
             a temporal-collection parameter.
+
+        Raises
+        ------
+        WrongParametersError
+            If a category, including an empty string, is not supported.
         """
-        self._validate_params(category)
+        call_utils.validate_supported(
+            category,
+            self._SUPPORTED_CATEGORIES,
+            "categories",
+        )
 
         super().__init__(method="DELETE")
         self.add_param(self._URI_PARAM, uri)
@@ -390,14 +400,3 @@ class DocumentsDeleteCall(ApiCall):
             A Documents call endpoint
         """
         return self._ENDPOINT.format(self._API_VERSION)
-
-    @classmethod
-    def _validate_params(
-        cls,
-        category: str,
-    ):
-        categories = [category] if not isinstance(category, list) else category
-        if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
-            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
-            msg = f"The supported categories are: {joined_supported_categories}"
-            raise exceptions.WrongParametersError(msg)

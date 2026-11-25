@@ -61,8 +61,9 @@ class ValuesApi:
         WrongParametersError
             If the format is omitted or unsupported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ValuesGetCall(
             database=database,
@@ -171,8 +172,9 @@ class ValuesApi:
         WrongParametersError
             If the name is blank or an enumerated value is omitted or unsupported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ValueGetCall(
             name=name,
@@ -299,8 +301,9 @@ class ValuesApi:
             If the name is blank, the body is missing, blank or JSON other than an
             object, or an enumerated value is omitted or unsupported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ValuePostCall(
             name=name,
@@ -376,8 +379,9 @@ class AsyncValuesApi:
         WrongParametersError
             If the format is omitted or unsupported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ValuesGetCall(
             database=database,
@@ -486,8 +490,9 @@ class AsyncValuesApi:
         WrongParametersError
             If the name is blank or an enumerated value is omitted or unsupported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ValueGetCall(
             name=name,
@@ -614,8 +619,9 @@ class AsyncValuesApi:
             If the name is blank, the body is missing, blank or JSON other than an
             object, or an enumerated value is omitted or unsupported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ValuePostCall(
             name=name,

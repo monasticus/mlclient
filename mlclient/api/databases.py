@@ -64,8 +64,9 @@ class DatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasesGetCall(data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -98,8 +99,9 @@ class DatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasesPostCall(body=body)
         return self._api.call(call, timeout=timeout)
@@ -143,8 +145,9 @@ class DatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabaseGetCall(database=database, data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -183,8 +186,9 @@ class DatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasePostCall(database=database, body=body)
         return self._api.call(call, timeout=timeout)
@@ -224,8 +228,9 @@ class DatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabaseDeleteCall(database=database, forest_delete=forest_delete)
         return self._api.call(call, timeout=timeout)
@@ -262,8 +267,9 @@ class DatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasePropertiesGetCall(database=database, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -299,8 +305,9 @@ class DatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasePropertiesPutCall(database=database, body=body)
         return self._api.call(call, timeout=timeout)
@@ -344,8 +351,9 @@ class AsyncDatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasesGetCall(data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -378,8 +386,9 @@ class AsyncDatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasesPostCall(body=body)
         return await self._api.call(call, timeout=timeout)
@@ -423,8 +432,9 @@ class AsyncDatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabaseGetCall(database=database, data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -463,8 +473,9 @@ class AsyncDatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasePostCall(database=database, body=body)
         return await self._api.call(call, timeout=timeout)
@@ -504,8 +515,9 @@ class AsyncDatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabaseDeleteCall(database=database, forest_delete=forest_delete)
         return await self._api.call(call, timeout=timeout)
@@ -542,8 +554,9 @@ class AsyncDatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasePropertiesGetCall(database=database, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
@@ -579,8 +592,9 @@ class AsyncDatabasesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DatabasePropertiesPutCall(database=database, body=body)
         return await self._api.call(call, timeout=timeout)

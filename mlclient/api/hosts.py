@@ -79,8 +79,9 @@ class HostsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostsGetCall(data_format=data_format, group_id=group_id, view=view)
         return self._api.call(call, timeout=timeout)
@@ -124,8 +125,9 @@ class HostsApi:
         WrongParametersError
             If the format or the view is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostGetCall(host=host, data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -168,8 +170,9 @@ class HostsApi:
         WrongParametersError
             If the body has no state or an unsupported state.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostPostCall(host=host, body=body)
         return self._api.call(call, timeout=timeout)
@@ -208,8 +211,9 @@ class HostsApi:
         WrongParametersError
             If the format is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostPropertiesGetCall(host=host, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -247,8 +251,9 @@ class HostsApi:
         WrongParametersError
             If the body is missing, blank or a JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostPropertiesPutCall(host=host, body=body)
         return self._api.call(call, timeout=timeout)
@@ -308,8 +313,9 @@ class AsyncHostsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostsGetCall(data_format=data_format, group_id=group_id, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -353,8 +359,9 @@ class AsyncHostsApi:
         WrongParametersError
             If the format or the view is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostGetCall(host=host, data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -397,8 +404,9 @@ class AsyncHostsApi:
         WrongParametersError
             If the body has no state or an unsupported state.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostPostCall(host=host, body=body)
         return await self._api.call(call, timeout=timeout)
@@ -437,8 +445,9 @@ class AsyncHostsApi:
         WrongParametersError
             If the format is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostPropertiesGetCall(host=host, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
@@ -476,8 +485,9 @@ class AsyncHostsApi:
         WrongParametersError
             If the body is missing, blank or a JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostPropertiesPutCall(host=host, body=body)
         return await self._api.call(call, timeout=timeout)

@@ -95,8 +95,9 @@ class DocumentsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DocumentsGetCall(
             uri=uri,
@@ -168,8 +169,9 @@ class DocumentsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DocumentsPostCall(
             body_parts=body_parts,
@@ -243,9 +245,12 @@ class DocumentsApi:
 
         Raises
         ------
+        WrongParametersError
+            If a category, including an empty string, is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DocumentsDeleteCall(
             uri=uri,
@@ -333,8 +338,9 @@ class AsyncDocumentsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DocumentsGetCall(
             uri=uri,
@@ -406,8 +412,9 @@ class AsyncDocumentsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DocumentsPostCall(
             body_parts=body_parts,
@@ -481,9 +488,12 @@ class AsyncDocumentsApi:
 
         Raises
         ------
+        WrongParametersError
+            If a category, including an empty string, is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = DocumentsDeleteCall(
             uri=uri,

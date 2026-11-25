@@ -76,8 +76,9 @@ class ServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServersGetCall(
             data_format=data_format,
@@ -127,8 +128,9 @@ class ServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
         return self._api.call(call, timeout=timeout)
@@ -193,8 +195,9 @@ class ServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerGetCall(
             server=server,
@@ -239,8 +242,9 @@ class ServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerDeleteCall(server=server, group_id=group_id)
         return self._api.call(call, timeout=timeout)
@@ -281,8 +285,9 @@ class ServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerPropertiesGetCall(
             server=server,
@@ -326,8 +331,9 @@ class ServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
         return self._api.call(call, timeout=timeout)
@@ -384,8 +390,9 @@ class AsyncServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServersGetCall(
             data_format=data_format,
@@ -435,8 +442,9 @@ class AsyncServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
         return await self._api.call(call, timeout=timeout)
@@ -501,8 +509,9 @@ class AsyncServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerGetCall(
             server=server,
@@ -547,8 +556,9 @@ class AsyncServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerDeleteCall(server=server, group_id=group_id)
         return await self._api.call(call, timeout=timeout)
@@ -589,8 +599,9 @@ class AsyncServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerPropertiesGetCall(
             server=server,
@@ -634,8 +645,9 @@ class AsyncServersApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
         return await self._api.call(call, timeout=timeout)

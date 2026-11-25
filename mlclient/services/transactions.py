@@ -85,8 +85,9 @@ class TransactionService:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -113,8 +114,9 @@ class TransactionService:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -135,8 +137,9 @@ class TransactionService:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -202,8 +205,9 @@ def open_transaction(
     Raises
     ------
     httpx.TimeoutException
-        If an HTTP connect, read, write or pool timeout expires after any
-        configured retries are exhausted.
+        If an HTTP connect, read, write or pool timeout expires on the last
+        attempt the retry policy allows. The default policy does not retry
+        read timeouts.
     MarkLogicError
         If MarkLogic returns an error, or opening answers an unexpected success
     httpx.HTTPStatusError
@@ -280,8 +284,9 @@ class AsyncTransactionService:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -308,8 +313,9 @@ class AsyncTransactionService:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -330,8 +336,9 @@ class AsyncTransactionService:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -397,8 +404,9 @@ async def async_open_transaction(
     Raises
     ------
     httpx.TimeoutException
-        If an HTTP connect, read, write or pool timeout expires after any
-        configured retries are exhausted.
+        If an HTTP connect, read, write or pool timeout expires on the last
+        attempt the retry policy allows. The default policy does not retry
+        read timeouts.
     MarkLogicError
         If MarkLogic returns an error, or opening answers an unexpected success
     httpx.HTTPStatusError

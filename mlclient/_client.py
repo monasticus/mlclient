@@ -356,8 +356,9 @@ class MLClient:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         httpx.HTTPStatusError
             If the server answered with a 4xx status, which signals a
             misdirected request (the HealthCheck server takes no auth) rather
@@ -611,8 +612,9 @@ class MLClient:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic rejects opening the transaction.
         """
@@ -993,8 +995,9 @@ class AsyncMLClient:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         httpx.HTTPStatusError
             If the server answered with a 4xx status, which signals a
             misdirected request (the HealthCheck server takes no auth) rather
@@ -1250,8 +1253,9 @@ class AsyncMLClient:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic rejects opening the transaction.
         """

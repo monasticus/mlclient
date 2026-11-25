@@ -39,22 +39,9 @@ from mlclient.connection import (
 )
 
 if TYPE_CHECKING:
-    from typing import TypedDict
-
     from typing_extensions import Unpack
 
-    class _HTTPConfigOverrides(TypedDict, total=False):
-        protocol: str | UnsetType
-        host: str
-        port: int | UnsetType
-        auth: AuthParam | UnsetType
-        username: str
-        password: str
-        ssl: SSLConfig | None
-        cloud: CloudConfig | None
-        retry: Retry | int | None
-        limits: httpx.Limits | int | None
-        timeout: httpx.Timeout | float | UnsetType | None
+    from mlclient._typing import HTTPConfigOverrides
 
 
 # ReadTimeout and 504 are left out: the server is still running the request,
@@ -425,7 +412,7 @@ class HTTPConfig:
             endpoint = f"/{base_path.strip('/')}/{endpoint.lstrip('/')}"
         return self.base_url + endpoint
 
-    def clone(self, **overrides: Unpack[_HTTPConfigOverrides]) -> HTTPConfig:
+    def clone(self, **overrides: Unpack[HTTPConfigOverrides]) -> HTTPConfig:
         """Return an independent config, overriding the given fields.
 
         Accepts any resolve() parameter (``port``, ``host``, ``auth``, ...);

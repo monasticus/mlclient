@@ -5,7 +5,7 @@ Builders compose expressions; services execute through the common evaluator.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, TypedDict, TypeVar, cast
 
 from mlclient._options import UNSET, UnsetType
 from mlclient.models.results import SearchHit, ValueHit
@@ -24,21 +24,26 @@ from mlclient.xquery.expressions import xpath as xpath_expression
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from typing import TypedDict
 
     import httpx
     from typing_extensions import Unpack
 
     from mlclient.api.rest import AsyncRestApi, RestApi
 
-    class _ExecutionOptions(TypedDict, total=False):
-        database: str | None
-        txid: str | None
-        timeout: httpx.Timeout | float | UnsetType | None
-        namespaces: Mapping[str, str] | None
 
-    class _NativeExecutionOptions(_ExecutionOptions, total=False):
-        output_type: type[str | bytes] | None
+class _ExecutionOptions(TypedDict, total=False):
+    """Request options every cts execution method takes as keyword arguments."""
+
+    database: str | None
+    txid: str | None
+    timeout: httpx.Timeout | float | UnsetType | None
+    namespaces: Mapping[str, str] | None
+
+
+class _NativeExecutionOptions(_ExecutionOptions, total=False):
+    """Request options of the cts methods that can return raw items."""
+
+    output_type: type[str | bytes] | None
 
 
 _HitT = TypeVar("_HitT", SearchHit, ValueHit)

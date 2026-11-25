@@ -37,7 +37,7 @@ from mlclient.models.documents import Document
 if TYPE_CHECKING:
     from typing_extensions import Self, Unpack
 
-    from mlclient._client import _MLClientOptions
+    from mlclient._typing import MLClientOptions
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class WriteDocumentsJob:
         """A status of the job."""
         return copy(self._report)
 
-    def with_client_config(self, **config: Unpack[_MLClientOptions]) -> None:
+    def with_client_config(self, **config: Unpack[MLClientOptions]) -> None:
         """Set AsyncMLClient configuration."""
         self._config = config
 
@@ -189,7 +189,7 @@ class ReadDocumentsJob:
         """Return all read documents from the job."""
         return list(self._documents)
 
-    def with_client_config(self, **config: Unpack[_MLClientOptions]) -> None:
+    def with_client_config(self, **config: Unpack[MLClientOptions]) -> None:
         """Set AsyncMLClient configuration."""
         self._config = config
 

@@ -16,6 +16,7 @@ from httpx_retries import Retry, RetryTransport
 
 from mlclient import _constants as const
 from mlclient._options import UNSET, UnsetType
+from mlclient._typing import HTTPConfigOverrides
 from mlclient.auth import AuthParam
 from mlclient.clients._restart import _RestartWaiter
 from mlclient.connection import CloudConfig, SSLConfig
@@ -26,11 +27,12 @@ from mlclient.models.types import DocumentType
 if TYPE_CHECKING:
     from typing_extensions import Self, Unpack
 
-    from mlclient.http import _HTTPConfigOverrides
 
-    class _HttpClientOptions(_HTTPConfigOverrides, total=False):
-        config: HTTPConfig | None
-        session_owner: HttpClient | AsyncHttpClient | None
+class _HttpClientOptions(HTTPConfigOverrides, total=False):
+    """HTTPConfig overrides plus the options HttpClient and AsyncHttpClient take."""
+
+    config: HTTPConfig | None
+    session_owner: HttpClient | AsyncHttpClient | None
 
 
 logger = logging.getLogger(__name__)

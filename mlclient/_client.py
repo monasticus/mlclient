@@ -63,14 +63,6 @@ if TYPE_CHECKING:
     import httpx
     from typing_extensions import Self
 
-    from mlclient.http import _HTTPConfigOverrides
-
-    class _MLClientOptions(_HTTPConfigOverrides, total=False):
-        config: HTTPConfig | None
-        manage_config: HTTPConfig | None
-        admin_config: HTTPConfig | None
-        health_config: HTTPConfig | None
-
 
 logger = logging.getLogger(__name__)
 

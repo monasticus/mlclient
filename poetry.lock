@@ -2620,4 +2620,4 @@ kerberos = ["pyspnego"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "04f219506172441f9ee89b6186a36a6a4a9ecb55368e038ca522dc38e7e67191"
+content-hash = "cf036cd062173994e07835cfd45b196c9bf4e0d5138bb24f20ccf25e9c89f388"

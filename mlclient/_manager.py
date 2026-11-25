@@ -20,7 +20,7 @@ from mlclient.http import HTTPConfig
 if TYPE_CHECKING:
     from typing_extensions import Unpack
 
-    from mlclient.http import _HTTPConfigOverrides
+    from mlclient._typing import HTTPConfigOverrides
 
 
 class MLClientManager:
@@ -33,7 +33,7 @@ class MLClientManager:
     def __init__(
         self,
         env_name: str,
-        **overrides: Unpack[_HTTPConfigOverrides],
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> None:
         """Load an environment and store HTTP defaults for clients created from it.
 
@@ -125,7 +125,7 @@ class MLClientManager:
     def get_config(
         self,
         app_server_id: str,
-        **overrides: Unpack[_HTTPConfigOverrides],
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> HTTPConfig:
         """Resolve HTTP settings for one server without creating a client.
 
@@ -185,7 +185,7 @@ class MLClientManager:
     def get_client(
         self,
         app_server_id: str | None = None,
-        **overrides: Unpack[_HTTPConfigOverrides],
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> MLClient:
         """Create a synchronous MarkLogic client for a configured App Server.
 
@@ -248,7 +248,7 @@ class MLClientManager:
     def get_async_client(
         self,
         app_server_id: str | None = None,
-        **overrides: Unpack[_HTTPConfigOverrides],
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> AsyncMLClient:
         """Create an asynchronous MarkLogic client for a configured App Server.
 
@@ -311,7 +311,7 @@ class MLClientManager:
     def get_async_http_client(
         self,
         app_server_id: str,
-        **overrides: Unpack[_HTTPConfigOverrides],
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> AsyncHttpClient:
         """Create a raw asynchronous HTTP client for one configured server.
 
@@ -369,7 +369,7 @@ class MLClientManager:
     def get_http_client(
         self,
         app_server_id: str,
-        **overrides: Unpack[_HTTPConfigOverrides],
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> HttpClient:
         """Create a raw synchronous HTTP client for one configured server.
 
@@ -427,7 +427,7 @@ class MLClientManager:
     def _client_configs(
         self,
         app_server_id: str | None,
-        **overrides: Unpack[_HTTPConfigOverrides],
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> dict[str, HTTPConfig]:
         """Build primary and auxiliary HTTP configurations for a MarkLogic client.
 

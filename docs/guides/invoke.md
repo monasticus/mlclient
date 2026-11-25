@@ -55,6 +55,9 @@ Pass `str` or `bytes` as `output_type` to receive each item verbatim:
 ...     result = ml.invoke.module("/ext/report.xqy", output_type=str)
 ```
 
+As in [`ml.eval`](eval.md#get-raw-output), a type checker sees
+`str | list[str]` or `bytes | list[bytes]` for the result.
+
 ## Reuse database and transaction settings
 
 Call the service to create a scoped copy without sending a request:

@@ -147,6 +147,10 @@ Without `output_type` the result is parsed into a Python object. Pass `str` or
 b'2024-02-22T12:24:53.677793Z'
 ```
 
+One item returns the item itself and several return a list, so a type checker
+sees `str | list[str]` for `output_type=str` and `bytes | list[bytes]` for
+`output_type=bytes`.
+
 ## Evaluate on a custom database
 
 ```python

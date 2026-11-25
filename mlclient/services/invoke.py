@@ -5,7 +5,7 @@ Provides parsed evaluation of modules installed in MarkLogic.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 from mlclient._options import UNSET, UnsetType
 from mlclient.models.results import ParsedValue
@@ -24,6 +24,7 @@ class InvokeService(ExecutionService):
     privilege, not xdmp-eval.
     """
 
+    @overload
     def module(
         self,
         path: str,
@@ -31,7 +32,45 @@ class InvokeService(ExecutionService):
         variables: dict | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
-        output_type: type | None = None,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
+
+    def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
@@ -51,7 +90,7 @@ class InvokeService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this invocation. Unset uses the
@@ -101,6 +140,7 @@ class AsyncInvokeService(ExecutionService):
     privilege, not xdmp-eval.
     """
 
+    @overload
     async def module(
         self,
         path: str,
@@ -108,7 +148,45 @@ class AsyncInvokeService(ExecutionService):
         variables: dict | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
-        output_type: type | None = None,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
+
+    async def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         **kwargs: object,
     ) -> ParsedValue:
@@ -128,7 +206,7 @@ class AsyncInvokeService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this invocation. Unset uses the

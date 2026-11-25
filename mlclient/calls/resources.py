@@ -14,9 +14,11 @@ It exports 4 classes:
 from __future__ import annotations
 
 import json
+from typing import ClassVar
 from urllib.parse import quote
 
 from mlclient import _constants as constants
+from mlclient import _utils as utils
 from mlclient import exceptions
 from mlclient.calls import _utils as call_utils
 from mlclient.calls.base import ApiCall
@@ -32,6 +34,8 @@ class _ResourceCall(ApiCall):
     _DATABASE_PARAM: str = "database"
     _TXID_PARAM: str = "txid"
 
+    _SUPPORTED_FORMATS: ClassVar[list] = ["json", "xml", "html", "text", "csv"]
+
     def __init__(
         self,
         name: str,
@@ -39,7 +43,7 @@ class _ResourceCall(ApiCall):
         params: dict | None,
         database: str | None,
         txid: str | None,
-        accept: str | None,
+        data_format: str | None,
         body: str | bytes | dict | list | None = None,
         content_type: str | None = None,
     ) -> None:
@@ -57,8 +61,9 @@ class _ResourceCall(ApiCall):
             The content database to perform the operation on.
         txid : str | None
             The multi-statement transaction to service the request in.
-        accept : str | None
-            The accepted response MIME type.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv, sent as the Accept header. None sends no Accept header.
         body : str | bytes | dict | list | None
             The request body.
         content_type : str | None
@@ -67,14 +72,18 @@ class _ResourceCall(ApiCall):
         Raises
         ------
         WrongParametersError
-            If the name is blank, or the body is unsupported or lacks a type.
+            If the name is blank, the format is not supported, or the body is
+            unsupported or lacks a type.
         """
         self._validate_name(name)
+        call_utils.validate_supported(data_format, self._SUPPORTED_FORMATS, "formats")
         body, content_type = self._encode_body(body, content_type)
         super().__init__(
             method=method,
             body=body,
-            accept=accept,
+            accept=utils.get_accept_header_for_format(data_format)
+            if data_format
+            else None,
             content_type=content_type,
         )
         self._name = name
@@ -180,7 +189,7 @@ class ResourceGetCall(_ResourceCall):
         params: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
     ) -> None:
         """Initialize ResourceGetCall instance.
 
@@ -201,9 +210,17 @@ class ResourceGetCall(_ResourceCall):
         txid : str | None
             The transaction identifier of the multi-statement transaction
             in which to service this request.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
+
+        Raises
+        ------
+        WrongParametersError
+            If the name is blank or the format is not supported.
         """
         super().__init__(
             name,
@@ -211,7 +228,7 @@ class ResourceGetCall(_ResourceCall):
             params,
             database,
             txid,
-            accept,
+            data_format,
         )
 
 
@@ -234,7 +251,7 @@ class ResourcePostCall(_ResourceCall):
         content_type: str | None = None,
         database: str | None = None,
         txid: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
     ) -> None:
         """Initialize ResourcePostCall instance.
 
@@ -263,9 +280,18 @@ class ResourcePostCall(_ResourceCall):
         txid : str | None
             The transaction identifier of the multi-statement transaction
             in which to service this request.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
+
+        Raises
+        ------
+        WrongParametersError
+            If the name is blank, the format is not supported, or the body is
+            unsupported or lacks a type.
         """
         super().__init__(
             name,
@@ -273,7 +299,7 @@ class ResourcePostCall(_ResourceCall):
             params,
             database,
             txid,
-            accept,
+            data_format,
             body,
             content_type,
         )
@@ -297,7 +323,7 @@ class ResourcePutCall(_ResourceCall):
         content_type: str | None = None,
         database: str | None = None,
         txid: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
     ) -> None:
         """Initialize ResourcePutCall instance.
 
@@ -325,9 +351,18 @@ class ResourcePutCall(_ResourceCall):
         txid : str | None
             The transaction identifier of the multi-statement transaction
             in which to service this request.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
+
+        Raises
+        ------
+        WrongParametersError
+            If the name is blank, the format is not supported, or the body is
+            unsupported or lacks a type.
         """
         super().__init__(
             name,
@@ -335,7 +370,7 @@ class ResourcePutCall(_ResourceCall):
             params,
             database,
             txid,
-            accept,
+            data_format,
             body,
             content_type,
         )
@@ -357,7 +392,7 @@ class ResourceDeleteCall(_ResourceCall):
         params: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
     ) -> None:
         """Initialize ResourceDeleteCall instance.
 
@@ -378,9 +413,17 @@ class ResourceDeleteCall(_ResourceCall):
         txid : str | None
             The transaction identifier of the multi-statement transaction
             in which to service this request.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
+
+        Raises
+        ------
+        WrongParametersError
+            If the name is blank or the format is not supported.
         """
         super().__init__(
             name,
@@ -388,5 +431,5 @@ class ResourceDeleteCall(_ResourceCall):
             params,
             database,
             txid,
-            accept,
+            data_format,
         )

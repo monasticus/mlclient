@@ -83,6 +83,22 @@ A list holds either `Document`s or JSON values, not both.
 
 The extension receives each part of a multipart body as one input document.
 
+## Ask for a format
+
+An extension that answers in several formats reads the requested types from its
+context (`accept-types` in XQuery). Pass `data_format` to ask for one: `json`,
+`xml`, `html`, `text` or `csv`. The resource endpoint has no `format` parameter,
+so the value is sent only as the `Accept` header. The extension decides what it
+returns, and the result is parsed by the type it returns:
+
+```python
+with MLClient() as ml:
+    report = ml.resources.get("sales-report", {"year": 2026}, data_format="csv")
+```
+
+Without `data_format` no `Accept` header is sent, and the extension's
+`accept-types` is empty.
+
 ## Reuse database and transaction settings
 
 Call the service to create a scoped copy without sending a request:
@@ -139,17 +155,16 @@ credentials. Call `xdmp:get-current-user()` from inside the extension to check.
 ## Raw responses
 
 [`ml.rest.resources`][mlclient.api.ResourcesApi] sends the same requests and
-returns the raw [`httpx.Response`](https://www.python-httpx.org/api/#response),
-with an `accept` header option for extensions that answer in several formats.
-It adds the `rs:` prefix in the same way and accepts `dict`, `list`, `str` and
-`bytes` bodies:
+returns the raw [`httpx.Response`](https://www.python-httpx.org/api/#response).
+It takes the same `data_format`, adds the `rs:` prefix in the same way and
+accepts `dict`, `list`, `str` and `bytes` bodies:
 
 ```python
 with MLClient() as ml:
     response = ml.rest.resources.get(
         "sales-report",
         params={"year": 2026},
-        accept="application/xml",
+        data_format="xml",
     )
 ```
 

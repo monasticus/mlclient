@@ -26,6 +26,11 @@ def test_get_accept_header_for_text_format():
     assert text_accept_header == "text/plain"
 
 
+def test_get_accept_header_for_csv_format():
+    csv_accept_header = utils.get_accept_header_for_format("csv")
+    assert csv_accept_header == "text/csv"
+
+
 def test_get_accept_header_for_format_case_insensitive():
     json_header = utils.get_accept_header_for_format("JSON")
     xml_header = utils.get_accept_header_for_format("Xml")

@@ -24,6 +24,7 @@ HEADER_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded"
 HEADER_ZIP = "application/zip"
 HEADER_HTML = "text/html"
 HEADER_PLAIN_TEXT = "text/plain"
+HEADER_CSV = "text/csv"
 
 HEADER_PRIMITIVE_STRING = "string"
 HEADER_PRIMITIVE_INTEGER = "integer"

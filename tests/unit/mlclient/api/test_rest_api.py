@@ -509,7 +509,7 @@ def test_get_resource():
         resp = ml.rest.resources.get(
             "mlclient-echo",
             params={"a": ["x", "y"], "flag": True},
-            accept="application/json",
+            data_format="json",
             database="Documents",
         )
 

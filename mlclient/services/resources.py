@@ -44,6 +44,7 @@ class ResourcesService(ExecutionService):
         name: str,
         params: dict | None = None,
         *,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -59,6 +60,12 @@ class ResourcesService(ExecutionService):
             that already has it is sent unchanged. A list value is repeated,
             so the extension receives a sequence. Booleans are sent as
             ``true`` / ``false``, other values as strings; None is omitted.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -80,7 +87,7 @@ class ResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -94,6 +101,7 @@ class ResourcesService(ExecutionService):
         response = self._rest.resources.get(
             name,
             params=params,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )
@@ -106,6 +114,7 @@ class ResourcesService(ExecutionService):
         params: dict | None = None,
         *,
         content_type: str | None = None,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -130,6 +139,12 @@ class ResourcesService(ExecutionService):
         content_type : str | None, default None
             The type of a str or bytes body, or a replacement for
             application/json for a dict or list body. Documents carry their own.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -151,9 +166,10 @@ class ResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, a content_type accompanies
-            Documents, or a Document is a MetadataDocument without content.
+            If the name is blank, the format is not supported, the body type is
+            not supported, a str or bytes body has no content_type, a
+            content_type accompanies Documents, or a Document is a
+            MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -170,6 +186,7 @@ class ResourcesService(ExecutionService):
             params=params,
             body=body,
             content_type=content_type,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )
@@ -182,6 +199,7 @@ class ResourcesService(ExecutionService):
         params: dict | None = None,
         *,
         content_type: str | None = None,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -205,6 +223,12 @@ class ResourcesService(ExecutionService):
         content_type : str | None, default None
             The type of a str or bytes body, or a replacement for
             application/json for a dict or list body. Documents carry their own.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -226,9 +250,10 @@ class ResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, a content_type accompanies
-            Documents, or a Document is a MetadataDocument without content.
+            If the name is blank, the format is not supported, the body type is
+            not supported, a str or bytes body has no content_type, a
+            content_type accompanies Documents, or a Document is a
+            MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -245,6 +270,7 @@ class ResourcesService(ExecutionService):
             params=params,
             body=body,
             content_type=content_type,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )
@@ -255,6 +281,7 @@ class ResourcesService(ExecutionService):
         name: str,
         params: dict | None = None,
         *,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -270,6 +297,12 @@ class ResourcesService(ExecutionService):
             that already has it is sent unchanged. A list value is repeated,
             so the extension receives a sequence. Booleans are sent as
             ``true`` / ``false``, other values as strings; None is omitted.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -291,7 +324,7 @@ class ResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -305,6 +338,7 @@ class ResourcesService(ExecutionService):
         response = self._rest.resources.delete(
             name,
             params=params,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )
@@ -324,6 +358,7 @@ class AsyncResourcesService(ExecutionService):
         name: str,
         params: dict | None = None,
         *,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -339,6 +374,12 @@ class AsyncResourcesService(ExecutionService):
             that already has it is sent unchanged. A list value is repeated,
             so the extension receives a sequence. Booleans are sent as
             ``true`` / ``false``, other values as strings; None is omitted.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -360,7 +401,7 @@ class AsyncResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -374,6 +415,7 @@ class AsyncResourcesService(ExecutionService):
         response = await self._rest.resources.get(
             name,
             params=params,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )
@@ -386,6 +428,7 @@ class AsyncResourcesService(ExecutionService):
         params: dict | None = None,
         *,
         content_type: str | None = None,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -410,6 +453,12 @@ class AsyncResourcesService(ExecutionService):
         content_type : str | None, default None
             The type of a str or bytes body, or a replacement for
             application/json for a dict or list body. Documents carry their own.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -431,9 +480,10 @@ class AsyncResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, a content_type accompanies
-            Documents, or a Document is a MetadataDocument without content.
+            If the name is blank, the format is not supported, the body type is
+            not supported, a str or bytes body has no content_type, a
+            content_type accompanies Documents, or a Document is a
+            MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -450,6 +500,7 @@ class AsyncResourcesService(ExecutionService):
             params=params,
             body=body,
             content_type=content_type,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )
@@ -462,6 +513,7 @@ class AsyncResourcesService(ExecutionService):
         params: dict | None = None,
         *,
         content_type: str | None = None,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -485,6 +537,12 @@ class AsyncResourcesService(ExecutionService):
         content_type : str | None, default None
             The type of a str or bytes body, or a replacement for
             application/json for a dict or list body. Documents carry their own.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -506,9 +564,10 @@ class AsyncResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank, the body type is not supported, a str or
-            bytes body has no content_type, a content_type accompanies
-            Documents, or a Document is a MetadataDocument without content.
+            If the name is blank, the format is not supported, the body type is
+            not supported, a str or bytes body has no content_type, a
+            content_type accompanies Documents, or a Document is a
+            MetadataDocument without content.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -525,6 +584,7 @@ class AsyncResourcesService(ExecutionService):
             params=params,
             body=body,
             content_type=content_type,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )
@@ -535,6 +595,7 @@ class AsyncResourcesService(ExecutionService):
         name: str,
         params: dict | None = None,
         *,
+        data_format: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -550,6 +611,12 @@ class AsyncResourcesService(ExecutionService):
             that already has it is sent unchanged. A list value is repeated,
             so the extension receives a sequence. Booleans are sent as
             ``true`` / ``false``, other values as strings; None is omitted.
+        data_format : str | None, default None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type; the result is
+            parsed by the type it returns. None sends no Accept header.
         database : str | None, default unset
             Content database name or id; unset inherits the service scope and
             None clears it.
@@ -571,7 +638,7 @@ class AsyncResourcesService(ExecutionService):
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         MarkLogicError
             If MarkLogic returns an error, including an extension that is not
             installed or does not implement the method.
@@ -585,6 +652,7 @@ class AsyncResourcesService(ExecutionService):
         response = await self._rest.resources.delete(
             name,
             params=params,
+            data_format=data_format,
             **self._request_scope(database, txid),
             timeout=timeout,
         )

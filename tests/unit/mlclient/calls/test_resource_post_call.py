@@ -113,7 +113,7 @@ def test_fully_parametrized_call():
         content_type="text/plain",
         database="Documents",
         txid="12345",
-        accept="application/json",
+        data_format="json",
     )
     assert call.method == "POST"
     assert call.endpoint == "/v1/resources/echo"

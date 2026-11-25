@@ -1145,14 +1145,25 @@ async def test_get_hosts_forwards_parameters_and_timeout(timeout):
 @respx.mock
 @pytest.mark.asyncio
 async def test_get_hosts_returns_raw_error_response():
-    respx.get("http://localhost:8002/manage/v2/hosts").respond(
-        403,
-        json={"errorResponse": {"message": "Forbidden"}},
+    respx.get(
+        "http://localhost:8002/manage/v2/hosts",
+        params={"format": "json", "group-id": "no-such-group", "view": "default"},
+    ).respond(
+        404,
+        content_type="application/json; charset=UTF-8",
+        content=(
+            b'{"errorResponse":{"statusCode":"404", "status":"Not Found", '
+            b'"messageCode":"XDMP-NOSUCHGROUP", "message":"XDMP-NOSUCHGROUP: '
+            b'xdmp:group(\\"no-such-group\\") -- No such group no-such-group"}}'
+        ),
     )
     async with AsyncMLClient() as ml:
-        response = await ml.manage.hosts.get_list()
-    assert response.status_code == 403
-    assert response.json() == {"errorResponse": {"message": "Forbidden"}}
+        response = await ml.manage.hosts.get_list(
+            data_format="json",
+            group_id="no-such-group",
+        )
+    assert response.status_code == httpx.codes.NOT_FOUND
+    assert response.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
 
 
 @pytest.mark.asyncio

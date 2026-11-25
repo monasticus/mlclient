@@ -86,8 +86,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestsGetCall(
             data_format=data_format,
@@ -134,8 +135,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestsPostCall(
             body=body,
@@ -174,8 +176,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestsPutCall(body=body)
         return self._api.call(call, timeout=timeout)
@@ -218,8 +221,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -257,8 +261,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestPostCall(forest=forest, body=body)
         return self._api.call(call, timeout=timeout)
@@ -302,8 +307,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
         return self._api.call(call, timeout=timeout)
@@ -340,8 +346,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -377,8 +384,9 @@ class ForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestPropertiesPutCall(forest=forest, body=body)
         return self._api.call(call, timeout=timeout)
@@ -443,8 +451,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestsGetCall(
             data_format=data_format,
@@ -491,8 +500,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestsPostCall(
             body=body,
@@ -531,8 +541,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestsPutCall(body=body)
         return await self._api.call(call, timeout=timeout)
@@ -575,8 +586,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -614,8 +626,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestPostCall(forest=forest, body=body)
         return await self._api.call(call, timeout=timeout)
@@ -659,8 +672,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
         return await self._api.call(call, timeout=timeout)
@@ -697,8 +711,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
@@ -734,8 +749,9 @@ class AsyncForestsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ForestPropertiesPutCall(forest=forest, body=body)
         return await self._api.call(call, timeout=timeout)

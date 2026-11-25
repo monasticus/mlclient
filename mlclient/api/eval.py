@@ -70,8 +70,9 @@ class EvalApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = EvalCall(
             xquery=xquery,
@@ -137,8 +138,9 @@ class AsyncEvalApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = EvalCall(
             xquery=xquery,

@@ -55,8 +55,9 @@ class AdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return self._api.call(call_, timeout=timeout)
 
@@ -85,8 +86,9 @@ class AdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return self._api.call(TimestampGetCall(), timeout=timeout)
 
@@ -114,8 +116,9 @@ class AdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return self._api.call(TimestampHeadCall(), timeout=timeout)
 
@@ -144,8 +147,9 @@ class AdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return self._api.call(ServerConfigGetCall(), timeout=timeout)
 
@@ -193,8 +197,9 @@ class AdminApi:
             If the format is unsupported, or the body is blank or a JSON
             value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = InitPostCall(body=body, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -241,8 +246,9 @@ class AdminApi:
             If the format is unsupported, or the body is missing, blank or a
             JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = InstanceAdminPostCall(body=body, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -308,8 +314,9 @@ class AdminApi:
             server_config is given without group, or group or zone is given
             with cluster_config.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ClusterConfigPostCall(
             server_config=server_config,
@@ -356,8 +363,9 @@ class AdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostConfigDeleteCall(remote_host=remote_host)
         return self._api.call(call, timeout=timeout)
@@ -390,8 +398,9 @@ class AsyncAdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return await self._api.call(call_, timeout=timeout)
 
@@ -420,8 +429,9 @@ class AsyncAdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return await self._api.call(TimestampGetCall(), timeout=timeout)
 
@@ -449,8 +459,9 @@ class AsyncAdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return await self._api.call(TimestampHeadCall(), timeout=timeout)
 
@@ -479,8 +490,9 @@ class AsyncAdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         return await self._api.call(ServerConfigGetCall(), timeout=timeout)
 
@@ -528,8 +540,9 @@ class AsyncAdminApi:
             If the format is unsupported, or the body is blank or a JSON
             value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = InitPostCall(body=body, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
@@ -576,8 +589,9 @@ class AsyncAdminApi:
             If the format is unsupported, or the body is missing, blank or a
             JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = InstanceAdminPostCall(body=body, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
@@ -643,8 +657,9 @@ class AsyncAdminApi:
             server_config is given without group, or group or zone is given
             with cluster_config.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = ClusterConfigPostCall(
             server_config=server_config,
@@ -691,8 +706,9 @@ class AsyncAdminApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = HostConfigDeleteCall(remote_host=remote_host)
         return await self._api.call(call, timeout=timeout)

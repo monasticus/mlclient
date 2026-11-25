@@ -62,8 +62,9 @@ class RolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolesGetCall(data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -96,8 +97,9 @@ class RolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolesPostCall(body=body)
         return self._api.call(call, timeout=timeout)
@@ -137,8 +139,9 @@ class RolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RoleGetCall(role=role, data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -171,8 +174,9 @@ class RolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RoleDeleteCall(role=role)
         return self._api.call(call, timeout=timeout)
@@ -209,8 +213,9 @@ class RolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolePropertiesGetCall(role=role, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -246,8 +251,9 @@ class RolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolePropertiesPutCall(role=role, body=body)
         return self._api.call(call, timeout=timeout)
@@ -290,8 +296,9 @@ class AsyncRolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolesGetCall(data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -324,8 +331,9 @@ class AsyncRolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolesPostCall(body=body)
         return await self._api.call(call, timeout=timeout)
@@ -365,8 +373,9 @@ class AsyncRolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RoleGetCall(role=role, data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -399,8 +408,9 @@ class AsyncRolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RoleDeleteCall(role=role)
         return await self._api.call(call, timeout=timeout)
@@ -437,8 +447,9 @@ class AsyncRolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolePropertiesGetCall(role=role, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
@@ -474,8 +485,9 @@ class AsyncRolesApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = RolePropertiesPutCall(role=role, body=body)
         return await self._api.call(call, timeout=timeout)

@@ -74,8 +74,9 @@ class GroupsApi:
         WrongParametersError
             If the format or the view is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupsGetCall(data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -114,8 +115,9 @@ class GroupsApi:
         WrongParametersError
             If the body is missing, blank or a JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupsPostCall(body=body)
         return self._api.call(call, timeout=timeout)
@@ -159,8 +161,9 @@ class GroupsApi:
         WrongParametersError
             If the format or the view is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupGetCall(group=group, data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -202,8 +205,9 @@ class GroupsApi:
         WrongParametersError
             If the body is missing, blank or a JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupPostCall(group=group, body=body)
         return self._api.call(call, timeout=timeout)
@@ -238,8 +242,9 @@ class GroupsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupDeleteCall(group=group)
         return self._api.call(call, timeout=timeout)
@@ -275,7 +280,9 @@ class GroupsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP timeout expires after any configured retries
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupPropertiesGetCall(group=group, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -310,7 +317,9 @@ class GroupsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP timeout expires after any configured retries
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupPropertiesPutCall(group=group, body=body)
         return self._api.call(call, timeout=timeout)
@@ -364,8 +373,9 @@ class AsyncGroupsApi:
         WrongParametersError
             If the format or the view is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupsGetCall(data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -404,8 +414,9 @@ class AsyncGroupsApi:
         WrongParametersError
             If the body is missing, blank or a JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupsPostCall(body=body)
         return await self._api.call(call, timeout=timeout)
@@ -449,8 +460,9 @@ class AsyncGroupsApi:
         WrongParametersError
             If the format or the view is not supported.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupGetCall(group=group, data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
@@ -492,8 +504,9 @@ class AsyncGroupsApi:
         WrongParametersError
             If the body is missing, blank or a JSON value other than an object.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupPostCall(group=group, body=body)
         return await self._api.call(call, timeout=timeout)
@@ -528,8 +541,9 @@ class AsyncGroupsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupDeleteCall(group=group)
         return await self._api.call(call, timeout=timeout)
@@ -565,7 +579,9 @@ class AsyncGroupsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP timeout expires after any configured retries
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupPropertiesGetCall(group=group, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
@@ -600,7 +616,9 @@ class AsyncGroupsApi:
         Raises
         ------
         httpx.TimeoutException
-            If an HTTP timeout expires after any configured retries
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = GroupPropertiesPutCall(group=group, body=body)
         return await self._api.call(call, timeout=timeout)

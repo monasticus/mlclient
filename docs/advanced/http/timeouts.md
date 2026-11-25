@@ -56,11 +56,13 @@ update may still commit; see [`ml eval --timeout`](../../cli/eval.md#-timeout).
 Connection and pool timeouts identify the stage that expired. Read, write and
 generic timeouts warn that the request may still be running on MarkLogic.
 
-With the default retry policy, `ml http` retries a `ReadTimeout` up to five times
-for `GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS` and `TRACE`. Total waiting time
-includes retries and backoff and can therefore exceed `--timeout`. The duration
-in the timeout error describes one attempt; the terminal's `Elapsed` line
-reports the total time. See [Retry policy](retries.md).
+With the default retry policy, `ml http` retries a `ConnectTimeout`,
+`WriteTimeout` or `PoolTimeout` up to five times for `GET`, `HEAD`, `PUT`,
+`DELETE`, `OPTIONS` and `TRACE`. A `ReadTimeout` is not retried: MarkLogic most
+likely is still running the request, so the command fails after one attempt.
+Total waiting time includes retries and backoff and can therefore exceed
+`--timeout`. The duration in the timeout error describes one attempt; the
+terminal's `Elapsed` line reports the total time. See [Retry policy](retries.md).
 
 ## Defaults
 

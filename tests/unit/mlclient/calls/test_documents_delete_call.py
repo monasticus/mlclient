@@ -34,6 +34,19 @@ def test_validation_multiple_categories_param():
     assert err.value.args[0] == expected_msg
 
 
+@pytest.mark.parametrize("category", ["", ["collections", ""]])
+def test_validation_rejects_empty_category(category):
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsDeleteCall(uri="/a.xml", category=category)
+
+    expected_msg = (
+        "The supported categories are: "
+        "content, metadata, metadata-values, collections, "
+        "permissions, properties, quality"
+    )
+    assert str(err.value) == expected_msg
+
+
 def test_endpoint(default_documents_get_call):
     assert default_documents_get_call.endpoint == "/v1/documents"
 

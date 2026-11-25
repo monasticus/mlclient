@@ -99,8 +99,9 @@ Without the option the client defaults apply: 5 seconds to connect, 60 seconds
 to read. See [Timeouts](../advanced/http/timeouts.md).
 
 For `GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS` and `TRACE`, the default retry
-policy can retry a read timeout up to five times. Retries and backoff can make
-the total wait longer than `--timeout`; the error reports the per-attempt limit.
+policy can retry a connect, write or pool timeout up to five times; a read
+timeout is not retried. Retries and backoff can make the total wait longer than
+`--timeout`; the error reports the per-attempt limit.
 See [retry details](../advanced/http/timeouts.md#command-line).
 
 A read or write timeout only stops the client from waiting. MarkLogic may keep

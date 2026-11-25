@@ -110,8 +110,9 @@ class SearchApi:
             If an enumerated value is unsupported, or a category is given without
             multipart.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = SearchGetCall(
             q=q,
@@ -222,8 +223,9 @@ class SearchApi:
             If the body is missing, blank or JSON other than an object, an enumerated
             value is unsupported, or a category is given without multipart.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = SearchPostCall(
             body=body,
@@ -294,8 +296,9 @@ class SearchApi:
             given without clear_database, or if clear_database is combined with
             a filter. Raised before any request is sent.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = SearchDeleteCall(
             database=database,
@@ -404,8 +407,9 @@ class AsyncSearchApi:
             If an enumerated value is unsupported, or a category is given without
             multipart.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = SearchGetCall(
             q=q,
@@ -516,8 +520,9 @@ class AsyncSearchApi:
             If the body is missing, blank or JSON other than an object, an enumerated
             value is unsupported, or a category is given without multipart.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = SearchPostCall(
             body=body,
@@ -588,8 +593,9 @@ class AsyncSearchApi:
             given without clear_database, or if clear_database is combined with
             a filter. Raised before any request is sent.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         """
         call = SearchDeleteCall(
             database=database,

@@ -218,8 +218,9 @@ class SearchService:
         WrongParametersError
             If a category is outside the supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -306,8 +307,9 @@ class SearchService:
         WrongParametersError
             If a category is outside the supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -383,8 +385,9 @@ class SearchService:
             If pos is not positive or not ordered, or a query value has no
             local native form.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -471,8 +474,9 @@ class SearchService:
             If the name is blank, or direction or frequency is outside its
             supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -575,8 +579,9 @@ class SearchService:
         WrongParametersError
             If the name is blank.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -670,8 +675,9 @@ class SearchService:
             If the name is blank, or direction or frequency is outside its
             supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -757,8 +763,9 @@ class SearchService:
         WrongParametersError
             If the view is outside the supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -938,8 +945,9 @@ class AsyncSearchService:
         WrongParametersError
             If a category is outside the supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -1026,8 +1034,9 @@ class AsyncSearchService:
         WrongParametersError
             If a category is outside the supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -1103,8 +1112,9 @@ class AsyncSearchService:
             If pos is not positive or not ordered, or a query value has no
             local native form.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -1191,8 +1201,9 @@ class AsyncSearchService:
             If the name is blank, or direction or frequency is outside its
             supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -1295,8 +1306,9 @@ class AsyncSearchService:
         WrongParametersError
             If the name is blank.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -1390,8 +1402,9 @@ class AsyncSearchService:
             If the name is blank, or direction or frequency is outside its
             supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """
@@ -1477,8 +1490,9 @@ class AsyncSearchService:
         WrongParametersError
             If the view is outside the supported set.
         httpx.TimeoutException
-            If an HTTP connect, read, write or pool timeout expires after any
-            configured retries are exhausted.
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
         MarkLogicError
             If MarkLogic returns an error.
         """

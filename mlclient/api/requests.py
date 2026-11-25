@@ -130,8 +130,10 @@ class RequestsApi:
         Parameters
         ----------
         request : str
-            A request id, such as the ``idref`` of a get_list item.
-            MarkLogic 12.1 answers 500 XDMP-CAST for a non-numeric value.
+            Use a numeric request id, such as the ``idref`` of a get_list item.
+            The endpoint reference documents an id or URI. On MarkLogic
+            10.0-11, 11.3.7 and 12.1.0, the returned ``uriref`` and a
+            non-numeric identifier instead produce 500 XDMP-CAST.
         data_format : str
             The format of the returned data. Can be either html, json, or xml (default).
             This value overrides the Accept header if both are present.
@@ -285,8 +287,10 @@ class AsyncRequestsApi:
         Parameters
         ----------
         request : str
-            A request id, such as the ``idref`` of a get_list item.
-            MarkLogic 12.1 answers 500 XDMP-CAST for a non-numeric value.
+            Use a numeric request id, such as the ``idref`` of a get_list item.
+            The endpoint reference documents an id or URI. On MarkLogic
+            10.0-11, 11.3.7 and 12.1.0, the returned ``uriref`` and a
+            non-numeric identifier instead produce 500 XDMP-CAST.
         data_format : str
             The format of the returned data. Can be either html, json, or xml (default).
             This value overrides the Accept header if both are present.

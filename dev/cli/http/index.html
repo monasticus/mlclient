@@ -16158,8 +16158,9 @@ An existing XML declaration is preserved verbatim; none is added when absent.</p
 Without the option the client defaults apply: 5 seconds to connect, 60 seconds
 to read. See <a href="../../advanced/http/timeouts/">Timeouts</a>.</p>
 <p>For <code>GET</code>, <code>HEAD</code>, <code>PUT</code>, <code>DELETE</code>, <code>OPTIONS</code> and <code>TRACE</code>, the default retry
-policy can retry a read timeout up to five times. Retries and backoff can make
-the total wait longer than <code>--timeout</code>; the error reports the per-attempt limit.
+policy can retry a connect, write or pool timeout up to five times; a read
+timeout is not retried. Retries and backoff can make the total wait longer than
+<code>--timeout</code>; the error reports the per-attempt limit.
 See <a href="../../advanced/http/timeouts/#command-line">retry details</a>.</p>
 <p>A read or write timeout only stops the client from waiting. MarkLogic may keep
 running the request, so an update may still commit after the command has failed. The command

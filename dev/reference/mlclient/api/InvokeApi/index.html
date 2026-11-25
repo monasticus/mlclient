@@ -16082,8 +16082,9 @@ the module's results</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If an HTTP connect, read, write or pool timeout expires after any
-configured retries are exhausted.</p>
+                <p>If an HTTP connect, read, write or pool timeout expires on the last
+attempt the retry policy allows. The default policy does not retry
+read timeouts.</p>
               </div>
             </td>
           </tr>
@@ -16147,7 +16148,8 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-76">76</a></span>
 <span class="normal"><a href="#__codelineno-0-77">77</a></span>
 <span class="normal"><a href="#__codelineno-0-78">78</a></span>
-<span class="normal"><a href="#__codelineno-0-79">79</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-79">79</a></span>
+<span class="normal"><a href="#__codelineno-0-80">80</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a>    <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28"></a>    <span class="o">*</span><span class="p">,</span>
@@ -16192,16 +16194,17 @@ configured retries are exhausted.</p>
 <a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    WrongParametersError</span>
 <a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        If the module path is missing or blank.</span>
 <a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">InvokeCall</span><span class="p">(</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a>        <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a>        <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>        <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="p">)</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">InvokeCall</span><span class="p">(</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a>        <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a>        <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>        <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="p">)</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

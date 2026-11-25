@@ -392,6 +392,43 @@ def test_put_sends_documents_as_multipart(ml):
     assert [part.content for part in parts] == [b"a", b"b"]
 
 
+# --- response format ---
+
+
+@respx.mock
+@pytest.mark.parametrize("method", ["get", "post", "put", "delete"])
+def test_format_is_sent_as_the_accept_header(ml, method):
+    route = _mock_json_response(method, b'{"method":"%s"}' % method.encode())
+
+    getattr(ml.resources, method)(NAME, data_format="xml")
+
+    assert _sent(route).headers["Accept"] == "application/xml"
+
+
+@respx.mock
+def test_get_parses_a_csv_result(ml):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(URL)
+    ml_mocker.with_request_header("Accept", "text/csv")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_header("Content-Type", "text/csv; charset=UTF-8")
+    ml_mocker.with_response_body(b"a,b\n1,2")
+    ml_mocker.mock_get()
+
+    assert ml.resources.get(NAME, data_format="csv") == "a,b\n1,2"
+
+
+@respx.mock
+def test_unsupported_format_is_rejected_before_any_request(ml):
+    router = respx.route(url__startswith=URL)
+
+    with pytest.raises(WrongParametersError) as err:
+        ml.resources.get(NAME, data_format="yaml")
+
+    assert str(err.value) == "The supported formats are: json, xml, html, text, csv"
+    assert router.calls.call_count == 0
+
+
 # --- database and transaction scope ---
 
 

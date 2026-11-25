@@ -30,6 +30,13 @@ class ResourcesApi:
     """
 
     def __init__(self, api: ApiClient) -> None:
+        """Bind resource extension operations to a synchronous API client.
+
+        Parameters
+        ----------
+        api : ApiClient
+            The transport used to send requests.
+        """
         self._api = api
 
     def get(
@@ -37,7 +44,7 @@ class ResourcesApi:
         name: str,
         *,
         params: dict | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -56,9 +63,12 @@ class ResourcesApi:
             already starting with ``rs:`` is sent unchanged). A list or tuple
             value is repeated, booleans are sent as ``true`` / ``false`` and
             other values as strings; None is omitted.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -81,7 +91,7 @@ class ResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -92,7 +102,7 @@ class ResourcesApi:
             params=params,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return self._api.call(call, timeout=timeout)
 
@@ -103,7 +113,7 @@ class ResourcesApi:
         params: dict | None = None,
         body: str | bytes | dict | list | None = None,
         content_type: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -129,9 +139,12 @@ class ResourcesApi:
             The type of the request body. The accepted values are service
             dependent. Defaults to application/json for a dict or list body;
             ``multipart/mixed`` with a boundary sends several documents.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -154,8 +167,9 @@ class ResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank, or the body is not a dict, list, str or
-            bytes, or a str or bytes body has no content_type.
+            If the name is blank, the format is not supported, the body is not
+            a dict, list, str or bytes, or a str or bytes body has no
+            content_type.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -168,7 +182,7 @@ class ResourcesApi:
             content_type=content_type,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return self._api.call(call, timeout=timeout)
 
@@ -179,7 +193,7 @@ class ResourcesApi:
         params: dict | None = None,
         body: str | bytes | dict | list | None = None,
         content_type: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -205,9 +219,12 @@ class ResourcesApi:
             The type of the request body. The accepted values are service
             dependent. Defaults to application/json for a dict or list body;
             ``multipart/mixed`` with a boundary sends several documents.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -230,8 +247,9 @@ class ResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank, or the body is not a dict, list, str or
-            bytes, or a str or bytes body has no content_type.
+            If the name is blank, the format is not supported, the body is not
+            a dict, list, str or bytes, or a str or bytes body has no
+            content_type.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -244,7 +262,7 @@ class ResourcesApi:
             content_type=content_type,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return self._api.call(call, timeout=timeout)
 
@@ -253,7 +271,7 @@ class ResourcesApi:
         name: str,
         *,
         params: dict | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -272,9 +290,12 @@ class ResourcesApi:
             already starting with ``rs:`` is sent unchanged). A list or tuple
             value is repeated, booleans are sent as ``true`` / ``false`` and
             other values as strings; None is omitted.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -297,7 +318,7 @@ class ResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -308,7 +329,7 @@ class ResourcesApi:
             params=params,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return self._api.call(call, timeout=timeout)
 
@@ -323,6 +344,13 @@ class AsyncResourcesApi:
     """
 
     def __init__(self, api: AsyncApiClient) -> None:
+        """Bind resource extension operations to an asynchronous API client.
+
+        Parameters
+        ----------
+        api : AsyncApiClient
+            The transport used to send requests.
+        """
         self._api = api
 
     async def get(
@@ -330,7 +358,7 @@ class AsyncResourcesApi:
         name: str,
         *,
         params: dict | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -349,9 +377,12 @@ class AsyncResourcesApi:
             already starting with ``rs:`` is sent unchanged). A list or tuple
             value is repeated, booleans are sent as ``true`` / ``false`` and
             other values as strings; None is omitted.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -374,7 +405,7 @@ class AsyncResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -385,7 +416,7 @@ class AsyncResourcesApi:
             params=params,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return await self._api.call(call, timeout=timeout)
 
@@ -396,7 +427,7 @@ class AsyncResourcesApi:
         params: dict | None = None,
         body: str | bytes | dict | list | None = None,
         content_type: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -422,9 +453,12 @@ class AsyncResourcesApi:
             The type of the request body. The accepted values are service
             dependent. Defaults to application/json for a dict or list body;
             ``multipart/mixed`` with a boundary sends several documents.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -447,8 +481,9 @@ class AsyncResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank, or the body is not a dict, list, str or
-            bytes, or a str or bytes body has no content_type.
+            If the name is blank, the format is not supported, the body is not
+            a dict, list, str or bytes, or a str or bytes body has no
+            content_type.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -461,7 +496,7 @@ class AsyncResourcesApi:
             content_type=content_type,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return await self._api.call(call, timeout=timeout)
 
@@ -472,7 +507,7 @@ class AsyncResourcesApi:
         params: dict | None = None,
         body: str | bytes | dict | list | None = None,
         content_type: str | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -498,9 +533,12 @@ class AsyncResourcesApi:
             The type of the request body. The accepted values are service
             dependent. Defaults to application/json for a dict or list body;
             ``multipart/mixed`` with a boundary sends several documents.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -523,8 +561,9 @@ class AsyncResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank, or the body is not a dict, list, str or
-            bytes, or a str or bytes body has no content_type.
+            If the name is blank, the format is not supported, the body is not
+            a dict, list, str or bytes, or a str or bytes body has no
+            content_type.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -537,7 +576,7 @@ class AsyncResourcesApi:
             content_type=content_type,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return await self._api.call(call, timeout=timeout)
 
@@ -546,7 +585,7 @@ class AsyncResourcesApi:
         name: str,
         *,
         params: dict | None = None,
-        accept: str | None = None,
+        data_format: str | None = None,
         database: str | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -565,9 +604,12 @@ class AsyncResourcesApi:
             already starting with ``rs:`` is sent unchanged). A list or tuple
             value is repeated, booleans are sent as ``true`` / ``false`` and
             other values as strings; None is omitted.
-        accept : str | None
-            The accepted response MIME type, if any. The accepted values depend
-            on the service extension implementation.
+        data_format : str | None
+            The response format to ask the extension for: json, xml, html, text
+            or csv. The endpoint has no format parameter, so the value is sent
+            only as the Accept header. The extension reads it from its context
+            (``accept-types``) and may still return another type. None sends no
+            Accept header.
         database : str | None
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
@@ -590,7 +632,7 @@ class AsyncResourcesApi:
         Raises
         ------
         WrongParametersError
-            If the name is blank.
+            If the name is blank or the format is not supported.
         httpx.TimeoutException
             If an HTTP connect, read, write or pool timeout expires on the last
             attempt the retry policy allows. The default policy does not retry
@@ -601,6 +643,6 @@ class AsyncResourcesApi:
             params=params,
             database=database,
             txid=txid,
-            accept=accept,
+            data_format=data_format,
         )
         return await self._api.call(call, timeout=timeout)

@@ -36,7 +36,7 @@ def get_accept_header_for_format(
     Parameters
     ----------
     data_format : str
-        Data format
+        One of xml, json, html, text or csv, in any letter case.
 
     Returns
     -------
@@ -58,6 +58,8 @@ def get_accept_header_for_format(
         return constants.HEADER_HTML
     if data_format == "text":
         return constants.HEADER_PLAIN_TEXT
+    if data_format == "csv":
+        return constants.HEADER_CSV
 
     msg = f"Provided format [{data_format}] is not supported."
     raise exceptions.UnsupportedFormatError(msg)

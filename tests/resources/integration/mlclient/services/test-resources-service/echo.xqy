@@ -54,6 +54,7 @@ declare private function echo:report(
       map:entry("method", $method),
       map:entry("database", xdmp:database-name(xdmp:database())),
       map:entry("params", $params),
+      map:entry("accept-types", json:to-array(map:get($context, "accept-types"))),
       map:entry("input-types", json:to-array($input ! echo:content-type(.))),
       map:entry("input-count", fn:count($input))
     ))

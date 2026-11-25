@@ -19,6 +19,15 @@ def test_validation_name_param(name):
     assert str(err.value) == expected_msg
 
 
+@pytest.mark.parametrize("data_format", ["yaml", "JSON", ""])
+def test_validation_format_param(data_format):
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        ResourceGetCall(name="echo", data_format=data_format)
+
+    expected_msg = "The supported formats are: json, xml, html, text, csv"
+    assert str(err.value) == expected_msg
+
+
 def test_endpoint(default_resource_get_call):
     assert default_resource_get_call.endpoint == "/v1/resources/echo"
 
@@ -56,6 +65,23 @@ def test_headers(default_resource_get_call):
     assert default_resource_get_call.headers == {}
 
 
+@pytest.mark.parametrize(
+    ("data_format", "accept"),
+    [
+        ("json", "application/json"),
+        ("xml", "application/xml"),
+        ("html", "text/html"),
+        ("text", "text/plain"),
+        ("csv", "text/csv"),
+    ],
+)
+def test_format_is_sent_as_the_accept_header(data_format, accept):
+    call = ResourceGetCall(name="echo", data_format=data_format)
+
+    assert call.headers == {"Accept": accept}
+    assert call.params == {}
+
+
 def test_body(default_resource_get_call):
     assert default_resource_get_call.body is None
 
@@ -66,7 +92,7 @@ def test_fully_parametrized_call():
         params={"a": "x"},
         database="Documents",
         txid="12345",
-        accept="application/json",
+        data_format="json",
     )
     assert call.method == "GET"
     assert call.endpoint == "/v1/resources/echo"

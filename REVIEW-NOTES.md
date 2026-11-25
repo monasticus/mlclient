@@ -130,6 +130,36 @@ outside this branch.
 - Still open: `output_type` (and `accept`) on the service for parity with eval and invoke; whether
   "Who the extension runs as" belongs in the guide or in an admonition.
 
+## Stacked on v1-18 and review decisions (2026-11-25)
+
+The branch now sits on `feature/v1-18-manage-requests` instead of main. Merge order: v1-00, v1-02,
+v1-13, v1-15, v1-17, v1-18, v1-19.
+
+- Rebase: v1-18 and this branch both add exports to `mlclient.api`, `mlclient.calls` and the public API
+  test; both sets stay, in alphabetical order.
+- Typing from v1-02: the resources Calls, API and service annotate `timeout`, `database` and `txid` with
+  `UnsetType` and have return types; `_extension_param_value` / `_extension_param_item` take
+  `value: object` (the `ANN` rule failed on 27 places). Retry wording from v1-00: the 16
+  `httpx.TimeoutException` entries say the timeout is raised on the last attempt the retry policy allows.
+  Folded into the commits that added the code.
+- Decision - no `output_type` on `ml.resources`: eval and invoke have it mainly for the CLI.
+- Decision - `data_format` instead of `accept`: the Calls, `ml.rest.resources` and `ml.resources` take
+  `data_format` (`json`, `xml`, `html`, `text` or `csv`), the name the other endpoints use, and send it as
+  the `Accept` header through `get_accept_header_for_format`, which now maps `csv` to `text/csv` (the other
+  Calls validate their own formats first, so none of them starts accepting `csv`). The resource endpoint
+  has no `format` parameter; the docstrings and the guide say the value goes only to the `Accept` header,
+  that the extension reads it as `accept-types` and may return another type, and that None sends no
+  header. The default is None, not `xml` as elsewhere, so an extension's own default stays in effect. An
+  unsupported value raises `WrongParametersError` before any request. A probe on local MarkLogic 12.1
+  showed MarkLogic passes any `Accept` value to the extension, never answers 406, and takes the response
+  type only from the extension's `output-types`. A full MIME type is not accepted: no extension seen needs
+  one, and `ml.http` can still send any header.
+- The two API `__init__` methods got the docstrings the other API classes have.
+- Tests: format validation and the Accept mapping in the GET Call, forwarding in all four service methods
+  (sync and async), a CSV result parsed as `str`; the integration echo extension now reports
+  `accept-types`, checked with and without `data_format`.
+- No longer open above: "`output_type` (and `accept`) on the service".
+
 ## Open points for the reviewer
 
 - Management (`/v1/config/resources`) remains undecided and is not on this branch. The guide says the extension

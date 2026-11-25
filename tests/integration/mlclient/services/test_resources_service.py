@@ -68,6 +68,18 @@ class TestResourcesService:
         assert result["params"] == {"a": "x"}
 
     @pytest.mark.ml_access
+    def test_get_asks_for_the_requested_format(self, ml_client: MLClient):
+        result = ml_client.resources.get(self.XQUERY_EXTENSION, data_format="csv")
+
+        assert result["accept-types"] == ["text/csv"]
+
+    @pytest.mark.ml_access
+    def test_get_without_a_format_asks_for_none(self, ml_client: MLClient):
+        result = ml_client.resources.get(self.XQUERY_EXTENSION)
+
+        assert result["accept-types"] == []
+
+    @pytest.mark.ml_access
     def test_get_receives_repeated_and_serialized_params(self, ml_client: MLClient):
         result = ml_client.resources.get(
             self.XQUERY_EXTENSION,

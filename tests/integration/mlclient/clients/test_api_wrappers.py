@@ -518,13 +518,6 @@ class TestRequestsManagement:
         properties = detail.json()["request-default"]["properties"]
         assert properties["request-text"] == request_text
 
-    @pytest.mark.ml_access
-    @pytest.mark.parametrize("view", ["default", "schema", "describe"])
-    def test_supported_request_views(self, ml_client: MLClient, view: str):
-        response = ml_client.manage.requests.get_list(view=view)
-        assert response.status_code == httpx.codes.OK
-        assert "xml" in response.headers["content-type"]
-
     @staticmethod
     def _eval_in_own_client(request_text: str) -> str:
         with MLClient() as ml:

@@ -159,6 +159,13 @@ v1-13, v1-15, v1-17, v1-18, v1-19.
   (sync and async), a CSV result parsed as `str`; the integration echo extension now reports
   `accept-types`, checked with and without `data_format`.
 - No longer open above: "`output_type` (and `accept`) on the service".
+- mypy: the new findings in `services/resources.py` are the `Response | Coroutine` union that eval and
+  invoke have on main too, and three invariants checked at runtime (a body without Documents, a Document
+  with content and a document type) that mypy cannot see; no annotation changed.
+- Verification: 11051 unit tests passed, 100% line coverage; `ruff check`, `ruff format --check`, the
+  strict docs build and `check_docs.py` pass. As the top of the stack, the whole integration suite except
+  the connection matrix (which needs the CI rig) ran on local MarkLogic 12.1: 464 passed, 9 skipped (the
+  native aggregate plugin tests, which need `MLCLIENT_NATIVE_PLUGIN_ZIP`).
 
 ## Open points for the reviewer
 

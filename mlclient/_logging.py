@@ -3,14 +3,33 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from collections.abc import Mapping
+from types import TracebackType
+from typing import TYPE_CHECKING, TypedDict, cast
+
+from typing_extensions import Unpack
+
+
+class _LoggingOptions(TypedDict, total=False):
+    """Keyword options accepted by the standard Logger.log method."""
+
+    exc_info: (
+        bool
+        | BaseException
+        | tuple[type[BaseException], BaseException, TracebackType | None]
+        | tuple[None, None, None]
+        | None
+    )
+    extra: Mapping[str, object] | None
+    stack_info: bool
+    stacklevel: int
 
 
 def _logger_fine(
     logger: logging.Logger,
     message: object,
     *args: object,
-    **kwargs: Any,  # noqa: ANN401 - forwarded to Logger.log as its keyword options
+    **kwargs: Unpack[_LoggingOptions],
 ) -> None:
     """Log at FINE, forwarding logging options and identifying the caller."""
     kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1
@@ -25,7 +44,7 @@ def _logger_fine(
 def _root_fine(
     message: object,
     *args: object,
-    **kwargs: Any,  # noqa: ANN401 - forwarded to Logger.log as its keyword options
+    **kwargs: Unpack[_LoggingOptions],
 ) -> None:
     """Log at FINE through the root logger, preserving logging options."""
     kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1

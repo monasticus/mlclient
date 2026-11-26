@@ -1,5 +1,7 @@
 import logging
 
+import pytest
+
 from mlclient._logging import register_fine_logging
 
 
@@ -56,3 +58,37 @@ def test_root_fine_configures_missing_handlers(monkeypatch, mocker):
     configure = mocker.patch("logging.basicConfig")
     logging.fine("Below default threshold")
     configure.assert_called_once_with()
+
+
+@pytest.mark.parametrize("use_root", [False, True])
+@pytest.mark.parametrize(
+    "exc_info",
+    [
+        None,
+        False,
+        ValueError("failure"),
+        (ValueError, ValueError("failure"), None),
+        (None, None, None),
+    ],
+)
+def test_fine_forwards_standard_logging_options(caplog, use_root, exc_info):
+    emit = logging.fine if use_root else logging.getLogger(__name__).fine
+    with caplog.at_level(logging.FINE):
+        emit(
+            "Document %s",
+            "example",
+            exc_info=exc_info,
+            extra={"uri": "/example.xml"},
+            stack_info=True,
+            stacklevel=1,
+        )
+    assert len(caplog.records) == 1
+    record = caplog.records[0]
+    assert record.getMessage() == "Document example"
+    assert record.uri == "/example.xml"
+    assert record.funcName == "test_fine_forwards_standard_logging_options"
+    assert record.stack_info.startswith("Stack (most recent call last):")
+    if isinstance(exc_info, BaseException):
+        assert record.exc_info == (type(exc_info), exc_info, exc_info.__traceback__)
+    else:
+        assert record.exc_info == exc_info

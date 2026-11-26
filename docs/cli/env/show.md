@@ -108,5 +108,7 @@ mapping. `app-servers` may be omitted, null or a list of mappings with non-empty
 `id` values. Errors name the file without printing its contents.
 
 With `--defaults`, empty or null YAML uses the environment defaults, and null
-`app-servers` is treated as an empty list. Typed fields are validated; errors
-identify their locations without printing input values, including at `-vvv`.
+`app-servers` is treated as an empty list. Settings are validated as when the
+environment is loaded: the error lists one problem per line with its location
+and reason, without printing input values, including at `-vvv` (see
+[validation errors](../../advanced/more-on-environments.md#validation-errors)).

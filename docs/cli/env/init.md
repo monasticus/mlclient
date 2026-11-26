@@ -130,6 +130,16 @@ are recorded when they differ from the root configuration. Other hostnames are
 treated as load-balanced connections: servers inherit the root protocol and
 authentication rather than their direct listener settings.
 
-Unsupported `saml` authentication is skipped with a warning. An `oauth` scheme is
-retained; add its bearer token before loading the environment. Review the output
-for the access path your application will actually use.
+Servers using unsupported `saml` authentication are skipped with a warning.
+OAuth connections generated from host discovery or Gradle properties include a
+token placeholder:
+
+```yaml
+auth:
+  method: oauth
+  token: REPLACE_WITH_BEARER_TOKEN
+```
+
+Replace `REPLACE_WITH_BEARER_TOKEN` with your bearer token before connecting.
+Review the generated protocol and authentication settings for the access path
+your application will use.

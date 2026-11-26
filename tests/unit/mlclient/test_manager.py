@@ -357,7 +357,11 @@ def test_get_client_unknown_app_server():
     mgr = MLClientManager("test")
     with pytest.raises(NoSuchAppServerError) as err:
         mgr.get_client("missing")
-    assert err.value.args[0] == "There's no [missing] app server configuration!"
+    assert err.value.args[0] == (
+        "There's no [missing] app server configuration in the [test] environment. "
+        "Available: manage (8002), content (8100), modules (8101), schemas (8102), "
+        "test (8103), app-services (8000), admin (8001), health (7997)."
+    )
 
 
 def test_get_http_client():
@@ -445,7 +449,11 @@ def test_get_async_client_unknown_app_server():
     mgr = MLClientManager("test")
     with pytest.raises(NoSuchAppServerError) as err:
         mgr.get_async_client("missing")
-    assert err.value.args[0] == "There's no [missing] app server configuration!"
+    assert err.value.args[0] == (
+        "There's no [missing] app server configuration in the [test] environment. "
+        "Available: manage (8002), content (8100), modules (8101), schemas (8102), "
+        "test (8103), app-services (8000), admin (8001), health (7997)."
+    )
 
 
 def test_get_async_http_client():

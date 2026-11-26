@@ -66,7 +66,6 @@ _SERVER_AUTH_TO_CLIENT = {
     "certificate": "certificate",
     "kerberos-ticket": "kerberos",
     "application-level": "app",
-    "oauth": "oauth",
 }
 
 _UNSUPPORTED_SERVER_AUTH = ("saml",)
@@ -873,11 +872,26 @@ def _parse_host_spec(
 
 def _client_auth(
     server_auth: str | None,
-) -> str:
-    """Map a server's authentication scheme to a client auth method."""
+) -> str | dict:
+    """Map a server's authentication scheme to a client auth method.
+
+    Parameters
+    ----------
+    server_auth : str | None
+        The App Server's authentication scheme, as Manage reports it.
+
+    Returns
+    -------
+    str | dict
+        A client auth shortcut, digest for an unknown or missing scheme, or an
+        OAuth mapping with an editable token placeholder.
+    """
     if server_auth is None:
         return "digest"
-    return _SERVER_AUTH_TO_CLIENT.get(server_auth.lower(), "digest")
+    auth = server_auth.lower()
+    if auth == "oauth":
+        return _oauth_template()
+    return _SERVER_AUTH_TO_CLIENT.get(auth, "digest")
 
 
 def _diff(
@@ -938,7 +952,7 @@ def _app_servers(
 def _default_gradle_entry(
     server: dict,
     standard_port: int,
-    root_auth: str,
+    root_auth: str | dict,
 ) -> dict | None:
     """Reduce a default server to the fields that diverge, or None when it matches.
 
@@ -1125,12 +1139,41 @@ def _lower(
 
 def _config_auth(
     value: str | None,
-) -> str | None:
-    """Map an ml-gradle server auth name to the environment spelling."""
+) -> str | dict | None:
+    """Map an ml-gradle server auth name to the environment spelling.
+
+    Parameters
+    ----------
+    value : str | None
+        An ml-gradle ``ml*Authentication`` property value.
+
+    Returns
+    -------
+    str | dict | None
+        The environment's auth setting; None when unset or ``cloud``, which the
+        cloud block authenticates by its API key; an OAuth mapping with a token
+        placeholder.
+    """
     if value is None:
         return None
     auth = value.lower()
+    if auth == "cloud":
+        return None
+    if auth == "oauth":
+        return _oauth_template()
     return _SERVER_AUTH_TO_CLIENT.get(auth, auth)
+
+
+def _oauth_template() -> dict:
+    """Return an OAuth auth setting with a bearer-token placeholder.
+
+    Returns
+    -------
+    dict
+        A new mapping on each call so the YAML output holds no aliases.
+        Replace the token placeholder before connecting to MarkLogic.
+    """
+    return {"method": "oauth", "token": "REPLACE_WITH_BEARER_TOKEN"}
 
 
 def _int(

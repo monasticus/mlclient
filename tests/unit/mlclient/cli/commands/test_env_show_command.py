@@ -406,8 +406,11 @@ def test_reports_non_mapping_environment(config: object) -> None:
     (directory / "mlclient-dev.yaml").write_text(yaml.safe_dump(config))
     tester = _get_tester()
 
-    with pytest.raises(WrongParametersError, match="must be a mapping"):
+    with pytest.raises(WrongParametersError, match="must be a mapping") as error:
         tester.execute("-e dev")
+
+    path = directory / "mlclient-dev.yaml"
+    assert str(error.value) == f"Environment configuration must be a mapping: {path}"
 
 
 @pytest.mark.parametrize("servers", [{}, "rest", 1, False])
@@ -441,8 +444,7 @@ def test_reports_invalid_yaml_without_revealing_contents() -> None:
         tester.execute("-e dev")
 
     message = str(error.value)
-    assert "Invalid YAML" in message
-    assert str(path) in message
+    assert message == f"Invalid YAML in environment configuration file: {path}"
     assert "secret-value" not in message
 
 
@@ -983,6 +985,40 @@ def test_show_defaults_displays_cloud_gateway_defaults():
 
 
 # --- safe error reporting ---
+
+
+def test_defaults_reports_unknown_settings_by_location() -> None:
+    path = _write_env(
+        "dev",
+        {
+            "pasword": "private-password",
+            "app-servers": [{"id": "rest", "prot": 8010}],
+        },
+    )
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("-e dev --defaults")
+
+    assert str(error.value) == (
+        f"Invalid environment configuration in {path}:\n"
+        "  app-servers.0.prot: unknown setting\n"
+        "  pasword: unknown setting"
+    )
+
+
+def test_defaults_reports_the_reason_for_an_invalid_value() -> None:
+    path = _write_env("dev", {"app-servers": [{"id": "rest", "port": "eighty"}]})
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("-e dev --defaults")
+
+    assert str(error.value) == (
+        f"Invalid environment configuration in {path}:\n"
+        "  app-servers.0.port: Input should be a valid integer, "
+        "unable to parse string as an integer"
+    )
 
 
 @pytest.mark.parametrize("verbosity", ["", "-vvv"])

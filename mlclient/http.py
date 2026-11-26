@@ -18,13 +18,14 @@ connection and auth functions together by hand.
 
 from __future__ import annotations
 
-import ssl
+import ssl as ssl_module
 from copy import copy
+from typing import TYPE_CHECKING
 
 import httpx
 from httpx_retries import Retry
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.auth import AuthParam
 from mlclient.connection import (
     CloudConfig,
@@ -36,6 +37,12 @@ from mlclient.connection import (
     _transport_verify,
     _validate_config,
 )
+
+if TYPE_CHECKING:
+    from typing_extensions import Unpack
+
+    from mlclient._typing import HTTPConfigOverrides
+
 
 # ReadTimeout and 504 are left out: the server is still running the request,
 # so a retry would run it again.
@@ -68,7 +75,9 @@ DEFAULT_HEALTH_TIMEOUT = httpx.Timeout(5.0)
 NO_RETRY_STRATEGY = Retry(total=0)
 
 
-def _normalize_timeout(timeout):
+def _normalize_timeout(
+    timeout: httpx.Timeout | float | UnsetType | None,
+) -> httpx.Timeout | UnsetType:
     """Turn a timeout argument into UNSET or a comparable httpx.Timeout.
 
     UNSET stays UNSET (no explicit value). None disables every HTTP timeout.
@@ -81,7 +90,7 @@ def _normalize_timeout(timeout):
     return httpx.Timeout(timeout)
 
 
-def _normalize_retry(retry):
+def _normalize_retry(retry: Retry | int | None) -> Retry | None:
     """Turn a retry argument into None or a Retry.
 
     None leaves the strategy unspecified, so DEFAULT_RETRY_STRATEGY applies to
@@ -100,7 +109,7 @@ def _normalize_retry(retry):
     )
 
 
-def _normalize_limits(limits):
+def _normalize_limits(limits: httpx.Limits | int | None) -> httpx.Limits | None:
     """Turn a limits argument into None or an httpx.Limits.
 
     None defers to httpx's own pool default. An int is shorthand for the
@@ -136,8 +145,8 @@ class HTTPConfig:
         password: str,
         retry: Retry | int | None,
         limits: httpx.Limits | int | None,
-        timeout,
-    ):
+        timeout: httpx.Timeout | float | UnsetType | None,
+    ) -> None:
         """Initialize HTTPConfig from already-resolved parts.
 
         Prefer :meth:`resolve`, which runs the connection and auth layers to
@@ -157,17 +166,17 @@ class HTTPConfig:
     def resolve(
         cls,
         *,
-        protocol=UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port=UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: httpx.Limits | int | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> HTTPConfig:
         """Resolve connection and auth parameters into an HTTPConfig.
 
@@ -374,14 +383,14 @@ class HTTPConfig:
             A cloned configuration if a default needs applying, otherwise this
             configuration. The source is not modified and no session is opened.
         """
-        overrides = {}
+        overrides: HTTPConfigOverrides = {}
         if not self.has_explicit_retry:
             overrides["retry"] = NO_RETRY_STRATEGY
         if not self.has_explicit_timeout:
             overrides["timeout"] = DEFAULT_HEALTH_TIMEOUT
         return self.clone(**overrides) if overrides else self
 
-    def transport_verify(self) -> ssl.SSLContext | bool:
+    def transport_verify(self) -> ssl_module.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""
         return _transport_verify(self._connection)
 
@@ -391,7 +400,7 @@ class HTTPConfig:
         Always carries ``verify``; carries ``limits`` only when explicitly set,
         so an unset value defers to httpx's own default.
         """
-        options = {"verify": self.transport_verify()}
+        options: dict = {"verify": self.transport_verify()}
         if self._limits is not None:
             options["limits"] = self.limits
         return options
@@ -403,7 +412,7 @@ class HTTPConfig:
             endpoint = f"/{base_path.strip('/')}/{endpoint.lstrip('/')}"
         return self.base_url + endpoint
 
-    def clone(self, **overrides) -> HTTPConfig:
+    def clone(self, **overrides: Unpack[HTTPConfigOverrides]) -> HTTPConfig:
         """Return an independent config, overriding the given fields.
 
         Accepts any resolve() parameter (``port``, ``host``, ``auth``, ...);
@@ -420,7 +429,7 @@ class HTTPConfig:
             overrides.pop("port", None)
             if not overrides:
                 return self
-        base = {
+        base: HTTPConfigOverrides = {
             "protocol": self.protocol,
             "host": self._host,
             "port": self.port,
@@ -433,7 +442,8 @@ class HTTPConfig:
             "limits": self._limits,
             "timeout": self._timeout,
         }
-        return self.resolve(**{**base, **overrides})
+        base.update(overrides)
+        return self.resolve(**base)
 
     @staticmethod
     def _build_base_url(protocol: str, host: str, port: int) -> str:
@@ -448,4 +458,5 @@ __all__ = [
     "NO_RETRY_STRATEGY",
     "UNSET",
     "HTTPConfig",
+    "UnsetType",
 ]

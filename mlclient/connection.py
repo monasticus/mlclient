@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mlclient._options import UNSET, _Unset
+from mlclient._options import UNSET, UnsetType
 from mlclient.auth import MarkLogicCloudAuth, _auth_method_name, _build_auth
 from mlclient.exceptions import ConfigError
 
@@ -85,8 +85,8 @@ class _ConnectionMode(BaseModel):
 
 
 def _resolve_connection(
-    protocol,
-    port,
+    protocol: str | UnsetType,
+    port: int | UnsetType,
     ssl: SSLConfig | None,
     cloud: CloudConfig | None,
 ) -> _ConnectionMode:
@@ -135,8 +135,8 @@ def _resolve_connection(
 
 
 def _resolve_cloud_connection(
-    protocol,
-    port,
+    protocol: str | UnsetType,
+    port: int | UnsetType,
     ssl: SSLConfig | None,
     cloud: CloudConfig,
 ) -> _ConnectionMode:
@@ -155,13 +155,13 @@ def _resolve_cloud_connection(
     )
 
 
-def _concrete_port(port) -> int:
+def _concrete_port(port: int | UnsetType) -> int:
     """Return the requested port, or the default when omitted."""
-    return DEFAULT_PORT if isinstance(port, _Unset) else port
+    return DEFAULT_PORT if isinstance(port, UnsetType) else port
 
 
 def _default_auth(
-    auth: AuthParam | _Unset,
+    auth: AuthParam | UnsetType,
     connection: _ConnectionMode,
 ) -> AuthParam:
     """Resolve the default auth method for a connection when none was chosen.
@@ -182,7 +182,7 @@ def _default_auth(
     str | httpx.Auth | AuthConfig | None
         The effective auth parameter.
     """
-    if not isinstance(auth, _Unset):
+    if not isinstance(auth, UnsetType):
         return auth
     if connection.is_cloud:
         return None

@@ -71,13 +71,13 @@ class ForestsGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
         database: str | None = None,
         group: str | None = None,
         host: str | None = None,
         full_refs: bool | None = None,
-    ):
+    ) -> None:
         """Initialize ForestsGetCall instance.
 
         Parameters
@@ -110,19 +110,20 @@ class ForestsGetCall(ApiCall):
             method="GET",
             accept=utils.get_accept_header_for_format(data_format),
         )
-        if full_refs is not None:
-            full_refs = str(full_refs).lower()
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
         self.add_param(self._DATABASE_ID_PARAM, database)
         self.add_param(self._GROUP_ID_PARAM, group)
         self.add_param(self._HOST_ID_PARAM, host)
-        self.add_param(self._FULL_REFS_PARAM, full_refs)
+        self.add_param(
+            self._FULL_REFS_PARAM,
+            str(full_refs).lower() if full_refs is not None else None,
+        )
 
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forests call.
 
         Returns
@@ -135,9 +136,9 @@ class ForestsGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -173,7 +174,7 @@ class ForestsPostCall(ApiCall):
         self,
         body: str | dict,
         wait_for_forest_to_mount: bool | None = None,
-    ):
+    ) -> None:
         """Initialize ForestsPostCall instance.
 
         Parameters
@@ -189,14 +190,17 @@ class ForestsPostCall(ApiCall):
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
         super().__init__(method="POST", content_type=content_type, body=body)
-        if wait_for_forest_to_mount is not None:
-            wait_for_forest_to_mount = str(wait_for_forest_to_mount).lower()
-        self.add_param(self._WAIT_FOR_FOREST_TO_MOUNT_PARAM, wait_for_forest_to_mount)
+        self.add_param(
+            self._WAIT_FOR_FOREST_TO_MOUNT_PARAM,
+            str(wait_for_forest_to_mount).lower()
+            if wait_for_forest_to_mount is not None
+            else None,
+        )
 
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forests call.
 
         Returns
@@ -209,8 +213,8 @@ class ForestsPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
-    ):
+        body: str | dict | None,
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/forests!"
             raise exceptions.WrongParametersError(msg)
@@ -234,7 +238,7 @@ class ForestsPutCall(ApiCall):
     def __init__(
         self,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize ForestsPutCall instance.
 
         Parameters
@@ -251,7 +255,7 @@ class ForestsPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forests call.
 
         Returns
@@ -264,8 +268,8 @@ class ForestsPutCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
-    ):
+        body: str | dict | None,
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for PUT /manage/v2/forests!"
             raise exceptions.WrongParametersError(msg)
@@ -305,9 +309,9 @@ class ForestGetCall(ApiCall):
     def __init__(
         self,
         forest: str,
-        data_format: str = "xml",
-        view: str = "default",
-    ):
+        data_format: str | None = "xml",
+        view: str | None = "default",
+    ) -> None:
         """Initialize ForestGetCall instance.
 
         Parameters
@@ -336,7 +340,7 @@ class ForestGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forest call.
 
         Returns
@@ -349,9 +353,9 @@ class ForestGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -396,7 +400,7 @@ class ForestPostCall(ApiCall):
         self,
         forest: str,
         body: dict,
-    ):
+    ) -> None:
         """Initialize ForestPostCall instance.
 
         Parameters
@@ -419,7 +423,7 @@ class ForestPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forests call.
 
         Returns
@@ -432,8 +436,8 @@ class ForestPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        state: str,
-    ):
+        state: str | None,
+    ) -> None:
         if state is None:
             msg = "You must include the 'state' parameter within a body!"
             raise exceptions.WrongParametersError(msg)
@@ -470,7 +474,7 @@ class ForestDeleteCall(ApiCall):
         forest: str,
         level: str,
         replicas: str | None = None,
-    ):
+    ) -> None:
         """Initialize ForestDeleteCall instance.
 
         Parameters
@@ -496,7 +500,7 @@ class ForestDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forest call.
 
         Returns
@@ -509,9 +513,9 @@ class ForestDeleteCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        level: str,
-        replicas: str,
-    ):
+        level: str | None,
+        replicas: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [level],
             cls._SUPPORTED_LEVELS,
@@ -547,8 +551,8 @@ class ForestPropertiesGetCall(ApiCall):
     def __init__(
         self,
         forest: str,
-        data_format: str = "xml",
-    ):
+        data_format: str | None = "xml",
+    ) -> None:
         """Initialize ForestPropertiesGetCall instance.
 
         Parameters
@@ -572,7 +576,7 @@ class ForestPropertiesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forest Properties call.
 
         Returns
@@ -585,8 +589,8 @@ class ForestPropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-    ):
+        data_format: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -614,7 +618,7 @@ class ForestPropertiesPutCall(ApiCall):
         self,
         forest: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize ForestPropertiesPutCall instance.
 
         Parameters
@@ -634,7 +638,7 @@ class ForestPropertiesPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Forest Properties call.
 
         Returns
@@ -647,8 +651,8 @@ class ForestPropertiesPutCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
-    ):
+        body: str | dict | None,
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (
                 "No request body provided for "

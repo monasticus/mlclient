@@ -8,6 +8,7 @@ It exports an implementation for the 'http' command:
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar
 from urllib.parse import parse_qs, urlsplit
 
 from cleo.commands.command import Command
@@ -89,7 +90,7 @@ class HttpCommand(Command):
 
     name: str = "http"
     description: str = "Sends a raw HTTP request to any REST endpoint"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "method",
             "The HTTP method (e.g. get, head, post, put, delete, patch)",
@@ -105,7 +106,7 @@ class HttpCommand(Command):
             multiple=True,
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(
             description=(
                 "The ML Client environment name; repeat it to send the request to "

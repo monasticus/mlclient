@@ -64,11 +64,11 @@ class ServersGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         group_id: str | None = None,
-        view: str = "default",
+        view: str | None = "default",
         full_refs: bool | None = None,
-    ):
+    ) -> None:
         """Initialize ServersGetCall instance.
 
         Parameters
@@ -95,17 +95,18 @@ class ServersGetCall(ApiCall):
             method="GET",
             accept=utils.get_accept_header_for_format(data_format),
         )
-        if full_refs is not None:
-            full_refs = str(full_refs).lower()
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._VIEW_PARAM, view)
-        self.add_param(self._FULL_REFS_PARAM, full_refs)
+        self.add_param(
+            self._FULL_REFS_PARAM,
+            str(full_refs).lower() if full_refs is not None else None,
+        )
 
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Servers call.
 
         Returns
@@ -118,9 +119,9 @@ class ServersGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -159,7 +160,7 @@ class ServersPostCall(ApiCall):
         body: str | dict,
         group_id: str | None = None,
         server_type: str | None = None,
-    ):
+    ) -> None:
         """Initialize ServersPostCall instance.
 
         Parameters
@@ -188,7 +189,7 @@ class ServersPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Servers call.
 
         Returns
@@ -201,9 +202,9 @@ class ServersPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        server_type: str,
-        body: str | dict,
-    ):
+        server_type: str | None,
+        body: str | dict | None,
+    ) -> None:
         if server_type and server_type not in cls._SUPPORTED_SERVER_TYPES:
             joined_supported_server_types = ", ".join(cls._SUPPORTED_SERVER_TYPES)
             msg = f"The supported server types are: {joined_supported_server_types}"
@@ -253,12 +254,12 @@ class ServerGetCall(ApiCall):
         self,
         server: str,
         group_id: str,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
         host_id: str | None = None,
         full_refs: bool | None = None,
         modules: bool | None = None,
-    ):
+    ) -> None:
         """Initialize ServerGetCall instance.
 
         Parameters
@@ -296,22 +297,24 @@ class ServerGetCall(ApiCall):
             method="GET",
             accept=utils.get_accept_header_for_format(data_format),
         )
-        if full_refs is not None:
-            full_refs = str(full_refs).lower()
-        if modules is not None:
-            modules = str(modules).lower()
         self._server = server
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
         self.add_param(self._HOST_ID_PARAM, host_id)
-        self.add_param(self._FULL_REFS_PARAM, full_refs)
-        self.add_param(self._MODULES_PARAM, modules)
+        self.add_param(
+            self._FULL_REFS_PARAM,
+            str(full_refs).lower() if full_refs is not None else None,
+        )
+        self.add_param(
+            self._MODULES_PARAM,
+            str(modules).lower() if modules is not None else None,
+        )
 
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Server call.
 
         Returns
@@ -324,9 +327,9 @@ class ServerGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -361,7 +364,7 @@ class ServerDeleteCall(ApiCall):
         self,
         server: str,
         group_id: str,
-    ):
+    ) -> None:
         """Initialize ServerDeleteCall instance.
 
         Parameters
@@ -379,7 +382,7 @@ class ServerDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Server call.
 
         Returns
@@ -415,8 +418,8 @@ class ServerPropertiesGetCall(ApiCall):
         self,
         server: str,
         group_id: str,
-        data_format: str = "xml",
-    ):
+        data_format: str | None = "xml",
+    ) -> None:
         """Initialize ServerPropertiesGetCall instance.
 
         Parameters
@@ -444,7 +447,7 @@ class ServerPropertiesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Server Properties call.
 
         Returns
@@ -457,8 +460,8 @@ class ServerPropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-    ):
+        data_format: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -489,7 +492,7 @@ class ServerPropertiesPutCall(ApiCall):
         server: str,
         group_id: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize ServerPropertiesPutCall instance.
 
         Parameters
@@ -513,7 +516,7 @@ class ServerPropertiesPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Server Properties call.
 
         Returns
@@ -526,8 +529,8 @@ class ServerPropertiesPutCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
-    ):
+        body: str | dict | None,
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (
                 "No request body provided for "

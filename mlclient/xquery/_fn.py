@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import datetime
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.xquery.expressions import (
     AtomicInput,
     FunctionCall,
@@ -19,14 +19,14 @@ from mlclient.xquery.expressions import (
 )
 
 
-def _optional_call(name: str, *arguments) -> FunctionCall:
+def _optional_call(name: str, *arguments: object) -> FunctionCall:
     """Trim omitted trailing arguments; preserve explicit empty sequences.
 
     Parameters
     ----------
     name : str
         Native function name.
-    arguments : str | int | float | bool | XqyExpression | None
+    arguments : object
         Native positional arguments; UNSET marks an omitted optional slot.
 
     Returns
@@ -72,7 +72,7 @@ class Fn:
     def adjust_date_time_to_timezone(
         arg: datetime.datetime | XqyExpression | None,
         *,
-        timezone: str | XqyExpression | None = UNSET,
+        timezone: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -82,7 +82,7 @@ class Fn:
         ----------
         arg : datetime.datetime | XqyExpression | None
             The dateTime to adjust to the new timezone.
-        timezone : str | XqyExpression | None
+        timezone : str | XqyExpression | None, default unset
             The new timezone for the dateTime.
             Omit to use the native default; None explicitly passes ().
 
@@ -101,7 +101,7 @@ class Fn:
     def adjust_date_to_timezone(
         arg: datetime.date | XqyExpression | None,
         *,
-        timezone: str | XqyExpression | None = UNSET,
+        timezone: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -111,7 +111,7 @@ class Fn:
         ----------
         arg : datetime.date | XqyExpression | None
             The date to adjust to the new timezone.
-        timezone : str | XqyExpression | None
+        timezone : str | XqyExpression | None, default unset
             The new timezone for the date.
             Omit to use the native default; None explicitly passes ().
 
@@ -130,7 +130,7 @@ class Fn:
     def adjust_time_to_timezone(
         arg: datetime.time | XqyExpression | None,
         *,
-        timezone: str | XqyExpression | None = UNSET,
+        timezone: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -140,7 +140,7 @@ class Fn:
         ----------
         arg : datetime.time | XqyExpression | None
             The time to adjust to the new timezone.
-        timezone : str | XqyExpression | None
+        timezone : str | XqyExpression | None, default unset
             The new timezone for the date.
             Omit to use the native default; None explicitly passes ().
 
@@ -160,7 +160,7 @@ class Fn:
         in_: str | XqyExpression | None,
         regex: str | XqyExpression,
         *,
-        flags: str | XqyExpression | None = UNSET,
+        flags: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -174,7 +174,7 @@ class Fn:
             The string to start with.
         regex : str | XqyExpression
             The regular expression pattern to match.
-        flags : str | XqyExpression | None
+        flags : str | XqyExpression | None, default unset
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -224,14 +224,14 @@ class Fn:
         return FunctionCall("fn:avg", (arg,))
 
     @staticmethod
-    def base_uri(arg: NodeInput = UNSET) -> FunctionCall:
+    def base_uri(arg: NodeInput | UnsetType = UNSET) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns the value of the base-uri property for the specified node.
 
         Parameters
         ----------
-        arg : NodeInput
+        arg : NodeInput, default unset
             The node whose base-uri is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -250,7 +250,7 @@ class Fn:
     def boolean(
         arg: AtomicInput,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -260,7 +260,7 @@ class Fn:
         ----------
         arg : AtomicInput
             A sequence of items.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -353,7 +353,7 @@ class Fn:
 
     @staticmethod
     def collection(
-        uri: StringInput = UNSET,
+        uri: StringInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -361,7 +361,7 @@ class Fn:
 
         Parameters
         ----------
-        uri : StringInput
+        uri : StringInput, default unset
             The URI of the collection to retrieve. If you omit this parameter, returns
             all of the documents in the database. If you specify a list of URIs, returns
             all of the documents in all of the collections at the URIs specified in the
@@ -384,7 +384,7 @@ class Fn:
         comparand1: str | XqyExpression | None,
         comparand2: str | XqyExpression | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -398,7 +398,7 @@ class Fn:
             A string to be compared.
         comparand2 : str | XqyExpression | None
             A string to be compared.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -447,7 +447,7 @@ class Fn:
         parameter1: str | XqyExpression | None,
         parameter2: str | XqyExpression | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -460,7 +460,7 @@ class Fn:
             The string from which to test.
         parameter2 : str | XqyExpression | None
             The string to test for existence in the first parameter.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -480,7 +480,7 @@ class Fn:
     def count(
         sequence: AtomicInput,
         *,
-        maximum: float | XqyExpression | None = UNSET,
+        maximum: float | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -490,7 +490,7 @@ class Fn:
         ----------
         sequence : AtomicInput
             The sequence of items to count.
-        maximum : float | XqyExpression | None
+        maximum : float | XqyExpression | None, default unset
             The maximum value of the count to return. MarkLogic Server will stop count
             when the $maximum value is reached and return the $maximum value. This is an
             extension to the W3C standard fn:count function.
@@ -683,7 +683,7 @@ class Fn:
         parameter1: AtomicInput,
         parameter2: AtomicInput,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -696,7 +696,7 @@ class Fn:
         parameter2 : AtomicInput
             The sequence of items to compare to the first sequence of items, again each
             item should be an atomic value or node.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -733,7 +733,7 @@ class Fn:
     def distinct_values(
         arg: AtomicInput,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -744,7 +744,7 @@ class Fn:
         ----------
         arg : AtomicInput
             A sequence of items.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -762,7 +762,7 @@ class Fn:
 
     @staticmethod
     def doc(
-        uri: StringInput = UNSET,
+        uri: StringInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -770,7 +770,7 @@ class Fn:
 
         Parameters
         ----------
-        uri : StringInput
+        uri : StringInput, default unset
             The URI of the document to retrieve. If you omit this parameter, returns all
             of the documents in the database - this is only allowed if you're not using
             xquery version 1.0 strict. If you specify a list of URIs, returns all of the
@@ -814,7 +814,7 @@ class Fn:
     def document(
         uris: XqyExpression | list[XqyExpression] | None,
         *,
-        base_node: NodeInput = UNSET,
+        base_node: NodeInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -831,7 +831,7 @@ class Fn:
             you are not using version 1.0 strict. If any URI in this sequence is an
             absolute URI, then it is used as is. If it is a relative URI, it is resolved
             against a base URI specified in the second argument.
-        base_node : NodeInput
+        base_node : NodeInput, default unset
             If $base-node is supplied, its base URI is used to resolve relative URIs in
             uri-sequence. If it is not supplied, the base URI of the node that contained
             the fn:document() call is used.
@@ -943,7 +943,7 @@ class Fn:
         parameter1: str | XqyExpression | None,
         parameter2: str | XqyExpression | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -956,7 +956,7 @@ class Fn:
             The parameter from which to test.
         parameter2 : str | XqyExpression | None
             The string to test whether it is at the end of the first parameter.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -974,9 +974,9 @@ class Fn:
 
     @staticmethod
     def error(
-        error: XqyExpression | None = UNSET,
-        description: str | XqyExpression | None = UNSET,
-        data: AtomicInput = UNSET,
+        error: XqyExpression | UnsetType | None = UNSET,
+        description: str | XqyExpression | UnsetType | None = UNSET,
+        data: AtomicInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -984,14 +984,14 @@ class Fn:
 
         Parameters
         ----------
-        error : XqyExpression | None
+        error : XqyExpression | None, default unset
             Error code, as an xs:QName . Note that this parameter does not exist in
             0.9-ml.
             Omit to use the native default; None explicitly passes ().
-        description : str | XqyExpression | None
+        description : str | XqyExpression | None, default unset
             String description to be printed with the error.
             Omit to use the native default; None explicitly passes ().
-        data : AtomicInput
+        data : AtomicInput, default unset
             Parameters to the error message.
             Omit to use the native default; None explicitly passes ().
 
@@ -1241,9 +1241,9 @@ class Fn:
         value: datetime.date | XqyExpression,
         picture: str | XqyExpression,
         *,
-        language: str | XqyExpression | None = UNSET,
-        calendar: str | XqyExpression | None = UNSET,
-        country: str | XqyExpression | None = UNSET,
+        language: str | XqyExpression | UnsetType | None = UNSET,
+        calendar: str | XqyExpression | UnsetType | None = UNSET,
+        country: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1260,13 +1260,13 @@ class Fn:
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : str | XqyExpression | None
+        language : str | XqyExpression | None, default unset
             The desired language for string representation of the date $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : str | XqyExpression | None
+        calendar : str | XqyExpression | None, default unset
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : str | XqyExpression | None
+        country : str | XqyExpression | None, default unset
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1294,9 +1294,9 @@ class Fn:
         value: datetime.datetime | XqyExpression,
         picture: str | XqyExpression,
         *,
-        language: str | XqyExpression | None = UNSET,
-        calendar: str | XqyExpression | None = UNSET,
-        country: str | XqyExpression | None = UNSET,
+        language: str | XqyExpression | UnsetType | None = UNSET,
+        calendar: str | XqyExpression | UnsetType | None = UNSET,
+        country: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1313,13 +1313,13 @@ class Fn:
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : str | XqyExpression | None
+        language : str | XqyExpression | None, default unset
             The desired language for string representation of the dateTime $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : str | XqyExpression | None
+        calendar : str | XqyExpression | None, default unset
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : str | XqyExpression | None
+        country : str | XqyExpression | None, default unset
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1347,7 +1347,7 @@ class Fn:
         value: float | XqyExpression,
         picture: str | XqyExpression,
         *,
-        decimal_format_name: str | XqyExpression | None = UNSET,
+        decimal_format_name: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1365,7 +1365,7 @@ class Fn:
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the format-number picture string, see
             http://www.w3.org/TR/xslt20/#function-format-number .
-        decimal_format_name : str | XqyExpression | None
+        decimal_format_name : str | XqyExpression | None, default unset
             Represents a named <xsl:decimal-format> instruction. It is used to assign
             values to the variables mentioned above based on the picture string.
             Omit to use the native default; None explicitly passes ().
@@ -1386,9 +1386,9 @@ class Fn:
         value: datetime.time | XqyExpression,
         picture: str | XqyExpression,
         *,
-        language: str | XqyExpression | None = UNSET,
-        calendar: str | XqyExpression | None = UNSET,
-        country: str | XqyExpression | None = UNSET,
+        language: str | XqyExpression | UnsetType | None = UNSET,
+        calendar: str | XqyExpression | UnsetType | None = UNSET,
+        country: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1405,13 +1405,13 @@ class Fn:
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : str | XqyExpression | None
+        language : str | XqyExpression | None, default unset
             The desired language for string representation of the time $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : str | XqyExpression | None
+        calendar : str | XqyExpression | None, default unset
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : str | XqyExpression | None
+        country : str | XqyExpression | None, default unset
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1460,7 +1460,7 @@ class Fn:
     def function_available(
         function_name: str | XqyExpression,
         *,
-        arity: int | XqyExpression | None = UNSET,
+        arity: int | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1477,7 +1477,7 @@ class Fn:
             namespace declarations in scope for the expression. If the lexical QName is
             unprefixed, then the standard function namespace is used in the expanded
             QName.
-        arity : int | XqyExpression | None
+        arity : int | XqyExpression | None, default unset
             If $arity parameter is present, then the function returns true if and only
             if the function specified by the first argument has a signature that takes
             $arity number of arguments.
@@ -1546,14 +1546,14 @@ class Fn:
         return FunctionCall("fn:function-name", (function,))
 
     @staticmethod
-    def generate_id(node: NodeInput = UNSET) -> FunctionCall:
+    def generate_id(node: NodeInput | UnsetType = UNSET) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns a string that uniquely identifies a given node.
 
         Parameters
         ----------
-        node : NodeInput
+        node : NodeInput, default unset
             The node whose ID will be generated.
             Omit to use the native default; None explicitly passes ().
 
@@ -1665,7 +1665,7 @@ class Fn:
     def id(
         arg: StringInput,
         *,
-        node: NodeInput = UNSET,
+        node: NodeInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1676,7 +1676,7 @@ class Fn:
         ----------
         arg : StringInput
             The IDs of the elements to return.
-        node : NodeInput
+        node : NodeInput, default unset
             The target node.
             Omit to use the native default; None explicitly passes ().
 
@@ -1695,7 +1695,7 @@ class Fn:
     def idref(
         arg: StringInput,
         *,
-        node: NodeInput = UNSET,
+        node: NodeInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1706,7 +1706,7 @@ class Fn:
         ----------
         arg : StringInput
             The IDREFs of the elements and attributes to return.
-        node : NodeInput
+        node : NodeInput, default unset
             The target node.
             Omit to use the native default; None explicitly passes ().
 
@@ -1772,7 +1772,7 @@ class Fn:
         | None,
         srch_param: str | int | float | bool | XqyExpression,
         *,
-        collation_literal: str | XqyExpression | None = UNSET,
+        collation_literal: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1785,7 +1785,7 @@ class Fn:
             A sequence of values.
         srch_param : str | int | float | bool | XqyExpression
             A value to find on the list.
-        collation_literal : str | XqyExpression | None
+        collation_literal : str | XqyExpression | None, default unset
             A collation identifier.
             Omit to use the native default; None explicitly passes ().
 
@@ -1858,7 +1858,7 @@ class Fn:
         key_name: str | XqyExpression,
         key_value: str | XqyExpression,
         *,
-        top: NodeInput = UNSET,
+        top: NodeInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1870,7 +1870,7 @@ class Fn:
             The name of the key.
         key_value : str | XqyExpression
             The value of the key.
-        top : NodeInput
+        top : NodeInput, default unset
             The subtree to limit the results to.
             ---
             Omit to use the native default; None explicitly passes ().
@@ -1890,7 +1890,7 @@ class Fn:
     def lang(
         testlang: str | XqyExpression | None,
         *,
-        node: NodeInput = UNSET,
+        node: NodeInput | UnsetType = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -1902,7 +1902,7 @@ class Fn:
         ----------
         testlang : str | XqyExpression | None
             The language against which to test the node.
-        node : NodeInput
+        node : NodeInput, default unset
             The node to test.
             ---
             Omit to use the native default; None explicitly passes ().
@@ -1936,7 +1936,7 @@ class Fn:
         return FunctionCall("fn:last")
 
     @staticmethod
-    def local_name(arg: NodeInput = UNSET) -> FunctionCall:
+    def local_name(arg: NodeInput | UnsetType = UNSET) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns the local part of the name of $arg as an xs:string that will either be
@@ -1944,7 +1944,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : NodeInput
+        arg : NodeInput, default unset
             The node whose local name is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2069,7 +2069,7 @@ class Fn:
         input: str | XqyExpression | None,
         pattern: str | XqyExpression,
         *,
-        flags: str | XqyExpression | None = UNSET,
+        flags: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2082,7 +2082,7 @@ class Fn:
             The input from which to match.
         pattern : str | XqyExpression
             The regular expression to match.
-        flags : str | XqyExpression | None
+        flags : str | XqyExpression | None, default unset
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -2110,7 +2110,7 @@ class Fn:
         | list[XqyExpression]
         | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2121,7 +2121,7 @@ class Fn:
         ----------
         arg : AtomicInput
             The sequence of values whose maximum will be returned.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -2148,7 +2148,7 @@ class Fn:
         | list[XqyExpression]
         | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2159,7 +2159,7 @@ class Fn:
         ----------
         arg : AtomicInput
             The sequence of values whose minimum will be returned.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -2318,7 +2318,7 @@ class Fn:
         return FunctionCall("fn:months-from-duration", (arg,))
 
     @staticmethod
-    def name(arg: NodeInput = UNSET) -> FunctionCall:
+    def name(arg: NodeInput | UnsetType = UNSET) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns the name of a node, as an xs:string that is either the zero-length
@@ -2326,7 +2326,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : NodeInput
+        arg : NodeInput, default unset
             The node whose name is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2342,14 +2342,14 @@ class Fn:
         return _optional_call("fn:name", arg)
 
     @staticmethod
-    def namespace_uri(arg: NodeInput = UNSET) -> FunctionCall:
+    def namespace_uri(arg: NodeInput | UnsetType = UNSET) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns the namespace URI of the xs:QName of the node specified by $arg.
 
         Parameters
         ----------
-        arg : NodeInput
+        arg : NodeInput, default unset
             The node whose namespace URI is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2459,7 +2459,9 @@ class Fn:
         return FunctionCall("fn:node-name", (arg,))
 
     @staticmethod
-    def normalize_space(input: str | XqyExpression | None = UNSET) -> FunctionCall:
+    def normalize_space(
+        input: str | XqyExpression | UnsetType | None = UNSET,
+    ) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns the specified string with normalized whitespace, which strips off any
@@ -2468,7 +2470,7 @@ class Fn:
 
         Parameters
         ----------
-        input : str | XqyExpression | None
+        input : str | XqyExpression | None, default unset
             The string from which to normalize whitespace.
             Omit to use the native default; None explicitly passes ().
 
@@ -2487,7 +2489,7 @@ class Fn:
     def normalize_unicode(
         arg: str | XqyExpression | None,
         *,
-        normalization_form: str | XqyExpression | None = UNSET,
+        normalization_form: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2498,7 +2500,7 @@ class Fn:
         ----------
         arg : str | XqyExpression | None
             The string to normalize.
-        normalization_form : str | XqyExpression | None
+        normalization_form : str | XqyExpression | None, default unset
             The form under which to normalize the specified string: NFC, NFD, NFKC, or
             NFKD.
             Omit to use the native default; None explicitly passes ().
@@ -2539,7 +2541,7 @@ class Fn:
 
     @staticmethod
     def number(
-        arg: str | int | float | bool | XqyExpression | None = UNSET,
+        arg: str | int | float | bool | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2548,7 +2550,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : str | int | float | bool | XqyExpression | None
+        arg : str | int | float | bool | XqyExpression | None, default unset
             The value to be returned as an xs:double value.
             Omit to use the native default; None explicitly passes ().
 
@@ -2686,7 +2688,7 @@ class Fn:
         pattern: str | XqyExpression,
         replacement: str | XqyExpression,
         *,
-        flags: str | XqyExpression | None = UNSET,
+        flags: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2704,7 +2706,7 @@ class Fn:
             The regular expression pattern to replace the $pattern with. It can also be
             a capture expression (for more details, see http://www.w3.org/TR/xpath-
             functions/#func-replace ).
-        flags : str | XqyExpression | None
+        flags : str | XqyExpression | None, default unset
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -2756,7 +2758,7 @@ class Fn:
     def resolve_uri(
         relative: str | XqyExpression | None,
         *,
-        base: str | XqyExpression | None = UNSET,
+        base: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2766,7 +2768,7 @@ class Fn:
         ----------
         relative : str | XqyExpression | None
             A URI reference to resolve against the base.
-        base : str | XqyExpression | None
+        base : str | XqyExpression | None, default unset
             An absolute URI to use as the base of the resolution.
             Omit to use the native default; None explicitly passes ().
 
@@ -2804,14 +2806,14 @@ class Fn:
         return FunctionCall("fn:reverse", (target,))
 
     @staticmethod
-    def root(arg: NodeInput = UNSET) -> FunctionCall:
+    def root(arg: NodeInput | UnsetType = UNSET) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns the root of the tree to which $arg belongs.
 
         Parameters
         ----------
-        arg : NodeInput
+        arg : NodeInput, default unset
             The node whose root node will be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2852,7 +2854,7 @@ class Fn:
     def round_half_to_even(
         arg: float | XqyExpression | None,
         *,
-        precision: int | XqyExpression | None = UNSET,
+        precision: int | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2863,7 +2865,7 @@ class Fn:
         ----------
         arg : float | XqyExpression | None
             A numeric value to round.
-        precision : int | XqyExpression | None
+        precision : int | XqyExpression | None, default unset
             The precision to which to round the value.
             Omit to use the native default; None explicitly passes ().
 
@@ -2954,7 +2956,7 @@ class Fn:
         parameter1: str | XqyExpression | None,
         parameter2: str | XqyExpression | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -2967,7 +2969,7 @@ class Fn:
             The string from which to test.
         parameter2 : str | XqyExpression | None
             The string to test whether it is at the beginning of the first parameter.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3001,14 +3003,14 @@ class Fn:
         return FunctionCall("fn:static-base-uri")
 
     @staticmethod
-    def string(arg: AtomicInput = UNSET) -> FunctionCall:
+    def string(arg: AtomicInput | UnsetType = UNSET) -> FunctionCall:
         """Build a native XQuery expression.
 
         Returns the value of $arg represented as an xs:string.
 
         Parameters
         ----------
-        arg : AtomicInput
+        arg : AtomicInput, default unset
             The item to be rendered as a string.
             Omit to use the native default; None explicitly passes ().
 
@@ -3053,7 +3055,7 @@ class Fn:
 
     @staticmethod
     def string_length(
-        source_string: str | XqyExpression | None = UNSET,
+        source_string: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3061,7 +3063,7 @@ class Fn:
 
         Parameters
         ----------
-        source_string : str | XqyExpression | None
+        source_string : str | XqyExpression | None, default unset
             The string to calculate the length.
             Omit to use the native default; None explicitly passes ().
 
@@ -3103,7 +3105,7 @@ class Fn:
         source_seq: AtomicInput,
         starting_loc: float | XqyExpression,
         *,
-        length: float | XqyExpression | None = UNSET,
+        length: float | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3117,7 +3119,7 @@ class Fn:
             The sequence of items from which a subsequence will be selected.
         starting_loc : float | XqyExpression
             The starting position of the start of the subsequence.
-        length : float | XqyExpression | None
+        length : float | XqyExpression | None, default unset
             The length of the subsequence.
             Omit to use the native default; None explicitly passes ().
 
@@ -3137,7 +3139,7 @@ class Fn:
         source_string: str | XqyExpression | None,
         starting_loc: float | XqyExpression,
         *,
-        length: float | XqyExpression | None = UNSET,
+        length: float | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3150,7 +3152,7 @@ class Fn:
             The string from which to create a substring.
         starting_loc : float | XqyExpression
             The number of characters from the start of the $sourceString.
-        length : float | XqyExpression | None
+        length : float | XqyExpression | None, default unset
             The number of characters beyond the $startingLoc.
             Omit to use the native default; None explicitly passes ().
 
@@ -3170,7 +3172,7 @@ class Fn:
         input: str | XqyExpression | None,
         after: str | XqyExpression | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3183,7 +3185,7 @@ class Fn:
             The string from which to create the substring.
         after : str | XqyExpression | None
             The string after which the substring is created.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3204,7 +3206,7 @@ class Fn:
         input: str | XqyExpression | None,
         before: str | XqyExpression | None,
         *,
-        collation: str | XqyExpression | None = UNSET,
+        collation: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3217,7 +3219,7 @@ class Fn:
             The string from which to create the substring.
         before : str | XqyExpression | None
             The string before which the substring is created.
-        collation : str | XqyExpression | None
+        collation : str | XqyExpression | None, default unset
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3244,7 +3246,7 @@ class Fn:
         | list[XqyExpression]
         | None,
         *,
-        zero: str | int | float | bool | XqyExpression | None = UNSET,
+        zero: str | int | float | bool | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3254,7 +3256,7 @@ class Fn:
         ----------
         arg : AtomicInput
             The sequence of values to be summed.
-        zero : str | int | float | bool | XqyExpression | None
+        zero : str | int | float | bool | XqyExpression | None, default unset
             The value to return as zero if the input sequence is the empty sequence.
             This parameter is not available in the 0.9-ml XQuery dialect.
             Omit to use the native default; None explicitly passes ().
@@ -3391,7 +3393,7 @@ class Fn:
         input: str | XqyExpression | None,
         pattern: str | XqyExpression,
         *,
-        flags: str | XqyExpression | None = UNSET,
+        flags: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3404,7 +3406,7 @@ class Fn:
             The string to tokenize.
         pattern : str | XqyExpression
             The regular expression pattern from which to separate the tokens.
-        flags : str | XqyExpression | None
+        flags : str | XqyExpression | None, default unset
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -3557,7 +3559,7 @@ class Fn:
     def unparsed_text(
         href: str | XqyExpression,
         *,
-        encoding: str | XqyExpression | None = UNSET,
+        encoding: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3570,7 +3572,7 @@ class Fn:
             The $href is a string containing a URI reference. It must identify a
             resource that can be read as text. If the URI is a relative URI then it is
             resolved relative to the base URI from the static context.
-        encoding : str | XqyExpression | None
+        encoding : str | XqyExpression | None, default unset
             If $encoding parameter is present and the URI points to a "text" file, the
             encoding is ignored since all the files are in UTF-8 in the database.
             However, if the URI points to a binary file, then an attempt is made to
@@ -3597,7 +3599,7 @@ class Fn:
     def unparsed_text_available(
         href: str | XqyExpression,
         *,
-        encoding: str | XqyExpression | None = UNSET,
+        encoding: str | XqyExpression | UnsetType | None = UNSET,
     ) -> FunctionCall:
         """Build a native XQuery expression.
 
@@ -3609,7 +3611,7 @@ class Fn:
             The $href is a string containing a URI reference. It must identify a
             resource that can be read as text. If the URI is a relative URI then it is
             resolved relative to the base URI from the static context.
-        encoding : str | XqyExpression | None
+        encoding : str | XqyExpression | None, default unset
             If $encoding parameter is present and the URI points to a "text" file, the
             encoding is ignored since all the files are in UTF-8 in the database.
             However, if the URI points to a binary file, then an attempt will be made to

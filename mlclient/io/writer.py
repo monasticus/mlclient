@@ -7,15 +7,16 @@ It exports a class serializing Documents into files:
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Iterable
 from pathlib import Path
+from typing import cast
 
 import aiofiles
 
+from mlclient._logging import get_logger
 from mlclient.models.documents import Document, Metadata
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DocumentsWriter:
@@ -28,7 +29,7 @@ class DocumentsWriter:
     async def write(
         cls,
         documents: Iterable[Document],
-        output_path: str,
+        output_path: str | Path,
     ) -> None:
         """Write documents to files under a path.
 
@@ -51,7 +52,7 @@ class DocumentsWriter:
     async def write_document(
         cls,
         document: Document,
-        output_path: str,
+        output_path: str | Path,
     ) -> None:
         """Write a single document to a file under a path.
 
@@ -67,7 +68,7 @@ class DocumentsWriter:
         output_path : str
             A path to the output directory.
         """
-        doc_path = Path(output_path) / document.uri[1:]
+        doc_path = Path(output_path) / cast("str", document.uri)[1:]
         doc_path.parent.mkdir(parents=True, exist_ok=True)
 
         if document.content_bytes is not None:

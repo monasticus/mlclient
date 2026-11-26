@@ -37,7 +37,7 @@ from __future__ import annotations
 import base64
 import logging
 import ssl
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union, cast
 from urllib.parse import urljoin
 
 import httpx
@@ -46,7 +46,10 @@ from pydantic import BaseModel
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import AsyncGenerator, Generator
+    from types import ModuleType
+
+    from spnego import ContextProxy
 
 _TokenVerify = Union[bool, str, ssl.SSLContext]
 
@@ -91,7 +94,7 @@ class OAuthBearerAuth(httpx.Auth):
     def __init__(
         self,
         token: str,
-    ):
+    ) -> None:
         """Initialize OAuthBearerAuth with a pre-acquired Bearer token.
 
         Parameters
@@ -104,7 +107,7 @@ class OAuthBearerAuth(httpx.Auth):
     def auth_flow(
         self,
         request: httpx.Request,
-    ):
+    ) -> Generator[httpx.Request, httpx.Response, None]:
         """Attach the Bearer token to the request."""
         request.headers["Authorization"] = f"Bearer {self._token}"
         yield request
@@ -133,7 +136,7 @@ class KerberosAuth(httpx.Auth):
         self,
         service: str = "HTTP",
         hostname: str | None = None,
-    ):
+    ) -> None:
         """Initialize KerberosAuth.
 
         Parameters
@@ -149,7 +152,7 @@ class KerberosAuth(httpx.Auth):
     def auth_flow(
         self,
         request: httpx.Request,
-    ):
+    ) -> Generator[httpx.Request, httpx.Response, None]:
         """Negotiate authentication, retrying once with a SPNEGO token."""
         response = yield request
         if not self._needs_negotiation(response):
@@ -172,7 +175,7 @@ class KerberosAuth(httpx.Auth):
     def _new_context(
         self,
         request_host: str,
-    ):
+    ) -> ContextProxy:
         """Create a SPNEGO client context for the target host's SPN."""
         spnego = _import_spnego()
         return spnego.client(
@@ -183,15 +186,15 @@ class KerberosAuth(httpx.Auth):
 
     def _initial_header(
         self,
-        context,
+        context: ContextProxy,
     ) -> str:
         """Return the first Negotiate header for the SPNEGO exchange."""
         token = context.step()
-        return self._negotiate_header(token)
+        return self._negotiate_header(cast("bytes", token))
 
     def _verify_mutual_auth(
         self,
-        context,
+        context: ContextProxy,
         response: httpx.Response,
     ) -> None:
         """Feed the server's final token back to confirm its identity.
@@ -242,7 +245,7 @@ class MarkLogicCloudAuth(httpx.Auth):
         api_key: str,
         token_duration: int = 0,
         verify: _TokenVerify = True,
-    ):
+    ) -> None:
         """Initialize MarkLogicCloudAuth.
 
         Parameters
@@ -266,7 +269,7 @@ class MarkLogicCloudAuth(httpx.Auth):
     def sync_auth_flow(
         self,
         request: httpx.Request,
-    ):
+    ) -> Generator[httpx.Request, httpx.Response, None]:
         """Attach a Bearer token, fetching/refreshing it synchronously."""
         if self._token is None:
             self._token = self._fetch_token()
@@ -278,7 +281,7 @@ class MarkLogicCloudAuth(httpx.Auth):
     async def async_auth_flow(
         self,
         request: httpx.Request,
-    ):
+    ) -> AsyncGenerator[httpx.Request, httpx.Response]:
         """Attach a Bearer token, fetching/refreshing it asynchronously."""
         if self._token is None:
             self._token = await self._async_fetch_token()
@@ -312,7 +315,7 @@ class MarkLogicCloudAuth(httpx.Auth):
 
     def _exchange(self) -> dict:
         """Return the token-exchange payload and optional duration param."""
-        exchange = {"data": {"grant_type": "apikey", "key": self._api_key}}
+        exchange: dict = {"data": {"grant_type": "apikey", "key": self._api_key}}
         if self._token_duration > 0:
             exchange["params"] = {"duration": self._token_duration}
         return exchange
@@ -477,7 +480,7 @@ def _build_from_config(
     if config.method == "certificate":
         return None
     if config.method == "oauth":
-        return OAuthBearerAuth(token=config.token)
+        return OAuthBearerAuth(token=cast("str", config.token))
     if config.method == "kerberos":
         return _build_kerberos_auth(config)
     msg = f"Unknown auth method: {config.method!r}"
@@ -496,7 +499,7 @@ def _build_kerberos_auth(
     return KerberosAuth(service=config.service, hostname=config.hostname)
 
 
-def _import_spnego():
+def _import_spnego() -> ModuleType:
     """Import the optional spnego dependency, or raise an install hint."""
     try:
         import spnego  # noqa: PLC0415

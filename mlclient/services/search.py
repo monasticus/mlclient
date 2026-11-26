@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 from xml.etree import ElementTree
 
 from mlclient import _constants as constants
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.models.document_parts import Category, DocumentsDisposition
 from mlclient.models.results import ParsedValue, SearchReport, TupleHit, ValueHit
 from mlclient.responses import MLResponseParser
@@ -23,6 +23,7 @@ from mlclient.services._documents_parsing import DocumentsReader, normalize_cate
 from mlclient.services.scope import OptionsInput, SearchScope
 
 if TYPE_CHECKING:
+    import httpx
     from httpx import Response
 
     from mlclient.api.rest import AsyncRestApi, RestApi
@@ -80,7 +81,7 @@ class SearchService:
     request.
     """
 
-    def __init__(self, rest: RestApi, scope: SearchScope | None = None):
+    def __init__(self, rest: RestApi, scope: SearchScope | None = None) -> None:
         """Create the service using the client's REST API.
 
         Parameters
@@ -97,13 +98,13 @@ class SearchService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        collection: str | list[str] | None = UNSET,
-        directory: str | None = UNSET,
-        forest_name: str | list[str] | None = UNSET,
-        options: OptionsInput = UNSET,
-        timestamp: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        collection: str | list[str] | UnsetType | None = UNSET,
+        directory: str | UnsetType | None = UNSET,
+        forest_name: str | list[str] | UnsetType | None = UNSET,
+        options: OptionsInput | UnsetType = UNSET,
+        timestamp: str | UnsetType | None = UNSET,
     ) -> SearchService:
         """Return a service whose operations use a narrower scope.
 
@@ -158,16 +159,16 @@ class SearchService:
 
     def documents(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
 
@@ -224,7 +225,7 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -235,27 +236,27 @@ class SearchService:
         )
         resp = self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
             multipart=True,
             timeout=timeout,
         )
-        return _parse_documents(resp, category)
+        return _parse_documents(resp, categories)
 
     def documents_with_report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
 
@@ -313,7 +314,7 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -324,7 +325,7 @@ class SearchService:
         )
         resp = self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
@@ -332,17 +333,17 @@ class SearchService:
             view="all",
             timeout=timeout,
         )
-        return _parse_documents_with_report(resp, category)
+        return _parse_documents_with_report(resp, categories)
 
     def uris(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
 
@@ -411,16 +412,16 @@ class SearchService:
     def values(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
 
@@ -505,17 +506,17 @@ class SearchService:
         self,
         name: str,
         function: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         aggregate_path: str | None = None,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
 
@@ -611,16 +612,16 @@ class SearchService:
     def tuples(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
 
@@ -704,16 +705,16 @@ class SearchService:
 
     def report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         view: ReportView = "all",
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
 
@@ -807,7 +808,7 @@ class AsyncSearchService:
     request.
     """
 
-    def __init__(self, rest: AsyncRestApi, scope: SearchScope | None = None):
+    def __init__(self, rest: AsyncRestApi, scope: SearchScope | None = None) -> None:
         """Create the service using the client's REST API.
 
         Parameters
@@ -824,13 +825,13 @@ class AsyncSearchService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        collection: str | list[str] | None = UNSET,
-        directory: str | None = UNSET,
-        forest_name: str | list[str] | None = UNSET,
-        options: OptionsInput = UNSET,
-        timestamp: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        collection: str | list[str] | UnsetType | None = UNSET,
+        directory: str | UnsetType | None = UNSET,
+        forest_name: str | list[str] | UnsetType | None = UNSET,
+        options: OptionsInput | UnsetType = UNSET,
+        timestamp: str | UnsetType | None = UNSET,
     ) -> AsyncSearchService:
         """Return a service whose operations use a narrower scope.
 
@@ -885,16 +886,16 @@ class AsyncSearchService:
 
     async def documents(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[Document]:
         """Return documents matching a query, in search result order.
 
@@ -951,7 +952,7 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -962,27 +963,27 @@ class AsyncSearchService:
         )
         resp = await self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
             multipart=True,
             timeout=timeout,
         )
-        return _parse_documents(resp, category)
+        return _parse_documents(resp, categories)
 
     async def documents_with_report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> tuple[SearchReport, list[Document]]:
         """Return a search report and matching documents in one request.
 
@@ -1040,7 +1041,7 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -1051,7 +1052,7 @@ class AsyncSearchService:
         )
         resp = await self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
@@ -1059,17 +1060,17 @@ class AsyncSearchService:
             view="all",
             timeout=timeout,
         )
-        return _parse_documents_with_report(resp, category)
+        return _parse_documents_with_report(resp, categories)
 
     async def uris(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[str]:
         """Return URIs of documents matching a query, in search result order.
 
@@ -1138,16 +1139,16 @@ class AsyncSearchService:
     async def values(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[ValueHit]:
         """Return values of a named lexicon definition with their frequencies.
 
@@ -1232,17 +1233,17 @@ class AsyncSearchService:
         self,
         name: str,
         function: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         aggregate_path: str | None = None,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue | None:
         """Aggregate a values or tuples definition with a built-in or native plugin.
 
@@ -1338,16 +1339,16 @@ class AsyncSearchService:
     async def tuples(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> list[TupleHit]:
         """Return typed co-occurring values of a named tuples definition.
 
@@ -1431,16 +1432,16 @@ class AsyncSearchService:
 
     async def report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         view: ReportView = "all",
         transform: str | None = None,
         transform_params: dict | None = None,
         scope: SearchScope | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> SearchReport:
         """Return a search report with results, scores, facets and metrics.
 
@@ -1522,8 +1523,8 @@ def _request_params(
     scope: SearchScope | None,
     *,
     lexicon: bool = False,
-    database: str | None = UNSET,
-    txid: str | None = UNSET,
+    database: str | UnsetType | None = UNSET,
+    txid: str | UnsetType | None = UNSET,
 ) -> dict:
     """Build the combined-query POST arguments with their scope and paging.
 
@@ -1577,10 +1578,10 @@ def _request_params(
 
 def _criteria(
     query: SearchInput,
-    options: OptionsInput,
+    options: OptionsInput | UnsetType,
     *,
     lexicon: bool = False,
-    operation_options: OptionsInput = UNSET,
+    operation_options: OptionsInput | UnsetType = UNSET,
 ) -> tuple[dict, dict]:
     """Carry a query and options in a combined-query body.
 
@@ -1591,7 +1592,7 @@ def _criteria(
     ----------
     query : SearchQuery | dict | str | None
         Search criteria, serialized locally.
-    options : str | dict | SearchOptions | None
+    options : str | dict | SearchOptions | UnsetType | None
         Installed name, inline options members or composition, or unset.
     lexicon : bool, default False
         Use additional-query for inline CTS restrictions: ML10/ML12 ignore
@@ -1894,9 +1895,12 @@ def _parse_uris(resp: Response) -> list[str]:
     if not isinstance(parts, list):
         parts = [parts]
     return [
-        DocumentsDisposition.from_header(
-            headers.get(constants.HEADER_NAME_CONTENT_DISP),
-        ).filename
+        cast(
+            "str",
+            DocumentsDisposition.from_header(
+                headers.get(constants.HEADER_NAME_CONTENT_DISP),
+            ).filename,
+        )
         for headers, _ in parts
     ]
 

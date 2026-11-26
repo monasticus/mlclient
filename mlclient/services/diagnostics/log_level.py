@@ -9,15 +9,16 @@ the equivalent Management REST resource.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from httpx import HTTPStatusError, RequestError
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
+    import httpx
     from httpx import Response
 
     from mlclient.api.manage import ManageApi
@@ -58,7 +59,7 @@ class LogLevelService:
         self,
         rest: RestApi,
         manage: ManageApi,
-    ):
+    ) -> None:
         """Initialize the service with REST and Manage API handles.
 
         Parameters
@@ -77,7 +78,7 @@ class LogLevelService:
         group: str = "Default",
         server: str | None = None,
         log_type: str = "file",
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Return the current log level, falling back to Manage on privilege errors.
 
@@ -122,7 +123,7 @@ class LogLevelService:
             raise
         if resp.is_success:
             logger.debug("Log-level eval succeeded")
-            return MLResponseParser.parse(resp)
+            return cast("str", MLResponseParser.parse(resp))
         _raise_unless_privilege_error(resp)
         return self._manage_get(group, server, log_type, timeout=timeout)
 
@@ -133,7 +134,7 @@ class LogLevelService:
         group: str = "Default",
         server: str | None = None,
         log_type: str = "file",
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Change the log level, falling back to Manage on privilege errors.
 
@@ -190,7 +191,7 @@ class LogLevelService:
         server: str | None,
         log_type: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Read a group or App Server log level through Management REST.
 
@@ -254,7 +255,7 @@ class LogLevelService:
         log_type: str,
         level: str,
         *,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> str:
         """Update only the requested log-level property through Management REST.
 
@@ -422,7 +423,7 @@ class LogLevelService:
         server: str | None,
         log_type: str,
         level: str | None,
-    ):
+    ) -> None:
         """Validate log selectors and any proposed level before making requests.
 
         Parameters

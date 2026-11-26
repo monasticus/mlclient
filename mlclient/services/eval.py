@@ -5,16 +5,20 @@ Provides parsed code evaluation on MarkLogic.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ElemTree
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import aiofiles
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
+from mlclient.api.rest import AsyncRestApi, RestApi
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
 from mlclient.xquery.expressions import XqyExpression
+
+if TYPE_CHECKING:
+    import httpx
 
 _XQUERY_FILE_EXT = ("xq", "xql", "xqm", "xqu", "xquery", "xqy")
 _JAVASCRIPT_FILE_EXT = ("js", "sjs")
@@ -25,18 +29,54 @@ SUPPORTED_FILE_EXTENSIONS = tuple(
 )
 
 
-class EvalService(ExecutionService):
+class EvalService(ExecutionService[RestApi]):
     """Higher-level service for /v1/eval endpoint."""
+
+    @overload
+    def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> ParsedValue: ...
+
+    @overload
+    def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> str | list[str]: ...
+
+    @overload
+    def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> bytes | list[bytes]: ...
 
     def expression(
         self,
         expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
@@ -55,7 +95,7 @@ class EvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
         timeout : httpx.Timeout | float | None, default unset
             Per-request HTTP timeout; unset inherits the client configuration.
@@ -93,27 +133,56 @@ class EvalService(ExecutionService):
         )
         return self._parse_result(response, output_type)
 
+    @overload
     def xquery(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def xquery(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def xquery(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
+
+    def xquery(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -128,7 +197,7 @@ class EvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -142,7 +211,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -158,30 +229,59 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    def javascript(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def javascript(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def javascript(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     def javascript(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -196,7 +296,7 @@ class EvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -210,7 +310,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -226,30 +328,59 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     def xqy(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -264,7 +395,7 @@ class EvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -278,7 +409,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -287,37 +420,66 @@ class EvalService(ExecutionService):
             attempt the retry policy allows. The default policy does not retry
             read timeouts.
         """
-        return self.xquery(
-            code,
+        return self._eval(
+            xq=code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     def js(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -332,7 +494,7 @@ class EvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -346,7 +508,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -355,37 +519,66 @@ class EvalService(ExecutionService):
             attempt the retry policy allows. The default policy does not retry
             read timeouts.
         """
-        return self.javascript(
-            code,
+        return self._eval(
+            js=code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    def file(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def file(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def file(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     def file(
         self,
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate code from a file in MarkLogic (auto-detect language).
 
         Parameters
@@ -400,7 +593,7 @@ class EvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -414,7 +607,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -430,8 +625,53 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    def execute(
+        self,
+        *,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def execute(
+        self,
+        *,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def execute(
+        self,
+        *,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     def execute(
         self,
@@ -440,12 +680,12 @@ class EvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate code in a MarkLogic server (general-purpose).
 
         Dynamically resolves the code type from the provided parameters.
@@ -467,7 +707,7 @@ class EvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -481,7 +721,9 @@ class EvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -501,7 +743,7 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     def _eval(
@@ -510,12 +752,12 @@ class EvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
         params = _get_eval_params(
@@ -533,7 +775,7 @@ def _validate_params(
     file: str | None,
     xq: str | None,
     js: str | None,
-):
+) -> None:
     """Validate parameters."""
     if file and xq:
         msg = "You cannot include both the file and the xquery parameter!"
@@ -603,18 +845,54 @@ def _file_language(file: str) -> str:
     raise UnsupportedFileExtensionError(msg)
 
 
-class AsyncEvalService(ExecutionService):
+class AsyncEvalService(ExecutionService[AsyncRestApi]):
     """Async higher-level service for /v1/eval endpoint."""
+
+    @overload
+    async def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> bytes | list[bytes]: ...
 
     async def expression(
         self,
         expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> ParsedValue:
         """Compile and execute an expression as the root of one eval request.
 
@@ -633,7 +911,7 @@ class AsyncEvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
         timeout : httpx.Timeout | float | None, default unset
             Per-request HTTP timeout; unset inherits the client configuration.
@@ -671,27 +949,56 @@ class AsyncEvalService(ExecutionService):
         )
         return self._parse_result(response, output_type)
 
+    @overload
     async def xquery(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def xquery(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def xquery(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
+
+    async def xquery(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -706,7 +1013,7 @@ class AsyncEvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -720,7 +1027,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -736,30 +1045,59 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    async def javascript(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def javascript(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def javascript(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     async def javascript(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -774,7 +1112,7 @@ class AsyncEvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -788,7 +1126,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -804,30 +1144,59 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    async def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     async def xqy(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate XQuery code in MarkLogic.
 
         Parameters
@@ -842,7 +1211,7 @@ class AsyncEvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -856,7 +1225,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -865,37 +1236,66 @@ class AsyncEvalService(ExecutionService):
             attempt the retry policy allows. The default policy does not retry
             read timeouts.
         """
-        return await self.xquery(
-            code,
+        return await self._eval(
+            xq=code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    async def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     async def js(
         self,
         code: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate JavaScript code in MarkLogic.
 
         Parameters
@@ -910,7 +1310,7 @@ class AsyncEvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -924,7 +1324,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -933,37 +1335,66 @@ class AsyncEvalService(ExecutionService):
             attempt the retry policy allows. The default policy does not retry
             read timeouts.
         """
-        return await self.javascript(
-            code,
+        return await self._eval(
+            js=code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    async def file(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def file(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def file(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     async def file(
         self,
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate code from a file in MarkLogic (auto-detect language).
 
         Parameters
@@ -978,7 +1409,7 @@ class AsyncEvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -992,7 +1423,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -1008,8 +1441,53 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
+
+    @overload
+    async def execute(
+        self,
+        *,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def execute(
+        self,
+        *,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def execute(
+        self,
+        *,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
 
     async def execute(
         self,
@@ -1018,12 +1496,12 @@ class AsyncEvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Evaluate code in a MarkLogic server (general-purpose).
 
         Dynamically resolves the code type from the provided parameters.
@@ -1045,7 +1523,7 @@ class AsyncEvalService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this evaluation. Unset uses the
@@ -1059,7 +1537,9 @@ class AsyncEvalService(ExecutionService):
 
         Returns
         -------
-        Parsed evaluation result
+        ParsedValue
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list.
 
         Raises
         ------
@@ -1079,7 +1559,7 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     async def _eval(
@@ -1088,12 +1568,12 @@ class AsyncEvalService(ExecutionService):
         xq: str | None = None,
         js: str | None = None,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
-    ):
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue:
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
         params = await _async_get_eval_params(

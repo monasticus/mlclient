@@ -8,7 +8,7 @@ from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from types import MappingProxyType
-from typing import ClassVar, Literal, get_args
+from typing import ClassVar, Literal, cast, get_args
 from xml.etree.ElementTree import Element as XmlElement
 from xml.etree.ElementTree import SubElement, tostring
 
@@ -166,7 +166,7 @@ class Range(QueryComponent):
     computed_buckets: Sequence[ComputedBucket] = ()
     anchors: Sequence[Anchor] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject a target or attribute the range cannot describe.
 
         Raises
@@ -178,8 +178,8 @@ class Range(QueryComponent):
         _matching(self.fragment_scope, self.weight)
         for bucket in self.buckets:
             _require(bucket, Bucket, "range bucket")
-        for bucket in self.computed_buckets:
-            _require(bucket, ComputedBucket, "computed range bucket")
+        for computed_bucket in self.computed_buckets:
+            _require(computed_bucket, ComputedBucket, "computed range bucket")
         for anchor in self.anchors:
             _require(anchor, Anchor, "range anchor")
         for name, value in (("facet", self.facet), ("nullable", self.nullable)):
@@ -320,7 +320,7 @@ class SearchOption(_OptionComponent):
     _definition: _Definition
 
     @abstractmethod
-    def __init__(self):
+    def __init__(self) -> None:
         """Create a concrete option from its typed parameters."""
         raise NotImplementedError
 
@@ -366,7 +366,7 @@ class SearchOptions(QueryComponent):
         self,
         *options: SearchOption | SearchOptions,
         namespaces: Mapping[str, str] | None = None,
-    ):
+    ) -> None:
         """Snapshot option composition while retaining immutable components.
 
         Parameters
@@ -382,8 +382,8 @@ class SearchOptions(QueryComponent):
         TypeError
             If a component has an unsupported type.
         """
-        bindings = {}
-        components = []
+        bindings: dict[str, str] = {}
+        components: list[SearchOption] = []
         for option in options:
             if isinstance(option, SearchOptions):
                 additions = option.components
@@ -425,6 +425,17 @@ class SearchOptions(QueryComponent):
         return self.to_json() == other.to_json() and tostring(
             self.to_xml(),
         ) == tostring(other.to_xml())
+
+    def __hash__(self) -> int:
+        """Hash the independent JSON representation consistently with equality.
+
+        Returns
+        -------
+        int
+            A content hash unaffected by JSON mapping order or XML prefix
+            registration. Unequal XML representations may share a hash.
+        """
+        return _hash_json(self.to_json())
 
     def __repr__(self) -> str:
         """Name the native definitions in insertion order.
@@ -496,8 +507,6 @@ class SearchOptions(QueryComponent):
                 members[name] = definition
         return {"options": members}
 
-    __hash__ = None
-
 
 @dataclass(frozen=True, init=False)
 class Values(SearchOption):
@@ -537,7 +546,7 @@ class Values(SearchOption):
         style: Literal["default", "consistent"] | None = None,
         aggregates: Sequence[Aggregate] = (),
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named range, URI or collection lexicon.
 
         Parameters
@@ -629,7 +638,7 @@ class Tuples(SearchOption):
         style: Literal["default", "consistent"] | None = None,
         aggregates: Sequence[Aggregate] = (),
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define co-occurring values from two or more indexes or lexicons.
 
         Parameters
@@ -723,7 +732,7 @@ class RangeConstraint(SearchOption):
         facet: bool = True,
         options: str | Sequence[str] | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named range constraint and optional facet.
 
         Parameters
@@ -800,7 +809,7 @@ class WordConstraint(SearchOption):
         weight: float | None = None,
         annotation: str | None = None,
         collation: str | None = None,
-    ):
+    ) -> None:
         """Define a named word constraint on an element, JSON property or field.
 
         String queries use it as ``name:word``; WordConstraintQuery names it.
@@ -882,7 +891,7 @@ class ValueConstraint(SearchOption):
         fragment_scope: Literal["documents", "properties"] | None = None,
         weight: float | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named value constraint on an element, JSON property or field.
 
         String queries use it as ``name:value``; ValueConstraintQuery names it.
@@ -973,7 +982,7 @@ class CollectionConstraint(SearchOption):
         facet: bool = True,
         options: str | Sequence[str] | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named collection constraint and optional facet.
 
         String queries use it as ``name:collection``, matched after the prefix.
@@ -1001,7 +1010,7 @@ class CollectionConstraint(SearchOption):
         object.__setattr__(self, "name", name)
         object.__setattr__(self, "prefix", prefix)
         object.__setattr__(self, "facet", facet)
-        attributes = {"facet": facet}
+        attributes: dict = {"facet": facet}
         if prefix is not None:
             attributes["prefix"] = prefix
         object.__setattr__(
@@ -1038,7 +1047,7 @@ class ContainerConstraint(SearchOption):
         *,
         fragment_scope: Literal["documents", "properties"] | None = None,
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Define a named container constraint on an element or JSON property.
 
         ContainerConstraintQuery names it to match a query within the container.
@@ -1122,7 +1131,7 @@ class SortOrder(SearchOption):
         *,
         direction: Literal["ascending", "descending"] = "ascending",
         annotation: str | None = None,
-    ):
+    ) -> None:
         """Append an index-based or native sort key in insertion order.
 
         Parameters
@@ -1199,7 +1208,7 @@ class Control(SearchOption):
     name: str
     value: str | int | float | bool
 
-    def __init__(self, name: str, value: str | int | float | bool):
+    def __init__(self, name: str, value: str | int | float | bool) -> None:
         """Set a scalar top-level option such as page-length or return-facets.
 
         A repeatable option such as search-option accumulates; any other
@@ -1247,7 +1256,7 @@ class NativeOption(SearchOption):
         If the native names, namespace or definition counts do not match.
     """
 
-    def __init__(self, definition: dict, element: XmlElement):
+    def __init__(self, definition: dict, element: XmlElement) -> None:
         """Snapshot the JSON value and corresponding XML element.
 
         Parameters
@@ -1264,6 +1273,17 @@ class NativeOption(SearchOption):
         """
         (matched,) = _pair_native_definitions(definition, (element,))
         object.__setattr__(self, "_definition", matched)
+
+    def __hash__(self) -> int:
+        """Hash the independent JSON representation consistently with equality.
+
+        Returns
+        -------
+        int
+            A content hash unaffected by JSON mapping order or XML prefix
+            registration. Unequal XML representations may share a hash.
+        """
+        return _hash_json(self.to_json())
 
     def __eq__(self, other: object) -> bool:
         """Compare native options using both independent formats.
@@ -1284,8 +1304,6 @@ class NativeOption(SearchOption):
             self.to_xml(),
         ) == tostring(other.to_xml())
 
-    __hash__ = None
-
 
 @dataclass(frozen=True, init=False, eq=False, repr=False)
 class NativeOptions(SearchOptions):
@@ -1304,7 +1322,7 @@ class NativeOptions(SearchOptions):
         If the native definitions do not have matching names and counts.
     """
 
-    def __init__(self, definition: dict, *elements: XmlElement):
+    def __init__(self, definition: dict, *elements: XmlElement) -> None:
         """Snapshot independent native forms for reuse in option compositions.
 
         Parameters
@@ -1322,7 +1340,10 @@ class NativeOptions(SearchOptions):
         matched = _pair_native_definitions(definition, elements)
         super().__init__(
             *(
-                NativeOption({member.name: member.native[0]}, member.native[1])
+                NativeOption(
+                    {member.name: cast("tuple[dict, XmlElement]", member.native)[0]},
+                    cast("tuple[dict, XmlElement]", member.native)[1],
+                )
                 for member in matched
             ),
         )
@@ -1334,7 +1355,7 @@ class PageLength(SearchOption):
 
     value: int
 
-    def __init__(self, value: int):
+    def __init__(self, value: int) -> None:
         """Create a typed page-length option.
 
         Parameters
@@ -1365,7 +1386,7 @@ class ReturnFacets(SearchOption):
 
     value: bool
 
-    def __init__(self, value: bool):
+    def __init__(self, value: bool) -> None:
         """Create a typed return-facets option.
 
         Parameters
@@ -1426,7 +1447,7 @@ class _Definition(QueryComponent):
     text_member: str | None = None
     namespaces: dict[str, str] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot mutable inputs without serializing nested components."""
         # Targets and ranges are immutable and already snapshot namespace mappings.
         for name in ("attributes", "value", "native", "namespaces"):
@@ -1527,6 +1548,29 @@ class _Definition(QueryComponent):
                 else:
                     members[name] = value
         return {self.name: members}
+
+
+def _hash_json(value: object) -> int:
+    """Hash nested JSON data using Python's mapping and scalar equality rules.
+
+    Parameters
+    ----------
+    value : object
+        A JSON mapping, sequence or scalar value.
+
+    Returns
+    -------
+    int
+        An order-independent hash for mappings and an ordered hash for
+        sequences. Equal scalar values, including 1, 1.0 and True, retain
+        equal hashes. XML is omitted because JSON equality is a necessary
+        condition for options equality, and XML prefixes are process-global.
+    """
+    if isinstance(value, dict):
+        return hash(frozenset((key, _hash_json(item)) for key, item in value.items()))
+    if isinstance(value, (list, tuple)):
+        return hash(tuple(_hash_json(item) for item in value))
+    return hash(value)
 
 
 def _pair_native_definitions(
@@ -1715,7 +1759,7 @@ class _BooleanOption(SearchOption):
     value: bool
     _name: ClassVar[str]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the boolean before constructing either native format.
 
         Raises
@@ -1877,7 +1921,7 @@ class ConcurrencyLevel(SearchOption):
 
     value: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -1911,7 +1955,7 @@ class QualityWeight(SearchOption):
 
     value: float
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -1945,7 +1989,7 @@ class Forest(SearchOption):
 
     value: str | int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -1975,7 +2019,7 @@ class FragmentScope(SearchOption):
 
     value: Literal["documents", "properties"]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -2005,7 +2049,7 @@ class SearchOptionString(SearchOption):
 
     value: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the control.
 
         Raises
@@ -2112,7 +2156,7 @@ class Callback(_OptionComponent):
     ns: str | None = None
     at: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the function attributes in an immutable definition."""
         object.__setattr__(
             self,
@@ -2145,7 +2189,7 @@ class Bucket(_OptionComponent):
     ge: str | int | float | None = None
     lt: str | int | float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture bounds separately from the display label."""
         object.__setattr__(
             self,
@@ -2195,7 +2239,7 @@ class ComputedBucket(_OptionComponent):
     ge_anchor: str | None = None
     lt_anchor: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture duration offsets and anchor choices."""
         object.__setattr__(
             self,
@@ -2237,7 +2281,7 @@ class Heatmap(_OptionComponent):
     latitude_divisions: int
     longitude_divisions: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject non-finite coordinates and invalid grid dimensions.
 
         Raises
@@ -2289,7 +2333,7 @@ class Aggregate(_OptionComponent):
     apply: str
     udf: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the aggregate function and optional plugin."""
         object.__setattr__(
             self,
@@ -2325,7 +2369,7 @@ class Word(_OptionComponent):
     weight: float | None = None
     collation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the target and snapshot option strings.
 
         Raises
@@ -2383,7 +2427,7 @@ class Value(_OptionComponent):
     fragment_scope: Literal["documents", "properties"] | None = None
     weight: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the target and JSON node type before serialization.
 
         Raises
@@ -2437,7 +2481,7 @@ class Collection(_OptionComponent):
     facet: bool | None = None
     options: str | Sequence[str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture collection settings and snapshot facet options."""
         object.__setattr__(
             self,
@@ -2469,7 +2513,7 @@ class WordLexicon(_OptionComponent):
     collation: str | None = None
     fragment_scope: Literal["documents", "properties"] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture lexicon selection without checking database configuration.
 
         Raises
@@ -2501,7 +2545,7 @@ class ResultDecorator(SearchOption):
 
     callback: Callback
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the callback under the result-decorator member.
 
         Raises
@@ -2529,7 +2573,7 @@ class PreferredMatches(_OptionComponent):
 
     targets: Sequence[Element | JsonProperty]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot and validate the preferred targets.
 
         Raises
@@ -2580,7 +2624,7 @@ class TransformResults(SearchOption):
     max_snippet_chars: int | None = None
     parameters: Sequence[QueryComponent] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot custom data and capture the snippet settings.
 
         Raises
@@ -2647,7 +2691,7 @@ class SuggestionSource(SearchOption):
 
     _name: ClassVar[str] = "suggestion-source"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the inline source and capture suggestion options.
 
         Raises
@@ -2706,7 +2750,7 @@ class TermDefault(_OptionComponent):
     ref: str | None = None
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and capture the default matching definition.
 
         Raises
@@ -2760,7 +2804,7 @@ class Term(SearchOption):
     fragment_scope: Literal["documents", "properties"] | None = None
     weight: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture default and empty-query behavior without invoking callbacks.
 
         Raises
@@ -2841,7 +2885,7 @@ class AdditionalQuery(SearchOption):
         """
         return "additional-query"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject objects that do not provide query serialization.
 
         Raises
@@ -2959,7 +3003,7 @@ class Starter(_OptionComponent):
     delimiter: str | None = None
     tokenize: Literal["word", "default"] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture operator attributes and its token label."""
         object.__setattr__(
             self,
@@ -3021,7 +3065,7 @@ class Joiner(_OptionComponent):
     consume: int | None = None
     tokenize: Literal["word", "default"] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the joiner token and native parser attributes."""
         object.__setattr__(
             self,
@@ -3068,7 +3112,7 @@ class Grammar(SearchOption):
     starters: Sequence[Starter] = ()
     joiners: Sequence[Joiner] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot operators and preserve their array cardinality.
 
         Raises
@@ -3116,7 +3160,7 @@ class OperatorState(_OptionComponent):
     name: str
     options: SearchOptions
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reject options that are unavailable inside an operator state.
 
         Raises
@@ -3169,7 +3213,7 @@ class Operator(SearchOption):
     name: str
     states: Sequence[OperatorState]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot the state list while preserving its order."""
         for state in self.states:
             _require(state, OperatorState, "operator state")
@@ -3180,7 +3224,7 @@ class Operator(SearchOption):
             _Definition(
                 "operator",
                 {"name": self.name},
-                self.states,
+                tuple(self.states),
                 repeatable=frozenset({"state"}),
             ),
         )
@@ -3199,7 +3243,7 @@ class SearchableExpression(SearchOption):
 
     path: PathIndex
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Reuse the public path component's two native forms."""
         _require(self.path, PathIndex, "searchable expression")
         object.__setattr__(
@@ -3229,7 +3273,7 @@ class ExtractDocumentData(SearchOption):
     )
     namespaces: Mapping[str, str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot path strings and namespace bindings.
 
         Raises
@@ -3294,10 +3338,10 @@ class _Geospatial(_OptionComponent):
     def _configure(
         self,
         name: str,
-        targets: tuple[QueryComponent, ...],
+        targets: tuple[_Renamed, ...],
         *,
         coord: str | None = None,
-    ):
+    ) -> None:
         """Capture a concrete index's targets and shared settings.
 
         Parameters
@@ -3322,7 +3366,7 @@ class _Geospatial(_OptionComponent):
         ):
             message = "geo-region-path does not support heatmaps or facet options"
             raise ValueError(message)
-        children = (
+        children: tuple[QueryComponent, ...] = (
             *targets,
             *_scalars({"fragment-scope": self.fragment_scope, "weight": self.weight}),
         )
@@ -3356,7 +3400,7 @@ def _geo_targets(
     name: str,
     targets: QueryComponent | Sequence[QueryComponent],
     expected: type,
-) -> tuple[QueryComponent, ...]:
+) -> tuple[_Renamed, ...]:
     """Validate one or several geospatial index selectors.
 
     Parameters
@@ -3378,7 +3422,11 @@ def _geo_targets(
     TypeError
         If any selector has the wrong type.
     """
-    items = (targets,) if isinstance(targets, expected) else tuple(targets)
+    items = (
+        (cast("QueryComponent", targets),)
+        if isinstance(targets, expected)
+        else tuple(cast("Sequence[QueryComponent]", targets))
+    )
     if not items or any(not isinstance(item, expected) for item in items):
         message = f"{name} requires one or more {expected.__name__} selectors"
         raise TypeError(message)
@@ -3400,7 +3448,7 @@ class GeoElement(_Geospatial):
     parent: Element | Sequence[Element]
     element: Element | Sequence[Element]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3408,7 +3456,7 @@ class GeoElement(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent", self.parent, Element)
         if not isinstance(self.parent, Element):
             object.__setattr__(self, "parent", tuple(self.parent))
@@ -3436,7 +3484,7 @@ class GeoElementPair(_Geospatial):
     lat: Element | Sequence[Element]
     lon: Element | Sequence[Element]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3444,7 +3492,7 @@ class GeoElementPair(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent", self.parent, Element)
         if not isinstance(self.parent, Element):
             object.__setattr__(self, "parent", tuple(self.parent))
@@ -3475,7 +3523,7 @@ class GeoAttributePair(_Geospatial):
     lat: Attribute | Sequence[Attribute]
     lon: Attribute | Sequence[Attribute]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3483,7 +3531,7 @@ class GeoAttributePair(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent", self.parent, Element)
         if not isinstance(self.parent, Element):
             object.__setattr__(self, "parent", tuple(self.parent))
@@ -3511,7 +3559,7 @@ class GeoJsonProperty(_Geospatial):
     parent_property: JsonProperty | Sequence[JsonProperty]
     json_property: JsonProperty | Sequence[JsonProperty]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3519,7 +3567,7 @@ class GeoJsonProperty(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent-property", self.parent_property, JsonProperty)
         if not isinstance(self.parent_property, JsonProperty):
             object.__setattr__(self, "parent_property", tuple(self.parent_property))
@@ -3547,7 +3595,7 @@ class GeoJsonPropertyPair(_Geospatial):
     lat_property: JsonProperty | Sequence[JsonProperty]
     lon_property: JsonProperty | Sequence[JsonProperty]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3555,7 +3603,7 @@ class GeoJsonPropertyPair(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent-property", self.parent_property, JsonProperty)
         if not isinstance(self.parent_property, JsonProperty):
             object.__setattr__(self, "parent_property", tuple(self.parent_property))
@@ -3580,7 +3628,7 @@ class GeoPath(_Geospatial):
 
     path_index: PathIndex | Sequence[PathIndex]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3588,7 +3636,7 @@ class GeoPath(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("path-index", self.path_index, PathIndex)
         if not isinstance(self.path_index, PathIndex):
             object.__setattr__(self, "path_index", tuple(self.path_index))
@@ -3608,7 +3656,7 @@ class GeoRegionPath(_Geospatial):
     path_index: PathIndex | Sequence[PathIndex]
     coord: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and snapshot the index selectors.
 
         Raises
@@ -3616,7 +3664,7 @@ class GeoRegionPath(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("path-index", self.path_index, PathIndex)
         if not isinstance(self.path_index, PathIndex):
             object.__setattr__(self, "path_index", tuple(self.path_index))
@@ -3649,7 +3697,7 @@ class GeoConstraint(SearchOption):
     )
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the index and name its native definition.
 
         Raises
@@ -3687,7 +3735,7 @@ class PropertiesConstraint(SearchOption):
     name: str
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Create the empty properties marker and optional annotation."""
         object.__setattr__(
             self,
@@ -3725,7 +3773,7 @@ class ElementQueryConstraint(SearchOption):
     fragment_scope: Literal["documents", "properties"] | None = None
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and describe the legacy element constraint.
 
         Raises
@@ -3782,7 +3830,7 @@ class CustomConstraint(SearchOption):
     term_options: str | Sequence[str] | None = None
     annotation: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture callback identities and snapshot extension option strings.
 
         Raises
@@ -3846,7 +3894,7 @@ class Anchor(_OptionComponent):
     value: str | None = None
     callback: Callback | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the fixed value or custom anchor function.
 
         Raises
@@ -3908,7 +3956,7 @@ class Annotation(SearchOption):
 
     text: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture annotation text without interpreting markup."""
         object.__setattr__(
             self,
@@ -3932,7 +3980,7 @@ class MetadataQName(_OptionComponent):
     element: Element
     attribute: Attribute | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the metadata element and optional attribute names.
 
         Raises
@@ -3963,7 +4011,7 @@ class ConstraintValue(_OptionComponent):
 
     ref: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Capture the referenced constraint name."""
         object.__setattr__(
             self,
@@ -3984,7 +4032,7 @@ class ExtractMetadata(SearchOption):
 
     sources: Sequence[MetadataQName | JsonProperty | ConstraintValue]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot and validate metadata selectors.
 
         Raises
@@ -4045,7 +4093,11 @@ def _namespace_bindings(bindings: Mapping[str, str]) -> Mapping[str, str]:
     return MappingProxyType(dict(bindings))
 
 
-def _require(value: object, expected: type | tuple[type, ...], description: str):
+def _require(
+    value: object,
+    expected: type | tuple[type, ...],
+    description: str,
+) -> None:
     """Validate a required component before it can be serialized.
 
     Parameters
@@ -4067,7 +4119,7 @@ def _require(value: object, expected: type | tuple[type, ...], description: str)
         raise TypeError(message)
 
 
-def _matching(fragment_scope: str | None, weight: float | None):
+def _matching(fragment_scope: str | None, weight: float | None) -> None:
     """Validate optional fragment selection and relevance weight.
 
     Parameters
@@ -4094,7 +4146,7 @@ def _matching(fragment_scope: str | None, weight: float | None):
         raise ValueError(message)
 
 
-def _style(style: str | None):
+def _style(style: str | None) -> None:
     """Validate the native values or tuples style.
 
     Parameters
@@ -4112,7 +4164,7 @@ def _style(style: str | None):
         raise ValueError(message)
 
 
-def _replace_list_children(node: XmlElement, name: str, values: list[str]):
+def _replace_list_children(node: XmlElement, name: str, values: list[str]) -> None:
     """Replace an inherited XML option list with the explicit list.
 
     Parameters

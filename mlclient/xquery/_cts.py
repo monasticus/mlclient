@@ -90,7 +90,7 @@ from mlclient.xquery.expressions import (
 xs = Xs()
 
 
-def _double(value) -> XqyExpression | None:
+def _double(value: AtomicInput) -> XqyExpression | None:
     """Cast an optional numeric value to the native double type."""
     return xs.double(value) if value is not None else None
 
@@ -1190,7 +1190,7 @@ class Cts:
     @staticmethod
     def directory_query(
         uris: StringInput,
-        depth: str | XqyExpression | None = "1",
+        depth: str | XqyExpression = "1",
     ) -> DirectoryQuery:
         """Build a composable ``cts:directory-query`` call.
 
@@ -10499,7 +10499,7 @@ class Cts:
 
     @staticmethod
     def search(
-        expression: XqyExpression | list[XqyExpression] | None = None,
+        expression: str | XqyExpression | None = None,
         query: str | XqyExpression | None = None,
         *,
         options: StringInput = None,

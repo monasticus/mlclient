@@ -8,6 +8,7 @@ It exports an implementation for 'eval' command:
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar
 
 import httpx
 from cleo.commands.command import Command
@@ -86,13 +87,13 @@ class EvalCommand(Command):
     name: str = "eval"
     description: str = "Runs XQuery or JavaScript code"
     help: str = "Uses the /v1/eval endpoint of a REST App Server."
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "code",
             "XQuery code, a code file path, or @path to force a file",
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(
             description=(
                 "The ML Client environment name; repeat it to time the code in "
@@ -136,7 +137,7 @@ class EvalCommand(Command):
         write_results(self, results)
         return 0
 
-    def _get_eval_params(self):
+    def _get_eval_params(self) -> dict:
         """Prepare parameters for an Eval service."""
         code = self.argument("code")
         variables = self.option("var")
@@ -203,7 +204,7 @@ class EvalCommand(Command):
         self,
         environment: str,
         eval_params: dict,
-    ):
+    ) -> str | list[str]:
         """Evaluate the code and get results."""
         rest_server = self.option("connection")
 

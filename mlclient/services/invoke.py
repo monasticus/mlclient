@@ -5,12 +5,18 @@ Provides parsed evaluation of modules installed in MarkLogic.
 
 from __future__ import annotations
 
-from mlclient._options import UNSET
+from typing import TYPE_CHECKING, overload
+
+from mlclient._options import UNSET, UnsetType
+from mlclient.api.rest import AsyncRestApi, RestApi
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
 
+if TYPE_CHECKING:
+    import httpx
 
-class InvokeService(ExecutionService):
+
+class InvokeService(ExecutionService[RestApi]):
     """Higher-level service for /v1/invoke endpoint.
 
     Invokes XQuery or server-side JavaScript modules installed in MarkLogic.
@@ -19,16 +25,55 @@ class InvokeService(ExecutionService):
     privilege, not xdmp-eval.
     """
 
+    @overload
     def module(
         self,
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
+
+    def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
     ) -> ParsedValue:
         """Invoke a module installed in MarkLogic and parse its result.
 
@@ -46,7 +91,7 @@ class InvokeService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this invocation. Unset uses the
@@ -87,7 +132,7 @@ class InvokeService(ExecutionService):
         return self._parse_result(response, output_type)
 
 
-class AsyncInvokeService(ExecutionService):
+class AsyncInvokeService(ExecutionService[AsyncRestApi]):
     """Async higher-level service for /v1/invoke endpoint.
 
     Invokes XQuery or server-side JavaScript modules installed in MarkLogic.
@@ -96,16 +141,55 @@ class AsyncInvokeService(ExecutionService):
     privilege, not xdmp-eval.
     """
 
+    @overload
     async def module(
         self,
         path: str,
         *,
         variables: dict | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        output_type: type | None = None,
-        timeout=UNSET,
-        **kwargs,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> ParsedValue: ...
+
+    @overload
+    async def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> str | list[str]: ...
+
+    @overload
+    async def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[bytes],
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
+    ) -> bytes | list[bytes]: ...
+
+    async def module(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        output_type: type[str | bytes] | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+        **kwargs: object,
     ) -> ParsedValue:
         """Invoke a module installed in MarkLogic and parse its result.
 
@@ -123,7 +207,7 @@ class AsyncInvokeService(ExecutionService):
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
-        output_type : type | None, default None
+        output_type : type[str | bytes] | None, default None
             A raw output type (supported: str, bytes)
         timeout : httpx.Timeout | float | None, default unset
             A per-request HTTP timeout for this invocation. Unset uses the

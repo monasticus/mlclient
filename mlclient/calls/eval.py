@@ -41,7 +41,7 @@ class EvalCall(ApiCall):
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
-    ):
+    ) -> None:
         """Initialize EvalCall instance.
 
         Parameters
@@ -78,7 +78,7 @@ class EvalCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Eval call.
 
         Returns
@@ -91,9 +91,9 @@ class EvalCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        xquery: str,
-        javascript: str,
-    ):
+        xquery: str | None,
+        javascript: str | None,
+    ) -> None:
         if not xquery and not javascript:
             msg = "You must include either the xquery or the javascript parameter!"
             raise exceptions.WrongParametersError(msg)
@@ -104,10 +104,10 @@ class EvalCall(ApiCall):
     @classmethod
     def _build_body(
         cls,
-        xquery: str,
-        javascript: str,
-        variables: dict,
-    ):
+        xquery: str | None,
+        javascript: str | None,
+        variables: dict | None,
+    ) -> dict[str, str | None]:
         code_lang = cls._XQ_PARAM if xquery else cls._JS_PARAM
         code_to_eval = xquery or javascript
         body = {code_lang: code_to_eval}

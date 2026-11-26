@@ -46,7 +46,7 @@ class TransactionsPostCall(ApiCall):
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-    ):
+    ) -> None:
         """Initialize TransactionsPostCall instance.
 
         Parameters
@@ -73,7 +73,7 @@ class TransactionsPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Transactions call.
 
         Returns
@@ -107,9 +107,9 @@ class TransactionGetCall(ApiCall):
     def __init__(
         self,
         txid: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         database: str | None = None,
-    ):
+    ) -> None:
         """Initialize TransactionGetCall instance.
 
         Parameters
@@ -138,7 +138,7 @@ class TransactionGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Transaction call.
 
         Returns
@@ -151,8 +151,8 @@ class TransactionGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-    ):
+        data_format: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -186,7 +186,7 @@ class TransactionPostCall(ApiCall):
         txid: str,
         result: str,
         database: str | None = None,
-    ):
+    ) -> None:
         """Initialize TransactionPostCall instance.
 
         Parameters
@@ -212,7 +212,7 @@ class TransactionPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Transaction call.
 
         Returns
@@ -225,8 +225,8 @@ class TransactionPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        result: str,
-    ):
+        result: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [result],
             cls._SUPPORTED_RESULTS,

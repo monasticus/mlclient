@@ -7,7 +7,7 @@ responses; this module turns them into Document instances.
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, cast
 
 from mlclient import _constants as constants
 from mlclient.models.document_parts import Category, DocumentsDisposition
@@ -16,6 +16,8 @@ from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
     from httpx import Response
+
+    from mlclient.models.results import ParsedValue
 
 
 def normalize_category(
@@ -51,7 +53,7 @@ class DocumentsReader:
         resp: Response,
         category: str | list[str] | None,
         *,
-        uris: str | list[str] | tuple[str] | set[str] | None = None,
+        uris: str | list[str] | tuple[str, ...] | set[str] | None = None,
     ) -> Iterator[Document]:
         """Parse a single-document or multipart/mixed response to Documents.
 
@@ -61,7 +63,7 @@ class DocumentsReader:
             The MarkLogic response.
         category : str | list[str] | None
             The categories requested; None means content only.
-        uris : str | list[str] | tuple[str] | set[str] | None, default None
+        uris : str | list[str] | tuple[str, ...] | set[str] | None, default None
             The requested URIs; a single-document response carries no URI, so
             it takes the first one. Multipart responses name every part.
 
@@ -128,7 +130,7 @@ class DocumentsReader:
         cls,
         parsed_resp: list[tuple],
         is_multipart: bool,
-        uris: str | list[str] | tuple[str] | set[str] | None,
+        uris: str | list[str] | tuple[str, ...] | set[str] | None,
         category: str | list[str] | None,
     ) -> Iterator[dict]:
         """Prepare document data from multipart or single-document parts.
@@ -139,7 +141,7 @@ class DocumentsReader:
             The ``(headers, body)`` pairs.
         is_multipart : bool
             Whether the response is multipart/mixed.
-        uris : str | list[str] | tuple[str] | set[str] | None
+        uris : str | list[str] | tuple[str, ...] | set[str] | None
             The requested URIs, used only for a single-document response.
         category : str | list[str] | None
             The categories requested.
@@ -195,7 +197,7 @@ class DocumentsReader:
     def _pre_format_document(
         cls,
         parsed_resp: list[tuple],
-        origin_uris: str | list[str] | tuple[str] | set[str] | None,
+        origin_uris: str | list[str] | tuple[str, ...] | set[str] | None,
         origin_category: str | list[str] | None,
     ) -> Iterator[dict]:
         """Prepare a single-document response, named by the requested URI.
@@ -204,7 +206,7 @@ class DocumentsReader:
         ----------
         parsed_resp : list[tuple]
             The single ``(headers, body)`` pair.
-        origin_uris : str | list[str] | tuple[str] | set[str] | None
+        origin_uris : str | list[str] | tuple[str, ...] | set[str] | None
             The requested URI, or a list whose first item is used.
         origin_category : str | list[str] | None
             The categories requested.
@@ -226,7 +228,9 @@ class DocumentsReader:
         else:
             yield {
                 "uri": uri,
-                "metadata": cls._pre_format_metadata(parsed_resp_body),
+                "metadata": cls._pre_format_metadata(
+                    cast("str | bytes", parsed_resp_body),
+                ),
             }
 
     @classmethod
@@ -271,13 +275,13 @@ class DocumentsReader:
         expect_metadata = origin_category and any(
             cat.value in origin_category for cat in Category if cat != Category.CONTENT
         )
-        return expect_content, expect_metadata
+        return expect_content, bool(expect_metadata)
 
     @classmethod
     def _get_partial_data(
         cls,
         content_disp: DocumentsDisposition,
-        parsed_resp_body: Any,
+        parsed_resp_body: ParsedValue,
     ) -> dict:
         """Return the data one multipart part contributes to its Document.
 
@@ -285,7 +289,7 @@ class DocumentsReader:
         ----------
         content_disp : DocumentsDisposition
             The part's parsed Content-Disposition.
-        parsed_resp_body : Any
+        parsed_resp_body : ParsedValue
             The part's body.
 
         Returns
@@ -301,7 +305,7 @@ class DocumentsReader:
             }
         return {
             "uri": content_disp.filename,
-            "metadata": cls._pre_format_metadata(parsed_resp_body),
+            "metadata": cls._pre_format_metadata(cast("str | bytes", parsed_resp_body)),
         }
 
     @classmethod
@@ -349,7 +353,7 @@ class DocumentsReader:
         metadata = Metadata(raw=raw_metadata) if raw_metadata else None
 
         if content is None:
-            return Document.metadata_update(uri, metadata or Metadata())
+            return Document.metadata_update(cast("str", uri), metadata or Metadata())
 
         return Document.create(
             content=content,

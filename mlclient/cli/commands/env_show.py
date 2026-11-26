@@ -8,6 +8,7 @@ It exports an implementation for 'env show' command:
 from __future__ import annotations
 
 import subprocess
+from typing import ClassVar
 
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -80,14 +81,14 @@ class EnvShowCommand(Command):
 
     name: str = "env show"
     description: str = "Renders one MLClient environment's settings"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "setting",
             "A root setting name (host, protocol, ...) or an app server id.",
             optional=True,
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(),
         option(
             "global",

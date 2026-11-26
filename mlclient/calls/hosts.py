@@ -58,10 +58,10 @@ class HostsGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         group_id: str | None = None,
-        view: str = "default",
-    ):
+        view: str | None = "default",
+    ) -> None:
         """Initialize HostsGetCall instance.
 
         Parameters
@@ -92,7 +92,7 @@ class HostsGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Hosts call.
 
         Returns
@@ -105,9 +105,9 @@ class HostsGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         """Validate the response format and host-list view.
 
         Parameters
@@ -169,9 +169,9 @@ class HostGetCall(ApiCall):
     def __init__(
         self,
         host: str,
-        data_format: str = "xml",
-        view: str = "default",
-    ):
+        data_format: str | None = "xml",
+        view: str | None = "default",
+    ) -> None:
         """Initialize HostGetCall instance.
 
         Parameters
@@ -201,7 +201,7 @@ class HostGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Host call.
 
         Returns
@@ -214,9 +214,9 @@ class HostGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         """Validate the response format and view.
 
         Parameters
@@ -269,7 +269,7 @@ class HostPostCall(ApiCall):
         self,
         host: str,
         body: dict,
-    ):
+    ) -> None:
         """Initialize HostPostCall instance.
 
         Parameters
@@ -292,7 +292,7 @@ class HostPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Host call.
 
         Returns
@@ -306,7 +306,7 @@ class HostPostCall(ApiCall):
     def _validate_params(
         cls,
         state: str | None,
-    ):
+    ) -> None:
         """Validate the requested state change.
 
         Parameters
@@ -353,8 +353,8 @@ class HostPropertiesGetCall(ApiCall):
     def __init__(
         self,
         host: str,
-        data_format: str = "xml",
-    ):
+        data_format: str | None = "xml",
+    ) -> None:
         """Initialize HostPropertiesGetCall instance.
 
         Parameters
@@ -378,7 +378,7 @@ class HostPropertiesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Host Properties call.
 
         Returns
@@ -391,8 +391,8 @@ class HostPropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-    ):
+        data_format: str | None,
+    ) -> None:
         """Validate the response format.
 
         Parameters
@@ -432,7 +432,7 @@ class HostPropertiesPutCall(ApiCall):
         self,
         host: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize HostPropertiesPutCall instance.
 
         Parameters
@@ -456,7 +456,7 @@ class HostPropertiesPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Host Properties call.
 
         Returns

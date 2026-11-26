@@ -1,5 +1,6 @@
 import json
 import sys
+from collections import UserList
 from xml.etree.ElementTree import ElementTree, fromstring
 
 import pytest
@@ -84,3 +85,19 @@ def test_nested_json_arrays_remain_arrays():
 def test_node_inputs_work_in_custom_calls():
     expression = FunctionCall("fn:node-kind", (fromstring("<report/>"),))
     assert "fn:node-kind(xdmp:unquote($v0) ! *)" in expression.compile()[1].values()
+
+
+def test_sequence_input_is_snapshotted_before_later_mutation():
+    source = UserList(["one", "two"])
+    expression = fn.count(source)
+    source.append("three")
+
+    code, variables = expression.compile()
+
+    assert code == (
+        'xquery version "1.0-ml";\n'
+        "declare variable $v0 as xs:string external;\n"
+        "declare variable $v1 as xs:string external;\n"
+        "fn:count(($v0, $v1))"
+    )
+    assert variables == {"v0": "one", "v1": "two"}

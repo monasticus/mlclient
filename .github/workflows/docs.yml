@@ -32,6 +32,8 @@ jobs:
       contents: write
       pages: write
       id-token: write
+    env:
+      PAGES_ARTIFACT: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -72,9 +74,13 @@ jobs:
           mkdir pages-site
           git archive gh-pages | tar -x -C pages-site
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: pages-site
+          name: ${{ env.PAGES_ARTIFACT }}
+          include-hidden-files: true
       - name: Deploy GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+        with:
+          artifact_name: ${{ env.PAGES_ARTIFACT }}

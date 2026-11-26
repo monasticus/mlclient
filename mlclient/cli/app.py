@@ -25,6 +25,7 @@ from cleo.io.io import IO
 from cleo.io.outputs.output import Output, Verbosity
 
 from mlclient._version import __version__ as ml_client_version
+from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.cli.commands.env_compare import EnvCompareCommand
 from mlclient.cli.commands.env_copy import EnvCopyCommand
 from mlclient.cli.commands.env_edit import EnvEditCommand
@@ -42,7 +43,6 @@ from mlclient.cli.commands.sample import SampleCommand
 from mlclient.cli.commands.trace_events import TraceEventsCommand
 from mlclient.cli.commands.url import UrlCommand
 from mlclient.cli.commands.version import VersionCommand
-from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.logging import setup_logger
 
 
@@ -54,7 +54,7 @@ class MLCLIentApplication(Application):
 
     def __init__(
         self,
-    ):
+    ) -> None:
         """Initialize MLCLIentApplication instance."""
         super().__init__(self._APP_NAME, ml_client_version)
         self.set_display_name(self._DISPLAY_NAME)
@@ -117,7 +117,7 @@ class CleoAppHandler(logging.Handler):
             "verbosity": Verbosity.VERY_VERBOSE,
             "style": "mlclient_debug",
         },
-        logging.FINE: {
+        logging.FINE: {  # type: ignore[attr-defined]
             "verbosity": Verbosity.DEBUG,
             "style": "mlclient_fine",
         },
@@ -127,7 +127,7 @@ class CleoAppHandler(logging.Handler):
         self,
         io: IO,
         level: int = logging.NOTSET,
-    ):
+    ) -> None:
         """Initialize CleoAppHandler instance."""
         super().__init__(level=level)
         self.io = io
@@ -135,7 +135,7 @@ class CleoAppHandler(logging.Handler):
     def emit(
         self,
         record: logging.LogRecord,
-    ):
+    ) -> None:
         """Emit a LogRecord."""
         verbosity = self._LEVELS[record.levelno]["verbosity"]
         style = self._LEVELS[record.levelno]["style"]
@@ -149,7 +149,7 @@ class CleoAppHandler(logging.Handler):
     def setup_for(
         cls,
         io: IO,
-    ):
+    ) -> None:
         """Set up MLClient logs handler and format for an IO.
 
         Logs go to the error output; their styles are registered on both
@@ -189,7 +189,9 @@ class CleoAppHandler(logging.Handler):
         cleo_handler = cls(io)
         cleo_handler.setFormatter(origin_formatter)
 
-        logger.setLevel(logging.FINE)
+        logger.setLevel(
+            logging.FINE,  # type: ignore[attr-defined]
+        )
         logger.handlers = [cleo_handler]
 
 

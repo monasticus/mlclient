@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.calls.admin import (
     ClusterConfigPostCall,
     HostConfigDeleteCall,
@@ -22,6 +22,8 @@ from mlclient.calls.admin import (
 from mlclient.calls.base import ApiCall
 
 if TYPE_CHECKING:
+    import httpx
+
     from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
@@ -31,10 +33,15 @@ class AdminApi:
     Requires the Admin server (port 8001 by default).
     """
 
-    def __init__(self, api: ApiClient):
+    def __init__(self, api: ApiClient) -> None:
         self._api = api
 
-    def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Send a custom ApiCall.
 
         Parameters
@@ -61,7 +68,11 @@ class AdminApi:
         """
         return self._api.call(call_, timeout=timeout)
 
-    def get_timestamp(self, *, timeout=UNSET) -> Response:
+    def get_timestamp(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Verify that MarkLogic Server is up and accepting requests.
 
         Returns a plain text timestamp of the last restart. Can be used to
@@ -92,7 +103,11 @@ class AdminApi:
         """
         return self._api.call(TimestampGetCall(), timeout=timeout)
 
-    def head_timestamp(self, *, timeout=UNSET) -> Response:
+    def head_timestamp(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Verify that MarkLogic Server is up and accepting requests.
 
         A lightweight availability check: the response carries only a status
@@ -122,7 +137,11 @@ class AdminApi:
         """
         return self._api.call(TimestampHeadCall(), timeout=timeout)
 
-    def get_server_config(self, *, timeout=UNSET) -> Response:
+    def get_server_config(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Retrieve server configuration information for cluster join.
 
         Returns the host configuration as XML, suitable for use as input to
@@ -158,7 +177,7 @@ class AdminApi:
         *,
         body: str | dict | None = None,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Initialize MarkLogic Server.
 
@@ -209,7 +228,7 @@ class AdminApi:
         body: str | dict,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Install the admin user and initialize security.
 
@@ -260,7 +279,7 @@ class AdminApi:
         group: str | None = None,
         zone: str | None = None,
         cluster_config: bytes | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Exchange the configuration for a cluster join.
 
@@ -330,7 +349,7 @@ class AdminApi:
         self,
         *,
         remote_host: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Drop a host from the cluster.
 
@@ -374,10 +393,15 @@ class AdminApi:
 class AsyncAdminApi:
     """Async Admin API group for /admin/v1/* endpoints."""
 
-    def __init__(self, api: AsyncApiClient):
+    def __init__(self, api: AsyncApiClient) -> None:
         self._api = api
 
-    async def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+    async def call(
+        self,
+        call_: ApiCall,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Send a custom ApiCall.
 
         Parameters
@@ -404,7 +428,11 @@ class AsyncAdminApi:
         """
         return await self._api.call(call_, timeout=timeout)
 
-    async def get_timestamp(self, *, timeout=UNSET) -> Response:
+    async def get_timestamp(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Verify that MarkLogic Server is up and accepting requests.
 
         Returns a plain text timestamp of the last restart. Can be used to
@@ -435,7 +463,11 @@ class AsyncAdminApi:
         """
         return await self._api.call(TimestampGetCall(), timeout=timeout)
 
-    async def head_timestamp(self, *, timeout=UNSET) -> Response:
+    async def head_timestamp(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Verify that MarkLogic Server is up and accepting requests.
 
         A lightweight availability check: the response carries only a status
@@ -465,7 +497,11 @@ class AsyncAdminApi:
         """
         return await self._api.call(TimestampHeadCall(), timeout=timeout)
 
-    async def get_server_config(self, *, timeout=UNSET) -> Response:
+    async def get_server_config(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
         """Retrieve server configuration information for cluster join.
 
         Returns the host configuration as XML, suitable for use as input to
@@ -501,7 +537,7 @@ class AsyncAdminApi:
         *,
         body: str | dict | None = None,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Initialize MarkLogic Server.
 
@@ -552,7 +588,7 @@ class AsyncAdminApi:
         body: str | dict,
         *,
         data_format: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Install the admin user and initialize security.
 
@@ -603,7 +639,7 @@ class AsyncAdminApi:
         group: str | None = None,
         zone: str | None = None,
         cluster_config: bytes | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Exchange the configuration for a cluster join.
 
@@ -673,7 +709,7 @@ class AsyncAdminApi:
         self,
         *,
         remote_host: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Drop a host from the cluster.
 

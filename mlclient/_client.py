@@ -21,12 +21,13 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from functools import cached_property
 from types import TracebackType
+from typing import TYPE_CHECKING, cast
 from xml.etree import ElementTree
 
 from httpx import Limits, RequestError, Response
 from httpx_retries import Retry
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient._utils import get_resource
 from mlclient.api.admin import AdminApi, AsyncAdminApi
 from mlclient.api.manage import AsyncManageApi, ManageApi
@@ -57,6 +58,11 @@ from mlclient.services.transactions import (
     async_open_transaction,
     open_transaction,
 )
+
+if TYPE_CHECKING:
+    import httpx
+    from typing_extensions import Self
+
 
 logger = logging.getLogger(__name__)
 
@@ -154,23 +160,23 @@ class MLClient:
 
     def __init__(
         self,
-        protocol=UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port=UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: Limits | int | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
         health_config: HTTPConfig | None = None,
-    ):
+    ) -> None:
         """Initialize MLClient instance.
 
         The connection parameters describe the primary connection. The Manage
@@ -261,17 +267,17 @@ class MLClient:
             ),
         )
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """Connect and return self for use as a context manager."""
         self.connect()
         return self
 
     def __exit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on context manager exit."""
         self.disconnect()
 
@@ -335,7 +341,11 @@ class MLClient:
         """
         return AdminApi(ApiClient(self._admin_http))
 
-    def healthcheck(self, *, timeout=UNSET) -> bool:
+    def healthcheck(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> bool:
         """Report whether the HealthCheck app server (port 7997 by default) is healthy.
 
         Sends a HEAD request to ``/`` on the HealthCheck connection.
@@ -405,7 +415,7 @@ class MLClient:
             If host discovery returns no hosts
         """
         try:
-            host_names = self.eval.xquery(_CLUSTER_HOSTS_XQUERY)
+            host_names = cast("list[str]", self.eval.xquery(_CLUSTER_HOSTS_XQUERY))
             if not host_names:
                 msg = "Cluster host discovery returned no hosts."
                 raise ValueError(msg)
@@ -414,7 +424,7 @@ class MLClient:
             else:
                 with ThreadPoolExecutor(max_workers=min(32, len(host_names))) as pool:
                     results = list(pool.map(self._get_host_health, host_names))
-            hosts = dict(zip(host_names, results))
+            hosts = dict(zip(host_names, cast("list[bool]", results)))
         except MarkLogicError as eval_error:
             try:
                 major_version = self.version.parts[0]
@@ -537,7 +547,7 @@ class MLClient:
             If the eval result is not a recognizable version string
         """
         try:
-            return MarkLogicVersion(self.eval.xquery("xdmp:version()"))
+            return MarkLogicVersion(cast("str", self.eval.xquery("xdmp:version()")))
         except MarkLogicError:
             version = self._version_from_secondaries()
             if version is not None:
@@ -563,7 +573,7 @@ class MLClient:
         with suppress(RequestError, ValueError, ElementTree.ParseError):
             admin = self.admin.get_server_config()
             if admin.is_success:
-                return MarkLogicVersion(_admin_config_version(admin.text))
+                return MarkLogicVersion(cast("str", _admin_config_version(admin.text)))
         return None
 
     def transaction(
@@ -572,7 +582,7 @@ class MLClient:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> TransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
@@ -626,7 +636,7 @@ class MLClient:
             timeout=timeout,
         )
 
-    def connect(self):
+    def connect(self) -> None:
         """Open the primary local HTTP session.
 
         This allocates transport resources; it does not probe connectivity or
@@ -635,7 +645,7 @@ class MLClient:
         """
         self._http.connect()
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """Close the primary and auxiliary sessions owned by this client.
 
         Shared HTTP clients are closed once. Cached API/service wrappers are
@@ -722,13 +732,16 @@ class MLClient:
         RequestError
             If the eval request fails at the HTTP transport level.
         """
-        return self.eval.xquery(
-            _CLUSTER_HEALTH_XQUERY,
-            variables={
-                "host": host,
-                "port": MARKLOGIC_HEALTHCHECK_PORT,
-                "timeout": int(DEFAULT_HEALTH_TIMEOUT.read),
-            },
+        return cast(
+            "bool",
+            self.eval.xquery(
+                _CLUSTER_HEALTH_XQUERY,
+                variables={
+                    "host": host,
+                    "port": MARKLOGIC_HEALTHCHECK_PORT,
+                    "timeout": int(cast("float", DEFAULT_HEALTH_TIMEOUT.read)),
+                },
+            ),
         )
 
     def _get_cluster_status(self) -> Response:
@@ -783,23 +796,23 @@ class AsyncMLClient:
 
     def __init__(
         self,
-        protocol=UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port=UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | int | None = None,
         limits: Limits | int | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
         health_config: HTTPConfig | None = None,
-    ):
+    ) -> None:
         """Initialize AsyncMLClient instance.
 
         The connection parameters describe the primary connection. The Manage
@@ -896,17 +909,17 @@ class AsyncMLClient:
             return self._http
         return AsyncHttpClient(config=config, session_owner=self._http)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         """Connect and return self for use as an async context manager."""
         await self.connect()
         return self
 
     async def __aexit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on context manager exit."""
         await self.disconnect()
 
@@ -974,7 +987,11 @@ class AsyncMLClient:
         """
         return AsyncAdminApi(AsyncApiClient(self._admin_http))
 
-    async def healthcheck(self, *, timeout=UNSET) -> bool:
+    async def healthcheck(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> bool:
         """Report whether the HealthCheck app server (port 7997 by default) is healthy.
 
         Sends a HEAD request to ``/`` on the HealthCheck connection.
@@ -1043,7 +1060,10 @@ class AsyncMLClient:
             If host discovery returns no hosts
         """
         try:
-            host_names = await self.eval.xquery(_CLUSTER_HOSTS_XQUERY)
+            host_names = cast(
+                "list[str]",
+                await self.eval.xquery(_CLUSTER_HOSTS_XQUERY),
+            )
             if not host_names:
                 msg = "Cluster host discovery returned no hosts."
                 raise ValueError(msg)
@@ -1054,7 +1074,7 @@ class AsyncMLClient:
             for result in results:
                 if isinstance(result, BaseException):
                     raise result
-            hosts = dict(zip(host_names, results))
+            hosts = dict(zip(host_names, cast("list[bool]", results)))
         except MarkLogicError as eval_error:
             try:
                 major_version = (await self.version()).parts[0]
@@ -1177,7 +1197,9 @@ class AsyncMLClient:
             If the eval result is not a recognizable version string
         """
         try:
-            return MarkLogicVersion(await self.eval.xquery("xdmp:version()"))
+            return MarkLogicVersion(
+                cast("str", await self.eval.xquery("xdmp:version()")),
+            )
         except MarkLogicError:
             version = await self._version_from_secondaries()
             if version is not None:
@@ -1203,7 +1225,7 @@ class AsyncMLClient:
         with suppress(RequestError, ValueError, ElementTree.ParseError):
             admin = await self.admin.get_server_config()
             if admin.is_success:
-                return MarkLogicVersion(_admin_config_version(admin.text))
+                return MarkLogicVersion(cast("str", _admin_config_version(admin.text)))
         return None
 
     async def transaction(
@@ -1212,7 +1234,7 @@ class AsyncMLClient:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> AsyncTransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
@@ -1267,7 +1289,7 @@ class AsyncMLClient:
             timeout=timeout,
         )
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Open the primary local HTTP session.
 
         This allocates transport resources; it does not probe connectivity or
@@ -1276,7 +1298,7 @@ class AsyncMLClient:
         """
         await self._http.connect()
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Close the primary and auxiliary sessions owned by this client.
 
         Shared HTTP clients are closed once. Cached API/service wrappers are
@@ -1363,13 +1385,16 @@ class AsyncMLClient:
         RequestError
             If the eval request fails at the HTTP transport level.
         """
-        return await self.eval.xquery(
-            _CLUSTER_HEALTH_XQUERY,
-            variables={
-                "host": host,
-                "port": MARKLOGIC_HEALTHCHECK_PORT,
-                "timeout": int(DEFAULT_HEALTH_TIMEOUT.read),
-            },
+        return cast(
+            "bool",
+            await self.eval.xquery(
+                _CLUSTER_HEALTH_XQUERY,
+                variables={
+                    "host": host,
+                    "port": MARKLOGIC_HEALTHCHECK_PORT,
+                    "timeout": int(cast("float", DEFAULT_HEALTH_TIMEOUT.read)),
+                },
+            ),
         )
 
     async def _get_cluster_status(self) -> Response:

@@ -8,12 +8,28 @@ It exports the following class:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, TypedDict, cast
+
 from mlclient._client import AsyncMLClient, MLClient
 from mlclient._options import UNSET
 from mlclient.clients.http import AsyncHttpClient, HttpClient
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import NoRestServerConfiguredError, NoSuchAppServerError
 from mlclient.http import HTTPConfig
+
+if TYPE_CHECKING:
+    from typing_extensions import Unpack
+
+    from mlclient._typing import HTTPConfigOverrides
+
+
+class _ClientConfigs(TypedDict):
+    """Resolved connections passed together to one composed client."""
+
+    config: HTTPConfig
+    manage_config: HTTPConfig
+    admin_config: HTTPConfig
+    health_config: HTTPConfig
 
 
 class MLClientManager:
@@ -26,8 +42,8 @@ class MLClientManager:
     def __init__(
         self,
         env_name: str,
-        **overrides,
-    ):
+        **overrides: Unpack[HTTPConfigOverrides],
+    ) -> None:
         """Load an environment and store HTTP defaults for clients created from it.
 
         The environment is loaded immediately. Overrides are applied and validated
@@ -98,7 +114,7 @@ class MLClientManager:
     def config(
         self,
         ml_configuration: MLEnvironment,
-    ):
+    ) -> None:
         """Replace the environment used for subsequent configuration requests.
 
         Parameters
@@ -115,7 +131,11 @@ class MLClientManager:
         """
         self._config = ml_configuration
 
-    def get_config(self, app_server_id: str, **overrides) -> HTTPConfig:
+    def get_config(
+        self,
+        app_server_id: str,
+        **overrides: Unpack[HTTPConfigOverrides],
+    ) -> HTTPConfig:
         """Resolve HTTP settings for one server without creating a client.
 
         An explicit retry strategy from the manager or this call is preserved.
@@ -171,7 +191,11 @@ class MLClientManager:
             config = config.with_health_defaults()
         return config
 
-    def get_client(self, app_server_id: str | None = None, **overrides) -> MLClient:
+    def get_client(
+        self,
+        app_server_id: str | None = None,
+        **overrides: Unpack[HTTPConfigOverrides],
+    ) -> MLClient:
         """Create a synchronous MarkLogic client for a configured App Server.
 
         The selected server is the primary HTTP endpoint. Selecting health,
@@ -233,7 +257,7 @@ class MLClientManager:
     def get_async_client(
         self,
         app_server_id: str | None = None,
-        **overrides,
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> AsyncMLClient:
         """Create an asynchronous MarkLogic client for a configured App Server.
 
@@ -296,7 +320,7 @@ class MLClientManager:
     def get_async_http_client(
         self,
         app_server_id: str,
-        **overrides,
+        **overrides: Unpack[HTTPConfigOverrides],
     ) -> AsyncHttpClient:
         """Create a raw asynchronous HTTP client for one configured server.
 
@@ -351,7 +375,11 @@ class MLClientManager:
         """
         return AsyncHttpClient(config=self.get_config(app_server_id, **overrides))
 
-    def get_http_client(self, app_server_id: str, **overrides) -> HttpClient:
+    def get_http_client(
+        self,
+        app_server_id: str,
+        **overrides: Unpack[HTTPConfigOverrides],
+    ) -> HttpClient:
         """Create a raw synchronous HTTP client for one configured server.
 
         All requests target the selected server; no auxiliary API clients are
@@ -408,8 +436,8 @@ class MLClientManager:
     def _client_configs(
         self,
         app_server_id: str | None,
-        **overrides,
-    ) -> dict[str, HTTPConfig]:
+        **overrides: Unpack[HTTPConfigOverrides],
+    ) -> _ClientConfigs:
         """Build primary and auxiliary HTTP configurations for a MarkLogic client.
 
         Resolve the selected server once. If it is manage, admin or health,
@@ -472,7 +500,7 @@ class MLClientManager:
             configs[f"{server_id}_config"] = (
                 primary if server_id == app_server_id else self.get_config(server_id)
             )
-        return configs
+        return cast("_ClientConfigs", configs)
 
     def _get_app_server_id(self, app_server_id: str | None) -> str:
         """Validate an explicit server identifier or select the first REST server.
@@ -510,7 +538,7 @@ class MLClientManager:
         return app_server_id
 
 
-def _without_unset(overrides: dict) -> dict:
+def _without_unset(overrides: HTTPConfigOverrides) -> HTTPConfigOverrides:
     """Filter omitted settings before merging manager and per-call overrides.
 
     Parameters
@@ -525,4 +553,7 @@ def _without_unset(overrides: dict) -> dict:
         A new mapping without UNSET-valued entries. The input is unchanged.
         Removing omitted entries lets the lower configuration level apply.
     """
-    return {key: value for key, value in overrides.items() if value is not UNSET}
+    return cast(
+        "HTTPConfigOverrides",
+        {key: value for key, value in overrides.items() if value is not UNSET},
+    )

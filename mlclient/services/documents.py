@@ -5,13 +5,14 @@ Provides parsed document operations on MarkLogic.
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Iterator
-from typing import TYPE_CHECKING
+from collections.abc import AsyncIterator, Iterator, Sequence
+from typing import TYPE_CHECKING, cast
 
 from mlclient import _constants as constants
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 
 if TYPE_CHECKING:
+    import httpx
     from mlclient.api.rest import AsyncRestApi, RestApi
 
 from mlclient.models.document_parts import Category, DocumentsBodyPart
@@ -34,7 +35,7 @@ _URI_PARAM_OVERHEAD = len("&uri=")
 
 
 def _batched_uris(
-    uris: str | list[str] | tuple[str] | set[str],
+    uris: str | list[str] | tuple[str, ...] | set[str],
     max_query_bytes: int = _MAX_QUERY_BYTES,
 ) -> Iterator[str | list[str]]:
     """Split URIs into batches whose combined query length stays under a limit.
@@ -76,7 +77,7 @@ class DocumentsService:
     each port.
     """
 
-    def __init__(self, rest: RestApi, scope: ServiceScope | None = None):
+    def __init__(self, rest: RestApi, scope: ServiceScope | None = None) -> None:
         """Create a service on the supplied REST connection.
 
         Parameters
@@ -92,8 +93,8 @@ class DocumentsService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
     ) -> DocumentsService:
         """Return a scoped copy without opening a connection or a transaction.
 
@@ -114,18 +115,18 @@ class DocumentsService:
 
     def write(
         self,
-        data: Document | Metadata | list[Document | Metadata],
+        data: Document | Metadata | Sequence[Document | Metadata],
         *,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
         Parameters
         ----------
-        data : Document | Metadata | list[Document | Metadata]
+        data : Document | Metadata | Sequence[Document | Metadata]
             One or more document or default metadata.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
@@ -165,16 +166,16 @@ class DocumentsService:
             txid=params["txid"],
             timeout=timeout,
         )
-        return MLResponseParser.parse(resp)
+        return cast("dict", MLResponseParser.parse(resp))
 
     def read(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -183,7 +184,7 @@ class DocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -220,16 +221,20 @@ class DocumentsService:
             txid=txid,
             timeout=timeout,
         )
-        return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
+        return (
+            next(docs)
+            if isinstance(uris, str)
+            else {cast("str", doc.uri): doc for doc in docs}
+        )
 
     def read_stream(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -239,7 +244,7 @@ class DocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -271,30 +276,30 @@ class DocumentsService:
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
-        category = normalize_category(category)
+        categories = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = self._rest.documents.get(
                 batch,
-                category=category,
+                category=categories,
                 database=params["database"],
                 data_format="json",
                 txid=params["txid"],
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
-            yield from DocumentsReader.parse(resp, category, uris=batch)
+            yield from DocumentsReader.parse(resp, categories, uris=batch)
 
     def delete(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        txid: str | None = UNSET,
-        timeout=UNSET,
-    ):
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Delete document(s) content or metadata in a MarkLogic database.
 
         URIs are transparently split into batches whose combined query string
@@ -303,7 +308,7 @@ class DocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             The URI of a document to delete.
         category : Category | str | list[Category | str] | None, default None
             The category of data to remove/reset.
@@ -334,11 +339,11 @@ class DocumentsService:
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
-        category = normalize_category(category)
+        categories = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = self._rest.documents.delete(
                 batch,
-                category=category,
+                category=categories,
                 database=params["database"],
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,
@@ -354,25 +359,32 @@ class _DocumentsSender:
     @classmethod
     def parse(
         cls,
-        data: Document | Metadata | list[Document | Metadata],
+        data: Document | Metadata | Sequence[Document | Metadata],
     ) -> list[DocumentsBodyPart]:
         """Parse Document or Metadata instance(s) to DocumentsBodyPart's list."""
-        if not isinstance(data, list):
+        if not isinstance(data, Sequence):
             data = [data]
         body_parts = []
         for data_unit in data:
             if type(data_unit) not in (Metadata, MetadataDocument):
-                if data_unit.metadata is not None:
+                document = cast("Document", data_unit)
+                if document.metadata is not None:
                     new_parts = [
-                        cls._get_doc_metadata_body_part(data_unit),
-                        cls._get_doc_content_body_part(data_unit),
+                        cls._get_doc_metadata_body_part(cast("Document", data_unit)),
+                        cls._get_doc_content_body_part(cast("Document", data_unit)),
                     ]
                 else:
-                    new_parts = [cls._get_doc_content_body_part(data_unit)]
+                    new_parts = [
+                        cls._get_doc_content_body_part(cast("Document", data_unit)),
+                    ]
             elif type(data_unit) is not Metadata:
-                new_parts = [cls._get_doc_metadata_body_part(data_unit)]
+                new_parts = [
+                    cls._get_doc_metadata_body_part(cast("Document", data_unit)),
+                ]
             else:
-                new_parts = [cls._get_default_metadata_body_part(data_unit)]
+                new_parts = [
+                    cls._get_default_metadata_body_part(cast("Metadata", data_unit)),
+                ]
             body_parts.extend(new_parts)
         return body_parts
 
@@ -382,9 +394,9 @@ class _DocumentsSender:
         document: Document,
     ) -> DocumentsBodyPart:
         """Instantiate DocumentsBodyPart with Document's content."""
-        return DocumentsBodyPart(
-            **{
-                "content-type": Mimetypes.get_mimetype(document.uri),
+        return DocumentsBodyPart.model_validate(
+            {
+                "content-type": Mimetypes.get_mimetype(cast("str", document.uri)),
                 "content-disposition": {
                     "type": "attachment",
                     "filename": document.uri,
@@ -400,15 +412,15 @@ class _DocumentsSender:
         document: Document,
     ) -> DocumentsBodyPart:
         """Instantiate DocumentsBodyPart with Document's metadata."""
-        return DocumentsBodyPart(
-            **{
+        return DocumentsBodyPart.model_validate(
+            {
                 "content-type": constants.HEADER_JSON,
                 "content-disposition": {
                     "type": "attachment",
                     "filename": document.uri,
                     "category": "metadata",
                 },
-                "content": document.metadata.to_json_string(),
+                "content": cast("Metadata", document.metadata).to_json_string(),
             },
         )
 
@@ -418,8 +430,8 @@ class _DocumentsSender:
         metadata: Metadata,
     ) -> DocumentsBodyPart:
         """Instantiate DocumentsBodyPart with default metadata."""
-        return DocumentsBodyPart(
-            **{
+        return DocumentsBodyPart.model_validate(
+            {
                 "content-type": constants.HEADER_JSON,
                 "content-disposition": {
                     "type": "inline",
@@ -433,7 +445,7 @@ class _DocumentsSender:
 class AsyncDocumentsService:
     """Async higher-level service for /v1/documents CRUD operations."""
 
-    def __init__(self, rest: AsyncRestApi, scope: ServiceScope | None = None):
+    def __init__(self, rest: AsyncRestApi, scope: ServiceScope | None = None) -> None:
         """Create a service on the supplied REST connection.
 
         Parameters
@@ -449,8 +461,8 @@ class AsyncDocumentsService:
     def __call__(
         self,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
     ) -> AsyncDocumentsService:
         """Return a scoped copy without opening a connection or a transaction.
 
@@ -471,18 +483,18 @@ class AsyncDocumentsService:
 
     async def write(
         self,
-        data: Document | Metadata | list[Document | Metadata],
+        data: Document | Metadata | Sequence[Document | Metadata],
         *,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
         Parameters
         ----------
-        data : Document | Metadata | list[Document | Metadata]
+        data : Document | Metadata | Sequence[Document | Metadata]
             One or more document or default metadata.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
@@ -522,16 +534,16 @@ class AsyncDocumentsService:
             txid=params["txid"],
             timeout=timeout,
         )
-        return MLResponseParser.parse(resp)
+        return cast("dict", MLResponseParser.parse(resp))
 
     async def read(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -540,7 +552,7 @@ class AsyncDocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -579,16 +591,16 @@ class AsyncDocumentsService:
         )
         if isinstance(uris, str):
             return await stream.__anext__()
-        return {doc.uri: doc async for doc in stream}
+        return {cast("str", doc.uri): doc async for doc in stream}
 
     async def read_stream(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
-        timeout=UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> AsyncIterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -598,7 +610,7 @@ class AsyncDocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
@@ -630,31 +642,31 @@ class AsyncDocumentsService:
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
-        category = normalize_category(category)
+        categories = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = await self._rest.documents.get(
                 batch,
-                category=category,
+                category=categories,
                 database=params["database"],
                 data_format="json",
                 txid=params["txid"],
                 timeout=timeout,
             )
             MLResponseParser.raise_for_status(resp)
-            for doc in DocumentsReader.parse(resp, category, uris=batch):
+            for doc in DocumentsReader.parse(resp, categories, uris=batch):
                 yield doc
 
     async def delete(
         self,
-        uris: str | list[str] | tuple[str] | set[str],
+        uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
-        database: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        txid: str | None = UNSET,
-        timeout=UNSET,
-    ):
+        txid: str | UnsetType | None = UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Delete document(s) content or metadata in a MarkLogic database.
 
         URIs are transparently split into batches whose combined query string
@@ -663,7 +675,7 @@ class AsyncDocumentsService:
 
         Parameters
         ----------
-        uris : str | list[str] | tuple[str] | set[str]
+        uris : str | list[str] | tuple[str, ...] | set[str]
             The URI of a document to delete.
         category : Category | str | list[Category | str] | None, default None
             The category of data to remove/reset.
@@ -694,11 +706,11 @@ class AsyncDocumentsService:
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
-        category = normalize_category(category)
+        categories = normalize_category(category)
         for batch in _batched_uris(uris):
             resp = await self._rest.documents.delete(
                 batch,
-                category=category,
+                category=categories,
                 database=params["database"],
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,

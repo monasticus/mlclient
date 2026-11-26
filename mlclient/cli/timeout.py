@@ -10,7 +10,7 @@ import math
 
 import httpx
 
-from mlclient._options import UNSET, _Unset
+from mlclient._options import UNSET, UnsetType
 from mlclient.exceptions import WrongParametersError
 
 _EXPIRED_COMPONENTS = {
@@ -23,7 +23,7 @@ _EXPIRED_COMPONENTS = {
 
 def parse_timeout(
     value: str | None,
-) -> float | None | _Unset:
+) -> float | UnsetType | None:
     """Turn the ``--timeout`` value into a per-request timeout argument.
 
     Parameters
@@ -33,7 +33,7 @@ def parse_timeout(
 
     Returns
     -------
-    float | None | _Unset
+    float | UnsetType | None
         Seconds for all four HTTP timeout components; None for ``0``, which
         disables the HTTP timeout; UNSET when absent, keeping the client's
         default timeout.

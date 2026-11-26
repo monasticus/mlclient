@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
@@ -57,10 +57,10 @@ class SampleCommand(Command):
 
     name: str = "sample"
     description: str = "Prints sample XML or JSON content from the database"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument("path", "Root name or XPath to sample", optional=True, default="/"),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(
             description=(
                 "The ML Client environment name; repeat it to sample several "

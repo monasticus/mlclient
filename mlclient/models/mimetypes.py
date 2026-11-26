@@ -8,7 +8,7 @@ This module extracts a class fetching mimetypes with file extensions and documen
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, cast
 
 import yaml
 
@@ -23,7 +23,7 @@ class Mimetypes:
     methods related to mimetypes in MarkLogic.
     """
 
-    _MIMETYPES: ClassVar[list[Mimetype]] = None
+    _MIMETYPES: ClassVar[list[Mimetype] | None] = None
     _DOC_TYPE_MIMETYPES: ClassVar[dict[DocumentType, list[Mimetype]]] = {
         DocumentType.XML: [],
         DocumentType.JSON: [],
@@ -35,7 +35,7 @@ class Mimetypes:
     def get_mimetypes(
         cls,
         doc_type: DocumentType,
-    ) -> tuple[str]:
+    ) -> tuple[str, ...]:
         """Return all known mimetypes linked to a specific document type.
 
         Parameters
@@ -45,7 +45,7 @@ class Mimetypes:
 
         Returns
         -------
-        tuple[str]
+        tuple[str, ...]
             A tuple of mimetypes linked to a specific document type
         """
         cls._init_doc_type_mimetypes(doc_type)
@@ -73,7 +73,7 @@ class Mimetypes:
         cls._init_mimetypes()
         gen = (
             mimetype.mime_type
-            for mimetype in cls._MIMETYPES
+            for mimetype in cast("list[Mimetype]", cls._MIMETYPES)
             if uri.endswith(cls._dotted_extensions(mimetype))
         )
         return next(gen, None)
@@ -96,7 +96,7 @@ class Mimetypes:
             A document type for a specific file or mime type
         """
         cls._init_mimetypes()
-        for mimetype in cls._MIMETYPES:
+        for mimetype in cast("list[Mimetype]", cls._MIMETYPES):
             if uri_or_mimetype.startswith(
                 mimetype.mime_type,
             ) or uri_or_mimetype.endswith(cls._dotted_extensions(mimetype)):
@@ -118,7 +118,7 @@ class Mimetypes:
     def _init_doc_type_mimetypes(
         cls,
         doc_type: DocumentType,
-    ):
+    ) -> None:
         """Initialize mimetypes in an internal dictionary entry for a document type.
 
         Parameters
@@ -128,14 +128,14 @@ class Mimetypes:
         """
         cls._init_mimetypes()
         if len(cls._DOC_TYPE_MIMETYPES[doc_type]) == 0:
-            for mimetype in cls._MIMETYPES:
+            for mimetype in cast("list[Mimetype]", cls._MIMETYPES):
                 if mimetype.document_type == doc_type:
                     cls._DOC_TYPE_MIMETYPES[doc_type].append(mimetype)
 
     @classmethod
     def _init_mimetypes(
         cls,
-    ):
+    ) -> None:
         """Initialize an internal list of mimetypes."""
         if cls._MIMETYPES is None:
             with utils.get_resource("mimetypes.yaml") as mimetypes_file:

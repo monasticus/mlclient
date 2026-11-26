@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
 from mlclient.exceptions import MarkLogicError
 from mlclient.responses import MLResponseParser
@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from mlclient.clients.api import ApiClient, AsyncApiClient
+    from mlclient.models.results import ParsedValue
 
 
 class TransactionService:
@@ -33,7 +34,12 @@ class TransactionService:
     within the transaction and against the same database it was opened on.
     """
 
-    def __init__(self, api: TransactionsApi, txid: str, database: str | None = None):
+    def __init__(
+        self,
+        api: TransactionsApi,
+        txid: str,
+        database: str | None = None,
+    ) -> None:
         self._api = api
         self._txid = txid
         self._database = database
@@ -64,7 +70,12 @@ class TransactionService:
         else:
             self.rollback()
 
-    def status(self, *, data_format: str = "json", timeout=UNSET):
+    def status(
+        self,
+        *,
+        data_format: str = "json",
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> ParsedValue:
         """Return the status of the transaction.
 
         Parameters
@@ -80,7 +91,8 @@ class TransactionService:
 
         Returns
         -------
-        The parsed transaction status
+        ParsedValue
+            The parsed transaction status.
 
         Raises
         ------
@@ -99,7 +111,11 @@ class TransactionService:
         )
         return MLResponseParser.parse(resp)
 
-    def commit(self, *, timeout=UNSET) -> None:
+    def commit(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Commit the transaction.
 
         Parameters
@@ -122,7 +138,11 @@ class TransactionService:
         """
         self._finish("commit", timeout=timeout)
 
-    def rollback(self, *, timeout=UNSET) -> None:
+    def rollback(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Roll back the transaction.
 
         Parameters
@@ -145,7 +165,12 @@ class TransactionService:
         """
         self._finish("rollback", timeout=timeout)
 
-    def _finish(self, result: str, *, timeout=UNSET) -> None:
+    def _finish(
+        self,
+        result: str,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         resp = self._api.post(
             self._txid,
             result=result,
@@ -160,7 +185,7 @@ class TransactionService:
             return ("txid",)
         return ("txid", "database")
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> str | None:
         """Return the value for a ``**``-unpacking key (txid or database)."""
         if key == "txid":
             return self._txid
@@ -175,7 +200,7 @@ def open_transaction(
     name: str | None = None,
     time_limit: int | None = None,
     database: str | None = None,
-    timeout=UNSET,
+    timeout: httpx.Timeout | float | UnsetType | None = UNSET,
 ) -> TransactionService:
     """Open a multi-statement transaction and return a service scoped to it.
 
@@ -232,7 +257,7 @@ class AsyncTransactionService:
         api: AsyncTransactionsApi,
         txid: str,
         database: str | None = None,
-    ):
+    ) -> None:
         self._api = api
         self._txid = txid
         self._database = database
@@ -263,7 +288,12 @@ class AsyncTransactionService:
         else:
             await self.rollback()
 
-    async def status(self, *, data_format: str = "json", timeout=UNSET):
+    async def status(
+        self,
+        *,
+        data_format: str = "json",
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> ParsedValue:
         """Return the status of the transaction.
 
         Parameters
@@ -279,7 +309,8 @@ class AsyncTransactionService:
 
         Returns
         -------
-        The parsed transaction status
+        ParsedValue
+            The parsed transaction status.
 
         Raises
         ------
@@ -298,7 +329,11 @@ class AsyncTransactionService:
         )
         return MLResponseParser.parse(resp)
 
-    async def commit(self, *, timeout=UNSET) -> None:
+    async def commit(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Commit the transaction.
 
         Parameters
@@ -321,7 +356,11 @@ class AsyncTransactionService:
         """
         await self._finish("commit", timeout=timeout)
 
-    async def rollback(self, *, timeout=UNSET) -> None:
+    async def rollback(
+        self,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         """Roll back the transaction.
 
         Parameters
@@ -344,7 +383,12 @@ class AsyncTransactionService:
         """
         await self._finish("rollback", timeout=timeout)
 
-    async def _finish(self, result: str, *, timeout=UNSET) -> None:
+    async def _finish(
+        self,
+        result: str,
+        *,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> None:
         resp = await self._api.post(
             self._txid,
             result=result,
@@ -359,7 +403,7 @@ class AsyncTransactionService:
             return ("txid",)
         return ("txid", "database")
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> str | None:
         """Return the value for a ``**``-unpacking key (txid or database)."""
         if key == "txid":
             return self._txid
@@ -374,7 +418,7 @@ async def async_open_transaction(
     name: str | None = None,
     time_limit: int | None = None,
     database: str | None = None,
-    timeout=UNSET,
+    timeout: httpx.Timeout | float | UnsetType | None = UNSET,
 ) -> AsyncTransactionService:
     """Open a multi-statement transaction and return a service scoped to it.
 

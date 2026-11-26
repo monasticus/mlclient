@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, fields, replace
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.search.options import SearchOptions
 
 
@@ -21,8 +21,8 @@ class ServiceScope:
         Transaction identifier. Unset inherits; None clears an inherited value.
     """
 
-    database: str | None = UNSET
-    txid: str | None = UNSET
+    database: str | UnsetType | None = UNSET
+    txid: str | UnsetType | None = UNSET
 
     def overridden_by(self, other: ServiceScope | None) -> ServiceScope:
         """Return a scope with the explicitly supplied fields overridden.
@@ -107,15 +107,15 @@ class SearchScope:
         members in an ``options`` key.
     """
 
-    database: str | None = UNSET
-    txid: str | None = UNSET
-    collection: str | list[str] | None = UNSET
-    directory: str | None = UNSET
-    forest_name: str | list[str] | None = UNSET
-    options: OptionsInput = UNSET
-    timestamp: str | None = UNSET
+    database: str | UnsetType | None = UNSET
+    txid: str | UnsetType | None = UNSET
+    collection: str | list[str] | UnsetType | None = UNSET
+    directory: str | UnsetType | None = UNSET
+    forest_name: str | list[str] | UnsetType | None = UNSET
+    options: OptionsInput | UnsetType = UNSET
+    timestamp: str | UnsetType | None = UNSET
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Freeze list restrictions to tuples and copy inline options.
 
         Raises
@@ -187,7 +187,7 @@ class SearchScope:
         }
 
 
-def _check_inline_options(options: dict):
+def _check_inline_options(options: dict) -> None:
     """Reject inline options still wrapped in their ``options`` object.
 
     Parameters

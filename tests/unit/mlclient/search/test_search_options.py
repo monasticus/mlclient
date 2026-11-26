@@ -7,7 +7,7 @@ in test_opt.py; component behavior is checked directly when composition is irrel
 
 from dataclasses import FrozenInstanceError
 from xml.etree.ElementTree import Element as XmlElement
-from xml.etree.ElementTree import fromstring, tostring
+from xml.etree.ElementTree import fromstring, register_namespace, tostring
 
 import pytest
 
@@ -40,6 +40,91 @@ from mlclient.xquery import cts
 from tests.utils.resources import discover_serialization_cases
 
 SEARCH_NAMESPACE = "http://marklogic.com/appservices/search"
+
+
+@pytest.fixture(params=["native", "group", "native-group"])
+def hashable_option_factory(request):
+    def build(definition, element):
+        if request.param == "native":
+            return NativeOption(definition, element)
+        if request.param == "native-group":
+            return NativeOptions(definition, element)
+        return SearchOptions(NativeOption(definition, element))
+
+    return build
+
+
+def test_equal_native_options_are_interchangeable_dictionary_keys(
+    hashable_option_factory,
+):
+    element = XmlElement(f"{{{SEARCH_NAMESPACE}}}custom")
+    left = hashable_option_factory(
+        {"custom": {"number": 1, "nested": [None, {"enabled": True}], "tuple": ([],)}},
+        element,
+    )
+    right = hashable_option_factory(
+        {"custom": {"tuple": ([],), "nested": [None, {"enabled": 1}], "number": 1.0}},
+        element,
+    )
+
+    assert left == right
+    assert hash(left) == hash(right)
+    assert {left: "found"}[right] == "found"
+    assert len({left, right}) == 1
+
+
+def test_options_hash_survives_input_output_and_namespace_changes(
+    hashable_option_factory,
+):
+    definition = {"custom": {"values": [1, {"name": "original"}]}}
+    element = XmlElement(f"{{{SEARCH_NAMESPACE}}}custom")
+    element.text = "original"
+    option = hashable_option_factory(definition, element)
+    equivalent = hashable_option_factory(definition, element)
+    initial = hash(option)
+    lookup = {option: "found"}
+
+    definition["custom"]["values"][1]["name"] = "changed"
+    element.text = "changed"
+    serialized = option.to_json()
+    members = serialized.get("options", serialized)
+    members["custom"]["values"][1]["name"] = "changed output"
+    serialized.clear()
+    option.to_xml().clear()
+    try:
+        register_namespace("hash-test", SEARCH_NAMESPACE)
+        assert hash(option) == initial
+        assert lookup[equivalent] == "found"
+    finally:
+        register_namespace("search", SEARCH_NAMESPACE)
+
+    assert hash(option) == initial
+    assert lookup[equivalent] == "found"
+
+
+def test_xml_distinctions_remain_distinct_dictionary_keys(hashable_option_factory):
+    element = XmlElement(f"{{{SEARCH_NAMESPACE}}}custom")
+    element.text = "first"
+    first = hashable_option_factory({"custom": False}, element)
+    element.text = "second"
+    second = hashable_option_factory({"custom": False}, element)
+
+    assert first != second
+    lookup = {first: "first", second: "second"}
+    assert len(lookup) == 2
+    assert lookup[first] == "first"
+    assert lookup[second] == "second"
+
+
+def test_equal_typed_and_native_groups_share_hashes():
+    element = XmlElement(f"{{{SEARCH_NAMESPACE}}}page-length")
+    element.text = "10"
+    typed = SearchOptions(PageLength(10))
+    native = NativeOptions({"page-length": 10}, element)
+
+    assert typed == native
+    assert hash(typed) == hash(native)
+    assert {typed: "found"}[native] == "found"
 
 
 def test_typed_constraint_survives_a_later_native_constraint():

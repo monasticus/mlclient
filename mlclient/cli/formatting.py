@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
 
@@ -89,6 +90,7 @@ def _format_xml_node(node: minidom.Node, indent: str = "") -> str:
     """
     if node.nodeType != node.ELEMENT_NODE:
         return indent + node.toxml()
+    node = cast("minidom.Element", node)
     has_elements = any(item.nodeType == item.ELEMENT_NODE for item in node.childNodes)
     if (
         not has_elements
@@ -100,7 +102,7 @@ def _format_xml_node(node: minidom.Node, indent: str = "") -> str:
         )
     ):
         return indent + node.toxml()
-    opening = node.cloneNode(deep=False).toxml()[:-2] + ">"
+    opening = cast("minidom.Element", node.cloneNode(deep=False)).toxml()[:-2] + ">"
     children = "\n".join(
         _format_xml_node(child, indent + "  ")
         for child in node.childNodes

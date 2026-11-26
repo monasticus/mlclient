@@ -45,9 +45,9 @@ class ValuesGetCall(ApiCall):
     def __init__(
         self,
         database: str | None = None,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         options: str | None = None,
-    ):
+    ) -> None:
         """Initialize ValuesGetCall instance.
 
         Parameters
@@ -77,7 +77,7 @@ class ValuesGetCall(ApiCall):
         )
 
     @classmethod
-    def _validate_params(cls, data_format: str):
+    def _validate_params(cls, data_format: str | None) -> None:
         """Validate the values-list response format.
 
         Parameters
@@ -100,7 +100,7 @@ class ValuesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Values call.
 
         Returns
@@ -143,23 +143,32 @@ class _ValueCall(ApiCall):
     _SUPPORTED_DIRECTIONS: ClassVar[list] = ["ascending", "descending"]
     _SUPPORTED_FREQUENCIES: ClassVar[list] = ["item", "fragment"]
 
-    def __init__(self, name: str, **kwargs):
-        """Initialize the shared part of a /v1/values/{name} call.
-
-        Parameters
-        ----------
-        name : str
-            The name of a values or tuples definition in the query options.
-        **kwargs
-            ApiCall arguments: method, body, accept and content_type.
-        """
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        name: str,
+        *,
+        method: str = "GET",
+        body: str | dict | bytes | None = None,
+        accept: str | None = None,
+        content_type: str | None = None,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> None:
+        """Initialize the shared named-values request and its transport arguments."""
+        super().__init__(
+            method=method,
+            body=body,
+            accept=accept,
+            content_type=content_type,
+            params=params,
+            headers=headers,
+        )
         self._name = name
 
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Value call.
 
         Returns
@@ -175,12 +184,12 @@ class _ValueCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        name: str,
+        name: str | None,
         view: str | None,
-        data_format: str,
+        data_format: str | None,
         direction: str | None,
         frequency: str | None,
-    ):
+    ) -> None:
         """Reject a missing name and enumerated values MarkLogic does not accept.
 
         Parameters
@@ -244,7 +253,7 @@ class ValueGetCall(_ValueCall):
         options: str | None = None,
         database: str | None = None,
         view: str | None = None,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         collection: str | list | None = None,
         directory: str | None = None,
         direction: str | None = None,
@@ -259,7 +268,7 @@ class ValueGetCall(_ValueCall):
         timestamp: str | None = None,
         txid: str | None = None,
         forest_name: str | list | None = None,
-    ):
+    ) -> None:
         """Initialize ValueGetCall instance.
 
         Parameters
@@ -382,7 +391,7 @@ class ValuePostCall(_ValueCall):
         options: str | None = None,
         database: str | None = None,
         view: str | None = None,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         txid: str | None = None,
         collection: str | list | None = None,
         direction: str | None = None,
@@ -397,7 +406,7 @@ class ValuePostCall(_ValueCall):
         transform_params: dict | None = None,
         timestamp: str | None = None,
         forest_name: str | list | None = None,
-    ):
+    ) -> None:
         """Initialize ValuePostCall instance.
 
         Parameters

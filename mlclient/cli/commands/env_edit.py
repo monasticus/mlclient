@@ -7,6 +7,8 @@ It exports an implementation for 'env edit' command:
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
@@ -45,10 +47,10 @@ class EnvEditCommand(Command):
 
     name: str = "env edit"
     description: str = "Opens an MLClient environment file in the user's editor"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument("name", "The environment name."),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         option(
             "global",
             "g",

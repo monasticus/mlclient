@@ -5,16 +5,18 @@ Exports sync and async HTTP clients for raw communication with MarkLogic.
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Mapping
 from types import TracebackType
+from typing import TYPE_CHECKING, cast
 
 import httpx
 from httpx import AsyncClient, AsyncHTTPTransport, Client, HTTPTransport, Response
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import _constants as const
-from mlclient._options import UNSET
+from mlclient._logging import get_logger
+from mlclient._options import UNSET, UnsetType
+from mlclient._typing import HTTPConfigOverrides
 from mlclient.auth import AuthParam
 from mlclient.clients._restart import _RestartWaiter
 from mlclient.connection import CloudConfig, SSLConfig
@@ -22,7 +24,20 @@ from mlclient.http import HTTPConfig
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.types import DocumentType
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from typing_extensions import Self, Unpack
+
+
+class _HttpClientOptions(HTTPConfigOverrides, total=False):
+    """HTTPConfig overrides plus the options HttpClient and AsyncHttpClient take."""
+
+    config: HTTPConfig | None
+    """Base configuration to apply the overrides to."""
+    session_owner: HttpClient | AsyncHttpClient | None
+    """Client whose HTTP session is reused."""
+
+
+logger = get_logger(__name__)
 
 
 _RESTART_RETRY_STRATEGY = Retry(
@@ -60,20 +75,20 @@ class _HttpClientBase:
 
     def __init__(
         self,
-        protocol=UNSET,
+        protocol: str | UnsetType = UNSET,
         host: str = "localhost",
-        port=UNSET,
-        auth: AuthParam = UNSET,
+        port: int | UnsetType = UNSET,
+        auth: AuthParam | UnsetType = UNSET,
         username: str = "admin",
         password: str = "admin",
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
-        retry: Retry | None = None,
-        limits: httpx.Limits | None = None,
-        timeout=UNSET,
+        retry: Retry | int | None = None,
+        limits: httpx.Limits | int | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
         config: HTTPConfig | None = None,
         session_owner: HttpClient | AsyncHttpClient | None = None,
-    ):
+    ) -> None:
         """Initialize _HttpClientBase instance.
 
         Parameters
@@ -96,10 +111,11 @@ class _HttpClientBase:
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
-            A retry strategy
-        limits : httpx.Limits | None, default None
-            Connection-pool limits; None defers to httpx's own default
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
+            A retry strategy; an int changes only the default policy's retry count
+        limits : httpx.Limits | int | None, default None
+            Connection-pool limits; None defers to httpx's own default; an int
+            is shorthand for httpx.Limits(max_connections=n)
         timeout : httpx.Timeout | float | None, default unset
             A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
             write=60, pool=5 seconds). None disables every HTTP timeout. A
@@ -146,7 +162,7 @@ class _HttpClientBase:
         body: str | bytes | dict | None = None,
     ) -> dict:
         """Prepare request details."""
-        request = {
+        request: dict = {
             "params": params or {},
             "headers": headers or {},
             "auth": self.config.auth,
@@ -177,7 +193,7 @@ class _HttpClientBase:
         method: str,
         endpoint: str,
         response: Response,
-    ):
+    ) -> None:
         """Log response details and restart warning, if applicable."""
         logger.debug("Response retrieved")
         logger.fine(cls.format_http_response(response))
@@ -238,7 +254,7 @@ class HttpClient(_HttpClientBase):
 
     _client: Client | None = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Unpack[_HttpClientOptions]) -> None:
         """Initialize HttpClient instance.
 
         Parameters
@@ -259,10 +275,11 @@ class HttpClient(_HttpClientBase):
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
-            A retry strategy
-        limits : httpx.Limits | None, default None
-            Connection-pool limits; None defers to httpx's own default
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
+            A retry strategy; an int changes only the default policy's retry count
+        limits : httpx.Limits | int | None, default None
+            Connection-pool limits; None defers to httpx's own default; an int
+            is shorthand for httpx.Limits(max_connections=n)
         timeout : httpx.Timeout | float | None, default unset
             A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
             write=60, pool=5 seconds). None disables every HTTP timeout. A
@@ -272,21 +289,21 @@ class HttpClient(_HttpClientBase):
         """
         super().__init__(**kwargs)
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """Connect and return self for use as a context manager."""
         self.connect()
         return self
 
     def __exit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on context manager exit."""
         self.disconnect()
 
-    def connect(self):
+    def connect(self) -> None:
         """Start an HTTP session unless already connected."""
         if self.is_connected():
             return
@@ -297,7 +314,7 @@ class HttpClient(_HttpClientBase):
             timeout=self.config.timeout,
         )
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """Close an HTTP session."""
         if self._client:
             logger.debug("Closing a connection")
@@ -320,7 +337,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a GET request.
 
@@ -364,7 +381,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a HEAD request.
 
@@ -409,7 +426,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a POST request.
 
@@ -457,7 +474,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a PUT request.
 
@@ -504,7 +521,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send a DELETE request.
 
@@ -550,7 +567,7 @@ class HttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an HTTP request.
 
@@ -604,7 +621,7 @@ class HttpClient(_HttpClientBase):
         if self._session_owner is not None and self._session_owner.is_connected():
             self.connect()
         if self.is_connected():
-            return self._client.request(method, url, **request)
+            return cast("Client", self._client).request(method, url, **request)
 
         logger.debug(
             "HttpClient is not connected -- "
@@ -633,7 +650,7 @@ class AsyncHttpClient(_HttpClientBase):
 
     _client: AsyncClient | None = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Unpack[_HttpClientOptions]) -> None:
         """Initialize AsyncHttpClient instance.
 
         Parameters
@@ -654,10 +671,11 @@ class AsyncHttpClient(_HttpClientBase):
             SSL/TLS configuration
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration
-        retry : Retry | None, default DEFAULT_RETRY_STRATEGY
-            A retry strategy
-        limits : httpx.Limits | None, default None
-            Connection-pool limits; None defers to httpx's own default
+        retry : Retry | int | None, default DEFAULT_RETRY_STRATEGY
+            A retry strategy; an int changes only the default policy's retry count
+        limits : httpx.Limits | int | None, default None
+            Connection-pool limits; None defers to httpx's own default; an int
+            is shorthand for httpx.Limits(max_connections=n)
         timeout : httpx.Timeout | float | None, default unset
             A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
             write=60, pool=5 seconds). None disables every HTTP timeout. A
@@ -667,21 +685,21 @@ class AsyncHttpClient(_HttpClientBase):
         """
         super().__init__(**kwargs)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         """Connect and return self for use as an async context manager."""
         await self.connect()
         return self
 
     async def __aexit__(
         self,
-        exc_type: type,
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ):
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Disconnect on async context manager exit."""
         await self.disconnect()
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Start an async HTTP session unless already connected."""
         if self.is_connected():
             return
@@ -692,7 +710,7 @@ class AsyncHttpClient(_HttpClientBase):
             timeout=self.config.timeout,
         )
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Close an async HTTP session."""
         if self._client:
             logger.debug("Closing a connection")
@@ -715,7 +733,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async GET request.
 
@@ -759,7 +777,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async HEAD request.
 
@@ -804,7 +822,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async POST request.
 
@@ -852,7 +870,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async PUT request.
 
@@ -899,7 +917,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async DELETE request.
 
@@ -945,7 +963,7 @@ class AsyncHttpClient(_HttpClientBase):
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        timeout=UNSET,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
         """Send an async HTTP request.
 
@@ -999,7 +1017,11 @@ class AsyncHttpClient(_HttpClientBase):
         if self._session_owner is not None and self._session_owner.is_connected():
             await self.connect()
         if self.is_connected():
-            return await self._client.request(method, url, **request)
+            return await cast("AsyncClient", self._client).request(
+                method,
+                url,
+                **request,
+            )
 
         logger.debug(
             "AsyncHttpClient is not connected -- "

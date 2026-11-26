@@ -8,23 +8,24 @@ It exports 1 class:
 from __future__ import annotations
 
 import json
-import logging
 import re
 import xml.etree.ElementTree as ElemTree
+from collections.abc import Mapping
 from datetime import date, datetime
 from decimal import Decimal
-from typing import ClassVar
+from typing import ClassVar, cast, overload
 
 from httpx import Headers, Response
 
 from mlclient import _constants as const
+from mlclient._logging import get_logger
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.results import ParsedValue
 from mlclient.models.types import DocumentType
 from mlclient.multipart import MultipartPart, decode_multipart_mixed
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 _FRACTIONAL_SECONDS = re.compile(r"(T\d{2}:\d{2}:\d{2})\.(\d+)")
@@ -114,6 +115,30 @@ class MLResponseParser:
     }
 
     @classmethod
+    @overload
+    def parse(
+        cls,
+        response: Response,
+        output_type: type[str],
+    ) -> str | list[str]: ...
+
+    @classmethod
+    @overload
+    def parse(
+        cls,
+        response: Response,
+        output_type: type[bytes],
+    ) -> bytes | list[bytes]: ...
+
+    @classmethod
+    @overload
+    def parse(
+        cls,
+        response: Response,
+        output_type: type | None = None,
+    ) -> ParsedValue: ...
+
+    @classmethod
     def parse(
         cls,
         response: Response,
@@ -155,7 +180,7 @@ class MLResponseParser:
         if not response.content:
             logger.fine("No content to parse")
             return []
-        return cls._parse(response, output_type)
+        return cast("ParsedValue", cls._parse(response, output_type))
 
     @classmethod
     def parse_with_headers(
@@ -196,7 +221,10 @@ class MLResponseParser:
         if not response.content:
             logger.fine("No content to parse")
             return response.headers, []
-        return cls._parse(response, output_type, with_headers=True)
+        return cast(
+            "tuple | list[tuple]",
+            cls._parse(response, output_type, with_headers=True),
+        )
 
     @classmethod
     def parse_atomic(
@@ -263,19 +291,7 @@ class MLResponseParser:
         response: Response,
         output_type: type | None = None,
         with_headers: bool = False,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | Decimal
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-        | tuple
-    ):
+    ) -> ParsedValue | tuple:
         """Parse a successful MarkLogic HTTP Response.
 
         Parameters
@@ -297,7 +313,9 @@ class MLResponseParser:
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            body_parts = decode_multipart_mixed(response.content, content_type)
+            body_parts: list[MultipartPart | Response] = list(
+                decode_multipart_mixed(response.content, content_type),
+            )
         else:
             body_parts = [response]
 
@@ -456,19 +474,7 @@ class MLResponseParser:
         body_part: MultipartPart | Response,
         output_type: type | None = None,
         with_headers: bool = False,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | Decimal
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-        | tuple
-    ):
+    ) -> ParsedValue | tuple:
         """Parse one result part without collapsing its content as a sequence.
 
         Parameters
@@ -505,7 +511,7 @@ class MLResponseParser:
             or doc_type is DocumentType.BINARY
             or headers.get(const.HEADER_NAME_PRIMITIVE) == const.HEADER_PRIMITIVE_BINARY
         ):
-            parsed = body_part.content
+            parsed: ParsedValue = body_part.content
             logger.fine("Returning binary response part value")
         elif output_type is str:
             parsed = body_part.text
@@ -522,20 +528,8 @@ class MLResponseParser:
     def _parse_type_specific(
         cls,
         body_part: MultipartPart | Response,
-        headers: Headers,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | Decimal
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
-        | tuple
-    ):
+        headers: Mapping[str, str],
+    ) -> ParsedValue:
         """Parse MarkLogic HTTP Response part to a corresponding python representation.
 
         Parameters

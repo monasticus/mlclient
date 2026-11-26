@@ -23,6 +23,7 @@ from collections.abc import Iterable
 from copy import copy
 from enum import Enum
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 from pydantic import BaseModel
 
@@ -32,6 +33,11 @@ from mlclient.io.loader import DocumentsLoader
 from mlclient.io.writer import DocumentsWriter
 from mlclient.models.document_parts import Category
 from mlclient.models.documents import Document
+
+if TYPE_CHECKING:
+    from typing_extensions import Self, Unpack
+
+    from mlclient._typing import MLClientOptions
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +58,7 @@ class WriteDocumentsJob:
         self,
         concurrency: int | None = None,
         batch_size: int = 100,
-    ):
+    ) -> None:
         """Initialize WriteDocumentsJob instance.
 
         Parameters
@@ -64,7 +70,7 @@ class WriteDocumentsJob:
         """
         self._concurrency: int = concurrency or 8
         self._batch_size: int = batch_size
-        self._config: dict = {}
+        self._config: MLClientOptions = {}
         self._database: str | None = None
         self._documents: list[Document] = []
         self._report = DocumentJobReport()
@@ -74,26 +80,26 @@ class WriteDocumentsJob:
         """A status of the job."""
         return copy(self._report)
 
-    def with_client_config(self, **config):
+    def with_client_config(self, **config: Unpack[MLClientOptions]) -> None:
         """Set AsyncMLClient configuration."""
         self._config = config
 
-    def with_database(self, database: str):
+    def with_database(self, database: str) -> None:
         """Set a database name."""
         self._database = database
 
-    def with_documents_input(self, documents: Iterable[Document]):
+    def with_documents_input(self, documents: Iterable[Document]) -> None:
         """Add Documents to the job's input."""
         self._documents.extend(documents)
 
-    def with_filesystem_input(self, path: str, uri_prefix: str = ""):
+    def with_filesystem_input(self, path: str, uri_prefix: str = "") -> None:
         """Load files and add parsed Documents to the job's input."""
         self._documents.extend(DocumentsLoader.load(path, uri_prefix))
 
     async def run(self) -> DocumentJobReport:
         """Execute the job and return a report when complete."""
         for doc in self._documents:
-            self._report.add_pending_doc(doc.uri)
+            self._report.add_pending_doc(cast("str", doc.uri))
 
         batches = [
             self._documents[i : i + self._batch_size]
@@ -121,9 +127,9 @@ class WriteDocumentsJob:
         sem: asyncio.Semaphore,
         batch: list[Document],
         ml: AsyncMLClient,
-    ):
+    ) -> None:
         """Send a documents batch to /v1/documents endpoint."""
-        batch_uris = [doc.uri for doc in batch]
+        batch_uris = [cast("str", doc.uri) for doc in batch]
         async with sem:
             try:
                 await ml.documents.write(batch, database=self._database)
@@ -153,7 +159,7 @@ class ReadDocumentsJob:
         self,
         concurrency: int | None = None,
         batch_size: int = 400,
-    ):
+    ) -> None:
         """Initialize ReadDocumentsJob instance.
 
         Parameters
@@ -165,7 +171,7 @@ class ReadDocumentsJob:
         """
         self._concurrency: int = concurrency or 16
         self._batch_size: int = batch_size
-        self._config: dict = {}
+        self._config: MLClientOptions = {}
         self._database: str | None = None
         self._uris: list[str] = []
         self._categories: list[str] = ["content"]
@@ -183,15 +189,15 @@ class ReadDocumentsJob:
         """Return all read documents from the job."""
         return list(self._documents)
 
-    def with_client_config(self, **config):
+    def with_client_config(self, **config: Unpack[MLClientOptions]) -> None:
         """Set AsyncMLClient configuration."""
         self._config = config
 
-    def with_database(self, database: str):
+    def with_database(self, database: str) -> None:
         """Set a database name."""
         self._database = database
 
-    def with_metadata(self, *args: Category | str):
+    def with_metadata(self, *args: Category | str) -> None:
         """Add metadata category/ies to retrieve from a MarkLogic server."""
         if len(args) == 0:
             self._categories.append("metadata")
@@ -200,11 +206,11 @@ class ReadDocumentsJob:
                 c.value if isinstance(c, Category) else c for c in args
             )
 
-    def with_uris_input(self, uris: Iterable[str]):
+    def with_uris_input(self, uris: Iterable[str]) -> None:
         """Add URIs to the job's input."""
         self._uris.extend(uris)
 
-    def with_filesystem_output(self, output_path: str):
+    def with_filesystem_output(self, output_path: str) -> None:
         """Set filesystem output directory to save documents inside."""
         self._fs_output_path = Path(output_path).resolve().absolute()
 
@@ -242,15 +248,15 @@ class ReadDocumentsJob:
         sem: asyncio.Semaphore,
         batch: list[str],
         ml: AsyncMLClient,
-    ):
+    ) -> None:
         """Send a URIs batch to /v1/documents endpoint."""
         async with sem:
             try:
-                kwargs = {"database": self._database}
+                kwargs: dict = {"database": self._database}
                 if self._categories != ["content"]:
                     kwargs["category"] = list(dict.fromkeys(self._categories))
                 async for doc in ml.documents.read_stream(batch, **kwargs):
-                    self._report.add_successful_doc(doc.uri)
+                    self._report.add_successful_doc(cast("str", doc.uri))
                     self._documents.append(doc)
             except Exception as err:
                 self._report.add_failed_docs(batch, err)
@@ -258,17 +264,20 @@ class ReadDocumentsJob:
                     "An unexpected error occurred while reading documents",
                 )
 
-    async def _save_documents(self):
+    async def _save_documents(self) -> None:
         """Save read documents to the filesystem."""
         for doc in self._documents:
             await self._save_document(doc)
 
-    async def _save_document(self, doc: Document):
+    async def _save_document(self, doc: Document) -> None:
         """Save a single document to the filesystem, reporting any failure."""
         try:
-            await DocumentsWriter.write_document(doc, self._fs_output_path)
+            await DocumentsWriter.write_document(
+                doc,
+                cast("Path", self._fs_output_path),
+            )
         except Exception as err:
-            self._report.add_failed_doc(doc.uri, err)
+            self._report.add_failed_doc(cast("str", doc.uri), err)
 
 
 @experimental()
@@ -277,11 +286,11 @@ class DocumentJobReport:
 
     def __init__(
         self,
-    ):
+    ) -> None:
         """Initialize DocumentJobReport instance."""
         self._doc_reports: dict[str, DocumentReport] = {}
 
-    def __copy__(self):
+    def __copy__(self) -> Self:
         """Copy DocumentJobReport instance."""
         report_copy = self.__class__()
         for report in self._doc_reports.values():
@@ -350,7 +359,7 @@ class DocumentJobReport:
     def add_pending_docs(
         self,
         uris: list[str],
-    ):
+    ) -> None:
         """Add pending documents' reports."""
         for uri in uris:
             self.add_pending_doc(uri)
@@ -358,7 +367,7 @@ class DocumentJobReport:
     def add_successful_docs(
         self,
         uris: list[str],
-    ):
+    ) -> None:
         """Add successfully completed documents' reports."""
         for uri in uris:
             self.add_successful_doc(uri)
@@ -367,7 +376,7 @@ class DocumentJobReport:
         self,
         uris: list[str],
         err: Exception,
-    ):
+    ) -> None:
         """Add failed documents' reports."""
         for uri in uris:
             self.add_failed_doc(uri, err)
@@ -375,14 +384,14 @@ class DocumentJobReport:
     def add_pending_doc(
         self,
         uri: str,
-    ):
+    ) -> None:
         """Add a pending document report."""
         self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.pending))
 
     def add_successful_doc(
         self,
         uri: str,
-    ):
+    ) -> None:
         """Add a successfully completed document report."""
         self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.success))
 
@@ -390,7 +399,7 @@ class DocumentJobReport:
         self,
         uri: str,
         err: Exception,
-    ):
+    ) -> None:
         """Add a failed document report."""
         self.add_doc_report(
             DocumentReport(
@@ -406,14 +415,14 @@ class DocumentJobReport:
     def add_doc_report(
         self,
         report: DocumentReport,
-    ):
+    ) -> None:
         """Add a document report."""
         self._doc_reports[report.uri] = report
 
     def get_doc_report(
         self,
         uri: str,
-    ):
+    ) -> DocumentReport | None:
         """Return a document report."""
         return self._doc_reports.get(uri)
 
@@ -433,16 +442,16 @@ class DocumentReport(BaseModel):
 
     uri: str
     status: DocumentStatus
-    details: DocumentStatusDetails = None
+    details: DocumentStatusDetails | None = None
 
 
 @experimental()
 class DocumentStatus(Enum):
     """A document's status enum."""
 
-    success: str = "SUCCESS"
-    failure: str = "FAILURE"
-    pending: str = "PENDING"
+    success = "SUCCESS"
+    failure = "FAILURE"
+    pending = "PENDING"
 
 
 @experimental()

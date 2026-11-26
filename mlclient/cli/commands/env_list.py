@@ -7,6 +7,8 @@ It exports an implementation for 'env list' command:
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
 from cleo.helpers import option
@@ -35,7 +37,7 @@ class EnvListCommand(Command):
 
     name: str = "env list"
     description: str = "Lists MLClient environments"
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         option(
             "global",
             "g",

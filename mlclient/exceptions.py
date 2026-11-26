@@ -153,7 +153,7 @@ class MarkLogicError(MLClientError):
     def __init__(
         self,
         error: dict | str,
-    ):
+    ) -> None:
         """Initialize MarkLogicError instance.
 
         Parameters
@@ -167,12 +167,14 @@ class MarkLogicError(MLClientError):
         self._message_code: str | None = None
         self._message: str | None = None
         if isinstance(error, dict):
-            error = error.get("errorResponse", error)
-            status_code = error.get("statusCode")
-            self._status_code = int(status_code) if str(status_code).isdigit() else None
-            self._status = error.get("status")
-            self._message_code = error.get("messageCode")
-            self._message = error.get("message")
+            details = error.get("errorResponse", error)
+            status_code = details.get("statusCode")
+            self._status_code = (
+                int(str(status_code)) if str(status_code).isdigit() else None
+            )
+            self._status = details.get("status")
+            self._message_code = details.get("messageCode")
+            self._message = details.get("message")
             if self._message_code:
                 error_msg = (
                     f"[{status_code} {self._status}] "
@@ -252,7 +254,7 @@ class ResourceNotFoundError(MLClientError):
     def __init__(
         self,
         resource_name: str,
-    ):
+    ) -> None:
         """Initialize ResourceNotFoundError exception with details.
 
         Extends Exception constructor with a custom message.
@@ -275,7 +277,7 @@ class EnvironmentFileExistsError(MLClientError):
     def __init__(
         self,
         file_path: str,
-    ):
+    ) -> None:
         """Initialize EnvironmentFileExistsError exception with details.
 
         Extends Exception constructor with a custom message.

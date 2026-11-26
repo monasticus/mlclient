@@ -16,7 +16,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from copy import copy
 from dataclasses import dataclass
-from typing import TypeAlias, overload
+from typing import TypeAlias
+from typing import cast as type_cast
+from typing import overload
 from xml.dom import minidom
 from xml.etree.ElementTree import Element, ElementTree, tostring
 
@@ -40,7 +42,7 @@ class XqyCompilationContext:
     values. XqyExpression.compile creates a fresh context for every invocation.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Create an empty context for one compilation."""
         self._variables: dict[str, str | bool] = {}
         self._paths: list[tuple[str, str]] = []
@@ -51,7 +53,7 @@ class XqyCompilationContext:
         """Return a copy of scalar bindings without exposing compiler state."""
         return self._variables.copy()
 
-    def bind(self, value, atomic_type: str = "xs:string") -> str:
+    def bind(self, value: str | bool, atomic_type: str = "xs:string") -> str:
         """Bind a JSON-compatible value and return its variable reference."""
         name = f"v{len(self._variables)}"
         self._variables[name] = value
@@ -119,7 +121,7 @@ class XqyCompilationContext:
         )
         body = re.sub(
             r"\x00\$(v[0-9]+)\x00",
-            lambda match: self._variables[match[1]],
+            lambda match: type_cast("str", self._variables[match[1]]),
             body,
         )
         source = self.bind(body)
@@ -141,7 +143,7 @@ class XqyCompilationContext:
         )
 
 
-def namespace_bindings(namespaces) -> dict[str, str]:
+def namespace_bindings(namespaces: Mapping[str, str] | None) -> dict[str, str]:
     """Copy namespace bindings and protect namespaces used by generated code.
 
     Parameters
@@ -201,7 +203,11 @@ class XqyExpression(ABC):
             XQuery body fragment. Runtime data must be bound, not interpolated.
         """
 
-    def compile(self, *, namespaces=None) -> tuple[str, dict]:
+    def compile(
+        self,
+        *,
+        namespaces: Mapping[str, str] | None = None,
+    ) -> tuple[str, dict]:
         """Return guarded XQuery source and external bindings.
 
         Parameters
@@ -293,18 +299,11 @@ AtomicScalar = (
 )
 PythonNode: TypeAlias = dict[str, object] | Element | ElementTree
 """Python representations of JSON object, XML element and XML document nodes."""
-NodeInput: TypeAlias = (
-    PythonNode | XqyExpression | list["NodeInput"] | tuple["NodeInput", ...] | None
-)
+NodeInput: TypeAlias = PythonNode | XqyExpression | Sequence["NodeInput"] | None
 """Python XML/JSON nodes, expressions yielding nodes, or sequences of them."""
 
 AtomicInput: TypeAlias = (
-    AtomicScalar
-    | PythonNode
-    | XqyExpression
-    | list["AtomicInput"]
-    | tuple["AtomicInput", ...]
-    | None
+    AtomicScalar | PythonNode | XqyExpression | Sequence["AtomicInput"] | None
 )
 StringInput = str | list[str] | XqyExpression | list[XqyExpression] | None
 FloatInput = float | list[float] | XqyExpression | list[XqyExpression] | None
@@ -339,7 +338,7 @@ class Index(XqyExpression):
     inner: XqyExpression
     position: int | XqyExpression
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the position when the predicate expression is created."""
         _validate_position(self.position)
 
@@ -363,7 +362,7 @@ class Range(XqyExpression):
     start: int | XqyExpression
     end: int | XqyExpression
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate both bounds and their literal order."""
         _validate_position(self.start)
         _validate_position(self.end)
@@ -391,7 +390,7 @@ class ResultXPath(XqyExpression):
     inner: XqyExpression
     source: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate result XPath input before sending a request.
 
         Raises
@@ -446,7 +445,7 @@ class FunctionCall(XqyExpression):
     args: tuple = ()
     optionals: tuple = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Snapshot arguments as expression objects."""
         object.__setattr__(self, "args", tuple(as_expr(arg) for arg in self.args))
         object.__setattr__(
@@ -480,7 +479,7 @@ class ModuleFunctionCall(XqyExpression):
         *,
         namespace: str,
         module_path: str,
-    ):
+    ) -> None:
         """Capture a module function and its arguments without performing I/O.
 
         Parameters
@@ -535,7 +534,7 @@ class ModuleFunctionCall(XqyExpression):
             "xdmp:function",
             (FunctionCall("fn:QName", (namespace, name)), module_path),
         )
-        self._call = FunctionCall("xdmp:apply", (function, *args), optionals)
+        self._call = FunctionCall("xdmp:apply", (function, *args), tuple(optionals))
 
     def render(self, ctx: XqyCompilationContext) -> str:
         """Render native module invocation in the shared compilation context.
@@ -586,7 +585,7 @@ class Path(XqyExpression):
     source: str
     kind: str = "xpath"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Require non-empty path text before registering server-side validation.
 
         Raises
@@ -619,7 +618,9 @@ class NamespaceMap(XqyExpression):
         return _namespace_code(dict(self.bindings), ctx)
 
 
-def namespace_map(value):
+def namespace_map(
+    value: Mapping[str, str] | XqyExpression | None,
+) -> XqyExpression | None:
     """Convert Python namespace mappings while preserving native map expressions."""
     if isinstance(value, Mapping):
         return NamespaceMap(tuple(namespace_bindings(value).items()))
@@ -644,7 +645,7 @@ def as_searchable_expression(expression: str | XqyExpression) -> XqyExpression:
     return expression
 
 
-def as_expr(value, *, cast: str | None = None) -> XqyExpression:
+def as_expr(value: AtomicInput, *, cast: str | None = None) -> XqyExpression:
     """Snapshot Python values into immutable XQuery expressions.
 
     Parameters
@@ -686,10 +687,10 @@ def as_expr(value, *, cast: str | None = None) -> XqyExpression:
             expr = expr.xpath("*")
     elif value is None:
         expr = XqySequence(())
-    elif isinstance(value, (list, tuple)):
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         expr = XqySequence(tuple(as_expr(item) for item in value))
     else:
-        expr = _scalar(value)
+        expr = _scalar(type_cast("AtomicScalar", value))
     if isinstance(expr, AtomicValue) and expr.cast == cast:
         return expr
     if isinstance(expr, FunctionCall) and expr.fn == cast:
@@ -732,7 +733,7 @@ def _xml_node_source(root: Element) -> str:
             if element.prefix and re.fullmatch(r"ns[0-9]+", element.prefix):
                 document.renameNode(
                     element,
-                    element.namespaceURI,
+                    element.namespaceURI or "",
                     renamed[element.prefix] + ":" + element.localName,
                 )
             for attribute in list(element.attributes.values()):
@@ -748,13 +749,13 @@ def _xml_node_source(root: Element) -> str:
                 elif attribute.prefix and re.fullmatch(r"ns[0-9]+", attribute.prefix):
                     document.renameNode(
                         attribute,
-                        attribute.namespaceURI,
+                        attribute.namespaceURI or "",
                         renamed[attribute.prefix] + ":" + attribute.localName,
                     )
-        return document.documentElement.toxml()
+        return type_cast("minidom.Element", document.documentElement).toxml()
 
 
-def _validate_json_keys(value):
+def _validate_json_keys(value: object) -> None:
     """Require string object keys before encoding a Python JSON node.
 
     Parameters
@@ -774,12 +775,14 @@ def _validate_json_keys(value):
                 message = "JSON object keys must be strings"
                 raise TypeError(message)
             _validate_json_keys(item)
-    elif isinstance(value, (list, tuple)):
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         for item in value:
             _validate_json_keys(item)
 
 
-def as_qname(value) -> XqyExpression:
+def as_qname(
+    value: str | XqyExpression | Sequence[str | XqyExpression] | None,
+) -> XqyExpression:
     """Convert local-name strings, QName expressions or their sequences.
 
     Parameters
@@ -816,7 +819,7 @@ def _namespace_declarations(namespaces: dict[str, str]) -> str:
     return "".join(declarations)
 
 
-def _namespace_code(namespaces, ctx: XqyCompilationContext) -> str:
+def _namespace_code(namespaces: dict[str, str], ctx: XqyCompilationContext) -> str:
     """Render a namespace map with data bindings, never interpolated URIs."""
     entries = [
         f"map:entry({ctx.bind(prefix)}, {ctx.bind(uri)})"
@@ -843,7 +846,7 @@ def _validate_position(value: int | XqyExpression) -> None:
         raise TypeError(message)
 
 
-def _scalar(value) -> AtomicValue:
+def _scalar(value: AtomicScalar) -> AtomicValue:
     """Encode scalars without losing precision in the JSON transport."""
     if isinstance(value, bool):
         atom = AtomicValue(value, "xs:boolean")

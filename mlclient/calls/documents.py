@@ -60,7 +60,7 @@ class DocumentsGetCall(ApiCall):
         transform: str | None = None,
         transform_params: dict | None = None,
         txid: str | None = None,
-    ):
+    ) -> None:
         """Initialize DocumentsGetCall instance.
 
         Parameters
@@ -121,7 +121,7 @@ class DocumentsGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Documents call.
 
         Returns
@@ -135,8 +135,8 @@ class DocumentsGetCall(ApiCall):
     def _validate_params(
         cls,
         category: str | list | None,
-        data_format: str,
-    ):
+        data_format: str | None,
+    ) -> None:
         categories = [category] if not isinstance(category, list) else category
         if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
             joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
@@ -159,9 +159,9 @@ class DocumentsGetCall(ApiCall):
     @staticmethod
     def _get_accept_header(
         uri: str | list,
-        category: str | list,
-        data_format: str,
-    ):
+        category: str | list | None,
+        data_format: str | None,
+    ) -> str | None:
         if (not isinstance(uri, str) and len(uri) > 1) or (
             isinstance(category, list) and len(category) > 1
         ):
@@ -201,7 +201,7 @@ class DocumentsPostCall(ApiCall):
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
-    ):
+    ) -> None:
         """Initialize DocumentsPostCall instance.
 
         Parameters
@@ -252,7 +252,7 @@ class DocumentsPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Documents call.
 
         Returns
@@ -266,7 +266,7 @@ class DocumentsPostCall(ApiCall):
     def _validate_params(
         cls,
         body: list[DocumentsBodyPart] | None,
-    ):
+    ) -> None:
         if body is None or len(body) == 0:
             msg = "No request body provided for POST /v1/documents!"
             raise exceptions.WrongParametersError(msg)
@@ -331,7 +331,7 @@ class DocumentsDeleteCall(ApiCall):
         temporal_collection: str | None = None,
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
-    ):
+    ) -> None:
         """Initialize DocumentsDeleteCall instance.
 
         Parameters
@@ -391,7 +391,7 @@ class DocumentsDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Documents call.
 
         Returns

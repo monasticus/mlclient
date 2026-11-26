@@ -183,7 +183,7 @@ def effective_config(
 
 def _settings_values(settings: dict) -> dict:
     """Serialize inherited settings, preserving no-auth as the YAML app alias."""
-    values = {}
+    values: dict = {}
     for field, value in settings.items():
         if field == "auth" and value is None:
             values[field] = "app"

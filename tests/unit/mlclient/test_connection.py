@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import datetime
 import logging
 import ssl
@@ -199,6 +200,15 @@ def test_validate_cloud_with_client_cert_raises():
 
 def test_unset_repr():
     assert repr(UNSET) == "UNSET"
+
+
+def test_unset_str():
+    assert str(UNSET) == "UNSET"
+
+
+def test_unset_stays_the_sentinel_when_copied():
+    assert copy.deepcopy(UNSET) is UNSET
+    assert copy.copy(UNSET) is UNSET
 
 
 def _write_self_signed_ca(tmp_path):

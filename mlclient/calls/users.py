@@ -52,9 +52,9 @@ class UsersGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
-        view: str = "default",
-    ):
+        data_format: str | None = "xml",
+        view: str | None = "default",
+    ) -> None:
         """Initialize UsersGetCall instance.
 
         Parameters
@@ -78,7 +78,7 @@ class UsersGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Users call.
 
         Returns
@@ -91,9 +91,9 @@ class UsersGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -125,7 +125,7 @@ class UsersPostCall(ApiCall):
     def __init__(
         self,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize UsersPostCall instance.
 
         Parameters
@@ -142,7 +142,7 @@ class UsersPostCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Users call.
 
         Returns
@@ -155,8 +155,8 @@ class UsersPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
-    ):
+        body: str | dict | None,
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/users!"
             raise exceptions.WrongParametersError(msg)
@@ -185,9 +185,9 @@ class UserGetCall(ApiCall):
     def __init__(
         self,
         user: str,
-        data_format: str = "xml",
-        view: str = "default",
-    ):
+        data_format: str | None = "xml",
+        view: str | None = "default",
+    ) -> None:
         """Initialize UserGetCall instance.
 
         Parameters
@@ -215,7 +215,7 @@ class UserGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the User call.
 
         Returns
@@ -228,9 +228,9 @@ class UserGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
-    ):
+        data_format: str | None,
+        view: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -262,7 +262,7 @@ class UserDeleteCall(ApiCall):
     def __init__(
         self,
         user: str,
-    ):
+    ) -> None:
         """Initialize UserDeleteCall instance.
 
         Parameters
@@ -276,7 +276,7 @@ class UserDeleteCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the User call.
 
         Returns
@@ -309,8 +309,8 @@ class UserPropertiesGetCall(ApiCall):
     def __init__(
         self,
         user: str,
-        data_format: str = "xml",
-    ):
+        data_format: str | None = "xml",
+    ) -> None:
         """Initialize UserPropertiesGetCall instance.
 
         Parameters
@@ -334,7 +334,7 @@ class UserPropertiesGetCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the User Properties call.
 
         Returns
@@ -347,8 +347,8 @@ class UserPropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-    ):
+        data_format: str | None,
+    ) -> None:
         call_utils.validate_supported(
             [data_format],
             cls._SUPPORTED_FORMATS,
@@ -376,7 +376,7 @@ class UserPropertiesPutCall(ApiCall):
         self,
         user: str,
         body: str | dict,
-    ):
+    ) -> None:
         """Initialize UserPropertiesPutCall instance.
 
         Parameters
@@ -396,7 +396,7 @@ class UserPropertiesPutCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the User Properties call.
 
         Returns
@@ -409,8 +409,8 @@ class UserPropertiesPutCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
-    ):
+        body: str | dict | None,
+    ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (
                 "No request body provided for "

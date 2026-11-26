@@ -30,6 +30,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
+    "Typing :: Typed",
 ]
 dependencies = [
     "httpx>=0.27.0,<1.0.0",
@@ -41,6 +42,7 @@ dependencies = [
     "aiofiles>=24.1.0,<26.0.0",
     "httpx-retries>=0.4.5,<0.7.0",
     "questionary>=2.1.1,<3.0.0",
+    "typing-extensions (>=4.12,<5)",
 ]
 
 [project.optional-dependencies]
@@ -57,7 +59,7 @@ ml = "mlclient.cli:main"
 
 [tool.poetry]
 packages = [{include = "mlclient"}]
-include = ["mlclient/resources/*"]
+include = ["mlclient/resources/*", "mlclient/py.typed"]
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
@@ -75,6 +77,12 @@ pyjwt = "^2.15.0"
 cryptography = "^50.0.0"
 packaging = ">=24,<27"
 testcontainers = "^4.15.0"
+mypy = ">=2.4,<3"
+types-pyyaml = "^6.0.12.20261113"
+types-python-dateutil = "^2.9.0.20261116"
+types-aiofiles = "^25.1.0.20261107"
+types-xmltodict = "^1.0.1.20260518"
+pyspnego = ">=0.12.1,<0.13.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -120,7 +128,7 @@ exclude_lines = [
 lint.select = [
     "F", "E", "W", "C90", "N", "D", "UP", "B", "A", "COM", "C4", "EM", "EXE", "ISC", "G", "PIE", "T20",
     "PT", "Q", "RSE", "RET", "SLF", "SIM", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "RUF", "FLY",
-    "ASYNC", "FA", "FIX", "PERF", "FURB", "LOG"
+    "ASYNC", "FA", "FIX", "PERF", "FURB", "LOG", "ANN"
 #    , "CPY"
 ]
 lint.ignore = []
@@ -215,6 +223,7 @@ max-complexity = 10
     "PLR0913" # allow many arguments as they depend on ML structure
 ]
 "tests/*" = [
+    "ANN", # test functions and fixtures are not public API
     "C901", # allow complex test helpers
     "D", # disable pydocstyle for tests
     "EM101", # allow string literals in exceptions' tests
@@ -239,3 +248,11 @@ max-complexity = 10
 "tests/utils/ml_mockers.py" = [
     "T201", # allow printing by MLMocker
 ]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["mlclient"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+show_error_codes = true

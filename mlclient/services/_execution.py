@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from mlclient._options import UNSET
+from mlclient._options import UNSET, UnsetType
 from mlclient.responses import MLResponseParser
 from mlclient.services.scope import ServiceScope
 
@@ -17,7 +17,10 @@ if TYPE_CHECKING:
 ScopedService = TypeVar("ScopedService", bound="ExecutionService")
 
 
-class ExecutionService:
+_RestT = TypeVar("_RestT", "RestApi", "AsyncRestApi")
+
+
+class ExecutionService(Generic[_RestT]):
     """Base of the sync and async services that run code on MarkLogic.
 
     Eval and invoke send code to different endpoints, but share the database
@@ -29,9 +32,9 @@ class ExecutionService:
 
     def __init__(
         self,
-        rest: RestApi | AsyncRestApi,
+        rest: _RestT,
         scope: ServiceScope | None = None,
-    ):
+    ) -> None:
         """Create a service on the supplied REST connection.
 
         Parameters
@@ -41,14 +44,14 @@ class ExecutionService:
         scope : ServiceScope | None, default None
             Database and transaction defaults; None uses an empty scope.
         """
-        self._rest = rest
+        self._rest: _RestT = rest
         self._scope = ServiceScope().overridden_by(scope)
 
     def __call__(
         self: ScopedService,
         *,
-        database: str | None = UNSET,
-        txid: str | None = UNSET,
+        database: str | UnsetType | None = UNSET,
+        txid: str | UnsetType | None = UNSET,
     ) -> ScopedService:
         """Return a scoped copy without opening a connection or a transaction.
 
@@ -70,16 +73,16 @@ class ExecutionService:
 
     def _request_scope(
         self,
-        database: str | None,
-        txid: str | None,
+        database: str | UnsetType | None,
+        txid: str | UnsetType | None,
     ) -> dict:
         """Resolve one request's database and transaction against the service scope.
 
         Parameters
         ----------
-        database : str | None
+        database : str | UnsetType | None
             Content database; unset inherits the service scope, None clears it.
-        txid : str | None
+        txid : str | UnsetType | None
             Transaction identifier; unset inherits the service scope, None clears it.
 
         Returns

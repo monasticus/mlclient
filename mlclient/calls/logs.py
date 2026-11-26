@@ -37,13 +37,13 @@ class LogsCall(ApiCall):
 
     def __init__(
         self,
-        filename: str,
-        data_format: str = "html",
+        filename: str | None,
+        data_format: str | None = "html",
         host: str | None = None,
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
-    ):
+    ) -> None:
         """Initialize LogsCall instance.
 
         Parameters
@@ -76,7 +76,7 @@ class LogsCall(ApiCall):
     @property
     def endpoint(
         self,
-    ):
+    ) -> str:
         """An endpoint for the Logs call.
 
         Returns
@@ -90,9 +90,9 @@ class LogsCall(ApiCall):
     def _validate_params(
         cls,
         data_format: str,
-        start_time: str,
-        end_time: str,
-    ):
+        start_time: str | None,
+        end_time: str | None,
+    ) -> None:
         if data_format and data_format not in ["xml", "json", "html", "text"]:
             msg = "The supported formats are xml, json, html or text!"
             raise exceptions.WrongParametersError(msg)
@@ -102,8 +102,8 @@ class LogsCall(ApiCall):
     @staticmethod
     def _validate_datetime_param(
         param_name: str,
-        param_value: str,
-    ):
+        param_value: str | None,
+    ) -> None:
         try:
             if param_value:
                 parser.parse(param_value)
@@ -113,8 +113,8 @@ class LogsCall(ApiCall):
 
     @staticmethod
     def _reformat_datetime_param(
-        datetime_param: str,
-    ):
+        datetime_param: str | None,
+    ) -> str | None:
         if datetime_param:
             return parser.parse(datetime_param).strftime("%Y-%m-%dT%H:%M:%S")
         return datetime_param

@@ -4,13 +4,13 @@
 [DocumentsService][mlclient.services.DocumentsService] for
 `/v1/documents`. It exposes three operations - `read`, `write` (create or update)
 and `delete` - that work with typed [`Document`][mlclient.models.Document] models instead of raw multipart
-bodies.
+bodies, and `exists` to check a single URI without downloading the document.
 
-Every operation accepts one URI or many, an optional `database`, and a `txid`
-to run inside a [transaction](transactions.md). `read` and `write` also carry
-metadata and apply [content transforms](#transforms); `read` can read
-[at a point in time](#point-in-time-reads); `write` and `delete` also handle
-temporal collections.
+`read`, `write` and `delete` accept one URI or many. Every operation takes an
+optional `database` and a `txid` to run inside a [transaction](transactions.md).
+`read` and `write` also carry metadata and apply [content transforms](#transforms);
+`read` can read [at a point in time](#point-in-time-reads); `write` and `delete`
+also handle temporal collections.
 
 Before the operations, two models are worth knowing: [`Document`][mlclient.models.Document] (what `read`
 returns and `write` accepts) and [`Metadata`][mlclient.models.Metadata].
@@ -226,6 +226,29 @@ network streaming. Both methods split long URI lists into request batches.
 >>> with mgr.get_client("my-app") as ml:
 ...     doc = ml.documents.read("/doc-1.xml", database="Documents")
 ```
+
+## Check that a document exists
+
+`exists` sends a `HEAD` request for one URI and returns `True` or `False` - no
+content is transferred. It accepts `database` and `txid` like `read`; inside a
+transaction, a document the transaction wrote but has not committed exists only
+when its `txid` is passed.
+
+```python
+>>> with MLClient() as ml:
+...     ml.documents.exists("/doc-1.xml")
+True
+
+>>> with MLClient() as ml:
+...     ml.documents.exists("/missing.xml")
+False
+```
+
+An error status (400 for an unknown database, 401 or 403, for example) raises
+`httpx.HTTPStatusError`: a `HEAD` response carries no MarkLogic error body. To
+read the headers themselves (`Content-Type`, `vnd.marklogic.document-format`,
+`ML-Effective-Timestamp`), use `ml.rest.documents.head(uri)`; pass `category`
+and `data_format` to it for the headers a metadata read would return.
 
 ## Reuse database and transaction settings
 
@@ -476,7 +499,7 @@ versions remain queryable:
 
 ## Within a transaction
 
-`read`, `write` and `delete` accept a `txid` to run inside an open
+`read`, `write`, `delete` and `exists` accept a `txid` to run inside an open
 multi-statement transaction. Pass the id explicitly, or spread a
 [`TransactionService`][mlclient.services.TransactionService] with `**` to carry both the `txid` and its database. See
 [Transactions](transactions.md) for the full lifecycle.

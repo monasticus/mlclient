@@ -2203,6 +2203,92 @@ def test_delete_many_uris_are_batched(ml):
 
 
 @respx.mock
+def test_exists_returns_true_for_existing_document(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    mocker.with_response_header("vnd.marklogic.document-format", "json")
+    mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    assert ml.documents.exists("/some/dir/doc2.json") is True
+
+
+@respx.mock
+def test_exists_returns_false_for_missing_document(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc5.json")
+    mocker.with_response_code(404)
+    mocker.with_response_content_type("application/json; charset=UTF-8")
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    assert ml.documents.exists("/some/dir/doc5.json") is False
+
+
+@respx.mock
+def test_exists_raises_http_status_error_for_an_error_status(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_request_param("database", "NoSuchDatabase")
+    mocker.with_response_code(400)
+    mocker.with_response_content_type("application/json; charset=UTF-8")
+    mocker.with_empty_response_body()
+    route = mocker.mock_head()
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        ml.documents.exists("/some/dir/doc2.json", database="NoSuchDatabase")
+
+    assert str(raised.value) == (
+        "Client error '400 Bad Request' for url "
+        "'http://localhost:8000/v1/documents"
+        "?uri=%2Fsome%2Fdir%2Fdoc2.json&database=NoSuchDatabase'\n"
+        "For more information check: "
+        "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    )
+    assert raised.value.response.url == route.calls.last.request.url
+
+
+@respx.mock
+def test_exists_raises_marklogic_error_for_an_unexpected_success(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    with pytest.raises(MarkLogicError) as raised:
+        ml.documents.exists("/some/dir/doc2.json")
+
+    assert str(raised.value) == (
+        "Expected 200 OK or 404 Not Found when checking a document, got 204."
+    )
+
+
+@respx.mock
+def test_exists_preserves_request_timeout(ml):
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    mocker.with_response_header("vnd.marklogic.document-format", "json")
+    mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    mocker.with_empty_response_body()
+    route = mocker.mock_head()
+
+    ml.documents.exists("/some/dir/doc2.json", timeout=2)
+
+    assert route.calls.last.request.extensions["timeout"] == httpx.Timeout(2).as_dict()
+
+
+@respx.mock
 def test_read_without_scope():
     mocker = MLRespXMocker(use_router=False, strict_params=True)
     mocker.with_url("http://localhost:8000/v1/documents")
@@ -2612,6 +2698,111 @@ def test_delete_scope_kwargs_clear_service_transaction():
     with MLClient() as ml:
         documents = ml.documents(database="service-db", txid="service-tx")
         documents.delete("/some/dir/doc1.xml", txid=None)
+
+
+@respx.mock
+def test_exists_with_scope_kwargs():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    mocker.with_response_header("vnd.marklogic.document-format", "json")
+    mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    with MLClient() as ml:
+        documents = ml.documents
+        exists = documents.exists(
+            "/some/dir/doc2.json",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert exists is True
+
+
+@respx.mock
+def test_exists_inherits_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    mocker.with_response_header("vnd.marklogic.document-format", "json")
+    mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        assert documents.exists("/some/dir/doc2.json") is True
+
+
+@respx.mock
+def test_exists_scope_kwargs_override_service_scope():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_request_param("database", "request-db")
+    mocker.with_request_param("txid", "request-tx")
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    mocker.with_response_header("vnd.marklogic.document-format", "json")
+    mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        exists = documents.exists(
+            "/some/dir/doc2.json",
+            database="request-db",
+            txid="request-tx",
+        )
+
+    assert exists is True
+
+
+@respx.mock
+def test_exists_scope_kwargs_clear_service_database():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_request_param("txid", "service-tx")
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    mocker.with_response_header("vnd.marklogic.document-format", "json")
+    mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        assert documents.exists("/some/dir/doc2.json", database=None) is True
+
+
+@respx.mock
+def test_exists_scope_kwargs_clear_service_transaction():
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", "/some/dir/doc2.json")
+    mocker.with_request_param("database", "service-db")
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=utf-8")
+    mocker.with_response_header("vnd.marklogic.document-format", "json")
+    mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    mocker.with_empty_response_body()
+    mocker.mock_head()
+
+    with MLClient() as ml:
+        documents = ml.documents(database="service-db", txid="service-tx")
+        assert documents.exists("/some/dir/doc2.json", txid=None) is True
 
 
 @respx.mock

@@ -10,6 +10,7 @@ from mlclient._options import UNSET, UnsetType
 from mlclient.calls.documents import (
     DocumentsDeleteCall,
     DocumentsGetCall,
+    DocumentsHeadCall,
     DocumentsPostCall,
 )
 from mlclient.models.document_parts import DocumentsBodyPart
@@ -109,6 +110,76 @@ class DocumentsApi:
             timestamp=timestamp,
             transform=transform,
             transform_params=transform_params,
+            txid=txid,
+        )
+        return self._api.call(call, timeout=timeout)
+
+    def head(
+        self,
+        uri: str,
+        *,
+        database: str | None = None,
+        category: str | list | None = None,
+        data_format: str | None = None,
+        txid: str | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
+        """Get the headers a GET of one document's content or metadata would return.
+
+        The response has no body: status 200 (OK) when the document exists and
+        404 (Not Found) when it does not.
+
+        Documentation: https://docs.marklogic.com/REST/HEAD/v1/documents
+
+        Parameters
+        ----------
+        uri : str
+            The URI of a document in the database. MarkLogic accepts a single URI
+            per request.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        category : str | list
+            The category of data for which to generate headers. Category can be
+            specified multiple times to request any combination of content
+            and metadata. Valid categories: content (default), metadata,
+            metadata-values, collections, permissions, properties, and quality.
+            Use metadata to request all categories except content.
+        data_format : str
+            The format of metadata whose headers are generated: xml or json.
+            This parameter does not affect document content.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response without a body, carrying the document's headers
+            (Content-Type, vnd.marklogic.document-format, ML-Effective-Timestamp)
+
+        Raises
+        ------
+        WrongParametersError
+            If a category is not supported or the format is neither json nor
+            xml.
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
+        """
+        call = DocumentsHeadCall(
+            uri=uri,
+            database=database,
+            category=category,
+            data_format=data_format,
             txid=txid,
         )
         return self._api.call(call, timeout=timeout)
@@ -353,6 +424,76 @@ class AsyncDocumentsApi:
             timestamp=timestamp,
             transform=transform,
             transform_params=transform_params,
+            txid=txid,
+        )
+        return await self._api.call(call, timeout=timeout)
+
+    async def head(
+        self,
+        uri: str,
+        *,
+        database: str | None = None,
+        category: str | list | None = None,
+        data_format: str | None = None,
+        txid: str | None = None,
+        timeout: httpx.Timeout | float | UnsetType | None = UNSET,
+    ) -> Response:
+        """Get the headers a GET of one document's content or metadata would return.
+
+        The response has no body: status 200 (OK) when the document exists and
+        404 (Not Found) when it does not.
+
+        Documentation: https://docs.marklogic.com/REST/HEAD/v1/documents
+
+        Parameters
+        ----------
+        uri : str
+            The URI of a document in the database. MarkLogic accepts a single URI
+            per request.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        category : str | list
+            The category of data for which to generate headers. Category can be
+            specified multiple times to request any combination of content
+            and metadata. Valid categories: content (default), metadata,
+            metadata-values, collections, permissions, properties, and quality.
+            Use metadata to request all categories except content.
+        data_format : str
+            The format of metadata whose headers are generated: xml or json.
+            This parameter does not affect document content.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response without a body, carrying the document's headers
+            (Content-Type, vnd.marklogic.document-format, ML-Effective-Timestamp)
+
+        Raises
+        ------
+        WrongParametersError
+            If a category is not supported or the format is neither json nor
+            xml.
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires on the last
+            attempt the retry policy allows. The default policy does not retry
+            read timeouts.
+        """
+        call = DocumentsHeadCall(
+            uri=uri,
+            database=database,
+            category=category,
+            data_format=data_format,
             txid=txid,
         )
         return await self._api.call(call, timeout=timeout)

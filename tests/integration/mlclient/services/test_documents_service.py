@@ -446,6 +446,38 @@ def test_read_multiple_documents_at_earlier_timestamp():
         docs_client_utils.delete_documents(uris)
 
 
+def test_exists_for_existing_and_missing_document():
+    uri = "/some/dir/exists-doc.json"
+    doc = JSONDocument(b'{"root": {"child": "data"}}', uri)
+
+    try:
+        with MLClient() as ml:
+            assert ml.documents.exists(uri) is False
+            ml.documents.write(doc)
+            assert ml.documents.exists(uri) is True
+    finally:
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
+
+
+def test_exists_within_transaction_sees_uncommitted_document_only_with_txid():
+    uri = "/some/dir/exists-txn-doc.json"
+    doc = JSONDocument(b'{"root": {"child": "data"}}', uri)
+
+    try:
+        with MLClient() as ml:
+            txid = _open_transaction(ml)
+            ml.documents.write(doc, txid=txid)
+            try:
+                assert ml.documents.exists(uri, txid=txid) is True
+                assert ml.documents.exists(uri) is False
+            finally:
+                ml.rest.transactions.post(txid, result="rollback")
+    finally:
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
+
+
 def _open_transaction(ml: MLClient) -> str:
     location = ml.rest.transactions.create().headers["Location"]
     return location.rsplit("/", 1)[-1]

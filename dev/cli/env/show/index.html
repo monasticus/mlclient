@@ -16148,8 +16148,10 @@ macOS or <code>clip</code> on Windows.</p>
 mapping. <code>app-servers</code> may be omitted, null or a list of mappings with non-empty
 <code>id</code> values. Errors name the file without printing its contents.</p>
 <p>With <code>--defaults</code>, empty or null YAML uses the environment defaults, and null
-<code>app-servers</code> is treated as an empty list. Typed fields are validated; errors
-identify their locations without printing input values, including at <code>-vvv</code>.</p>
+<code>app-servers</code> is treated as an empty list. Settings are validated as when the
+environment is loaded: the error lists one problem per line with its location
+and reason, without printing input values, including at <code>-vvv</code> (see
+<a href="../../../advanced/more-on-environments/#validation-errors">validation errors</a>).</p>
 
 
 

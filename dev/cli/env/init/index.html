@@ -16224,9 +16224,16 @@ left untouched and the command reports an error.</p>
 are recorded when they differ from the root configuration. Other hostnames are
 treated as load-balanced connections: servers inherit the root protocol and
 authentication rather than their direct listener settings.</p>
-<p>Unsupported <code>saml</code> authentication is skipped with a warning. An <code>oauth</code> scheme is
-retained; add its bearer token before loading the environment. Review the output
-for the access path your application will actually use.</p>
+<p>Servers using unsupported <code>saml</code> authentication are skipped with a warning.
+OAuth connections generated from host discovery or Gradle properties include a
+token placeholder:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">auth</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REPLACE_WITH_BEARER_TOKEN</span>
+</code></pre></div>
+<p>Replace <code>REPLACE_WITH_BEARER_TOKEN</code> with your bearer token before connecting.
+Review the generated protocol and authentication settings for the access path
+your application will use.</p>
 
 
 

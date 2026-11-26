@@ -16137,7 +16137,11 @@ depend on your server release and configuration.</p>
 token through <code>AuthConfig(method="oauth", token=...)</code>. This setup requires
 MarkLogic 11.2 or later; see the
 <a href="https://docs.progress.com/bundle/marklogic-server-secure-11/page/topics/external-security/oauth-based-authentication-and-authorization.html">OAuth configuration guide</a>.
-Obtain the token from your identity provider before creating the client.
+Obtain the token from your identity provider before creating the client;
+<code>AuthConfig(method="oauth")</code> without a token, or with an empty one, raises a
+pydantic <code>ValidationError</code> when it is built. The token, like
+<code>SSLConfig.key_password</code> and <code>CloudConfig.api_key</code>, is stored as a pydantic
+<code>SecretStr</code> and masked in <code>repr()</code> and logs; read it with <code>get_secret_value()</code>.
 MLClient sends it as a Bearer token with each request; your application is
 responsible for replacing it when it expires.</p>
 <p><code>"certificate"</code> and <code>"kerberos"</code> are accepted as plain strings because they need no extra data: certificate identity comes from the <code>ssl</code> client cert, and Kerberos defaults to the <code>HTTP</code> service on the request host. Use <a class="autorefs autorefs-internal" title="mlclient.auth.AuthConfig
@@ -16240,6 +16244,11 @@ and setup listed above, including MarkLogic 11.2+ for JWT Resource Server auth.<
 <td><code>certificate</code> without a client cert</td>
 <td>rejected</td>
 <td>certificate auth requires a client cert over HTTPS</td>
+</tr>
+<tr>
+<td><code>AuthConfig(method="oauth")</code> without a token, or with an empty one</td>
+<td>rejected (<code>ValidationError</code> when built)</td>
+<td>OAuth has no default token</td>
 </tr>
 <tr>
 <td>client cert + <code>protocol="http"</code></td>

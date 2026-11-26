@@ -16075,8 +16075,10 @@ render the always-present platform app servers.</p>
 <p>See also <a href="../../#global-options">global options</a>.</p>
 <h2 id="configuration-validation">Configuration validation<a class="headerlink" href="#configuration-validation" title="Permanent link">&para;</a></h2>
 <p>Empty or null YAML uses the environment defaults; null <code>app-servers</code> is treated
-as an empty list. Invalid YAML or typed fields produce an error naming the file
-and, for typed fields, the field location without exposing input values.</p>
+as an empty list. Invalid YAML produces an error naming the file. Invalid
+settings produce the same message as loading the environment: the file, then
+one line per problem with its location and reason, without input values (see
+<a href="../../../advanced/more-on-environments/#validation-errors">validation errors</a>).</p>
 <p>Comparison does not connect to MarkLogic, load certificate files or require
 Kerberos tooling. It compares inherited configuration before validating whether
 the transport and authentication combination can create a client. Without ANSI

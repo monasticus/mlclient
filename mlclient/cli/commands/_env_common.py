@@ -10,13 +10,21 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import yaml
 from cleo.formatters.formatter import Formatter
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, SecretStr, ValidationError
 
 from mlclient import _constants as constants
-from mlclient.env import MLEnvironment, find_mlclient_directory
-from mlclient.exceptions import MLClientDirectoryNotFoundError, WrongParametersError
+from mlclient.env import (
+    MLEnvironment,
+    find_mlclient_directory,
+    invalid_settings_message,
+    read_environment_source,
+)
+from mlclient.exceptions import (
+    ConfigError,
+    MLClientDirectoryNotFoundError,
+    WrongParametersError,
+)
 
 if TYPE_CHECKING:
     from cleo.commands.command import Command
@@ -83,12 +91,7 @@ def read_config(
     path: Path,
 ) -> dict:
     """Read YAML and validate the structure needed to render an environment."""
-    config = _read_yaml(path)
-    if config is None:
-        return {}
-    if not isinstance(config, dict):
-        message = Formatter.escape(f"Environment in {path} must be a mapping.")
-        raise WrongParametersError(message)
+    config = _read_environment_source(path)
     servers = config.get(APP_SERVERS_KEY)
     if servers is None:
         return config
@@ -109,29 +112,39 @@ def read_config(
     return config
 
 
-def _read_yaml(path: Path) -> object:
-    """Load YAML without retaining parser exceptions containing file contents."""
+def _read_environment_source(path: Path) -> dict:
+    """Read raw settings, adapting safe configuration errors for CLI use.
+
+    Parameters
+    ----------
+    path : Path
+        Configuration file to inspect.
+
+    Returns
+    -------
+    dict
+        Unresolved settings, or an empty mapping for an empty file.
+
+    Raises
+    ------
+    WrongParametersError
+        If the shared reader rejects YAML or the document structure. The
+        message is preserved, escaped for CLI markup, without chained inputs.
+    """
     try:
-        return yaml.safe_load(path.read_text())
-    except yaml.YAMLError:
-        message = Formatter.escape(f"Invalid YAML in {path}.")
-    # Cleo also renders suppressed exception contexts at debug verbosity.
+        return read_environment_source(str(path), allow_empty=True)
+    except ConfigError as error:
+        message = Formatter.escape(str(error))
     raise WrongParametersError(message)
 
 
 def _validate_environment(path: Path, raw: dict) -> MLEnvironment:
-    """Validate settings, reporting field locations without secret input values."""
+    """Validate settings, reporting each problem as loading the environment does."""
     data = {**raw, APP_SERVERS_KEY: raw.get(APP_SERVERS_KEY) or []}
     try:
         return MLEnvironment.model_validate(data)
     except ValidationError as error:
-        fields = sorted(
-            {
-                ".".join(str(part) for part in issue["loc"])
-                for issue in error.errors(include_input=False, include_context=False)
-            },
-        )
-        message = f"Invalid environment in {path}: check {', '.join(fields)}."
+        message = invalid_settings_message(str(path), error)
     raise WrongParametersError(Formatter.escape(message))
 
 
@@ -155,6 +168,7 @@ def effective_config(
         servers. No-auth remains the explicit YAML ``app`` alias. Transport
         validation and authentication handler construction are deferred until
         a client is created, so incomplete connection setups can be inspected.
+        Secrets hold their real values; rendering masks them.
 
     Raises
     ------
@@ -162,11 +176,12 @@ def effective_config(
         If fields cannot be validated, without including their input values.
     """
     environment = _validate_environment(path, raw)
-    root = environment.model_dump(
-        mode="json",
-        exclude={"app_servers"},
-        by_alias=True,
-        exclude_none=True,
+    root = _revealed(
+        environment.model_dump(
+            exclude={"app_servers"},
+            by_alias=True,
+            exclude_none=True,
+        ),
     )
     if environment.auth is None:
         root["auth"] = "app"
@@ -188,14 +203,26 @@ def _settings_values(settings: dict) -> dict:
         if field == "auth" and value is None:
             values[field] = "app"
         elif isinstance(value, BaseModel):
-            values[field] = value.model_dump(
-                mode="json",
-                by_alias=True,
-                exclude_none=True,
+            values[field] = _revealed(
+                value.model_dump(by_alias=True, exclude_none=True),
             )
         elif value is not None:
             values[field] = value
     return values
+
+
+def _revealed(dumped: dict) -> dict:
+    """Replace every SecretStr in a model dump with its plain value."""
+    return {key: _revealed_value(value) for key, value in dumped.items()}
+
+
+def _revealed_value(value: object) -> object:
+    """Return a SecretStr's plain value, recursing into nested model dumps."""
+    if isinstance(value, SecretStr):
+        return value.get_secret_value()
+    if isinstance(value, dict):
+        return _revealed(value)
+    return value
 
 
 def display_value(

@@ -30,10 +30,18 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Optional, Union, cast
 
 import yaml
-from pydantic import BaseModel, BeforeValidator, Field, model_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    SecretStr,
+    ValidationError,
+    model_validator,
+)
 
 from mlclient import _constants as constants
-from mlclient.auth import AuthConfig
+from mlclient.auth import AuthConfig, require_known_auth_shortcut
 from mlclient.connection import (
     CLOUD_PORT,
     CLOUD_PROTOCOL,
@@ -43,8 +51,10 @@ from mlclient.connection import (
     MARKLOGIC_MANAGE_PORT,
     CloudConfig,
     SSLConfig,
+    secret_value,
 )
 from mlclient.exceptions import (
+    ConfigError,
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
     NoSuchAppServerError,
@@ -52,19 +62,32 @@ from mlclient.exceptions import (
 from mlclient.http import HTTPConfig
 
 if TYPE_CHECKING:
-    from mlclient.http import HTTPConfigOverrides
+    from pydantic_core import ErrorDetails
+
+    from mlclient._typing import HTTPConfigOverrides
 
 logger = logging.getLogger(__name__)
 
 
-def _normalize_auth(value: object) -> object:
-    """Resolve the environment's app alias to no HTTP auth."""
-    return None if value == "app" else value
+def _validate_auth(value: object) -> object:
+    """Resolve the app alias to no HTTP auth and validate the setting eagerly.
+
+    A mapping is validated as an AuthConfig here rather than by the union, so a
+    mistake in it is reported once under ``auth`` instead of once per union
+    member.
+    """
+    if value == "app":
+        return None
+    if isinstance(value, str):
+        require_known_auth_shortcut(value)
+    if isinstance(value, dict):
+        return AuthConfig.model_validate(value)
+    return value
 
 
 Auth = Annotated[
     Optional[Union[str, AuthConfig]],
-    BeforeValidator(_normalize_auth),
+    BeforeValidator(_validate_auth),
 ]
 
 
@@ -72,8 +95,16 @@ class MLServerConfig(BaseModel):
     """A class representing MarkLogic App Server configuration.
 
     Connection and authentication settings default to ``None`` so an unset
-    field inherits the root-level value from MLEnvironment.
+    field inherits the root-level value from MLEnvironment. Unknown settings
+    are rejected, assignments are validated too, and ``password`` is a
+    ``SecretStr`` (a plain str assigned to it is wrapped).
     """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        hide_input_in_errors=True,
+        validate_assignment=True,
+    )
 
     identifier: str = Field(
         alias="id",
@@ -95,7 +126,7 @@ class MLServerConfig(BaseModel):
         description="A username; None inherits from root",
         default=None,
     )
-    password: Optional[str] = Field(
+    password: Optional[SecretStr] = Field(
         description="A password; None inherits from root",
         default=None,
     )
@@ -128,8 +159,15 @@ class MLEnvironment(BaseModel):
     Connection and authentication settings configured here act as defaults for
     every app server and may be overridden per server. The App Services, Manage,
     Admin and Health servers always exist; a user entry sharing one of their ids
-    overrides it.
+    overrides it. Unknown settings are rejected, assignments are validated too,
+    and ``password`` is a ``SecretStr`` (a plain str assigned to it is wrapped).
     """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        hide_input_in_errors=True,
+        validate_assignment=True,
+    )
 
     app_name: Optional[str] = Field(
         alias="app-name",
@@ -139,7 +177,7 @@ class MLEnvironment(BaseModel):
     protocol: str = Field(description="An HTTP protocol", default="http")
     host: str = Field(description="A hostname", default="localhost")
     username: str = Field(description="An username", default="admin")
-    password: str = Field(description="A password", default="admin")
+    password: SecretStr = Field(description="A password", default=SecretStr("admin"))
     auth: Auth = Field(description="An authentication method", default="digest")
     ssl: Optional[SSLConfig] = Field(
         description="SSL/TLS configuration",
@@ -166,7 +204,11 @@ class MLEnvironment(BaseModel):
         by_id = {server.identifier: server for server in self.app_servers}
         for default in _DEFAULT_APP_SERVERS:
             by_id.setdefault(default.identifier, default.model_copy())
-        self.app_servers = list(by_id.values())
+        merged_app_servers = list(by_id.values())
+        # Assignment is validated and runs this validator again: assigning only
+        # a changed list ends that recursion after one round.
+        if merged_app_servers != self.app_servers:
+            self.app_servers = merged_app_servers
         return self
 
     @property
@@ -240,13 +282,13 @@ class MLEnvironment(BaseModel):
         ml_config = self._root_config()
         app_server = self._find_app_server(app_server_id)
         app_server_config = self._app_server_overrides(app_server)
-        merged = {**ml_config, **app_server_config}
+        merged = {
+            **ml_config,
+            **app_server_config,
+            "port": self._effective_port(app_server),
+        }
         if app_server.ssl is not None:
             merged["ssl"] = self._merge_ssl(self.ssl, app_server.ssl)
-        merged.setdefault(
-            "port",
-            CLOUD_PORT if self.cloud is not None else DEFAULT_PORT,
-        )
         if self.cloud is not None:
             merged.setdefault("protocol", CLOUD_PROTOCOL)
             merged.setdefault("auth", None)
@@ -265,7 +307,7 @@ class MLEnvironment(BaseModel):
             "protocol": self.protocol,
             "host": self.host,
             "username": self.username,
-            "password": self.password,
+            "password": self.password.get_secret_value(),
             "auth": self.auth,
             "ssl": self.ssl,
             "cloud": None,
@@ -285,9 +327,17 @@ class MLEnvironment(BaseModel):
             None,
         )
         if not app_server:
-            msg = f"There's no [{app_server_id}] app server configuration!"
-            raise NoSuchAppServerError(msg)
+            raise no_such_app_server_error(self, app_server_id)
         return app_server
+
+    def _effective_port(
+        self,
+        app_server: MLServerConfig,
+    ) -> int:
+        """Return the server's port, or the connection's default when unset."""
+        if app_server.port is not None:
+            return app_server.port
+        return CLOUD_PORT if self.cloud is not None else DEFAULT_PORT
 
     @staticmethod
     def _app_server_overrides(
@@ -295,10 +345,9 @@ class MLEnvironment(BaseModel):
     ) -> dict:
         """Return app server fields that override root defaults."""
         overrides: dict = {
-            "port": app_server.port,
             "protocol": app_server.protocol,
             "username": app_server.username,
-            "password": app_server.password,
+            "password": secret_value(app_server.password),
             "ssl": app_server.ssl,
         }
         overrides = {
@@ -355,6 +404,8 @@ class MLEnvironment(BaseModel):
             If .mlclient directory has not been found
         MLClientEnvironmentNotFoundError
             If there's no .mlclient/mlclient-<env_name>.yaml file
+        ConfigError
+            If the file is empty, is not a YAML mapping or holds invalid settings
         """
         logger.debug(
             "Loading MLClient configuration for the environment: [%s]",
@@ -379,10 +430,22 @@ class MLEnvironment(BaseModel):
         -------
         MLEnvironment
             An MLEnvironment instance
+
+        Raises
+        ------
+        ConfigError
+            If the file is empty, is not a YAML mapping or holds invalid
+            settings. The message names the file and lists one problem per
+            line, without the configured values.
         """
         logger.info("Loading MLClient configuration from the file: [%s]", file_path)
         source_config = cls._get_source_config(file_path)
-        return MLEnvironment(**source_config)
+        try:
+            return cls.model_validate(source_config)
+        except ValidationError as error:
+            msg = invalid_settings_message(file_path, error)
+        # Raise outside the handler so exception contexts cannot expose input values.
+        raise ConfigError(msg)
 
     @staticmethod
     def _get_source_config(
@@ -399,9 +462,13 @@ class MLEnvironment(BaseModel):
         -------
         dict
             A source MLClient's configuration
+
+        Raises
+        ------
+        ConfigError
+            If the file is not valid YAML, is empty or is not a mapping
         """
-        with Path(file_path).open() as config_file:
-            return yaml.safe_load(config_file.read())
+        return read_environment_source(file_path)
 
 
 def find_mlclient_environment(
@@ -492,6 +559,144 @@ def find_mlclient_directory(
         "Run 'ml env init' or 'ml env init --global'."
     )
     raise MLClientDirectoryNotFoundError(msg)
+
+
+def no_such_app_server_error(
+    environment: MLEnvironment,
+    app_server_id: str,
+    env_name: str | None = None,
+) -> NoSuchAppServerError:
+    """Build the error for an unknown app server, listing the configured ones.
+
+    Each configured server is shown with its effective port, so predefined
+    servers without an explicit port still show where they connect.
+
+    Parameters
+    ----------
+    environment : MLEnvironment
+        The environment that was searched.
+    app_server_id : str
+        The identifier that was not found.
+    env_name : str | None, default None
+        The environment's name; when given, the message names the environment.
+
+    Returns
+    -------
+    NoSuchAppServerError
+        The error to raise, listing the configured identifiers in
+        configuration order.
+    """
+    scope = f" in the [{env_name}] environment" if env_name else ""
+    available = ", ".join(
+        f"{server_id} ({environment.provide_config_dict(server_id)['port']})"
+        for server_id in environment.app_server_ids
+    )
+    msg = (
+        f"There's no [{app_server_id}] app server configuration{scope}. "
+        f"Available: {available}."
+    )
+    return NoSuchAppServerError(msg)
+
+
+def read_environment_source(file_path: str, *, allow_empty: bool = False) -> dict:
+    """Read a configuration mapping without resolving or validating its settings.
+
+    Parameters
+    ----------
+    file_path : str
+        Source YAML path.
+    allow_empty : bool, default False
+        Whether an empty document becomes an empty mapping for inspection.
+
+    Returns
+    -------
+    dict
+        Raw settings in their source order, without injected defaults.
+
+    Raises
+    ------
+    ConfigError
+        If YAML is invalid, the document is not a mapping, or it is empty and
+        allow_empty is false. Messages omit configuration values and parser details.
+    """
+    source_config = _load_yaml(file_path)
+    if source_config is None:
+        if allow_empty:
+            return {}
+        msg = f"Environment configuration file is empty: {file_path}"
+        raise ConfigError(msg)
+    if not isinstance(source_config, dict):
+        msg = f"Environment configuration must be a mapping: {file_path}"
+        raise ConfigError(msg)
+    return source_config
+
+
+def invalid_settings_message(
+    file_path: str,
+    error: ValidationError,
+) -> str:
+    """Describe an environment's validation problems, one per line.
+
+    Parameters
+    ----------
+    file_path : str
+        The configuration file the settings come from.
+    error : ValidationError
+        The error raised by validating the settings.
+
+    Returns
+    -------
+    str
+        A header naming the file, then one line per problem with the field's
+        location and the reason. Input values are left out, so a secret never
+        appears in the message.
+    """
+    problems = [
+        f"  {'.'.join(str(part) for part in issue['loc'])}: {_problem_reason(issue)}"
+        for issue in error.errors(include_url=False, include_input=False)
+    ]
+    return "\n".join(
+        [f"Invalid environment configuration in {file_path}:", *problems],
+    )
+
+
+def _problem_reason(
+    issue: ErrorDetails,
+) -> str:
+    """Return a validation issue's reason in configuration-file terms."""
+    if issue["type"] == "extra_forbidden":
+        return "unknown setting"
+    return issue["msg"].removeprefix("Value error, ")
+
+
+def _load_yaml(
+    file_path: str,
+) -> object:
+    """Parse a YAML file without exposing the parser's message.
+
+    Parameters
+    ----------
+    file_path : str
+        A source configuration's filepath
+
+    Returns
+    -------
+    object
+        The parsed document, or None for an empty file
+
+    Raises
+    ------
+    ConfigError
+        If the file is not valid YAML. The message names only the file.
+    """
+    with Path(file_path).open() as config_file:
+        try:
+            return yaml.safe_load(config_file)
+        except yaml.YAMLError:
+            msg = f"Invalid YAML in environment configuration file: {file_path}"
+    # Parser messages can quote secrets. Raise outside the handler to discard
+    # the parser exception context, including at verbose traceback levels.
+    raise ConfigError(msg)
 
 
 __all__ = [

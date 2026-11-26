@@ -62,8 +62,10 @@ See also [global options](../index.md#global-options).
 ## Configuration validation
 
 Empty or null YAML uses the environment defaults; null `app-servers` is treated
-as an empty list. Invalid YAML or typed fields produce an error naming the file
-and, for typed fields, the field location without exposing input values.
+as an empty list. Invalid YAML produces an error naming the file. Invalid
+settings produce the same message as loading the environment: the file, then
+one line per problem with its location and reason, without input values (see
+[validation errors](../../advanced/more-on-environments.md#validation-errors)).
 
 Comparison does not connect to MarkLogic, load certificate files or require
 Kerberos tooling. It compares inherited configuration before validating whether

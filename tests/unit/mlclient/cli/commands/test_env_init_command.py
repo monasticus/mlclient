@@ -348,8 +348,10 @@ def test_from_gradle_reports_invalid_properties(tmp_path: Path):
     )
 
     tester = _get_tester()
-    with pytest.raises(WrongParametersError):
+    with pytest.raises(WrongParametersError) as err:
         tester.execute("bad --from-gradle=bad")
+    assert "cloud.base-path" in str(err.value)
+    assert "key-only" not in str(err.value)
 
 
 def test_from_gradle_merges_base_and_overlay(tmp_path: Path):
@@ -406,6 +408,38 @@ def test_from_gradle_writes_app_auth(tmp_path: Path):
     config = MLEnvironment.load_file(_written_env("app").as_posix())
     assert config.auth is None
     assert config.provide_config("rest").auth is None
+
+
+def test_from_gradle_leaves_cloud_auth_to_the_cloud_block(tmp_path: Path):
+    (tmp_path / "gradle-cloud.properties").write_text(
+        "mlHost=cloud.example.com\n"
+        "mlAuthentication=cloud\n"
+        "mlCloudApiKey=key-123\n"
+        "mlCloudBasePath=/ml/instance\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("cloud --from-gradle=cloud")
+
+    env = _load_written("cloud")
+    assert "auth" not in env
+    assert env["cloud"] == {"api-key": "key-123", "base-path": "/ml/instance"}
+    assert MLEnvironment.load_file(_written_env("cloud").as_posix())
+
+
+def test_from_gradle_writes_oauth_with_a_token_placeholder(tmp_path: Path):
+    (tmp_path / "gradle-oauth.properties").write_text(
+        "mlHost=localhost\nmlAuthentication=oauth\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("oauth --from-gradle=oauth")
+
+    assert _load_written("oauth")["auth"] == {
+        "method": "oauth",
+        "token": "REPLACE_WITH_BEARER_TOKEN",
+    }
+    assert MLEnvironment.load_file(_written_env("oauth").as_posix())
 
 
 def test_from_gradle_reads_a_file_path(tmp_path: Path):
@@ -1425,7 +1459,7 @@ def test_from_host_skips_server_with_unsupported_auth(caplog):
         ("certificate", "certificate"),
         ("kerberos-ticket", "kerberos"),
         ("application-level", "app"),
-        ("oauth", "oauth"),
+        ("oauth", {"method": "oauth", "token": "REPLACE_WITH_BEARER_TOKEN"}),
     ],
 )
 @respx.mock
@@ -1436,6 +1470,25 @@ def test_from_host_maps_discovered_server_auth(server_auth, expected):
     tester.execute("prod --from-host=localhost --username=admin --password=pw")
 
     assert _load_written("prod")["app-servers"][0]["auth"] == expected
+
+
+@respx.mock
+def test_from_host_writes_oauth_with_a_token_placeholder():
+    _mock_discovery("localhost", [_server("content", 8010, auth="oauth")])
+
+    tester = _get_tester()
+    tester.execute("prod --from-host=localhost --username=admin --password=pw")
+
+    written = _written_env("prod")
+    env = _load_written("prod")
+    assert env["app-servers"][0]["auth"] == {
+        "method": "oauth",
+        "token": "REPLACE_WITH_BEARER_TOKEN",
+    }
+    assert MLEnvironment.load_file(written.as_posix())
+
+    env["app-servers"][0]["auth"]["token"] = "bearer-token"
+    assert MLEnvironment(**env).provide_config("content").auth is not None
 
 
 @pytest.mark.parametrize("server_auth", ["digest", "unknown-scheme", None])

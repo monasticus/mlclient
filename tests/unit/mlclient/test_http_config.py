@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import httpx
 import pytest
+import respx
 from httpx_retries import Retry
 
 from mlclient._options import UNSET
@@ -67,6 +68,23 @@ def test_clone_on_cloud_returns_self():
     )
 
     assert config.clone(port=8002) is config
+
+
+@respx.mock
+def test_cloud_auth_exchanges_the_plain_api_key():
+    token_route = respx.post("https://x.marklogic.cloud/token").mock(
+        return_value=httpx.Response(200, json={"access_token": "tok-1"}),
+    )
+    respx.get("https://x.marklogic.cloud/").mock(return_value=httpx.Response(200))
+    config = HTTPConfig.resolve(
+        host="x.marklogic.cloud",
+        cloud=CloudConfig(api_key="mk-1", base_path="/ml/example/manage"),
+    )
+
+    with httpx.Client(auth=config.auth) as client:
+        client.get("https://x.marklogic.cloud/")
+
+    assert b"key=mk-1" in token_route.calls.last.request.content
 
 
 def test_clone_carries_retry_strategy():

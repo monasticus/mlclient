@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import ClassVar
+from functools import partial
+from importlib import import_module
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from cleo.application import Application
 from cleo.formatters.formatter import Formatter
@@ -23,27 +25,15 @@ from cleo.io.inputs.argv_input import ArgvInput
 from cleo.io.inputs.input import Input
 from cleo.io.io import IO
 from cleo.io.outputs.output import Output, Verbosity
+from cleo.loaders.factory_command_loader import FactoryCommandLoader
 
 from mlclient._version import __version__ as ml_client_version
+from mlclient.cli.commands import COMMANDS
 from mlclient.cli.commands._waiting_indicator import ERASE_LINE
-from mlclient.cli.commands.env_compare import EnvCompareCommand
-from mlclient.cli.commands.env_copy import EnvCopyCommand
-from mlclient.cli.commands.env_edit import EnvEditCommand
-from mlclient.cli.commands.env_init import EnvInitCommand
-from mlclient.cli.commands.env_list import EnvListCommand
-from mlclient.cli.commands.env_remove import EnvRemoveCommand
-from mlclient.cli.commands.env_show import EnvShowCommand
-from mlclient.cli.commands.eval import EvalCommand
-from mlclient.cli.commands.health import HealthCommand
-from mlclient.cli.commands.http import HttpCommand
-from mlclient.cli.commands.invoke import InvokeCommand
-from mlclient.cli.commands.log_level import LogLevelCommand
-from mlclient.cli.commands.logs import LogsCommand
-from mlclient.cli.commands.sample import SampleCommand
-from mlclient.cli.commands.trace_events import TraceEventsCommand
-from mlclient.cli.commands.url import UrlCommand
-from mlclient.cli.commands.version import VersionCommand
 from mlclient.logging import setup_logger
+
+if TYPE_CHECKING:
+    from cleo.commands.command import Command
 
 
 class MLCLIentApplication(Application):
@@ -58,23 +48,14 @@ class MLCLIentApplication(Application):
         """Initialize MLCLIentApplication instance."""
         super().__init__(self._APP_NAME, ml_client_version)
         self.set_display_name(self._DISPLAY_NAME)
-        self.add(LogsCommand())
-        self.add(EvalCommand())
-        self.add(InvokeCommand())
-        self.add(HttpCommand())
-        self.add(SampleCommand())
-        self.add(EnvInitCommand())
-        self.add(EnvListCommand())
-        self.add(EnvShowCommand())
-        self.add(EnvEditCommand())
-        self.add(EnvCopyCommand())
-        self.add(EnvRemoveCommand())
-        self.add(EnvCompareCommand())
-        self.add(HealthCommand())
-        self.add(LogLevelCommand())
-        self.add(TraceEventsCommand())
-        self.add(UrlCommand())
-        self.add(VersionCommand())
+        self.set_command_loader(
+            FactoryCommandLoader(
+                {
+                    name: partial(_load_command, target)
+                    for name, target in COMMANDS.items()
+                },
+            ),
+        )
 
     def create_io(
         self,
@@ -210,6 +191,31 @@ def _command_line_input() -> ArgvInput:
     if arguments in (["-h"], ["--help"]):
         arguments = ["list"]
     return ArgvInput([script, *arguments])
+
+
+def _load_command(target: str) -> Command:
+    """Import and construct one registered command when Cleo requests it.
+
+    Parameters
+    ----------
+    target : str
+        Fully qualified command class from the command registry.
+
+    Returns
+    -------
+    Command
+        A new instance of the selected command.
+
+    Raises
+    ------
+    ImportError
+        If the registered command module cannot be imported.
+    AttributeError
+        If its registered class is missing.
+    """
+    module_name, class_name = target.rsplit(".", 1)
+    command = cast("type[Command]", getattr(import_module(module_name), class_name))
+    return command()
 
 
 if __name__ == "__main__":

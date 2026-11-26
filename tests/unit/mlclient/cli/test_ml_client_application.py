@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import subprocess
 import sys
 
 import pytest
@@ -10,7 +11,7 @@ from cleo.io.outputs.buffered_output import BufferedOutput
 from cleo.io.outputs.output import Verbosity
 
 import mlclient
-from mlclient.cli import MLCLIentApplication, main
+from mlclient.cli import MLCLIentApplication, commands, main
 from mlclient.cli.app import CleoAppHandler
 from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 
@@ -172,3 +173,72 @@ def test_create_io_styles_logs_written_to_the_error_output(mlclient_logger):
 
 def _record(level: int, message: str) -> logging.LogRecord:
     return logging.LogRecord("mlclient", level, __file__, 1, message, None, None)
+
+
+@pytest.mark.parametrize(
+    ("arguments", "allowed"),
+    [(["--version"], None), (["env", "list", "--help"], "env_list")],
+)
+def test_cli_only_imports_the_requested_command(arguments, allowed):
+    script = """
+import importlib.abc
+import sys
+
+class SelectedCommandOnly(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.startswith("mlclient.cli.commands."):
+            module = fullname.rsplit(".", 1)[-1]
+            if not module.startswith("_") and module != ALLOWED:
+                raise RuntimeError("Unselected command imported: " + fullname)
+        return None
+
+sys.meta_path.insert(0, SelectedCommandOnly())
+from mlclient.cli import main
+sys.argv = ["ml", *ARGUMENTS]
+main()
+"""
+    script = f"ALLOWED = {allowed!r}\nARGUMENTS = {arguments!r}\n" + script
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    if allowed is None:
+        assert result.stdout == f"MLCLIent (version {mlclient.__version__})\n"
+    else:
+        assert "env list" in result.stdout
+
+
+def test_command_package_preserves_class_exports_and_discovery():
+    expected = [
+        "EnvCompareCommand",
+        "EnvCopyCommand",
+        "EnvEditCommand",
+        "EnvInitCommand",
+        "EnvListCommand",
+        "EnvRemoveCommand",
+        "EnvShowCommand",
+        "EvalCommand",
+        "HealthCommand",
+        "HttpCommand",
+        "InvokeCommand",
+        "LogLevelCommand",
+        "LogsCommand",
+        "SampleCommand",
+        "UrlCommand",
+        "VersionCommand",
+    ]
+    assert commands.__all__ == expected
+    for name in expected:
+        assert name in dir(commands)
+        command_type = getattr(commands, name)
+        command = command_type()
+        assert type(MLCLIentApplication().find(command.name)) is command_type
+
+    with pytest.raises(AttributeError, match="MissingCommand") as error:
+        _ = commands.MissingCommand
+    assert str(error.value) == (
+        "module 'mlclient.cli.commands' has no attribute 'MissingCommand'"
+    )

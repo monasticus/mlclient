@@ -5,7 +5,7 @@ Calls resource service extensions (REST extensions) and parses their results.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from mlclient import _constants as constants
 from mlclient import exceptions
@@ -686,7 +686,7 @@ def _encode_body(
     """
     documents = _documents(body)
     if documents is None:
-        return body, content_type
+        return cast("dict | list | str | bytes | None", body), content_type
     if content_type is not None:
         msg = "A Document body carries its own content type; omit content_type!"
         raise exceptions.WrongParametersError(msg)
@@ -745,7 +745,7 @@ def _document_part(document: Document) -> MultipartPart:
     """
     return MultipartPart(
         headers={constants.HEADER_NAME_CONTENT_TYPE: _document_content_type(document)},
-        content=document.content_bytes,
+        content=cast("bytes", document.content_bytes),
     )
 
 
@@ -764,4 +764,7 @@ def _document_content_type(document: Document) -> str:
         the URI is missing or its extension unknown.
     """
     mimetype = Mimetypes.get_mimetype(document.uri) if document.uri else None
-    return mimetype or _DOCUMENT_TYPE_CONTENT_TYPES[document.doc_type]
+    return (
+        mimetype
+        or _DOCUMENT_TYPE_CONTENT_TYPES[cast("DocumentType", document.doc_type)]
+    )

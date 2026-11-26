@@ -48,8 +48,8 @@ class RequestsGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
         group_id: str | None = None,
         host_id: str | None = None,
         server_id: str | None = None,
@@ -97,17 +97,19 @@ class RequestsGetCall(ApiCall):
             method=constants.METHOD_GET,
             accept=utils.get_accept_header_for_format(data_format),
         )
-        if full_refs is not None:
-            full_refs = str(full_refs).lower()
-        if seconds_min is not None:
-            seconds_min = str(seconds_min)
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._HOST_ID_PARAM, host_id)
         self.add_param(self._SERVER_ID_PARAM, server_id)
-        self.add_param(self._SECONDS_MIN_PARAM, seconds_min)
-        self.add_param(self._FULL_REFS_PARAM, full_refs)
+        self.add_param(
+            self._SECONDS_MIN_PARAM,
+            str(seconds_min) if seconds_min is not None else None,
+        )
+        self.add_param(
+            self._FULL_REFS_PARAM,
+            str(full_refs).lower() if full_refs is not None else None,
+        )
 
     @property
     def endpoint(
@@ -193,7 +195,7 @@ class RequestGetCall(ApiCall):
     def __init__(
         self,
         request: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         group_id: str | None = None,
         host_id: str | None = None,
         server_id: str | None = None,

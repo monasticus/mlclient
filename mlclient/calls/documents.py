@@ -100,7 +100,14 @@ class DocumentsGetCall(ApiCall):
             multi-statement transactions.
         """
         categories = self._categories_list(category)
-        self._validate_params(categories, data_format, timestamp, txid)
+        self._validate_params(
+            categories,
+            data_format,
+            timestamp,
+            txid,
+            transform,
+            transform_params,
+        )
 
         super().__init__(method="GET")
         accept_header = self._get_accept_header(uri, categories, data_format)
@@ -155,6 +162,8 @@ class DocumentsGetCall(ApiCall):
         data_format: str | None,
         timestamp: str | None,
         txid: str | None,
+        transform: str | None,
+        transform_params: dict | None,
     ) -> None:
         """Reject parameters and combinations MarkLogic does not accept.
 
@@ -171,6 +180,10 @@ class DocumentsGetCall(ApiCall):
             The point in time to read at.
         txid : str | None
             The multi-statement transaction identifier.
+        transform : str | None
+            Installed transform name.
+        transform_params : dict | None
+            Parameters requiring a transform.
 
         Raises
         ------
@@ -193,6 +206,7 @@ class DocumentsGetCall(ApiCall):
         if timestamp is not None and txid is not None:
             msg = "timestamp cannot be combined with txid"
             raise exceptions.WrongParametersError(msg)
+        _validate_transform_params(transform, transform_params)
 
     @staticmethod
     def _get_accept_header(
@@ -285,7 +299,9 @@ class DocumentsPostCall(ApiCall):
             This time will override the system time set by MarkLogic.
             Ignored if temporal-collection is not included in the request.
         """
-        self._validate_params(body_parts)
+        self._validate_params(
+            body_parts, transform, transform_params, temporal_collection, system_time,
+        )
 
         super().__init__(method="POST")
         self.add_header(constants.HEADER_NAME_ACCEPT, constants.HEADER_JSON)
@@ -316,10 +332,38 @@ class DocumentsPostCall(ApiCall):
     def _validate_params(
         cls,
         body: list[DocumentsBodyPart] | None,
+        transform: str | None,
+        transform_params: dict | None,
+        temporal_collection: str | None,
+        system_time: str | None,
     ) -> None:
+        """Validate the request body, transform parameters and temporal options.
+
+        Parameters
+        ----------
+        body : list[DocumentsBodyPart] | None
+            Content and metadata parts to write.
+        transform : str | None
+            Installed transform name.
+        transform_params : dict | None
+            Parameters requiring a transform.
+        temporal_collection : str | None
+            Temporal collection receiving the write.
+        system_time : str | None
+            Explicit system time requiring a temporal collection.
+
+        Raises
+        ------
+        WrongParametersError
+            If the body is empty or the transform/temporal options conflict.
+        """
         if body is None or len(body) == 0:
             msg = "No request body provided for POST /v1/documents!"
             raise exceptions.WrongParametersError(msg)
+        if system_time is not None and not temporal_collection:
+            msg = "system_time requires temporal_collection"
+            raise exceptions.WrongParametersError(msg)
+        _validate_transform_params(transform, transform_params)
 
     @classmethod
     def _build_body(
@@ -450,3 +494,26 @@ class DocumentsDeleteCall(ApiCall):
             A Documents call endpoint
         """
         return self._ENDPOINT.format(self._API_VERSION)
+
+
+def _validate_transform_params(
+    transform: str | None,
+    transform_params: dict | None,
+) -> None:
+    """Reject transform parameters sent without a transform to receive them.
+
+    Parameters
+    ----------
+    transform : str | None
+        Name of an installed transform.
+    transform_params : dict | None
+        Parameters for the transform.
+
+    Raises
+    ------
+    WrongParametersError
+        If transform_params are given without transform.
+    """
+    if transform_params and not transform:
+        msg = "transform_params require transform"
+        raise exceptions.WrongParametersError(msg)

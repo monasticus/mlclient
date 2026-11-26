@@ -11,6 +11,7 @@ import shutil
 import stat
 import tempfile
 from pathlib import Path
+from typing import ClassVar
 
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -57,11 +58,11 @@ class EnvCopyCommand(Command):
 
     name: str = "env copy"
     description: str = "Clones an MLClient environment file under a new name"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument("source", "The environment name to copy from."),
         argument("target", "The environment name to copy to."),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         option(
             "global",
             "g",

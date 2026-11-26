@@ -58,9 +58,9 @@ class HostsGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         group_id: str | None = None,
-        view: str = "default",
+        view: str | None = "default",
     ) -> None:
         """Initialize HostsGetCall instance.
 
@@ -105,8 +105,8 @@ class HostsGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         """Validate the response format and host-list view.
 
@@ -169,8 +169,8 @@ class HostGetCall(ApiCall):
     def __init__(
         self,
         host: str,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize HostGetCall instance.
 
@@ -214,8 +214,8 @@ class HostGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         """Validate the response format and view.
 
@@ -353,7 +353,7 @@ class HostPropertiesGetCall(ApiCall):
     def __init__(
         self,
         host: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
     ) -> None:
         """Initialize HostPropertiesGetCall instance.
 
@@ -391,7 +391,7 @@ class HostPropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
+        data_format: str | None,
     ) -> None:
         """Validate the response format.
 

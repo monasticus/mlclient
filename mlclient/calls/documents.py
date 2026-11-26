@@ -135,7 +135,7 @@ class DocumentsGetCall(ApiCall):
     def _validate_params(
         cls,
         category: str | list | None,
-        data_format: str,
+        data_format: str | None,
     ) -> None:
         categories = [category] if not isinstance(category, list) else category
         if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
@@ -159,8 +159,8 @@ class DocumentsGetCall(ApiCall):
     @staticmethod
     def _get_accept_header(
         uri: str | list,
-        category: str | list,
-        data_format: str,
+        category: str | list | None,
+        data_format: str | None,
     ) -> str | None:
         if (not isinstance(uri, str) and len(uri) > 1) or (
             isinstance(category, list) and len(category) > 1

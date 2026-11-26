@@ -23,7 +23,7 @@ from collections.abc import Iterable
 from copy import copy
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pydantic import BaseModel
 
@@ -70,7 +70,7 @@ class WriteDocumentsJob:
         """
         self._concurrency: int = concurrency or 8
         self._batch_size: int = batch_size
-        self._config: dict = {}
+        self._config: MLClientOptions = {}
         self._database: str | None = None
         self._documents: list[Document] = []
         self._report = DocumentJobReport()
@@ -99,7 +99,7 @@ class WriteDocumentsJob:
     async def run(self) -> DocumentJobReport:
         """Execute the job and return a report when complete."""
         for doc in self._documents:
-            self._report.add_pending_doc(doc.uri)
+            self._report.add_pending_doc(cast("str", doc.uri))
 
         batches = [
             self._documents[i : i + self._batch_size]
@@ -129,7 +129,7 @@ class WriteDocumentsJob:
         ml: AsyncMLClient,
     ) -> None:
         """Send a documents batch to /v1/documents endpoint."""
-        batch_uris = [doc.uri for doc in batch]
+        batch_uris = [cast("str", doc.uri) for doc in batch]
         async with sem:
             try:
                 await ml.documents.write(batch, database=self._database)
@@ -171,7 +171,7 @@ class ReadDocumentsJob:
         """
         self._concurrency: int = concurrency or 16
         self._batch_size: int = batch_size
-        self._config: dict = {}
+        self._config: MLClientOptions = {}
         self._database: str | None = None
         self._uris: list[str] = []
         self._categories: list[str] = ["content"]
@@ -252,11 +252,11 @@ class ReadDocumentsJob:
         """Send a URIs batch to /v1/documents endpoint."""
         async with sem:
             try:
-                kwargs = {"database": self._database}
+                kwargs: dict = {"database": self._database}
                 if self._categories != ["content"]:
                     kwargs["category"] = list(dict.fromkeys(self._categories))
                 async for doc in ml.documents.read_stream(batch, **kwargs):
-                    self._report.add_successful_doc(doc.uri)
+                    self._report.add_successful_doc(cast("str", doc.uri))
                     self._documents.append(doc)
             except Exception as err:
                 self._report.add_failed_docs(batch, err)
@@ -272,9 +272,12 @@ class ReadDocumentsJob:
     async def _save_document(self, doc: Document) -> None:
         """Save a single document to the filesystem, reporting any failure."""
         try:
-            await DocumentsWriter.write_document(doc, self._fs_output_path)
+            await DocumentsWriter.write_document(
+                doc,
+                cast("Path", self._fs_output_path),
+            )
         except Exception as err:
-            self._report.add_failed_doc(doc.uri, err)
+            self._report.add_failed_doc(cast("str", doc.uri), err)
 
 
 @experimental()
@@ -439,16 +442,16 @@ class DocumentReport(BaseModel):
 
     uri: str
     status: DocumentStatus
-    details: DocumentStatusDetails = None
+    details: DocumentStatusDetails | None = None
 
 
 @experimental()
 class DocumentStatus(Enum):
     """A document's status enum."""
 
-    success: str = "SUCCESS"
-    failure: str = "FAILURE"
-    pending: str = "PENDING"
+    success = "SUCCESS"
+    failure = "FAILURE"
+    pending = "PENDING"
 
 
 @experimental()

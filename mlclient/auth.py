@@ -37,7 +37,7 @@ from __future__ import annotations
 import base64
 import logging
 import ssl
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union, cast
 from urllib.parse import urljoin
 
 import httpx
@@ -190,7 +190,7 @@ class KerberosAuth(httpx.Auth):
     ) -> str:
         """Return the first Negotiate header for the SPNEGO exchange."""
         token = context.step()
-        return self._negotiate_header(token)
+        return self._negotiate_header(cast("bytes", token))
 
     def _verify_mutual_auth(
         self,
@@ -315,7 +315,7 @@ class MarkLogicCloudAuth(httpx.Auth):
 
     def _exchange(self) -> dict:
         """Return the token-exchange payload and optional duration param."""
-        exchange = {"data": {"grant_type": "apikey", "key": self._api_key}}
+        exchange: dict = {"data": {"grant_type": "apikey", "key": self._api_key}}
         if self._token_duration > 0:
             exchange["params"] = {"duration": self._token_duration}
         return exchange
@@ -480,7 +480,7 @@ def _build_from_config(
     if config.method == "certificate":
         return None
     if config.method == "oauth":
-        return OAuthBearerAuth(token=config.token)
+        return OAuthBearerAuth(token=cast("str", config.token))
     if config.method == "kerberos":
         return _build_kerberos_auth(config)
     msg = f"Unknown auth method: {config.method!r}"

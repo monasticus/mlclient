@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, overload
 
 from mlclient._options import UNSET, UnsetType
+from mlclient.api.rest import AsyncRestApi, RestApi
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
 
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
     import httpx
 
 
-class InvokeService(ExecutionService):
+class InvokeService(ExecutionService[RestApi]):
     """Higher-level service for /v1/invoke endpoint.
 
     Invokes XQuery or server-side JavaScript modules installed in MarkLogic.
@@ -131,7 +132,7 @@ class InvokeService(ExecutionService):
         return self._parse_result(response, output_type)
 
 
-class AsyncInvokeService(ExecutionService):
+class AsyncInvokeService(ExecutionService[AsyncRestApi]):
     """Async higher-level service for /v1/invoke endpoint.
 
     Invokes XQuery or server-side JavaScript modules installed in MarkLogic.

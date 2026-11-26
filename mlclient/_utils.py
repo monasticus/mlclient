@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import importlib.resources as pkg_resources
 import json
-from typing import TextIO
+from typing import TextIO, cast
 
 from mlclient import _constants as constants
 from mlclient import exceptions
@@ -29,7 +29,7 @@ from mlclient.exceptions import ResourceNotFoundError
 
 
 def get_accept_header_for_format(
-    data_format: str,
+    data_format: str | None,
 ) -> str:
     """Return an Accept header for data format.
 
@@ -48,7 +48,7 @@ def get_accept_header_for_format(
     UnsupportedFormatError
         If the format provided is not being supported
     """
-    data_format = data_format.lower()
+    data_format = cast("str", data_format).lower()
 
     if data_format == "xml":
         return constants.HEADER_XML
@@ -134,8 +134,10 @@ class _BiDict:
         input_dict : dict[str | None, str | None]
             An input regular dictionary
         """
-        self._origin = dict(input_dict)
-        self._inverse = {value: key for key, value in input_dict.items()}
+        self._origin = cast("dict[str | None, str | None]", dict(input_dict))
+        self._inverse: dict[str | None, str | None] = {
+            value: key for key, value in input_dict.items()
+        }
 
     def get(
         self,

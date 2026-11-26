@@ -13,6 +13,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import indent
+from typing import ClassVar
 
 import yaml
 from cleo.commands.command import Command
@@ -175,14 +176,14 @@ class EnvInitCommand(Command):
 
     name: str = "env init"
     description: str = "Scaffolds an MLClient environment configuration file"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "name",
             "The environment name. Omit to run the interactive wizard.",
             optional=True,
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         option(
             "interactive",
             "i",

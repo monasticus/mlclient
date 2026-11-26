@@ -104,7 +104,7 @@ class ForestsApi:
 
     def create(
         self,
-        body: str | dict,
+        body: dict,
         *,
         wait_for_forest_to_mount: bool | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -149,7 +149,7 @@ class ForestsApi:
 
     def put(
         self,
-        body: str | dict,
+        body: dict,
         *,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
@@ -233,7 +233,7 @@ class ForestsApi:
     def post(
         self,
         forest: str,
-        body: str | dict,
+        body: dict,
         *,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
@@ -358,7 +358,7 @@ class ForestsApi:
     def put_properties(
         self,
         forest: str,
-        body: str | dict,
+        body: dict,
         *,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
@@ -469,7 +469,7 @@ class AsyncForestsApi:
 
     async def create(
         self,
-        body: str | dict,
+        body: dict,
         *,
         wait_for_forest_to_mount: bool | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -514,7 +514,7 @@ class AsyncForestsApi:
 
     async def put(
         self,
-        body: str | dict,
+        body: dict,
         *,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
@@ -598,7 +598,7 @@ class AsyncForestsApi:
     async def post(
         self,
         forest: str,
-        body: str | dict,
+        body: dict,
         *,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
@@ -723,7 +723,7 @@ class AsyncForestsApi:
     async def put_properties(
         self,
         forest: str,
-        body: str | dict,
+        body: dict,
         *,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:

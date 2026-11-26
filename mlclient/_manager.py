@@ -8,7 +8,7 @@ It exports the following class:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict, cast
 
 from mlclient._client import AsyncMLClient, MLClient
 from mlclient._options import UNSET
@@ -21,6 +21,15 @@ if TYPE_CHECKING:
     from typing_extensions import Unpack
 
     from mlclient._typing import HTTPConfigOverrides
+
+
+class _ClientConfigs(TypedDict):
+    """Resolved connections passed together to one composed client."""
+
+    config: HTTPConfig
+    manage_config: HTTPConfig
+    admin_config: HTTPConfig
+    health_config: HTTPConfig
 
 
 class MLClientManager:
@@ -428,7 +437,7 @@ class MLClientManager:
         self,
         app_server_id: str | None,
         **overrides: Unpack[HTTPConfigOverrides],
-    ) -> dict[str, HTTPConfig]:
+    ) -> _ClientConfigs:
         """Build primary and auxiliary HTTP configurations for a MarkLogic client.
 
         Resolve the selected server once. If it is manage, admin or health,
@@ -491,7 +500,7 @@ class MLClientManager:
             configs[f"{server_id}_config"] = (
                 primary if server_id == app_server_id else self.get_config(server_id)
             )
-        return configs
+        return cast("_ClientConfigs", configs)
 
     def _get_app_server_id(self, app_server_id: str | None) -> str:
         """Validate an explicit server identifier or select the first REST server.
@@ -529,7 +538,7 @@ class MLClientManager:
         return app_server_id
 
 
-def _without_unset(overrides: dict) -> dict:
+def _without_unset(overrides: HTTPConfigOverrides) -> HTTPConfigOverrides:
     """Filter omitted settings before merging manager and per-call overrides.
 
     Parameters
@@ -544,4 +553,7 @@ def _without_unset(overrides: dict) -> dict:
         A new mapping without UNSET-valued entries. The input is unchanged.
         Removing omitted entries lets the lower configuration level apply.
     """
-    return {key: value for key, value in overrides.items() if value is not UNSET}
+    return cast(
+        "HTTPConfigOverrides",
+        {key: value for key, value in overrides.items() if value is not UNSET},
+    )

@@ -8,7 +8,7 @@ It exports 1 class:
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from mlclient import _constants as constants
 
@@ -71,7 +71,9 @@ class ApiCall(metaclass=ABCMeta):
         bool
             True if the subclass includes the endpoint property
         """
-        return "endpoint" in subclass.__dict__ and not callable(subclass.endpoint)
+        return "endpoint" in subclass.__dict__ and not callable(
+            cast("type[ApiCall]", subclass).endpoint,
+        )
 
     @property
     @abstractmethod
@@ -130,7 +132,7 @@ class ApiCall(metaclass=ABCMeta):
     @params.setter
     def params(
         self,
-        params: dict,
+        params: dict | None,
     ) -> None:
         """Set request parameters.
 
@@ -139,7 +141,7 @@ class ApiCall(metaclass=ABCMeta):
         params : dict
             Request parameters
         """
-        self._params = {}
+        self._params: dict = {}
         if params:
             for key, value in params.items():
                 self.add_param(key, value)
@@ -160,7 +162,7 @@ class ApiCall(metaclass=ABCMeta):
     @headers.setter
     def headers(
         self,
-        headers: dict,
+        headers: dict | None,
     ) -> None:
         """Set request headers.
 
@@ -169,7 +171,7 @@ class ApiCall(metaclass=ABCMeta):
         headers : dict
             Request headers
         """
-        self._headers = {}
+        self._headers: dict = {}
         if headers:
             for key, value in headers.items():
                 self.add_header(key, value)
@@ -194,7 +196,7 @@ class ApiCall(metaclass=ABCMeta):
     @body.setter
     def body(
         self,
-        body: str | dict | bytes,
+        body: str | dict | bytes | None,
     ) -> None:
         """Set a request body.
 

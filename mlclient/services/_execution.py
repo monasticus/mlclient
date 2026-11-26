@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from mlclient._options import UNSET, UnsetType
 from mlclient.responses import MLResponseParser
@@ -17,7 +17,10 @@ if TYPE_CHECKING:
 ScopedService = TypeVar("ScopedService", bound="ExecutionService")
 
 
-class ExecutionService:
+_RestT = TypeVar("_RestT", "RestApi", "AsyncRestApi")
+
+
+class ExecutionService(Generic[_RestT]):
     """Base of the sync and async services that run code on MarkLogic.
 
     Eval and invoke send code to different endpoints, but share the database
@@ -29,7 +32,7 @@ class ExecutionService:
 
     def __init__(
         self,
-        rest: RestApi | AsyncRestApi,
+        rest: _RestT,
         scope: ServiceScope | None = None,
     ) -> None:
         """Create a service on the supplied REST connection.
@@ -41,7 +44,7 @@ class ExecutionService:
         scope : ServiceScope | None, default None
             Database and transaction defaults; None uses an empty scope.
         """
-        self._rest = rest
+        self._rest: _RestT = rest
         self._scope = ServiceScope().overridden_by(scope)
 
     def __call__(

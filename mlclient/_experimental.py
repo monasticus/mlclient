@@ -34,10 +34,15 @@ def experimental(*, log_on_init: bool = False) -> Callable[[_ClassT], _ClassT]:
 
     def decorate(cls: _ClassT) -> _ClassT:
         """Attach the notice and optionally wrap this class's constructor."""
-        cls.__experimental__ = EXPERIMENTAL_NOTICE
-        cls.__doc__ = (cls.__doc__ or "").rstrip() + "\n\n" + EXPERIMENTAL_NOTICE
+        metadata = {
+            "__experimental__": EXPERIMENTAL_NOTICE,
+            "__doc__": (cls.__doc__ or "").rstrip() + "\n\n" + EXPERIMENTAL_NOTICE,
+        }
+        for name, value in metadata.items():
+            setattr(cls, name, value)
         if log_on_init:
-            init = cls.__init__
+            init_name = "__init__"
+            init = getattr(cls, init_name)
 
             @wraps(init)
             def initialize(self: object, *args: object, **kwargs: object) -> None:
@@ -49,7 +54,7 @@ def experimental(*, log_on_init: bool = False) -> Callable[[_ClassT], _ClassT]:
                 )
                 init(self, *args, **kwargs)
 
-            cls.__init__ = initialize
+            setattr(cls, init_name, initialize)
         return cls
 
     return decorate

@@ -7,6 +7,8 @@ It exports an implementation for 'invoke' command:
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 import httpx
 from cleo.commands.command import Command
 from cleo.helpers import argument
@@ -72,13 +74,13 @@ class InvokeCommand(Command):
     name: str = "invoke"
     description: str = "Runs an XQuery or JavaScript module deployed on the server"
     help: str = "Uses the /v1/invoke endpoint of a REST App Server."
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "module",
             "The path of a module installed in MarkLogic",
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(
             description=(
                 "The ML Client environment name; repeat to compare environments"

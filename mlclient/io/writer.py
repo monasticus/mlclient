@@ -10,9 +10,11 @@ from __future__ import annotations
 import logging
 from collections.abc import Iterable
 from pathlib import Path
+from typing import cast
 
 import aiofiles
 
+from mlclient._logging import fine_level
 from mlclient.models.documents import Document, Metadata
 
 logger = logging.getLogger(__name__)
@@ -28,7 +30,7 @@ class DocumentsWriter:
     async def write(
         cls,
         documents: Iterable[Document],
-        output_path: str,
+        output_path: str | Path,
     ) -> None:
         """Write documents to files under a path.
 
@@ -51,7 +53,7 @@ class DocumentsWriter:
     async def write_document(
         cls,
         document: Document,
-        output_path: str,
+        output_path: str | Path,
     ) -> None:
         """Write a single document to a file under a path.
 
@@ -67,11 +69,11 @@ class DocumentsWriter:
         output_path : str
             A path to the output directory.
         """
-        doc_path = Path(output_path) / document.uri[1:]
+        doc_path = Path(output_path) / cast("str", document.uri)[1:]
         doc_path.parent.mkdir(parents=True, exist_ok=True)
 
         if document.content_bytes is not None:
-            logger.fine("Writing data into file [%s]", doc_path)
+            logger.log(fine_level(), "Writing data into file [%s]", doc_path)
             async with aiofiles.open(doc_path, mode="wb") as file:
                 await file.write(document.content_bytes)
 
@@ -104,7 +106,7 @@ class DocumentsWriter:
             suffix = cls._JSON_METADATA_SUFFIX
 
         metadata_path = doc_path.with_suffix(suffix)
-        logger.fine("Writing metadata into file [%s]", metadata_path)
+        logger.log(fine_level(), "Writing metadata into file [%s]", metadata_path)
         async with aiofiles.open(metadata_path, mode="wb") as file:
             await file.write(payload)
 

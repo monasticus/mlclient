@@ -9,7 +9,7 @@ connected REST App-Server.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from mlclient._options import UNSET, UnsetType
 from mlclient.responses import MLResponseParser
@@ -91,7 +91,7 @@ class TraceEventsService:
             If HTTP fails without a recognized MarkLogic error
         """
         resp = self._eval(self._get_code(), {"group": group}, timeout)
-        state = MLResponseParser.parse(resp)
+        state = cast("dict", MLResponseParser.parse(resp))
         return TraceEvents(
             activated=state["activated"],
             events=tuple(sorted(state["events"])),

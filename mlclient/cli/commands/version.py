@@ -7,7 +7,7 @@ It exports an implementation for 'version' command:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from cleo.commands.command import Command
 from cleo.io.inputs.option import Option
@@ -46,7 +46,7 @@ class VersionCommand(Command):
 
     name: str = "version"
     description: str = "Reports the MarkLogic version of an environment"
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(
             description=(
                 "The ML Client environment name; repeat it to ask several environments"

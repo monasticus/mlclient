@@ -11,7 +11,7 @@ import asyncio
 import heapq
 from collections.abc import Generator, Iterator
 from http import HTTPStatus
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -30,6 +30,7 @@ from mlclient.responses import MLResponseParser
 from mlclient.services.diagnostics.logs import AsyncLogsService, LogsService
 
 if TYPE_CHECKING:
+    from cleo.application import Application
     from cleo.ui.table_separator import TableSeparator
 
     from mlclient._client import AsyncMLClient
@@ -68,7 +69,7 @@ class LogsCommand(Command):
     name: str = "logs"
     description: str = "Prints MarkLogic log lines or lists log files"
     help: str = "Uses the /manage/v2/logs endpoint of the Manage App Server."
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(),
         option(
             "server",
@@ -227,7 +228,7 @@ class LogsCommand(Command):
             Filename and URL cells, with separators between server sections.
         """
         grouped_logs = logs_list["grouped"][host]
-        log_urls = {}
+        log_urls: dict = {}
         for log in logs_list["source"]:
             if log["roleref"] == host:
                 log_urls.setdefault(log["nameref"], f"{base_url}{log['uriref']}")
@@ -591,7 +592,7 @@ class LogsCommand(Command):
         except MarkLogicError as error:
             if not self._is_missing_log(error):
                 raise
-            self.application.render_error(error, self._io)
+            cast("Application", self.application).render_error(error, self._io)
             self._hint_missing_log(file_name)
             return 1
         formatted_logs = self._format_logs(logs)

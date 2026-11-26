@@ -108,9 +108,9 @@ class InvokeCall(ApiCall):
     @classmethod
     def _build_body(
         cls,
-        module: str,
+        module: str | None,
         variables: dict | None,
-    ) -> dict[str, str]:
+    ) -> dict[str, str | None]:
         """Build the x-www-form-urlencoded body of the request.
 
         Parameters

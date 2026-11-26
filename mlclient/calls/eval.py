@@ -91,8 +91,8 @@ class EvalCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        xquery: str,
-        javascript: str,
+        xquery: str | None,
+        javascript: str | None,
     ) -> None:
         if not xquery and not javascript:
             msg = "You must include either the xquery or the javascript parameter!"
@@ -104,10 +104,10 @@ class EvalCall(ApiCall):
     @classmethod
     def _build_body(
         cls,
-        xquery: str,
-        javascript: str,
-        variables: dict,
-    ) -> dict[str, str]:
+        xquery: str | None,
+        javascript: str | None,
+        variables: dict | None,
+    ) -> dict[str, str | None]:
         code_lang = cls._XQ_PARAM if xquery else cls._JS_PARAM
         code_to_eval = xquery or javascript
         body = {code_lang: code_to_eval}

@@ -7,6 +7,8 @@ It exports an implementation for 'trace-events' command:
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 import httpx
 import questionary
 from cleo.commands.command import Command
@@ -77,7 +79,7 @@ class TraceEventsCommand(Command):
 
     name: str = "trace-events"
     description: str = "Shows or sets a MarkLogic group's diagnostic trace events"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "value",
             description=(
@@ -87,7 +89,7 @@ class TraceEventsCommand(Command):
             optional=True,
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(),
         connection_option(),
         option(
@@ -229,9 +231,9 @@ class TraceEventsCommand(Command):
             self.line_error("Cancelled.")
             return 1
 
-        selected = set(selected)
+        chosen = set(selected)
         with waiting_for(self.io, url):
-            result = self._apply_selection(service, group, current, selected)
+            result = self._apply_selection(service, group, current, chosen)
 
         self._print(group, None, result, list_all=True)
         return 0

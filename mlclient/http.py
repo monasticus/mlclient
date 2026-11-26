@@ -18,7 +18,7 @@ connection and auth functions together by hand.
 
 from __future__ import annotations
 
-import ssl
+import ssl as ssl_module
 from copy import copy
 from typing import TYPE_CHECKING
 
@@ -383,14 +383,14 @@ class HTTPConfig:
             A cloned configuration if a default needs applying, otherwise this
             configuration. The source is not modified and no session is opened.
         """
-        overrides = {}
+        overrides: HTTPConfigOverrides = {}
         if not self.has_explicit_retry:
             overrides["retry"] = NO_RETRY_STRATEGY
         if not self.has_explicit_timeout:
             overrides["timeout"] = DEFAULT_HEALTH_TIMEOUT
         return self.clone(**overrides) if overrides else self
 
-    def transport_verify(self) -> ssl.SSLContext | bool:
+    def transport_verify(self) -> ssl_module.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""
         return _transport_verify(self._connection)
 
@@ -400,7 +400,7 @@ class HTTPConfig:
         Always carries ``verify``; carries ``limits`` only when explicitly set,
         so an unset value defers to httpx's own default.
         """
-        options = {"verify": self.transport_verify()}
+        options: dict = {"verify": self.transport_verify()}
         if self._limits is not None:
             options["limits"] = self.limits
         return options
@@ -429,7 +429,7 @@ class HTTPConfig:
             overrides.pop("port", None)
             if not overrides:
                 return self
-        base = {
+        base: HTTPConfigOverrides = {
             "protocol": self.protocol,
             "host": self._host,
             "port": self.port,
@@ -442,7 +442,8 @@ class HTTPConfig:
             "limits": self._limits,
             "timeout": self._timeout,
         }
-        return self.resolve(**{**base, **overrides})
+        base.update(overrides)
+        return self.resolve(**base)
 
     @staticmethod
     def _build_base_url(protocol: str, host: str, port: int) -> str:

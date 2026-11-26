@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 from xml.etree import ElementTree
 
 from mlclient import _constants as constants
@@ -159,9 +159,9 @@ class SearchService:
 
     def documents(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -225,7 +225,7 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -236,20 +236,20 @@ class SearchService:
         )
         resp = self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
             multipart=True,
             timeout=timeout,
         )
-        return _parse_documents(resp, category)
+        return _parse_documents(resp, categories)
 
     def documents_with_report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -314,7 +314,7 @@ class SearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -325,7 +325,7 @@ class SearchService:
         )
         resp = self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
@@ -333,13 +333,13 @@ class SearchService:
             view="all",
             timeout=timeout,
         )
-        return _parse_documents_with_report(resp, category)
+        return _parse_documents_with_report(resp, categories)
 
     def uris(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -412,12 +412,12 @@ class SearchService:
     def values(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -506,13 +506,13 @@ class SearchService:
         self,
         name: str,
         function: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         aggregate_path: str | None = None,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -612,12 +612,12 @@ class SearchService:
     def tuples(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -705,9 +705,9 @@ class SearchService:
 
     def report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         view: ReportView = "all",
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -886,9 +886,9 @@ class AsyncSearchService:
 
     async def documents(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -952,7 +952,7 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -963,20 +963,20 @@ class AsyncSearchService:
         )
         resp = await self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
             multipart=True,
             timeout=timeout,
         )
-        return _parse_documents(resp, category)
+        return _parse_documents(resp, categories)
 
     async def documents_with_report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         category: Category | str | list[Category | str] | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -1041,7 +1041,7 @@ class AsyncSearchService:
         MarkLogicError
             If MarkLogic returns an error.
         """
-        category = normalize_category(category)
+        categories = normalize_category(category)
         params = _request_params(
             self._scope,
             query,
@@ -1052,7 +1052,7 @@ class AsyncSearchService:
         )
         resp = await self._rest.search.post(
             **params,
-            category=category,
+            category=categories,
             data_format="json",
             transform=transform,
             transform_params=transform_params,
@@ -1060,13 +1060,13 @@ class AsyncSearchService:
             view="all",
             timeout=timeout,
         )
-        return _parse_documents_with_report(resp, category)
+        return _parse_documents_with_report(resp, categories)
 
     async def uris(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -1139,12 +1139,12 @@ class AsyncSearchService:
     async def values(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -1233,13 +1233,13 @@ class AsyncSearchService:
         self,
         name: str,
         function: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         aggregate_path: str | None = None,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -1339,12 +1339,12 @@ class AsyncSearchService:
     async def tuples(
         self,
         name: str,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
         direction: Direction | None = None,
         frequency: Frequency | None = None,
         limit: int | None = None,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         scope: SearchScope | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
@@ -1432,9 +1432,9 @@ class AsyncSearchService:
 
     async def report(
         self,
-        query: SearchInput = None,
+        query: SearchInput | None = None,
         *,
-        pos: PositionInput = None,
+        pos: PositionInput | None = None,
         view: ReportView = "all",
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -1895,9 +1895,12 @@ def _parse_uris(resp: Response) -> list[str]:
     if not isinstance(parts, list):
         parts = [parts]
     return [
-        DocumentsDisposition.from_header(
-            headers.get(constants.HEADER_NAME_CONTENT_DISP),
-        ).filename
+        cast(
+            "str",
+            DocumentsDisposition.from_header(
+                headers.get(constants.HEADER_NAME_CONTENT_DISP),
+            ).filename,
+        )
         for headers, _ in parts
     ]
 

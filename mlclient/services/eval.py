@@ -6,11 +6,12 @@ Provides parsed code evaluation on MarkLogic.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import aiofiles
 
 from mlclient._options import UNSET, UnsetType
+from mlclient.api.rest import AsyncRestApi, RestApi
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
 from mlclient.models.results import ParsedValue
 from mlclient.services._execution import ExecutionService
@@ -28,7 +29,7 @@ SUPPORTED_FILE_EXTENSIONS = tuple(
 )
 
 
-class EvalService(ExecutionService):
+class EvalService(ExecutionService[RestApi]):
     """Higher-level service for /v1/eval endpoint."""
 
     @overload
@@ -228,7 +229,7 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -327,7 +328,7 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -426,7 +427,7 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -525,7 +526,7 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -624,7 +625,7 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -742,7 +743,7 @@ class EvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     def _eval(
@@ -844,7 +845,7 @@ def _file_language(file: str) -> str:
     raise UnsupportedFileExtensionError(msg)
 
 
-class AsyncEvalService(ExecutionService):
+class AsyncEvalService(ExecutionService[AsyncRestApi]):
     """Async higher-level service for /v1/eval endpoint."""
 
     @overload
@@ -1044,7 +1045,7 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -1143,7 +1144,7 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -1242,7 +1243,7 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -1341,7 +1342,7 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -1440,7 +1441,7 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     @overload
@@ -1558,7 +1559,7 @@ class AsyncEvalService(ExecutionService):
             txid=txid,
             output_type=output_type,
             timeout=timeout,
-            **kwargs,
+            **cast("dict[str, Any]", kwargs),
         )
 
     async def _eval(

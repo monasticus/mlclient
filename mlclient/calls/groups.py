@@ -51,8 +51,8 @@ class GroupsGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize GroupsGetCall instance.
 
@@ -92,8 +92,8 @@ class GroupsGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         """Validate the response format and view.
 
@@ -206,8 +206,8 @@ class GroupGetCall(ApiCall):
     def __init__(
         self,
         group: str,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize GroupGetCall instance.
 
@@ -251,8 +251,8 @@ class GroupGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         """Validate the response format and view.
 
@@ -405,7 +405,7 @@ class GroupPropertiesGetCall(ApiCall):
     def __init__(
         self,
         group: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
     ) -> None:
         """Initialize GroupPropertiesGetCall instance.
 
@@ -443,7 +443,7 @@ class GroupPropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
+        data_format: str | None,
     ) -> None:
         """Validate the response format.
 

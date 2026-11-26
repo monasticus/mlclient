@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.14"
 
       - name: Install MLClient with poetry
         run: |
@@ -24,3 +24,26 @@ jobs:
 
       - name: Lint with Ruff
         run: poetry run ruff check --output-format=github .
+
+  typing:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install poetry==2.2.0
+          poetry install
+      - name: Check the package
+        run: poetry run mypy
+      - name: Build and install the typed wheel
+        run: |
+          poetry build --format wheel
+          poetry run pip install --force-reinstall --no-deps dist/*.whl
+      - name: Check installed consumer contracts
+        run: poetry run python scripts/check_typing.py

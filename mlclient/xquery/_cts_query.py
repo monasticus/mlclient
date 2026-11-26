@@ -14,10 +14,20 @@ import re
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from copy import deepcopy
-from dataclasses import dataclass, fields, replace
+from dataclasses import Field, dataclass, fields, replace
 from decimal import Decimal
 from io import StringIO
-from typing import TYPE_CHECKING, ClassVar, Literal, NoReturn
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Generic,
+    Literal,
+    NoReturn,
+    Protocol,
+    TypeVar,
+    cast,
+    overload,
+)
 from xml.dom import minidom
 from xml.etree.ElementTree import (
     Element,
@@ -45,7 +55,7 @@ from mlclient.xquery.expressions import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
     from mlclient.search.options import SearchOptions
 
@@ -147,6 +157,7 @@ class _NativeCall(XqyExpression):
     required arguments and the rest optional ones.
     """
 
+    __dataclass_fields__: ClassVar[dict[str, Field]]
     _FUNCTION: ClassVar[str]
     _REQUIRED_ARGUMENTS: ClassVar[int]
 
@@ -195,7 +206,7 @@ class _NativeCall(XqyExpression):
         )
         return f"{type(self).__name__}({arguments})"
 
-    def _snapshot(self, **arguments: XqyExpression | None) -> None:
+    def _snapshot(self, **arguments: AtomicInput) -> None:
         """Store converted constructor arguments on this frozen query.
 
         Parameters
@@ -214,6 +225,15 @@ class CtsQuery(SearchQuery, _NativeCall):
     their literal arguments locally; serialization never evaluates arbitrary
     expressions.
     """
+
+    @overload
+    def serialize(self, output_format: Literal["json"] = "json") -> dict: ...
+
+    @overload
+    def serialize(self, output_format: Literal["xml"]) -> Element: ...
+
+    @overload
+    def serialize(self, output_format: Literal["json", "xml"]) -> dict | Element: ...
 
     def serialize(
         self,
@@ -1115,7 +1135,7 @@ class DirectoryQuery(CtsQuery):
     uris: XqyExpression
     depth: XqyExpression | None
 
-    def __init__(self, uris: StringInput, depth: StringInput = "1") -> None:
+    def __init__(self, uris: StringInput, depth: str | XqyExpression = "1") -> None:
         """Snapshot native constructor arguments.
 
         Parameters
@@ -5526,6 +5546,27 @@ def _near_distance(distance: XqyExpression) -> int:
     return math.floor(max(0, _number(distance)) + 0.5) % (2**32)
 
 
+@overload
+def _subquery(
+    expression: XqyExpression,
+    output_format: Literal["json"],
+) -> dict: ...
+
+
+@overload
+def _subquery(
+    expression: XqyExpression,
+    output_format: Literal["xml"],
+) -> Element: ...
+
+
+@overload
+def _subquery(
+    expression: XqyExpression,
+    output_format: Literal["json", "xml"],
+) -> dict | Element: ...
+
+
 def _subquery(
     expression: XqyExpression,
     output_format: Literal["json", "xml"],
@@ -5671,7 +5712,7 @@ def _strings(expression: XqyExpression | None) -> list[str]:
                 f"CTS string argument requires server evaluation, got {_display(item)}."
             )
             raise TypeError(message)
-        result.append(item.value)
+        result.append(cast("str", item.value))
     return result
 
 
@@ -5716,6 +5757,30 @@ def _number(expression: XqyExpression) -> float:
         f"CTS numeric argument requires server evaluation, got {_display(expression)}."
     )
     raise TypeError(message)
+
+
+@overload
+def _render(
+    name: str,
+    members: list[_Member],
+    output_format: Literal["json"],
+) -> dict: ...
+
+
+@overload
+def _render(
+    name: str,
+    members: list[_Member],
+    output_format: Literal["xml"],
+) -> Element: ...
+
+
+@overload
+def _render(
+    name: str,
+    members: list[_Member],
+    output_format: Literal["json", "xml"],
+) -> dict | Element: ...
 
 
 def _render(
@@ -5799,8 +5864,11 @@ def _render_xml(name: str, members: list[_Member]) -> Element:
     return root
 
 
+_MemberValue_co = TypeVar("_MemberValue_co", covariant=True)
+
+
 @dataclass(frozen=True)
-class _Member(ABC):
+class _Member(ABC, Generic[_MemberValue_co]):
     """One native field of a CTS query, described once for both formats.
 
     Parameters
@@ -5816,7 +5884,7 @@ class _Member(ABC):
 
     json_key: str
     xml_tag: str
-    values: object
+    values: _MemberValue_co
 
     @property
     def omitted(self) -> bool:
@@ -5852,7 +5920,7 @@ class _Member(ABC):
         """
 
 
-class _TextsMember(_Member):
+class _TextsMember(_Member[list[str]]):
     """Repeated literal strings, one child element each."""
 
     def add_to_xml(self, root: Element) -> None:
@@ -5866,7 +5934,7 @@ class _TextsMember(_Member):
         _text_nodes(root, self.xml_tag, self.values)
 
 
-class _TextMember(_Member):
+class _TextMember(_Member[str | None]):
     """One literal string: a JSON string and one child element."""
 
     def add_to_xml(self, root: Element) -> None:
@@ -5877,10 +5945,10 @@ class _TextMember(_Member):
         root : xml.etree.ElementTree.Element
             The query element.
         """
-        _text_nodes(root, self.xml_tag, [self.values])
+        _text_nodes(root, self.xml_tag, [cast("str", self.values)])
 
 
-class _BooleanMember(_Member):
+class _BooleanMember(_Member[bool | None]):
     """A boolean: a JSON boolean and a true/false child element."""
 
     def add_to_xml(self, root: Element) -> None:
@@ -5894,7 +5962,7 @@ class _BooleanMember(_Member):
         _text_nodes(root, self.xml_tag, ["true" if self.values else "false"])
 
 
-class _AttributeMember(_Member):
+class _AttributeMember(_Member[object]):
     """One scalar rendered as an XML attribute of the query element."""
 
     def add_to_xml(self, root: Element) -> None:
@@ -5908,7 +5976,7 @@ class _AttributeMember(_Member):
         root.set(self.xml_tag, str(self.values))
 
 
-class _WeightMember(_Member):
+class _WeightMember(_Member[float | None]):
     """A scoring weight: a JSON number and a native double XML attribute."""
 
     def add_to_xml(self, root: Element) -> None:
@@ -5919,10 +5987,10 @@ class _WeightMember(_Member):
         root : xml.etree.ElementTree.Element
             The query element.
         """
-        root.set(self.xml_tag, _weight_text(self.values))
+        root.set(self.xml_tag, _weight_text(cast("float", self.values)))
 
 
-class _QueryMember(_Member):
+class _QueryMember(_Member[XqyExpression | None]):
     """One nested query, serialized in the format of its parent."""
 
     def to_json(self) -> object:
@@ -5933,7 +6001,7 @@ class _QueryMember(_Member):
         object
             The nested query's native representation.
         """
-        return _subquery(self.values, "json")
+        return _subquery(cast("XqyExpression", self.values), "json")
 
     def add_to_xml(self, root: Element) -> None:
         """Append the nested query element directly.
@@ -5943,7 +6011,7 @@ class _QueryMember(_Member):
         root : xml.etree.ElementTree.Element
             The query element.
         """
-        root.append(_subquery(self.values, "xml"))
+        root.append(_subquery(cast("XqyExpression", self.values), "xml"))
 
 
 class _WrappedQueryMember(_QueryMember):
@@ -5958,10 +6026,10 @@ class _WrappedQueryMember(_QueryMember):
             The query element.
         """
         wrapper = SubElement(root, f"{{{CTS_NS_URI}}}{self.xml_tag}")
-        wrapper.append(_subquery(self.values, "xml"))
+        wrapper.append(_subquery(cast("XqyExpression", self.values), "xml"))
 
 
-class _QueriesMember(_Member):
+class _QueriesMember(_Member[list[XqyExpression]]):
     """Several nested queries, appended directly in XML."""
 
     def to_json(self) -> object:
@@ -5985,7 +6053,7 @@ class _QueriesMember(_Member):
         root.extend([_subquery(query, "xml") for query in self.values])
 
 
-class _QNamesMember(_Member):
+class _QNamesMember(_Member[list[tuple[str, str]]]):
     """Repeated QNames: Clark notation in JSON, prefixed text in XML."""
 
     def to_json(self) -> object:
@@ -6009,7 +6077,7 @@ class _QNamesMember(_Member):
         _qname_nodes(root, self.xml_tag, self.values)
 
 
-class _QNameMember(_Member):
+class _QNameMember(_Member[tuple[str, str] | None]):
     """One QName: a Clark-notation JSON string and one child element."""
 
     def to_json(self) -> object:
@@ -6020,7 +6088,7 @@ class _QNameMember(_Member):
         str
             ``{uri}local``, or the bare local name without a namespace.
         """
-        return _clark(*self.values)
+        return _clark(*cast("tuple[str, str]", self.values))
 
     def add_to_xml(self, root: Element) -> None:
         """Append the QName child.
@@ -6030,10 +6098,10 @@ class _QNameMember(_Member):
         root : xml.etree.ElementTree.Element
             The query element.
         """
-        _qname_nodes(root, self.xml_tag, [self.values])
+        _qname_nodes(root, self.xml_tag, [cast("tuple[str, str]", self.values)])
 
 
-class _TypedMember(_Member):
+class _TypedMember(_Member[list[tuple[str, str]]]):
     """Range values with their XML Schema types."""
 
     def to_json(self) -> object:
@@ -6061,7 +6129,7 @@ class _TypedMember(_Member):
             _typed_node(root, self.xml_tag, atomic_type, lexical)
 
 
-class _JsonValuesMember(_Member):
+class _JsonValuesMember(_Member[list[tuple[str, str]]]):
     """JSON property values: strings, numbers and booleans."""
 
     def to_json(self) -> object:
@@ -6088,7 +6156,7 @@ class _JsonValuesMember(_Member):
             _json_value_node(root, self.xml_tag, atomic_type, lexical)
 
 
-class _RegionsMember(_Member):
+class _RegionsMember(_Member[list[tuple[str, str]]]):
     """Geospatial regions by their native text forms."""
 
     def to_json(self) -> object:
@@ -6116,7 +6184,7 @@ class _RegionsMember(_Member):
             child.text = text
 
 
-class _PeriodsMember(_Member):
+class _PeriodsMember(_Member[list[tuple[str, str]]]):
     """Temporal periods with their start and end."""
 
     def to_json(self) -> object:
@@ -6143,7 +6211,7 @@ class _PeriodsMember(_Member):
             SubElement(period, f"{{{CTS_NS_URI}}}period-end").text = end
 
 
-class _ReferencesMember(_Member):
+class _ReferencesMember(_Member[list[tuple[str, list[_Member]]]]):
     """Literal range-index references, each a complete native element."""
 
     def to_json(self) -> object:
@@ -6179,7 +6247,7 @@ class _ReferencesMember(_Member):
         root.extend([_render(name, members, "xml") for name, members in self.values])
 
 
-class _TriplesMember(_Member):
+class _TriplesMember(_Member[list[tuple[str | None, str]]]):
     """RDF terms: IRIs, or typed literals with their datatype."""
 
     def to_json(self) -> object:
@@ -6215,7 +6283,7 @@ class _TriplesMember(_Member):
             child.text = lexical
 
 
-class _NodesMember(_Member):
+class _NodesMember(_Member[list[tuple[object, bool]]]):
     """Literal XML or JSON model nodes."""
 
     def to_json(self) -> object:
@@ -6245,10 +6313,10 @@ class _NodesMember(_Member):
                     separators=(", ", ":"),
                 )
             else:
-                child.extend(_xml_model_nodes(value))
+                child.extend(_xml_model_nodes(cast("str", value)))
 
 
-class _DistinctiveOptionsMember(_Member):
+class _DistinctiveOptionsMember(_Member[Element | None]):
     """Distinctive-term options of a similar query, held as their XML element."""
 
     def to_json(self) -> object:
@@ -6265,21 +6333,21 @@ class _DistinctiveOptionsMember(_Member):
             For an option without a native JSON form.
         """
         result = {}
-        converters = {
+        converters: dict[str, Callable[[str], object]] = {
             "score": str,
             "max-terms": int,
             "min-val": int,
             "min-weight": int,
             "complete": lambda text: text in {"true", "1"},
         }
-        for child in self.values:
+        for child in cast("Element", self.values):
             if not isinstance(child.tag, str):
                 continue
             name = child.tag.removeprefix("{cts:distinctive-terms}")
             if name not in converters:
                 message = f"Unsupported local CTS distinctive-term option: {child.tag}"
                 raise ValueError(message)
-            result[_json_name(name)] = converters[name](child.text)
+            result[_json_name(name)] = converters[name](cast("str", child.text))
         return result
 
     def add_to_xml(self, root: Element) -> None:
@@ -6290,10 +6358,10 @@ class _DistinctiveOptionsMember(_Member):
         root : xml.etree.ElementTree.Element
             The query element.
         """
-        root.append(deepcopy(self.values))
+        root.append(deepcopy(cast("Element", self.values)))
 
 
-class _ColumnMember(_Member):
+class _ColumnMember(_Member[tuple[str, int] | None]):
     """A TDE column predicate with its name and column ID."""
 
     def to_json(self) -> object:
@@ -6304,7 +6372,7 @@ class _ColumnMember(_Member):
         list[dict]
             ``[{"column": ..., "columnID": ...}]``.
         """
-        name, column_id = self.values
+        name, column_id = cast("tuple[str, int]", self.values)
         return [{"column": name, "columnID": str(column_id)}]
 
     def add_to_xml(self, root: Element) -> None:
@@ -6315,7 +6383,7 @@ class _ColumnMember(_Member):
         root : xml.etree.ElementTree.Element
             The query element.
         """
-        name, column_id = self.values
+        name, column_id = cast("tuple[str, int]", self.values)
         SubElement(
             root,
             f"{{{CTS_NS_URI}}}{self.xml_tag}",
@@ -6877,7 +6945,16 @@ def _query_member(
     return _QueryMember(json_key, xml_tag, expression)
 
 
-def _single(values: list) -> object:
+class _CompletedParse(Protocol):
+    """The root exposed by a completed ElementTree iterparse iterator."""
+
+    root: Element
+
+
+_Item = TypeVar("_Item")
+
+
+def _single(values: list[_Item]) -> _Item:
     """Return the only item of a resolved sequence.
 
     Parameters
@@ -7142,7 +7219,7 @@ def _reference(expression: XqyExpression) -> tuple[str, list[_Member]]:
             f"got {_display(expression)}."
         )
         raise TypeError(message)
-    members = []
+    members: list[_Member] = []
     for index, (key, tag, kind) in enumerate(selectors):
         value = expression.args[index]
         if kind == "qname":
@@ -7212,7 +7289,7 @@ def _reference_options(name: str, options: list[str]) -> list[_Member]:
     ValueError
         For an option without a local form.
     """
-    members = []
+    members: list[_Member] = []
     for option in options:
         if option in ("checked", "unchecked"):
             continue
@@ -7268,7 +7345,7 @@ def _triples_member(tag: str, expression: XqyExpression) -> _TriplesMember:
         For a value requiring server evaluation.
     """
     with _error_context(tag):
-        values = []
+        values: list[tuple[str | None, str]] = []
         for item in _sequence(expression):
             if (
                 isinstance(item, FunctionCall)
@@ -7398,7 +7475,11 @@ def _literal_node(expression: XqyExpression) -> tuple[object, bool]:
         "*",
         "node()",
     }
-    inner = expression.inner if projected else expression
+    inner = (
+        expression.inner
+        if isinstance(expression, ResultXPath) and projected
+        else expression
+    )
     if (
         not isinstance(inner, FunctionCall)
         or inner.fn != "xdmp:unquote"
@@ -7412,7 +7493,11 @@ def _literal_node(expression: XqyExpression) -> tuple[object, bool]:
         raise TypeError(message)
     source = _single(_strings(inner.args[0]))
     if not source.lstrip().startswith("<"):
-        if projected and expression.source != "node()":
+        if (
+            isinstance(expression, ResultXPath)
+            and projected
+            and expression.source != "node()"
+        ):
             message = "CTS JSON model-node projections require server evaluation."
             raise TypeError(message)
         return json.loads(source, parse_constant=_invalid_json_constant), False
@@ -7426,7 +7511,7 @@ def _literal_node(expression: XqyExpression) -> tuple[object, bool]:
         raise ValueError(message) from error
     with document:
         if projected:
-            source = document.documentElement.toxml()
+            source = cast("minidom.Element", document.documentElement).toxml()
     return source, True
 
 
@@ -7469,7 +7554,7 @@ def _xml_model_nodes(source: str) -> list[Element]:
             for attribute, uri in pending:
                 value.set(attribute, uri)
             pending.clear()
-    return list(parsed.root)
+    return list(cast("_CompletedParse", parsed).root)
 
 
 def _invalid_json_constant(value: str) -> NoReturn:
@@ -7515,7 +7600,7 @@ def _distinctive_options_member(
         value, is_xml = (
             _literal_node(expression) if expression is not None else (None, False)
         )
-        node = _single(_xml_model_nodes(value)) if is_xml else None
+        node = _single(_xml_model_nodes(cast("str", value))) if is_xml else None
         if expression is not None and (
             node is None
             or node.tag != "{cts:distinctive-terms}options"
@@ -7609,7 +7694,7 @@ def _operator_argument(
 
 
 def _choice_options_argument(
-    options: str | list[str] | XqyExpression | None,
+    options: StringInput,
     allowed: frozenset[str],
     query_name: str,
 ) -> XqyExpression | None:
@@ -7670,7 +7755,7 @@ def _check_choice_options(
 
 
 def _near_options_argument(
-    options: str | list[str] | XqyExpression | None,
+    options: StringInput,
 ) -> XqyExpression | None:
     """Validate literal near-query options.
 
@@ -7770,7 +7855,7 @@ def _optional(value: AtomicInput) -> XqyExpression | None:
 
     Parameters
     ----------
-    value : AtomicInput | None
+    value : AtomicInput
         A supplied argument or None.
 
     Returns

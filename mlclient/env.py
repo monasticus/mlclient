@@ -27,7 +27,7 @@ from __future__ import annotations
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Annotated, Optional, Union
+from typing import TYPE_CHECKING, Annotated, Optional, Union, cast
 
 import yaml
 from pydantic import BaseModel, BeforeValidator, Field, model_validator
@@ -50,6 +50,9 @@ from mlclient.exceptions import (
     NoSuchAppServerError,
 )
 from mlclient.http import HTTPConfig
+
+if TYPE_CHECKING:
+    from mlclient.http import HTTPConfigOverrides
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +118,7 @@ DEFAULT_APP_SERVER_SETTINGS = (
 
 
 _DEFAULT_APP_SERVERS = [
-    MLServerConfig(**server) for server in DEFAULT_APP_SERVER_SETTINGS
+    MLServerConfig.model_validate(server) for server in DEFAULT_APP_SERVER_SETTINGS
 ]
 
 
@@ -203,7 +206,9 @@ class MLEnvironment(BaseModel):
             A resolved configuration for a client initialization
         """
         logger.debug("Getting configuration for the [%s] app server", app_server_id)
-        return HTTPConfig.resolve(**self.provide_config_dict(app_server_id))
+        return HTTPConfig.resolve(
+            **cast("HTTPConfigOverrides", self.provide_config_dict(app_server_id)),
+        )
 
     def provide_config_dict(self, app_server_id: str) -> dict[str, object]:
         """Provide an App Server's inherited connection settings as a dictionary.
@@ -289,7 +294,7 @@ class MLEnvironment(BaseModel):
         app_server: MLServerConfig,
     ) -> dict:
         """Return app server fields that override root defaults."""
-        overrides = {
+        overrides: dict = {
             "port": app_server.port,
             "protocol": app_server.protocol,
             "username": app_server.username,
@@ -318,7 +323,7 @@ class MLEnvironment(BaseModel):
         """
         if root_ssl is None:
             return server_ssl
-        overrides = {
+        overrides: dict = {
             field: getattr(server_ssl, field) for field in server_ssl.model_fields_set
         }
         return root_ssl.model_copy(update=overrides)

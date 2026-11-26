@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, overload
 from xml.etree.ElementTree import Element
 
 if TYPE_CHECKING:
@@ -66,6 +66,15 @@ class QueryComponent(ABC):
     Concrete components define their own representation. This contract does not
     execute queries or imply XQuery compilation.
     """
+
+    @overload
+    def serialize(self, output_format: Literal["json"] = "json") -> dict: ...
+
+    @overload
+    def serialize(self, output_format: Literal["xml"]) -> Element: ...
+
+    @overload
+    def serialize(self, output_format: Literal["json", "xml"]) -> dict | Element: ...
 
     def serialize(
         self,

@@ -399,8 +399,8 @@ class ClusterConfigPostCall(ApiCall):
     @classmethod
     def _build_form(
         cls,
-        server_config: str,
-        group: str,
+        server_config: str | None,
+        group: str | None,
         zone: str | None,
     ) -> dict:
         """Return the form data requesting the cluster configuration.

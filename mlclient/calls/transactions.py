@@ -107,7 +107,7 @@ class TransactionGetCall(ApiCall):
     def __init__(
         self,
         txid: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
         database: str | None = None,
     ) -> None:
         """Initialize TransactionGetCall instance.
@@ -151,7 +151,7 @@ class TransactionGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
+        data_format: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -225,7 +225,7 @@ class TransactionPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        result: str,
+        result: str | None,
     ) -> None:
         call_utils.validate_supported(
             [result],

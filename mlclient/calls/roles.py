@@ -52,8 +52,8 @@ class RolesGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize RolesGetCall instance.
 
@@ -91,8 +91,8 @@ class RolesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -155,7 +155,7 @@ class RolesPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
+        body: str | dict | None,
     ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/roles!"
@@ -185,8 +185,8 @@ class RoleGetCall(ApiCall):
     def __init__(
         self,
         role: str,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize RoleGetCall instance.
 
@@ -228,8 +228,8 @@ class RoleGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -309,7 +309,7 @@ class RolePropertiesGetCall(ApiCall):
     def __init__(
         self,
         role: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
     ) -> None:
         """Initialize RolePropertiesGetCall instance.
 
@@ -347,7 +347,7 @@ class RolePropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
+        data_format: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -409,7 +409,7 @@ class RolePropertiesPutCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
+        body: str | dict | None,
     ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (

@@ -150,8 +150,67 @@ def _arguments(method, pos):
             continue
         if name == "pos":
             arguments[name] = pos
+        elif name == "output_type":
+            arguments[name] = None
         elif name == "xpath":
             arguments[name] = "t:child"
         else:
             arguments[name] = fn.true()
     return arguments
+
+
+@pytest.mark.parametrize("operation", ["uris", "uri_match"])
+@pytest.mark.parametrize(
+    ("output_type", "expected"),
+    [
+        (None, ["/products/a.json"]),
+        (str, ["/products/a.json"]),
+        (bytes, [b"/products/a.json"]),
+    ],
+)
+@respx.mock
+@pytest.mark.asyncio
+async def test_uri_results_keep_native_strings_or_explicit_conversion(
+    operation,
+    output_type,
+    expected,
+):
+    body, content_type = encode_multipart_mixed(
+        [
+            MultipartPart(
+                {"Content-Type": "text/plain", "X-Primitive": "string"},
+                b"/products/a.json",
+            ),
+        ],
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    if operation == "uris":
+        ml_mocker.with_request_body({"xquery": 'xquery version "1.0-ml";\ncts:uris()'})
+    else:
+        ml_mocker.with_request_body(
+            {
+                "xquery": (
+                    'xquery version "1.0-ml";\n'
+                    "declare variable $v0 as xs:string external;\n"
+                    "cts:uri-match($v0)"
+                ),
+                "vars": '{"v0": "/products/*.json"}',
+            },
+        )
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type(content_type)
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        cts = AsyncCtsService(ml.rest)
+        result = await (
+            cts.uris(output_type=output_type)
+            if operation == "uris"
+            else cts.uri_match("/products/*.json", output_type=output_type)
+        )
+
+    assert result == expected
+    assert route.call_count == 1

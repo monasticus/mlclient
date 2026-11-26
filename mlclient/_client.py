@@ -21,7 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from functools import cached_property
 from types import TracebackType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from xml.etree import ElementTree
 
 from httpx import Limits, RequestError, Response
@@ -415,7 +415,7 @@ class MLClient:
             If host discovery returns no hosts
         """
         try:
-            host_names = self.eval.xquery(_CLUSTER_HOSTS_XQUERY)
+            host_names = cast("list[str]", self.eval.xquery(_CLUSTER_HOSTS_XQUERY))
             if not host_names:
                 msg = "Cluster host discovery returned no hosts."
                 raise ValueError(msg)
@@ -424,7 +424,7 @@ class MLClient:
             else:
                 with ThreadPoolExecutor(max_workers=min(32, len(host_names))) as pool:
                     results = list(pool.map(self._get_host_health, host_names))
-            hosts = dict(zip(host_names, results))
+            hosts = dict(zip(host_names, cast("list[bool]", results)))
         except MarkLogicError as eval_error:
             try:
                 major_version = self.version.parts[0]
@@ -547,7 +547,7 @@ class MLClient:
             If the eval result is not a recognizable version string
         """
         try:
-            return MarkLogicVersion(self.eval.xquery("xdmp:version()"))
+            return MarkLogicVersion(cast("str", self.eval.xquery("xdmp:version()")))
         except MarkLogicError:
             version = self._version_from_secondaries()
             if version is not None:
@@ -573,7 +573,7 @@ class MLClient:
         with suppress(RequestError, ValueError, ElementTree.ParseError):
             admin = self.admin.get_server_config()
             if admin.is_success:
-                return MarkLogicVersion(_admin_config_version(admin.text))
+                return MarkLogicVersion(cast("str", _admin_config_version(admin.text)))
         return None
 
     def transaction(
@@ -732,13 +732,16 @@ class MLClient:
         RequestError
             If the eval request fails at the HTTP transport level.
         """
-        return self.eval.xquery(
-            _CLUSTER_HEALTH_XQUERY,
-            variables={
-                "host": host,
-                "port": MARKLOGIC_HEALTHCHECK_PORT,
-                "timeout": int(DEFAULT_HEALTH_TIMEOUT.read),
-            },
+        return cast(
+            "bool",
+            self.eval.xquery(
+                _CLUSTER_HEALTH_XQUERY,
+                variables={
+                    "host": host,
+                    "port": MARKLOGIC_HEALTHCHECK_PORT,
+                    "timeout": int(cast("float", DEFAULT_HEALTH_TIMEOUT.read)),
+                },
+            ),
         )
 
     def _get_cluster_status(self) -> Response:
@@ -1057,7 +1060,10 @@ class AsyncMLClient:
             If host discovery returns no hosts
         """
         try:
-            host_names = await self.eval.xquery(_CLUSTER_HOSTS_XQUERY)
+            host_names = cast(
+                "list[str]",
+                await self.eval.xquery(_CLUSTER_HOSTS_XQUERY),
+            )
             if not host_names:
                 msg = "Cluster host discovery returned no hosts."
                 raise ValueError(msg)
@@ -1068,7 +1074,7 @@ class AsyncMLClient:
             for result in results:
                 if isinstance(result, BaseException):
                     raise result
-            hosts = dict(zip(host_names, results))
+            hosts = dict(zip(host_names, cast("list[bool]", results)))
         except MarkLogicError as eval_error:
             try:
                 major_version = (await self.version()).parts[0]
@@ -1191,7 +1197,9 @@ class AsyncMLClient:
             If the eval result is not a recognizable version string
         """
         try:
-            return MarkLogicVersion(await self.eval.xquery("xdmp:version()"))
+            return MarkLogicVersion(
+                cast("str", await self.eval.xquery("xdmp:version()")),
+            )
         except MarkLogicError:
             version = await self._version_from_secondaries()
             if version is not None:
@@ -1217,7 +1225,7 @@ class AsyncMLClient:
         with suppress(RequestError, ValueError, ElementTree.ParseError):
             admin = await self.admin.get_server_config()
             if admin.is_success:
-                return MarkLogicVersion(_admin_config_version(admin.text))
+                return MarkLogicVersion(cast("str", _admin_config_version(admin.text)))
         return None
 
     async def transaction(
@@ -1377,13 +1385,16 @@ class AsyncMLClient:
         RequestError
             If the eval request fails at the HTTP transport level.
         """
-        return await self.eval.xquery(
-            _CLUSTER_HEALTH_XQUERY,
-            variables={
-                "host": host,
-                "port": MARKLOGIC_HEALTHCHECK_PORT,
-                "timeout": int(DEFAULT_HEALTH_TIMEOUT.read),
-            },
+        return cast(
+            "bool",
+            await self.eval.xquery(
+                _CLUSTER_HEALTH_XQUERY,
+                variables={
+                    "host": host,
+                    "port": MARKLOGIC_HEALTHCHECK_PORT,
+                    "timeout": int(cast("float", DEFAULT_HEALTH_TIMEOUT.read)),
+                },
+            ),
         )
 
     async def _get_cluster_status(self) -> Response:

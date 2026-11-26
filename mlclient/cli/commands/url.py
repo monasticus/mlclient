@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import subprocess
 import webbrowser
+from typing import ClassVar
 
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -62,14 +63,14 @@ class UrlCommand(Command):
 
     name: str = "url"
     description: str = "Prints MarkLogic browser URLs for an environment"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "target",
             "admin, qconsole (qc), manage, monitoring, or an App Server id.",
             optional=True,
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(
             description=(
                 "The ML Client environment name; repeat it to show several environments"

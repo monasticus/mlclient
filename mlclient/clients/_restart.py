@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import TYPE_CHECKING, NoReturn, Union
+from typing import TYPE_CHECKING, NoReturn, Union, cast
 from xml.etree import ElementTree
 
 import httpx
@@ -178,6 +178,7 @@ class _RestartWaiter:
         if not _RestartWaiter.is_restart_response(response):
             return {}
 
+        response = cast("Response", response)
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         if "json" in content_type:
             return _RestartWaiter._get_last_startup_by_host_from_json(
@@ -375,7 +376,7 @@ class _RestartWaiter:
             current_host_baseline.set_result(
                 restart_hosts_by_name.get(self._config.host),
             )
-            return restart_hosts_by_name
+            return dict(restart_hosts_by_name)
 
     @staticmethod
     def _get_restart_hosts_by_name(

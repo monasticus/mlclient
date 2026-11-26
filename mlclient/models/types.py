@@ -19,10 +19,10 @@ from mlclient.exceptions import InvalidLogTypeError
 class DocumentType(Enum):
     """An enumeration class representing document types."""
 
-    XML: str = "xml"
-    JSON: str = "json"
-    BINARY: str = "binary"
-    TEXT: str = "text"
+    XML = "xml"
+    JSON = "json"
+    BINARY = "binary"
+    TEXT = "text"
 
 
 class Mimetype(BaseModel):

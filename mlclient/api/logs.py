@@ -28,7 +28,7 @@ class LogsApi:
 
     def get(
         self,
-        filename: str,
+        filename: str | None,
         *,
         data_format: str | None = None,
         host: str | None = None,
@@ -93,7 +93,7 @@ class AsyncLogsApi:
 
     async def get(
         self,
-        filename: str,
+        filename: str | None,
         *,
         data_format: str | None = None,
         host: str | None = None,

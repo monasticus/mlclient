@@ -16,7 +16,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from copy import copy
 from dataclasses import dataclass
-from typing import TypeAlias, overload
+from typing import TypeAlias
+from typing import cast as type_cast
+from typing import overload
 from xml.dom import minidom
 from xml.etree.ElementTree import Element, ElementTree, tostring
 
@@ -119,7 +121,7 @@ class XqyCompilationContext:
         )
         body = re.sub(
             r"\x00\$(v[0-9]+)\x00",
-            lambda match: self._variables[match[1]],
+            lambda match: type_cast("str", self._variables[match[1]]),
             body,
         )
         source = self.bind(body)
@@ -297,18 +299,11 @@ AtomicScalar = (
 )
 PythonNode: TypeAlias = dict[str, object] | Element | ElementTree
 """Python representations of JSON object, XML element and XML document nodes."""
-NodeInput: TypeAlias = (
-    PythonNode | XqyExpression | list["NodeInput"] | tuple["NodeInput", ...] | None
-)
+NodeInput: TypeAlias = PythonNode | XqyExpression | Sequence["NodeInput"] | None
 """Python XML/JSON nodes, expressions yielding nodes, or sequences of them."""
 
 AtomicInput: TypeAlias = (
-    AtomicScalar
-    | PythonNode
-    | XqyExpression
-    | list["AtomicInput"]
-    | tuple["AtomicInput", ...]
-    | None
+    AtomicScalar | PythonNode | XqyExpression | Sequence["AtomicInput"] | None
 )
 StringInput = str | list[str] | XqyExpression | list[XqyExpression] | None
 FloatInput = float | list[float] | XqyExpression | list[XqyExpression] | None
@@ -539,7 +534,7 @@ class ModuleFunctionCall(XqyExpression):
             "xdmp:function",
             (FunctionCall("fn:QName", (namespace, name)), module_path),
         )
-        self._call = FunctionCall("xdmp:apply", (function, *args), optionals)
+        self._call = FunctionCall("xdmp:apply", (function, *args), tuple(optionals))
 
     def render(self, ctx: XqyCompilationContext) -> str:
         """Render native module invocation in the shared compilation context.
@@ -692,10 +687,10 @@ def as_expr(value: AtomicInput, *, cast: str | None = None) -> XqyExpression:
             expr = expr.xpath("*")
     elif value is None:
         expr = XqySequence(())
-    elif isinstance(value, (list, tuple)):
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         expr = XqySequence(tuple(as_expr(item) for item in value))
     else:
-        expr = _scalar(value)
+        expr = _scalar(type_cast("AtomicScalar", value))
     if isinstance(expr, AtomicValue) and expr.cast == cast:
         return expr
     if isinstance(expr, FunctionCall) and expr.fn == cast:
@@ -738,7 +733,7 @@ def _xml_node_source(root: Element) -> str:
             if element.prefix and re.fullmatch(r"ns[0-9]+", element.prefix):
                 document.renameNode(
                     element,
-                    element.namespaceURI,
+                    element.namespaceURI or "",
                     renamed[element.prefix] + ":" + element.localName,
                 )
             for attribute in list(element.attributes.values()):
@@ -754,10 +749,10 @@ def _xml_node_source(root: Element) -> str:
                 elif attribute.prefix and re.fullmatch(r"ns[0-9]+", attribute.prefix):
                     document.renameNode(
                         attribute,
-                        attribute.namespaceURI,
+                        attribute.namespaceURI or "",
                         renamed[attribute.prefix] + ":" + attribute.localName,
                     )
-        return document.documentElement.toxml()
+        return type_cast("minidom.Element", document.documentElement).toxml()
 
 
 def _validate_json_keys(value: object) -> None:
@@ -780,7 +775,7 @@ def _validate_json_keys(value: object) -> None:
                 message = "JSON object keys must be strings"
                 raise TypeError(message)
             _validate_json_keys(item)
-    elif isinstance(value, (list, tuple)):
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         for item in value:
             _validate_json_keys(item)
 

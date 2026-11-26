@@ -8,7 +8,7 @@ It exports an implementation for 'env compare' command:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -74,7 +74,7 @@ class EnvCompareCommand(Command):
 
     name: str = "env compare"
     description: str = "Compares settings across MLClient environments side by side"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "names",
             "The environment names to compare. Omit to compare them all.",
@@ -82,7 +82,7 @@ class EnvCompareCommand(Command):
             multiple=True,
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         option(
             "global",
             "g",

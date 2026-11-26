@@ -5,16 +5,16 @@ Exports sync and async HTTP clients for raw communication with MarkLogic.
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Mapping
 from types import TracebackType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import httpx
 from httpx import AsyncClient, AsyncHTTPTransport, Client, HTTPTransport, Response
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import _constants as const
+from mlclient._logging import get_logger
 from mlclient._options import UNSET, UnsetType
 from mlclient._typing import HTTPConfigOverrides
 from mlclient.auth import AuthParam
@@ -35,7 +35,7 @@ class _HttpClientOptions(HTTPConfigOverrides, total=False):
     session_owner: HttpClient | AsyncHttpClient | None
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 _RESTART_RETRY_STRATEGY = Retry(
@@ -160,7 +160,7 @@ class _HttpClientBase:
         body: str | bytes | dict | None = None,
     ) -> dict:
         """Prepare request details."""
-        request = {
+        request: dict = {
             "params": params or {},
             "headers": headers or {},
             "auth": self.config.auth,
@@ -619,7 +619,7 @@ class HttpClient(_HttpClientBase):
         if self._session_owner is not None and self._session_owner.is_connected():
             self.connect()
         if self.is_connected():
-            return self._client.request(method, url, **request)
+            return cast("Client", self._client).request(method, url, **request)
 
         logger.debug(
             "HttpClient is not connected -- "
@@ -1015,7 +1015,11 @@ class AsyncHttpClient(_HttpClientBase):
         if self._session_owner is not None and self._session_owner.is_connected():
             await self.connect()
         if self.is_connected():
-            return await self._client.request(method, url, **request)
+            return await cast("AsyncClient", self._client).request(
+                method,
+                url,
+                **request,
+            )
 
         logger.debug(
             "AsyncHttpClient is not connected -- "

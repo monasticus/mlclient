@@ -298,7 +298,7 @@ def _client_kwargs(
         "password": password,
         "auth": auth,
     }
-    kwargs = {name: value for name, value in details.items() if value is not None}
+    kwargs: dict = {name: value for name, value in details.items() if value is not None}
     if ssl is not None:
         kwargs["ssl"] = ssl if isinstance(ssl, SSLConfig) else SSLConfig(**ssl)
         kwargs.setdefault("protocol", "https")

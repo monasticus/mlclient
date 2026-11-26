@@ -15,7 +15,7 @@ import time
 from collections import deque
 from contextlib import AsyncExitStack
 from datetime import datetime
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, ClassVar
 
 from cleo.commands.command import Command
 from cleo.cursor import Cursor
@@ -127,7 +127,7 @@ class HealthCommand(Command):
     description: str = (
         "Reports whether a MarkLogic environment's HealthCheck server is up"
     )
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(
             description=(
                 "The ML Client environment name; repeat it to check several "
@@ -569,7 +569,7 @@ class _WatchTable:
         )
         table = Table(buffer, style="box")
         table.set_headers(["time", *map(Formatter.escape, self._environments)])
-        table.set_rows(rows)
+        table.set_rows([list(row) for row in rows])
         table.set_column_widths(
             [
                 _TIMESTAMP_WIDTH,

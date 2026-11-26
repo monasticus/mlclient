@@ -5,7 +5,7 @@ Builders compose expressions; services execute through the common evaluator.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict, TypeVar, cast
+from typing import TYPE_CHECKING, TypedDict, TypeVar, cast, overload
 
 from mlclient._options import UNSET, UnsetType
 from mlclient.models.results import SearchHit, ValueHit
@@ -48,8 +48,126 @@ class _NativeExecutionOptions(_ExecutionOptions, total=False):
 
 _HitT = TypeVar("_HitT", SearchHit, ValueHit)
 
+_Options = TypeVar("_Options", _ExecutionOptions, _NativeExecutionOptions)
 
-class CtsService(Cts):
+
+class _CtsConstructors:
+    """Expose shared constructors without inheriting execution builders."""
+
+    after_query = staticmethod(Cts.after_query)
+    and_not_query = staticmethod(Cts.and_not_query)
+    and_query = staticmethod(Cts.and_query)
+    before_query = staticmethod(Cts.before_query)
+    boost_query = staticmethod(Cts.boost_query)
+    box = staticmethod(Cts.box)
+    circle = staticmethod(Cts.circle)
+    collection_query = staticmethod(Cts.collection_query)
+    collection_reference = staticmethod(Cts.collection_reference)
+    column_range_query = staticmethod(Cts.column_range_query)
+    complex_polygon = staticmethod(Cts.complex_polygon)
+    confidence_order = staticmethod(Cts.confidence_order)
+    directory_query = staticmethod(Cts.directory_query)
+    document_format_query = staticmethod(Cts.document_format_query)
+    document_fragment_query = staticmethod(Cts.document_fragment_query)
+    document_order = staticmethod(Cts.document_order)
+    document_permission_query = staticmethod(Cts.document_permission_query)
+    document_query = staticmethod(Cts.document_query)
+    document_root_query = staticmethod(Cts.document_root_query)
+    element_attribute_pair_geospatial_query = staticmethod(
+        Cts.element_attribute_pair_geospatial_query,
+    )
+    element_attribute_range_query = staticmethod(Cts.element_attribute_range_query)
+    element_attribute_reference = staticmethod(Cts.element_attribute_reference)
+    element_attribute_value_query = staticmethod(Cts.element_attribute_value_query)
+    element_attribute_word_query = staticmethod(Cts.element_attribute_word_query)
+    element_child_geospatial_query = staticmethod(Cts.element_child_geospatial_query)
+    element_geospatial_query = staticmethod(Cts.element_geospatial_query)
+    element_pair_geospatial_query = staticmethod(Cts.element_pair_geospatial_query)
+    element_query = staticmethod(Cts.element_query)
+    element_range_query = staticmethod(Cts.element_range_query)
+    element_reference = staticmethod(Cts.element_reference)
+    element_value_query = staticmethod(Cts.element_value_query)
+    element_word_query = staticmethod(Cts.element_word_query)
+    entity = staticmethod(Cts.entity)
+    entity_dictionary = staticmethod(Cts.entity_dictionary)
+    entity_dictionary_parse = staticmethod(Cts.entity_dictionary_parse)
+    false_query = staticmethod(Cts.false_query)
+    field_range_query = staticmethod(Cts.field_range_query)
+    field_reference = staticmethod(Cts.field_reference)
+    field_value_query = staticmethod(Cts.field_value_query)
+    field_word_query = staticmethod(Cts.field_word_query)
+    fitness_order = staticmethod(Cts.fitness_order)
+    geospatial_attribute_pair_reference = staticmethod(
+        Cts.geospatial_attribute_pair_reference,
+    )
+    geospatial_element_child_reference = staticmethod(
+        Cts.geospatial_element_child_reference,
+    )
+    geospatial_element_pair_reference = staticmethod(
+        Cts.geospatial_element_pair_reference,
+    )
+    geospatial_element_reference = staticmethod(Cts.geospatial_element_reference)
+    geospatial_json_property_child_reference = staticmethod(
+        Cts.geospatial_json_property_child_reference,
+    )
+    geospatial_json_property_pair_reference = staticmethod(
+        Cts.geospatial_json_property_pair_reference,
+    )
+    geospatial_json_property_reference = staticmethod(
+        Cts.geospatial_json_property_reference,
+    )
+    geospatial_path_reference = staticmethod(Cts.geospatial_path_reference)
+    geospatial_region_path_reference = staticmethod(
+        Cts.geospatial_region_path_reference,
+    )
+    geospatial_region_query = staticmethod(Cts.geospatial_region_query)
+    index_order = staticmethod(Cts.index_order)
+    iri_reference = staticmethod(Cts.iri_reference)
+    json_property_child_geospatial_query = staticmethod(
+        Cts.json_property_child_geospatial_query,
+    )
+    json_property_geospatial_query = staticmethod(Cts.json_property_geospatial_query)
+    json_property_pair_geospatial_query = staticmethod(
+        Cts.json_property_pair_geospatial_query,
+    )
+    json_property_range_query = staticmethod(Cts.json_property_range_query)
+    json_property_reference = staticmethod(Cts.json_property_reference)
+    json_property_scope_query = staticmethod(Cts.json_property_scope_query)
+    json_property_value_query = staticmethod(Cts.json_property_value_query)
+    json_property_word_query = staticmethod(Cts.json_property_word_query)
+    linestring = staticmethod(Cts.linestring)
+    locks_fragment_query = staticmethod(Cts.locks_fragment_query)
+    lsqt_query = staticmethod(Cts.lsqt_query)
+    near_query = staticmethod(Cts.near_query)
+    not_in_query = staticmethod(Cts.not_in_query)
+    not_query = staticmethod(Cts.not_query)
+    or_query = staticmethod(Cts.or_query)
+    parse = staticmethod(Cts.parse)
+    path_geospatial_query = staticmethod(Cts.path_geospatial_query)
+    path_range_query = staticmethod(Cts.path_range_query)
+    path_reference = staticmethod(Cts.path_reference)
+    period = staticmethod(Cts.period)
+    period_compare_query = staticmethod(Cts.period_compare_query)
+    period_range_query = staticmethod(Cts.period_range_query)
+    point = staticmethod(Cts.point)
+    polygon = staticmethod(Cts.polygon)
+    properties_fragment_query = staticmethod(Cts.properties_fragment_query)
+    quality_order = staticmethod(Cts.quality_order)
+    query = staticmethod(Cts.query)
+    range_query = staticmethod(Cts.range_query)
+    reference_parse = staticmethod(Cts.reference_parse)
+    registered_query = staticmethod(Cts.registered_query)
+    reverse_query = staticmethod(Cts.reverse_query)
+    score_order = staticmethod(Cts.score_order)
+    similar_query = staticmethod(Cts.similar_query)
+    triple_range_query = staticmethod(Cts.triple_range_query)
+    true_query = staticmethod(Cts.true_query)
+    unordered = staticmethod(Cts.unordered)
+    uri_reference = staticmethod(Cts.uri_reference)
+    word_query = staticmethod(Cts.word_query)
+
+
+class CtsService(_CtsConstructors):
     """Executes cts search, lexicon and estimate queries via ``/v1/eval``."""
 
     def __init__(
@@ -74,7 +192,7 @@ class CtsService(Cts):
 
     def search(
         self,
-        expression: XqyExpression | list[XqyExpression] | None = None,
+        expression: str | XqyExpression | None = None,
         query: str | XqyExpression | None = None,
         *,
         options: StringInput = None,
@@ -227,6 +345,7 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
+    @overload
     def uris(
         self,
         *,
@@ -236,8 +355,36 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs: Unpack[_NativeExecutionOptions],
-    ) -> list:
+        output_type: type[bytes],
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[bytes]: ...
+
+    @overload
+    def uris(
+        self,
+        *,
+        start: str | XqyExpression | None = None,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str]: ...
+
+    def uris(
+        self,
+        *,
+        start: str | XqyExpression | None = None,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | type[bytes] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str] | list[bytes]:
         """Execute ``cts:uris`` via ``/v1/eval``.
 
         Returns values from the URI lexicon.
@@ -309,13 +456,17 @@ class CtsService(Cts):
         pos : Position | PositionRange | None
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
+        output_type : type[str] | type[bytes] | None, default None
+            Client-side conversion of URI strings to str or bytes. None keeps
+            the native URI strings; this is not a cts function argument.
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
 
         Returns
         -------
-        list[str]
+        list[str] | list[bytes]
+            URI strings by default, or bytes when output_type=bytes.
             Always a list; empty sequences return [] and singletons return [item].
 
         Raises
@@ -341,9 +492,13 @@ class CtsService(Cts):
             ),
             pos,
         )
-        return self._execute_native(
-            expr,
-            **_execution_options(self._namespaces, kwargs),
+        return cast(
+            "list[str] | list[bytes]",
+            self._execute_native(
+                expr,
+                output_type=output_type,
+                **_execution_options(self._namespaces, kwargs),
+            ),
         )
 
     def values(
@@ -635,7 +790,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:aggregate
         """
-        expr = Cts.aggregate(
+        expr: XqyExpression = Cts.aggregate(
             native_plugin=native_plugin,
             aggregate_name=aggregate_name,
             range_indexes=range_indexes,
@@ -695,7 +850,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:avg-aggregate
         """
-        expr = Cts.avg_aggregate(
+        expr: XqyExpression = Cts.avg_aggregate(
             range_index=range_index,
             options=options,
             query=query,
@@ -767,7 +922,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:classify
         """
-        expr = Cts.classify(
+        expr: XqyExpression = Cts.classify(
             data_nodes=data_nodes,
             classifier=classifier,
             options=options,
@@ -869,7 +1024,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:cluster
         """
-        expr = Cts.cluster(nodes=nodes, options=options)
+        expr: XqyExpression = Cts.cluster(nodes=nodes, options=options)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -982,7 +1137,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:collection-match
         """
-        expr = Cts.collection_match(
+        expr: XqyExpression = Cts.collection_match(
             pattern=pattern,
             options=options,
             query=query,
@@ -1101,7 +1256,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:collections
         """
-        expr = Cts.collections(
+        expr: XqyExpression = Cts.collections(
             start=start,
             options=options,
             query=query,
@@ -1154,7 +1309,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:confidence
         """
-        expr = Cts.confidence(node=node)
+        expr: XqyExpression = Cts.confidence(node=node)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -1202,7 +1357,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:contains
         """
-        expr = Cts.contains(nodes=nodes, query=query)
+        expr: XqyExpression = Cts.contains(nodes=nodes, query=query)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -1257,7 +1412,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:correlation
         """
-        expr = Cts.correlation(
+        expr: XqyExpression = Cts.correlation(
             value1=value1,
             value2=value2,
             options=options,
@@ -1315,7 +1470,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:count-aggregate
         """
-        expr = Cts.count_aggregate(
+        expr: XqyExpression = Cts.count_aggregate(
             range_index=range_index,
             options=options,
             query=query,
@@ -1376,7 +1531,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:covariance
         """
-        expr = Cts.covariance(
+        expr: XqyExpression = Cts.covariance(
             value1=value1,
             value2=value2,
             options=options,
@@ -1438,7 +1593,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:covariance-p
         """
-        expr = Cts.covariance_p(
+        expr: XqyExpression = Cts.covariance_p(
             value1=value1,
             value2=value2,
             options=options,
@@ -1487,7 +1642,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:deregister
         """
-        expr = Cts.deregister(id=id)
+        expr: XqyExpression = Cts.deregister(id=id)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -1608,7 +1763,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:distinctive-terms
         """
-        expr = Cts.distinctive_terms(nodes=nodes, options=options)
+        expr: XqyExpression = Cts.distinctive_terms(nodes=nodes, options=options)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -1759,7 +1914,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_pair_geospatial_boxes(
+        expr: XqyExpression = Cts.element_attribute_pair_geospatial_boxes(
             parent_element_names=parent_element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -1898,7 +2053,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_pair_geospatial_value_match(
+        expr: XqyExpression = Cts.element_attribute_pair_geospatial_value_match(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -2037,7 +2192,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_pair_geospatial_values(
+        expr: XqyExpression = Cts.element_attribute_pair_geospatial_values(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -2201,7 +2356,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_value_co_occurrences(
+        expr: XqyExpression = Cts.element_attribute_value_co_occurrences(
             element_name_1=element_name_1,
             attribute_name_1=attribute_name_1,
             element_name_2=element_name_2,
@@ -2372,7 +2527,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_value_geospatial_co_occurrences(
+        expr: XqyExpression = Cts.element_attribute_value_geospatial_co_occurrences(
             element_name_1=element_name_1,
             attribute_name_1=attribute_name_1,
             geo_element_name=geo_element_name,
@@ -2523,7 +2678,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-match
         """
-        expr = Cts.element_attribute_value_match(
+        expr: XqyExpression = Cts.element_attribute_value_match(
             element_names=element_names,
             attribute_names=attribute_names,
             pattern=pattern,
@@ -2678,7 +2833,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-ranges
         """
-        expr = Cts.element_attribute_value_ranges(
+        expr: XqyExpression = Cts.element_attribute_value_ranges(
             element_names=element_names,
             attribute_names=attribute_names,
             bounds=bounds,
@@ -2824,7 +2979,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-values
         """
-        expr = Cts.element_attribute_values(
+        expr: XqyExpression = Cts.element_attribute_values(
             element_names=element_names,
             attribute_names=attribute_names,
             start=start,
@@ -2942,7 +3097,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-word-match
         """
-        expr = Cts.element_attribute_word_match(
+        expr: XqyExpression = Cts.element_attribute_word_match(
             element_names=element_names,
             attribute_names=attribute_names,
             pattern=pattern,
@@ -3059,7 +3214,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-words
         """
-        expr = Cts.element_attribute_words(
+        expr: XqyExpression = Cts.element_attribute_words(
             element_names=element_names,
             attribute_names=attribute_names,
             start=start,
@@ -3224,7 +3379,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-boxes
         """
-        expr = Cts.element_child_geospatial_boxes(
+        expr: XqyExpression = Cts.element_child_geospatial_boxes(
             parent_element_names=parent_element_names,
             child_element_names=child_element_names,
             latitude_bounds=latitude_bounds,
@@ -3362,7 +3517,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_child_geospatial_value_match(
+        expr: XqyExpression = Cts.element_child_geospatial_value_match(
             element_names=element_names,
             child_names=child_names,
             pattern=pattern,
@@ -3501,7 +3656,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-values
         """
-        expr = Cts.element_child_geospatial_values(
+        expr: XqyExpression = Cts.element_child_geospatial_values(
             element_names=element_names,
             child_names=child_names,
             start=start,
@@ -3655,7 +3810,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-boxes
         """
-        expr = Cts.element_geospatial_boxes(
+        expr: XqyExpression = Cts.element_geospatial_boxes(
             element_names=element_names,
             latitude_bounds=latitude_bounds,
             longitude_bounds=longitude_bounds,
@@ -3789,7 +3944,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-value-match
         """
-        expr = Cts.element_geospatial_value_match(
+        expr: XqyExpression = Cts.element_geospatial_value_match(
             element_names=element_names,
             pattern=pattern,
             options=options,
@@ -3922,7 +4077,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-values
         """
-        expr = Cts.element_geospatial_values(
+        expr: XqyExpression = Cts.element_geospatial_values(
             element_names=element_names,
             start=start,
             options=options,
@@ -4082,7 +4237,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-boxes
         """
-        expr = Cts.element_pair_geospatial_boxes(
+        expr: XqyExpression = Cts.element_pair_geospatial_boxes(
             parent_element_names=parent_element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -4221,7 +4376,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_pair_geospatial_value_match(
+        expr: XqyExpression = Cts.element_pair_geospatial_value_match(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -4361,7 +4516,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-values
         """
-        expr = Cts.element_pair_geospatial_values(
+        expr: XqyExpression = Cts.element_pair_geospatial_values(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -4518,7 +4673,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-co-occurrences
         """
-        expr = Cts.element_value_co_occurrences(
+        expr: XqyExpression = Cts.element_value_co_occurrences(
             element_name_1=element_name_1,
             element_name_2=element_name_2,
             options=options,
@@ -4688,7 +4843,7 @@ class CtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_value_geospatial_co_occurrences(
+        expr: XqyExpression = Cts.element_value_geospatial_co_occurrences(
             element_name_1=element_name_1,
             geo_element_name=geo_element_name,
             coord_child_name_1=coord_child_name_1,
@@ -4834,7 +4989,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-match
         """
-        expr = Cts.element_value_match(
+        expr: XqyExpression = Cts.element_value_match(
             element_names=element_names,
             pattern=pattern,
             options=options,
@@ -4985,7 +5140,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-ranges
         """
-        expr = Cts.element_value_ranges(
+        expr: XqyExpression = Cts.element_value_ranges(
             element_names=element_names,
             bounds=bounds,
             options=options,
@@ -5128,7 +5283,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-values
         """
-        expr = Cts.element_values(
+        expr: XqyExpression = Cts.element_values(
             element_names=element_names,
             start=start,
             options=options,
@@ -5188,9 +5343,9 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-walk
         """
-        expr = Cts.element_walk(node=node, element=element, expr=expr)
+        operation = Cts.element_walk(node=node, element=element, expr=expr)
         return self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -5293,7 +5448,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-word-match
         """
-        expr = Cts.element_word_match(
+        expr: XqyExpression = Cts.element_word_match(
             element_names=element_names,
             pattern=pattern,
             options=options,
@@ -5406,7 +5561,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-words
         """
-        expr = Cts.element_words(
+        expr: XqyExpression = Cts.element_words(
             element_names=element_names,
             start=start,
             options=options,
@@ -5457,7 +5612,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:entity-dictionary-get
         """
-        expr = Cts.entity_dictionary_get(uri=uri)
+        expr: XqyExpression = Cts.entity_dictionary_get(uri=uri)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -5512,9 +5667,9 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:entity-highlight
         """
-        expr = Cts.entity_highlight(node=node, expr=expr, dict=dict)
+        operation = Cts.entity_highlight(node=node, expr=expr, dict=dict)
         return self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -5568,9 +5723,9 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:entity-walk
         """
-        expr = Cts.entity_walk(node=node, expr=expr, dict=dict)
+        operation = Cts.entity_walk(node=node, expr=expr, dict=dict)
         return self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -5715,7 +5870,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-co-occurrences
         """
-        expr = Cts.field_value_co_occurrences(
+        expr: XqyExpression = Cts.field_value_co_occurrences(
             field_name_1=field_name_1,
             field_name_2=field_name_2,
             options=options,
@@ -5859,7 +6014,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-match
         """
-        expr = Cts.field_value_match(
+        expr: XqyExpression = Cts.field_value_match(
             field_names=field_names,
             pattern=pattern,
             options=options,
@@ -6010,7 +6165,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-ranges
         """
-        expr = Cts.field_value_ranges(
+        expr: XqyExpression = Cts.field_value_ranges(
             field_names=field_names,
             bounds=bounds,
             options=options,
@@ -6145,7 +6300,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-values
         """
-        expr = Cts.field_values(
+        expr: XqyExpression = Cts.field_values(
             field_names=field_names,
             start=start,
             options=options,
@@ -6259,7 +6414,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-word-match
         """
-        expr = Cts.field_word_match(
+        expr: XqyExpression = Cts.field_word_match(
             field_names=field_names,
             pattern=pattern,
             options=options,
@@ -6372,7 +6527,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-words
         """
-        expr = Cts.field_words(
+        expr: XqyExpression = Cts.field_words(
             field_names=field_names,
             start=start,
             options=options,
@@ -6426,7 +6581,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:fitness
         """
-        expr = Cts.fitness(node=node)
+        expr: XqyExpression = Cts.fitness(node=node)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -6471,7 +6626,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:frequency
         """
-        expr = Cts.frequency(value=value)
+        expr: XqyExpression = Cts.frequency(value=value)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -6615,7 +6770,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-boxes
         """
-        expr = Cts.geospatial_boxes(
+        expr: XqyExpression = Cts.geospatial_boxes(
             geo_indexes=geo_indexes,
             latitude_bounds=latitude_bounds,
             longitude_bounds=longitude_bounds,
@@ -6811,7 +6966,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-co-occurrences
         """
-        expr = Cts.geospatial_co_occurrences(
+        expr: XqyExpression = Cts.geospatial_co_occurrences(
             geo_element_name_1=geo_element_name_1,
             geo_element_name_2=geo_element_name_2,
             child_1_name_1=child_1_name_1,
@@ -6875,9 +7030,9 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:highlight
         """
-        expr = Cts.highlight(node=node, query=query, expr=expr)
+        operation = Cts.highlight(node=node, query=query, expr=expr)
         return self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -6980,7 +7135,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-word-match
         """
-        expr = Cts.json_property_word_match(
+        expr: XqyExpression = Cts.json_property_word_match(
             property_names=property_names,
             pattern=pattern,
             options=options,
@@ -7093,7 +7248,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-words
         """
-        expr = Cts.json_property_words(
+        expr: XqyExpression = Cts.json_property_words(
             property_names=property_names,
             start=start,
             options=options,
@@ -7156,7 +7311,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:linear-model
         """
-        expr = Cts.linear_model(
+        expr: XqyExpression = Cts.linear_model(
             values=values,
             options=options,
             query=query,
@@ -7256,7 +7411,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:match-regions
         """
-        expr = Cts.match_regions(
+        expr: XqyExpression = Cts.match_regions(
             range_indexes=range_indexes,
             operation=operation,
             regions=regions,
@@ -7315,7 +7470,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:max
         """
-        expr = Cts.max(
+        expr: XqyExpression = Cts.max(
             range_index=range_index,
             options=options,
             query=query,
@@ -7362,7 +7517,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:median
         """
-        expr = Cts.median(arg=arg)
+        expr: XqyExpression = Cts.median(arg=arg)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7414,7 +7569,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:min
         """
-        expr = Cts.min(
+        expr: XqyExpression = Cts.min(
             range_index=range_index,
             options=options,
             query=query,
@@ -7461,7 +7616,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:part-of-speech
         """
-        expr = Cts.part_of_speech(token=token)
+        expr: XqyExpression = Cts.part_of_speech(token=token)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7524,7 +7679,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:percent-rank
         """
-        expr = Cts.percent_rank(arg=arg, value=value, options=options)
+        expr: XqyExpression = Cts.percent_rank(arg=arg, value=value, options=options)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7569,7 +7724,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:percentile
         """
-        expr = Cts.percentile(arg=arg, p=p)
+        expr: XqyExpression = Cts.percentile(arg=arg, p=p)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7617,7 +7772,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:period-compare
         """
-        expr = Cts.period_compare(
+        expr: XqyExpression = Cts.period_compare(
             period_1=period_1,
             operator=operator,
             period_2=period_2,
@@ -7666,7 +7821,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:quality
         """
-        expr = Cts.quality(node=node)
+        expr: XqyExpression = Cts.quality(node=node)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7728,7 +7883,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:rank
         """
-        expr = Cts.rank(arg=arg, value=value, options=options)
+        expr: XqyExpression = Cts.rank(arg=arg, value=value, options=options)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7770,7 +7925,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:register
         """
-        expr = Cts.register(query=query)
+        expr: XqyExpression = Cts.register(query=query)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7819,7 +7974,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:relevance-info
         """
-        expr = Cts.relevance_info(node=node, output_kind=output_kind)
+        expr: XqyExpression = Cts.relevance_info(node=node, output_kind=output_kind)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7866,7 +8021,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:remainder
         """
-        expr = Cts.remainder(node=node)
+        expr: XqyExpression = Cts.remainder(node=node)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7911,7 +8066,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:score
         """
-        expr = Cts.score(node=node)
+        expr: XqyExpression = Cts.score(node=node)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -7964,7 +8119,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:stddev
         """
-        expr = Cts.stddev(
+        expr: XqyExpression = Cts.stddev(
             range_index=range_index,
             options=options,
             query=query,
@@ -8022,7 +8177,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:stddev-p
         """
-        expr = Cts.stddev_p(
+        expr: XqyExpression = Cts.stddev_p(
             range_index=range_index,
             options=options,
             query=query,
@@ -8078,7 +8233,11 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:stem
         """
-        expr = Cts.stem(text=text, language=language, part_of_speech=part_of_speech)
+        expr: XqyExpression = Cts.stem(
+            text=text,
+            language=language,
+            part_of_speech=part_of_speech,
+        )
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8130,7 +8289,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:sum-aggregate
         """
-        expr = Cts.sum_aggregate(
+        expr: XqyExpression = Cts.sum_aggregate(
             range_index=range_index,
             options=options,
             query=query,
@@ -8191,7 +8350,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:thresholds
         """
-        expr = Cts.thresholds(
+        expr: XqyExpression = Cts.thresholds(
             computed_labels=computed_labels,
             known_labels=known_labels,
             recall_weight=recall_weight,
@@ -8247,7 +8406,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:tokenize
         """
-        expr = Cts.tokenize(text=text, language=language, field=field)
+        expr: XqyExpression = Cts.tokenize(text=text, language=language, field=field)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8374,7 +8533,11 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:train
         """
-        expr = Cts.train(training_nodes=training_nodes, labels=labels, options=options)
+        expr: XqyExpression = Cts.train(
+            training_nodes=training_nodes,
+            labels=labels,
+            options=options,
+        )
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8429,7 +8592,10 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:triple-value-statistics
         """
-        expr = Cts.triple_value_statistics(values=values, forest_ids=forest_ids)
+        expr: XqyExpression = Cts.triple_value_statistics(
+            values=values,
+            forest_ids=forest_ids,
+        )
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8563,7 +8729,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:triples
         """
-        expr = Cts.triples(
+        expr: XqyExpression = Cts.triples(
             subject=subject,
             predicate=predicate,
             object=object,
@@ -8577,6 +8743,7 @@ class CtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
+    @overload
     def uri_match(
         self,
         pattern: str | XqyExpression,
@@ -8586,8 +8753,36 @@ class CtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs: Unpack[_NativeExecutionOptions],
-    ) -> list:
+        output_type: type[bytes],
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[bytes]: ...
+
+    @overload
+    def uri_match(
+        self,
+        pattern: str | XqyExpression,
+        *,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str]: ...
+
+    def uri_match(
+        self,
+        pattern: str | XqyExpression,
+        *,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | type[bytes] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str] | list[bytes]:
         """Execute ``cts:uri-match`` via ``/v1/eval``.
 
         Returns values from the URI lexicon that match the specified wildcard
@@ -8661,13 +8856,17 @@ class CtsService(Cts):
         pos : Position | PositionRange | None
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
+        output_type : type[str] | type[bytes] | None, default None
+            Client-side conversion of URI strings to str or bytes. None keeps
+            the native URI strings; this is not a cts function argument.
         kwargs : dict
             Execution keywords: database, txid, output_type, timeout and namespaces.
 
         Returns
         -------
-        list[str]
-            A list of URI strings; empty when no URIs match.
+        list[str] | list[bytes]
+            URI strings by default, or bytes when output_type=bytes.
+            Empty when no URIs match.
 
         Raises
         ------
@@ -8684,7 +8883,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:uri-match
         """
-        expr = Cts.uri_match(
+        expr: XqyExpression = Cts.uri_match(
             pattern=pattern,
             options=options,
             query=query,
@@ -8692,9 +8891,13 @@ class CtsService(Cts):
             forest_ids=forest_ids,
         )
         expr = _positioned(expr, pos)
-        return self._execute_native(
-            expr,
-            **_execution_options(self._namespaces, kwargs),
+        return cast(
+            "list[str] | list[bytes]",
+            self._execute_native(
+                expr,
+                output_type=output_type,
+                **_execution_options(self._namespaces, kwargs),
+            ),
         )
 
     def valid_document_patch_path(
@@ -8740,7 +8943,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-document-patch-path
         """
-        expr = Cts.valid_document_patch_path(string=string, map=map)
+        expr: XqyExpression = Cts.valid_document_patch_path(string=string, map=map)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8789,7 +8992,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-extract-path
         """
-        expr = Cts.valid_extract_path(string=string, map=map)
+        expr: XqyExpression = Cts.valid_extract_path(string=string, map=map)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8835,7 +9038,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-index-path
         """
-        expr = Cts.valid_index_path(string=string, ignorens=ignorens)
+        expr: XqyExpression = Cts.valid_index_path(string=string, ignorens=ignorens)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8884,7 +9087,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-optic-path
         """
-        expr = Cts.valid_optic_path(string=string, map=map)
+        expr: XqyExpression = Cts.valid_optic_path(string=string, map=map)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -8933,7 +9136,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-tde-context
         """
-        expr = Cts.valid_tde_context(string=string, map=map)
+        expr: XqyExpression = Cts.valid_tde_context(string=string, map=map)
         return self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -9060,7 +9263,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-co-occurrences
         """
-        expr = Cts.value_co_occurrences(
+        expr: XqyExpression = Cts.value_co_occurrences(
             range_index_1=range_index_1,
             range_index_2=range_index_2,
             options=options,
@@ -9193,7 +9396,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-match
         """
-        expr = Cts.value_match(
+        expr: XqyExpression = Cts.value_match(
             range_indexes=range_indexes,
             pattern=pattern,
             options=options,
@@ -9333,7 +9536,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-ranges
         """
-        expr = Cts.value_ranges(
+        expr: XqyExpression = Cts.value_ranges(
             range_indexes=range_indexes,
             bounds=bounds,
             options=options,
@@ -9460,7 +9663,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-tuples
         """
-        expr = Cts.value_tuples(
+        expr: XqyExpression = Cts.value_tuples(
             range_indexes=range_indexes,
             options=options,
             query=query,
@@ -9518,7 +9721,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:variance
         """
-        expr = Cts.variance(
+        expr: XqyExpression = Cts.variance(
             range_index=range_index,
             options=options,
             query=query,
@@ -9576,7 +9779,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:variance-p
         """
-        expr = Cts.variance_p(
+        expr: XqyExpression = Cts.variance_p(
             range_index=range_index,
             options=options,
             query=query,
@@ -9634,9 +9837,9 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:walk
         """
-        expr = Cts.walk(node=node, query=query, expr=expr)
+        operation = Cts.walk(node=node, query=query, expr=expr)
         return self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -9735,7 +9938,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:word-match
         """
-        expr = Cts.word_match(
+        expr: XqyExpression = Cts.word_match(
             pattern=pattern,
             options=options,
             query=query,
@@ -9844,7 +10047,7 @@ class CtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:words
         """
-        expr = Cts.words(
+        expr: XqyExpression = Cts.words(
             start=start,
             options=options,
             query=query,
@@ -9970,7 +10173,7 @@ class CtsService(Cts):
         return _result_pairs(response, model)
 
 
-class AsyncCtsService(Cts):
+class AsyncCtsService(_CtsConstructors):
     """Async execution of cts search, lexicon and estimate queries via ``/v1/eval``."""
 
     def __init__(
@@ -9995,7 +10198,7 @@ class AsyncCtsService(Cts):
 
     async def search(
         self,
-        expression: XqyExpression | list[XqyExpression] | None = None,
+        expression: str | XqyExpression | None = None,
         query: str | XqyExpression | None = None,
         *,
         options: StringInput = None,
@@ -10148,6 +10351,7 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
+    @overload
     async def uris(
         self,
         *,
@@ -10157,8 +10361,36 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs: Unpack[_NativeExecutionOptions],
-    ) -> list:
+        output_type: type[bytes],
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[bytes]: ...
+
+    @overload
+    async def uris(
+        self,
+        *,
+        start: str | XqyExpression | None = None,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str]: ...
+
+    async def uris(
+        self,
+        *,
+        start: str | XqyExpression | None = None,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | type[bytes] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str] | list[bytes]:
         """Execute ``cts:uris`` via ``/v1/eval``.
 
         Returns values from the URI lexicon.
@@ -10230,13 +10462,17 @@ class AsyncCtsService(Cts):
         pos : Position | PositionRange | None
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
+        output_type : type[str] | type[bytes] | None, default None
+            Client-side conversion of URI strings to str or bytes. None keeps
+            the native URI strings; this is not a cts function argument.
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
 
         Returns
         -------
-        list[str]
+        list[str] | list[bytes]
+            URI strings by default, or bytes when output_type=bytes.
             Always a list; empty sequences return [] and singletons return [item].
 
         Raises
@@ -10262,9 +10498,13 @@ class AsyncCtsService(Cts):
             ),
             pos,
         )
-        return await self._execute_native(
-            expr,
-            **_execution_options(self._namespaces, kwargs),
+        return cast(
+            "list[str] | list[bytes]",
+            await self._execute_native(
+                expr,
+                output_type=output_type,
+                **_execution_options(self._namespaces, kwargs),
+            ),
         )
 
     async def values(
@@ -10556,7 +10796,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:aggregate
         """
-        expr = Cts.aggregate(
+        expr: XqyExpression = Cts.aggregate(
             native_plugin=native_plugin,
             aggregate_name=aggregate_name,
             range_indexes=range_indexes,
@@ -10616,7 +10856,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:avg-aggregate
         """
-        expr = Cts.avg_aggregate(
+        expr: XqyExpression = Cts.avg_aggregate(
             range_index=range_index,
             options=options,
             query=query,
@@ -10688,7 +10928,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:classify
         """
-        expr = Cts.classify(
+        expr: XqyExpression = Cts.classify(
             data_nodes=data_nodes,
             classifier=classifier,
             options=options,
@@ -10790,7 +11030,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:cluster
         """
-        expr = Cts.cluster(nodes=nodes, options=options)
+        expr: XqyExpression = Cts.cluster(nodes=nodes, options=options)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -10903,7 +11143,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:collection-match
         """
-        expr = Cts.collection_match(
+        expr: XqyExpression = Cts.collection_match(
             pattern=pattern,
             options=options,
             query=query,
@@ -11022,7 +11262,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:collections
         """
-        expr = Cts.collections(
+        expr: XqyExpression = Cts.collections(
             start=start,
             options=options,
             query=query,
@@ -11075,7 +11315,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:confidence
         """
-        expr = Cts.confidence(node=node)
+        expr: XqyExpression = Cts.confidence(node=node)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -11123,7 +11363,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:contains
         """
-        expr = Cts.contains(nodes=nodes, query=query)
+        expr: XqyExpression = Cts.contains(nodes=nodes, query=query)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -11178,7 +11418,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:correlation
         """
-        expr = Cts.correlation(
+        expr: XqyExpression = Cts.correlation(
             value1=value1,
             value2=value2,
             options=options,
@@ -11236,7 +11476,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:count-aggregate
         """
-        expr = Cts.count_aggregate(
+        expr: XqyExpression = Cts.count_aggregate(
             range_index=range_index,
             options=options,
             query=query,
@@ -11297,7 +11537,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:covariance
         """
-        expr = Cts.covariance(
+        expr: XqyExpression = Cts.covariance(
             value1=value1,
             value2=value2,
             options=options,
@@ -11359,7 +11599,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:covariance-p
         """
-        expr = Cts.covariance_p(
+        expr: XqyExpression = Cts.covariance_p(
             value1=value1,
             value2=value2,
             options=options,
@@ -11408,7 +11648,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:deregister
         """
-        expr = Cts.deregister(id=id)
+        expr: XqyExpression = Cts.deregister(id=id)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -11529,7 +11769,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:distinctive-terms
         """
-        expr = Cts.distinctive_terms(nodes=nodes, options=options)
+        expr: XqyExpression = Cts.distinctive_terms(nodes=nodes, options=options)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -11680,7 +11920,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_pair_geospatial_boxes(
+        expr: XqyExpression = Cts.element_attribute_pair_geospatial_boxes(
             parent_element_names=parent_element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -11819,7 +12059,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_pair_geospatial_value_match(
+        expr: XqyExpression = Cts.element_attribute_pair_geospatial_value_match(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -11958,7 +12198,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_pair_geospatial_values(
+        expr: XqyExpression = Cts.element_attribute_pair_geospatial_values(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -12122,7 +12362,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_value_co_occurrences(
+        expr: XqyExpression = Cts.element_attribute_value_co_occurrences(
             element_name_1=element_name_1,
             attribute_name_1=attribute_name_1,
             element_name_2=element_name_2,
@@ -12293,7 +12533,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_attribute_value_geospatial_co_occurrences(
+        expr: XqyExpression = Cts.element_attribute_value_geospatial_co_occurrences(
             element_name_1=element_name_1,
             attribute_name_1=attribute_name_1,
             geo_element_name=geo_element_name,
@@ -12444,7 +12684,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-match
         """
-        expr = Cts.element_attribute_value_match(
+        expr: XqyExpression = Cts.element_attribute_value_match(
             element_names=element_names,
             attribute_names=attribute_names,
             pattern=pattern,
@@ -12599,7 +12839,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-ranges
         """
-        expr = Cts.element_attribute_value_ranges(
+        expr: XqyExpression = Cts.element_attribute_value_ranges(
             element_names=element_names,
             attribute_names=attribute_names,
             bounds=bounds,
@@ -12745,7 +12985,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-values
         """
-        expr = Cts.element_attribute_values(
+        expr: XqyExpression = Cts.element_attribute_values(
             element_names=element_names,
             attribute_names=attribute_names,
             start=start,
@@ -12863,7 +13103,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-word-match
         """
-        expr = Cts.element_attribute_word_match(
+        expr: XqyExpression = Cts.element_attribute_word_match(
             element_names=element_names,
             attribute_names=attribute_names,
             pattern=pattern,
@@ -12980,7 +13220,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-words
         """
-        expr = Cts.element_attribute_words(
+        expr: XqyExpression = Cts.element_attribute_words(
             element_names=element_names,
             attribute_names=attribute_names,
             start=start,
@@ -13145,7 +13385,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-boxes
         """
-        expr = Cts.element_child_geospatial_boxes(
+        expr: XqyExpression = Cts.element_child_geospatial_boxes(
             parent_element_names=parent_element_names,
             child_element_names=child_element_names,
             latitude_bounds=latitude_bounds,
@@ -13283,7 +13523,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_child_geospatial_value_match(
+        expr: XqyExpression = Cts.element_child_geospatial_value_match(
             element_names=element_names,
             child_names=child_names,
             pattern=pattern,
@@ -13422,7 +13662,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-values
         """
-        expr = Cts.element_child_geospatial_values(
+        expr: XqyExpression = Cts.element_child_geospatial_values(
             element_names=element_names,
             child_names=child_names,
             start=start,
@@ -13576,7 +13816,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-boxes
         """
-        expr = Cts.element_geospatial_boxes(
+        expr: XqyExpression = Cts.element_geospatial_boxes(
             element_names=element_names,
             latitude_bounds=latitude_bounds,
             longitude_bounds=longitude_bounds,
@@ -13710,7 +13950,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-value-match
         """
-        expr = Cts.element_geospatial_value_match(
+        expr: XqyExpression = Cts.element_geospatial_value_match(
             element_names=element_names,
             pattern=pattern,
             options=options,
@@ -13843,7 +14083,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-values
         """
-        expr = Cts.element_geospatial_values(
+        expr: XqyExpression = Cts.element_geospatial_values(
             element_names=element_names,
             start=start,
             options=options,
@@ -14003,7 +14243,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-boxes
         """
-        expr = Cts.element_pair_geospatial_boxes(
+        expr: XqyExpression = Cts.element_pair_geospatial_boxes(
             parent_element_names=parent_element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -14142,7 +14382,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_pair_geospatial_value_match(
+        expr: XqyExpression = Cts.element_pair_geospatial_value_match(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -14282,7 +14522,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-values
         """
-        expr = Cts.element_pair_geospatial_values(
+        expr: XqyExpression = Cts.element_pair_geospatial_values(
             element_names=element_names,
             latitude_names=latitude_names,
             longitude_names=longitude_names,
@@ -14439,7 +14679,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-co-occurrences
         """
-        expr = Cts.element_value_co_occurrences(
+        expr: XqyExpression = Cts.element_value_co_occurrences(
             element_name_1=element_name_1,
             element_name_2=element_name_2,
             options=options,
@@ -14609,7 +14849,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference:
         """
-        expr = Cts.element_value_geospatial_co_occurrences(
+        expr: XqyExpression = Cts.element_value_geospatial_co_occurrences(
             element_name_1=element_name_1,
             geo_element_name=geo_element_name,
             coord_child_name_1=coord_child_name_1,
@@ -14755,7 +14995,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-match
         """
-        expr = Cts.element_value_match(
+        expr: XqyExpression = Cts.element_value_match(
             element_names=element_names,
             pattern=pattern,
             options=options,
@@ -14906,7 +15146,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-ranges
         """
-        expr = Cts.element_value_ranges(
+        expr: XqyExpression = Cts.element_value_ranges(
             element_names=element_names,
             bounds=bounds,
             options=options,
@@ -15049,7 +15289,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-values
         """
-        expr = Cts.element_values(
+        expr: XqyExpression = Cts.element_values(
             element_names=element_names,
             start=start,
             options=options,
@@ -15109,9 +15349,9 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-walk
         """
-        expr = Cts.element_walk(node=node, element=element, expr=expr)
+        operation = Cts.element_walk(node=node, element=element, expr=expr)
         return await self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -15214,7 +15454,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-word-match
         """
-        expr = Cts.element_word_match(
+        expr: XqyExpression = Cts.element_word_match(
             element_names=element_names,
             pattern=pattern,
             options=options,
@@ -15327,7 +15567,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:element-words
         """
-        expr = Cts.element_words(
+        expr: XqyExpression = Cts.element_words(
             element_names=element_names,
             start=start,
             options=options,
@@ -15378,7 +15618,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:entity-dictionary-get
         """
-        expr = Cts.entity_dictionary_get(uri=uri)
+        expr: XqyExpression = Cts.entity_dictionary_get(uri=uri)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -15433,9 +15673,9 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:entity-highlight
         """
-        expr = Cts.entity_highlight(node=node, expr=expr, dict=dict)
+        operation = Cts.entity_highlight(node=node, expr=expr, dict=dict)
         return await self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -15489,9 +15729,9 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:entity-walk
         """
-        expr = Cts.entity_walk(node=node, expr=expr, dict=dict)
+        operation = Cts.entity_walk(node=node, expr=expr, dict=dict)
         return await self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -15636,7 +15876,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-co-occurrences
         """
-        expr = Cts.field_value_co_occurrences(
+        expr: XqyExpression = Cts.field_value_co_occurrences(
             field_name_1=field_name_1,
             field_name_2=field_name_2,
             options=options,
@@ -15780,7 +16020,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-match
         """
-        expr = Cts.field_value_match(
+        expr: XqyExpression = Cts.field_value_match(
             field_names=field_names,
             pattern=pattern,
             options=options,
@@ -15931,7 +16171,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-ranges
         """
-        expr = Cts.field_value_ranges(
+        expr: XqyExpression = Cts.field_value_ranges(
             field_names=field_names,
             bounds=bounds,
             options=options,
@@ -16066,7 +16306,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-values
         """
-        expr = Cts.field_values(
+        expr: XqyExpression = Cts.field_values(
             field_names=field_names,
             start=start,
             options=options,
@@ -16180,7 +16420,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-word-match
         """
-        expr = Cts.field_word_match(
+        expr: XqyExpression = Cts.field_word_match(
             field_names=field_names,
             pattern=pattern,
             options=options,
@@ -16293,7 +16533,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:field-words
         """
-        expr = Cts.field_words(
+        expr: XqyExpression = Cts.field_words(
             field_names=field_names,
             start=start,
             options=options,
@@ -16347,7 +16587,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:fitness
         """
-        expr = Cts.fitness(node=node)
+        expr: XqyExpression = Cts.fitness(node=node)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -16392,7 +16632,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:frequency
         """
-        expr = Cts.frequency(value=value)
+        expr: XqyExpression = Cts.frequency(value=value)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -16536,7 +16776,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-boxes
         """
-        expr = Cts.geospatial_boxes(
+        expr: XqyExpression = Cts.geospatial_boxes(
             geo_indexes=geo_indexes,
             latitude_bounds=latitude_bounds,
             longitude_bounds=longitude_bounds,
@@ -16732,7 +16972,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-co-occurrences
         """
-        expr = Cts.geospatial_co_occurrences(
+        expr: XqyExpression = Cts.geospatial_co_occurrences(
             geo_element_name_1=geo_element_name_1,
             geo_element_name_2=geo_element_name_2,
             child_1_name_1=child_1_name_1,
@@ -16796,9 +17036,9 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:highlight
         """
-        expr = Cts.highlight(node=node, query=query, expr=expr)
+        operation = Cts.highlight(node=node, query=query, expr=expr)
         return await self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -16901,7 +17141,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-word-match
         """
-        expr = Cts.json_property_word_match(
+        expr: XqyExpression = Cts.json_property_word_match(
             property_names=property_names,
             pattern=pattern,
             options=options,
@@ -17014,7 +17254,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-words
         """
-        expr = Cts.json_property_words(
+        expr: XqyExpression = Cts.json_property_words(
             property_names=property_names,
             start=start,
             options=options,
@@ -17077,7 +17317,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:linear-model
         """
-        expr = Cts.linear_model(
+        expr: XqyExpression = Cts.linear_model(
             values=values,
             options=options,
             query=query,
@@ -17177,7 +17417,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:match-regions
         """
-        expr = Cts.match_regions(
+        expr: XqyExpression = Cts.match_regions(
             range_indexes=range_indexes,
             operation=operation,
             regions=regions,
@@ -17236,7 +17476,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:max
         """
-        expr = Cts.max(
+        expr: XqyExpression = Cts.max(
             range_index=range_index,
             options=options,
             query=query,
@@ -17283,7 +17523,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:median
         """
-        expr = Cts.median(arg=arg)
+        expr: XqyExpression = Cts.median(arg=arg)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17335,7 +17575,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:min
         """
-        expr = Cts.min(
+        expr: XqyExpression = Cts.min(
             range_index=range_index,
             options=options,
             query=query,
@@ -17382,7 +17622,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:part-of-speech
         """
-        expr = Cts.part_of_speech(token=token)
+        expr: XqyExpression = Cts.part_of_speech(token=token)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17445,7 +17685,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:percent-rank
         """
-        expr = Cts.percent_rank(arg=arg, value=value, options=options)
+        expr: XqyExpression = Cts.percent_rank(arg=arg, value=value, options=options)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17490,7 +17730,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:percentile
         """
-        expr = Cts.percentile(arg=arg, p=p)
+        expr: XqyExpression = Cts.percentile(arg=arg, p=p)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17538,7 +17778,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:period-compare
         """
-        expr = Cts.period_compare(
+        expr: XqyExpression = Cts.period_compare(
             period_1=period_1,
             operator=operator,
             period_2=period_2,
@@ -17587,7 +17827,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:quality
         """
-        expr = Cts.quality(node=node)
+        expr: XqyExpression = Cts.quality(node=node)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17649,7 +17889,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:rank
         """
-        expr = Cts.rank(arg=arg, value=value, options=options)
+        expr: XqyExpression = Cts.rank(arg=arg, value=value, options=options)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17691,7 +17931,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:register
         """
-        expr = Cts.register(query=query)
+        expr: XqyExpression = Cts.register(query=query)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17740,7 +17980,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:relevance-info
         """
-        expr = Cts.relevance_info(node=node, output_kind=output_kind)
+        expr: XqyExpression = Cts.relevance_info(node=node, output_kind=output_kind)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17787,7 +18027,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:remainder
         """
-        expr = Cts.remainder(node=node)
+        expr: XqyExpression = Cts.remainder(node=node)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17832,7 +18072,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:score
         """
-        expr = Cts.score(node=node)
+        expr: XqyExpression = Cts.score(node=node)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -17885,7 +18125,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:stddev
         """
-        expr = Cts.stddev(
+        expr: XqyExpression = Cts.stddev(
             range_index=range_index,
             options=options,
             query=query,
@@ -17943,7 +18183,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:stddev-p
         """
-        expr = Cts.stddev_p(
+        expr: XqyExpression = Cts.stddev_p(
             range_index=range_index,
             options=options,
             query=query,
@@ -17999,7 +18239,11 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:stem
         """
-        expr = Cts.stem(text=text, language=language, part_of_speech=part_of_speech)
+        expr: XqyExpression = Cts.stem(
+            text=text,
+            language=language,
+            part_of_speech=part_of_speech,
+        )
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18051,7 +18295,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:sum-aggregate
         """
-        expr = Cts.sum_aggregate(
+        expr: XqyExpression = Cts.sum_aggregate(
             range_index=range_index,
             options=options,
             query=query,
@@ -18112,7 +18356,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:thresholds
         """
-        expr = Cts.thresholds(
+        expr: XqyExpression = Cts.thresholds(
             computed_labels=computed_labels,
             known_labels=known_labels,
             recall_weight=recall_weight,
@@ -18168,7 +18412,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:tokenize
         """
-        expr = Cts.tokenize(text=text, language=language, field=field)
+        expr: XqyExpression = Cts.tokenize(text=text, language=language, field=field)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18295,7 +18539,11 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:train
         """
-        expr = Cts.train(training_nodes=training_nodes, labels=labels, options=options)
+        expr: XqyExpression = Cts.train(
+            training_nodes=training_nodes,
+            labels=labels,
+            options=options,
+        )
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18350,7 +18598,10 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:triple-value-statistics
         """
-        expr = Cts.triple_value_statistics(values=values, forest_ids=forest_ids)
+        expr: XqyExpression = Cts.triple_value_statistics(
+            values=values,
+            forest_ids=forest_ids,
+        )
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18484,7 +18735,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:triples
         """
-        expr = Cts.triples(
+        expr: XqyExpression = Cts.triples(
             subject=subject,
             predicate=predicate,
             object=object,
@@ -18498,6 +18749,7 @@ class AsyncCtsService(Cts):
             **_execution_options(self._namespaces, kwargs),
         )
 
+    @overload
     async def uri_match(
         self,
         pattern: str | XqyExpression,
@@ -18507,8 +18759,36 @@ class AsyncCtsService(Cts):
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         pos: Position | PositionRange | None = None,
-        **kwargs: Unpack[_NativeExecutionOptions],
-    ) -> list:
+        output_type: type[bytes],
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[bytes]: ...
+
+    @overload
+    async def uri_match(
+        self,
+        pattern: str | XqyExpression,
+        *,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str]: ...
+
+    async def uri_match(
+        self,
+        pattern: str | XqyExpression,
+        *,
+        options: StringInput = None,
+        query: str | XqyExpression | None = None,
+        quality_weight: float | XqyExpression | None = None,
+        forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
+        pos: Position | PositionRange | None = None,
+        output_type: type[str] | type[bytes] | None = None,
+        **kwargs: Unpack[_ExecutionOptions],
+    ) -> list[str] | list[bytes]:
         """Execute ``cts:uri-match`` via ``/v1/eval``.
 
         Returns values from the URI lexicon that match the specified wildcard
@@ -18582,13 +18862,17 @@ class AsyncCtsService(Cts):
         pos : Position | PositionRange | None
             One-based position, or an inclusive two-item [start, end] range.
             Positions accept positive integers or fn.last().
+        output_type : type[str] | type[bytes] | None, default None
+            Client-side conversion of URI strings to str or bytes. None keeps
+            the native URI strings; this is not a cts function argument.
         kwargs : dict
             Execution keywords: database, txid, output_type, timeout and namespaces.
 
         Returns
         -------
-        list[str]
-            A list of URI strings; empty when no URIs match.
+        list[str] | list[bytes]
+            URI strings by default, or bytes when output_type=bytes.
+            Empty when no URIs match.
 
         Raises
         ------
@@ -18605,7 +18889,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:uri-match
         """
-        expr = Cts.uri_match(
+        expr: XqyExpression = Cts.uri_match(
             pattern=pattern,
             options=options,
             query=query,
@@ -18613,9 +18897,13 @@ class AsyncCtsService(Cts):
             forest_ids=forest_ids,
         )
         expr = _positioned(expr, pos)
-        return await self._execute_native(
-            expr,
-            **_execution_options(self._namespaces, kwargs),
+        return cast(
+            "list[str] | list[bytes]",
+            await self._execute_native(
+                expr,
+                output_type=output_type,
+                **_execution_options(self._namespaces, kwargs),
+            ),
         )
 
     async def valid_document_patch_path(
@@ -18661,7 +18949,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-document-patch-path
         """
-        expr = Cts.valid_document_patch_path(string=string, map=map)
+        expr: XqyExpression = Cts.valid_document_patch_path(string=string, map=map)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18710,7 +18998,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-extract-path
         """
-        expr = Cts.valid_extract_path(string=string, map=map)
+        expr: XqyExpression = Cts.valid_extract_path(string=string, map=map)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18756,7 +19044,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-index-path
         """
-        expr = Cts.valid_index_path(string=string, ignorens=ignorens)
+        expr: XqyExpression = Cts.valid_index_path(string=string, ignorens=ignorens)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18805,7 +19093,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-optic-path
         """
-        expr = Cts.valid_optic_path(string=string, map=map)
+        expr: XqyExpression = Cts.valid_optic_path(string=string, map=map)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18854,7 +19142,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:valid-tde-context
         """
-        expr = Cts.valid_tde_context(string=string, map=map)
+        expr: XqyExpression = Cts.valid_tde_context(string=string, map=map)
         return await self._execute_native(
             expr,
             **_execution_options(self._namespaces, kwargs),
@@ -18981,7 +19269,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-co-occurrences
         """
-        expr = Cts.value_co_occurrences(
+        expr: XqyExpression = Cts.value_co_occurrences(
             range_index_1=range_index_1,
             range_index_2=range_index_2,
             options=options,
@@ -19114,7 +19402,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-match
         """
-        expr = Cts.value_match(
+        expr: XqyExpression = Cts.value_match(
             range_indexes=range_indexes,
             pattern=pattern,
             options=options,
@@ -19254,7 +19542,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-ranges
         """
-        expr = Cts.value_ranges(
+        expr: XqyExpression = Cts.value_ranges(
             range_indexes=range_indexes,
             bounds=bounds,
             options=options,
@@ -19381,7 +19669,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:value-tuples
         """
-        expr = Cts.value_tuples(
+        expr: XqyExpression = Cts.value_tuples(
             range_indexes=range_indexes,
             options=options,
             query=query,
@@ -19439,7 +19727,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:variance
         """
-        expr = Cts.variance(
+        expr: XqyExpression = Cts.variance(
             range_index=range_index,
             options=options,
             query=query,
@@ -19497,7 +19785,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:variance-p
         """
-        expr = Cts.variance_p(
+        expr: XqyExpression = Cts.variance_p(
             range_index=range_index,
             options=options,
             query=query,
@@ -19555,9 +19843,9 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:walk
         """
-        expr = Cts.walk(node=node, query=query, expr=expr)
+        operation = Cts.walk(node=node, query=query, expr=expr)
         return await self._execute_native(
-            expr,
+            operation,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -19656,7 +19944,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:word-match
         """
-        expr = Cts.word_match(
+        expr: XqyExpression = Cts.word_match(
             pattern=pattern,
             options=options,
             query=query,
@@ -19765,7 +20053,7 @@ class AsyncCtsService(Cts):
         -----
         Native reference: https://docs.marklogic.com/cts:words
         """
-        expr = Cts.words(
+        expr: XqyExpression = Cts.words(
             start=start,
             options=options,
             query=query,
@@ -20049,8 +20337,8 @@ def _positioned(
 
 def _execution_options(
     default_namespaces: dict[str, str],
-    options: _ExecutionOptions,
-) -> _ExecutionOptions:
+    options: _Options,
+) -> _Options:
     """Merge per-call namespace overrides without changing service defaults.
 
     Parameters
@@ -20067,10 +20355,15 @@ def _execution_options(
         Independent options with namespace overrides applied by prefix; every
         other option, output_type included, is kept.
     """
-    return {
-        **options,
-        "namespaces": {
-            **default_namespaces,
-            **namespace_bindings(options.get("namespaces")),
+    return cast(
+        "_Options",
+        {
+            **options,
+            "namespaces": {
+                **default_namespaces,
+                **namespace_bindings(
+                    cast("Mapping[str, str] | None", options.get("namespaces")),
+                ),
+            },
         },
-    }
+    )

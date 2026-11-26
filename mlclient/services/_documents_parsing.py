@@ -7,7 +7,7 @@ responses; this module turns them into Document instances.
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from mlclient import _constants as constants
 from mlclient.models.document_parts import Category, DocumentsDisposition
@@ -228,7 +228,9 @@ class DocumentsReader:
         else:
             yield {
                 "uri": uri,
-                "metadata": cls._pre_format_metadata(parsed_resp_body),
+                "metadata": cls._pre_format_metadata(
+                    cast("str | bytes", parsed_resp_body),
+                ),
             }
 
     @classmethod
@@ -273,7 +275,7 @@ class DocumentsReader:
         expect_metadata = origin_category and any(
             cat.value in origin_category for cat in Category if cat != Category.CONTENT
         )
-        return expect_content, expect_metadata
+        return expect_content, bool(expect_metadata)
 
     @classmethod
     def _get_partial_data(
@@ -303,7 +305,7 @@ class DocumentsReader:
             }
         return {
             "uri": content_disp.filename,
-            "metadata": cls._pre_format_metadata(parsed_resp_body),
+            "metadata": cls._pre_format_metadata(cast("str | bytes", parsed_resp_body)),
         }
 
     @classmethod
@@ -351,7 +353,7 @@ class DocumentsReader:
         metadata = Metadata(raw=raw_metadata) if raw_metadata else None
 
         if content is None:
-            return Document.metadata_update(uri, metadata or Metadata())
+            return Document.metadata_update(cast("str", uri), metadata or Metadata())
 
         return Document.create(
             content=content,

@@ -10,7 +10,7 @@ from dataclasses import dataclass, field, fields
 from datetime import date, datetime
 from decimal import Decimal
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar, Literal, TypeVar, get_args
+from typing import TYPE_CHECKING, ClassVar, Literal, TypeVar, cast, get_args, overload
 from xml.etree.ElementTree import Element as XmlElement
 from xml.etree.ElementTree import register_namespace
 
@@ -139,6 +139,7 @@ class _Validated:
     ``_VALUE_FIELDS`` hold search values, which may be INF or NaN.
     """
 
+    __dataclass_fields__: ClassVar[dict[str, DataclassField]]
     _VALUE_FIELDS: ClassVar[frozenset[str]] = frozenset()
 
     def __post_init__(self) -> None:
@@ -197,7 +198,7 @@ class StructuredQuery(SearchQuery, _Validated):
         if not isinstance(other, StructuredQuery):
             return NotImplemented
         unordered_and = isinstance(self, AndQuery) and self.ordered is None
-        left = self.queries if unordered_and else self
+        left = self.queries if isinstance(self, AndQuery) and unordered_and else self
         return AndQuery((*_sequence(left), other))
 
     def __or__(self, other: StructuredQuery) -> OrQuery:
@@ -494,7 +495,7 @@ class PathIndex(QueryTarget):
             Fresh native path-index.
         """
         if output_format == "json":
-            value = {"text": self.path}
+            value: dict = {"text": self.path}
             if self.namespaces:
                 value["namespaces"] = dict(self.namespaces)
             return {"path-index": value}
@@ -986,7 +987,13 @@ class DirectoryQuery(StructuredQuery):
             If a directory URI does not end with a forward slash.
         """
         _check_type(self, "infinite", bool, optional=True)
-        if any(not uri.endswith("/") for uri in _sequence(self.uris)):
+        if any(
+            not uri.endswith("/")
+            for uri in cast(
+                "Sequence[str]",
+                _sequence(cast("Sequence[str]", self.uris)),
+            )
+        ):
             message = "Directory URIs must end with a forward slash."
             raise ValueError(message)
 
@@ -1475,7 +1482,7 @@ class RangeQuery(StructuredQuery):
         dict or xml.etree.ElementTree.Element
             Fresh native range-query.
         """
-        values = _sequence(self.value)
+        values = cast("Sequence[_Scalar]", _sequence(self.value))
         attributes = {}
         if self.index_type is not None:
             attributes["type"] = self.index_type
@@ -3208,7 +3215,13 @@ def _queries_node(
         Fresh native component.
     """
     if output_format == "json":
-        return {name: {"queries": [_json_full_member(child) for child in children]}}
+        return {
+            name: {
+                "queries": [
+                    _json_full_member(cast("dict", child)) for child in children
+                ],
+            },
+        }
     return _node(name, children, output_format=output_format)
 
 
@@ -3272,7 +3285,7 @@ def _json_members(
     dict
         Combined native component content.
     """
-    result = dict(attributes or {})
+    result: dict = dict(attributes or {})
     for child in children:
         for key, value in child.items():
             if key in result:
@@ -3495,8 +3508,18 @@ def _node(
         Fresh native component containing the supplied children.
     """
     if output_format == "json":
-        return _json_node(name, children, attributes=attributes, text=text)
-    return _xml_node(name, children, attributes=attributes, text=text)
+        return _json_node(
+            name,
+            cast("Sequence[dict]", children),
+            attributes=attributes,
+            text=text,
+        )
+    return _xml_node(
+        name,
+        cast("Sequence[XmlElement]", children),
+        attributes=attributes,
+        text=text,
+    )
 
 
 def _xml_node(
@@ -3814,7 +3837,7 @@ def _children(
         Text children, escaped by ElementTree during serialization.
     """
     nodes = [
-        _node(name, text=_lexical(value), output_format=output_format)
+        _node(name, text=_lexical(cast("_Scalar", value)), output_format=output_format)
         for value in _sequence(values)
     ]
     return [_as_json_array(node) for node in nodes] if json_array else nodes
@@ -3861,6 +3884,14 @@ def _lexical(value: _Scalar) -> str:
         lexical = str(value)
         return {"inf": "INF", "-inf": "-INF", "nan": "NaN"}.get(lexical, lexical)
     return str(value)
+
+
+@overload
+def _sequence(value: str) -> Sequence[str]: ...
+
+
+@overload
+def _sequence(value: _Item | Sequence[_Item]) -> Sequence[_Item]: ...
 
 
 def _sequence(value: _Item | Sequence[_Item]) -> Sequence[_Item]:

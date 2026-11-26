@@ -52,8 +52,8 @@ class UsersGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize UsersGetCall instance.
 
@@ -91,8 +91,8 @@ class UsersGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -155,7 +155,7 @@ class UsersPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
+        body: str | dict | None,
     ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/users!"
@@ -185,8 +185,8 @@ class UserGetCall(ApiCall):
     def __init__(
         self,
         user: str,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize UserGetCall instance.
 
@@ -228,8 +228,8 @@ class UserGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -309,7 +309,7 @@ class UserPropertiesGetCall(ApiCall):
     def __init__(
         self,
         user: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
     ) -> None:
         """Initialize UserPropertiesGetCall instance.
 
@@ -347,7 +347,7 @@ class UserPropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
+        data_format: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -409,7 +409,7 @@ class UserPropertiesPutCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
+        body: str | dict | None,
     ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (

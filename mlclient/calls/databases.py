@@ -61,8 +61,8 @@ class DatabasesGetCall(ApiCall):
 
     def __init__(
         self,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize DatabasesGetCall instance.
 
@@ -101,8 +101,8 @@ class DatabasesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -165,7 +165,7 @@ class DatabasesPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
+        body: str | dict | None,
     ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/databases!"
@@ -207,8 +207,8 @@ class DatabaseGetCall(ApiCall):
     def __init__(
         self,
         database: str,
-        data_format: str = "xml",
-        view: str = "default",
+        data_format: str | None = "xml",
+        view: str | None = "default",
     ) -> None:
         """Initialize DatabaseGetCall instance.
 
@@ -252,8 +252,8 @@ class DatabaseGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
-        view: str,
+        data_format: str | None,
+        view: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -323,7 +323,7 @@ class DatabasePostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
+        body: str | dict | None,
     ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/databases/{id|name}!"
@@ -388,7 +388,7 @@ class DatabaseDeleteCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        forest_delete: str,
+        forest_delete: str | None,
     ) -> None:
         if forest_delete and forest_delete not in cls._SUPPORTED_FOREST_DELETE_OPTS:
             joined_supported_opts = ", ".join(cls._SUPPORTED_FOREST_DELETE_OPTS)
@@ -419,7 +419,7 @@ class DatabasePropertiesGetCall(ApiCall):
     def __init__(
         self,
         database: str,
-        data_format: str = "xml",
+        data_format: str | None = "xml",
     ) -> None:
         """Initialize DatabasePropertiesGetCall instance.
 
@@ -457,7 +457,7 @@ class DatabasePropertiesGetCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        data_format: str,
+        data_format: str | None,
     ) -> None:
         call_utils.validate_supported(
             [data_format],
@@ -521,7 +521,7 @@ class DatabasePropertiesPutCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: str | dict,
+        body: str | dict | None,
     ) -> None:
         if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (

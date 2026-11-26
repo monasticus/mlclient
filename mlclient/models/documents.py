@@ -32,7 +32,7 @@ import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import ClassVar, TextIO
+from typing import Callable, ClassVar, TextIO, cast
 from xml.dom import minidom
 
 import xmltodict
@@ -93,11 +93,11 @@ class Document(metaclass=ABCMeta):
         """
         return (
             "content" in subclass.__dict__
-            and not callable(subclass.content)
+            and not callable(cast("type[Document]", subclass).content)
             and "content_bytes" in subclass.__dict__
-            and not callable(subclass.content_bytes)
+            and not callable(cast("type[Document]", subclass).content_bytes)
             and "content_string" in subclass.__dict__
-            and not callable(subclass.content_string)
+            and not callable(cast("type[Document]", subclass).content_string)
         )
 
     @classmethod
@@ -417,7 +417,7 @@ class Document(metaclass=ABCMeta):
     @property
     def uri(
         self,
-    ) -> str:
+    ) -> str | None:
         """A document URI."""
         return self._uri
 
@@ -431,7 +431,7 @@ class Document(metaclass=ABCMeta):
     @property
     def metadata(
         self,
-    ) -> Metadata | bytes | str:
+    ) -> Metadata | None:
         """A document metadata."""
         return copy.copy(self._metadata)
 
@@ -444,7 +444,7 @@ class Document(metaclass=ABCMeta):
 
     @staticmethod
     def _get_non_blank_uri(
-        uri: str,
+        uri: str | None,
     ) -> str | None:
         """Return URI or None when blank."""
         return uri if uri is not None and not re.search("^\\s*$", uri) else None
@@ -459,7 +459,7 @@ class JSONDocument(Document):
 
     def __init__(
         self,
-        content: dict | str | bytes,
+        content: dict | str | bytes | None,
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
@@ -495,7 +495,7 @@ class JSONDocument(Document):
                 if self._content_bytes is not None
                 else self._content_string
             )
-            self._parsed = json.loads(raw)
+            self._parsed = json.loads(cast("str | bytes", raw))
         return self._parsed
 
     @property
@@ -511,7 +511,7 @@ class JSONDocument(Document):
         """
         if self._content_bytes is None:
             if self._content_string is not None:
-                self._content_bytes = self._content_string.encode("utf-8")
+                self._content_bytes = cast("str", self._content_string).encode("utf-8")
             else:
                 self._content_bytes = json.dumps(self._parsed).encode("utf-8")
         return self._content_bytes
@@ -529,7 +529,9 @@ class JSONDocument(Document):
         """
         if self._content_string is None:
             if self._content_bytes is not None:
-                self._content_string = self._content_bytes.decode("utf-8")
+                self._content_string = cast("bytes", self._content_bytes).decode(
+                    "utf-8",
+                )
             else:
                 self._content_string = json.dumps(self._parsed)
         return self._content_string
@@ -570,7 +572,7 @@ class XMLDocument(Document):
 
     def __init__(
         self,
-        content: ElemTree.ElementTree | ElemTree.Element | str | bytes,
+        content: ElemTree.ElementTree | ElemTree.Element | str | bytes | None,
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
@@ -611,7 +613,11 @@ class XMLDocument(Document):
                     ElemTree.fromstring(self._content_bytes),
                 )
             else:
-                source = self._XML_DECL_RE.sub("", self._content_string, count=1)
+                source = self._XML_DECL_RE.sub(
+                    "",
+                    cast("str", self._content_string),
+                    count=1,
+                )
                 self._parsed = ElemTree.ElementTree(ElemTree.fromstring(source))
         return self._parsed
 
@@ -628,7 +634,7 @@ class XMLDocument(Document):
         """
         if self._content_bytes is None:
             if self._content_string is not None:
-                self._content_bytes = self._content_string.encode("utf-8")
+                self._content_bytes = cast("str", self._content_string).encode("utf-8")
             else:
                 self._content_bytes = self._serialize_tree()
         return self._content_bytes
@@ -646,7 +652,9 @@ class XMLDocument(Document):
         """
         if self._content_string is None:
             if self._content_bytes is not None:
-                self._content_string = self._content_bytes.decode("utf-8")
+                self._content_string = cast("bytes", self._content_bytes).decode(
+                    "utf-8",
+                )
             else:
                 self._content_string = self._serialize_tree().decode("utf-8")
         return self._content_string
@@ -655,7 +663,7 @@ class XMLDocument(Document):
         """Serialize the parsed ElementTree to UTF-8 bytes with XML declaration."""
         return _normalize_xml_declaration(
             ElemTree.tostring(
-                self._parsed.getroot(),
+                cast("ElemTree.Element", self.content.getroot()),
                 encoding="UTF-8",
                 xml_declaration=True,
             ),
@@ -710,7 +718,7 @@ class TextDocument(Document):
 
     def __init__(
         self,
-        content: str | bytes,
+        content: str | bytes | None,
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
@@ -748,7 +756,7 @@ class TextDocument(Document):
             The text content encoded as UTF-8.
         """
         if self._content_bytes is None:
-            self._content_bytes = self._content_string.encode("utf-8")
+            self._content_bytes = cast("str", self._content_string).encode("utf-8")
         return self._content_bytes
 
     @property
@@ -761,7 +769,7 @@ class TextDocument(Document):
             The text content.
         """
         if self._content_string is None:
-            self._content_string = self._content_bytes.decode("utf-8")
+            self._content_string = cast("bytes", self._content_bytes).decode("utf-8")
         return self._content_string
 
 
@@ -773,7 +781,7 @@ class BinaryDocument(Document):
 
     def __init__(
         self,
-        content: bytes,
+        content: bytes | None,
         uri: str | None = None,
         metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
@@ -986,9 +994,9 @@ class Metadata:
         Metadata
             A Metadata instance
         """
-        file_path = Path(file_path)
-        with file_path.open() as file:
-            if file_path.suffix == ".json":
+        path = Path(file_path)
+        with path.open() as file:
+            if path.suffix == ".json":
                 return cls._from_json_file(file)
             return cls._from_xml_file(file)
 
@@ -1016,7 +1024,7 @@ class Metadata:
         """Parse a JSON metadata payload to Metadata constructor kwargs."""
         raw_metadata = json.loads(content)
         if "permissions" in raw_metadata:
-            permissions = []
+            permissions: list[Permission] = []
             for permission in raw_metadata["permissions"]:
                 role_name = permission["role-name"]
                 capabilities = permission["capabilities"]
@@ -1047,7 +1055,7 @@ class Metadata:
                 cls._RAPI_NS_URI: None,
                 cls._PROP_NS_URI: None,
             },
-            postprocessor=cls._skip_namespace_declarations,
+            postprocessor=cast("Callable", cls._skip_namespace_declarations),
         )
         metadata_node = parsed["metadata"] or {}
         raw_metadata = {
@@ -1062,7 +1070,7 @@ class Metadata:
                     values = [values]
                 raw_metadata[items] = values
         if "permissions" in raw_metadata:
-            permissions = []
+            permissions: list[Permission] = []
             for permission in raw_metadata["permissions"]:
                 role_name = permission["role-name"]
                 capability = permission["capability"]
@@ -1153,11 +1161,11 @@ class Metadata:
         """
         self._raw: bytes | str | None = raw
         if raw is not None:
-            self._collections: list | None = None
-            self._permissions: list | None = None
-            self._properties: dict | None = None
-            self._quality: int | None = None
-            self._metadata_values: dict | None = None
+            self._collections: list = []
+            self._permissions: list = []
+            self._properties: dict = {}
+            self._quality: int = 0
+            self._metadata_values: dict = {}
         else:
             self._collections = list(set(collections)) if collections else []
             self._permissions = self._get_clean_permissions(permissions)
@@ -1167,7 +1175,7 @@ class Metadata:
 
     def _ensure_parsed(self) -> None:
         """Materialize parsed fields from the raw payload, then discard raw."""
-        if self._collections is not None:
+        if self._raw is None:
             return
         source = (
             self._raw.decode("utf-8") if isinstance(self._raw, bytes) else self._raw
@@ -1186,7 +1194,7 @@ class Metadata:
 
     def __eq__(
         self,
-        other: Metadata,
+        other: object,
     ) -> bool:
         """Verify if Metadata instances are equal.
 
@@ -1464,7 +1472,7 @@ class Metadata:
             self._ensure_parsed()
             permission = self._get_permission_for_role(self._permissions, role_name)
             allow = permission is not None
-            if allow:
+            if permission is not None:
                 success = permission.remove_capability(capability)
                 if len(permission.capabilities()) == 0:
                     self._permissions.remove(permission)
@@ -1578,7 +1586,7 @@ class Metadata:
             )
             if source.lstrip().startswith("<"):
                 return source
-        metadata_xml = self.to_xml().getroot()
+        metadata_xml = cast("ElemTree.Element", self.to_xml().getroot())
         if indent is None:
             metadata_str = ElemTree.tostring(
                 metadata_xml,
@@ -1683,7 +1691,7 @@ class Metadata:
         permissions : list
             A clean permissions list
         """
-        permissions = []
+        permissions: list[Permission] = []
         if source_permissions is None:
             return permissions
 
@@ -1754,7 +1762,7 @@ class Permission:
     UPDATE_NODE: str = "update-node"
     EXECUTE: str = "execute"
 
-    _CAPABILITIES: ClassVar[tuple] = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
+    _CAPABILITIES: ClassVar[set[str]] = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
 
     def __init__(
         self,
@@ -1775,7 +1783,7 @@ class Permission:
 
     def __eq__(
         self,
-        other: Permission,
+        other: object,
     ) -> bool:
         """Verify if Permission instances are equal.
 

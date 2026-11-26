@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 
 def _logger_fine(
@@ -14,7 +14,7 @@ def _logger_fine(
 ) -> None:
     """Log at FINE, forwarding logging options and identifying the caller."""
     kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1
-    logger.log(logging.FINE, message, *args, **kwargs)
+    logger.log(fine_level(), message, *args, **kwargs)
 
 
 def _root_fine(
@@ -27,7 +27,37 @@ def _root_fine(
     root = logging.getLogger()
     if not root.handlers:
         logging.basicConfig()
-    root.log(logging.FINE, message, *args, **kwargs)
+    root.log(fine_level(), message, *args, **kwargs)
+
+
+if TYPE_CHECKING:
+
+    class _FineLogger(logging.Logger):
+        """A standard logger with MLClient's registered FINE method."""
+
+        fine = _logger_fine
+
+
+def get_logger(name: str) -> _FineLogger:
+    """Get a standard logger with its registered FINE method typed.
+
+    Parameters
+    ----------
+    name : str
+        Logger name, normally the calling module's name.
+
+    Returns
+    -------
+    logging.Logger
+        The standard logging registry's logger, including the FINE extension.
+        No new logger class or handler is installed.
+    """
+    return cast("_FineLogger", logging.getLogger(name))
+
+
+def fine_level() -> int:
+    """Return the registered FINE level, including an application override."""
+    return cast("int", vars(logging)["FINE"])
 
 
 def register_fine_logging() -> None:
@@ -38,9 +68,11 @@ def register_fine_logging() -> None:
     FINE defaults to one level below DEBUG. No handlers are configured here.
     """
     if not hasattr(logging, "FINE"):
-        logging.FINE = logging.DEBUG - 1
-        logging.addLevelName(logging.FINE, "FINE")
-    if not hasattr(logging.Logger, "fine"):
-        logging.Logger.fine = _logger_fine
-    if not hasattr(logging, "fine"):
-        logging.fine = _root_fine
+        vars(logging)["FINE"] = logging.DEBUG - 1
+        logging.addLevelName(fine_level(), "FINE")
+    for target, name, method in (
+        (logging.Logger, "fine", _logger_fine),
+        (logging, "fine", _root_fine),
+    ):
+        if not hasattr(target, name):
+            setattr(target, name, method)

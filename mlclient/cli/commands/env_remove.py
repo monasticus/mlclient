@@ -7,6 +7,8 @@ It exports an implementation for 'env remove' command:
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
 from cleo.helpers import argument, option
@@ -47,10 +49,10 @@ class EnvRemoveCommand(Command):
 
     name: str = "env remove"
     description: str = "Deletes an MLClient environment file"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument("name", "The environment name."),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         option(
             "global",
             "g",

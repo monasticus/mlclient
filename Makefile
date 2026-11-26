@@ -73,3 +73,7 @@ docs-deploy-dev:
 	@gh workflow run docs.yml --ref main
 
 .PHONY: release-patch release-minor release-major release-pre release-tag
+
+typecheck:
+	@poetry run mypy
+	@poetry run python scripts/check_typing.py

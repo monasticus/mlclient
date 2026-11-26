@@ -7,6 +7,8 @@ It exports an implementation for 'log-level' command:
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
 from cleo.helpers import argument, option
@@ -72,14 +74,14 @@ class LogLevelCommand(Command):
 
     name: str = "log-level"
     description: str = "Shows or sets a MarkLogic file/system log level"
-    arguments: list[Argument] = [
+    arguments: ClassVar[list[Argument]] = [
         argument(
             "level",
             description="The log level to set. Omit to show the current level.",
             optional=True,
         ),
     ]
-    options: list[Option] = [
+    options: ClassVar[list[Option]] = [
         environment_option(),
         connection_option(),
         option(

@@ -37,7 +37,7 @@ class LogsCall(ApiCall):
 
     def __init__(
         self,
-        filename: str,
+        filename: str | None,
         data_format: str | None = "html",
         host: str | None = None,
         start_time: str | None = None,

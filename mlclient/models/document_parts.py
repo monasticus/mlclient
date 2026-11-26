@@ -162,7 +162,7 @@ class DocumentsDisposition(BaseModel):
             A parsed DocumentsDisposition instance
         """
         m = _DispositionMapping
-        disp_dict = {}
+        disp_dict: dict = {}
         for disp in header.split(m.DISP_SEP):
             key, value = cls._parse_header_part(disp)
             curr_value = disp_dict.get(key)
@@ -172,7 +172,7 @@ class DocumentsDisposition(BaseModel):
                 disp_dict[key] = [curr_value, value]
             else:
                 curr_value.append(value)
-        return cls(**disp_dict)
+        return cls.model_validate(disp_dict)
 
     def to_header(self) -> str:
         """Serialize this instance to a raw Content-Disposition header string.
@@ -187,7 +187,7 @@ class DocumentsDisposition(BaseModel):
         return m.DISP_SEP.join([p for p in parts if p is not None])
 
     @staticmethod
-    def _parse_header_part(disp: str) -> tuple[str, str]:
+    def _parse_header_part(disp: str) -> tuple[str | None, str]:
         m = _DispositionMapping
         key_value_pair = disp.split(m.KEY_VALUE_SEP)
         if len(key_value_pair) == 1:

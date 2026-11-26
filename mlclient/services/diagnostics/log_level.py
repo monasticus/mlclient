@@ -9,7 +9,7 @@ the equivalent Management REST resource.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from httpx import HTTPStatusError, RequestError
 
@@ -123,7 +123,7 @@ class LogLevelService:
             raise
         if resp.is_success:
             logger.debug("Log-level eval succeeded")
-            return MLResponseParser.parse(resp)
+            return cast("str", MLResponseParser.parse(resp))
         _raise_unless_privilege_error(resp)
         return self._manage_get(group, server, log_type, timeout=timeout)
 

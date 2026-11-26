@@ -8,7 +8,7 @@ from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from types import MappingProxyType
-from typing import ClassVar, Literal, get_args
+from typing import ClassVar, Literal, cast, get_args
 from xml.etree.ElementTree import Element as XmlElement
 from xml.etree.ElementTree import SubElement, tostring
 
@@ -178,8 +178,8 @@ class Range(QueryComponent):
         _matching(self.fragment_scope, self.weight)
         for bucket in self.buckets:
             _require(bucket, Bucket, "range bucket")
-        for bucket in self.computed_buckets:
-            _require(bucket, ComputedBucket, "computed range bucket")
+        for computed_bucket in self.computed_buckets:
+            _require(computed_bucket, ComputedBucket, "computed range bucket")
         for anchor in self.anchors:
             _require(anchor, Anchor, "range anchor")
         for name, value in (("facet", self.facet), ("nullable", self.nullable)):
@@ -382,8 +382,8 @@ class SearchOptions(QueryComponent):
         TypeError
             If a component has an unsupported type.
         """
-        bindings = {}
-        components = []
+        bindings: dict[str, str] = {}
+        components: list[SearchOption] = []
         for option in options:
             if isinstance(option, SearchOptions):
                 additions = option.components
@@ -425,6 +425,17 @@ class SearchOptions(QueryComponent):
         return self.to_json() == other.to_json() and tostring(
             self.to_xml(),
         ) == tostring(other.to_xml())
+
+    def __hash__(self) -> int:
+        """Hash the independent JSON representation consistently with equality.
+
+        Returns
+        -------
+        int
+            A content hash unaffected by JSON mapping order or XML prefix
+            registration. Unequal XML representations may share a hash.
+        """
+        return _hash_json(self.to_json())
 
     def __repr__(self) -> str:
         """Name the native definitions in insertion order.
@@ -495,8 +506,6 @@ class SearchOptions(QueryComponent):
             else:
                 members[name] = definition
         return {"options": members}
-
-    __hash__ = None
 
 
 @dataclass(frozen=True, init=False)
@@ -1001,7 +1010,7 @@ class CollectionConstraint(SearchOption):
         object.__setattr__(self, "name", name)
         object.__setattr__(self, "prefix", prefix)
         object.__setattr__(self, "facet", facet)
-        attributes = {"facet": facet}
+        attributes: dict = {"facet": facet}
         if prefix is not None:
             attributes["prefix"] = prefix
         object.__setattr__(
@@ -1265,6 +1274,17 @@ class NativeOption(SearchOption):
         (matched,) = _pair_native_definitions(definition, (element,))
         object.__setattr__(self, "_definition", matched)
 
+    def __hash__(self) -> int:
+        """Hash the independent JSON representation consistently with equality.
+
+        Returns
+        -------
+        int
+            A content hash unaffected by JSON mapping order or XML prefix
+            registration. Unequal XML representations may share a hash.
+        """
+        return _hash_json(self.to_json())
+
     def __eq__(self, other: object) -> bool:
         """Compare native options using both independent formats.
 
@@ -1283,8 +1303,6 @@ class NativeOption(SearchOption):
         return self.to_json() == other.to_json() and tostring(
             self.to_xml(),
         ) == tostring(other.to_xml())
-
-    __hash__ = None
 
 
 @dataclass(frozen=True, init=False, eq=False, repr=False)
@@ -1322,7 +1340,10 @@ class NativeOptions(SearchOptions):
         matched = _pair_native_definitions(definition, elements)
         super().__init__(
             *(
-                NativeOption({member.name: member.native[0]}, member.native[1])
+                NativeOption(
+                    {member.name: cast("tuple[dict, XmlElement]", member.native)[0]},
+                    cast("tuple[dict, XmlElement]", member.native)[1],
+                )
                 for member in matched
             ),
         )
@@ -1527,6 +1548,29 @@ class _Definition(QueryComponent):
                 else:
                     members[name] = value
         return {self.name: members}
+
+
+def _hash_json(value: object) -> int:
+    """Hash nested JSON data using Python's mapping and scalar equality rules.
+
+    Parameters
+    ----------
+    value : object
+        A JSON mapping, sequence or scalar value.
+
+    Returns
+    -------
+    int
+        An order-independent hash for mappings and an ordered hash for
+        sequences. Equal scalar values, including 1, 1.0 and True, retain
+        equal hashes. XML is omitted because JSON equality is a necessary
+        condition for options equality, and XML prefixes are process-global.
+    """
+    if isinstance(value, dict):
+        return hash(frozenset((key, _hash_json(item)) for key, item in value.items()))
+    if isinstance(value, (list, tuple)):
+        return hash(tuple(_hash_json(item) for item in value))
+    return hash(value)
 
 
 def _pair_native_definitions(
@@ -3180,7 +3224,7 @@ class Operator(SearchOption):
             _Definition(
                 "operator",
                 {"name": self.name},
-                self.states,
+                tuple(self.states),
                 repeatable=frozenset({"state"}),
             ),
         )
@@ -3294,7 +3338,7 @@ class _Geospatial(_OptionComponent):
     def _configure(
         self,
         name: str,
-        targets: tuple[QueryComponent, ...],
+        targets: tuple[_Renamed, ...],
         *,
         coord: str | None = None,
     ) -> None:
@@ -3322,7 +3366,7 @@ class _Geospatial(_OptionComponent):
         ):
             message = "geo-region-path does not support heatmaps or facet options"
             raise ValueError(message)
-        children = (
+        children: tuple[QueryComponent, ...] = (
             *targets,
             *_scalars({"fragment-scope": self.fragment_scope, "weight": self.weight}),
         )
@@ -3356,7 +3400,7 @@ def _geo_targets(
     name: str,
     targets: QueryComponent | Sequence[QueryComponent],
     expected: type,
-) -> tuple[QueryComponent, ...]:
+) -> tuple[_Renamed, ...]:
     """Validate one or several geospatial index selectors.
 
     Parameters
@@ -3378,7 +3422,11 @@ def _geo_targets(
     TypeError
         If any selector has the wrong type.
     """
-    items = (targets,) if isinstance(targets, expected) else tuple(targets)
+    items = (
+        (cast("QueryComponent", targets),)
+        if isinstance(targets, expected)
+        else tuple(cast("Sequence[QueryComponent]", targets))
+    )
     if not items or any(not isinstance(item, expected) for item in items):
         message = f"{name} requires one or more {expected.__name__} selectors"
         raise TypeError(message)
@@ -3408,7 +3456,7 @@ class GeoElement(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent", self.parent, Element)
         if not isinstance(self.parent, Element):
             object.__setattr__(self, "parent", tuple(self.parent))
@@ -3444,7 +3492,7 @@ class GeoElementPair(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent", self.parent, Element)
         if not isinstance(self.parent, Element):
             object.__setattr__(self, "parent", tuple(self.parent))
@@ -3483,7 +3531,7 @@ class GeoAttributePair(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent", self.parent, Element)
         if not isinstance(self.parent, Element):
             object.__setattr__(self, "parent", tuple(self.parent))
@@ -3519,7 +3567,7 @@ class GeoJsonProperty(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent-property", self.parent_property, JsonProperty)
         if not isinstance(self.parent_property, JsonProperty):
             object.__setattr__(self, "parent_property", tuple(self.parent_property))
@@ -3555,7 +3603,7 @@ class GeoJsonPropertyPair(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("parent-property", self.parent_property, JsonProperty)
         if not isinstance(self.parent_property, JsonProperty):
             object.__setattr__(self, "parent_property", tuple(self.parent_property))
@@ -3588,7 +3636,7 @@ class GeoPath(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("path-index", self.path_index, PathIndex)
         if not isinstance(self.path_index, PathIndex):
             object.__setattr__(self, "path_index", tuple(self.path_index))
@@ -3616,7 +3664,7 @@ class GeoRegionPath(_Geospatial):
         TypeError
             If a selector has an incompatible type.
         """
-        targets = ()
+        targets: tuple[_Renamed, ...] = ()
         targets += _geo_targets("path-index", self.path_index, PathIndex)
         if not isinstance(self.path_index, PathIndex):
             object.__setattr__(self, "path_index", tuple(self.path_index))

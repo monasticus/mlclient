@@ -167,12 +167,14 @@ class MarkLogicError(MLClientError):
         self._message_code: str | None = None
         self._message: str | None = None
         if isinstance(error, dict):
-            error = error.get("errorResponse", error)
-            status_code = error.get("statusCode")
-            self._status_code = int(status_code) if str(status_code).isdigit() else None
-            self._status = error.get("status")
-            self._message_code = error.get("messageCode")
-            self._message = error.get("message")
+            details = error.get("errorResponse", error)
+            status_code = details.get("statusCode")
+            self._status_code = (
+                int(str(status_code)) if str(status_code).isdigit() else None
+            )
+            self._status = details.get("status")
+            self._message_code = details.get("messageCode")
+            self._message = details.get("message")
             if self._message_code:
                 error_msg = (
                     f"[{status_code} {self._status}] "

@@ -24,7 +24,6 @@ from cleo.io.inputs.input import Input
 from cleo.io.io import IO
 from cleo.io.outputs.output import Output, Verbosity
 
-from mlclient._logging import fine_level
 from mlclient._version import __version__ as ml_client_version
 from mlclient.cli.commands._waiting_indicator import ERASE_LINE
 from mlclient.cli.commands.env_compare import EnvCompareCommand
@@ -118,7 +117,7 @@ class CleoAppHandler(logging.Handler):
             "verbosity": Verbosity.VERY_VERBOSE,
             "style": "mlclient_debug",
         },
-        fine_level(): {
+        logging.FINE: {  # type: ignore[attr-defined]
             "verbosity": Verbosity.DEBUG,
             "style": "mlclient_fine",
         },
@@ -190,7 +189,9 @@ class CleoAppHandler(logging.Handler):
         cleo_handler = cls(io)
         cleo_handler.setFormatter(origin_formatter)
 
-        logger.setLevel(fine_level())
+        logger.setLevel(
+            logging.FINE,  # type: ignore[attr-defined]
+        )
         logger.handlers = [cleo_handler]
 
 

@@ -88,6 +88,22 @@ for name in ("HttpClient", "AsyncHttpClient"):
     assert "kwargs" not in signature, ("Forwarded constructor options not expanded", name)
 
 
+for relative, method, parameters in (
+    ("mlclient/MLClientManager", "MLClientManager", ("host", "retry", "timeout")),
+    ("mlclient/http/HTTPConfig", "clone", ("host", "retry", "timeout")),
+    ("mlclient/jobs/WriteDocumentsJob", "with_client_config", ("host", "timeout", "manage_config")),
+    ("mlclient/services/CtsService", "estimate", ("database", "txid", "timeout", "namespaces", "output_type")),
+):
+    path = site / "reference" / relative / "index.html"
+    signatures = [value for value in pages[path].signatures if value.lstrip().startswith(method + "(")]
+    assert signatures, ("Missing expanded signature", relative, method)
+    for signature in signatures:
+        for parameter in parameters:
+            assert parameter in signature, ("Hidden inherited keyword", relative, method, parameter)
+        assert "**" not in signature, ("Unexpanded keyword schema", relative, method)
+    assert "Expanded keyword defaults" in path.read_text(), ("Missing omission semantics", relative)
+
+
 # Only top-level public modules/packages define canonical user imports.
 # The CLI is an executable entry point, not part of the Python library reference.
 documented = {"mlclient": mlclient}

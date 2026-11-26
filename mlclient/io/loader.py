@@ -7,16 +7,15 @@ It exports a class parsing files into Documents:
 
 from __future__ import annotations
 
-import logging
 import os
 from collections.abc import Generator
 from pathlib import Path
 
-from mlclient._logging import fine_level
+from mlclient._logging import get_logger
 from mlclient.models.documents import Document, Metadata
 from mlclient.models.mimetypes import Mimetypes
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DocumentsLoader:
@@ -142,8 +141,7 @@ class DocumentsLoader:
         if not metadata_file_path:
             return None
 
-        logger.log(
-            fine_level(),
+        logger.fine(
             "Document [%s] loaded with metadata [%s]",
             path,
             metadata_file_path,

@@ -22,22 +22,37 @@ class HTTPConfigOverrides(TypedDict, total=False):
     """Settings that replace those of an HTTPConfig, as HTTPConfig.clone takes them."""
 
     protocol: str | UnsetType
+    """HTTP protocol override."""
     host: str
+    """Server hostname override."""
     port: int | UnsetType
+    """Server port override."""
     auth: AuthParam | UnsetType
+    """Authentication method override."""
     username: str
+    """Authentication username override."""
     password: str
+    """Authentication password override."""
     ssl: SSLConfig | None
+    """TLS configuration override."""
     cloud: CloudConfig | None
+    """Cloud connection configuration override."""
     retry: Retry | int | None
+    """Retry policy override."""
     limits: httpx.Limits | int | None
+    """Connection pool limits override."""
     timeout: httpx.Timeout | float | UnsetType | None
+    """Request timeout override; None disables the timeout."""
 
 
 class MLClientOptions(HTTPConfigOverrides, total=False):
     """HTTPConfig overrides plus the per-server configurations MLClient takes."""
 
     config: HTTPConfig | None
+    """Base REST server configuration."""
     manage_config: HTTPConfig | None
+    """Management server configuration."""
     admin_config: HTTPConfig | None
+    """Administration server configuration."""
     health_config: HTTPConfig | None
+    """Health check server configuration."""

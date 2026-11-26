@@ -35,15 +35,20 @@ class _ExecutionOptions(TypedDict, total=False):
     """Request options every cts execution method takes as keyword arguments."""
 
     database: str | None
+    """Target content database."""
     txid: str | None
+    """Existing transaction identifier."""
     timeout: httpx.Timeout | float | UnsetType | None
+    """Request timeout override; None disables the timeout."""
     namespaces: Mapping[str, str] | None
+    """Namespace prefix bindings merged with the service bindings."""
 
 
 class _NativeExecutionOptions(_ExecutionOptions, total=False):
     """Request options of the cts methods that can return raw items."""
 
     output_type: type[str | bytes] | None
+    """Raw item type (str or bytes); None enables automatic decoding."""
 
 
 _HitT = TypeVar("_HitT", SearchHit, ValueHit)

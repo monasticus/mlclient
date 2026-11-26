@@ -14,7 +14,12 @@ def _logger_fine(
 ) -> None:
     """Log at FINE, forwarding logging options and identifying the caller."""
     kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1
-    logger.log(fine_level(), message, *args, **kwargs)
+    logger.log(
+        logging.FINE,  # type: ignore[attr-defined]
+        message,
+        *args,
+        **kwargs,
+    )
 
 
 def _root_fine(
@@ -27,7 +32,12 @@ def _root_fine(
     root = logging.getLogger()
     if not root.handlers:
         logging.basicConfig()
-    root.log(fine_level(), message, *args, **kwargs)
+    root.log(
+        logging.FINE,  # type: ignore[attr-defined]
+        message,
+        *args,
+        **kwargs,
+    )
 
 
 if TYPE_CHECKING:
@@ -55,11 +65,6 @@ def get_logger(name: str) -> _FineLogger:
     return cast("_FineLogger", logging.getLogger(name))
 
 
-def fine_level() -> int:
-    """Return the registered FINE level, including an application override."""
-    return cast("int", vars(logging)["FINE"])
-
-
 def register_fine_logging() -> None:
     """Make FINE available as a level and as logger/module convenience methods.
 
@@ -69,7 +74,10 @@ def register_fine_logging() -> None:
     """
     if not hasattr(logging, "FINE"):
         vars(logging)["FINE"] = logging.DEBUG - 1
-        logging.addLevelName(fine_level(), "FINE")
+        logging.addLevelName(
+            logging.FINE,  # type: ignore[attr-defined]
+            "FINE",
+        )
     for target, name, method in (
         (logging.Logger, "fine", _logger_fine),
         (logging, "fine", _root_fine),

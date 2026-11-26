@@ -32,7 +32,9 @@ class _HttpClientOptions(HTTPConfigOverrides, total=False):
     """HTTPConfig overrides plus the options HttpClient and AsyncHttpClient take."""
 
     config: HTTPConfig | None
+    """Base configuration to apply the overrides to."""
     session_owner: HttpClient | AsyncHttpClient | None
+    """Client whose HTTP session is reused."""
 
 
 logger = get_logger(__name__)

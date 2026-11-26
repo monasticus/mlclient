@@ -7,17 +7,16 @@ It exports a class serializing Documents into files:
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Iterable
 from pathlib import Path
 from typing import cast
 
 import aiofiles
 
-from mlclient._logging import fine_level
+from mlclient._logging import get_logger
 from mlclient.models.documents import Document, Metadata
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DocumentsWriter:
@@ -73,7 +72,7 @@ class DocumentsWriter:
         doc_path.parent.mkdir(parents=True, exist_ok=True)
 
         if document.content_bytes is not None:
-            logger.log(fine_level(), "Writing data into file [%s]", doc_path)
+            logger.fine("Writing data into file [%s]", doc_path)
             async with aiofiles.open(doc_path, mode="wb") as file:
                 await file.write(document.content_bytes)
 
@@ -106,7 +105,7 @@ class DocumentsWriter:
             suffix = cls._JSON_METADATA_SUFFIX
 
         metadata_path = doc_path.with_suffix(suffix)
-        logger.log(fine_level(), "Writing metadata into file [%s]", metadata_path)
+        logger.fine("Writing metadata into file [%s]", metadata_path)
         async with aiofiles.open(metadata_path, mode="wb") as file:
             await file.write(payload)
 

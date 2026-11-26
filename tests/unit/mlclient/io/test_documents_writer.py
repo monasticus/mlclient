@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import json
+import logging
 
 import pytest
 
-from mlclient.io import DocumentsWriter
+from mlclient.io import DocumentsLoader, DocumentsWriter
 from mlclient.models import Document, Metadata
 
 
@@ -100,3 +101,30 @@ async def test_write_document_creates_missing_directories(tmp_path):
     await DocumentsWriter.write_document(doc, str(tmp_path))
 
     assert (tmp_path / "deeply/nested/dir/doc-1.xml").exists()
+
+
+@pytest.mark.asyncio
+async def test_io_honors_an_application_fine_method(tmp_path, monkeypatch):
+    messages = []
+
+    def fine(logger, message, *args, **_kwargs):
+        if logger.name.startswith("mlclient.io."):
+            messages.append(message % args)
+
+    monkeypatch.setattr(logging.Logger, "fine", fine)
+    document = Document.create(
+        "/document.xml",
+        "<root/>",
+        metadata=Metadata(collections=["fine-test"]),
+    )
+
+    await DocumentsWriter.write_document(document, tmp_path)
+    loaded = list(DocumentsLoader.load(str(tmp_path / "document.xml")))
+
+    assert len(loaded) == 1
+    assert messages == [
+        f"Writing data into file [{tmp_path / 'document.xml'}]",
+        f"Writing metadata into file [{tmp_path / 'document.metadata.json'}]",
+        f"Document [{tmp_path / 'document.xml'}] loaded with metadata "
+        f"[{tmp_path / 'document.metadata.json'}]",
+    ]

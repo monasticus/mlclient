@@ -118,6 +118,61 @@ def test_get_documents():
 
 
 @respx.mock
+def test_head_documents():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_param("uri", "/some/dir/doc1.json")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("txid", "12345")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=utf-8")
+    ml_mocker.with_response_header("vnd.marklogic.document-format", "json")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17945794362918270")
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    with MLClient() as ml:
+        resp = ml.rest.documents.head(
+            "/some/dir/doc1.json",
+            database="Documents",
+            txid="12345",
+            timeout=2,
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.headers["vnd.marklogic.document-format"] == "json"
+    assert resp.content == b""
+    assert route.calls.last.request.extensions["timeout"] == httpx.Timeout(2).as_dict()
+
+
+@respx.mock
+def test_head_documents_metadata():
+    ml_mocker = MLRespXMocker(use_router=False, strict_params=True)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_param("uri", "/some/dir/doc1.json")
+    ml_mocker.with_request_param("category", "metadata")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("Accept", "application/json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=utf-8")
+    ml_mocker.with_response_header("vnd.marklogic.document-format", "json")
+    ml_mocker.with_response_header("ML-Effective-Timestamp", "17955379202442950")
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+
+    with MLClient() as ml:
+        resp = ml.rest.documents.head(
+            "/some/dir/doc1.json",
+            category="metadata",
+            data_format="json",
+        )
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.headers["Content-Type"] == "application/json; charset=utf-8"
+    assert resp.content == b""
+
+
+@respx.mock
 def test_post_documents():
     body_part = {
         "content-type": "application/json",

@@ -32,6 +32,7 @@ import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
+from types import NotImplementedType
 from typing import Callable, ClassVar, TextIO, cast
 from xml.dom import minidom
 
@@ -96,7 +97,8 @@ class Document(metaclass=ABCMeta):
             return NotImplemented
         return not getattr(subclass, "__abstractmethods__", ()) and all(
             hasattr(subclass, name) and not callable(getattr(subclass, name))
-            for name in ("content", "content_bytes", "content_string")        )
+            for name in ("content", "content_bytes", "content_string")
+        )
 
     @classmethod
     def create(

@@ -348,3 +348,12 @@ def test_transform_params_preserve_false_zero_and_empty_values():
         "trans:limit": 0,
         "trans:label": "",
     }
+
+
+@pytest.mark.parametrize("transform", [None, ""])
+def test_transform_params_require_transform(transform):
+    with pytest.raises(exceptions.WrongParametersError) as error:
+        DocumentsGetCall(
+            "/example.xml", transform=transform, transform_params={"tag": "x"},
+        )
+    assert str(error.value) == "transform_params require transform"

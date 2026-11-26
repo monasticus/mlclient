@@ -138,3 +138,25 @@ def test_transform_params_preserve_false_zero_and_empty_values(default_body_part
         "trans:limit": 0,
         "trans:label": "",
     }
+
+
+@pytest.mark.parametrize("transform", [None, ""])
+def test_transform_params_require_transform(default_body_part, transform):
+    with pytest.raises(exceptions.WrongParametersError) as error:
+        DocumentsPostCall(
+            [default_body_part], transform=transform, transform_params={"tag": "x"},
+        )
+    assert str(error.value) == "transform_params require transform"
+
+
+@pytest.mark.parametrize("temporal_collection", [None, ""])
+def test_system_time_requires_temporal_collection(
+    default_body_part, temporal_collection,
+):
+    with pytest.raises(exceptions.WrongParametersError) as error:
+        DocumentsPostCall(
+            [default_body_part],
+            temporal_collection=temporal_collection,
+            system_time="2026-11-26T00:00:00Z",
+        )
+    assert str(error.value) == "system_time requires temporal_collection"

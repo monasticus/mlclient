@@ -8,7 +8,6 @@ It exports 1 class:
 from __future__ import annotations
 
 import json
-import logging
 import re
 import xml.etree.ElementTree as ElemTree
 from collections.abc import Mapping
@@ -19,14 +18,14 @@ from typing import ClassVar, cast, overload
 from httpx import Headers, Response
 
 from mlclient import _constants as const
-from mlclient._logging import fine_level
+from mlclient._logging import get_logger
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.results import ParsedValue
 from mlclient.models.types import DocumentType
 from mlclient.multipart import MultipartPart, decode_multipart_mixed
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 _FRACTIONAL_SECONDS = re.compile(r"(T\d{2}:\d{2}:\d{2})\.(\d+)")
@@ -179,7 +178,7 @@ class MLResponseParser:
         cls.raise_for_status(response)
         logger.debug("Attempt to parse a response")
         if not response.content:
-            logger.log(fine_level(), "No content to parse")
+            logger.fine("No content to parse")
             return []
         return cast("ParsedValue", cls._parse(response, output_type))
 
@@ -220,7 +219,7 @@ class MLResponseParser:
         cls.raise_for_status(response)
         logger.debug("Attempt to parse a response")
         if not response.content:
-            logger.log(fine_level(), "No content to parse")
+            logger.fine("No content to parse")
             return response.headers, []
         return cast(
             "tuple | list[tuple]",
@@ -513,13 +512,13 @@ class MLResponseParser:
             or headers.get(const.HEADER_NAME_PRIMITIVE) == const.HEADER_PRIMITIVE_BINARY
         ):
             parsed: ParsedValue = body_part.content
-            logger.log(fine_level(), "Returning binary response part value")
+            logger.fine("Returning binary response part value")
         elif output_type is str:
             parsed = body_part.text
-            logger.log(fine_level(), "Response part parsed to text value: [%s]", parsed)
+            logger.fine("Response part parsed to text value: [%s]", parsed)
         else:
             parsed = cls._parse_type_specific(body_part, headers)
-            logger.log(fine_level(), "Response part parsed value: [%s]", parsed)
+            logger.fine("Response part parsed value: [%s]", parsed)
 
         if not with_headers:
             return parsed

@@ -19,15 +19,34 @@ class Page(HTMLParser):
         super().__init__()
         self.ids = set()
         self.links = []
+        self.signatures = []
+        self._signature_depth = 0
         self.feed(text)
 
     def handle_starttag(self, tag, attrs):
         """Record anchors and links from a rendered HTML tag."""
         attrs = dict(attrs)
+        if tag == "div":
+            if self._signature_depth:
+                self._signature_depth += 1
+            elif "doc-signature" in attrs.get("class", "").split():
+                self._signature_depth = 1
+                self.signatures.append("")
         if "id" in attrs:
             self.ids.add(attrs["id"])
         if tag == "a" and "href" in attrs:
             self.links.append(attrs["href"])
+
+
+    def handle_endtag(self, tag):
+        """Finish a signature when its enclosing div closes."""
+        if tag == "div" and self._signature_depth:
+            self._signature_depth -= 1
+
+    def handle_data(self, data):
+        """Collect visible signature text independently of syntax highlighting."""
+        if self._signature_depth:
+            self.signatures[-1] += data
 
 
 # CLI guides describe the actual command surface without embedding help dumps.
@@ -49,6 +68,24 @@ for name, command in MLCLIentApplication().all().items():
 site = Path(sys.argv[1] if len(sys.argv) > 1 else "site").resolve()
 pages = {path: Page(path.read_text()) for path in site.rglob("*.html")}
 assert pages, "Build the site before running this check"
+
+
+for path, page in pages.items():
+    for signature in page.signatures:
+        assert "Unpack[" not in "".join(signature.split()), (
+            "Internal keyword schema in public signature", path, signature
+        )
+
+for name in ("HttpClient", "AsyncHttpClient"):
+    path = site / "reference/mlclient/clients" / name / "index.html"
+    assert pages[path].signatures, ("Missing constructor signature", path)
+    signature = pages[path].signatures[0]
+    assert f"{name}(*," in "".join(signature.split()), (
+        "Forwarded constructor options must remain keyword-only", name
+    )
+    for parameter in ("protocol", "host", "port", "timeout", "config", "session_owner"):
+        assert parameter in signature, ("Hidden constructor option", name, parameter)
+    assert "kwargs" not in signature, ("Forwarded constructor options not expanded", name)
 
 
 # Only top-level public modules/packages define canonical user imports.

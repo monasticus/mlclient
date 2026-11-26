@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15938,7 +15968,8 @@ Ordinary strings passed to builders remain externally bound values.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-556">556</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-555">555</a></span>
+<span class="normal"><a href="#__codelineno-0-556">556</a></span>
 <span class="normal"><a href="#__codelineno-0-557">557</a></span>
 <span class="normal"><a href="#__codelineno-0-558">558</a></span>
 <span class="normal"><a href="#__codelineno-0-559">559</a></span>
@@ -15960,31 +15991,30 @@ Ordinary strings passed to builders remain externally bound values.</p>
 <span class="normal"><a href="#__codelineno-0-575">575</a></span>
 <span class="normal"><a href="#__codelineno-0-576">576</a></span>
 <span class="normal"><a href="#__codelineno-0-577">577</a></span>
-<span class="normal"><a href="#__codelineno-0-578">578</a></span>
-<span class="normal"><a href="#__codelineno-0-579">579</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="k">def</span><span class="w"> </span><span class="nf">xpath</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a path validated before execution, including inside nested functions.</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">    source : str</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">        Non-empty extraction XPath, not arbitrary XQuery code. EQNames such as</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">        ``/Q{https://monasticus.com/mlclient/examples/example}item`` avoid relying</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">        on namespace declarations.</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="sd">    Path</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">        A path expression, validated by cts:valid-extract-path before evaluation.</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a><span class="sd">        Ordinary strings passed to builders remain externally bound values.</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">    TypeError</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">        If source is not a string.</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="sd">    ValueError</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">        If source is empty or whitespace-only.</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a>    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-578">578</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-555" name="__codelineno-0-555"></a><span class="k">def</span><span class="w"> </span><span class="nf">xpath</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a path validated before execution, including inside nested functions.</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">    source : str</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">        Non-empty extraction XPath, not arbitrary XQuery code. EQNames such as</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">        ``/Q{https://monasticus.com/mlclient/examples/example}item`` avoid relying</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">        on namespace declarations.</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">    Path</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="sd">        A path expression, validated by cts:valid-extract-path before evaluation.</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">        Ordinary strings passed to builders remain externally bound values.</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">    TypeError</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">        If source is not a string.</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">    ValueError</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="sd">        If source is empty or whitespace-only.</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a>    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

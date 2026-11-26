@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -25767,9 +25797,8 @@ resources.</p>
 
 <a href="#mlclient.xquery.Cts.directory_query" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">directory_query</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">uris</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">depth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DirectoryQuery</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">uris</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DirectoryQuery</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -25892,7 +25921,7 @@ URIs.</p>
 <span class="normal"><a href="#__codelineno-0-1217">1217</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1190" name="__codelineno-0-1190"></a><span class="nd">@staticmethod</span>
 <a id="__codelineno-0-1191" name="__codelineno-0-1191"></a><span class="k">def</span><span class="w"> </span><span class="nf">directory_query</span><span class="p">(</span>
 <a id="__codelineno-0-1192" name="__codelineno-0-1192"></a>    <span class="n">uris</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
-<a id="__codelineno-0-1193" name="__codelineno-0-1193"></a>    <span class="n">depth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-1193" name="__codelineno-0-1193"></a>    <span class="n">depth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-1194" name="__codelineno-0-1194"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DirectoryQuery</span><span class="p">:</span>
 <a id="__codelineno-0-1195" name="__codelineno-0-1195"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a composable ``cts:directory-query`` call.</span>
 <a id="__codelineno-0-1196" name="__codelineno-0-1196"></a>
@@ -67890,19 +67919,17 @@ score. "ascending" Return results in ascending order of score.</p>
 
 <a href="#mlclient.xquery.Cts.search" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">search</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">expression</span><span class="p">:</span> <span class="n">XqyExpression</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">quality_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">forest_ids</span><span class="p">:</span> <span class="nb">int</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FunctionCall</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">quality_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">forest_ids</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FunctionCall</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -68249,7 +68276,7 @@ document order.</p>
 <span class="normal"><a href="#__codelineno-0-10624">10624</a></span>
 <span class="normal"><a href="#__codelineno-0-10625">10625</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-10500" name="__codelineno-0-10500"></a><span class="nd">@staticmethod</span>
 <a id="__codelineno-0-10501" name="__codelineno-0-10501"></a><span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span>
-<a id="__codelineno-0-10502" name="__codelineno-0-10502"></a>    <span class="n">expression</span><span class="p">:</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-10502" name="__codelineno-0-10502"></a>    <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-10503" name="__codelineno-0-10503"></a>    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-10504" name="__codelineno-0-10504"></a>    <span class="o">*</span><span class="p">,</span>
 <a id="__codelineno-0-10505" name="__codelineno-0-10505"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

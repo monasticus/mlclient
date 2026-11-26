@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15838,7 +15868,12 @@
   </span>
 
 <a href="#mlclient.xquery.WordQuery" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">WordQuery</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">WordQuery</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">text</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -15923,39 +15958,51 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5400">5400</a></span>
-<span class="normal"><a href="#__codelineno-0-5401">5401</a></span>
-<span class="normal"><a href="#__codelineno-0-5402">5402</a></span>
-<span class="normal"><a href="#__codelineno-0-5403">5403</a></span>
-<span class="normal"><a href="#__codelineno-0-5404">5404</a></span>
-<span class="normal"><a href="#__codelineno-0-5405">5405</a></span>
-<span class="normal"><a href="#__codelineno-0-5406">5406</a></span>
-<span class="normal"><a href="#__codelineno-0-5407">5407</a></span>
-<span class="normal"><a href="#__codelineno-0-5408">5408</a></span>
-<span class="normal"><a href="#__codelineno-0-5409">5409</a></span>
-<span class="normal"><a href="#__codelineno-0-5410">5410</a></span>
-<span class="normal"><a href="#__codelineno-0-5411">5411</a></span>
-<span class="normal"><a href="#__codelineno-0-5412">5412</a></span>
-<span class="normal"><a href="#__codelineno-0-5413">5413</a></span>
-<span class="normal"><a href="#__codelineno-0-5414">5414</a></span>
-<span class="normal"><a href="#__codelineno-0-5415">5415</a></span>
-<span class="normal"><a href="#__codelineno-0-5416">5416</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5400" name="__codelineno-0-5400"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<a id="__codelineno-0-5401" name="__codelineno-0-5401"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot text, options and weight without changing native compilation.</span>
-<a id="__codelineno-0-5402" name="__codelineno-0-5402"></a>
-<a id="__codelineno-0-5403" name="__codelineno-0-5403"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-5404" name="__codelineno-0-5404"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-5405" name="__codelineno-0-5405"></a><span class="sd">    text : StringInput</span>
-<a id="__codelineno-0-5406" name="__codelineno-0-5406"></a><span class="sd">        Words or phrases, including arbitrary server-evaluated expressions.</span>
-<a id="__codelineno-0-5407" name="__codelineno-0-5407"></a><span class="sd">    options : StringInput, default None</span>
-<a id="__codelineno-0-5408" name="__codelineno-0-5408"></a><span class="sd">        Native word-query options.</span>
-<a id="__codelineno-0-5409" name="__codelineno-0-5409"></a><span class="sd">    weight : float or XqyExpression or None, default None</span>
-<a id="__codelineno-0-5410" name="__codelineno-0-5410"></a><span class="sd">        Native double weight, omitted when None.</span>
-<a id="__codelineno-0-5411" name="__codelineno-0-5411"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-5412" name="__codelineno-0-5412"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-5413" name="__codelineno-0-5413"></a>        <span class="n">text</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
-<a id="__codelineno-0-5414" name="__codelineno-0-5414"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-5415" name="__codelineno-0-5415"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-5416" name="__codelineno-0-5416"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5439">5439</a></span>
+<span class="normal"><a href="#__codelineno-0-5440">5440</a></span>
+<span class="normal"><a href="#__codelineno-0-5441">5441</a></span>
+<span class="normal"><a href="#__codelineno-0-5442">5442</a></span>
+<span class="normal"><a href="#__codelineno-0-5443">5443</a></span>
+<span class="normal"><a href="#__codelineno-0-5444">5444</a></span>
+<span class="normal"><a href="#__codelineno-0-5445">5445</a></span>
+<span class="normal"><a href="#__codelineno-0-5446">5446</a></span>
+<span class="normal"><a href="#__codelineno-0-5447">5447</a></span>
+<span class="normal"><a href="#__codelineno-0-5448">5448</a></span>
+<span class="normal"><a href="#__codelineno-0-5449">5449</a></span>
+<span class="normal"><a href="#__codelineno-0-5450">5450</a></span>
+<span class="normal"><a href="#__codelineno-0-5451">5451</a></span>
+<span class="normal"><a href="#__codelineno-0-5452">5452</a></span>
+<span class="normal"><a href="#__codelineno-0-5453">5453</a></span>
+<span class="normal"><a href="#__codelineno-0-5454">5454</a></span>
+<span class="normal"><a href="#__codelineno-0-5455">5455</a></span>
+<span class="normal"><a href="#__codelineno-0-5456">5456</a></span>
+<span class="normal"><a href="#__codelineno-0-5457">5457</a></span>
+<span class="normal"><a href="#__codelineno-0-5458">5458</a></span>
+<span class="normal"><a href="#__codelineno-0-5459">5459</a></span>
+<span class="normal"><a href="#__codelineno-0-5460">5460</a></span>
+<span class="normal"><a href="#__codelineno-0-5461">5461</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5439" name="__codelineno-0-5439"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-5440" name="__codelineno-0-5440"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-5441" name="__codelineno-0-5441"></a>    <span class="n">text</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
+<a id="__codelineno-0-5442" name="__codelineno-0-5442"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5443" name="__codelineno-0-5443"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5444" name="__codelineno-0-5444"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5445" name="__codelineno-0-5445"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-5446" name="__codelineno-0-5446"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot text, options and weight without changing native compilation.</span>
+<a id="__codelineno-0-5447" name="__codelineno-0-5447"></a>
+<a id="__codelineno-0-5448" name="__codelineno-0-5448"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-5449" name="__codelineno-0-5449"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-5450" name="__codelineno-0-5450"></a><span class="sd">    text : StringInput</span>
+<a id="__codelineno-0-5451" name="__codelineno-0-5451"></a><span class="sd">        Words or phrases, including arbitrary server-evaluated expressions.</span>
+<a id="__codelineno-0-5452" name="__codelineno-0-5452"></a><span class="sd">    options : StringInput, default None</span>
+<a id="__codelineno-0-5453" name="__codelineno-0-5453"></a><span class="sd">        Native word-query options.</span>
+<a id="__codelineno-0-5454" name="__codelineno-0-5454"></a><span class="sd">    weight : float or XqyExpression or None, default None</span>
+<a id="__codelineno-0-5455" name="__codelineno-0-5455"></a><span class="sd">        Native double weight, omitted when None.</span>
+<a id="__codelineno-0-5456" name="__codelineno-0-5456"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-5457" name="__codelineno-0-5457"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-5458" name="__codelineno-0-5458"></a>        <span class="n">text</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
+<a id="__codelineno-0-5459" name="__codelineno-0-5459"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-5460" name="__codelineno-0-5460"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-5461" name="__codelineno-0-5461"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

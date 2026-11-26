@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16880,7 +16910,7 @@
 <a id="__codelineno-0-162" name="__codelineno-0-162"></a><span class="sd">        A parsed DocumentsDisposition instance</span>
 <a id="__codelineno-0-163" name="__codelineno-0-163"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-164" name="__codelineno-0-164"></a>    <span class="n">m</span> <span class="o">=</span> <span class="n">_DispositionMapping</span>
-<a id="__codelineno-0-165" name="__codelineno-0-165"></a>    <span class="n">disp_dict</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-165" name="__codelineno-0-165"></a>    <span class="n">disp_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 <a id="__codelineno-0-166" name="__codelineno-0-166"></a>    <span class="k">for</span> <span class="n">disp</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">DISP_SEP</span><span class="p">):</span>
 <a id="__codelineno-0-167" name="__codelineno-0-167"></a>        <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_parse_header_part</span><span class="p">(</span><span class="n">disp</span><span class="p">)</span>
 <a id="__codelineno-0-168" name="__codelineno-0-168"></a>        <span class="n">curr_value</span> <span class="o">=</span> <span class="n">disp_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -16890,7 +16920,7 @@
 <a id="__codelineno-0-172" name="__codelineno-0-172"></a>            <span class="n">disp_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">curr_value</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span>
 <a id="__codelineno-0-173" name="__codelineno-0-173"></a>        <span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-0-174" name="__codelineno-0-174"></a>            <span class="n">curr_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">disp_dict</span><span class="p">)</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">disp_dict</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

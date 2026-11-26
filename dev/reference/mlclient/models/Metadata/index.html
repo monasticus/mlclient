@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16429,15 +16459,7 @@ re-serialize from the parsed state.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1123">1123</a></span>
-<span class="normal"><a href="#__codelineno-0-1124">1124</a></span>
-<span class="normal"><a href="#__codelineno-0-1125">1125</a></span>
-<span class="normal"><a href="#__codelineno-0-1126">1126</a></span>
-<span class="normal"><a href="#__codelineno-0-1127">1127</a></span>
-<span class="normal"><a href="#__codelineno-0-1128">1128</a></span>
-<span class="normal"><a href="#__codelineno-0-1129">1129</a></span>
-<span class="normal"><a href="#__codelineno-0-1130">1130</a></span>
-<span class="normal"><a href="#__codelineno-0-1131">1131</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1131">1131</a></span>
 <span class="normal"><a href="#__codelineno-0-1132">1132</a></span>
 <span class="normal"><a href="#__codelineno-0-1133">1133</a></span>
 <span class="normal"><a href="#__codelineno-0-1134">1134</a></span>
@@ -16472,50 +16494,58 @@ re-serialize from the parsed state.</p>
 <span class="normal"><a href="#__codelineno-0-1163">1163</a></span>
 <span class="normal"><a href="#__codelineno-0-1164">1164</a></span>
 <span class="normal"><a href="#__codelineno-0-1165">1165</a></span>
-<span class="normal"><a href="#__codelineno-0-1166">1166</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1123" name="__codelineno-0-1123"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-1124" name="__codelineno-0-1124"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1125" name="__codelineno-0-1125"></a>    <span class="n">collections</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1126" name="__codelineno-0-1126"></a>    <span class="n">permissions</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1127" name="__codelineno-0-1127"></a>    <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1128" name="__codelineno-0-1128"></a>    <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-0-1129" name="__codelineno-0-1129"></a>    <span class="n">metadata_values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1130" name="__codelineno-0-1130"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-1131" name="__codelineno-0-1131"></a>    <span class="n">raw</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1132" name="__codelineno-0-1132"></a><span class="p">):</span>
-<a id="__codelineno-0-1133" name="__codelineno-0-1133"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize Metadata instance.</span>
-<a id="__codelineno-0-1134" name="__codelineno-0-1134"></a>
-<a id="__codelineno-0-1135" name="__codelineno-0-1135"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1136" name="__codelineno-0-1136"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1137" name="__codelineno-0-1137"></a><span class="sd">    collections : list | None</span>
-<a id="__codelineno-0-1138" name="__codelineno-0-1138"></a><span class="sd">        Document collections&#39; list</span>
-<a id="__codelineno-0-1139" name="__codelineno-0-1139"></a><span class="sd">    permissions : list | None</span>
-<a id="__codelineno-0-1140" name="__codelineno-0-1140"></a><span class="sd">        Document permissions&#39; list</span>
-<a id="__codelineno-0-1141" name="__codelineno-0-1141"></a><span class="sd">    properties : dict | None</span>
-<a id="__codelineno-0-1142" name="__codelineno-0-1142"></a><span class="sd">        Document&#39;s properties</span>
-<a id="__codelineno-0-1143" name="__codelineno-0-1143"></a><span class="sd">    quality : int</span>
-<a id="__codelineno-0-1144" name="__codelineno-0-1144"></a><span class="sd">        Document&#39;s quality</span>
-<a id="__codelineno-0-1145" name="__codelineno-0-1145"></a><span class="sd">    metadata_values : dict | None</span>
-<a id="__codelineno-0-1146" name="__codelineno-0-1146"></a><span class="sd">        Document&#39;s metadata values</span>
-<a id="__codelineno-0-1147" name="__codelineno-0-1147"></a><span class="sd">    raw : bytes | str | None</span>
-<a id="__codelineno-0-1148" name="__codelineno-0-1148"></a><span class="sd">        Raw metadata payload. When set, parsing is deferred until a field</span>
-<a id="__codelineno-0-1149" name="__codelineno-0-1149"></a><span class="sd">        accessor is called. Format is auto-detected: a leading ``&lt;`` (after</span>
-<a id="__codelineno-0-1150" name="__codelineno-0-1150"></a><span class="sd">        whitespace) is treated as XML, anything else as JSON. Once parsed</span>
-<a id="__codelineno-0-1151" name="__codelineno-0-1151"></a><span class="sd">        the raw form is discarded and ``to_json_string`` / ``to_xml_string``</span>
-<a id="__codelineno-0-1152" name="__codelineno-0-1152"></a><span class="sd">        re-serialize from the parsed state.</span>
-<a id="__codelineno-0-1153" name="__codelineno-0-1153"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1154" name="__codelineno-0-1154"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">raw</span>
-<a id="__codelineno-0-1155" name="__codelineno-0-1155"></a>    <span class="k">if</span> <span class="n">raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-1156" name="__codelineno-0-1156"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-1157" name="__codelineno-0-1157"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-1158" name="__codelineno-0-1158"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-1159" name="__codelineno-0-1159"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-1160" name="__codelineno-0-1160"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-1161" name="__codelineno-0-1161"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-1162" name="__codelineno-0-1162"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">collections</span><span class="p">))</span> <span class="k">if</span> <span class="n">collections</span> <span class="k">else</span> <span class="p">[]</span>
-<a id="__codelineno-0-1163" name="__codelineno-0-1163"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_permissions</span><span class="p">(</span><span class="n">permissions</span><span class="p">)</span>
-<a id="__codelineno-0-1164" name="__codelineno-0-1164"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_dict</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
-<a id="__codelineno-0-1165" name="__codelineno-0-1165"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span> <span class="o">=</span> <span class="n">quality</span>
-<a id="__codelineno-0-1166" name="__codelineno-0-1166"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_dict</span><span class="p">(</span><span class="n">metadata_values</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-1166">1166</a></span>
+<span class="normal"><a href="#__codelineno-0-1167">1167</a></span>
+<span class="normal"><a href="#__codelineno-0-1168">1168</a></span>
+<span class="normal"><a href="#__codelineno-0-1169">1169</a></span>
+<span class="normal"><a href="#__codelineno-0-1170">1170</a></span>
+<span class="normal"><a href="#__codelineno-0-1171">1171</a></span>
+<span class="normal"><a href="#__codelineno-0-1172">1172</a></span>
+<span class="normal"><a href="#__codelineno-0-1173">1173</a></span>
+<span class="normal"><a href="#__codelineno-0-1174">1174</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1131" name="__codelineno-0-1131"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-1132" name="__codelineno-0-1132"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1133" name="__codelineno-0-1133"></a>    <span class="n">collections</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1134" name="__codelineno-0-1134"></a>    <span class="n">permissions</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1135" name="__codelineno-0-1135"></a>    <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1136" name="__codelineno-0-1136"></a>    <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-0-1137" name="__codelineno-0-1137"></a>    <span class="n">metadata_values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1138" name="__codelineno-0-1138"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-1139" name="__codelineno-0-1139"></a>    <span class="n">raw</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1140" name="__codelineno-0-1140"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1141" name="__codelineno-0-1141"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize Metadata instance.</span>
+<a id="__codelineno-0-1142" name="__codelineno-0-1142"></a>
+<a id="__codelineno-0-1143" name="__codelineno-0-1143"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1144" name="__codelineno-0-1144"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1145" name="__codelineno-0-1145"></a><span class="sd">    collections : list | None</span>
+<a id="__codelineno-0-1146" name="__codelineno-0-1146"></a><span class="sd">        Document collections&#39; list</span>
+<a id="__codelineno-0-1147" name="__codelineno-0-1147"></a><span class="sd">    permissions : list | None</span>
+<a id="__codelineno-0-1148" name="__codelineno-0-1148"></a><span class="sd">        Document permissions&#39; list</span>
+<a id="__codelineno-0-1149" name="__codelineno-0-1149"></a><span class="sd">    properties : dict | None</span>
+<a id="__codelineno-0-1150" name="__codelineno-0-1150"></a><span class="sd">        Document&#39;s properties</span>
+<a id="__codelineno-0-1151" name="__codelineno-0-1151"></a><span class="sd">    quality : int</span>
+<a id="__codelineno-0-1152" name="__codelineno-0-1152"></a><span class="sd">        Document&#39;s quality</span>
+<a id="__codelineno-0-1153" name="__codelineno-0-1153"></a><span class="sd">    metadata_values : dict | None</span>
+<a id="__codelineno-0-1154" name="__codelineno-0-1154"></a><span class="sd">        Document&#39;s metadata values</span>
+<a id="__codelineno-0-1155" name="__codelineno-0-1155"></a><span class="sd">    raw : bytes | str | None</span>
+<a id="__codelineno-0-1156" name="__codelineno-0-1156"></a><span class="sd">        Raw metadata payload. When set, parsing is deferred until a field</span>
+<a id="__codelineno-0-1157" name="__codelineno-0-1157"></a><span class="sd">        accessor is called. Format is auto-detected: a leading ``&lt;`` (after</span>
+<a id="__codelineno-0-1158" name="__codelineno-0-1158"></a><span class="sd">        whitespace) is treated as XML, anything else as JSON. Once parsed</span>
+<a id="__codelineno-0-1159" name="__codelineno-0-1159"></a><span class="sd">        the raw form is discarded and ``to_json_string`` / ``to_xml_string``</span>
+<a id="__codelineno-0-1160" name="__codelineno-0-1160"></a><span class="sd">        re-serialize from the parsed state.</span>
+<a id="__codelineno-0-1161" name="__codelineno-0-1161"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1162" name="__codelineno-0-1162"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">raw</span>
+<a id="__codelineno-0-1163" name="__codelineno-0-1163"></a>    <span class="k">if</span> <span class="n">raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1164" name="__codelineno-0-1164"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-1165" name="__codelineno-0-1165"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-1166" name="__codelineno-0-1166"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-1167" name="__codelineno-0-1167"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-0-1168" name="__codelineno-0-1168"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-1169" name="__codelineno-0-1169"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-1170" name="__codelineno-0-1170"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">collections</span><span class="p">))</span> <span class="k">if</span> <span class="n">collections</span> <span class="k">else</span> <span class="p">[]</span>
+<a id="__codelineno-0-1171" name="__codelineno-0-1171"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_permissions</span><span class="p">(</span><span class="n">permissions</span><span class="p">)</span>
+<a id="__codelineno-0-1172" name="__codelineno-0-1172"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_dict</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+<a id="__codelineno-0-1173" name="__codelineno-0-1173"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span> <span class="o">=</span> <span class="n">quality</span>
+<a id="__codelineno-0-1174" name="__codelineno-0-1174"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_dict</span><span class="p">(</span><span class="n">metadata_values</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16605,15 +16635,7 @@ in document's collections. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1328">1328</a></span>
-<span class="normal"><a href="#__codelineno-0-1329">1329</a></span>
-<span class="normal"><a href="#__codelineno-0-1330">1330</a></span>
-<span class="normal"><a href="#__codelineno-0-1331">1331</a></span>
-<span class="normal"><a href="#__codelineno-0-1332">1332</a></span>
-<span class="normal"><a href="#__codelineno-0-1333">1333</a></span>
-<span class="normal"><a href="#__codelineno-0-1334">1334</a></span>
-<span class="normal"><a href="#__codelineno-0-1335">1335</a></span>
-<span class="normal"><a href="#__codelineno-0-1336">1336</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1336">1336</a></span>
 <span class="normal"><a href="#__codelineno-0-1337">1337</a></span>
 <span class="normal"><a href="#__codelineno-0-1338">1338</a></span>
 <span class="normal"><a href="#__codelineno-0-1339">1339</a></span>
@@ -16629,31 +16651,39 @@ in document's collections. Otherwise, False.</p>
 <span class="normal"><a href="#__codelineno-0-1349">1349</a></span>
 <span class="normal"><a href="#__codelineno-0-1350">1350</a></span>
 <span class="normal"><a href="#__codelineno-0-1351">1351</a></span>
-<span class="normal"><a href="#__codelineno-0-1352">1352</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1328" name="__codelineno-0-1328"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_collection</span><span class="p">(</span>
-<a id="__codelineno-0-1329" name="__codelineno-0-1329"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1330" name="__codelineno-0-1330"></a>    <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1331" name="__codelineno-0-1331"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1332" name="__codelineno-0-1332"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new collection to document.</span>
-<a id="__codelineno-0-1333" name="__codelineno-0-1333"></a>
-<a id="__codelineno-0-1334" name="__codelineno-0-1334"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1335" name="__codelineno-0-1335"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1336" name="__codelineno-0-1336"></a><span class="sd">    collection : str</span>
-<a id="__codelineno-0-1337" name="__codelineno-0-1337"></a><span class="sd">        A document&#39;s new collection</span>
-<a id="__codelineno-0-1338" name="__codelineno-0-1338"></a>
-<a id="__codelineno-0-1339" name="__codelineno-0-1339"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1340" name="__codelineno-0-1340"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1341" name="__codelineno-0-1341"></a><span class="sd">    allow : bool</span>
-<a id="__codelineno-0-1342" name="__codelineno-0-1342"></a><span class="sd">        True if the collection is non-blank value, and it does not appear already</span>
-<a id="__codelineno-0-1343" name="__codelineno-0-1343"></a><span class="sd">        in document&#39;s collections. Otherwise, False.</span>
-<a id="__codelineno-0-1344" name="__codelineno-0-1344"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1345" name="__codelineno-0-1345"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-1346" name="__codelineno-0-1346"></a>        <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-<a id="__codelineno-0-1347" name="__codelineno-0-1347"></a>        <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">s*$&quot;</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
-<a id="__codelineno-0-1348" name="__codelineno-0-1348"></a>        <span class="ow">and</span> <span class="n">collection</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">()</span>
-<a id="__codelineno-0-1349" name="__codelineno-0-1349"></a>    <span class="p">)</span>
-<a id="__codelineno-0-1350" name="__codelineno-0-1350"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
-<a id="__codelineno-0-1351" name="__codelineno-0-1351"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
-<a id="__codelineno-0-1352" name="__codelineno-0-1352"></a>    <span class="k">return</span> <span class="n">allow</span>
+<span class="normal"><a href="#__codelineno-0-1352">1352</a></span>
+<span class="normal"><a href="#__codelineno-0-1353">1353</a></span>
+<span class="normal"><a href="#__codelineno-0-1354">1354</a></span>
+<span class="normal"><a href="#__codelineno-0-1355">1355</a></span>
+<span class="normal"><a href="#__codelineno-0-1356">1356</a></span>
+<span class="normal"><a href="#__codelineno-0-1357">1357</a></span>
+<span class="normal"><a href="#__codelineno-0-1358">1358</a></span>
+<span class="normal"><a href="#__codelineno-0-1359">1359</a></span>
+<span class="normal"><a href="#__codelineno-0-1360">1360</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1336" name="__codelineno-0-1336"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_collection</span><span class="p">(</span>
+<a id="__codelineno-0-1337" name="__codelineno-0-1337"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1338" name="__codelineno-0-1338"></a>    <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1339" name="__codelineno-0-1339"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1340" name="__codelineno-0-1340"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new collection to document.</span>
+<a id="__codelineno-0-1341" name="__codelineno-0-1341"></a>
+<a id="__codelineno-0-1342" name="__codelineno-0-1342"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1343" name="__codelineno-0-1343"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1344" name="__codelineno-0-1344"></a><span class="sd">    collection : str</span>
+<a id="__codelineno-0-1345" name="__codelineno-0-1345"></a><span class="sd">        A document&#39;s new collection</span>
+<a id="__codelineno-0-1346" name="__codelineno-0-1346"></a>
+<a id="__codelineno-0-1347" name="__codelineno-0-1347"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1348" name="__codelineno-0-1348"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1349" name="__codelineno-0-1349"></a><span class="sd">    allow : bool</span>
+<a id="__codelineno-0-1350" name="__codelineno-0-1350"></a><span class="sd">        True if the collection is non-blank value, and it does not appear already</span>
+<a id="__codelineno-0-1351" name="__codelineno-0-1351"></a><span class="sd">        in document&#39;s collections. Otherwise, False.</span>
+<a id="__codelineno-0-1352" name="__codelineno-0-1352"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1353" name="__codelineno-0-1353"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-1354" name="__codelineno-0-1354"></a>        <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<a id="__codelineno-0-1355" name="__codelineno-0-1355"></a>        <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">s*$&quot;</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+<a id="__codelineno-0-1356" name="__codelineno-0-1356"></a>        <span class="ow">and</span> <span class="n">collection</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">()</span>
+<a id="__codelineno-0-1357" name="__codelineno-0-1357"></a>    <span class="p">)</span>
+<a id="__codelineno-0-1358" name="__codelineno-0-1358"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+<a id="__codelineno-0-1359" name="__codelineno-0-1359"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+<a id="__codelineno-0-1360" name="__codelineno-0-1360"></a>    <span class="k">return</span> <span class="n">allow</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16749,15 +16779,7 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1354">1354</a></span>
-<span class="normal"><a href="#__codelineno-0-1355">1355</a></span>
-<span class="normal"><a href="#__codelineno-0-1356">1356</a></span>
-<span class="normal"><a href="#__codelineno-0-1357">1357</a></span>
-<span class="normal"><a href="#__codelineno-0-1358">1358</a></span>
-<span class="normal"><a href="#__codelineno-0-1359">1359</a></span>
-<span class="normal"><a href="#__codelineno-0-1360">1360</a></span>
-<span class="normal"><a href="#__codelineno-0-1361">1361</a></span>
-<span class="normal"><a href="#__codelineno-0-1362">1362</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1362">1362</a></span>
 <span class="normal"><a href="#__codelineno-0-1363">1363</a></span>
 <span class="normal"><a href="#__codelineno-0-1364">1364</a></span>
 <span class="normal"><a href="#__codelineno-0-1365">1365</a></span>
@@ -16778,36 +16800,44 @@ a correct one. Otherwise, False.</p>
 <span class="normal"><a href="#__codelineno-0-1380">1380</a></span>
 <span class="normal"><a href="#__codelineno-0-1381">1381</a></span>
 <span class="normal"><a href="#__codelineno-0-1382">1382</a></span>
-<span class="normal"><a href="#__codelineno-0-1383">1383</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1354" name="__codelineno-0-1354"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_permission</span><span class="p">(</span>
-<a id="__codelineno-0-1355" name="__codelineno-0-1355"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1356" name="__codelineno-0-1356"></a>    <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1357" name="__codelineno-0-1357"></a>    <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1358" name="__codelineno-0-1358"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1359" name="__codelineno-0-1359"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new permission to document.</span>
-<a id="__codelineno-0-1360" name="__codelineno-0-1360"></a>
-<a id="__codelineno-0-1361" name="__codelineno-0-1361"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1362" name="__codelineno-0-1362"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1363" name="__codelineno-0-1363"></a><span class="sd">    role_name : str</span>
-<a id="__codelineno-0-1364" name="__codelineno-0-1364"></a><span class="sd">        a permission&#39;s role name</span>
-<a id="__codelineno-0-1365" name="__codelineno-0-1365"></a><span class="sd">    capability : str</span>
-<a id="__codelineno-0-1366" name="__codelineno-0-1366"></a><span class="sd">        a permission&#39;s capability</span>
-<a id="__codelineno-0-1367" name="__codelineno-0-1367"></a>
-<a id="__codelineno-0-1368" name="__codelineno-0-1368"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1369" name="__codelineno-0-1369"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1370" name="__codelineno-0-1370"></a><span class="sd">    bool</span>
-<a id="__codelineno-0-1371" name="__codelineno-0-1371"></a><span class="sd">        True if there&#39;s no such capability assigned to this role already, and it is</span>
-<a id="__codelineno-0-1372" name="__codelineno-0-1372"></a><span class="sd">        a correct one. Otherwise, False.</span>
-<a id="__codelineno-0-1373" name="__codelineno-0-1373"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1374" name="__codelineno-0-1374"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="n">role_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-<a id="__codelineno-0-1375" name="__codelineno-0-1375"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
-<a id="__codelineno-0-1376" name="__codelineno-0-1376"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1377" name="__codelineno-0-1377"></a>        <span class="n">permission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permission_for_role</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">,</span> <span class="n">role_name</span><span class="p">)</span>
-<a id="__codelineno-0-1378" name="__codelineno-0-1378"></a>        <span class="k">if</span> <span class="n">permission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-1379" name="__codelineno-0-1379"></a>            <span class="k">return</span> <span class="n">permission</span><span class="o">.</span><span class="n">add_capability</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
-<a id="__codelineno-0-1380" name="__codelineno-0-1380"></a>
-<a id="__codelineno-0-1381" name="__codelineno-0-1381"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Permission</span><span class="p">(</span><span class="n">role_name</span><span class="p">,</span> <span class="p">{</span><span class="n">capability</span><span class="p">}))</span>
-<a id="__codelineno-0-1382" name="__codelineno-0-1382"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-1383" name="__codelineno-0-1383"></a>    <span class="k">return</span> <span class="n">allow</span>
+<span class="normal"><a href="#__codelineno-0-1383">1383</a></span>
+<span class="normal"><a href="#__codelineno-0-1384">1384</a></span>
+<span class="normal"><a href="#__codelineno-0-1385">1385</a></span>
+<span class="normal"><a href="#__codelineno-0-1386">1386</a></span>
+<span class="normal"><a href="#__codelineno-0-1387">1387</a></span>
+<span class="normal"><a href="#__codelineno-0-1388">1388</a></span>
+<span class="normal"><a href="#__codelineno-0-1389">1389</a></span>
+<span class="normal"><a href="#__codelineno-0-1390">1390</a></span>
+<span class="normal"><a href="#__codelineno-0-1391">1391</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1362" name="__codelineno-0-1362"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_permission</span><span class="p">(</span>
+<a id="__codelineno-0-1363" name="__codelineno-0-1363"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1364" name="__codelineno-0-1364"></a>    <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1365" name="__codelineno-0-1365"></a>    <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1366" name="__codelineno-0-1366"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1367" name="__codelineno-0-1367"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new permission to document.</span>
+<a id="__codelineno-0-1368" name="__codelineno-0-1368"></a>
+<a id="__codelineno-0-1369" name="__codelineno-0-1369"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1370" name="__codelineno-0-1370"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1371" name="__codelineno-0-1371"></a><span class="sd">    role_name : str</span>
+<a id="__codelineno-0-1372" name="__codelineno-0-1372"></a><span class="sd">        a permission&#39;s role name</span>
+<a id="__codelineno-0-1373" name="__codelineno-0-1373"></a><span class="sd">    capability : str</span>
+<a id="__codelineno-0-1374" name="__codelineno-0-1374"></a><span class="sd">        a permission&#39;s capability</span>
+<a id="__codelineno-0-1375" name="__codelineno-0-1375"></a>
+<a id="__codelineno-0-1376" name="__codelineno-0-1376"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1377" name="__codelineno-0-1377"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1378" name="__codelineno-0-1378"></a><span class="sd">    bool</span>
+<a id="__codelineno-0-1379" name="__codelineno-0-1379"></a><span class="sd">        True if there&#39;s no such capability assigned to this role already, and it is</span>
+<a id="__codelineno-0-1380" name="__codelineno-0-1380"></a><span class="sd">        a correct one. Otherwise, False.</span>
+<a id="__codelineno-0-1381" name="__codelineno-0-1381"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1382" name="__codelineno-0-1382"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="n">role_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<a id="__codelineno-0-1383" name="__codelineno-0-1383"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+<a id="__codelineno-0-1384" name="__codelineno-0-1384"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1385" name="__codelineno-0-1385"></a>        <span class="n">permission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permission_for_role</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">,</span> <span class="n">role_name</span><span class="p">)</span>
+<a id="__codelineno-0-1386" name="__codelineno-0-1386"></a>        <span class="k">if</span> <span class="n">permission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1387" name="__codelineno-0-1387"></a>            <span class="k">return</span> <span class="n">permission</span><span class="o">.</span><span class="n">add_capability</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
+<a id="__codelineno-0-1388" name="__codelineno-0-1388"></a>
+<a id="__codelineno-0-1389" name="__codelineno-0-1389"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Permission</span><span class="p">(</span><span class="n">role_name</span><span class="p">,</span> <span class="p">{</span><span class="n">capability</span><span class="p">}))</span>
+<a id="__codelineno-0-1390" name="__codelineno-0-1390"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1391" name="__codelineno-0-1391"></a>    <span class="k">return</span> <span class="n">allow</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16832,17 +16862,17 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1248">1248</a></span>
-<span class="normal"><a href="#__codelineno-0-1249">1249</a></span>
-<span class="normal"><a href="#__codelineno-0-1250">1250</a></span>
-<span class="normal"><a href="#__codelineno-0-1251">1251</a></span>
-<span class="normal"><a href="#__codelineno-0-1252">1252</a></span>
-<span class="normal"><a href="#__codelineno-0-1253">1253</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1248" name="__codelineno-0-1248"></a><span class="k">def</span><span class="w"> </span><span class="nf">collections</span><span class="p">(</span>
-<a id="__codelineno-0-1249" name="__codelineno-0-1249"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1250" name="__codelineno-0-1250"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<a id="__codelineno-0-1251" name="__codelineno-0-1251"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s collections.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-1252" name="__codelineno-0-1252"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1253" name="__codelineno-0-1253"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1256">1256</a></span>
+<span class="normal"><a href="#__codelineno-0-1257">1257</a></span>
+<span class="normal"><a href="#__codelineno-0-1258">1258</a></span>
+<span class="normal"><a href="#__codelineno-0-1259">1259</a></span>
+<span class="normal"><a href="#__codelineno-0-1260">1260</a></span>
+<span class="normal"><a href="#__codelineno-0-1261">1261</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1256" name="__codelineno-0-1256"></a><span class="k">def</span><span class="w"> </span><span class="nf">collections</span><span class="p">(</span>
+<a id="__codelineno-0-1257" name="__codelineno-0-1257"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1258" name="__codelineno-0-1258"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<a id="__codelineno-0-1259" name="__codelineno-0-1259"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s collections.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-1260" name="__codelineno-0-1260"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1261" name="__codelineno-0-1261"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16925,49 +16955,49 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-972">972</a></span>
-<span class="normal"><a href="#__codelineno-0-973">973</a></span>
-<span class="normal"><a href="#__codelineno-0-974">974</a></span>
-<span class="normal"><a href="#__codelineno-0-975">975</a></span>
-<span class="normal"><a href="#__codelineno-0-976">976</a></span>
-<span class="normal"><a href="#__codelineno-0-977">977</a></span>
-<span class="normal"><a href="#__codelineno-0-978">978</a></span>
-<span class="normal"><a href="#__codelineno-0-979">979</a></span>
-<span class="normal"><a href="#__codelineno-0-980">980</a></span>
-<span class="normal"><a href="#__codelineno-0-981">981</a></span>
-<span class="normal"><a href="#__codelineno-0-982">982</a></span>
-<span class="normal"><a href="#__codelineno-0-983">983</a></span>
-<span class="normal"><a href="#__codelineno-0-984">984</a></span>
-<span class="normal"><a href="#__codelineno-0-985">985</a></span>
-<span class="normal"><a href="#__codelineno-0-986">986</a></span>
-<span class="normal"><a href="#__codelineno-0-987">987</a></span>
-<span class="normal"><a href="#__codelineno-0-988">988</a></span>
-<span class="normal"><a href="#__codelineno-0-989">989</a></span>
-<span class="normal"><a href="#__codelineno-0-990">990</a></span>
-<span class="normal"><a href="#__codelineno-0-991">991</a></span>
-<span class="normal"><a href="#__codelineno-0-992">992</a></span>
-<span class="normal"><a href="#__codelineno-0-993">993</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-972" name="__codelineno-0-972"></a><span class="nd">@classmethod</span>
-<a id="__codelineno-0-973" name="__codelineno-0-973"></a><span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span>
-<a id="__codelineno-0-974" name="__codelineno-0-974"></a>    <span class="bp">cls</span><span class="p">,</span>
-<a id="__codelineno-0-975" name="__codelineno-0-975"></a>    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-976" name="__codelineno-0-976"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metadata</span><span class="p">:</span>
-<a id="__codelineno-0-977" name="__codelineno-0-977"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a Metadata instance from a file.</span>
-<a id="__codelineno-0-978" name="__codelineno-0-978"></a>
-<a id="__codelineno-0-979" name="__codelineno-0-979"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-980" name="__codelineno-0-980"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-981" name="__codelineno-0-981"></a><span class="sd">    file_path : str</span>
-<a id="__codelineno-0-982" name="__codelineno-0-982"></a><span class="sd">        A metadata file path</span>
-<a id="__codelineno-0-983" name="__codelineno-0-983"></a>
-<a id="__codelineno-0-984" name="__codelineno-0-984"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-985" name="__codelineno-0-985"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-986" name="__codelineno-0-986"></a><span class="sd">    Metadata</span>
-<a id="__codelineno-0-987" name="__codelineno-0-987"></a><span class="sd">        A Metadata instance</span>
-<a id="__codelineno-0-988" name="__codelineno-0-988"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-989" name="__codelineno-0-989"></a>    <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-<a id="__codelineno-0-990" name="__codelineno-0-990"></a>    <span class="k">with</span> <span class="n">file_path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-<a id="__codelineno-0-991" name="__codelineno-0-991"></a>        <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-992" name="__codelineno-0-992"></a>            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_json_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-<a id="__codelineno-0-993" name="__codelineno-0-993"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_xml_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-980"> 980</a></span>
+<span class="normal"><a href="#__codelineno-0-981"> 981</a></span>
+<span class="normal"><a href="#__codelineno-0-982"> 982</a></span>
+<span class="normal"><a href="#__codelineno-0-983"> 983</a></span>
+<span class="normal"><a href="#__codelineno-0-984"> 984</a></span>
+<span class="normal"><a href="#__codelineno-0-985"> 985</a></span>
+<span class="normal"><a href="#__codelineno-0-986"> 986</a></span>
+<span class="normal"><a href="#__codelineno-0-987"> 987</a></span>
+<span class="normal"><a href="#__codelineno-0-988"> 988</a></span>
+<span class="normal"><a href="#__codelineno-0-989"> 989</a></span>
+<span class="normal"><a href="#__codelineno-0-990"> 990</a></span>
+<span class="normal"><a href="#__codelineno-0-991"> 991</a></span>
+<span class="normal"><a href="#__codelineno-0-992"> 992</a></span>
+<span class="normal"><a href="#__codelineno-0-993"> 993</a></span>
+<span class="normal"><a href="#__codelineno-0-994"> 994</a></span>
+<span class="normal"><a href="#__codelineno-0-995"> 995</a></span>
+<span class="normal"><a href="#__codelineno-0-996"> 996</a></span>
+<span class="normal"><a href="#__codelineno-0-997"> 997</a></span>
+<span class="normal"><a href="#__codelineno-0-998"> 998</a></span>
+<span class="normal"><a href="#__codelineno-0-999"> 999</a></span>
+<span class="normal"><a href="#__codelineno-0-1000">1000</a></span>
+<span class="normal"><a href="#__codelineno-0-1001">1001</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-980" name="__codelineno-0-980"></a><span class="nd">@classmethod</span>
+<a id="__codelineno-0-981" name="__codelineno-0-981"></a><span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span>
+<a id="__codelineno-0-982" name="__codelineno-0-982"></a>    <span class="bp">cls</span><span class="p">,</span>
+<a id="__codelineno-0-983" name="__codelineno-0-983"></a>    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-984" name="__codelineno-0-984"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metadata</span><span class="p">:</span>
+<a id="__codelineno-0-985" name="__codelineno-0-985"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a Metadata instance from a file.</span>
+<a id="__codelineno-0-986" name="__codelineno-0-986"></a>
+<a id="__codelineno-0-987" name="__codelineno-0-987"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-988" name="__codelineno-0-988"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-989" name="__codelineno-0-989"></a><span class="sd">    file_path : str</span>
+<a id="__codelineno-0-990" name="__codelineno-0-990"></a><span class="sd">        A metadata file path</span>
+<a id="__codelineno-0-991" name="__codelineno-0-991"></a>
+<a id="__codelineno-0-992" name="__codelineno-0-992"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-993" name="__codelineno-0-993"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-994" name="__codelineno-0-994"></a><span class="sd">    Metadata</span>
+<a id="__codelineno-0-995" name="__codelineno-0-995"></a><span class="sd">        A Metadata instance</span>
+<a id="__codelineno-0-996" name="__codelineno-0-996"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-997" name="__codelineno-0-997"></a>    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+<a id="__codelineno-0-998" name="__codelineno-0-998"></a>    <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-0-999" name="__codelineno-0-999"></a>        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-1000" name="__codelineno-0-1000"></a>            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_json_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-0-1001" name="__codelineno-0-1001"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_xml_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16992,17 +17022,17 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1276">1276</a></span>
-<span class="normal"><a href="#__codelineno-0-1277">1277</a></span>
-<span class="normal"><a href="#__codelineno-0-1278">1278</a></span>
-<span class="normal"><a href="#__codelineno-0-1279">1279</a></span>
-<span class="normal"><a href="#__codelineno-0-1280">1280</a></span>
-<span class="normal"><a href="#__codelineno-0-1281">1281</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1276" name="__codelineno-0-1276"></a><span class="k">def</span><span class="w"> </span><span class="nf">metadata_values</span><span class="p">(</span>
-<a id="__codelineno-0-1277" name="__codelineno-0-1277"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1278" name="__codelineno-0-1278"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-0-1279" name="__codelineno-0-1279"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s metadata values.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-1280" name="__codelineno-0-1280"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1281" name="__codelineno-0-1281"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1284">1284</a></span>
+<span class="normal"><a href="#__codelineno-0-1285">1285</a></span>
+<span class="normal"><a href="#__codelineno-0-1286">1286</a></span>
+<span class="normal"><a href="#__codelineno-0-1287">1287</a></span>
+<span class="normal"><a href="#__codelineno-0-1288">1288</a></span>
+<span class="normal"><a href="#__codelineno-0-1289">1289</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1284" name="__codelineno-0-1284"></a><span class="k">def</span><span class="w"> </span><span class="nf">metadata_values</span><span class="p">(</span>
+<a id="__codelineno-0-1285" name="__codelineno-0-1285"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1286" name="__codelineno-0-1286"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-0-1287" name="__codelineno-0-1287"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s metadata values.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-1288" name="__codelineno-0-1288"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1289" name="__codelineno-0-1289"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17027,17 +17057,17 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1255">1255</a></span>
-<span class="normal"><a href="#__codelineno-0-1256">1256</a></span>
-<span class="normal"><a href="#__codelineno-0-1257">1257</a></span>
-<span class="normal"><a href="#__codelineno-0-1258">1258</a></span>
-<span class="normal"><a href="#__codelineno-0-1259">1259</a></span>
-<span class="normal"><a href="#__codelineno-0-1260">1260</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1255" name="__codelineno-0-1255"></a><span class="k">def</span><span class="w"> </span><span class="nf">permissions</span><span class="p">(</span>
-<a id="__codelineno-0-1256" name="__codelineno-0-1256"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1257" name="__codelineno-0-1257"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<a id="__codelineno-0-1258" name="__codelineno-0-1258"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s permissions.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-1259" name="__codelineno-0-1259"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1260" name="__codelineno-0-1260"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span> <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">]</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1263">1263</a></span>
+<span class="normal"><a href="#__codelineno-0-1264">1264</a></span>
+<span class="normal"><a href="#__codelineno-0-1265">1265</a></span>
+<span class="normal"><a href="#__codelineno-0-1266">1266</a></span>
+<span class="normal"><a href="#__codelineno-0-1267">1267</a></span>
+<span class="normal"><a href="#__codelineno-0-1268">1268</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1263" name="__codelineno-0-1263"></a><span class="k">def</span><span class="w"> </span><span class="nf">permissions</span><span class="p">(</span>
+<a id="__codelineno-0-1264" name="__codelineno-0-1264"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1265" name="__codelineno-0-1265"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<a id="__codelineno-0-1266" name="__codelineno-0-1266"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s permissions.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-1267" name="__codelineno-0-1267"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1268" name="__codelineno-0-1268"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span> <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17062,17 +17092,17 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1262">1262</a></span>
-<span class="normal"><a href="#__codelineno-0-1263">1263</a></span>
-<span class="normal"><a href="#__codelineno-0-1264">1264</a></span>
-<span class="normal"><a href="#__codelineno-0-1265">1265</a></span>
-<span class="normal"><a href="#__codelineno-0-1266">1266</a></span>
-<span class="normal"><a href="#__codelineno-0-1267">1267</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1262" name="__codelineno-0-1262"></a><span class="k">def</span><span class="w"> </span><span class="nf">properties</span><span class="p">(</span>
-<a id="__codelineno-0-1263" name="__codelineno-0-1263"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1264" name="__codelineno-0-1264"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-0-1265" name="__codelineno-0-1265"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s properties.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-1266" name="__codelineno-0-1266"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1267" name="__codelineno-0-1267"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1270">1270</a></span>
+<span class="normal"><a href="#__codelineno-0-1271">1271</a></span>
+<span class="normal"><a href="#__codelineno-0-1272">1272</a></span>
+<span class="normal"><a href="#__codelineno-0-1273">1273</a></span>
+<span class="normal"><a href="#__codelineno-0-1274">1274</a></span>
+<span class="normal"><a href="#__codelineno-0-1275">1275</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1270" name="__codelineno-0-1270"></a><span class="k">def</span><span class="w"> </span><span class="nf">properties</span><span class="p">(</span>
+<a id="__codelineno-0-1271" name="__codelineno-0-1271"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1272" name="__codelineno-0-1272"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-0-1273" name="__codelineno-0-1273"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s properties.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-1274" name="__codelineno-0-1274"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1275" name="__codelineno-0-1275"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17087,7 +17117,7 @@ a correct one. Otherwise, False.</p>
 
 
 <a href="#mlclient.models.Metadata.put_metadata_value" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">put_metadata_value</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">put_metadata_value</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17144,15 +17174,7 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1403">1403</a></span>
-<span class="normal"><a href="#__codelineno-0-1404">1404</a></span>
-<span class="normal"><a href="#__codelineno-0-1405">1405</a></span>
-<span class="normal"><a href="#__codelineno-0-1406">1406</a></span>
-<span class="normal"><a href="#__codelineno-0-1407">1407</a></span>
-<span class="normal"><a href="#__codelineno-0-1408">1408</a></span>
-<span class="normal"><a href="#__codelineno-0-1409">1409</a></span>
-<span class="normal"><a href="#__codelineno-0-1410">1410</a></span>
-<span class="normal"><a href="#__codelineno-0-1411">1411</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1411">1411</a></span>
 <span class="normal"><a href="#__codelineno-0-1412">1412</a></span>
 <span class="normal"><a href="#__codelineno-0-1413">1413</a></span>
 <span class="normal"><a href="#__codelineno-0-1414">1414</a></span>
@@ -17160,23 +17182,31 @@ a correct one. Otherwise, False.</p>
 <span class="normal"><a href="#__codelineno-0-1416">1416</a></span>
 <span class="normal"><a href="#__codelineno-0-1417">1417</a></span>
 <span class="normal"><a href="#__codelineno-0-1418">1418</a></span>
-<span class="normal"><a href="#__codelineno-0-1419">1419</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1403" name="__codelineno-0-1403"></a><span class="k">def</span><span class="w"> </span><span class="nf">put_metadata_value</span><span class="p">(</span>
-<a id="__codelineno-0-1404" name="__codelineno-0-1404"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1405" name="__codelineno-0-1405"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1406" name="__codelineno-0-1406"></a>    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1407" name="__codelineno-0-1407"></a><span class="p">):</span>
-<a id="__codelineno-0-1408" name="__codelineno-0-1408"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new metadata value to document.</span>
-<a id="__codelineno-0-1409" name="__codelineno-0-1409"></a>
-<a id="__codelineno-0-1410" name="__codelineno-0-1410"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1411" name="__codelineno-0-1411"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1412" name="__codelineno-0-1412"></a><span class="sd">    name : str</span>
-<a id="__codelineno-0-1413" name="__codelineno-0-1413"></a><span class="sd">        A metadata name</span>
-<a id="__codelineno-0-1414" name="__codelineno-0-1414"></a><span class="sd">    value : str</span>
-<a id="__codelineno-0-1415" name="__codelineno-0-1415"></a><span class="sd">        A metadata value</span>
-<a id="__codelineno-0-1416" name="__codelineno-0-1416"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1417" name="__codelineno-0-1417"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
-<a id="__codelineno-0-1418" name="__codelineno-0-1418"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1419" name="__codelineno-0-1419"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<span class="normal"><a href="#__codelineno-0-1419">1419</a></span>
+<span class="normal"><a href="#__codelineno-0-1420">1420</a></span>
+<span class="normal"><a href="#__codelineno-0-1421">1421</a></span>
+<span class="normal"><a href="#__codelineno-0-1422">1422</a></span>
+<span class="normal"><a href="#__codelineno-0-1423">1423</a></span>
+<span class="normal"><a href="#__codelineno-0-1424">1424</a></span>
+<span class="normal"><a href="#__codelineno-0-1425">1425</a></span>
+<span class="normal"><a href="#__codelineno-0-1426">1426</a></span>
+<span class="normal"><a href="#__codelineno-0-1427">1427</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1411" name="__codelineno-0-1411"></a><span class="k">def</span><span class="w"> </span><span class="nf">put_metadata_value</span><span class="p">(</span>
+<a id="__codelineno-0-1412" name="__codelineno-0-1412"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1413" name="__codelineno-0-1413"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1414" name="__codelineno-0-1414"></a>    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1415" name="__codelineno-0-1415"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1416" name="__codelineno-0-1416"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new metadata value to document.</span>
+<a id="__codelineno-0-1417" name="__codelineno-0-1417"></a>
+<a id="__codelineno-0-1418" name="__codelineno-0-1418"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1419" name="__codelineno-0-1419"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1420" name="__codelineno-0-1420"></a><span class="sd">    name : str</span>
+<a id="__codelineno-0-1421" name="__codelineno-0-1421"></a><span class="sd">        A metadata name</span>
+<a id="__codelineno-0-1422" name="__codelineno-0-1422"></a><span class="sd">    value : str</span>
+<a id="__codelineno-0-1423" name="__codelineno-0-1423"></a><span class="sd">        A metadata value</span>
+<a id="__codelineno-0-1424" name="__codelineno-0-1424"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1425" name="__codelineno-0-1425"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
+<a id="__codelineno-0-1426" name="__codelineno-0-1426"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1427" name="__codelineno-0-1427"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17191,7 +17221,7 @@ a correct one. Otherwise, False.</p>
 
 
 <a href="#mlclient.models.Metadata.put_property" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">put_property</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">put_property</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17248,15 +17278,7 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1385">1385</a></span>
-<span class="normal"><a href="#__codelineno-0-1386">1386</a></span>
-<span class="normal"><a href="#__codelineno-0-1387">1387</a></span>
-<span class="normal"><a href="#__codelineno-0-1388">1388</a></span>
-<span class="normal"><a href="#__codelineno-0-1389">1389</a></span>
-<span class="normal"><a href="#__codelineno-0-1390">1390</a></span>
-<span class="normal"><a href="#__codelineno-0-1391">1391</a></span>
-<span class="normal"><a href="#__codelineno-0-1392">1392</a></span>
-<span class="normal"><a href="#__codelineno-0-1393">1393</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1393">1393</a></span>
 <span class="normal"><a href="#__codelineno-0-1394">1394</a></span>
 <span class="normal"><a href="#__codelineno-0-1395">1395</a></span>
 <span class="normal"><a href="#__codelineno-0-1396">1396</a></span>
@@ -17264,23 +17286,31 @@ a correct one. Otherwise, False.</p>
 <span class="normal"><a href="#__codelineno-0-1398">1398</a></span>
 <span class="normal"><a href="#__codelineno-0-1399">1399</a></span>
 <span class="normal"><a href="#__codelineno-0-1400">1400</a></span>
-<span class="normal"><a href="#__codelineno-0-1401">1401</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1385" name="__codelineno-0-1385"></a><span class="k">def</span><span class="w"> </span><span class="nf">put_property</span><span class="p">(</span>
-<a id="__codelineno-0-1386" name="__codelineno-0-1386"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1387" name="__codelineno-0-1387"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1388" name="__codelineno-0-1388"></a>    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1389" name="__codelineno-0-1389"></a><span class="p">):</span>
-<a id="__codelineno-0-1390" name="__codelineno-0-1390"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new property to document.</span>
-<a id="__codelineno-0-1391" name="__codelineno-0-1391"></a>
-<a id="__codelineno-0-1392" name="__codelineno-0-1392"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1393" name="__codelineno-0-1393"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1394" name="__codelineno-0-1394"></a><span class="sd">    name : str</span>
-<a id="__codelineno-0-1395" name="__codelineno-0-1395"></a><span class="sd">        A property name</span>
-<a id="__codelineno-0-1396" name="__codelineno-0-1396"></a><span class="sd">    value : str</span>
-<a id="__codelineno-0-1397" name="__codelineno-0-1397"></a><span class="sd">        A property value</span>
-<a id="__codelineno-0-1398" name="__codelineno-0-1398"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1399" name="__codelineno-0-1399"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
-<a id="__codelineno-0-1400" name="__codelineno-0-1400"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1401" name="__codelineno-0-1401"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<span class="normal"><a href="#__codelineno-0-1401">1401</a></span>
+<span class="normal"><a href="#__codelineno-0-1402">1402</a></span>
+<span class="normal"><a href="#__codelineno-0-1403">1403</a></span>
+<span class="normal"><a href="#__codelineno-0-1404">1404</a></span>
+<span class="normal"><a href="#__codelineno-0-1405">1405</a></span>
+<span class="normal"><a href="#__codelineno-0-1406">1406</a></span>
+<span class="normal"><a href="#__codelineno-0-1407">1407</a></span>
+<span class="normal"><a href="#__codelineno-0-1408">1408</a></span>
+<span class="normal"><a href="#__codelineno-0-1409">1409</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1393" name="__codelineno-0-1393"></a><span class="k">def</span><span class="w"> </span><span class="nf">put_property</span><span class="p">(</span>
+<a id="__codelineno-0-1394" name="__codelineno-0-1394"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1395" name="__codelineno-0-1395"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1396" name="__codelineno-0-1396"></a>    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1397" name="__codelineno-0-1397"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1398" name="__codelineno-0-1398"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign a new property to document.</span>
+<a id="__codelineno-0-1399" name="__codelineno-0-1399"></a>
+<a id="__codelineno-0-1400" name="__codelineno-0-1400"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1401" name="__codelineno-0-1401"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1402" name="__codelineno-0-1402"></a><span class="sd">    name : str</span>
+<a id="__codelineno-0-1403" name="__codelineno-0-1403"></a><span class="sd">        A property name</span>
+<a id="__codelineno-0-1404" name="__codelineno-0-1404"></a><span class="sd">    value : str</span>
+<a id="__codelineno-0-1405" name="__codelineno-0-1405"></a><span class="sd">        A property value</span>
+<a id="__codelineno-0-1406" name="__codelineno-0-1406"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1407" name="__codelineno-0-1407"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
+<a id="__codelineno-0-1408" name="__codelineno-0-1408"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1409" name="__codelineno-0-1409"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17305,17 +17335,17 @@ a correct one. Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1269">1269</a></span>
-<span class="normal"><a href="#__codelineno-0-1270">1270</a></span>
-<span class="normal"><a href="#__codelineno-0-1271">1271</a></span>
-<span class="normal"><a href="#__codelineno-0-1272">1272</a></span>
-<span class="normal"><a href="#__codelineno-0-1273">1273</a></span>
-<span class="normal"><a href="#__codelineno-0-1274">1274</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1269" name="__codelineno-0-1269"></a><span class="k">def</span><span class="w"> </span><span class="nf">quality</span><span class="p">(</span>
-<a id="__codelineno-0-1270" name="__codelineno-0-1270"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1271" name="__codelineno-0-1271"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<a id="__codelineno-0-1272" name="__codelineno-0-1272"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s quality.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-1273" name="__codelineno-0-1273"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1274" name="__codelineno-0-1274"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1277">1277</a></span>
+<span class="normal"><a href="#__codelineno-0-1278">1278</a></span>
+<span class="normal"><a href="#__codelineno-0-1279">1279</a></span>
+<span class="normal"><a href="#__codelineno-0-1280">1280</a></span>
+<span class="normal"><a href="#__codelineno-0-1281">1281</a></span>
+<span class="normal"><a href="#__codelineno-0-1282">1282</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1277" name="__codelineno-0-1277"></a><span class="k">def</span><span class="w"> </span><span class="nf">quality</span><span class="p">(</span>
+<a id="__codelineno-0-1278" name="__codelineno-0-1278"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1279" name="__codelineno-0-1279"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<a id="__codelineno-0-1280" name="__codelineno-0-1280"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return document&#39;s quality.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-1281" name="__codelineno-0-1281"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1282" name="__codelineno-0-1282"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17372,15 +17402,7 @@ built from fields or has already been parsed.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1283">1283</a></span>
-<span class="normal"><a href="#__codelineno-0-1284">1284</a></span>
-<span class="normal"><a href="#__codelineno-0-1285">1285</a></span>
-<span class="normal"><a href="#__codelineno-0-1286">1286</a></span>
-<span class="normal"><a href="#__codelineno-0-1287">1287</a></span>
-<span class="normal"><a href="#__codelineno-0-1288">1288</a></span>
-<span class="normal"><a href="#__codelineno-0-1289">1289</a></span>
-<span class="normal"><a href="#__codelineno-0-1290">1290</a></span>
-<span class="normal"><a href="#__codelineno-0-1291">1291</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1291">1291</a></span>
 <span class="normal"><a href="#__codelineno-0-1292">1292</a></span>
 <span class="normal"><a href="#__codelineno-0-1293">1293</a></span>
 <span class="normal"><a href="#__codelineno-0-1294">1294</a></span>
@@ -17393,28 +17415,36 @@ built from fields or has already been parsed.</p>
 <span class="normal"><a href="#__codelineno-0-1301">1301</a></span>
 <span class="normal"><a href="#__codelineno-0-1302">1302</a></span>
 <span class="normal"><a href="#__codelineno-0-1303">1303</a></span>
-<span class="normal"><a href="#__codelineno-0-1304">1304</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1283" name="__codelineno-0-1283"></a><span class="k">def</span><span class="w"> </span><span class="nf">raw</span><span class="p">(</span>
-<a id="__codelineno-0-1284" name="__codelineno-0-1284"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1285" name="__codelineno-0-1285"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-1286" name="__codelineno-0-1286"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the raw metadata payload, or None if not available.</span>
-<a id="__codelineno-0-1287" name="__codelineno-0-1287"></a>
-<a id="__codelineno-0-1288" name="__codelineno-0-1288"></a><span class="sd">    Available when the instance was created via ``Metadata(raw=...)`` and</span>
-<a id="__codelineno-0-1289" name="__codelineno-0-1289"></a><span class="sd">    no field has been read or modified yet. Returns the payload in the</span>
-<a id="__codelineno-0-1290" name="__codelineno-0-1290"></a><span class="sd">    original type (``bytes`` or ``str``) so consumers can route it to</span>
-<a id="__codelineno-0-1291" name="__codelineno-0-1291"></a><span class="sd">    bytes-oriented sinks (file writes, multipart bodies) without an</span>
-<a id="__codelineno-0-1292" name="__codelineno-0-1292"></a><span class="sd">    unnecessary decode/encode round-trip.</span>
-<a id="__codelineno-0-1293" name="__codelineno-0-1293"></a>
-<a id="__codelineno-0-1294" name="__codelineno-0-1294"></a><span class="sd">    Once a field accessor is called, the raw payload is discarded and</span>
-<a id="__codelineno-0-1295" name="__codelineno-0-1295"></a><span class="sd">    ``raw()`` returns None; use ``to_json_string()`` / ``to_xml_string()``</span>
-<a id="__codelineno-0-1296" name="__codelineno-0-1296"></a><span class="sd">    instead.</span>
-<a id="__codelineno-0-1297" name="__codelineno-0-1297"></a>
-<a id="__codelineno-0-1298" name="__codelineno-0-1298"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1299" name="__codelineno-0-1299"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1300" name="__codelineno-0-1300"></a><span class="sd">    bytes | str | None</span>
-<a id="__codelineno-0-1301" name="__codelineno-0-1301"></a><span class="sd">        The raw payload in its original type, or None if the metadata was</span>
-<a id="__codelineno-0-1302" name="__codelineno-0-1302"></a><span class="sd">        built from fields or has already been parsed.</span>
-<a id="__codelineno-0-1303" name="__codelineno-0-1303"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1304" name="__codelineno-0-1304"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span>
+<span class="normal"><a href="#__codelineno-0-1304">1304</a></span>
+<span class="normal"><a href="#__codelineno-0-1305">1305</a></span>
+<span class="normal"><a href="#__codelineno-0-1306">1306</a></span>
+<span class="normal"><a href="#__codelineno-0-1307">1307</a></span>
+<span class="normal"><a href="#__codelineno-0-1308">1308</a></span>
+<span class="normal"><a href="#__codelineno-0-1309">1309</a></span>
+<span class="normal"><a href="#__codelineno-0-1310">1310</a></span>
+<span class="normal"><a href="#__codelineno-0-1311">1311</a></span>
+<span class="normal"><a href="#__codelineno-0-1312">1312</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1291" name="__codelineno-0-1291"></a><span class="k">def</span><span class="w"> </span><span class="nf">raw</span><span class="p">(</span>
+<a id="__codelineno-0-1292" name="__codelineno-0-1292"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1293" name="__codelineno-0-1293"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1294" name="__codelineno-0-1294"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the raw metadata payload, or None if not available.</span>
+<a id="__codelineno-0-1295" name="__codelineno-0-1295"></a>
+<a id="__codelineno-0-1296" name="__codelineno-0-1296"></a><span class="sd">    Available when the instance was created via ``Metadata(raw=...)`` and</span>
+<a id="__codelineno-0-1297" name="__codelineno-0-1297"></a><span class="sd">    no field has been read or modified yet. Returns the payload in the</span>
+<a id="__codelineno-0-1298" name="__codelineno-0-1298"></a><span class="sd">    original type (``bytes`` or ``str``) so consumers can route it to</span>
+<a id="__codelineno-0-1299" name="__codelineno-0-1299"></a><span class="sd">    bytes-oriented sinks (file writes, multipart bodies) without an</span>
+<a id="__codelineno-0-1300" name="__codelineno-0-1300"></a><span class="sd">    unnecessary decode/encode round-trip.</span>
+<a id="__codelineno-0-1301" name="__codelineno-0-1301"></a>
+<a id="__codelineno-0-1302" name="__codelineno-0-1302"></a><span class="sd">    Once a field accessor is called, the raw payload is discarded and</span>
+<a id="__codelineno-0-1303" name="__codelineno-0-1303"></a><span class="sd">    ``raw()`` returns None; use ``to_json_string()`` / ``to_xml_string()``</span>
+<a id="__codelineno-0-1304" name="__codelineno-0-1304"></a><span class="sd">    instead.</span>
+<a id="__codelineno-0-1305" name="__codelineno-0-1305"></a>
+<a id="__codelineno-0-1306" name="__codelineno-0-1306"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1307" name="__codelineno-0-1307"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1308" name="__codelineno-0-1308"></a><span class="sd">    bytes | str | None</span>
+<a id="__codelineno-0-1309" name="__codelineno-0-1309"></a><span class="sd">        The raw payload in its original type, or None if the metadata was</span>
+<a id="__codelineno-0-1310" name="__codelineno-0-1310"></a><span class="sd">        built from fields or has already been parsed.</span>
+<a id="__codelineno-0-1311" name="__codelineno-0-1311"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1312" name="__codelineno-0-1312"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17493,15 +17523,7 @@ built from fields or has already been parsed.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1421">1421</a></span>
-<span class="normal"><a href="#__codelineno-0-1422">1422</a></span>
-<span class="normal"><a href="#__codelineno-0-1423">1423</a></span>
-<span class="normal"><a href="#__codelineno-0-1424">1424</a></span>
-<span class="normal"><a href="#__codelineno-0-1425">1425</a></span>
-<span class="normal"><a href="#__codelineno-0-1426">1426</a></span>
-<span class="normal"><a href="#__codelineno-0-1427">1427</a></span>
-<span class="normal"><a href="#__codelineno-0-1428">1428</a></span>
-<span class="normal"><a href="#__codelineno-0-1429">1429</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1429">1429</a></span>
 <span class="normal"><a href="#__codelineno-0-1430">1430</a></span>
 <span class="normal"><a href="#__codelineno-0-1431">1431</a></span>
 <span class="normal"><a href="#__codelineno-0-1432">1432</a></span>
@@ -17512,26 +17534,34 @@ built from fields or has already been parsed.</p>
 <span class="normal"><a href="#__codelineno-0-1437">1437</a></span>
 <span class="normal"><a href="#__codelineno-0-1438">1438</a></span>
 <span class="normal"><a href="#__codelineno-0-1439">1439</a></span>
-<span class="normal"><a href="#__codelineno-0-1440">1440</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1421" name="__codelineno-0-1421"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_collection</span><span class="p">(</span>
-<a id="__codelineno-0-1422" name="__codelineno-0-1422"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1423" name="__codelineno-0-1423"></a>    <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1424" name="__codelineno-0-1424"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1425" name="__codelineno-0-1425"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a collection from document.</span>
-<a id="__codelineno-0-1426" name="__codelineno-0-1426"></a>
-<a id="__codelineno-0-1427" name="__codelineno-0-1427"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1428" name="__codelineno-0-1428"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1429" name="__codelineno-0-1429"></a><span class="sd">    collection : str</span>
-<a id="__codelineno-0-1430" name="__codelineno-0-1430"></a><span class="sd">        A document&#39;s collection</span>
-<a id="__codelineno-0-1431" name="__codelineno-0-1431"></a>
-<a id="__codelineno-0-1432" name="__codelineno-0-1432"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1433" name="__codelineno-0-1433"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1434" name="__codelineno-0-1434"></a><span class="sd">    allow : bool</span>
-<a id="__codelineno-0-1435" name="__codelineno-0-1435"></a><span class="sd">        True if the collection is assigned to the document. Otherwise, False.</span>
-<a id="__codelineno-0-1436" name="__codelineno-0-1436"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1437" name="__codelineno-0-1437"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">()</span>
-<a id="__codelineno-0-1438" name="__codelineno-0-1438"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
-<a id="__codelineno-0-1439" name="__codelineno-0-1439"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
-<a id="__codelineno-0-1440" name="__codelineno-0-1440"></a>    <span class="k">return</span> <span class="n">allow</span>
+<span class="normal"><a href="#__codelineno-0-1440">1440</a></span>
+<span class="normal"><a href="#__codelineno-0-1441">1441</a></span>
+<span class="normal"><a href="#__codelineno-0-1442">1442</a></span>
+<span class="normal"><a href="#__codelineno-0-1443">1443</a></span>
+<span class="normal"><a href="#__codelineno-0-1444">1444</a></span>
+<span class="normal"><a href="#__codelineno-0-1445">1445</a></span>
+<span class="normal"><a href="#__codelineno-0-1446">1446</a></span>
+<span class="normal"><a href="#__codelineno-0-1447">1447</a></span>
+<span class="normal"><a href="#__codelineno-0-1448">1448</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1429" name="__codelineno-0-1429"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_collection</span><span class="p">(</span>
+<a id="__codelineno-0-1430" name="__codelineno-0-1430"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1431" name="__codelineno-0-1431"></a>    <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1432" name="__codelineno-0-1432"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1433" name="__codelineno-0-1433"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a collection from document.</span>
+<a id="__codelineno-0-1434" name="__codelineno-0-1434"></a>
+<a id="__codelineno-0-1435" name="__codelineno-0-1435"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1436" name="__codelineno-0-1436"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1437" name="__codelineno-0-1437"></a><span class="sd">    collection : str</span>
+<a id="__codelineno-0-1438" name="__codelineno-0-1438"></a><span class="sd">        A document&#39;s collection</span>
+<a id="__codelineno-0-1439" name="__codelineno-0-1439"></a>
+<a id="__codelineno-0-1440" name="__codelineno-0-1440"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1441" name="__codelineno-0-1441"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1442" name="__codelineno-0-1442"></a><span class="sd">    allow : bool</span>
+<a id="__codelineno-0-1443" name="__codelineno-0-1443"></a><span class="sd">        True if the collection is assigned to the document. Otherwise, False.</span>
+<a id="__codelineno-0-1444" name="__codelineno-0-1444"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1445" name="__codelineno-0-1445"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">()</span>
+<a id="__codelineno-0-1446" name="__codelineno-0-1446"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+<a id="__codelineno-0-1447" name="__codelineno-0-1447"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+<a id="__codelineno-0-1448" name="__codelineno-0-1448"></a>    <span class="k">return</span> <span class="n">allow</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17610,15 +17640,7 @@ built from fields or has already been parsed.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1494">1494</a></span>
-<span class="normal"><a href="#__codelineno-0-1495">1495</a></span>
-<span class="normal"><a href="#__codelineno-0-1496">1496</a></span>
-<span class="normal"><a href="#__codelineno-0-1497">1497</a></span>
-<span class="normal"><a href="#__codelineno-0-1498">1498</a></span>
-<span class="normal"><a href="#__codelineno-0-1499">1499</a></span>
-<span class="normal"><a href="#__codelineno-0-1500">1500</a></span>
-<span class="normal"><a href="#__codelineno-0-1501">1501</a></span>
-<span class="normal"><a href="#__codelineno-0-1502">1502</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1502">1502</a></span>
 <span class="normal"><a href="#__codelineno-0-1503">1503</a></span>
 <span class="normal"><a href="#__codelineno-0-1504">1504</a></span>
 <span class="normal"><a href="#__codelineno-0-1505">1505</a></span>
@@ -17627,24 +17649,32 @@ built from fields or has already been parsed.</p>
 <span class="normal"><a href="#__codelineno-0-1508">1508</a></span>
 <span class="normal"><a href="#__codelineno-0-1509">1509</a></span>
 <span class="normal"><a href="#__codelineno-0-1510">1510</a></span>
-<span class="normal"><a href="#__codelineno-0-1511">1511</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1494" name="__codelineno-0-1494"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_metadata_value</span><span class="p">(</span>
-<a id="__codelineno-0-1495" name="__codelineno-0-1495"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1496" name="__codelineno-0-1496"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1497" name="__codelineno-0-1497"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1498" name="__codelineno-0-1498"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a metadata value from document.</span>
-<a id="__codelineno-0-1499" name="__codelineno-0-1499"></a>
-<a id="__codelineno-0-1500" name="__codelineno-0-1500"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1501" name="__codelineno-0-1501"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1502" name="__codelineno-0-1502"></a><span class="sd">    name : str</span>
-<a id="__codelineno-0-1503" name="__codelineno-0-1503"></a><span class="sd">        A metadata name</span>
-<a id="__codelineno-0-1504" name="__codelineno-0-1504"></a>
-<a id="__codelineno-0-1505" name="__codelineno-0-1505"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1506" name="__codelineno-0-1506"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1507" name="__codelineno-0-1507"></a><span class="sd">    bool</span>
-<a id="__codelineno-0-1508" name="__codelineno-0-1508"></a><span class="sd">        True if the document has a metadata with such name. Otherwise, False.</span>
-<a id="__codelineno-0-1509" name="__codelineno-0-1509"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1510" name="__codelineno-0-1510"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1511" name="__codelineno-0-1511"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="normal"><a href="#__codelineno-0-1511">1511</a></span>
+<span class="normal"><a href="#__codelineno-0-1512">1512</a></span>
+<span class="normal"><a href="#__codelineno-0-1513">1513</a></span>
+<span class="normal"><a href="#__codelineno-0-1514">1514</a></span>
+<span class="normal"><a href="#__codelineno-0-1515">1515</a></span>
+<span class="normal"><a href="#__codelineno-0-1516">1516</a></span>
+<span class="normal"><a href="#__codelineno-0-1517">1517</a></span>
+<span class="normal"><a href="#__codelineno-0-1518">1518</a></span>
+<span class="normal"><a href="#__codelineno-0-1519">1519</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1502" name="__codelineno-0-1502"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_metadata_value</span><span class="p">(</span>
+<a id="__codelineno-0-1503" name="__codelineno-0-1503"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1504" name="__codelineno-0-1504"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1505" name="__codelineno-0-1505"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1506" name="__codelineno-0-1506"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a metadata value from document.</span>
+<a id="__codelineno-0-1507" name="__codelineno-0-1507"></a>
+<a id="__codelineno-0-1508" name="__codelineno-0-1508"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1509" name="__codelineno-0-1509"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1510" name="__codelineno-0-1510"></a><span class="sd">    name : str</span>
+<a id="__codelineno-0-1511" name="__codelineno-0-1511"></a><span class="sd">        A metadata name</span>
+<a id="__codelineno-0-1512" name="__codelineno-0-1512"></a>
+<a id="__codelineno-0-1513" name="__codelineno-0-1513"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1514" name="__codelineno-0-1514"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1515" name="__codelineno-0-1515"></a><span class="sd">    bool</span>
+<a id="__codelineno-0-1516" name="__codelineno-0-1516"></a><span class="sd">        True if the document has a metadata with such name. Otherwise, False.</span>
+<a id="__codelineno-0-1517" name="__codelineno-0-1517"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1518" name="__codelineno-0-1518"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1519" name="__codelineno-0-1519"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17740,15 +17770,7 @@ Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1442">1442</a></span>
-<span class="normal"><a href="#__codelineno-0-1443">1443</a></span>
-<span class="normal"><a href="#__codelineno-0-1444">1444</a></span>
-<span class="normal"><a href="#__codelineno-0-1445">1445</a></span>
-<span class="normal"><a href="#__codelineno-0-1446">1446</a></span>
-<span class="normal"><a href="#__codelineno-0-1447">1447</a></span>
-<span class="normal"><a href="#__codelineno-0-1448">1448</a></span>
-<span class="normal"><a href="#__codelineno-0-1449">1449</a></span>
-<span class="normal"><a href="#__codelineno-0-1450">1450</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1450">1450</a></span>
 <span class="normal"><a href="#__codelineno-0-1451">1451</a></span>
 <span class="normal"><a href="#__codelineno-0-1452">1452</a></span>
 <span class="normal"><a href="#__codelineno-0-1453">1453</a></span>
@@ -17771,38 +17793,46 @@ Otherwise, False.</p>
 <span class="normal"><a href="#__codelineno-0-1470">1470</a></span>
 <span class="normal"><a href="#__codelineno-0-1471">1471</a></span>
 <span class="normal"><a href="#__codelineno-0-1472">1472</a></span>
-<span class="normal"><a href="#__codelineno-0-1473">1473</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1442" name="__codelineno-0-1442"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_permission</span><span class="p">(</span>
-<a id="__codelineno-0-1443" name="__codelineno-0-1443"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1444" name="__codelineno-0-1444"></a>    <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1445" name="__codelineno-0-1445"></a>    <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1446" name="__codelineno-0-1446"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1447" name="__codelineno-0-1447"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a permission from document.</span>
-<a id="__codelineno-0-1448" name="__codelineno-0-1448"></a>
-<a id="__codelineno-0-1449" name="__codelineno-0-1449"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1450" name="__codelineno-0-1450"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1451" name="__codelineno-0-1451"></a><span class="sd">    role_name : str</span>
-<a id="__codelineno-0-1452" name="__codelineno-0-1452"></a><span class="sd">        A permission&#39;s role name</span>
-<a id="__codelineno-0-1453" name="__codelineno-0-1453"></a><span class="sd">    capability : str</span>
-<a id="__codelineno-0-1454" name="__codelineno-0-1454"></a><span class="sd">        A permission&#39;s capability</span>
-<a id="__codelineno-0-1455" name="__codelineno-0-1455"></a>
-<a id="__codelineno-0-1456" name="__codelineno-0-1456"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1457" name="__codelineno-0-1457"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1458" name="__codelineno-0-1458"></a><span class="sd">    bool</span>
-<a id="__codelineno-0-1459" name="__codelineno-0-1459"></a><span class="sd">        True if the capability is assigned to the role for a document.</span>
-<a id="__codelineno-0-1460" name="__codelineno-0-1460"></a><span class="sd">        Otherwise, False.</span>
-<a id="__codelineno-0-1461" name="__codelineno-0-1461"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1462" name="__codelineno-0-1462"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="n">role_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-<a id="__codelineno-0-1463" name="__codelineno-0-1463"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
-<a id="__codelineno-0-1464" name="__codelineno-0-1464"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1465" name="__codelineno-0-1465"></a>        <span class="n">permission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permission_for_role</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">,</span> <span class="n">role_name</span><span class="p">)</span>
-<a id="__codelineno-0-1466" name="__codelineno-0-1466"></a>        <span class="n">allow</span> <span class="o">=</span> <span class="n">permission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-<a id="__codelineno-0-1467" name="__codelineno-0-1467"></a>        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
-<a id="__codelineno-0-1468" name="__codelineno-0-1468"></a>            <span class="n">success</span> <span class="o">=</span> <span class="n">permission</span><span class="o">.</span><span class="n">remove_capability</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
-<a id="__codelineno-0-1469" name="__codelineno-0-1469"></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">permission</span><span class="o">.</span><span class="n">capabilities</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-1470" name="__codelineno-0-1470"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">permission</span><span class="p">)</span>
-<a id="__codelineno-0-1471" name="__codelineno-0-1471"></a>            <span class="k">return</span> <span class="n">success</span>
-<a id="__codelineno-0-1472" name="__codelineno-0-1472"></a>        <span class="k">return</span> <span class="n">allow</span>
-<a id="__codelineno-0-1473" name="__codelineno-0-1473"></a>    <span class="k">return</span> <span class="n">allow</span>
+<span class="normal"><a href="#__codelineno-0-1473">1473</a></span>
+<span class="normal"><a href="#__codelineno-0-1474">1474</a></span>
+<span class="normal"><a href="#__codelineno-0-1475">1475</a></span>
+<span class="normal"><a href="#__codelineno-0-1476">1476</a></span>
+<span class="normal"><a href="#__codelineno-0-1477">1477</a></span>
+<span class="normal"><a href="#__codelineno-0-1478">1478</a></span>
+<span class="normal"><a href="#__codelineno-0-1479">1479</a></span>
+<span class="normal"><a href="#__codelineno-0-1480">1480</a></span>
+<span class="normal"><a href="#__codelineno-0-1481">1481</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1450" name="__codelineno-0-1450"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_permission</span><span class="p">(</span>
+<a id="__codelineno-0-1451" name="__codelineno-0-1451"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1452" name="__codelineno-0-1452"></a>    <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1453" name="__codelineno-0-1453"></a>    <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1454" name="__codelineno-0-1454"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1455" name="__codelineno-0-1455"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a permission from document.</span>
+<a id="__codelineno-0-1456" name="__codelineno-0-1456"></a>
+<a id="__codelineno-0-1457" name="__codelineno-0-1457"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1458" name="__codelineno-0-1458"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1459" name="__codelineno-0-1459"></a><span class="sd">    role_name : str</span>
+<a id="__codelineno-0-1460" name="__codelineno-0-1460"></a><span class="sd">        A permission&#39;s role name</span>
+<a id="__codelineno-0-1461" name="__codelineno-0-1461"></a><span class="sd">    capability : str</span>
+<a id="__codelineno-0-1462" name="__codelineno-0-1462"></a><span class="sd">        A permission&#39;s capability</span>
+<a id="__codelineno-0-1463" name="__codelineno-0-1463"></a>
+<a id="__codelineno-0-1464" name="__codelineno-0-1464"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1465" name="__codelineno-0-1465"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1466" name="__codelineno-0-1466"></a><span class="sd">    bool</span>
+<a id="__codelineno-0-1467" name="__codelineno-0-1467"></a><span class="sd">        True if the capability is assigned to the role for a document.</span>
+<a id="__codelineno-0-1468" name="__codelineno-0-1468"></a><span class="sd">        Otherwise, False.</span>
+<a id="__codelineno-0-1469" name="__codelineno-0-1469"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1470" name="__codelineno-0-1470"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="n">role_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<a id="__codelineno-0-1471" name="__codelineno-0-1471"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+<a id="__codelineno-0-1472" name="__codelineno-0-1472"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1473" name="__codelineno-0-1473"></a>        <span class="n">permission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permission_for_role</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">,</span> <span class="n">role_name</span><span class="p">)</span>
+<a id="__codelineno-0-1474" name="__codelineno-0-1474"></a>        <span class="n">allow</span> <span class="o">=</span> <span class="n">permission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<a id="__codelineno-0-1475" name="__codelineno-0-1475"></a>        <span class="k">if</span> <span class="n">permission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1476" name="__codelineno-0-1476"></a>            <span class="n">success</span> <span class="o">=</span> <span class="n">permission</span><span class="o">.</span><span class="n">remove_capability</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
+<a id="__codelineno-0-1477" name="__codelineno-0-1477"></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">permission</span><span class="o">.</span><span class="n">capabilities</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-1478" name="__codelineno-0-1478"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">permission</span><span class="p">)</span>
+<a id="__codelineno-0-1479" name="__codelineno-0-1479"></a>            <span class="k">return</span> <span class="n">success</span>
+<a id="__codelineno-0-1480" name="__codelineno-0-1480"></a>        <span class="k">return</span> <span class="n">allow</span>
+<a id="__codelineno-0-1481" name="__codelineno-0-1481"></a>    <span class="k">return</span> <span class="n">allow</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17881,15 +17911,7 @@ Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1475">1475</a></span>
-<span class="normal"><a href="#__codelineno-0-1476">1476</a></span>
-<span class="normal"><a href="#__codelineno-0-1477">1477</a></span>
-<span class="normal"><a href="#__codelineno-0-1478">1478</a></span>
-<span class="normal"><a href="#__codelineno-0-1479">1479</a></span>
-<span class="normal"><a href="#__codelineno-0-1480">1480</a></span>
-<span class="normal"><a href="#__codelineno-0-1481">1481</a></span>
-<span class="normal"><a href="#__codelineno-0-1482">1482</a></span>
-<span class="normal"><a href="#__codelineno-0-1483">1483</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1483">1483</a></span>
 <span class="normal"><a href="#__codelineno-0-1484">1484</a></span>
 <span class="normal"><a href="#__codelineno-0-1485">1485</a></span>
 <span class="normal"><a href="#__codelineno-0-1486">1486</a></span>
@@ -17898,24 +17920,32 @@ Otherwise, False.</p>
 <span class="normal"><a href="#__codelineno-0-1489">1489</a></span>
 <span class="normal"><a href="#__codelineno-0-1490">1490</a></span>
 <span class="normal"><a href="#__codelineno-0-1491">1491</a></span>
-<span class="normal"><a href="#__codelineno-0-1492">1492</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1475" name="__codelineno-0-1475"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_property</span><span class="p">(</span>
-<a id="__codelineno-0-1476" name="__codelineno-0-1476"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1477" name="__codelineno-0-1477"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-1478" name="__codelineno-0-1478"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1479" name="__codelineno-0-1479"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a property from document.</span>
-<a id="__codelineno-0-1480" name="__codelineno-0-1480"></a>
-<a id="__codelineno-0-1481" name="__codelineno-0-1481"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1482" name="__codelineno-0-1482"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1483" name="__codelineno-0-1483"></a><span class="sd">    name : str</span>
-<a id="__codelineno-0-1484" name="__codelineno-0-1484"></a><span class="sd">        A property name</span>
-<a id="__codelineno-0-1485" name="__codelineno-0-1485"></a>
-<a id="__codelineno-0-1486" name="__codelineno-0-1486"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1487" name="__codelineno-0-1487"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1488" name="__codelineno-0-1488"></a><span class="sd">    bool</span>
-<a id="__codelineno-0-1489" name="__codelineno-0-1489"></a><span class="sd">        True if the document has a property with such name. Otherwise, False.</span>
-<a id="__codelineno-0-1490" name="__codelineno-0-1490"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1491" name="__codelineno-0-1491"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1492" name="__codelineno-0-1492"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="normal"><a href="#__codelineno-0-1492">1492</a></span>
+<span class="normal"><a href="#__codelineno-0-1493">1493</a></span>
+<span class="normal"><a href="#__codelineno-0-1494">1494</a></span>
+<span class="normal"><a href="#__codelineno-0-1495">1495</a></span>
+<span class="normal"><a href="#__codelineno-0-1496">1496</a></span>
+<span class="normal"><a href="#__codelineno-0-1497">1497</a></span>
+<span class="normal"><a href="#__codelineno-0-1498">1498</a></span>
+<span class="normal"><a href="#__codelineno-0-1499">1499</a></span>
+<span class="normal"><a href="#__codelineno-0-1500">1500</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1483" name="__codelineno-0-1483"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_property</span><span class="p">(</span>
+<a id="__codelineno-0-1484" name="__codelineno-0-1484"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1485" name="__codelineno-0-1485"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-1486" name="__codelineno-0-1486"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1487" name="__codelineno-0-1487"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a property from document.</span>
+<a id="__codelineno-0-1488" name="__codelineno-0-1488"></a>
+<a id="__codelineno-0-1489" name="__codelineno-0-1489"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1490" name="__codelineno-0-1490"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1491" name="__codelineno-0-1491"></a><span class="sd">    name : str</span>
+<a id="__codelineno-0-1492" name="__codelineno-0-1492"></a><span class="sd">        A property name</span>
+<a id="__codelineno-0-1493" name="__codelineno-0-1493"></a>
+<a id="__codelineno-0-1494" name="__codelineno-0-1494"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1495" name="__codelineno-0-1495"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1496" name="__codelineno-0-1496"></a><span class="sd">    bool</span>
+<a id="__codelineno-0-1497" name="__codelineno-0-1497"></a><span class="sd">        True if the document has a property with such name. Otherwise, False.</span>
+<a id="__codelineno-0-1498" name="__codelineno-0-1498"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1499" name="__codelineno-0-1499"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1500" name="__codelineno-0-1500"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17994,15 +18024,7 @@ Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1306">1306</a></span>
-<span class="normal"><a href="#__codelineno-0-1307">1307</a></span>
-<span class="normal"><a href="#__codelineno-0-1308">1308</a></span>
-<span class="normal"><a href="#__codelineno-0-1309">1309</a></span>
-<span class="normal"><a href="#__codelineno-0-1310">1310</a></span>
-<span class="normal"><a href="#__codelineno-0-1311">1311</a></span>
-<span class="normal"><a href="#__codelineno-0-1312">1312</a></span>
-<span class="normal"><a href="#__codelineno-0-1313">1313</a></span>
-<span class="normal"><a href="#__codelineno-0-1314">1314</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1314">1314</a></span>
 <span class="normal"><a href="#__codelineno-0-1315">1315</a></span>
 <span class="normal"><a href="#__codelineno-0-1316">1316</a></span>
 <span class="normal"><a href="#__codelineno-0-1317">1317</a></span>
@@ -18014,27 +18036,35 @@ Otherwise, False.</p>
 <span class="normal"><a href="#__codelineno-0-1323">1323</a></span>
 <span class="normal"><a href="#__codelineno-0-1324">1324</a></span>
 <span class="normal"><a href="#__codelineno-0-1325">1325</a></span>
-<span class="normal"><a href="#__codelineno-0-1326">1326</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1306" name="__codelineno-0-1306"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_quality</span><span class="p">(</span>
-<a id="__codelineno-0-1307" name="__codelineno-0-1307"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1308" name="__codelineno-0-1308"></a>    <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<a id="__codelineno-0-1309" name="__codelineno-0-1309"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-1310" name="__codelineno-0-1310"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set document&#39;s quality.</span>
-<a id="__codelineno-0-1311" name="__codelineno-0-1311"></a>
-<a id="__codelineno-0-1312" name="__codelineno-0-1312"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1313" name="__codelineno-0-1313"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1314" name="__codelineno-0-1314"></a><span class="sd">    quality : int</span>
-<a id="__codelineno-0-1315" name="__codelineno-0-1315"></a><span class="sd">        A document&#39;s new quality</span>
-<a id="__codelineno-0-1316" name="__codelineno-0-1316"></a>
-<a id="__codelineno-0-1317" name="__codelineno-0-1317"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1318" name="__codelineno-0-1318"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1319" name="__codelineno-0-1319"></a><span class="sd">    allow : bool</span>
-<a id="__codelineno-0-1320" name="__codelineno-0-1320"></a><span class="sd">        True if value provided is an integer. Otherwise, False.</span>
-<a id="__codelineno-0-1321" name="__codelineno-0-1321"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1322" name="__codelineno-0-1322"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">quality</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-<a id="__codelineno-0-1323" name="__codelineno-0-1323"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
-<a id="__codelineno-0-1324" name="__codelineno-0-1324"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1325" name="__codelineno-0-1325"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span> <span class="o">=</span> <span class="n">quality</span>
-<a id="__codelineno-0-1326" name="__codelineno-0-1326"></a>    <span class="k">return</span> <span class="n">allow</span>
+<span class="normal"><a href="#__codelineno-0-1326">1326</a></span>
+<span class="normal"><a href="#__codelineno-0-1327">1327</a></span>
+<span class="normal"><a href="#__codelineno-0-1328">1328</a></span>
+<span class="normal"><a href="#__codelineno-0-1329">1329</a></span>
+<span class="normal"><a href="#__codelineno-0-1330">1330</a></span>
+<span class="normal"><a href="#__codelineno-0-1331">1331</a></span>
+<span class="normal"><a href="#__codelineno-0-1332">1332</a></span>
+<span class="normal"><a href="#__codelineno-0-1333">1333</a></span>
+<span class="normal"><a href="#__codelineno-0-1334">1334</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1314" name="__codelineno-0-1314"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_quality</span><span class="p">(</span>
+<a id="__codelineno-0-1315" name="__codelineno-0-1315"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1316" name="__codelineno-0-1316"></a>    <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-1317" name="__codelineno-0-1317"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1318" name="__codelineno-0-1318"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set document&#39;s quality.</span>
+<a id="__codelineno-0-1319" name="__codelineno-0-1319"></a>
+<a id="__codelineno-0-1320" name="__codelineno-0-1320"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1321" name="__codelineno-0-1321"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1322" name="__codelineno-0-1322"></a><span class="sd">    quality : int</span>
+<a id="__codelineno-0-1323" name="__codelineno-0-1323"></a><span class="sd">        A document&#39;s new quality</span>
+<a id="__codelineno-0-1324" name="__codelineno-0-1324"></a>
+<a id="__codelineno-0-1325" name="__codelineno-0-1325"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1326" name="__codelineno-0-1326"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1327" name="__codelineno-0-1327"></a><span class="sd">    allow : bool</span>
+<a id="__codelineno-0-1328" name="__codelineno-0-1328"></a><span class="sd">        True if value provided is an integer. Otherwise, False.</span>
+<a id="__codelineno-0-1329" name="__codelineno-0-1329"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1330" name="__codelineno-0-1330"></a>    <span class="n">allow</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">quality</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<a id="__codelineno-0-1331" name="__codelineno-0-1331"></a>    <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+<a id="__codelineno-0-1332" name="__codelineno-0-1332"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1333" name="__codelineno-0-1333"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span> <span class="o">=</span> <span class="n">quality</span>
+<a id="__codelineno-0-1334" name="__codelineno-0-1334"></a>    <span class="k">return</span> <span class="n">allow</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -18059,29 +18089,29 @@ Otherwise, False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1542">1542</a></span>
-<span class="normal"><a href="#__codelineno-0-1543">1543</a></span>
-<span class="normal"><a href="#__codelineno-0-1544">1544</a></span>
-<span class="normal"><a href="#__codelineno-0-1545">1545</a></span>
-<span class="normal"><a href="#__codelineno-0-1546">1546</a></span>
-<span class="normal"><a href="#__codelineno-0-1547">1547</a></span>
-<span class="normal"><a href="#__codelineno-0-1548">1548</a></span>
-<span class="normal"><a href="#__codelineno-0-1549">1549</a></span>
-<span class="normal"><a href="#__codelineno-0-1550">1550</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1550">1550</a></span>
 <span class="normal"><a href="#__codelineno-0-1551">1551</a></span>
 <span class="normal"><a href="#__codelineno-0-1552">1552</a></span>
-<span class="normal"><a href="#__codelineno-0-1553">1553</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1542" name="__codelineno-0-1542"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span>
-<a id="__codelineno-0-1543" name="__codelineno-0-1543"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1544" name="__codelineno-0-1544"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-0-1545" name="__codelineno-0-1545"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a JSON representation of the Metadata instance.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-1546" name="__codelineno-0-1546"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1547" name="__codelineno-0-1547"></a>    <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-1548" name="__codelineno-0-1548"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_COLLECTIONS_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">(),</span>
-<a id="__codelineno-0-1549" name="__codelineno-0-1549"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_PERMISSIONS_KEY</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">],</span>
-<a id="__codelineno-0-1550" name="__codelineno-0-1550"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_PROPERTIES_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">(),</span>
-<a id="__codelineno-0-1551" name="__codelineno-0-1551"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_QUALITY_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">(),</span>
-<a id="__codelineno-0-1552" name="__codelineno-0-1552"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_VALUES_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">,</span>
-<a id="__codelineno-0-1553" name="__codelineno-0-1553"></a>    <span class="p">}</span>
+<span class="normal"><a href="#__codelineno-0-1553">1553</a></span>
+<span class="normal"><a href="#__codelineno-0-1554">1554</a></span>
+<span class="normal"><a href="#__codelineno-0-1555">1555</a></span>
+<span class="normal"><a href="#__codelineno-0-1556">1556</a></span>
+<span class="normal"><a href="#__codelineno-0-1557">1557</a></span>
+<span class="normal"><a href="#__codelineno-0-1558">1558</a></span>
+<span class="normal"><a href="#__codelineno-0-1559">1559</a></span>
+<span class="normal"><a href="#__codelineno-0-1560">1560</a></span>
+<span class="normal"><a href="#__codelineno-0-1561">1561</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1550" name="__codelineno-0-1550"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span>
+<a id="__codelineno-0-1551" name="__codelineno-0-1551"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1552" name="__codelineno-0-1552"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-0-1553" name="__codelineno-0-1553"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a JSON representation of the Metadata instance.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-1554" name="__codelineno-0-1554"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1555" name="__codelineno-0-1555"></a>    <span class="k">return</span> <span class="p">{</span>
+<a id="__codelineno-0-1556" name="__codelineno-0-1556"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_COLLECTIONS_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">(),</span>
+<a id="__codelineno-0-1557" name="__codelineno-0-1557"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_PERMISSIONS_KEY</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">],</span>
+<a id="__codelineno-0-1558" name="__codelineno-0-1558"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_PROPERTIES_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">(),</span>
+<a id="__codelineno-0-1559" name="__codelineno-0-1559"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_QUALITY_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">(),</span>
+<a id="__codelineno-0-1560" name="__codelineno-0-1560"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_VALUES_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">,</span>
+<a id="__codelineno-0-1561" name="__codelineno-0-1561"></a>    <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -18163,15 +18193,7 @@ re-serialization.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1513">1513</a></span>
-<span class="normal"><a href="#__codelineno-0-1514">1514</a></span>
-<span class="normal"><a href="#__codelineno-0-1515">1515</a></span>
-<span class="normal"><a href="#__codelineno-0-1516">1516</a></span>
-<span class="normal"><a href="#__codelineno-0-1517">1517</a></span>
-<span class="normal"><a href="#__codelineno-0-1518">1518</a></span>
-<span class="normal"><a href="#__codelineno-0-1519">1519</a></span>
-<span class="normal"><a href="#__codelineno-0-1520">1520</a></span>
-<span class="normal"><a href="#__codelineno-0-1521">1521</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1521">1521</a></span>
 <span class="normal"><a href="#__codelineno-0-1522">1522</a></span>
 <span class="normal"><a href="#__codelineno-0-1523">1523</a></span>
 <span class="normal"><a href="#__codelineno-0-1524">1524</a></span>
@@ -18190,34 +18212,42 @@ re-serialization.</p>
 <span class="normal"><a href="#__codelineno-0-1537">1537</a></span>
 <span class="normal"><a href="#__codelineno-0-1538">1538</a></span>
 <span class="normal"><a href="#__codelineno-0-1539">1539</a></span>
-<span class="normal"><a href="#__codelineno-0-1540">1540</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1513" name="__codelineno-0-1513"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_json_string</span><span class="p">(</span>
-<a id="__codelineno-0-1514" name="__codelineno-0-1514"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1515" name="__codelineno-0-1515"></a>    <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1516" name="__codelineno-0-1516"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-1517" name="__codelineno-0-1517"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a stringified JSON representation of the Metadata instance.</span>
-<a id="__codelineno-0-1518" name="__codelineno-0-1518"></a>
-<a id="__codelineno-0-1519" name="__codelineno-0-1519"></a><span class="sd">    When the instance was created from a raw JSON payload and no field has</span>
-<a id="__codelineno-0-1520" name="__codelineno-0-1520"></a><span class="sd">    been read or modified yet, the original payload is returned without</span>
-<a id="__codelineno-0-1521" name="__codelineno-0-1521"></a><span class="sd">    re-serialization.</span>
-<a id="__codelineno-0-1522" name="__codelineno-0-1522"></a>
-<a id="__codelineno-0-1523" name="__codelineno-0-1523"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1524" name="__codelineno-0-1524"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1525" name="__codelineno-0-1525"></a><span class="sd">    indent : int | None</span>
-<a id="__codelineno-0-1526" name="__codelineno-0-1526"></a><span class="sd">        A number of spaces per indent level</span>
-<a id="__codelineno-0-1527" name="__codelineno-0-1527"></a>
-<a id="__codelineno-0-1528" name="__codelineno-0-1528"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1529" name="__codelineno-0-1529"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1530" name="__codelineno-0-1530"></a><span class="sd">    str</span>
-<a id="__codelineno-0-1531" name="__codelineno-0-1531"></a><span class="sd">        Metadata in a stringified JSON representation</span>
-<a id="__codelineno-0-1532" name="__codelineno-0-1532"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1533" name="__codelineno-0-1533"></a>    <span class="k">if</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-1534" name="__codelineno-0-1534"></a>        <span class="n">source</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-1535" name="__codelineno-0-1535"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span>
-<a id="__codelineno-0-1536" name="__codelineno-0-1536"></a>        <span class="p">)</span>
-<a id="__codelineno-0-1537" name="__codelineno-0-1537"></a>        <span class="n">stripped</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-<a id="__codelineno-0-1538" name="__codelineno-0-1538"></a>        <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;[&quot;</span><span class="p">)):</span>
-<a id="__codelineno-0-1539" name="__codelineno-0-1539"></a>            <span class="k">return</span> <span class="n">source</span>
-<a id="__codelineno-0-1540" name="__codelineno-0-1540"></a>    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-1540">1540</a></span>
+<span class="normal"><a href="#__codelineno-0-1541">1541</a></span>
+<span class="normal"><a href="#__codelineno-0-1542">1542</a></span>
+<span class="normal"><a href="#__codelineno-0-1543">1543</a></span>
+<span class="normal"><a href="#__codelineno-0-1544">1544</a></span>
+<span class="normal"><a href="#__codelineno-0-1545">1545</a></span>
+<span class="normal"><a href="#__codelineno-0-1546">1546</a></span>
+<span class="normal"><a href="#__codelineno-0-1547">1547</a></span>
+<span class="normal"><a href="#__codelineno-0-1548">1548</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1521" name="__codelineno-0-1521"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_json_string</span><span class="p">(</span>
+<a id="__codelineno-0-1522" name="__codelineno-0-1522"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1523" name="__codelineno-0-1523"></a>    <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1524" name="__codelineno-0-1524"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-1525" name="__codelineno-0-1525"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a stringified JSON representation of the Metadata instance.</span>
+<a id="__codelineno-0-1526" name="__codelineno-0-1526"></a>
+<a id="__codelineno-0-1527" name="__codelineno-0-1527"></a><span class="sd">    When the instance was created from a raw JSON payload and no field has</span>
+<a id="__codelineno-0-1528" name="__codelineno-0-1528"></a><span class="sd">    been read or modified yet, the original payload is returned without</span>
+<a id="__codelineno-0-1529" name="__codelineno-0-1529"></a><span class="sd">    re-serialization.</span>
+<a id="__codelineno-0-1530" name="__codelineno-0-1530"></a>
+<a id="__codelineno-0-1531" name="__codelineno-0-1531"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1532" name="__codelineno-0-1532"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1533" name="__codelineno-0-1533"></a><span class="sd">    indent : int | None</span>
+<a id="__codelineno-0-1534" name="__codelineno-0-1534"></a><span class="sd">        A number of spaces per indent level</span>
+<a id="__codelineno-0-1535" name="__codelineno-0-1535"></a>
+<a id="__codelineno-0-1536" name="__codelineno-0-1536"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1537" name="__codelineno-0-1537"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1538" name="__codelineno-0-1538"></a><span class="sd">    str</span>
+<a id="__codelineno-0-1539" name="__codelineno-0-1539"></a><span class="sd">        Metadata in a stringified JSON representation</span>
+<a id="__codelineno-0-1540" name="__codelineno-0-1540"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1541" name="__codelineno-0-1541"></a>    <span class="k">if</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1542" name="__codelineno-0-1542"></a>        <span class="n">source</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-1543" name="__codelineno-0-1543"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span>
+<a id="__codelineno-0-1544" name="__codelineno-0-1544"></a>        <span class="p">)</span>
+<a id="__codelineno-0-1545" name="__codelineno-0-1545"></a>        <span class="n">stripped</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+<a id="__codelineno-0-1546" name="__codelineno-0-1546"></a>        <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;[&quot;</span><span class="p">)):</span>
+<a id="__codelineno-0-1547" name="__codelineno-0-1547"></a>            <span class="k">return</span> <span class="n">source</span>
+<a id="__codelineno-0-1548" name="__codelineno-0-1548"></a>    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -18242,33 +18272,33 @@ re-serialization.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1598">1598</a></span>
-<span class="normal"><a href="#__codelineno-0-1599">1599</a></span>
-<span class="normal"><a href="#__codelineno-0-1600">1600</a></span>
-<span class="normal"><a href="#__codelineno-0-1601">1601</a></span>
-<span class="normal"><a href="#__codelineno-0-1602">1602</a></span>
-<span class="normal"><a href="#__codelineno-0-1603">1603</a></span>
-<span class="normal"><a href="#__codelineno-0-1604">1604</a></span>
-<span class="normal"><a href="#__codelineno-0-1605">1605</a></span>
-<span class="normal"><a href="#__codelineno-0-1606">1606</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1606">1606</a></span>
 <span class="normal"><a href="#__codelineno-0-1607">1607</a></span>
 <span class="normal"><a href="#__codelineno-0-1608">1608</a></span>
 <span class="normal"><a href="#__codelineno-0-1609">1609</a></span>
 <span class="normal"><a href="#__codelineno-0-1610">1610</a></span>
-<span class="normal"><a href="#__codelineno-0-1611">1611</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1598" name="__codelineno-0-1598"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_xml</span><span class="p">(</span>
-<a id="__codelineno-0-1599" name="__codelineno-0-1599"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1600" name="__codelineno-0-1600"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">:</span>
-<a id="__codelineno-0-1601" name="__codelineno-0-1601"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an XML representation of the Metadata instance.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-1602" name="__codelineno-0-1602"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
-<a id="__codelineno-0-1603" name="__codelineno-0-1603"></a>    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_RAPI_NS_PREFIX</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_RAPI_NS_URI</span><span class="p">}</span>
-<a id="__codelineno-0-1604" name="__codelineno-0-1604"></a>    <span class="n">root</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_TAG</span><span class="p">,</span> <span class="n">attrib</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
-<a id="__codelineno-0-1605" name="__codelineno-0-1605"></a>
-<a id="__codelineno-0-1606" name="__codelineno-0-1606"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_collections</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<a id="__codelineno-0-1607" name="__codelineno-0-1607"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_permissions</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<a id="__codelineno-0-1608" name="__codelineno-0-1608"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_properties</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<a id="__codelineno-0-1609" name="__codelineno-0-1609"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_quality</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<a id="__codelineno-0-1610" name="__codelineno-0-1610"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_metadata_values</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<a id="__codelineno-0-1611" name="__codelineno-0-1611"></a>    <span class="k">return</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-1611">1611</a></span>
+<span class="normal"><a href="#__codelineno-0-1612">1612</a></span>
+<span class="normal"><a href="#__codelineno-0-1613">1613</a></span>
+<span class="normal"><a href="#__codelineno-0-1614">1614</a></span>
+<span class="normal"><a href="#__codelineno-0-1615">1615</a></span>
+<span class="normal"><a href="#__codelineno-0-1616">1616</a></span>
+<span class="normal"><a href="#__codelineno-0-1617">1617</a></span>
+<span class="normal"><a href="#__codelineno-0-1618">1618</a></span>
+<span class="normal"><a href="#__codelineno-0-1619">1619</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1606" name="__codelineno-0-1606"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_xml</span><span class="p">(</span>
+<a id="__codelineno-0-1607" name="__codelineno-0-1607"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1608" name="__codelineno-0-1608"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">:</span>
+<a id="__codelineno-0-1609" name="__codelineno-0-1609"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an XML representation of the Metadata instance.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-1610" name="__codelineno-0-1610"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_parsed</span><span class="p">()</span>
+<a id="__codelineno-0-1611" name="__codelineno-0-1611"></a>    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_RAPI_NS_PREFIX</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_RAPI_NS_URI</span><span class="p">}</span>
+<a id="__codelineno-0-1612" name="__codelineno-0-1612"></a>    <span class="n">root</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_TAG</span><span class="p">,</span> <span class="n">attrib</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+<a id="__codelineno-0-1613" name="__codelineno-0-1613"></a>
+<a id="__codelineno-0-1614" name="__codelineno-0-1614"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_collections</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-0-1615" name="__codelineno-0-1615"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_permissions</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-0-1616" name="__codelineno-0-1616"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_properties</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-0-1617" name="__codelineno-0-1617"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_quality</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-0-1618" name="__codelineno-0-1618"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_metadata_values</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-0-1619" name="__codelineno-0-1619"></a>    <span class="k">return</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -18350,15 +18380,7 @@ re-serialization.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1555">1555</a></span>
-<span class="normal"><a href="#__codelineno-0-1556">1556</a></span>
-<span class="normal"><a href="#__codelineno-0-1557">1557</a></span>
-<span class="normal"><a href="#__codelineno-0-1558">1558</a></span>
-<span class="normal"><a href="#__codelineno-0-1559">1559</a></span>
-<span class="normal"><a href="#__codelineno-0-1560">1560</a></span>
-<span class="normal"><a href="#__codelineno-0-1561">1561</a></span>
-<span class="normal"><a href="#__codelineno-0-1562">1562</a></span>
-<span class="normal"><a href="#__codelineno-0-1563">1563</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1563">1563</a></span>
 <span class="normal"><a href="#__codelineno-0-1564">1564</a></span>
 <span class="normal"><a href="#__codelineno-0-1565">1565</a></span>
 <span class="normal"><a href="#__codelineno-0-1566">1566</a></span>
@@ -18391,48 +18413,56 @@ re-serialization.</p>
 <span class="normal"><a href="#__codelineno-0-1593">1593</a></span>
 <span class="normal"><a href="#__codelineno-0-1594">1594</a></span>
 <span class="normal"><a href="#__codelineno-0-1595">1595</a></span>
-<span class="normal"><a href="#__codelineno-0-1596">1596</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1555" name="__codelineno-0-1555"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_xml_string</span><span class="p">(</span>
-<a id="__codelineno-0-1556" name="__codelineno-0-1556"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1557" name="__codelineno-0-1557"></a>    <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-1558" name="__codelineno-0-1558"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-1559" name="__codelineno-0-1559"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a stringified XML representation of the Metadata instance.</span>
-<a id="__codelineno-0-1560" name="__codelineno-0-1560"></a>
-<a id="__codelineno-0-1561" name="__codelineno-0-1561"></a><span class="sd">    When the instance was created from a raw XML payload and no field has</span>
-<a id="__codelineno-0-1562" name="__codelineno-0-1562"></a><span class="sd">    been read or modified yet, the original payload is returned without</span>
-<a id="__codelineno-0-1563" name="__codelineno-0-1563"></a><span class="sd">    re-serialization.</span>
-<a id="__codelineno-0-1564" name="__codelineno-0-1564"></a>
-<a id="__codelineno-0-1565" name="__codelineno-0-1565"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1566" name="__codelineno-0-1566"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1567" name="__codelineno-0-1567"></a><span class="sd">    indent : int | None</span>
-<a id="__codelineno-0-1568" name="__codelineno-0-1568"></a><span class="sd">        A number of spaces per indent level</span>
-<a id="__codelineno-0-1569" name="__codelineno-0-1569"></a>
-<a id="__codelineno-0-1570" name="__codelineno-0-1570"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-1571" name="__codelineno-0-1571"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-1572" name="__codelineno-0-1572"></a><span class="sd">    str</span>
-<a id="__codelineno-0-1573" name="__codelineno-0-1573"></a><span class="sd">        Metadata in a stringified XML representation</span>
-<a id="__codelineno-0-1574" name="__codelineno-0-1574"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1575" name="__codelineno-0-1575"></a>    <span class="k">if</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-1576" name="__codelineno-0-1576"></a>        <span class="n">source</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-1577" name="__codelineno-0-1577"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span>
-<a id="__codelineno-0-1578" name="__codelineno-0-1578"></a>        <span class="p">)</span>
-<a id="__codelineno-0-1579" name="__codelineno-0-1579"></a>        <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-1580" name="__codelineno-0-1580"></a>            <span class="k">return</span> <span class="n">source</span>
-<a id="__codelineno-0-1581" name="__codelineno-0-1581"></a>    <span class="n">metadata_xml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_xml</span><span class="p">()</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
-<a id="__codelineno-0-1582" name="__codelineno-0-1582"></a>    <span class="k">if</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-1583" name="__codelineno-0-1583"></a>        <span class="n">metadata_str</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span>
-<a id="__codelineno-0-1584" name="__codelineno-0-1584"></a>            <span class="n">metadata_xml</span><span class="p">,</span>
-<a id="__codelineno-0-1585" name="__codelineno-0-1585"></a>            <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-1586" name="__codelineno-0-1586"></a>            <span class="n">method</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-1587" name="__codelineno-0-1587"></a>            <span class="n">xml_declaration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-1588" name="__codelineno-0-1588"></a>        <span class="p">)</span>
-<a id="__codelineno-0-1589" name="__codelineno-0-1589"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-1590" name="__codelineno-0-1590"></a>        <span class="n">metadata_xml_string</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">metadata_xml</span><span class="p">)</span>
-<a id="__codelineno-0-1591" name="__codelineno-0-1591"></a>        <span class="n">metadata_xml_minidom</span> <span class="o">=</span> <span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">metadata_xml_string</span><span class="p">)</span>
-<a id="__codelineno-0-1592" name="__codelineno-0-1592"></a>        <span class="n">metadata_str</span> <span class="o">=</span> <span class="n">metadata_xml_minidom</span><span class="o">.</span><span class="n">toprettyxml</span><span class="p">(</span>
-<a id="__codelineno-0-1593" name="__codelineno-0-1593"></a>            <span class="n">indent</span><span class="o">=</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">indent</span><span class="p">,</span>
-<a id="__codelineno-0-1594" name="__codelineno-0-1594"></a>            <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-1595" name="__codelineno-0-1595"></a>        <span class="p">)</span>
-<a id="__codelineno-0-1596" name="__codelineno-0-1596"></a>    <span class="k">return</span> <span class="n">_normalize_xml_declaration</span><span class="p">(</span><span class="n">metadata_str</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-1596">1596</a></span>
+<span class="normal"><a href="#__codelineno-0-1597">1597</a></span>
+<span class="normal"><a href="#__codelineno-0-1598">1598</a></span>
+<span class="normal"><a href="#__codelineno-0-1599">1599</a></span>
+<span class="normal"><a href="#__codelineno-0-1600">1600</a></span>
+<span class="normal"><a href="#__codelineno-0-1601">1601</a></span>
+<span class="normal"><a href="#__codelineno-0-1602">1602</a></span>
+<span class="normal"><a href="#__codelineno-0-1603">1603</a></span>
+<span class="normal"><a href="#__codelineno-0-1604">1604</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1563" name="__codelineno-0-1563"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_xml_string</span><span class="p">(</span>
+<a id="__codelineno-0-1564" name="__codelineno-0-1564"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1565" name="__codelineno-0-1565"></a>    <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-1566" name="__codelineno-0-1566"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-1567" name="__codelineno-0-1567"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a stringified XML representation of the Metadata instance.</span>
+<a id="__codelineno-0-1568" name="__codelineno-0-1568"></a>
+<a id="__codelineno-0-1569" name="__codelineno-0-1569"></a><span class="sd">    When the instance was created from a raw XML payload and no field has</span>
+<a id="__codelineno-0-1570" name="__codelineno-0-1570"></a><span class="sd">    been read or modified yet, the original payload is returned without</span>
+<a id="__codelineno-0-1571" name="__codelineno-0-1571"></a><span class="sd">    re-serialization.</span>
+<a id="__codelineno-0-1572" name="__codelineno-0-1572"></a>
+<a id="__codelineno-0-1573" name="__codelineno-0-1573"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1574" name="__codelineno-0-1574"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1575" name="__codelineno-0-1575"></a><span class="sd">    indent : int | None</span>
+<a id="__codelineno-0-1576" name="__codelineno-0-1576"></a><span class="sd">        A number of spaces per indent level</span>
+<a id="__codelineno-0-1577" name="__codelineno-0-1577"></a>
+<a id="__codelineno-0-1578" name="__codelineno-0-1578"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-1579" name="__codelineno-0-1579"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-1580" name="__codelineno-0-1580"></a><span class="sd">    str</span>
+<a id="__codelineno-0-1581" name="__codelineno-0-1581"></a><span class="sd">        Metadata in a stringified XML representation</span>
+<a id="__codelineno-0-1582" name="__codelineno-0-1582"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1583" name="__codelineno-0-1583"></a>    <span class="k">if</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1584" name="__codelineno-0-1584"></a>        <span class="n">source</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-1585" name="__codelineno-0-1585"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span>
+<a id="__codelineno-0-1586" name="__codelineno-0-1586"></a>        <span class="p">)</span>
+<a id="__codelineno-0-1587" name="__codelineno-0-1587"></a>        <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-1588" name="__codelineno-0-1588"></a>            <span class="k">return</span> <span class="n">source</span>
+<a id="__codelineno-0-1589" name="__codelineno-0-1589"></a>    <span class="n">metadata_xml</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;ElemTree.Element&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_xml</span><span class="p">()</span><span class="o">.</span><span class="n">getroot</span><span class="p">())</span>
+<a id="__codelineno-0-1590" name="__codelineno-0-1590"></a>    <span class="k">if</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1591" name="__codelineno-0-1591"></a>        <span class="n">metadata_str</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span>
+<a id="__codelineno-0-1592" name="__codelineno-0-1592"></a>            <span class="n">metadata_xml</span><span class="p">,</span>
+<a id="__codelineno-0-1593" name="__codelineno-0-1593"></a>            <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-1594" name="__codelineno-0-1594"></a>            <span class="n">method</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-1595" name="__codelineno-0-1595"></a>            <span class="n">xml_declaration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-1596" name="__codelineno-0-1596"></a>        <span class="p">)</span>
+<a id="__codelineno-0-1597" name="__codelineno-0-1597"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-1598" name="__codelineno-0-1598"></a>        <span class="n">metadata_xml_string</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">metadata_xml</span><span class="p">)</span>
+<a id="__codelineno-0-1599" name="__codelineno-0-1599"></a>        <span class="n">metadata_xml_minidom</span> <span class="o">=</span> <span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">metadata_xml_string</span><span class="p">)</span>
+<a id="__codelineno-0-1600" name="__codelineno-0-1600"></a>        <span class="n">metadata_str</span> <span class="o">=</span> <span class="n">metadata_xml_minidom</span><span class="o">.</span><span class="n">toprettyxml</span><span class="p">(</span>
+<a id="__codelineno-0-1601" name="__codelineno-0-1601"></a>            <span class="n">indent</span><span class="o">=</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">indent</span><span class="p">,</span>
+<a id="__codelineno-0-1602" name="__codelineno-0-1602"></a>            <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-1603" name="__codelineno-0-1603"></a>        <span class="p">)</span>
+<a id="__codelineno-0-1604" name="__codelineno-0-1604"></a>    <span class="k">return</span> <span class="n">_normalize_xml_declaration</span><span class="p">(</span><span class="n">metadata_str</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

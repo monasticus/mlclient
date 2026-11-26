@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15892,35 +15922,35 @@ matched.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-783">783</a></span>
-<span class="normal"><a href="#__codelineno-0-784">784</a></span>
-<span class="normal"><a href="#__codelineno-0-785">785</a></span>
-<span class="normal"><a href="#__codelineno-0-786">786</a></span>
-<span class="normal"><a href="#__codelineno-0-787">787</a></span>
-<span class="normal"><a href="#__codelineno-0-788">788</a></span>
-<span class="normal"><a href="#__codelineno-0-789">789</a></span>
-<span class="normal"><a href="#__codelineno-0-790">790</a></span>
-<span class="normal"><a href="#__codelineno-0-791">791</a></span>
-<span class="normal"><a href="#__codelineno-0-792">792</a></span>
-<span class="normal"><a href="#__codelineno-0-793">793</a></span>
-<span class="normal"><a href="#__codelineno-0-794">794</a></span>
-<span class="normal"><a href="#__codelineno-0-795">795</a></span>
-<span class="normal"><a href="#__codelineno-0-796">796</a></span>
-<span class="normal"><a href="#__codelineno-0-797">797</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-783" name="__codelineno-0-783"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-784" name="__codelineno-0-784"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-785" name="__codelineno-0-785"></a>    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-786" name="__codelineno-0-786"></a><span class="p">):</span>
-<a id="__codelineno-0-787" name="__codelineno-0-787"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-788" name="__codelineno-0-788"></a>
-<a id="__codelineno-0-789" name="__codelineno-0-789"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-790" name="__codelineno-0-790"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-791" name="__codelineno-0-791"></a><span class="sd">    timestamp : int | XqyExpression</span>
-<a id="__codelineno-0-792" name="__codelineno-0-792"></a><span class="sd">        A commit timestamp. Database fragments committed before this timestamp are</span>
-<a id="__codelineno-0-793" name="__codelineno-0-793"></a><span class="sd">        matched.</span>
-<a id="__codelineno-0-794" name="__codelineno-0-794"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-795" name="__codelineno-0-795"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-796" name="__codelineno-0-796"></a>        <span class="n">timestamp</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>
-<a id="__codelineno-0-797" name="__codelineno-0-797"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-814">814</a></span>
+<span class="normal"><a href="#__codelineno-0-815">815</a></span>
+<span class="normal"><a href="#__codelineno-0-816">816</a></span>
+<span class="normal"><a href="#__codelineno-0-817">817</a></span>
+<span class="normal"><a href="#__codelineno-0-818">818</a></span>
+<span class="normal"><a href="#__codelineno-0-819">819</a></span>
+<span class="normal"><a href="#__codelineno-0-820">820</a></span>
+<span class="normal"><a href="#__codelineno-0-821">821</a></span>
+<span class="normal"><a href="#__codelineno-0-822">822</a></span>
+<span class="normal"><a href="#__codelineno-0-823">823</a></span>
+<span class="normal"><a href="#__codelineno-0-824">824</a></span>
+<span class="normal"><a href="#__codelineno-0-825">825</a></span>
+<span class="normal"><a href="#__codelineno-0-826">826</a></span>
+<span class="normal"><a href="#__codelineno-0-827">827</a></span>
+<span class="normal"><a href="#__codelineno-0-828">828</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-814" name="__codelineno-0-814"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-815" name="__codelineno-0-815"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-816" name="__codelineno-0-816"></a>    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-817" name="__codelineno-0-817"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-818" name="__codelineno-0-818"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-819" name="__codelineno-0-819"></a>
+<a id="__codelineno-0-820" name="__codelineno-0-820"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-821" name="__codelineno-0-821"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-822" name="__codelineno-0-822"></a><span class="sd">    timestamp : int | XqyExpression</span>
+<a id="__codelineno-0-823" name="__codelineno-0-823"></a><span class="sd">        A commit timestamp. Database fragments committed before this timestamp are</span>
+<a id="__codelineno-0-824" name="__codelineno-0-824"></a><span class="sd">        matched.</span>
+<a id="__codelineno-0-825" name="__codelineno-0-825"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-826" name="__codelineno-0-826"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-827" name="__codelineno-0-827"></a>        <span class="n">timestamp</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>
+<a id="__codelineno-0-828" name="__codelineno-0-828"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

@@ -2442,6 +2442,8 @@
       
         
       
+        
+      
     
     
     
@@ -2497,6 +2499,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15886,9 +15916,9 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/clients/api.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-61">61</a></span>
-<span class="normal"><a href="#__codelineno-0-62">62</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">http</span><span class="p">:</span> <span class="n">AsyncHttpClient</span><span class="p">):</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_http</span> <span class="o">=</span> <span class="n">http</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-71">71</a></span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">http</span><span class="p">:</span> <span class="n">AsyncHttpClient</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_http</span> <span class="o">=</span> <span class="n">http</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -15917,7 +15947,11 @@
   </span>
 
 <a href="#mlclient.clients.AsyncApiClient.call" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">call</span><span class="p">(</span><span class="n">call_</span><span class="p">:</span> <span class="n">ApiCall</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">call</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">call_</span><span class="p">:</span> <span class="n">ApiCall</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16026,73 +16060,83 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/clients/api.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-64">64</a></span>
-<span class="normal"><a href="#__codelineno-0-65">65</a></span>
-<span class="normal"><a href="#__codelineno-0-66">66</a></span>
-<span class="normal"><a href="#__codelineno-0-67">67</a></span>
-<span class="normal"><a href="#__codelineno-0-68">68</a></span>
-<span class="normal"><a href="#__codelineno-0-69">69</a></span>
-<span class="normal"><a href="#__codelineno-0-70">70</a></span>
-<span class="normal"><a href="#__codelineno-0-71">71</a></span>
-<span class="normal"><a href="#__codelineno-0-72">72</a></span>
-<span class="normal"><a href="#__codelineno-0-73">73</a></span>
-<span class="normal"><a href="#__codelineno-0-74">74</a></span>
-<span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span>
-<span class="normal"><a href="#__codelineno-0-77">77</a></span>
-<span class="normal"><a href="#__codelineno-0-78">78</a></span>
-<span class="normal"><a href="#__codelineno-0-79">79</a></span>
-<span class="normal"><a href="#__codelineno-0-80">80</a></span>
-<span class="normal"><a href="#__codelineno-0-81">81</a></span>
-<span class="normal"><a href="#__codelineno-0-82">82</a></span>
-<span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span>
-<span class="normal"><a href="#__codelineno-0-85">85</a></span>
-<span class="normal"><a href="#__codelineno-0-86">86</a></span>
-<span class="normal"><a href="#__codelineno-0-87">87</a></span>
-<span class="normal"><a href="#__codelineno-0-88">88</a></span>
-<span class="normal"><a href="#__codelineno-0-89">89</a></span>
-<span class="normal"><a href="#__codelineno-0-90">90</a></span>
-<span class="normal"><a href="#__codelineno-0-91">91</a></span>
-<span class="normal"><a href="#__codelineno-0-92">92</a></span>
-<span class="normal"><a href="#__codelineno-0-93">93</a></span>
-<span class="normal"><a href="#__codelineno-0-94">94</a></span>
-<span class="normal"><a href="#__codelineno-0-95">95</a></span>
-<span class="normal"><a href="#__codelineno-0-96">96</a></span>
-<span class="normal"><a href="#__codelineno-0-97">97</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_</span><span class="p">:</span> <span class="n">ApiCall</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a request using an ApiCall object.</span>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    call_ : ApiCall</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        A specific endpoint call implementation</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        A per-request timeout applied to this call only. Unset uses the</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        client&#39;s configured timeout. None disables every HTTP timeout; a</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">        number sets all four components to that many seconds; an</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        httpx.Timeout overrides them. It is an execution option, never sent</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">        as a request parameter, header or body.</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">        An HTTP response</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a>        <span class="n">method</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>        <span class="n">endpoint</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>        <span class="n">params</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="n">headers</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>        <span class="n">body</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-74"> 74</a></span>
+<span class="normal"><a href="#__codelineno-0-75"> 75</a></span>
+<span class="normal"><a href="#__codelineno-0-76"> 76</a></span>
+<span class="normal"><a href="#__codelineno-0-77"> 77</a></span>
+<span class="normal"><a href="#__codelineno-0-78"> 78</a></span>
+<span class="normal"><a href="#__codelineno-0-79"> 79</a></span>
+<span class="normal"><a href="#__codelineno-0-80"> 80</a></span>
+<span class="normal"><a href="#__codelineno-0-81"> 81</a></span>
+<span class="normal"><a href="#__codelineno-0-82"> 82</a></span>
+<span class="normal"><a href="#__codelineno-0-83"> 83</a></span>
+<span class="normal"><a href="#__codelineno-0-84"> 84</a></span>
+<span class="normal"><a href="#__codelineno-0-85"> 85</a></span>
+<span class="normal"><a href="#__codelineno-0-86"> 86</a></span>
+<span class="normal"><a href="#__codelineno-0-87"> 87</a></span>
+<span class="normal"><a href="#__codelineno-0-88"> 88</a></span>
+<span class="normal"><a href="#__codelineno-0-89"> 89</a></span>
+<span class="normal"><a href="#__codelineno-0-90"> 90</a></span>
+<span class="normal"><a href="#__codelineno-0-91"> 91</a></span>
+<span class="normal"><a href="#__codelineno-0-92"> 92</a></span>
+<span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
+<span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
+<span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
+<span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
+<span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
+<span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
+<span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
+<span class="normal"><a href="#__codelineno-0-100">100</a></span>
+<span class="normal"><a href="#__codelineno-0-101">101</a></span>
+<span class="normal"><a href="#__codelineno-0-102">102</a></span>
+<span class="normal"><a href="#__codelineno-0-103">103</a></span>
+<span class="normal"><a href="#__codelineno-0-104">104</a></span>
+<span class="normal"><a href="#__codelineno-0-105">105</a></span>
+<span class="normal"><a href="#__codelineno-0-106">106</a></span>
+<span class="normal"><a href="#__codelineno-0-107">107</a></span>
+<span class="normal"><a href="#__codelineno-0-108">108</a></span>
+<span class="normal"><a href="#__codelineno-0-109">109</a></span>
+<span class="normal"><a href="#__codelineno-0-110">110</a></span>
+<span class="normal"><a href="#__codelineno-0-111">111</a></span>
+<span class="normal"><a href="#__codelineno-0-112">112</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="n">call_</span><span class="p">:</span> <span class="n">ApiCall</span><span class="p">,</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a request using an ApiCall object.</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">    call_ : ApiCall</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">        A specific endpoint call implementation</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        A per-request timeout applied to this call only. Unset uses the</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        client&#39;s configured timeout. None disables every HTTP timeout; a</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">        number sets all four components to that many seconds; an</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        httpx.Timeout overrides them. It is an execution option, never sent</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        as a request parameter, header or body.</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">        An HTTP response</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a>        <span class="n">method</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a>        <span class="n">endpoint</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a>        <span class="n">params</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>        <span class="n">headers</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a>        <span class="n">body</span><span class="o">=</span><span class="n">call_</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

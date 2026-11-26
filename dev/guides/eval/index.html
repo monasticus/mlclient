@@ -2571,6 +2571,8 @@
       
         
       
+        
+      
     
     
     
@@ -2626,6 +2628,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16260,6 +16290,9 @@ methods also accept <code>variables</code>; expressions bind their arguments aut
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">result</span>
 <a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="sa">b</span><span class="s1">&#39;2024-02-22T12:24:53.677793Z&#39;</span>
 </code></pre></div>
+<p>One item returns the item itself and several return a list, so a type checker
+sees <code>str | list[str]</code> for <code>output_type=str</code> and <code>bytes | list[bytes]</code> for
+<code>output_type=bytes</code>.</p>
 <h2 id="evaluate-on-a-custom-database">Evaluate on a custom database<a class="headerlink" href="#evaluate-on-a-custom-database" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>

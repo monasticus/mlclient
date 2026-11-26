@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15944,33 +15974,33 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-463">463</a></span>
-<span class="normal"><a href="#__codelineno-0-464">464</a></span>
-<span class="normal"><a href="#__codelineno-0-465">465</a></span>
-<span class="normal"><a href="#__codelineno-0-466">466</a></span>
-<span class="normal"><a href="#__codelineno-0-467">467</a></span>
-<span class="normal"><a href="#__codelineno-0-468">468</a></span>
-<span class="normal"><a href="#__codelineno-0-469">469</a></span>
-<span class="normal"><a href="#__codelineno-0-470">470</a></span>
-<span class="normal"><a href="#__codelineno-0-471">471</a></span>
-<span class="normal"><a href="#__codelineno-0-472">472</a></span>
-<span class="normal"><a href="#__codelineno-0-473">473</a></span>
-<span class="normal"><a href="#__codelineno-0-474">474</a></span>
-<span class="normal"><a href="#__codelineno-0-475">475</a></span>
-<span class="normal"><a href="#__codelineno-0-476">476</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="n">XqyExpression</span><span class="p">):</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot the radius as a native double and the center.</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">    radius : float | XqyExpression</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">        Radius in the units of the query options (miles by default).</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">    center : XqyExpression</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">        The center point, usually a Point from ``cts.point``.</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="n">radius</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">cast</span><span class="o">=</span><span class="s2">&quot;xs:double&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="n">center</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">center</span><span class="p">),</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-490">490</a></span>
+<span class="normal"><a href="#__codelineno-0-491">491</a></span>
+<span class="normal"><a href="#__codelineno-0-492">492</a></span>
+<span class="normal"><a href="#__codelineno-0-493">493</a></span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span>
+<span class="normal"><a href="#__codelineno-0-495">495</a></span>
+<span class="normal"><a href="#__codelineno-0-496">496</a></span>
+<span class="normal"><a href="#__codelineno-0-497">497</a></span>
+<span class="normal"><a href="#__codelineno-0-498">498</a></span>
+<span class="normal"><a href="#__codelineno-0-499">499</a></span>
+<span class="normal"><a href="#__codelineno-0-500">500</a></span>
+<span class="normal"><a href="#__codelineno-0-501">501</a></span>
+<span class="normal"><a href="#__codelineno-0-502">502</a></span>
+<span class="normal"><a href="#__codelineno-0-503">503</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="n">XqyExpression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot the radius as a native double and the center.</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">    radius : float | XqyExpression</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">        Radius in the units of the query options (miles by default).</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">    center : XqyExpression</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">        The center point, usually a Point from ``cts.point``.</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a>        <span class="n">radius</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">cast</span><span class="o">=</span><span class="s2">&quot;xs:double&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a>        <span class="n">center</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">center</span><span class="p">),</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16051,33 +16081,33 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-478">478</a></span>
-<span class="normal"><a href="#__codelineno-0-479">479</a></span>
-<span class="normal"><a href="#__codelineno-0-480">480</a></span>
-<span class="normal"><a href="#__codelineno-0-481">481</a></span>
-<span class="normal"><a href="#__codelineno-0-482">482</a></span>
-<span class="normal"><a href="#__codelineno-0-483">483</a></span>
-<span class="normal"><a href="#__codelineno-0-484">484</a></span>
-<span class="normal"><a href="#__codelineno-0-485">485</a></span>
-<span class="normal"><a href="#__codelineno-0-486">486</a></span>
-<span class="normal"><a href="#__codelineno-0-487">487</a></span>
-<span class="normal"><a href="#__codelineno-0-488">488</a></span>
-<span class="normal"><a href="#__codelineno-0-489">489</a></span>
-<span class="normal"><a href="#__codelineno-0-490">490</a></span>
-<span class="normal"><a href="#__codelineno-0-491">491</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the native ``@radius latitude,longitude`` text.</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="sd">    str</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">        Circle text.</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">    TypeError</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">        For a radius or center requiring server evaluation.</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;@</span><span class="si">{</span><span class="n">_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">_point_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-505">505</a></span>
+<span class="normal"><a href="#__codelineno-0-506">506</a></span>
+<span class="normal"><a href="#__codelineno-0-507">507</a></span>
+<span class="normal"><a href="#__codelineno-0-508">508</a></span>
+<span class="normal"><a href="#__codelineno-0-509">509</a></span>
+<span class="normal"><a href="#__codelineno-0-510">510</a></span>
+<span class="normal"><a href="#__codelineno-0-511">511</a></span>
+<span class="normal"><a href="#__codelineno-0-512">512</a></span>
+<span class="normal"><a href="#__codelineno-0-513">513</a></span>
+<span class="normal"><a href="#__codelineno-0-514">514</a></span>
+<span class="normal"><a href="#__codelineno-0-515">515</a></span>
+<span class="normal"><a href="#__codelineno-0-516">516</a></span>
+<span class="normal"><a href="#__codelineno-0-517">517</a></span>
+<span class="normal"><a href="#__codelineno-0-518">518</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the native ``@radius latitude,longitude`` text.</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">    str</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">        Circle text.</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">    TypeError</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">        For a radius or center requiring server evaluation.</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;@</span><span class="si">{</span><span class="n">_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">_point_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

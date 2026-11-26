@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15973,7 +16003,9 @@
 
 
 <a href="#mlclient.xquery.XqyExpression.compile" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">compile</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">compile</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="o">*</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16038,9 +16070,7 @@ Invalid paths raise MLCLIENT-INVALID-PATH when evaluated.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-204">204</a></span>
-<span class="normal"><a href="#__codelineno-0-205">205</a></span>
-<span class="normal"><a href="#__codelineno-0-206">206</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-206">206</a></span>
 <span class="normal"><a href="#__codelineno-0-207">207</a></span>
 <span class="normal"><a href="#__codelineno-0-208">208</a></span>
 <span class="normal"><a href="#__codelineno-0-209">209</a></span>
@@ -16059,28 +16089,38 @@ Invalid paths raise MLCLIENT-INVALID-PATH when evaluated.</p>
 <span class="normal"><a href="#__codelineno-0-222">222</a></span>
 <span class="normal"><a href="#__codelineno-0-223">223</a></span>
 <span class="normal"><a href="#__codelineno-0-224">224</a></span>
-<span class="normal"><a href="#__codelineno-0-225">225</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="k">def</span><span class="w"> </span><span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return guarded XQuery source and external bindings.</span>
-<a id="__codelineno-0-206" name="__codelineno-0-206"></a>
-<a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-208" name="__codelineno-0-208"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-209" name="__codelineno-0-209"></a><span class="sd">    namespaces : Mapping[str, str] | None</span>
-<a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="sd">        Prefix-to-URI bindings shared by path validation and execution.</span>
-<a id="__codelineno-0-211" name="__codelineno-0-211"></a>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    tuple[str, dict]</span>
-<a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="sd">        XQuery 1.0-ml source and independent JSON-compatible bindings.</span>
-<a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="sd">        Invalid paths raise MLCLIENT-INVALID-PATH when evaluated.</span>
-<a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-218" name="__codelineno-0-218"></a>    <span class="n">ctx</span> <span class="o">=</span> <span class="n">XqyCompilationContext</span><span class="p">()</span>
-<a id="__codelineno-0-219" name="__codelineno-0-219"></a>    <span class="n">bindings</span> <span class="o">=</span> <span class="n">namespace_bindings</span><span class="p">(</span><span class="n">namespaces</span><span class="p">)</span>
-<a id="__codelineno-0-220" name="__codelineno-0-220"></a>    <span class="n">body</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">guard</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">))</span>
-<a id="__codelineno-0-221" name="__codelineno-0-221"></a>    <span class="n">variables</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">variables</span>
-<a id="__codelineno-0-222" name="__codelineno-0-222"></a>    <span class="n">prolog</span> <span class="o">=</span> <span class="s1">&#39;xquery version &quot;1.0-ml&quot;;</span><span class="se">\n</span><span class="s1">&#39;</span>
-<a id="__codelineno-0-223" name="__codelineno-0-223"></a>    <span class="n">prolog</span> <span class="o">+=</span> <span class="n">_namespace_declarations</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span>
-<a id="__codelineno-0-224" name="__codelineno-0-224"></a>    <span class="n">prolog</span> <span class="o">+=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">declarations</span>
-<a id="__codelineno-0-225" name="__codelineno-0-225"></a>    <span class="k">return</span> <span class="n">prolog</span> <span class="o">+</span> <span class="n">body</span><span class="p">,</span> <span class="n">variables</span>
+<span class="normal"><a href="#__codelineno-0-225">225</a></span>
+<span class="normal"><a href="#__codelineno-0-226">226</a></span>
+<span class="normal"><a href="#__codelineno-0-227">227</a></span>
+<span class="normal"><a href="#__codelineno-0-228">228</a></span>
+<span class="normal"><a href="#__codelineno-0-229">229</a></span>
+<span class="normal"><a href="#__codelineno-0-230">230</a></span>
+<span class="normal"><a href="#__codelineno-0-231">231</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-206" name="__codelineno-0-206"></a><span class="k">def</span><span class="w"> </span><span class="nf">compile</span><span class="p">(</span>
+<a id="__codelineno-0-207" name="__codelineno-0-207"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-208" name="__codelineno-0-208"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-209" name="__codelineno-0-209"></a>    <span class="n">namespaces</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<a id="__codelineno-0-211" name="__codelineno-0-211"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return guarded XQuery source and external bindings.</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a>
+<a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="sd">    namespaces : Mapping[str, str] | None</span>
+<a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="sd">        Prefix-to-URI bindings shared by path validation and execution.</span>
+<a id="__codelineno-0-217" name="__codelineno-0-217"></a>
+<a id="__codelineno-0-218" name="__codelineno-0-218"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220"></a><span class="sd">    tuple[str, dict]</span>
+<a id="__codelineno-0-221" name="__codelineno-0-221"></a><span class="sd">        XQuery 1.0-ml source and independent JSON-compatible bindings.</span>
+<a id="__codelineno-0-222" name="__codelineno-0-222"></a><span class="sd">        Invalid paths raise MLCLIENT-INVALID-PATH when evaluated.</span>
+<a id="__codelineno-0-223" name="__codelineno-0-223"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-224" name="__codelineno-0-224"></a>    <span class="n">ctx</span> <span class="o">=</span> <span class="n">XqyCompilationContext</span><span class="p">()</span>
+<a id="__codelineno-0-225" name="__codelineno-0-225"></a>    <span class="n">bindings</span> <span class="o">=</span> <span class="n">namespace_bindings</span><span class="p">(</span><span class="n">namespaces</span><span class="p">)</span>
+<a id="__codelineno-0-226" name="__codelineno-0-226"></a>    <span class="n">body</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">guard</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">))</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="n">variables</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">variables</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a>    <span class="n">prolog</span> <span class="o">=</span> <span class="s1">&#39;xquery version &quot;1.0-ml&quot;;</span><span class="se">\n</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-229" name="__codelineno-0-229"></a>    <span class="n">prolog</span> <span class="o">+=</span> <span class="n">_namespace_declarations</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span>
+<a id="__codelineno-0-230" name="__codelineno-0-230"></a>    <span class="n">prolog</span> <span class="o">+=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">declarations</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231"></a>    <span class="k">return</span> <span class="n">prolog</span> <span class="o">+</span> <span class="n">body</span><span class="p">,</span> <span class="n">variables</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16194,13 +16234,7 @@ is neither an integer nor fn.last().</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-227">227</a></span>
-<span class="normal"><a href="#__codelineno-0-228">228</a></span>
-<span class="normal"><a href="#__codelineno-0-229">229</a></span>
-<span class="normal"><a href="#__codelineno-0-230">230</a></span>
-<span class="normal"><a href="#__codelineno-0-231">231</a></span>
-<span class="normal"><a href="#__codelineno-0-232">232</a></span>
-<span class="normal"><a href="#__codelineno-0-233">233</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-233">233</a></span>
 <span class="normal"><a href="#__codelineno-0-234">234</a></span>
 <span class="normal"><a href="#__codelineno-0-235">235</a></span>
 <span class="normal"><a href="#__codelineno-0-236">236</a></span>
@@ -16226,39 +16260,45 @@ is neither an integer nor fn.last().</p>
 <span class="normal"><a href="#__codelineno-0-256">256</a></span>
 <span class="normal"><a href="#__codelineno-0-257">257</a></span>
 <span class="normal"><a href="#__codelineno-0-258">258</a></span>
-<span class="normal"><a href="#__codelineno-0-259">259</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-227" name="__codelineno-0-227"></a><span class="k">def</span><span class="w"> </span><span class="nf">pos</span><span class="p">(</span>
-<a id="__codelineno-0-228" name="__codelineno-0-228"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-229" name="__codelineno-0-229"></a>    <span class="n">pos</span><span class="p">:</span> <span class="n">Position</span> <span class="o">|</span> <span class="n">PositionRange</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XqyExpression</span><span class="p">:</span>
-<a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Select one one-based position or an inclusive two-position range.</span>
-<a id="__codelineno-0-232" name="__codelineno-0-232"></a>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-234" name="__codelineno-0-234"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-235" name="__codelineno-0-235"></a><span class="sd">    pos : Position | PositionRange | None</span>
-<a id="__codelineno-0-236" name="__codelineno-0-236"></a><span class="sd">        A positive integer or fn.last() selects one item. A two-item list</span>
-<a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="sd">        or tuple selects an inclusive range. None preserves the expression.</span>
+<span class="normal"><a href="#__codelineno-0-259">259</a></span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span>
+<span class="normal"><a href="#__codelineno-0-262">262</a></span>
+<span class="normal"><a href="#__codelineno-0-263">263</a></span>
+<span class="normal"><a href="#__codelineno-0-264">264</a></span>
+<span class="normal"><a href="#__codelineno-0-265">265</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="k">def</span><span class="w"> </span><span class="nf">pos</span><span class="p">(</span>
+<a id="__codelineno-0-234" name="__codelineno-0-234"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>    <span class="n">pos</span><span class="p">:</span> <span class="n">Position</span> <span class="o">|</span> <span class="n">PositionRange</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-236" name="__codelineno-0-236"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XqyExpression</span><span class="p">:</span>
+<a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Select one one-based position or an inclusive two-position range.</span>
 <a id="__codelineno-0-238" name="__codelineno-0-238"></a>
-<a id="__codelineno-0-239" name="__codelineno-0-239"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">    XqyExpression</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">        A composable predicate, or this expression for None.</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">    TypeError</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">        If a range does not contain exactly two positions or a position</span>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">        is neither an integer nor fn.last().</span>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">    ValueError</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">        If a position is not positive or literal range bounds are reversed.</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a>    <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a>        <span class="k">return</span> <span class="bp">self</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-<a id="__codelineno-0-255" name="__codelineno-0-255"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">!=</span> <span class="n">_RANGE_BOUND_COUNT</span><span class="p">:</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a>            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;pos ranges must contain exactly two positions&quot;</span>
-<a id="__codelineno-0-257" name="__codelineno-0-257"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-258" name="__codelineno-0-258"></a>        <span class="k">return</span> <span class="n">Range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">pos</span><span class="p">)</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="k">return</span> <span class="n">Index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+<a id="__codelineno-0-239" name="__codelineno-0-239"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">    pos : Position | PositionRange | None</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">        A positive integer or fn.last() selects one item. A two-item list</span>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">        or tuple selects an inclusive range. None preserves the expression.</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">    XqyExpression</span>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">        A composable predicate, or this expression for None.</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249"></a>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">    TypeError</span>
+<a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="sd">        If a range does not contain exactly two positions or a position</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a><span class="sd">        is neither an integer nor fn.last().</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a><span class="sd">    ValueError</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="sd">        If a position is not positive or literal range bounds are reversed.</span>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>        <span class="k">return</span> <span class="bp">self</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">!=</span> <span class="n">_RANGE_BOUND_COUNT</span><span class="p">:</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a>            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;pos ranges must contain exactly two positions&quot;</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>        <span class="k">return</span> <span class="n">Range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">pos</span><span class="p">)</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a>    <span class="k">return</span> <span class="n">Index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16341,9 +16381,7 @@ is neither an integer nor fn.last().</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-189">189</a></span>
-<span class="normal"><a href="#__codelineno-0-190">190</a></span>
-<span class="normal"><a href="#__codelineno-0-191">191</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-191">191</a></span>
 <span class="normal"><a href="#__codelineno-0-192">192</a></span>
 <span class="normal"><a href="#__codelineno-0-193">193</a></span>
 <span class="normal"><a href="#__codelineno-0-194">194</a></span>
@@ -16354,20 +16392,22 @@ is neither an integer nor fn.last().</p>
 <span class="normal"><a href="#__codelineno-0-199">199</a></span>
 <span class="normal"><a href="#__codelineno-0-200">200</a></span>
 <span class="normal"><a href="#__codelineno-0-201">201</a></span>
-<span class="normal"><a href="#__codelineno-0-202">202</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-189" name="__codelineno-0-189"></a><span class="nd">@abstractmethod</span>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Render this expression using the shared compilation context.</span>
-<a id="__codelineno-0-192" name="__codelineno-0-192"></a>
-<a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">    ctx : XqyCompilationContext</span>
-<a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">        Context for binding runtime values and registering path validation.</span>
-<a id="__codelineno-0-197" name="__codelineno-0-197"></a>
-<a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="sd">    str</span>
-<a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="sd">        XQuery body fragment. Runtime data must be bound, not interpolated.</span>
-<a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">    &quot;&quot;&quot;</span>
+<span class="normal"><a href="#__codelineno-0-202">202</a></span>
+<span class="normal"><a href="#__codelineno-0-203">203</a></span>
+<span class="normal"><a href="#__codelineno-0-204">204</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="nd">@abstractmethod</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Render this expression using the shared compilation context.</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="sd">    ctx : XqyCompilationContext</span>
+<a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        Context for binding runtime values and registering path validation.</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199"></a>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">    str</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">        XQuery body fragment. Runtime data must be bound, not interpolated.</span>
+<a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16487,13 +16527,7 @@ during evaluation, before executing the composed expression.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-261">261</a></span>
-<span class="normal"><a href="#__codelineno-0-262">262</a></span>
-<span class="normal"><a href="#__codelineno-0-263">263</a></span>
-<span class="normal"><a href="#__codelineno-0-264">264</a></span>
-<span class="normal"><a href="#__codelineno-0-265">265</a></span>
-<span class="normal"><a href="#__codelineno-0-266">266</a></span>
-<span class="normal"><a href="#__codelineno-0-267">267</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-267">267</a></span>
 <span class="normal"><a href="#__codelineno-0-268">268</a></span>
 <span class="normal"><a href="#__codelineno-0-269">269</a></span>
 <span class="normal"><a href="#__codelineno-0-270">270</a></span>
@@ -16510,30 +16544,36 @@ during evaluation, before executing the composed expression.</p>
 <span class="normal"><a href="#__codelineno-0-281">281</a></span>
 <span class="normal"><a href="#__codelineno-0-282">282</a></span>
 <span class="normal"><a href="#__codelineno-0-283">283</a></span>
-<span class="normal"><a href="#__codelineno-0-284">284</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="k">def</span><span class="w"> </span><span class="nf">xpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultXPath</span><span class="p">:</span>
-<a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a restricted XPath from each result item in sequence order.</span>
-<a id="__codelineno-0-263" name="__codelineno-0-263"></a>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">    path : str</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">        Non-empty native extraction path. Relative paths start at each item;</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">        absolute paths start at its root. Uses compilation namespaces.</span>
+<span class="normal"><a href="#__codelineno-0-284">284</a></span>
+<span class="normal"><a href="#__codelineno-0-285">285</a></span>
+<span class="normal"><a href="#__codelineno-0-286">286</a></span>
+<span class="normal"><a href="#__codelineno-0-287">287</a></span>
+<span class="normal"><a href="#__codelineno-0-288">288</a></span>
+<span class="normal"><a href="#__codelineno-0-289">289</a></span>
+<span class="normal"><a href="#__codelineno-0-290">290</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="k">def</span><span class="w"> </span><span class="nf">xpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultXPath</span><span class="p">:</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a restricted XPath from each result item in sequence order.</span>
 <a id="__codelineno-0-269" name="__codelineno-0-269"></a>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">    ResultXPath</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">        A simple-map expression. Apply pos before this method to</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">        select hits before applying this XPath.</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">    path : str</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">        Non-empty native extraction path. Relative paths start at each item;</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">        absolute paths start at its root. Uses compilation namespaces.</span>
 <a id="__codelineno-0-275" name="__codelineno-0-275"></a>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    TypeError</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">        If path is not a string.</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    ValueError</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">        If path is empty or whitespace-only. Native syntax validation occurs</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">        during evaluation, before executing the composed expression.</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>    <span class="k">return</span> <span class="n">ResultXPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    ResultXPath</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">        A simple-map expression. Apply pos before this method to</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">        select hits before applying this XPath.</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    TypeError</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">        If path is not a string.</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    ValueError</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">        If path is empty or whitespace-only. Native syntax validation occurs</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">        during evaluation, before executing the composed expression.</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>    <span class="k">return</span> <span class="n">ResultXPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

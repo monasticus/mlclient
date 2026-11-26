@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16095,8 +16125,8 @@ Metadata is identified for a file at the same level with .metadata.json or
 <a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
 <a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="n">file_path</span> <span class="o">=</span> <span class="n">path</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="n">uri</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span> <span class="n">uri_prefix</span><span class="p">)</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="n">uri</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span> <span class="n">uri_prefix</span><span class="p">)</span>
 <a id="__codelineno-0-61" name="__codelineno-0-61"></a>        <span class="k">yield</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load_document</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
 <a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loading documents from [</span><span class="si">%s</span><span class="s2">] directory&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>

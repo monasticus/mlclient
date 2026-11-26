@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15952,91 +15982,91 @@ are rounded to 0, which means that they do not contribute to the score.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-4973">4973</a></span>
-<span class="normal"><a href="#__codelineno-0-4974">4974</a></span>
-<span class="normal"><a href="#__codelineno-0-4975">4975</a></span>
-<span class="normal"><a href="#__codelineno-0-4976">4976</a></span>
-<span class="normal"><a href="#__codelineno-0-4977">4977</a></span>
-<span class="normal"><a href="#__codelineno-0-4978">4978</a></span>
-<span class="normal"><a href="#__codelineno-0-4979">4979</a></span>
-<span class="normal"><a href="#__codelineno-0-4980">4980</a></span>
-<span class="normal"><a href="#__codelineno-0-4981">4981</a></span>
-<span class="normal"><a href="#__codelineno-0-4982">4982</a></span>
-<span class="normal"><a href="#__codelineno-0-4983">4983</a></span>
-<span class="normal"><a href="#__codelineno-0-4984">4984</a></span>
-<span class="normal"><a href="#__codelineno-0-4985">4985</a></span>
-<span class="normal"><a href="#__codelineno-0-4986">4986</a></span>
-<span class="normal"><a href="#__codelineno-0-4987">4987</a></span>
-<span class="normal"><a href="#__codelineno-0-4988">4988</a></span>
-<span class="normal"><a href="#__codelineno-0-4989">4989</a></span>
-<span class="normal"><a href="#__codelineno-0-4990">4990</a></span>
-<span class="normal"><a href="#__codelineno-0-4991">4991</a></span>
-<span class="normal"><a href="#__codelineno-0-4992">4992</a></span>
-<span class="normal"><a href="#__codelineno-0-4993">4993</a></span>
-<span class="normal"><a href="#__codelineno-0-4994">4994</a></span>
-<span class="normal"><a href="#__codelineno-0-4995">4995</a></span>
-<span class="normal"><a href="#__codelineno-0-4996">4996</a></span>
-<span class="normal"><a href="#__codelineno-0-4997">4997</a></span>
-<span class="normal"><a href="#__codelineno-0-4998">4998</a></span>
-<span class="normal"><a href="#__codelineno-0-4999">4999</a></span>
-<span class="normal"><a href="#__codelineno-0-5000">5000</a></span>
-<span class="normal"><a href="#__codelineno-0-5001">5001</a></span>
-<span class="normal"><a href="#__codelineno-0-5002">5002</a></span>
-<span class="normal"><a href="#__codelineno-0-5003">5003</a></span>
-<span class="normal"><a href="#__codelineno-0-5004">5004</a></span>
-<span class="normal"><a href="#__codelineno-0-5005">5005</a></span>
-<span class="normal"><a href="#__codelineno-0-5006">5006</a></span>
-<span class="normal"><a href="#__codelineno-0-5007">5007</a></span>
-<span class="normal"><a href="#__codelineno-0-5008">5008</a></span>
-<span class="normal"><a href="#__codelineno-0-5009">5009</a></span>
-<span class="normal"><a href="#__codelineno-0-5010">5010</a></span>
-<span class="normal"><a href="#__codelineno-0-5011">5011</a></span>
-<span class="normal"><a href="#__codelineno-0-5012">5012</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5012">5012</a></span>
 <span class="normal"><a href="#__codelineno-0-5013">5013</a></span>
 <span class="normal"><a href="#__codelineno-0-5014">5014</a></span>
-<span class="normal"><a href="#__codelineno-0-5015">5015</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-4973" name="__codelineno-0-4973"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-4974" name="__codelineno-0-4974"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-4975" name="__codelineno-0-4975"></a>    <span class="n">ids</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-4976" name="__codelineno-0-4976"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-4977" name="__codelineno-0-4977"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-4978" name="__codelineno-0-4978"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-4979" name="__codelineno-0-4979"></a><span class="p">):</span>
-<a id="__codelineno-0-4980" name="__codelineno-0-4980"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-4981" name="__codelineno-0-4981"></a>
-<a id="__codelineno-0-4982" name="__codelineno-0-4982"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-4983" name="__codelineno-0-4983"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-4984" name="__codelineno-0-4984"></a><span class="sd">    ids : int | list[int] | XqyExpression | list[XqyExpression] | None</span>
-<a id="__codelineno-0-4985" name="__codelineno-0-4985"></a><span class="sd">        Some registered query identifiers.</span>
-<a id="__codelineno-0-4986" name="__codelineno-0-4986"></a><span class="sd">    options : StringInput, optional</span>
-<a id="__codelineno-0-4987" name="__codelineno-0-4987"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;filtered&quot; A</span>
-<a id="__codelineno-0-4988" name="__codelineno-0-4988"></a><span class="sd">        filtered query (the default). Filtered queries eliminate any false-positive</span>
-<a id="__codelineno-0-4989" name="__codelineno-0-4989"></a><span class="sd">        results and properly resolve cases where there are multiple candidate</span>
-<a id="__codelineno-0-4990" name="__codelineno-0-4990"></a><span class="sd">        matches within the same fragment, thereby guaranteeing that the results</span>
-<a id="__codelineno-0-4991" name="__codelineno-0-4991"></a><span class="sd">        fully satisfy the original cts:query item that was registered. This option</span>
-<a id="__codelineno-0-4992" name="__codelineno-0-4992"></a><span class="sd">        is not currently available. &quot;unfiltered&quot; An unfiltered query. Unfiltered</span>
-<a id="__codelineno-0-4993" name="__codelineno-0-4993"></a><span class="sd">        registered queries select fragments from the indexes that are candidates to</span>
-<a id="__codelineno-0-4994" name="__codelineno-0-4994"></a><span class="sd">        satisfy the cts:query . Depending on the original cts:query , the structure</span>
-<a id="__codelineno-0-4995" name="__codelineno-0-4995"></a><span class="sd">        of the documents in the database, and the configuration of the database,</span>
-<a id="__codelineno-0-4996" name="__codelineno-0-4996"></a><span class="sd">        unfiltered registered queries may result in false-positive results or in</span>
-<a id="__codelineno-0-4997" name="__codelineno-0-4997"></a><span class="sd">        incorrect matches when there are multiple candidate matches within the same</span>
-<a id="__codelineno-0-4998" name="__codelineno-0-4998"></a><span class="sd">        fragment. To avoid these problems, you should only use unfiltered queries on</span>
-<a id="__codelineno-0-4999" name="__codelineno-0-4999"></a><span class="sd">        top-level XPath expressions (for example, document nodes, collections,</span>
-<a id="__codelineno-0-5000" name="__codelineno-0-5000"></a><span class="sd">        directories) or on fragment roots. Using unfiltered queries on complex XPath</span>
-<a id="__codelineno-0-5001" name="__codelineno-0-5001"></a><span class="sd">        expressions or on XPath expressions that traverse below a fragment root can</span>
-<a id="__codelineno-0-5002" name="__codelineno-0-5002"></a><span class="sd">        result in unexpected results. This option is required in the current</span>
-<a id="__codelineno-0-5003" name="__codelineno-0-5003"></a><span class="sd">        release.</span>
-<a id="__codelineno-0-5004" name="__codelineno-0-5004"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
-<a id="__codelineno-0-5005" name="__codelineno-0-5005"></a><span class="sd">        A weight for this query. Higher weights move search results up in the</span>
-<a id="__codelineno-0-5006" name="__codelineno-0-5006"></a><span class="sd">        relevance order. The default is 1.0. The weight should be between 64 and</span>
-<a id="__codelineno-0-5007" name="__codelineno-0-5007"></a><span class="sd">        -16. Weights greater than 64 will have the same effect as a weight of 64.</span>
-<a id="__codelineno-0-5008" name="__codelineno-0-5008"></a><span class="sd">        Weights less than the absolute value of 0.0625 (between -0.0625 and 0.0625)</span>
-<a id="__codelineno-0-5009" name="__codelineno-0-5009"></a><span class="sd">        are rounded to 0, which means that they do not contribute to the score.</span>
-<a id="__codelineno-0-5010" name="__codelineno-0-5010"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-5011" name="__codelineno-0-5011"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-5012" name="__codelineno-0-5012"></a>        <span class="n">ids</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">ids</span><span class="p">),</span>
-<a id="__codelineno-0-5013" name="__codelineno-0-5013"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-5014" name="__codelineno-0-5014"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-5015" name="__codelineno-0-5015"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-5015">5015</a></span>
+<span class="normal"><a href="#__codelineno-0-5016">5016</a></span>
+<span class="normal"><a href="#__codelineno-0-5017">5017</a></span>
+<span class="normal"><a href="#__codelineno-0-5018">5018</a></span>
+<span class="normal"><a href="#__codelineno-0-5019">5019</a></span>
+<span class="normal"><a href="#__codelineno-0-5020">5020</a></span>
+<span class="normal"><a href="#__codelineno-0-5021">5021</a></span>
+<span class="normal"><a href="#__codelineno-0-5022">5022</a></span>
+<span class="normal"><a href="#__codelineno-0-5023">5023</a></span>
+<span class="normal"><a href="#__codelineno-0-5024">5024</a></span>
+<span class="normal"><a href="#__codelineno-0-5025">5025</a></span>
+<span class="normal"><a href="#__codelineno-0-5026">5026</a></span>
+<span class="normal"><a href="#__codelineno-0-5027">5027</a></span>
+<span class="normal"><a href="#__codelineno-0-5028">5028</a></span>
+<span class="normal"><a href="#__codelineno-0-5029">5029</a></span>
+<span class="normal"><a href="#__codelineno-0-5030">5030</a></span>
+<span class="normal"><a href="#__codelineno-0-5031">5031</a></span>
+<span class="normal"><a href="#__codelineno-0-5032">5032</a></span>
+<span class="normal"><a href="#__codelineno-0-5033">5033</a></span>
+<span class="normal"><a href="#__codelineno-0-5034">5034</a></span>
+<span class="normal"><a href="#__codelineno-0-5035">5035</a></span>
+<span class="normal"><a href="#__codelineno-0-5036">5036</a></span>
+<span class="normal"><a href="#__codelineno-0-5037">5037</a></span>
+<span class="normal"><a href="#__codelineno-0-5038">5038</a></span>
+<span class="normal"><a href="#__codelineno-0-5039">5039</a></span>
+<span class="normal"><a href="#__codelineno-0-5040">5040</a></span>
+<span class="normal"><a href="#__codelineno-0-5041">5041</a></span>
+<span class="normal"><a href="#__codelineno-0-5042">5042</a></span>
+<span class="normal"><a href="#__codelineno-0-5043">5043</a></span>
+<span class="normal"><a href="#__codelineno-0-5044">5044</a></span>
+<span class="normal"><a href="#__codelineno-0-5045">5045</a></span>
+<span class="normal"><a href="#__codelineno-0-5046">5046</a></span>
+<span class="normal"><a href="#__codelineno-0-5047">5047</a></span>
+<span class="normal"><a href="#__codelineno-0-5048">5048</a></span>
+<span class="normal"><a href="#__codelineno-0-5049">5049</a></span>
+<span class="normal"><a href="#__codelineno-0-5050">5050</a></span>
+<span class="normal"><a href="#__codelineno-0-5051">5051</a></span>
+<span class="normal"><a href="#__codelineno-0-5052">5052</a></span>
+<span class="normal"><a href="#__codelineno-0-5053">5053</a></span>
+<span class="normal"><a href="#__codelineno-0-5054">5054</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5012" name="__codelineno-0-5012"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-5013" name="__codelineno-0-5013"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-5014" name="__codelineno-0-5014"></a>    <span class="n">ids</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5015" name="__codelineno-0-5015"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5016" name="__codelineno-0-5016"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5017" name="__codelineno-0-5017"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5018" name="__codelineno-0-5018"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-5019" name="__codelineno-0-5019"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-5020" name="__codelineno-0-5020"></a>
+<a id="__codelineno-0-5021" name="__codelineno-0-5021"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-5022" name="__codelineno-0-5022"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-5023" name="__codelineno-0-5023"></a><span class="sd">    ids : int | list[int] | XqyExpression | list[XqyExpression] | None</span>
+<a id="__codelineno-0-5024" name="__codelineno-0-5024"></a><span class="sd">        Some registered query identifiers.</span>
+<a id="__codelineno-0-5025" name="__codelineno-0-5025"></a><span class="sd">    options : StringInput, optional</span>
+<a id="__codelineno-0-5026" name="__codelineno-0-5026"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;filtered&quot; A</span>
+<a id="__codelineno-0-5027" name="__codelineno-0-5027"></a><span class="sd">        filtered query (the default). Filtered queries eliminate any false-positive</span>
+<a id="__codelineno-0-5028" name="__codelineno-0-5028"></a><span class="sd">        results and properly resolve cases where there are multiple candidate</span>
+<a id="__codelineno-0-5029" name="__codelineno-0-5029"></a><span class="sd">        matches within the same fragment, thereby guaranteeing that the results</span>
+<a id="__codelineno-0-5030" name="__codelineno-0-5030"></a><span class="sd">        fully satisfy the original cts:query item that was registered. This option</span>
+<a id="__codelineno-0-5031" name="__codelineno-0-5031"></a><span class="sd">        is not currently available. &quot;unfiltered&quot; An unfiltered query. Unfiltered</span>
+<a id="__codelineno-0-5032" name="__codelineno-0-5032"></a><span class="sd">        registered queries select fragments from the indexes that are candidates to</span>
+<a id="__codelineno-0-5033" name="__codelineno-0-5033"></a><span class="sd">        satisfy the cts:query . Depending on the original cts:query , the structure</span>
+<a id="__codelineno-0-5034" name="__codelineno-0-5034"></a><span class="sd">        of the documents in the database, and the configuration of the database,</span>
+<a id="__codelineno-0-5035" name="__codelineno-0-5035"></a><span class="sd">        unfiltered registered queries may result in false-positive results or in</span>
+<a id="__codelineno-0-5036" name="__codelineno-0-5036"></a><span class="sd">        incorrect matches when there are multiple candidate matches within the same</span>
+<a id="__codelineno-0-5037" name="__codelineno-0-5037"></a><span class="sd">        fragment. To avoid these problems, you should only use unfiltered queries on</span>
+<a id="__codelineno-0-5038" name="__codelineno-0-5038"></a><span class="sd">        top-level XPath expressions (for example, document nodes, collections,</span>
+<a id="__codelineno-0-5039" name="__codelineno-0-5039"></a><span class="sd">        directories) or on fragment roots. Using unfiltered queries on complex XPath</span>
+<a id="__codelineno-0-5040" name="__codelineno-0-5040"></a><span class="sd">        expressions or on XPath expressions that traverse below a fragment root can</span>
+<a id="__codelineno-0-5041" name="__codelineno-0-5041"></a><span class="sd">        result in unexpected results. This option is required in the current</span>
+<a id="__codelineno-0-5042" name="__codelineno-0-5042"></a><span class="sd">        release.</span>
+<a id="__codelineno-0-5043" name="__codelineno-0-5043"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
+<a id="__codelineno-0-5044" name="__codelineno-0-5044"></a><span class="sd">        A weight for this query. Higher weights move search results up in the</span>
+<a id="__codelineno-0-5045" name="__codelineno-0-5045"></a><span class="sd">        relevance order. The default is 1.0. The weight should be between 64 and</span>
+<a id="__codelineno-0-5046" name="__codelineno-0-5046"></a><span class="sd">        -16. Weights greater than 64 will have the same effect as a weight of 64.</span>
+<a id="__codelineno-0-5047" name="__codelineno-0-5047"></a><span class="sd">        Weights less than the absolute value of 0.0625 (between -0.0625 and 0.0625)</span>
+<a id="__codelineno-0-5048" name="__codelineno-0-5048"></a><span class="sd">        are rounded to 0, which means that they do not contribute to the score.</span>
+<a id="__codelineno-0-5049" name="__codelineno-0-5049"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-5050" name="__codelineno-0-5050"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-5051" name="__codelineno-0-5051"></a>        <span class="n">ids</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">ids</span><span class="p">),</span>
+<a id="__codelineno-0-5052" name="__codelineno-0-5052"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-5053" name="__codelineno-0-5053"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-5054" name="__codelineno-0-5054"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

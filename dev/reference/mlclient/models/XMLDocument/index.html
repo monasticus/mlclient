@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15957,7 +15987,7 @@
 
 <a href="#mlclient.models.XMLDocument" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">XMLDocument</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">content</span><span class="p">:</span> <span class="n">ElementTree</span> <span class="o">|</span> <span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">content</span><span class="p">:</span> <span class="n">ElementTree</span> <span class="o">|</span> <span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15984,9 +16014,7 @@ to the first <code>.content</code> access.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-571">571</a></span>
-<span class="normal"><a href="#__codelineno-0-572">572</a></span>
-<span class="normal"><a href="#__codelineno-0-573">573</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-573">573</a></span>
 <span class="normal"><a href="#__codelineno-0-574">574</a></span>
 <span class="normal"><a href="#__codelineno-0-575">575</a></span>
 <span class="normal"><a href="#__codelineno-0-576">576</a></span>
@@ -16007,30 +16035,32 @@ to the first <code>.content</code> access.</p>
 <span class="normal"><a href="#__codelineno-0-591">591</a></span>
 <span class="normal"><a href="#__codelineno-0-592">592</a></span>
 <span class="normal"><a href="#__codelineno-0-593">593</a></span>
-<span class="normal"><a href="#__codelineno-0-594">594</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a>    <span class="n">content</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span> <span class="o">|</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">,</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="p">):</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a>    <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a>            <span class="s2">&quot;XMLDocument requires content; &quot;</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a>            <span class="s2">&quot;use Document.metadata_update() for metadata-only updates&quot;</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a>        <span class="p">)</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="p">)</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">):</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">):</span>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="o">=</span> <span class="n">content</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a>        <span class="n">content</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a>    <span class="p">)</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_content_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">content</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="normal"><a href="#__codelineno-0-594">594</a></span>
+<span class="normal"><a href="#__codelineno-0-595">595</a></span>
+<span class="normal"><a href="#__codelineno-0-596">596</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a>    <span class="n">content</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span> <span class="o">|</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>    <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a>            <span class="s2">&quot;XMLDocument requires content; &quot;</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>            <span class="s2">&quot;use Document.metadata_update() for metadata-only updates&quot;</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a>        <span class="p">)</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="p">)</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">):</span>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a>    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">):</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="o">=</span> <span class="n">content</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a>        <span class="n">content</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a>    <span class="p">)</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_content_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">content</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16243,15 +16273,7 @@ output. Has no effect when the document has not been parsed yet.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-681">681</a></span>
-<span class="normal"><a href="#__codelineno-0-682">682</a></span>
-<span class="normal"><a href="#__codelineno-0-683">683</a></span>
-<span class="normal"><a href="#__codelineno-0-684">684</a></span>
-<span class="normal"><a href="#__codelineno-0-685">685</a></span>
-<span class="normal"><a href="#__codelineno-0-686">686</a></span>
-<span class="normal"><a href="#__codelineno-0-687">687</a></span>
-<span class="normal"><a href="#__codelineno-0-688">688</a></span>
-<span class="normal"><a href="#__codelineno-0-689">689</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-689">689</a></span>
 <span class="normal"><a href="#__codelineno-0-690">690</a></span>
 <span class="normal"><a href="#__codelineno-0-691">691</a></span>
 <span class="normal"><a href="#__codelineno-0-692">692</a></span>
@@ -16264,28 +16286,36 @@ output. Has no effect when the document has not been parsed yet.</p>
 <span class="normal"><a href="#__codelineno-0-699">699</a></span>
 <span class="normal"><a href="#__codelineno-0-700">700</a></span>
 <span class="normal"><a href="#__codelineno-0-701">701</a></span>
-<span class="normal"><a href="#__codelineno-0-702">702</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-681" name="__codelineno-0-681"></a><span class="k">def</span><span class="w"> </span><span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XMLDocument</span><span class="p">:</span>
-<a id="__codelineno-0-682" name="__codelineno-0-682"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Drop cached bytes/string serializations of the parsed ElementTree.</span>
-<a id="__codelineno-0-683" name="__codelineno-0-683"></a>
-<a id="__codelineno-0-684" name="__codelineno-0-684"></a><span class="sd">    Use this when the parsed ``.content`` has been mutated externally so</span>
-<a id="__codelineno-0-685" name="__codelineno-0-685"></a><span class="sd">    that subsequent ``.content_bytes`` / ``.content_string`` calls</span>
-<a id="__codelineno-0-686" name="__codelineno-0-686"></a><span class="sd">    re-serialize from the parsed form instead of returning stale cached</span>
-<a id="__codelineno-0-687" name="__codelineno-0-687"></a><span class="sd">    output. Has no effect when the document has not been parsed yet.</span>
-<a id="__codelineno-0-688" name="__codelineno-0-688"></a>
-<a id="__codelineno-0-689" name="__codelineno-0-689"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-690" name="__codelineno-0-690"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-691" name="__codelineno-0-691"></a><span class="sd">    XMLDocument</span>
-<a id="__codelineno-0-692" name="__codelineno-0-692"></a><span class="sd">        ``self``, so the call can be chained directly into a write.</span>
-<a id="__codelineno-0-693" name="__codelineno-0-693"></a>
-<a id="__codelineno-0-694" name="__codelineno-0-694"></a><span class="sd">    Examples</span>
-<a id="__codelineno-0-695" name="__codelineno-0-695"></a><span class="sd">    --------</span>
-<a id="__codelineno-0-696" name="__codelineno-0-696"></a><span class="sd">    &gt;&gt;&gt; doc.content.find(&quot;name&quot;).text = &quot;Smith&quot;</span>
-<a id="__codelineno-0-697" name="__codelineno-0-697"></a><span class="sd">    &gt;&gt;&gt; ml.documents.write(doc.invalidate())</span>
-<a id="__codelineno-0-698" name="__codelineno-0-698"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-699" name="__codelineno-0-699"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-700" name="__codelineno-0-700"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-701" name="__codelineno-0-701"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_string</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-702" name="__codelineno-0-702"></a>    <span class="k">return</span> <span class="bp">self</span>
+<span class="normal"><a href="#__codelineno-0-702">702</a></span>
+<span class="normal"><a href="#__codelineno-0-703">703</a></span>
+<span class="normal"><a href="#__codelineno-0-704">704</a></span>
+<span class="normal"><a href="#__codelineno-0-705">705</a></span>
+<span class="normal"><a href="#__codelineno-0-706">706</a></span>
+<span class="normal"><a href="#__codelineno-0-707">707</a></span>
+<span class="normal"><a href="#__codelineno-0-708">708</a></span>
+<span class="normal"><a href="#__codelineno-0-709">709</a></span>
+<span class="normal"><a href="#__codelineno-0-710">710</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-689" name="__codelineno-0-689"></a><span class="k">def</span><span class="w"> </span><span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XMLDocument</span><span class="p">:</span>
+<a id="__codelineno-0-690" name="__codelineno-0-690"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Drop cached bytes/string serializations of the parsed ElementTree.</span>
+<a id="__codelineno-0-691" name="__codelineno-0-691"></a>
+<a id="__codelineno-0-692" name="__codelineno-0-692"></a><span class="sd">    Use this when the parsed ``.content`` has been mutated externally so</span>
+<a id="__codelineno-0-693" name="__codelineno-0-693"></a><span class="sd">    that subsequent ``.content_bytes`` / ``.content_string`` calls</span>
+<a id="__codelineno-0-694" name="__codelineno-0-694"></a><span class="sd">    re-serialize from the parsed form instead of returning stale cached</span>
+<a id="__codelineno-0-695" name="__codelineno-0-695"></a><span class="sd">    output. Has no effect when the document has not been parsed yet.</span>
+<a id="__codelineno-0-696" name="__codelineno-0-696"></a>
+<a id="__codelineno-0-697" name="__codelineno-0-697"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-698" name="__codelineno-0-698"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-699" name="__codelineno-0-699"></a><span class="sd">    XMLDocument</span>
+<a id="__codelineno-0-700" name="__codelineno-0-700"></a><span class="sd">        ``self``, so the call can be chained directly into a write.</span>
+<a id="__codelineno-0-701" name="__codelineno-0-701"></a>
+<a id="__codelineno-0-702" name="__codelineno-0-702"></a><span class="sd">    Examples</span>
+<a id="__codelineno-0-703" name="__codelineno-0-703"></a><span class="sd">    --------</span>
+<a id="__codelineno-0-704" name="__codelineno-0-704"></a><span class="sd">    &gt;&gt;&gt; doc.content.find(&quot;name&quot;).text = &quot;Smith&quot;</span>
+<a id="__codelineno-0-705" name="__codelineno-0-705"></a><span class="sd">    &gt;&gt;&gt; ml.documents.write(doc.invalidate())</span>
+<a id="__codelineno-0-706" name="__codelineno-0-706"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-707" name="__codelineno-0-707"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-708" name="__codelineno-0-708"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-709" name="__codelineno-0-709"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_string</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-710" name="__codelineno-0-710"></a>    <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16380,37 +16410,37 @@ output. Has no effect when the document has not been parsed yet.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-664">664</a></span>
-<span class="normal"><a href="#__codelineno-0-665">665</a></span>
-<span class="normal"><a href="#__codelineno-0-666">666</a></span>
-<span class="normal"><a href="#__codelineno-0-667">667</a></span>
-<span class="normal"><a href="#__codelineno-0-668">668</a></span>
-<span class="normal"><a href="#__codelineno-0-669">669</a></span>
-<span class="normal"><a href="#__codelineno-0-670">670</a></span>
-<span class="normal"><a href="#__codelineno-0-671">671</a></span>
-<span class="normal"><a href="#__codelineno-0-672">672</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-672">672</a></span>
 <span class="normal"><a href="#__codelineno-0-673">673</a></span>
 <span class="normal"><a href="#__codelineno-0-674">674</a></span>
 <span class="normal"><a href="#__codelineno-0-675">675</a></span>
 <span class="normal"><a href="#__codelineno-0-676">676</a></span>
 <span class="normal"><a href="#__codelineno-0-677">677</a></span>
 <span class="normal"><a href="#__codelineno-0-678">678</a></span>
-<span class="normal"><a href="#__codelineno-0-679">679</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-664" name="__codelineno-0-664"></a><span class="k">def</span><span class="w"> </span><span class="nf">xpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">namespaces</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<a id="__codelineno-0-665" name="__codelineno-0-665"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Run an XPath expression against the document content.</span>
-<a id="__codelineno-0-666" name="__codelineno-0-666"></a>
-<a id="__codelineno-0-667" name="__codelineno-0-667"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-668" name="__codelineno-0-668"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-669" name="__codelineno-0-669"></a><span class="sd">    expr : str</span>
-<a id="__codelineno-0-670" name="__codelineno-0-670"></a><span class="sd">        XPath expression.</span>
-<a id="__codelineno-0-671" name="__codelineno-0-671"></a><span class="sd">    **namespaces : str</span>
-<a id="__codelineno-0-672" name="__codelineno-0-672"></a><span class="sd">        Namespace prefix-to-URI mappings used in ``expr``.</span>
-<a id="__codelineno-0-673" name="__codelineno-0-673"></a>
-<a id="__codelineno-0-674" name="__codelineno-0-674"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-675" name="__codelineno-0-675"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-676" name="__codelineno-0-676"></a><span class="sd">    list</span>
-<a id="__codelineno-0-677" name="__codelineno-0-677"></a><span class="sd">        Matching elements.</span>
-<a id="__codelineno-0-678" name="__codelineno-0-678"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-679" name="__codelineno-0-679"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">namespaces</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-679">679</a></span>
+<span class="normal"><a href="#__codelineno-0-680">680</a></span>
+<span class="normal"><a href="#__codelineno-0-681">681</a></span>
+<span class="normal"><a href="#__codelineno-0-682">682</a></span>
+<span class="normal"><a href="#__codelineno-0-683">683</a></span>
+<span class="normal"><a href="#__codelineno-0-684">684</a></span>
+<span class="normal"><a href="#__codelineno-0-685">685</a></span>
+<span class="normal"><a href="#__codelineno-0-686">686</a></span>
+<span class="normal"><a href="#__codelineno-0-687">687</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-672" name="__codelineno-0-672"></a><span class="k">def</span><span class="w"> </span><span class="nf">xpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">namespaces</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Run an XPath expression against the document content.</span>
+<a id="__codelineno-0-674" name="__codelineno-0-674"></a>
+<a id="__codelineno-0-675" name="__codelineno-0-675"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-676" name="__codelineno-0-676"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-677" name="__codelineno-0-677"></a><span class="sd">    expr : str</span>
+<a id="__codelineno-0-678" name="__codelineno-0-678"></a><span class="sd">        XPath expression.</span>
+<a id="__codelineno-0-679" name="__codelineno-0-679"></a><span class="sd">    **namespaces : str</span>
+<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="sd">        Namespace prefix-to-URI mappings used in ``expr``.</span>
+<a id="__codelineno-0-681" name="__codelineno-0-681"></a>
+<a id="__codelineno-0-682" name="__codelineno-0-682"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-683" name="__codelineno-0-683"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-684" name="__codelineno-0-684"></a><span class="sd">    list</span>
+<a id="__codelineno-0-685" name="__codelineno-0-685"></a><span class="sd">        Matching elements.</span>
+<a id="__codelineno-0-686" name="__codelineno-0-686"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-687" name="__codelineno-0-687"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">namespaces</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

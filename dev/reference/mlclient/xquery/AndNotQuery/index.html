@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15909,33 +15939,41 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-683">683</a></span>
-<span class="normal"><a href="#__codelineno-0-684">684</a></span>
-<span class="normal"><a href="#__codelineno-0-685">685</a></span>
-<span class="normal"><a href="#__codelineno-0-686">686</a></span>
-<span class="normal"><a href="#__codelineno-0-687">687</a></span>
-<span class="normal"><a href="#__codelineno-0-688">688</a></span>
-<span class="normal"><a href="#__codelineno-0-689">689</a></span>
-<span class="normal"><a href="#__codelineno-0-690">690</a></span>
-<span class="normal"><a href="#__codelineno-0-691">691</a></span>
-<span class="normal"><a href="#__codelineno-0-692">692</a></span>
-<span class="normal"><a href="#__codelineno-0-693">693</a></span>
-<span class="normal"><a href="#__codelineno-0-694">694</a></span>
-<span class="normal"><a href="#__codelineno-0-695">695</a></span>
-<span class="normal"><a href="#__codelineno-0-696">696</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-683" name="__codelineno-0-683"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positive_query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="n">negative_query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">):</span>
-<a id="__codelineno-0-684" name="__codelineno-0-684"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot constructor arguments.</span>
-<a id="__codelineno-0-685" name="__codelineno-0-685"></a>
-<a id="__codelineno-0-686" name="__codelineno-0-686"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-687" name="__codelineno-0-687"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-688" name="__codelineno-0-688"></a><span class="sd">    positive_query : str | XqyExpression</span>
-<a id="__codelineno-0-689" name="__codelineno-0-689"></a><span class="sd">        A positive query, specifying the search results filtered in.</span>
-<a id="__codelineno-0-690" name="__codelineno-0-690"></a><span class="sd">    negative_query : str | XqyExpression</span>
-<a id="__codelineno-0-691" name="__codelineno-0-691"></a><span class="sd">        A negative query, specifying the search results to filter out.</span>
-<a id="__codelineno-0-692" name="__codelineno-0-692"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-693" name="__codelineno-0-693"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-694" name="__codelineno-0-694"></a>        <span class="n">positive_query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">positive_query</span><span class="p">),</span>
-<a id="__codelineno-0-695" name="__codelineno-0-695"></a>        <span class="n">negative_query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">negative_query</span><span class="p">),</span>
-<a id="__codelineno-0-696" name="__codelineno-0-696"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-710">710</a></span>
+<span class="normal"><a href="#__codelineno-0-711">711</a></span>
+<span class="normal"><a href="#__codelineno-0-712">712</a></span>
+<span class="normal"><a href="#__codelineno-0-713">713</a></span>
+<span class="normal"><a href="#__codelineno-0-714">714</a></span>
+<span class="normal"><a href="#__codelineno-0-715">715</a></span>
+<span class="normal"><a href="#__codelineno-0-716">716</a></span>
+<span class="normal"><a href="#__codelineno-0-717">717</a></span>
+<span class="normal"><a href="#__codelineno-0-718">718</a></span>
+<span class="normal"><a href="#__codelineno-0-719">719</a></span>
+<span class="normal"><a href="#__codelineno-0-720">720</a></span>
+<span class="normal"><a href="#__codelineno-0-721">721</a></span>
+<span class="normal"><a href="#__codelineno-0-722">722</a></span>
+<span class="normal"><a href="#__codelineno-0-723">723</a></span>
+<span class="normal"><a href="#__codelineno-0-724">724</a></span>
+<span class="normal"><a href="#__codelineno-0-725">725</a></span>
+<span class="normal"><a href="#__codelineno-0-726">726</a></span>
+<span class="normal"><a href="#__codelineno-0-727">727</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-710" name="__codelineno-0-710"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-711" name="__codelineno-0-711"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-712" name="__codelineno-0-712"></a>    <span class="n">positive_query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
+<a id="__codelineno-0-713" name="__codelineno-0-713"></a>    <span class="n">negative_query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
+<a id="__codelineno-0-714" name="__codelineno-0-714"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-715" name="__codelineno-0-715"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot constructor arguments.</span>
+<a id="__codelineno-0-716" name="__codelineno-0-716"></a>
+<a id="__codelineno-0-717" name="__codelineno-0-717"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-718" name="__codelineno-0-718"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-719" name="__codelineno-0-719"></a><span class="sd">    positive_query : str | XqyExpression</span>
+<a id="__codelineno-0-720" name="__codelineno-0-720"></a><span class="sd">        A positive query, specifying the search results filtered in.</span>
+<a id="__codelineno-0-721" name="__codelineno-0-721"></a><span class="sd">    negative_query : str | XqyExpression</span>
+<a id="__codelineno-0-722" name="__codelineno-0-722"></a><span class="sd">        A negative query, specifying the search results to filter out.</span>
+<a id="__codelineno-0-723" name="__codelineno-0-723"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-724" name="__codelineno-0-724"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-725" name="__codelineno-0-725"></a>        <span class="n">positive_query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">positive_query</span><span class="p">),</span>
+<a id="__codelineno-0-726" name="__codelineno-0-726"></a>        <span class="n">negative_query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">negative_query</span><span class="p">),</span>
+<a id="__codelineno-0-727" name="__codelineno-0-727"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

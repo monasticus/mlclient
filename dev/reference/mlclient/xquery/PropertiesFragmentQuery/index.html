@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15891,27 +15921,27 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-4822">4822</a></span>
-<span class="normal"><a href="#__codelineno-0-4823">4823</a></span>
-<span class="normal"><a href="#__codelineno-0-4824">4824</a></span>
-<span class="normal"><a href="#__codelineno-0-4825">4825</a></span>
-<span class="normal"><a href="#__codelineno-0-4826">4826</a></span>
-<span class="normal"><a href="#__codelineno-0-4827">4827</a></span>
-<span class="normal"><a href="#__codelineno-0-4828">4828</a></span>
-<span class="normal"><a href="#__codelineno-0-4829">4829</a></span>
-<span class="normal"><a href="#__codelineno-0-4830">4830</a></span>
-<span class="normal"><a href="#__codelineno-0-4831">4831</a></span>
-<span class="normal"><a href="#__codelineno-0-4832">4832</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-4822" name="__codelineno-0-4822"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">):</span>
-<a id="__codelineno-0-4823" name="__codelineno-0-4823"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot constructor arguments.</span>
-<a id="__codelineno-0-4824" name="__codelineno-0-4824"></a>
-<a id="__codelineno-0-4825" name="__codelineno-0-4825"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-4826" name="__codelineno-0-4826"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-4827" name="__codelineno-0-4827"></a><span class="sd">    query : str | XqyExpression</span>
-<a id="__codelineno-0-4828" name="__codelineno-0-4828"></a><span class="sd">        A query to be matched against the properties fragment.</span>
-<a id="__codelineno-0-4829" name="__codelineno-0-4829"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-4830" name="__codelineno-0-4830"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-4831" name="__codelineno-0-4831"></a>        <span class="n">query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">query</span><span class="p">),</span>
-<a id="__codelineno-0-4832" name="__codelineno-0-4832"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-4861">4861</a></span>
+<span class="normal"><a href="#__codelineno-0-4862">4862</a></span>
+<span class="normal"><a href="#__codelineno-0-4863">4863</a></span>
+<span class="normal"><a href="#__codelineno-0-4864">4864</a></span>
+<span class="normal"><a href="#__codelineno-0-4865">4865</a></span>
+<span class="normal"><a href="#__codelineno-0-4866">4866</a></span>
+<span class="normal"><a href="#__codelineno-0-4867">4867</a></span>
+<span class="normal"><a href="#__codelineno-0-4868">4868</a></span>
+<span class="normal"><a href="#__codelineno-0-4869">4869</a></span>
+<span class="normal"><a href="#__codelineno-0-4870">4870</a></span>
+<span class="normal"><a href="#__codelineno-0-4871">4871</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-4861" name="__codelineno-0-4861"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-4862" name="__codelineno-0-4862"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot constructor arguments.</span>
+<a id="__codelineno-0-4863" name="__codelineno-0-4863"></a>
+<a id="__codelineno-0-4864" name="__codelineno-0-4864"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-4865" name="__codelineno-0-4865"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-4866" name="__codelineno-0-4866"></a><span class="sd">    query : str | XqyExpression</span>
+<a id="__codelineno-0-4867" name="__codelineno-0-4867"></a><span class="sd">        A query to be matched against the properties fragment.</span>
+<a id="__codelineno-0-4868" name="__codelineno-0-4868"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-4869" name="__codelineno-0-4869"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-4870" name="__codelineno-0-4870"></a>        <span class="n">query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">query</span><span class="p">),</span>
+<a id="__codelineno-0-4871" name="__codelineno-0-4871"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

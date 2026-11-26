@@ -2460,6 +2460,8 @@
       
         
       
+        
+      
     
     
     
@@ -2515,6 +2517,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15931,6 +15961,8 @@ as described in <a href="../eval/#within-a-namespace">Evaluate code</a>.</p>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="o">...</span>     <span class="n">result</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">invoke</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="s2">&quot;/ext/report.xqy&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 </code></pre></div>
+<p>As in <a href="../eval/#get-raw-output"><code>ml.eval</code></a>, a type checker sees
+<code>str | list[str]</code> or <code>bytes | list[bytes]</code> for the result.</p>
 <h2 id="reuse-database-and-transaction-settings">Reuse database and transaction settings<a class="headerlink" href="#reuse-database-and-transaction-settings" title="Permanent link">&para;</a></h2>
 <p>Call the service to create a scoped copy without sending a request:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>

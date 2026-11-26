@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16042,7 +16072,8 @@ during evaluation, not during compilation.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-475">475</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
 <span class="normal"><a href="#__codelineno-0-476">476</a></span>
 <span class="normal"><a href="#__codelineno-0-477">477</a></span>
 <span class="normal"><a href="#__codelineno-0-478">478</a></span>
@@ -16104,71 +16135,70 @@ during evaluation, not during compilation.</p>
 <span class="normal"><a href="#__codelineno-0-534">534</a></span>
 <span class="normal"><a href="#__codelineno-0-535">535</a></span>
 <span class="normal"><a href="#__codelineno-0-536">536</a></span>
-<span class="normal"><a href="#__codelineno-0-537">537</a></span>
-<span class="normal"><a href="#__codelineno-0-538">538</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a>    <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AtomicInput</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a>    <span class="n">optionals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AtomicInput</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="n">namespace</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="n">module_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="p">):</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Capture a module function and its arguments without performing I/O.</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">    name : str</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">        Function local name (an XML NCName), without a namespace prefix.</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">    args : Sequence[AtomicInput], default ()</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="sd">        Positional arguments, including Python values or XqyExpression</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">        instances. A nested list/tuple is one sequence-valued argument;</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">        None is an explicit empty-sequence argument.</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">    optionals : Sequence[AtomicInput], default ()</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">        Optional trailing slots. Trailing None slots are omitted; interior</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">        None slots become empty sequences. Use args to pass a trailing</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">        empty sequence explicitly. Both argument collections are snapshotted.</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    namespace : str</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        Non-empty module namespace URI. It need not be an HTTP URL.</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    module_path : str</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        Non-empty module location resolved by the App Server. The module</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        must already be deployed and accessible to the evaluating user.</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">    TypeError</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        If name, namespace or module_path is not a string, or an argument</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">        cannot be represented as an XQuery expression.</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">    ValueError</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">        If an identifier is blank or the function name is not an NCName.</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">    Notes</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">    -----</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">    Names, paths and argument values are bound as data, never interpolated</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">    into XQuery source. Application code should choose the module and function;</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">    binding them does not authorize executing an arbitrary library.</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">    Missing modules/functions and arity/type errors are reported by MarkLogic</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">    during evaluation, not during compilation.</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>        <span class="p">(</span><span class="s2">&quot;namespace&quot;</span><span class="p">,</span> <span class="n">namespace</span><span class="p">),</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a>        <span class="p">(</span><span class="s2">&quot;module_path&quot;</span><span class="p">,</span> <span class="n">module_path</span><span class="p">),</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a>    <span class="p">):</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> must be a string&quot;</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a>            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> must not be blank&quot;</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a>    <span class="k">if</span> <span class="n">_NCNAME</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a>        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;function name must be an XML NCName without a prefix&quot;</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="n">function</span> <span class="o">=</span> <span class="n">FunctionCall</span><span class="p">(</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a>        <span class="s2">&quot;xdmp:function&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>        <span class="p">(</span><span class="n">FunctionCall</span><span class="p">(</span><span class="s2">&quot;fn:QName&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">name</span><span class="p">)),</span> <span class="n">module_path</span><span class="p">),</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>    <span class="p">)</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_call</span> <span class="o">=</span> <span class="n">FunctionCall</span><span class="p">(</span><span class="s2">&quot;xdmp:apply&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">),</span> <span class="n">optionals</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-537">537</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>    <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AtomicInput</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>    <span class="n">optionals</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AtomicInput</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="n">namespace</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="n">module_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Capture a module function and its arguments without performing I/O.</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="sd">    name : str</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">        Function local name (an XML NCName), without a namespace prefix.</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">    args : Sequence[AtomicInput], default ()</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">        Positional arguments, including Python values or XqyExpression</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="sd">        instances. A nested list/tuple is one sequence-valued argument;</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">        None is an explicit empty-sequence argument.</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">    optionals : Sequence[AtomicInput], default ()</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">        Optional trailing slots. Trailing None slots are omitted; interior</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">        None slots become empty sequences. Use args to pass a trailing</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">        empty sequence explicitly. Both argument collections are snapshotted.</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">    namespace : str</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">        Non-empty module namespace URI. It need not be an HTTP URL.</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    module_path : str</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        Non-empty module location resolved by the App Server. The module</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        must already be deployed and accessible to the evaluating user.</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">    TypeError</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        If name, namespace or module_path is not a string, or an argument</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        cannot be represented as an XQuery expression.</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">    ValueError</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        If an identifier is blank or the function name is not an NCName.</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">    Notes</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">    -----</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">    Names, paths and argument values are bound as data, never interpolated</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">    into XQuery source. Application code should choose the module and function;</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">    binding them does not authorize executing an arbitrary library.</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">    Missing modules/functions and arity/type errors are reported by MarkLogic</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">    during evaluation, not during compilation.</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>        <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="p">(</span><span class="s2">&quot;namespace&quot;</span><span class="p">,</span> <span class="n">namespace</span><span class="p">),</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a>        <span class="p">(</span><span class="s2">&quot;module_path&quot;</span><span class="p">,</span> <span class="n">module_path</span><span class="p">),</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="p">):</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> must be a string&quot;</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> must not be blank&quot;</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>    <span class="k">if</span> <span class="n">_NCNAME</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;function name must be an XML NCName without a prefix&quot;</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a>    <span class="n">function</span> <span class="o">=</span> <span class="n">FunctionCall</span><span class="p">(</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a>        <span class="s2">&quot;xdmp:function&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a>        <span class="p">(</span><span class="n">FunctionCall</span><span class="p">(</span><span class="s2">&quot;fn:QName&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">name</span><span class="p">)),</span> <span class="n">module_path</span><span class="p">),</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a>    <span class="p">)</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_call</span> <span class="o">=</span> <span class="n">FunctionCall</span><span class="p">(</span><span class="s2">&quot;xdmp:apply&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">optionals</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16257,7 +16287,8 @@ during evaluation, not during compilation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-540">540</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-539">539</a></span>
+<span class="normal"><a href="#__codelineno-0-540">540</a></span>
 <span class="normal"><a href="#__codelineno-0-541">541</a></span>
 <span class="normal"><a href="#__codelineno-0-542">542</a></span>
 <span class="normal"><a href="#__codelineno-0-543">543</a></span>
@@ -16269,21 +16300,20 @@ during evaluation, not during compilation.</p>
 <span class="normal"><a href="#__codelineno-0-549">549</a></span>
 <span class="normal"><a href="#__codelineno-0-550">550</a></span>
 <span class="normal"><a href="#__codelineno-0-551">551</a></span>
-<span class="normal"><a href="#__codelineno-0-552">552</a></span>
-<span class="normal"><a href="#__codelineno-0-553">553</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Render native module invocation in the shared compilation context.</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">    ctx : XqyCompilationContext</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">        Context shared with nested calls for typed bindings and path guards.</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">    str</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">        An xdmp:apply expression using an explicitly namespaced function.</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-552">552</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Render native module invocation in the shared compilation context.</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    ctx : XqyCompilationContext</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        Context shared with nested calls for typed bindings and path guards.</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">    str</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">        An xdmp:apply expression using an explicitly namespaced function.</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

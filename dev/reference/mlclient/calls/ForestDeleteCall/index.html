@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15964,11 +15994,7 @@ and delete the replica.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/calls/forests.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-468">468</a></span>
-<span class="normal"><a href="#__codelineno-0-469">469</a></span>
-<span class="normal"><a href="#__codelineno-0-470">470</a></span>
-<span class="normal"><a href="#__codelineno-0-471">471</a></span>
-<span class="normal"><a href="#__codelineno-0-472">472</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-472">472</a></span>
 <span class="normal"><a href="#__codelineno-0-473">473</a></span>
 <span class="normal"><a href="#__codelineno-0-474">474</a></span>
 <span class="normal"><a href="#__codelineno-0-475">475</a></span>
@@ -15990,33 +16016,37 @@ and delete the replica.</p>
 <span class="normal"><a href="#__codelineno-0-491">491</a></span>
 <span class="normal"><a href="#__codelineno-0-492">492</a></span>
 <span class="normal"><a href="#__codelineno-0-493">493</a></span>
-<span class="normal"><a href="#__codelineno-0-494">494</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>    <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="n">replicas</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="p">):</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ForestDeleteCall instance.</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">    forest : str</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">        A forest identifier. The forest can be identified either by ID or name.</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="sd">    level : str</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">        The type of state change to initiate. Allowed values: full, config-only.</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">        A config-only deletion removes only the forest configuration;</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="sd">        the data contained in the forest remains on disk.</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">        A full deletion removes both the forest configuration and the data.</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">    replicas : str</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">        Determines how to process the replicas.</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="sd">        Allowed values: detach to detach the replica but keep it; delete to detach</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">        and delete the replica.</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">replicas</span><span class="p">)</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">METHOD_DELETE</span><span class="p">)</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_LEVEL_PARAM</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_REPLICAS_PARAM</span><span class="p">,</span> <span class="n">replicas</span><span class="p">)</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span>
+<span class="normal"><a href="#__codelineno-0-495">495</a></span>
+<span class="normal"><a href="#__codelineno-0-496">496</a></span>
+<span class="normal"><a href="#__codelineno-0-497">497</a></span>
+<span class="normal"><a href="#__codelineno-0-498">498</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="n">replicas</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ForestDeleteCall instance.</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">    forest : str</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="sd">        A forest identifier. The forest can be identified either by ID or name.</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">    level : str</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">        The type of state change to initiate. Allowed values: full, config-only.</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">        A config-only deletion removes only the forest configuration;</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="sd">        the data contained in the forest remains on disk.</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">        A full deletion removes both the forest configuration and the data.</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">    replicas : str</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">        Determines how to process the replicas.</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="sd">        Allowed values: detach to detach the replica but keep it; delete to detach</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">        and delete the replica.</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">replicas</span><span class="p">)</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">METHOD_DELETE</span><span class="p">)</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_LEVEL_PARAM</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_REPLICAS_PARAM</span><span class="p">,</span> <span class="n">replicas</span><span class="p">)</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16043,7 +16073,7 @@ and delete the replica.</p>
   </span>
 
 <a href="#mlclient.calls.ForestDeleteCall.endpoint" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

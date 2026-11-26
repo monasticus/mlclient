@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15946,8 +15976,7 @@ to this request. Allowed values: true (default) or false.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/calls/forests.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-172">172</a></span>
-<span class="normal"><a href="#__codelineno-0-173">173</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-173">173</a></span>
 <span class="normal"><a href="#__codelineno-0-174">174</a></span>
 <span class="normal"><a href="#__codelineno-0-175">175</a></span>
 <span class="normal"><a href="#__codelineno-0-176">176</a></span>
@@ -15968,29 +15997,36 @@ to this request. Allowed values: true (default) or false.</p>
 <span class="normal"><a href="#__codelineno-0-191">191</a></span>
 <span class="normal"><a href="#__codelineno-0-192">192</a></span>
 <span class="normal"><a href="#__codelineno-0-193">193</a></span>
-<span class="normal"><a href="#__codelineno-0-194">194</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-172" name="__codelineno-0-172"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-173" name="__codelineno-0-173"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-174" name="__codelineno-0-174"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
-<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="n">wait_for_forest_to_mount</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a><span class="p">):</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ForestsPostCall instance.</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    body : str | dict</span>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">        A forest properties in XML or JSON format.</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">    wait_for_forest_to_mount : bool</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">        Whether to wait for the new forest to mount before sending a response</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">        to this request. Allowed values: true (default) or false.</span>
-<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-188" name="__codelineno-0-188"></a>    <span class="n">content_type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_content_type_header_for_data</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-189" name="__codelineno-0-189"></a>    <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_JSON</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a>        <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-192" name="__codelineno-0-192"></a>    <span class="k">if</span> <span class="n">wait_for_forest_to_mount</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-193" name="__codelineno-0-193"></a>        <span class="n">wait_for_forest_to_mount</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">wait_for_forest_to_mount</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_WAIT_FOR_FOREST_TO_MOUNT_PARAM</span><span class="p">,</span> <span class="n">wait_for_forest_to_mount</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-194">194</a></span>
+<span class="normal"><a href="#__codelineno-0-195">195</a></span>
+<span class="normal"><a href="#__codelineno-0-196">196</a></span>
+<span class="normal"><a href="#__codelineno-0-197">197</a></span>
+<span class="normal"><a href="#__codelineno-0-198">198</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-173" name="__codelineno-0-173"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-174" name="__codelineno-0-174"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="n">wait_for_forest_to_mount</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ForestsPostCall instance.</span>
+<a id="__codelineno-0-179" name="__codelineno-0-179"></a>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">    body : str | dict</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">        A forest properties in XML or JSON format.</span>
+<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">    wait_for_forest_to_mount : bool</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">        Whether to wait for the new forest to mount before sending a response</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">        to this request. Allowed values: true (default) or false.</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a>    <span class="n">content_type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_content_type_header_for_data</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-190" name="__codelineno-0-190"></a>    <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_JSON</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a>        <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_WAIT_FOR_FOREST_TO_MOUNT_PARAM</span><span class="p">,</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a>        <span class="nb">str</span><span class="p">(</span><span class="n">wait_for_forest_to_mount</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a>        <span class="k">if</span> <span class="n">wait_for_forest_to_mount</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<a id="__codelineno-0-197" name="__codelineno-0-197"></a>        <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-198" name="__codelineno-0-198"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16017,7 +16053,7 @@ to this request. Allowed values: true (default) or false.</p>
   </span>
 
 <a href="#mlclient.calls.ForestsPostCall.endpoint" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15922,7 +15952,8 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-346">346</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-345">345</a></span>
+<span class="normal"><a href="#__codelineno-0-346">346</a></span>
 <span class="normal"><a href="#__codelineno-0-347">347</a></span>
 <span class="normal"><a href="#__codelineno-0-348">348</a></span>
 <span class="normal"><a href="#__codelineno-0-349">349</a></span>
@@ -15930,17 +15961,16 @@
 <span class="normal"><a href="#__codelineno-0-351">351</a></span>
 <span class="normal"><a href="#__codelineno-0-352">352</a></span>
 <span class="normal"><a href="#__codelineno-0-353">353</a></span>
-<span class="normal"><a href="#__codelineno-0-354">354</a></span>
-<span class="normal"><a href="#__codelineno-0-355">355</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Keep fn:last inside the selected sequence&#39;s predicate context.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="n">position</span> <span class="o">=</span> <span class="n">as_expr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="n">inner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">,</span>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="p">(</span><span class="n">FunctionCall</span><span class="p">,</span> <span class="n">ModuleFunctionCall</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Range</span><span class="p">),</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>    <span class="p">):</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="n">inner</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2">)&quot;</span>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">]&quot;</span>
+<span class="normal"><a href="#__codelineno-0-354">354</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Keep fn:last inside the selected sequence&#39;s predicate context.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>    <span class="n">position</span> <span class="o">=</span> <span class="n">as_expr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="n">inner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">,</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="p">(</span><span class="n">FunctionCall</span><span class="p">,</span> <span class="n">ModuleFunctionCall</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Range</span><span class="p">),</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="p">):</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="n">inner</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2">)&quot;</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">]&quot;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

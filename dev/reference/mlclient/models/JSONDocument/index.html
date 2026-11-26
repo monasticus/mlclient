@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15935,7 +15965,7 @@
 
 <a href="#mlclient.models.JSONDocument" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">JSONDocument</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15981,11 +16011,11 @@ as-is; parsing to <code>dict</code> is deferred to the first <code>.content</cod
 <span class="normal"><a href="#__codelineno-0-477">477</a></span>
 <span class="normal"><a href="#__codelineno-0-478">478</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
 <a id="__codelineno-0-461" name="__codelineno-0-461"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">,</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-463" name="__codelineno-0-463"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-464" name="__codelineno-0-464"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-465" name="__codelineno-0-465"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="p">):</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-467" name="__codelineno-0-467"></a>    <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-468" name="__codelineno-0-468"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
 <a id="__codelineno-0-469" name="__codelineno-0-469"></a>            <span class="s2">&quot;JSONDocument requires content; &quot;</span>
@@ -16210,9 +16240,7 @@ output. Has no effect when the document has not been parsed yet.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-537">537</a></span>
-<span class="normal"><a href="#__codelineno-0-538">538</a></span>
-<span class="normal"><a href="#__codelineno-0-539">539</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-539">539</a></span>
 <span class="normal"><a href="#__codelineno-0-540">540</a></span>
 <span class="normal"><a href="#__codelineno-0-541">541</a></span>
 <span class="normal"><a href="#__codelineno-0-542">542</a></span>
@@ -16231,28 +16259,30 @@ output. Has no effect when the document has not been parsed yet.</p>
 <span class="normal"><a href="#__codelineno-0-555">555</a></span>
 <span class="normal"><a href="#__codelineno-0-556">556</a></span>
 <span class="normal"><a href="#__codelineno-0-557">557</a></span>
-<span class="normal"><a href="#__codelineno-0-558">558</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="k">def</span><span class="w"> </span><span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JSONDocument</span><span class="p">:</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Drop cached bytes/string serializations of the parsed dict.</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">    Use this when the parsed ``.content`` has been mutated externally so</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">    that subsequent ``.content_bytes`` / ``.content_string`` calls</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">    re-serialize from the parsed form instead of returning stale cached</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">    output. Has no effect when the document has not been parsed yet.</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">    JSONDocument</span>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">        ``self``, so the call can be chained directly into a write.</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">    Examples</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">    --------</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">    &gt;&gt;&gt; doc.content[&quot;name&quot;] = &quot;Smith&quot;</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">    &gt;&gt;&gt; ml.documents.write(doc.invalidate())</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_string</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a>    <span class="k">return</span> <span class="bp">self</span>
+<span class="normal"><a href="#__codelineno-0-558">558</a></span>
+<span class="normal"><a href="#__codelineno-0-559">559</a></span>
+<span class="normal"><a href="#__codelineno-0-560">560</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="k">def</span><span class="w"> </span><span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JSONDocument</span><span class="p">:</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Drop cached bytes/string serializations of the parsed dict.</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">    Use this when the parsed ``.content`` has been mutated externally so</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">    that subsequent ``.content_bytes`` / ``.content_string`` calls</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    re-serialize from the parsed form instead of returning stale cached</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">    output. Has no effect when the document has not been parsed yet.</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">    JSONDocument</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">        ``self``, so the call can be chained directly into a write.</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">    Examples</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">    --------</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">    &gt;&gt;&gt; doc.content[&quot;name&quot;] = &quot;Smith&quot;</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a><span class="sd">    &gt;&gt;&gt; ml.documents.write(doc.invalidate())</span>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parsed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_content_string</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a>    <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15912,35 +15942,35 @@ serializes as its start and end.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-508">508</a></span>
-<span class="normal"><a href="#__codelineno-0-509">509</a></span>
-<span class="normal"><a href="#__codelineno-0-510">510</a></span>
-<span class="normal"><a href="#__codelineno-0-511">511</a></span>
-<span class="normal"><a href="#__codelineno-0-512">512</a></span>
-<span class="normal"><a href="#__codelineno-0-513">513</a></span>
-<span class="normal"><a href="#__codelineno-0-514">514</a></span>
-<span class="normal"><a href="#__codelineno-0-515">515</a></span>
-<span class="normal"><a href="#__codelineno-0-516">516</a></span>
-<span class="normal"><a href="#__codelineno-0-517">517</a></span>
-<span class="normal"><a href="#__codelineno-0-518">518</a></span>
-<span class="normal"><a href="#__codelineno-0-519">519</a></span>
-<span class="normal"><a href="#__codelineno-0-520">520</a></span>
-<span class="normal"><a href="#__codelineno-0-521">521</a></span>
-<span class="normal"><a href="#__codelineno-0-522">522</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a>    <span class="n">start</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a>    <span class="n">end</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="p">):</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot the period bounds.</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">    start : datetime.datetime | XqyExpression</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">        Start of the period.</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">    end : datetime.datetime | XqyExpression</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">        End of the period.</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">end</span><span class="p">))</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-535">535</a></span>
+<span class="normal"><a href="#__codelineno-0-536">536</a></span>
+<span class="normal"><a href="#__codelineno-0-537">537</a></span>
+<span class="normal"><a href="#__codelineno-0-538">538</a></span>
+<span class="normal"><a href="#__codelineno-0-539">539</a></span>
+<span class="normal"><a href="#__codelineno-0-540">540</a></span>
+<span class="normal"><a href="#__codelineno-0-541">541</a></span>
+<span class="normal"><a href="#__codelineno-0-542">542</a></span>
+<span class="normal"><a href="#__codelineno-0-543">543</a></span>
+<span class="normal"><a href="#__codelineno-0-544">544</a></span>
+<span class="normal"><a href="#__codelineno-0-545">545</a></span>
+<span class="normal"><a href="#__codelineno-0-546">546</a></span>
+<span class="normal"><a href="#__codelineno-0-547">547</a></span>
+<span class="normal"><a href="#__codelineno-0-548">548</a></span>
+<span class="normal"><a href="#__codelineno-0-549">549</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a>    <span class="n">start</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>    <span class="n">end</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot the period bounds.</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    start : datetime.datetime | XqyExpression</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        Start of the period.</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">    end : datetime.datetime | XqyExpression</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">        End of the period.</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">end</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

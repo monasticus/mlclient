@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15983,46 +16013,7 @@ results of this query in the list cache.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-4599">4599</a></span>
-<span class="normal"><a href="#__codelineno-0-4600">4600</a></span>
-<span class="normal"><a href="#__codelineno-0-4601">4601</a></span>
-<span class="normal"><a href="#__codelineno-0-4602">4602</a></span>
-<span class="normal"><a href="#__codelineno-0-4603">4603</a></span>
-<span class="normal"><a href="#__codelineno-0-4604">4604</a></span>
-<span class="normal"><a href="#__codelineno-0-4605">4605</a></span>
-<span class="normal"><a href="#__codelineno-0-4606">4606</a></span>
-<span class="normal"><a href="#__codelineno-0-4607">4607</a></span>
-<span class="normal"><a href="#__codelineno-0-4608">4608</a></span>
-<span class="normal"><a href="#__codelineno-0-4609">4609</a></span>
-<span class="normal"><a href="#__codelineno-0-4610">4610</a></span>
-<span class="normal"><a href="#__codelineno-0-4611">4611</a></span>
-<span class="normal"><a href="#__codelineno-0-4612">4612</a></span>
-<span class="normal"><a href="#__codelineno-0-4613">4613</a></span>
-<span class="normal"><a href="#__codelineno-0-4614">4614</a></span>
-<span class="normal"><a href="#__codelineno-0-4615">4615</a></span>
-<span class="normal"><a href="#__codelineno-0-4616">4616</a></span>
-<span class="normal"><a href="#__codelineno-0-4617">4617</a></span>
-<span class="normal"><a href="#__codelineno-0-4618">4618</a></span>
-<span class="normal"><a href="#__codelineno-0-4619">4619</a></span>
-<span class="normal"><a href="#__codelineno-0-4620">4620</a></span>
-<span class="normal"><a href="#__codelineno-0-4621">4621</a></span>
-<span class="normal"><a href="#__codelineno-0-4622">4622</a></span>
-<span class="normal"><a href="#__codelineno-0-4623">4623</a></span>
-<span class="normal"><a href="#__codelineno-0-4624">4624</a></span>
-<span class="normal"><a href="#__codelineno-0-4625">4625</a></span>
-<span class="normal"><a href="#__codelineno-0-4626">4626</a></span>
-<span class="normal"><a href="#__codelineno-0-4627">4627</a></span>
-<span class="normal"><a href="#__codelineno-0-4628">4628</a></span>
-<span class="normal"><a href="#__codelineno-0-4629">4629</a></span>
-<span class="normal"><a href="#__codelineno-0-4630">4630</a></span>
-<span class="normal"><a href="#__codelineno-0-4631">4631</a></span>
-<span class="normal"><a href="#__codelineno-0-4632">4632</a></span>
-<span class="normal"><a href="#__codelineno-0-4633">4633</a></span>
-<span class="normal"><a href="#__codelineno-0-4634">4634</a></span>
-<span class="normal"><a href="#__codelineno-0-4635">4635</a></span>
-<span class="normal"><a href="#__codelineno-0-4636">4636</a></span>
-<span class="normal"><a href="#__codelineno-0-4637">4637</a></span>
-<span class="normal"><a href="#__codelineno-0-4638">4638</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-4638">4638</a></span>
 <span class="normal"><a href="#__codelineno-0-4639">4639</a></span>
 <span class="normal"><a href="#__codelineno-0-4640">4640</a></span>
 <span class="normal"><a href="#__codelineno-0-4641">4641</a></span>
@@ -16047,71 +16038,110 @@ results of this query in the list cache.</p>
 <span class="normal"><a href="#__codelineno-0-4660">4660</a></span>
 <span class="normal"><a href="#__codelineno-0-4661">4661</a></span>
 <span class="normal"><a href="#__codelineno-0-4662">4662</a></span>
-<span class="normal"><a href="#__codelineno-0-4663">4663</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-4599" name="__codelineno-0-4599"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-4600" name="__codelineno-0-4600"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-4601" name="__codelineno-0-4601"></a>    <span class="n">axis_1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-4602" name="__codelineno-0-4602"></a>    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-4603" name="__codelineno-0-4603"></a>    <span class="n">axis_2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-4604" name="__codelineno-0-4604"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-4605" name="__codelineno-0-4605"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-4606" name="__codelineno-0-4606"></a><span class="p">):</span>
-<a id="__codelineno-0-4607" name="__codelineno-0-4607"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-4608" name="__codelineno-0-4608"></a>
-<a id="__codelineno-0-4609" name="__codelineno-0-4609"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-4610" name="__codelineno-0-4610"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-4611" name="__codelineno-0-4611"></a><span class="sd">    axis_1 : str | XqyExpression</span>
-<a id="__codelineno-0-4612" name="__codelineno-0-4612"></a><span class="sd">        Name of the first axis to compare</span>
-<a id="__codelineno-0-4613" name="__codelineno-0-4613"></a><span class="sd">    operator : str | XqyExpression</span>
-<a id="__codelineno-0-4614" name="__codelineno-0-4614"></a><span class="sd">        A comparison operator. Period is the two timestamps contained in the axis.</span>
-<a id="__codelineno-0-4615" name="__codelineno-0-4615"></a><span class="sd">        Operators include: &quot;aln_equals&quot; Match documents whose period1 equals</span>
-<a id="__codelineno-0-4616" name="__codelineno-0-4616"></a><span class="sd">        period2. &quot;aln_contains&quot; Match documents whose period1 contains period2. i.e.</span>
-<a id="__codelineno-0-4617" name="__codelineno-0-4617"></a><span class="sd">        period1 starts before period2 starts and ends before period2 ends.</span>
-<a id="__codelineno-0-4618" name="__codelineno-0-4618"></a><span class="sd">        &quot;aln_contained_by&quot; Match documents whose period1 is contained by period2.</span>
-<a id="__codelineno-0-4619" name="__codelineno-0-4619"></a><span class="sd">        &quot;aln_meets&quot; Match documents whose period1 meets period2, i.e. period1 ends</span>
-<a id="__codelineno-0-4620" name="__codelineno-0-4620"></a><span class="sd">        at period2 start. &quot;aln_met_by&quot; Match documents whose period1 meets period2,</span>
-<a id="__codelineno-0-4621" name="__codelineno-0-4621"></a><span class="sd">        i.e. period1 starts at period2 end. &quot;aln_before&quot; Match documents whose</span>
-<a id="__codelineno-0-4622" name="__codelineno-0-4622"></a><span class="sd">        period1 is before period2, i.e. period1 ends before period2 starts.</span>
-<a id="__codelineno-0-4623" name="__codelineno-0-4623"></a><span class="sd">        &quot;aln_after&quot; Match documents whose period1 is after period2, i.e. period1</span>
-<a id="__codelineno-0-4624" name="__codelineno-0-4624"></a><span class="sd">        starts after period2 ends. &quot;aln_starts&quot; Match documents whose period1 starts</span>
-<a id="__codelineno-0-4625" name="__codelineno-0-4625"></a><span class="sd">        period2, i.e. period1 starts at period2 start and ends before period2 ends.</span>
-<a id="__codelineno-0-4626" name="__codelineno-0-4626"></a><span class="sd">        &quot;aln_started_by&quot; Match documents whose period2 starts period1, i.e. period1</span>
-<a id="__codelineno-0-4627" name="__codelineno-0-4627"></a><span class="sd">        starts at period2 start and ends after period2 ends. &quot;aln_finishes&quot; Match</span>
-<a id="__codelineno-0-4628" name="__codelineno-0-4628"></a><span class="sd">        documents whose period1 finishes period2, i.e. period1 finishes at period2</span>
-<a id="__codelineno-0-4629" name="__codelineno-0-4629"></a><span class="sd">        finish and starts after period2 starts. &quot;aln_finished_by&quot; Match documents</span>
-<a id="__codelineno-0-4630" name="__codelineno-0-4630"></a><span class="sd">        whose period2 finishes period1, i.e. period1 finishes at period2 finish and</span>
-<a id="__codelineno-0-4631" name="__codelineno-0-4631"></a><span class="sd">        starts before period2 starts. &quot;aln_overlaps&quot; Match documents whose period1</span>
-<a id="__codelineno-0-4632" name="__codelineno-0-4632"></a><span class="sd">        overlaps period2, i.e. period1 starts before period2 start and ends before</span>
-<a id="__codelineno-0-4633" name="__codelineno-0-4633"></a><span class="sd">        period2 ends but after period2 starts. &quot;aln_overlapped_by&quot; Match documents</span>
-<a id="__codelineno-0-4634" name="__codelineno-0-4634"></a><span class="sd">        whose period2 overlaps period1, i.e. period1 starts after period2 start but</span>
-<a id="__codelineno-0-4635" name="__codelineno-0-4635"></a><span class="sd">        before period2 ends and ends after period2 ends. &quot;iso_contains&quot; Match</span>
-<a id="__codelineno-0-4636" name="__codelineno-0-4636"></a><span class="sd">        documents whose period1 contains period2 in sql 2011 standard. i.e. period1</span>
-<a id="__codelineno-0-4637" name="__codelineno-0-4637"></a><span class="sd">        starts before or at period2 starts and ends after or at period2 ends.</span>
-<a id="__codelineno-0-4638" name="__codelineno-0-4638"></a><span class="sd">        &quot;iso_overlaps&quot; Match documents whose period1 overlaps period2 in sql 2011</span>
-<a id="__codelineno-0-4639" name="__codelineno-0-4639"></a><span class="sd">        standard. i.e. period1 and period2 have common time period. &quot;iso_succeeds&quot;</span>
-<a id="__codelineno-0-4640" name="__codelineno-0-4640"></a><span class="sd">        Match documents whose period1 succeeds period2 in sql 2011 standard. i.e.</span>
-<a id="__codelineno-0-4641" name="__codelineno-0-4641"></a><span class="sd">        period1 starts at or after period2 ends &quot;iso_precedes&quot; Match documents whose</span>
-<a id="__codelineno-0-4642" name="__codelineno-0-4642"></a><span class="sd">        period1 precedes period2 in sql 2011 standard. i.e. period1 ends at or</span>
-<a id="__codelineno-0-4643" name="__codelineno-0-4643"></a><span class="sd">        before period2 ends &quot;iso_succeeds&quot; Match documents whose period1 succeeds</span>
-<a id="__codelineno-0-4644" name="__codelineno-0-4644"></a><span class="sd">        period2 in sql 2011 standard. i.e. period1 starts at or after period2 ends</span>
-<a id="__codelineno-0-4645" name="__codelineno-0-4645"></a><span class="sd">        &quot;iso_precedes&quot; Match documents whose period1 precedes period2 in sql 2011</span>
-<a id="__codelineno-0-4646" name="__codelineno-0-4646"></a><span class="sd">        standard. i.e. period1 ends at or before period2 ends &quot;iso_imm_succeeds&quot;</span>
-<a id="__codelineno-0-4647" name="__codelineno-0-4647"></a><span class="sd">        Match documents whose period1 immediately succeeds period2 in sql 2011</span>
-<a id="__codelineno-0-4648" name="__codelineno-0-4648"></a><span class="sd">        standard. i.e. period1 starts at period2 ends &quot;iso_imm_precedes&quot; Match</span>
-<a id="__codelineno-0-4649" name="__codelineno-0-4649"></a><span class="sd">        documents whose period1 immediately precedes period2 in sql 2011 standard.</span>
-<a id="__codelineno-0-4650" name="__codelineno-0-4650"></a><span class="sd">        i.e. period1 ends at period2 ends</span>
-<a id="__codelineno-0-4651" name="__codelineno-0-4651"></a><span class="sd">    axis_2 : str | XqyExpression</span>
-<a id="__codelineno-0-4652" name="__codelineno-0-4652"></a><span class="sd">        Name of the second period to compare</span>
-<a id="__codelineno-0-4653" name="__codelineno-0-4653"></a><span class="sd">    options : StringInput, optional</span>
-<a id="__codelineno-0-4654" name="__codelineno-0-4654"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;cached&quot; Cache</span>
-<a id="__codelineno-0-4655" name="__codelineno-0-4655"></a><span class="sd">        the results of this query in the list cache. &quot;uncached&quot; Do not cache the</span>
-<a id="__codelineno-0-4656" name="__codelineno-0-4656"></a><span class="sd">        results of this query in the list cache.</span>
-<a id="__codelineno-0-4657" name="__codelineno-0-4657"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-4658" name="__codelineno-0-4658"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-4659" name="__codelineno-0-4659"></a>        <span class="n">axis_1</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">axis_1</span><span class="p">),</span>
-<a id="__codelineno-0-4660" name="__codelineno-0-4660"></a>        <span class="n">operator</span><span class="o">=</span><span class="n">_temporal_operator_argument</span><span class="p">(</span><span class="n">operator</span><span class="p">),</span>
-<a id="__codelineno-0-4661" name="__codelineno-0-4661"></a>        <span class="n">axis_2</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">axis_2</span><span class="p">),</span>
-<a id="__codelineno-0-4662" name="__codelineno-0-4662"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-4663" name="__codelineno-0-4663"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-4663">4663</a></span>
+<span class="normal"><a href="#__codelineno-0-4664">4664</a></span>
+<span class="normal"><a href="#__codelineno-0-4665">4665</a></span>
+<span class="normal"><a href="#__codelineno-0-4666">4666</a></span>
+<span class="normal"><a href="#__codelineno-0-4667">4667</a></span>
+<span class="normal"><a href="#__codelineno-0-4668">4668</a></span>
+<span class="normal"><a href="#__codelineno-0-4669">4669</a></span>
+<span class="normal"><a href="#__codelineno-0-4670">4670</a></span>
+<span class="normal"><a href="#__codelineno-0-4671">4671</a></span>
+<span class="normal"><a href="#__codelineno-0-4672">4672</a></span>
+<span class="normal"><a href="#__codelineno-0-4673">4673</a></span>
+<span class="normal"><a href="#__codelineno-0-4674">4674</a></span>
+<span class="normal"><a href="#__codelineno-0-4675">4675</a></span>
+<span class="normal"><a href="#__codelineno-0-4676">4676</a></span>
+<span class="normal"><a href="#__codelineno-0-4677">4677</a></span>
+<span class="normal"><a href="#__codelineno-0-4678">4678</a></span>
+<span class="normal"><a href="#__codelineno-0-4679">4679</a></span>
+<span class="normal"><a href="#__codelineno-0-4680">4680</a></span>
+<span class="normal"><a href="#__codelineno-0-4681">4681</a></span>
+<span class="normal"><a href="#__codelineno-0-4682">4682</a></span>
+<span class="normal"><a href="#__codelineno-0-4683">4683</a></span>
+<span class="normal"><a href="#__codelineno-0-4684">4684</a></span>
+<span class="normal"><a href="#__codelineno-0-4685">4685</a></span>
+<span class="normal"><a href="#__codelineno-0-4686">4686</a></span>
+<span class="normal"><a href="#__codelineno-0-4687">4687</a></span>
+<span class="normal"><a href="#__codelineno-0-4688">4688</a></span>
+<span class="normal"><a href="#__codelineno-0-4689">4689</a></span>
+<span class="normal"><a href="#__codelineno-0-4690">4690</a></span>
+<span class="normal"><a href="#__codelineno-0-4691">4691</a></span>
+<span class="normal"><a href="#__codelineno-0-4692">4692</a></span>
+<span class="normal"><a href="#__codelineno-0-4693">4693</a></span>
+<span class="normal"><a href="#__codelineno-0-4694">4694</a></span>
+<span class="normal"><a href="#__codelineno-0-4695">4695</a></span>
+<span class="normal"><a href="#__codelineno-0-4696">4696</a></span>
+<span class="normal"><a href="#__codelineno-0-4697">4697</a></span>
+<span class="normal"><a href="#__codelineno-0-4698">4698</a></span>
+<span class="normal"><a href="#__codelineno-0-4699">4699</a></span>
+<span class="normal"><a href="#__codelineno-0-4700">4700</a></span>
+<span class="normal"><a href="#__codelineno-0-4701">4701</a></span>
+<span class="normal"><a href="#__codelineno-0-4702">4702</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-4638" name="__codelineno-0-4638"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-4639" name="__codelineno-0-4639"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-4640" name="__codelineno-0-4640"></a>    <span class="n">axis_1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-4641" name="__codelineno-0-4641"></a>    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-4642" name="__codelineno-0-4642"></a>    <span class="n">axis_2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-4643" name="__codelineno-0-4643"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-4644" name="__codelineno-0-4644"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-4645" name="__codelineno-0-4645"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-4646" name="__codelineno-0-4646"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-4647" name="__codelineno-0-4647"></a>
+<a id="__codelineno-0-4648" name="__codelineno-0-4648"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-4649" name="__codelineno-0-4649"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-4650" name="__codelineno-0-4650"></a><span class="sd">    axis_1 : str | XqyExpression</span>
+<a id="__codelineno-0-4651" name="__codelineno-0-4651"></a><span class="sd">        Name of the first axis to compare</span>
+<a id="__codelineno-0-4652" name="__codelineno-0-4652"></a><span class="sd">    operator : str | XqyExpression</span>
+<a id="__codelineno-0-4653" name="__codelineno-0-4653"></a><span class="sd">        A comparison operator. Period is the two timestamps contained in the axis.</span>
+<a id="__codelineno-0-4654" name="__codelineno-0-4654"></a><span class="sd">        Operators include: &quot;aln_equals&quot; Match documents whose period1 equals</span>
+<a id="__codelineno-0-4655" name="__codelineno-0-4655"></a><span class="sd">        period2. &quot;aln_contains&quot; Match documents whose period1 contains period2. i.e.</span>
+<a id="__codelineno-0-4656" name="__codelineno-0-4656"></a><span class="sd">        period1 starts before period2 starts and ends before period2 ends.</span>
+<a id="__codelineno-0-4657" name="__codelineno-0-4657"></a><span class="sd">        &quot;aln_contained_by&quot; Match documents whose period1 is contained by period2.</span>
+<a id="__codelineno-0-4658" name="__codelineno-0-4658"></a><span class="sd">        &quot;aln_meets&quot; Match documents whose period1 meets period2, i.e. period1 ends</span>
+<a id="__codelineno-0-4659" name="__codelineno-0-4659"></a><span class="sd">        at period2 start. &quot;aln_met_by&quot; Match documents whose period1 meets period2,</span>
+<a id="__codelineno-0-4660" name="__codelineno-0-4660"></a><span class="sd">        i.e. period1 starts at period2 end. &quot;aln_before&quot; Match documents whose</span>
+<a id="__codelineno-0-4661" name="__codelineno-0-4661"></a><span class="sd">        period1 is before period2, i.e. period1 ends before period2 starts.</span>
+<a id="__codelineno-0-4662" name="__codelineno-0-4662"></a><span class="sd">        &quot;aln_after&quot; Match documents whose period1 is after period2, i.e. period1</span>
+<a id="__codelineno-0-4663" name="__codelineno-0-4663"></a><span class="sd">        starts after period2 ends. &quot;aln_starts&quot; Match documents whose period1 starts</span>
+<a id="__codelineno-0-4664" name="__codelineno-0-4664"></a><span class="sd">        period2, i.e. period1 starts at period2 start and ends before period2 ends.</span>
+<a id="__codelineno-0-4665" name="__codelineno-0-4665"></a><span class="sd">        &quot;aln_started_by&quot; Match documents whose period2 starts period1, i.e. period1</span>
+<a id="__codelineno-0-4666" name="__codelineno-0-4666"></a><span class="sd">        starts at period2 start and ends after period2 ends. &quot;aln_finishes&quot; Match</span>
+<a id="__codelineno-0-4667" name="__codelineno-0-4667"></a><span class="sd">        documents whose period1 finishes period2, i.e. period1 finishes at period2</span>
+<a id="__codelineno-0-4668" name="__codelineno-0-4668"></a><span class="sd">        finish and starts after period2 starts. &quot;aln_finished_by&quot; Match documents</span>
+<a id="__codelineno-0-4669" name="__codelineno-0-4669"></a><span class="sd">        whose period2 finishes period1, i.e. period1 finishes at period2 finish and</span>
+<a id="__codelineno-0-4670" name="__codelineno-0-4670"></a><span class="sd">        starts before period2 starts. &quot;aln_overlaps&quot; Match documents whose period1</span>
+<a id="__codelineno-0-4671" name="__codelineno-0-4671"></a><span class="sd">        overlaps period2, i.e. period1 starts before period2 start and ends before</span>
+<a id="__codelineno-0-4672" name="__codelineno-0-4672"></a><span class="sd">        period2 ends but after period2 starts. &quot;aln_overlapped_by&quot; Match documents</span>
+<a id="__codelineno-0-4673" name="__codelineno-0-4673"></a><span class="sd">        whose period2 overlaps period1, i.e. period1 starts after period2 start but</span>
+<a id="__codelineno-0-4674" name="__codelineno-0-4674"></a><span class="sd">        before period2 ends and ends after period2 ends. &quot;iso_contains&quot; Match</span>
+<a id="__codelineno-0-4675" name="__codelineno-0-4675"></a><span class="sd">        documents whose period1 contains period2 in sql 2011 standard. i.e. period1</span>
+<a id="__codelineno-0-4676" name="__codelineno-0-4676"></a><span class="sd">        starts before or at period2 starts and ends after or at period2 ends.</span>
+<a id="__codelineno-0-4677" name="__codelineno-0-4677"></a><span class="sd">        &quot;iso_overlaps&quot; Match documents whose period1 overlaps period2 in sql 2011</span>
+<a id="__codelineno-0-4678" name="__codelineno-0-4678"></a><span class="sd">        standard. i.e. period1 and period2 have common time period. &quot;iso_succeeds&quot;</span>
+<a id="__codelineno-0-4679" name="__codelineno-0-4679"></a><span class="sd">        Match documents whose period1 succeeds period2 in sql 2011 standard. i.e.</span>
+<a id="__codelineno-0-4680" name="__codelineno-0-4680"></a><span class="sd">        period1 starts at or after period2 ends &quot;iso_precedes&quot; Match documents whose</span>
+<a id="__codelineno-0-4681" name="__codelineno-0-4681"></a><span class="sd">        period1 precedes period2 in sql 2011 standard. i.e. period1 ends at or</span>
+<a id="__codelineno-0-4682" name="__codelineno-0-4682"></a><span class="sd">        before period2 ends &quot;iso_succeeds&quot; Match documents whose period1 succeeds</span>
+<a id="__codelineno-0-4683" name="__codelineno-0-4683"></a><span class="sd">        period2 in sql 2011 standard. i.e. period1 starts at or after period2 ends</span>
+<a id="__codelineno-0-4684" name="__codelineno-0-4684"></a><span class="sd">        &quot;iso_precedes&quot; Match documents whose period1 precedes period2 in sql 2011</span>
+<a id="__codelineno-0-4685" name="__codelineno-0-4685"></a><span class="sd">        standard. i.e. period1 ends at or before period2 ends &quot;iso_imm_succeeds&quot;</span>
+<a id="__codelineno-0-4686" name="__codelineno-0-4686"></a><span class="sd">        Match documents whose period1 immediately succeeds period2 in sql 2011</span>
+<a id="__codelineno-0-4687" name="__codelineno-0-4687"></a><span class="sd">        standard. i.e. period1 starts at period2 ends &quot;iso_imm_precedes&quot; Match</span>
+<a id="__codelineno-0-4688" name="__codelineno-0-4688"></a><span class="sd">        documents whose period1 immediately precedes period2 in sql 2011 standard.</span>
+<a id="__codelineno-0-4689" name="__codelineno-0-4689"></a><span class="sd">        i.e. period1 ends at period2 ends</span>
+<a id="__codelineno-0-4690" name="__codelineno-0-4690"></a><span class="sd">    axis_2 : str | XqyExpression</span>
+<a id="__codelineno-0-4691" name="__codelineno-0-4691"></a><span class="sd">        Name of the second period to compare</span>
+<a id="__codelineno-0-4692" name="__codelineno-0-4692"></a><span class="sd">    options : StringInput, optional</span>
+<a id="__codelineno-0-4693" name="__codelineno-0-4693"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;cached&quot; Cache</span>
+<a id="__codelineno-0-4694" name="__codelineno-0-4694"></a><span class="sd">        the results of this query in the list cache. &quot;uncached&quot; Do not cache the</span>
+<a id="__codelineno-0-4695" name="__codelineno-0-4695"></a><span class="sd">        results of this query in the list cache.</span>
+<a id="__codelineno-0-4696" name="__codelineno-0-4696"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-4697" name="__codelineno-0-4697"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-4698" name="__codelineno-0-4698"></a>        <span class="n">axis_1</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">axis_1</span><span class="p">),</span>
+<a id="__codelineno-0-4699" name="__codelineno-0-4699"></a>        <span class="n">operator</span><span class="o">=</span><span class="n">_temporal_operator_argument</span><span class="p">(</span><span class="n">operator</span><span class="p">),</span>
+<a id="__codelineno-0-4700" name="__codelineno-0-4700"></a>        <span class="n">axis_2</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">axis_2</span><span class="p">),</span>
+<a id="__codelineno-0-4701" name="__codelineno-0-4701"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-4702" name="__codelineno-0-4702"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

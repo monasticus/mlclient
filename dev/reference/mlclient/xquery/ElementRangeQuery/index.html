@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15919,7 +15949,7 @@ $value. "!=" Match range index values not equal to $value.</p>
                 <code>value</code>
             </td>
             <td>
-                  <code><span title="AtomicInput">AtomicInput</span></code>
+                  <code><span title="mlclient.xquery.expressions.AtomicInput">AtomicInput</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16000,42 +16030,7 @@ score).</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-2365">2365</a></span>
-<span class="normal"><a href="#__codelineno-0-2366">2366</a></span>
-<span class="normal"><a href="#__codelineno-0-2367">2367</a></span>
-<span class="normal"><a href="#__codelineno-0-2368">2368</a></span>
-<span class="normal"><a href="#__codelineno-0-2369">2369</a></span>
-<span class="normal"><a href="#__codelineno-0-2370">2370</a></span>
-<span class="normal"><a href="#__codelineno-0-2371">2371</a></span>
-<span class="normal"><a href="#__codelineno-0-2372">2372</a></span>
-<span class="normal"><a href="#__codelineno-0-2373">2373</a></span>
-<span class="normal"><a href="#__codelineno-0-2374">2374</a></span>
-<span class="normal"><a href="#__codelineno-0-2375">2375</a></span>
-<span class="normal"><a href="#__codelineno-0-2376">2376</a></span>
-<span class="normal"><a href="#__codelineno-0-2377">2377</a></span>
-<span class="normal"><a href="#__codelineno-0-2378">2378</a></span>
-<span class="normal"><a href="#__codelineno-0-2379">2379</a></span>
-<span class="normal"><a href="#__codelineno-0-2380">2380</a></span>
-<span class="normal"><a href="#__codelineno-0-2381">2381</a></span>
-<span class="normal"><a href="#__codelineno-0-2382">2382</a></span>
-<span class="normal"><a href="#__codelineno-0-2383">2383</a></span>
-<span class="normal"><a href="#__codelineno-0-2384">2384</a></span>
-<span class="normal"><a href="#__codelineno-0-2385">2385</a></span>
-<span class="normal"><a href="#__codelineno-0-2386">2386</a></span>
-<span class="normal"><a href="#__codelineno-0-2387">2387</a></span>
-<span class="normal"><a href="#__codelineno-0-2388">2388</a></span>
-<span class="normal"><a href="#__codelineno-0-2389">2389</a></span>
-<span class="normal"><a href="#__codelineno-0-2390">2390</a></span>
-<span class="normal"><a href="#__codelineno-0-2391">2391</a></span>
-<span class="normal"><a href="#__codelineno-0-2392">2392</a></span>
-<span class="normal"><a href="#__codelineno-0-2393">2393</a></span>
-<span class="normal"><a href="#__codelineno-0-2394">2394</a></span>
-<span class="normal"><a href="#__codelineno-0-2395">2395</a></span>
-<span class="normal"><a href="#__codelineno-0-2396">2396</a></span>
-<span class="normal"><a href="#__codelineno-0-2397">2397</a></span>
-<span class="normal"><a href="#__codelineno-0-2398">2398</a></span>
-<span class="normal"><a href="#__codelineno-0-2399">2399</a></span>
-<span class="normal"><a href="#__codelineno-0-2400">2400</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-2400">2400</a></span>
 <span class="normal"><a href="#__codelineno-0-2401">2401</a></span>
 <span class="normal"><a href="#__codelineno-0-2402">2402</a></span>
 <span class="normal"><a href="#__codelineno-0-2403">2403</a></span>
@@ -16068,75 +16063,110 @@ score).</p>
 <span class="normal"><a href="#__codelineno-0-2430">2430</a></span>
 <span class="normal"><a href="#__codelineno-0-2431">2431</a></span>
 <span class="normal"><a href="#__codelineno-0-2432">2432</a></span>
-<span class="normal"><a href="#__codelineno-0-2433">2433</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-2365" name="__codelineno-0-2365"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-2366" name="__codelineno-0-2366"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-2367" name="__codelineno-0-2367"></a>    <span class="n">element_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
-<a id="__codelineno-0-2368" name="__codelineno-0-2368"></a>    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-2369" name="__codelineno-0-2369"></a>    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-2370" name="__codelineno-0-2370"></a>    <span class="o">|</span> <span class="nb">int</span>
-<a id="__codelineno-0-2371" name="__codelineno-0-2371"></a>    <span class="o">|</span> <span class="nb">float</span>
-<a id="__codelineno-0-2372" name="__codelineno-0-2372"></a>    <span class="o">|</span> <span class="nb">bool</span>
-<a id="__codelineno-0-2373" name="__codelineno-0-2373"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
-<a id="__codelineno-0-2374" name="__codelineno-0-2374"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
-<a id="__codelineno-0-2375" name="__codelineno-0-2375"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
-<a id="__codelineno-0-2376" name="__codelineno-0-2376"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-2377" name="__codelineno-0-2377"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-2378" name="__codelineno-0-2378"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-2379" name="__codelineno-0-2379"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-2380" name="__codelineno-0-2380"></a><span class="p">):</span>
-<a id="__codelineno-0-2381" name="__codelineno-0-2381"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-2382" name="__codelineno-0-2382"></a>
-<a id="__codelineno-0-2383" name="__codelineno-0-2383"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-2384" name="__codelineno-0-2384"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-2385" name="__codelineno-0-2385"></a><span class="sd">    element_name : StringInput</span>
-<a id="__codelineno-0-2386" name="__codelineno-0-2386"></a><span class="sd">        One or more element QNames to match. When multiple QNames are specified, the</span>
-<a id="__codelineno-0-2387" name="__codelineno-0-2387"></a><span class="sd">        query matches if any QName matches.</span>
-<a id="__codelineno-0-2388" name="__codelineno-0-2388"></a><span class="sd">    operator : str | XqyExpression</span>
-<a id="__codelineno-0-2389" name="__codelineno-0-2389"></a><span class="sd">        A comparison operator. Operators include: &quot;&lt;&quot; Match range index values less</span>
-<a id="__codelineno-0-2390" name="__codelineno-0-2390"></a><span class="sd">        than $value. &quot;&lt;=&quot; Match range index values less than or equal to $value. &quot;&gt;&quot;</span>
-<a id="__codelineno-0-2391" name="__codelineno-0-2391"></a><span class="sd">        Match range index values greater than $value. &quot;&gt;=&quot; Match range index values</span>
-<a id="__codelineno-0-2392" name="__codelineno-0-2392"></a><span class="sd">        greater than or equal to $value. &quot;=&quot; Match range index values equal to</span>
-<a id="__codelineno-0-2393" name="__codelineno-0-2393"></a><span class="sd">        $value. &quot;!=&quot; Match range index values not equal to $value.</span>
-<a id="__codelineno-0-2394" name="__codelineno-0-2394"></a><span class="sd">    value : AtomicInput</span>
-<a id="__codelineno-0-2395" name="__codelineno-0-2395"></a><span class="sd">        One or more element values to match. When multiple values are specified, the</span>
-<a id="__codelineno-0-2396" name="__codelineno-0-2396"></a><span class="sd">        query matches if any value matches.</span>
-<a id="__codelineno-0-2397" name="__codelineno-0-2397"></a><span class="sd">    options : StringInput, optional</span>
-<a id="__codelineno-0-2398" name="__codelineno-0-2398"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;collation= URI &quot;</span>
-<a id="__codelineno-0-2399" name="__codelineno-0-2399"></a><span class="sd">        Use the range index with the collation specified by URI . If not specified,</span>
-<a id="__codelineno-0-2400" name="__codelineno-0-2400"></a><span class="sd">        then the default collation from the query is used. If a range index with the</span>
-<a id="__codelineno-0-2401" name="__codelineno-0-2401"></a><span class="sd">        specified collation does not exist, an error is thrown. &quot;cached&quot; Cache the</span>
-<a id="__codelineno-0-2402" name="__codelineno-0-2402"></a><span class="sd">        results of this query in the list cache. &quot;uncached&quot; Do not cache the results</span>
-<a id="__codelineno-0-2403" name="__codelineno-0-2403"></a><span class="sd">        of this query in the list cache. &quot;cached-incremental&quot; When querying on a</span>
-<a id="__codelineno-0-2404" name="__codelineno-0-2404"></a><span class="sd">        short date or dateTime range, break the query into sub-queries on smaller</span>
-<a id="__codelineno-0-2405" name="__codelineno-0-2405"></a><span class="sd">        ranges, and then cache the results of each. See the Usage Notes for details.</span>
-<a id="__codelineno-0-2406" name="__codelineno-0-2406"></a><span class="sd">        &quot;min-occurs= number &quot; Specifies the minimum number of occurrences required.</span>
-<a id="__codelineno-0-2407" name="__codelineno-0-2407"></a><span class="sd">        If fewer that this number of words occur, the fragment does not match. The</span>
-<a id="__codelineno-0-2408" name="__codelineno-0-2408"></a><span class="sd">        default is 1. &quot;max-occurs= number &quot; Specifies the maximum number of</span>
-<a id="__codelineno-0-2409" name="__codelineno-0-2409"></a><span class="sd">        occurrences required. If more than this number of words occur, the fragment</span>
-<a id="__codelineno-0-2410" name="__codelineno-0-2410"></a><span class="sd">        does not match. The default is unbounded. &quot;score-function= function &quot; Use</span>
-<a id="__codelineno-0-2411" name="__codelineno-0-2411"></a><span class="sd">        the selected scoring function. The score function may be: linear Use a</span>
-<a id="__codelineno-0-2412" name="__codelineno-0-2412"></a><span class="sd">        linear function of the difference between the specified query value and the</span>
-<a id="__codelineno-0-2413" name="__codelineno-0-2413"></a><span class="sd">        matching value in the index to calculate a score for this range query.</span>
-<a id="__codelineno-0-2414" name="__codelineno-0-2414"></a><span class="sd">        reciprocal Use a reciprocal function of the difference between the specified</span>
-<a id="__codelineno-0-2415" name="__codelineno-0-2415"></a><span class="sd">        query value and the matching value in the index to calculate a score for</span>
-<a id="__codelineno-0-2416" name="__codelineno-0-2416"></a><span class="sd">        this range query. zero This range query does not contribute to the score.</span>
-<a id="__codelineno-0-2417" name="__codelineno-0-2417"></a><span class="sd">        This is the default. &quot;slope-factor= number &quot; Apply the given number as a</span>
-<a id="__codelineno-0-2418" name="__codelineno-0-2418"></a><span class="sd">        scaling factor to the slope of the scoring function. The default is 1.0.</span>
-<a id="__codelineno-0-2419" name="__codelineno-0-2419"></a><span class="sd">        &quot;synonym&quot; Specifies that all of the terms in the $value parameter are</span>
-<a id="__codelineno-0-2420" name="__codelineno-0-2420"></a><span class="sd">        considered synonyms for scoring purposes. The result is that occurrences of</span>
-<a id="__codelineno-0-2421" name="__codelineno-0-2421"></a><span class="sd">        more than one of the synonyms are scored as if there are more occurrences of</span>
-<a id="__codelineno-0-2422" name="__codelineno-0-2422"></a><span class="sd">        the same term (as opposed to having a separate term that contributes to</span>
-<a id="__codelineno-0-2423" name="__codelineno-0-2423"></a><span class="sd">        score).</span>
-<a id="__codelineno-0-2424" name="__codelineno-0-2424"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
-<a id="__codelineno-0-2425" name="__codelineno-0-2425"></a><span class="sd">        A weight for this query. The default is 1.0.</span>
-<a id="__codelineno-0-2426" name="__codelineno-0-2426"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-2427" name="__codelineno-0-2427"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-2428" name="__codelineno-0-2428"></a>        <span class="n">element_name</span><span class="o">=</span><span class="n">as_qname</span><span class="p">(</span><span class="n">element_name</span><span class="p">),</span>
-<a id="__codelineno-0-2429" name="__codelineno-0-2429"></a>        <span class="n">operator</span><span class="o">=</span><span class="n">_operator_argument</span><span class="p">(</span><span class="n">operator</span><span class="p">),</span>
-<a id="__codelineno-0-2430" name="__codelineno-0-2430"></a>        <span class="n">value</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
-<a id="__codelineno-0-2431" name="__codelineno-0-2431"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-2432" name="__codelineno-0-2432"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-2433" name="__codelineno-0-2433"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-2433">2433</a></span>
+<span class="normal"><a href="#__codelineno-0-2434">2434</a></span>
+<span class="normal"><a href="#__codelineno-0-2435">2435</a></span>
+<span class="normal"><a href="#__codelineno-0-2436">2436</a></span>
+<span class="normal"><a href="#__codelineno-0-2437">2437</a></span>
+<span class="normal"><a href="#__codelineno-0-2438">2438</a></span>
+<span class="normal"><a href="#__codelineno-0-2439">2439</a></span>
+<span class="normal"><a href="#__codelineno-0-2440">2440</a></span>
+<span class="normal"><a href="#__codelineno-0-2441">2441</a></span>
+<span class="normal"><a href="#__codelineno-0-2442">2442</a></span>
+<span class="normal"><a href="#__codelineno-0-2443">2443</a></span>
+<span class="normal"><a href="#__codelineno-0-2444">2444</a></span>
+<span class="normal"><a href="#__codelineno-0-2445">2445</a></span>
+<span class="normal"><a href="#__codelineno-0-2446">2446</a></span>
+<span class="normal"><a href="#__codelineno-0-2447">2447</a></span>
+<span class="normal"><a href="#__codelineno-0-2448">2448</a></span>
+<span class="normal"><a href="#__codelineno-0-2449">2449</a></span>
+<span class="normal"><a href="#__codelineno-0-2450">2450</a></span>
+<span class="normal"><a href="#__codelineno-0-2451">2451</a></span>
+<span class="normal"><a href="#__codelineno-0-2452">2452</a></span>
+<span class="normal"><a href="#__codelineno-0-2453">2453</a></span>
+<span class="normal"><a href="#__codelineno-0-2454">2454</a></span>
+<span class="normal"><a href="#__codelineno-0-2455">2455</a></span>
+<span class="normal"><a href="#__codelineno-0-2456">2456</a></span>
+<span class="normal"><a href="#__codelineno-0-2457">2457</a></span>
+<span class="normal"><a href="#__codelineno-0-2458">2458</a></span>
+<span class="normal"><a href="#__codelineno-0-2459">2459</a></span>
+<span class="normal"><a href="#__codelineno-0-2460">2460</a></span>
+<span class="normal"><a href="#__codelineno-0-2461">2461</a></span>
+<span class="normal"><a href="#__codelineno-0-2462">2462</a></span>
+<span class="normal"><a href="#__codelineno-0-2463">2463</a></span>
+<span class="normal"><a href="#__codelineno-0-2464">2464</a></span>
+<span class="normal"><a href="#__codelineno-0-2465">2465</a></span>
+<span class="normal"><a href="#__codelineno-0-2466">2466</a></span>
+<span class="normal"><a href="#__codelineno-0-2467">2467</a></span>
+<span class="normal"><a href="#__codelineno-0-2468">2468</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-2400" name="__codelineno-0-2400"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-2401" name="__codelineno-0-2401"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-2402" name="__codelineno-0-2402"></a>    <span class="n">element_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
+<a id="__codelineno-0-2403" name="__codelineno-0-2403"></a>    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-2404" name="__codelineno-0-2404"></a>    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-2405" name="__codelineno-0-2405"></a>    <span class="o">|</span> <span class="nb">int</span>
+<a id="__codelineno-0-2406" name="__codelineno-0-2406"></a>    <span class="o">|</span> <span class="nb">float</span>
+<a id="__codelineno-0-2407" name="__codelineno-0-2407"></a>    <span class="o">|</span> <span class="nb">bool</span>
+<a id="__codelineno-0-2408" name="__codelineno-0-2408"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
+<a id="__codelineno-0-2409" name="__codelineno-0-2409"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
+<a id="__codelineno-0-2410" name="__codelineno-0-2410"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
+<a id="__codelineno-0-2411" name="__codelineno-0-2411"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-2412" name="__codelineno-0-2412"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-2413" name="__codelineno-0-2413"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-2414" name="__codelineno-0-2414"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-2415" name="__codelineno-0-2415"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-2416" name="__codelineno-0-2416"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-2417" name="__codelineno-0-2417"></a>
+<a id="__codelineno-0-2418" name="__codelineno-0-2418"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-2419" name="__codelineno-0-2419"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-2420" name="__codelineno-0-2420"></a><span class="sd">    element_name : StringInput</span>
+<a id="__codelineno-0-2421" name="__codelineno-0-2421"></a><span class="sd">        One or more element QNames to match. When multiple QNames are specified, the</span>
+<a id="__codelineno-0-2422" name="__codelineno-0-2422"></a><span class="sd">        query matches if any QName matches.</span>
+<a id="__codelineno-0-2423" name="__codelineno-0-2423"></a><span class="sd">    operator : str | XqyExpression</span>
+<a id="__codelineno-0-2424" name="__codelineno-0-2424"></a><span class="sd">        A comparison operator. Operators include: &quot;&lt;&quot; Match range index values less</span>
+<a id="__codelineno-0-2425" name="__codelineno-0-2425"></a><span class="sd">        than $value. &quot;&lt;=&quot; Match range index values less than or equal to $value. &quot;&gt;&quot;</span>
+<a id="__codelineno-0-2426" name="__codelineno-0-2426"></a><span class="sd">        Match range index values greater than $value. &quot;&gt;=&quot; Match range index values</span>
+<a id="__codelineno-0-2427" name="__codelineno-0-2427"></a><span class="sd">        greater than or equal to $value. &quot;=&quot; Match range index values equal to</span>
+<a id="__codelineno-0-2428" name="__codelineno-0-2428"></a><span class="sd">        $value. &quot;!=&quot; Match range index values not equal to $value.</span>
+<a id="__codelineno-0-2429" name="__codelineno-0-2429"></a><span class="sd">    value : AtomicInput</span>
+<a id="__codelineno-0-2430" name="__codelineno-0-2430"></a><span class="sd">        One or more element values to match. When multiple values are specified, the</span>
+<a id="__codelineno-0-2431" name="__codelineno-0-2431"></a><span class="sd">        query matches if any value matches.</span>
+<a id="__codelineno-0-2432" name="__codelineno-0-2432"></a><span class="sd">    options : StringInput, optional</span>
+<a id="__codelineno-0-2433" name="__codelineno-0-2433"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;collation= URI &quot;</span>
+<a id="__codelineno-0-2434" name="__codelineno-0-2434"></a><span class="sd">        Use the range index with the collation specified by URI . If not specified,</span>
+<a id="__codelineno-0-2435" name="__codelineno-0-2435"></a><span class="sd">        then the default collation from the query is used. If a range index with the</span>
+<a id="__codelineno-0-2436" name="__codelineno-0-2436"></a><span class="sd">        specified collation does not exist, an error is thrown. &quot;cached&quot; Cache the</span>
+<a id="__codelineno-0-2437" name="__codelineno-0-2437"></a><span class="sd">        results of this query in the list cache. &quot;uncached&quot; Do not cache the results</span>
+<a id="__codelineno-0-2438" name="__codelineno-0-2438"></a><span class="sd">        of this query in the list cache. &quot;cached-incremental&quot; When querying on a</span>
+<a id="__codelineno-0-2439" name="__codelineno-0-2439"></a><span class="sd">        short date or dateTime range, break the query into sub-queries on smaller</span>
+<a id="__codelineno-0-2440" name="__codelineno-0-2440"></a><span class="sd">        ranges, and then cache the results of each. See the Usage Notes for details.</span>
+<a id="__codelineno-0-2441" name="__codelineno-0-2441"></a><span class="sd">        &quot;min-occurs= number &quot; Specifies the minimum number of occurrences required.</span>
+<a id="__codelineno-0-2442" name="__codelineno-0-2442"></a><span class="sd">        If fewer that this number of words occur, the fragment does not match. The</span>
+<a id="__codelineno-0-2443" name="__codelineno-0-2443"></a><span class="sd">        default is 1. &quot;max-occurs= number &quot; Specifies the maximum number of</span>
+<a id="__codelineno-0-2444" name="__codelineno-0-2444"></a><span class="sd">        occurrences required. If more than this number of words occur, the fragment</span>
+<a id="__codelineno-0-2445" name="__codelineno-0-2445"></a><span class="sd">        does not match. The default is unbounded. &quot;score-function= function &quot; Use</span>
+<a id="__codelineno-0-2446" name="__codelineno-0-2446"></a><span class="sd">        the selected scoring function. The score function may be: linear Use a</span>
+<a id="__codelineno-0-2447" name="__codelineno-0-2447"></a><span class="sd">        linear function of the difference between the specified query value and the</span>
+<a id="__codelineno-0-2448" name="__codelineno-0-2448"></a><span class="sd">        matching value in the index to calculate a score for this range query.</span>
+<a id="__codelineno-0-2449" name="__codelineno-0-2449"></a><span class="sd">        reciprocal Use a reciprocal function of the difference between the specified</span>
+<a id="__codelineno-0-2450" name="__codelineno-0-2450"></a><span class="sd">        query value and the matching value in the index to calculate a score for</span>
+<a id="__codelineno-0-2451" name="__codelineno-0-2451"></a><span class="sd">        this range query. zero This range query does not contribute to the score.</span>
+<a id="__codelineno-0-2452" name="__codelineno-0-2452"></a><span class="sd">        This is the default. &quot;slope-factor= number &quot; Apply the given number as a</span>
+<a id="__codelineno-0-2453" name="__codelineno-0-2453"></a><span class="sd">        scaling factor to the slope of the scoring function. The default is 1.0.</span>
+<a id="__codelineno-0-2454" name="__codelineno-0-2454"></a><span class="sd">        &quot;synonym&quot; Specifies that all of the terms in the $value parameter are</span>
+<a id="__codelineno-0-2455" name="__codelineno-0-2455"></a><span class="sd">        considered synonyms for scoring purposes. The result is that occurrences of</span>
+<a id="__codelineno-0-2456" name="__codelineno-0-2456"></a><span class="sd">        more than one of the synonyms are scored as if there are more occurrences of</span>
+<a id="__codelineno-0-2457" name="__codelineno-0-2457"></a><span class="sd">        the same term (as opposed to having a separate term that contributes to</span>
+<a id="__codelineno-0-2458" name="__codelineno-0-2458"></a><span class="sd">        score).</span>
+<a id="__codelineno-0-2459" name="__codelineno-0-2459"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
+<a id="__codelineno-0-2460" name="__codelineno-0-2460"></a><span class="sd">        A weight for this query. The default is 1.0.</span>
+<a id="__codelineno-0-2461" name="__codelineno-0-2461"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-2462" name="__codelineno-0-2462"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-2463" name="__codelineno-0-2463"></a>        <span class="n">element_name</span><span class="o">=</span><span class="n">as_qname</span><span class="p">(</span><span class="n">element_name</span><span class="p">),</span>
+<a id="__codelineno-0-2464" name="__codelineno-0-2464"></a>        <span class="n">operator</span><span class="o">=</span><span class="n">_operator_argument</span><span class="p">(</span><span class="n">operator</span><span class="p">),</span>
+<a id="__codelineno-0-2465" name="__codelineno-0-2465"></a>        <span class="n">value</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+<a id="__codelineno-0-2466" name="__codelineno-0-2466"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-2467" name="__codelineno-0-2467"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-2468" name="__codelineno-0-2468"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

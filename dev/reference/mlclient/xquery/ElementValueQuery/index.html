@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15973,42 +16003,7 @@ are rounded to 0, which means that they do not contribute to the score.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-2479">2479</a></span>
-<span class="normal"><a href="#__codelineno-0-2480">2480</a></span>
-<span class="normal"><a href="#__codelineno-0-2481">2481</a></span>
-<span class="normal"><a href="#__codelineno-0-2482">2482</a></span>
-<span class="normal"><a href="#__codelineno-0-2483">2483</a></span>
-<span class="normal"><a href="#__codelineno-0-2484">2484</a></span>
-<span class="normal"><a href="#__codelineno-0-2485">2485</a></span>
-<span class="normal"><a href="#__codelineno-0-2486">2486</a></span>
-<span class="normal"><a href="#__codelineno-0-2487">2487</a></span>
-<span class="normal"><a href="#__codelineno-0-2488">2488</a></span>
-<span class="normal"><a href="#__codelineno-0-2489">2489</a></span>
-<span class="normal"><a href="#__codelineno-0-2490">2490</a></span>
-<span class="normal"><a href="#__codelineno-0-2491">2491</a></span>
-<span class="normal"><a href="#__codelineno-0-2492">2492</a></span>
-<span class="normal"><a href="#__codelineno-0-2493">2493</a></span>
-<span class="normal"><a href="#__codelineno-0-2494">2494</a></span>
-<span class="normal"><a href="#__codelineno-0-2495">2495</a></span>
-<span class="normal"><a href="#__codelineno-0-2496">2496</a></span>
-<span class="normal"><a href="#__codelineno-0-2497">2497</a></span>
-<span class="normal"><a href="#__codelineno-0-2498">2498</a></span>
-<span class="normal"><a href="#__codelineno-0-2499">2499</a></span>
-<span class="normal"><a href="#__codelineno-0-2500">2500</a></span>
-<span class="normal"><a href="#__codelineno-0-2501">2501</a></span>
-<span class="normal"><a href="#__codelineno-0-2502">2502</a></span>
-<span class="normal"><a href="#__codelineno-0-2503">2503</a></span>
-<span class="normal"><a href="#__codelineno-0-2504">2504</a></span>
-<span class="normal"><a href="#__codelineno-0-2505">2505</a></span>
-<span class="normal"><a href="#__codelineno-0-2506">2506</a></span>
-<span class="normal"><a href="#__codelineno-0-2507">2507</a></span>
-<span class="normal"><a href="#__codelineno-0-2508">2508</a></span>
-<span class="normal"><a href="#__codelineno-0-2509">2509</a></span>
-<span class="normal"><a href="#__codelineno-0-2510">2510</a></span>
-<span class="normal"><a href="#__codelineno-0-2511">2511</a></span>
-<span class="normal"><a href="#__codelineno-0-2512">2512</a></span>
-<span class="normal"><a href="#__codelineno-0-2513">2513</a></span>
-<span class="normal"><a href="#__codelineno-0-2514">2514</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-2514">2514</a></span>
 <span class="normal"><a href="#__codelineno-0-2515">2515</a></span>
 <span class="normal"><a href="#__codelineno-0-2516">2516</a></span>
 <span class="normal"><a href="#__codelineno-0-2517">2517</a></span>
@@ -16027,61 +16022,96 @@ are rounded to 0, which means that they do not contribute to the score.</p>
 <span class="normal"><a href="#__codelineno-0-2530">2530</a></span>
 <span class="normal"><a href="#__codelineno-0-2531">2531</a></span>
 <span class="normal"><a href="#__codelineno-0-2532">2532</a></span>
-<span class="normal"><a href="#__codelineno-0-2533">2533</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-2479" name="__codelineno-0-2479"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-2480" name="__codelineno-0-2480"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-2481" name="__codelineno-0-2481"></a>    <span class="n">element_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
-<a id="__codelineno-0-2482" name="__codelineno-0-2482"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-2483" name="__codelineno-0-2483"></a>    <span class="n">text</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-2484" name="__codelineno-0-2484"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-2485" name="__codelineno-0-2485"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-2486" name="__codelineno-0-2486"></a><span class="p">):</span>
-<a id="__codelineno-0-2487" name="__codelineno-0-2487"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-2488" name="__codelineno-0-2488"></a>
-<a id="__codelineno-0-2489" name="__codelineno-0-2489"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-2490" name="__codelineno-0-2490"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-2491" name="__codelineno-0-2491"></a><span class="sd">    element_name : StringInput</span>
-<a id="__codelineno-0-2492" name="__codelineno-0-2492"></a><span class="sd">        One or more element QNames to match. When multiple QNames are specified, the</span>
-<a id="__codelineno-0-2493" name="__codelineno-0-2493"></a><span class="sd">        query matches if any QName matches.</span>
-<a id="__codelineno-0-2494" name="__codelineno-0-2494"></a><span class="sd">    text : StringInput, optional</span>
-<a id="__codelineno-0-2495" name="__codelineno-0-2495"></a><span class="sd">        One or more element values to match. When multiple strings are specified,</span>
-<a id="__codelineno-0-2496" name="__codelineno-0-2496"></a><span class="sd">        the query matches if any string matches.</span>
-<a id="__codelineno-0-2497" name="__codelineno-0-2497"></a><span class="sd">    options : StringInput, optional</span>
-<a id="__codelineno-0-2498" name="__codelineno-0-2498"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;case-sensitive&quot;</span>
-<a id="__codelineno-0-2499" name="__codelineno-0-2499"></a><span class="sd">        A case-sensitive query. &quot;case-insensitive&quot; A case-insensitive query.</span>
-<a id="__codelineno-0-2500" name="__codelineno-0-2500"></a><span class="sd">        &quot;diacritic-sensitive&quot; A diacritic-sensitive query. &quot;diacritic-insensitive&quot; A</span>
-<a id="__codelineno-0-2501" name="__codelineno-0-2501"></a><span class="sd">        diacritic-insensitive query. &quot;punctuation-sensitive&quot; A punctuation-sensitive</span>
-<a id="__codelineno-0-2502" name="__codelineno-0-2502"></a><span class="sd">        query. &quot;punctuation-insensitive&quot; A punctuation-insensitive query.</span>
-<a id="__codelineno-0-2503" name="__codelineno-0-2503"></a><span class="sd">        &quot;whitespace-sensitive&quot; A whitespace-sensitive query.</span>
-<a id="__codelineno-0-2504" name="__codelineno-0-2504"></a><span class="sd">        &quot;whitespace-insensitive&quot; A whitespace-insensitive query. &quot;stemmed&quot; A stemmed</span>
-<a id="__codelineno-0-2505" name="__codelineno-0-2505"></a><span class="sd">        query. &quot;unstemmed&quot; An unstemmed query. &quot;wildcarded&quot; A wildcarded query.</span>
-<a id="__codelineno-0-2506" name="__codelineno-0-2506"></a><span class="sd">        &quot;unwildcarded&quot; An unwildcarded query. &quot;exact&quot; An exact match query.</span>
-<a id="__codelineno-0-2507" name="__codelineno-0-2507"></a><span class="sd">        Shorthand for &quot;case-sensitive&quot;, &quot;diacritic-sensitive&quot;,</span>
-<a id="__codelineno-0-2508" name="__codelineno-0-2508"></a><span class="sd">        &quot;punctuation-sensitive&quot;, &quot;whitespace-sensitive&quot;, &quot;unstemmed&quot;, and</span>
-<a id="__codelineno-0-2509" name="__codelineno-0-2509"></a><span class="sd">        &quot;unwildcarded&quot;. &quot;lang= iso639code &quot; Specifies the language of the query. The</span>
-<a id="__codelineno-0-2510" name="__codelineno-0-2510"></a><span class="sd">        iso639code code portion is case-insensitive, and uses the languages</span>
-<a id="__codelineno-0-2511" name="__codelineno-0-2511"></a><span class="sd">        specified by ISO 639 . The default is specified in the database</span>
-<a id="__codelineno-0-2512" name="__codelineno-0-2512"></a><span class="sd">        configuration. &quot;min-occurs= number &quot; Specifies the minimum number of</span>
-<a id="__codelineno-0-2513" name="__codelineno-0-2513"></a><span class="sd">        occurrences required. If fewer that this number of words occur, the fragment</span>
-<a id="__codelineno-0-2514" name="__codelineno-0-2514"></a><span class="sd">        does not match. The default is 1. &quot;max-occurs= number &quot; Specifies the</span>
-<a id="__codelineno-0-2515" name="__codelineno-0-2515"></a><span class="sd">        maximum number of occurrences required. If more than this number of words</span>
-<a id="__codelineno-0-2516" name="__codelineno-0-2516"></a><span class="sd">        occur, the fragment does not match. The default is unbounded. &quot;synonym&quot;</span>
-<a id="__codelineno-0-2517" name="__codelineno-0-2517"></a><span class="sd">        Specifies that all of the terms in the $text parameter are considered</span>
-<a id="__codelineno-0-2518" name="__codelineno-0-2518"></a><span class="sd">        synonyms for scoring purposes. The result is that occurrences of more than</span>
-<a id="__codelineno-0-2519" name="__codelineno-0-2519"></a><span class="sd">        one of the synonyms are scored as if there are more occurrences of the same</span>
-<a id="__codelineno-0-2520" name="__codelineno-0-2520"></a><span class="sd">        term (as opposed to having a separate term that contributes to score).</span>
-<a id="__codelineno-0-2521" name="__codelineno-0-2521"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
-<a id="__codelineno-0-2522" name="__codelineno-0-2522"></a><span class="sd">        A weight for this query. Higher weights move search results up in the</span>
-<a id="__codelineno-0-2523" name="__codelineno-0-2523"></a><span class="sd">        relevance order. The default is 1.0. The weight should be between 64 and</span>
-<a id="__codelineno-0-2524" name="__codelineno-0-2524"></a><span class="sd">        -16. Weights greater than 64 will have the same effect as a weight of 64.</span>
-<a id="__codelineno-0-2525" name="__codelineno-0-2525"></a><span class="sd">        Weights less than the absolute value of 0.0625 (between -0.0625 and 0.0625)</span>
-<a id="__codelineno-0-2526" name="__codelineno-0-2526"></a><span class="sd">        are rounded to 0, which means that they do not contribute to the score.</span>
-<a id="__codelineno-0-2527" name="__codelineno-0-2527"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-2528" name="__codelineno-0-2528"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-2529" name="__codelineno-0-2529"></a>        <span class="n">element_name</span><span class="o">=</span><span class="n">as_qname</span><span class="p">(</span><span class="n">element_name</span><span class="p">),</span>
-<a id="__codelineno-0-2530" name="__codelineno-0-2530"></a>        <span class="n">text</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
-<a id="__codelineno-0-2531" name="__codelineno-0-2531"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-2532" name="__codelineno-0-2532"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-2533" name="__codelineno-0-2533"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-2533">2533</a></span>
+<span class="normal"><a href="#__codelineno-0-2534">2534</a></span>
+<span class="normal"><a href="#__codelineno-0-2535">2535</a></span>
+<span class="normal"><a href="#__codelineno-0-2536">2536</a></span>
+<span class="normal"><a href="#__codelineno-0-2537">2537</a></span>
+<span class="normal"><a href="#__codelineno-0-2538">2538</a></span>
+<span class="normal"><a href="#__codelineno-0-2539">2539</a></span>
+<span class="normal"><a href="#__codelineno-0-2540">2540</a></span>
+<span class="normal"><a href="#__codelineno-0-2541">2541</a></span>
+<span class="normal"><a href="#__codelineno-0-2542">2542</a></span>
+<span class="normal"><a href="#__codelineno-0-2543">2543</a></span>
+<span class="normal"><a href="#__codelineno-0-2544">2544</a></span>
+<span class="normal"><a href="#__codelineno-0-2545">2545</a></span>
+<span class="normal"><a href="#__codelineno-0-2546">2546</a></span>
+<span class="normal"><a href="#__codelineno-0-2547">2547</a></span>
+<span class="normal"><a href="#__codelineno-0-2548">2548</a></span>
+<span class="normal"><a href="#__codelineno-0-2549">2549</a></span>
+<span class="normal"><a href="#__codelineno-0-2550">2550</a></span>
+<span class="normal"><a href="#__codelineno-0-2551">2551</a></span>
+<span class="normal"><a href="#__codelineno-0-2552">2552</a></span>
+<span class="normal"><a href="#__codelineno-0-2553">2553</a></span>
+<span class="normal"><a href="#__codelineno-0-2554">2554</a></span>
+<span class="normal"><a href="#__codelineno-0-2555">2555</a></span>
+<span class="normal"><a href="#__codelineno-0-2556">2556</a></span>
+<span class="normal"><a href="#__codelineno-0-2557">2557</a></span>
+<span class="normal"><a href="#__codelineno-0-2558">2558</a></span>
+<span class="normal"><a href="#__codelineno-0-2559">2559</a></span>
+<span class="normal"><a href="#__codelineno-0-2560">2560</a></span>
+<span class="normal"><a href="#__codelineno-0-2561">2561</a></span>
+<span class="normal"><a href="#__codelineno-0-2562">2562</a></span>
+<span class="normal"><a href="#__codelineno-0-2563">2563</a></span>
+<span class="normal"><a href="#__codelineno-0-2564">2564</a></span>
+<span class="normal"><a href="#__codelineno-0-2565">2565</a></span>
+<span class="normal"><a href="#__codelineno-0-2566">2566</a></span>
+<span class="normal"><a href="#__codelineno-0-2567">2567</a></span>
+<span class="normal"><a href="#__codelineno-0-2568">2568</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-2514" name="__codelineno-0-2514"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-2515" name="__codelineno-0-2515"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-2516" name="__codelineno-0-2516"></a>    <span class="n">element_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
+<a id="__codelineno-0-2517" name="__codelineno-0-2517"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-2518" name="__codelineno-0-2518"></a>    <span class="n">text</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-2519" name="__codelineno-0-2519"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-2520" name="__codelineno-0-2520"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-2521" name="__codelineno-0-2521"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-2522" name="__codelineno-0-2522"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-2523" name="__codelineno-0-2523"></a>
+<a id="__codelineno-0-2524" name="__codelineno-0-2524"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-2525" name="__codelineno-0-2525"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-2526" name="__codelineno-0-2526"></a><span class="sd">    element_name : StringInput</span>
+<a id="__codelineno-0-2527" name="__codelineno-0-2527"></a><span class="sd">        One or more element QNames to match. When multiple QNames are specified, the</span>
+<a id="__codelineno-0-2528" name="__codelineno-0-2528"></a><span class="sd">        query matches if any QName matches.</span>
+<a id="__codelineno-0-2529" name="__codelineno-0-2529"></a><span class="sd">    text : StringInput, optional</span>
+<a id="__codelineno-0-2530" name="__codelineno-0-2530"></a><span class="sd">        One or more element values to match. When multiple strings are specified,</span>
+<a id="__codelineno-0-2531" name="__codelineno-0-2531"></a><span class="sd">        the query matches if any string matches.</span>
+<a id="__codelineno-0-2532" name="__codelineno-0-2532"></a><span class="sd">    options : StringInput, optional</span>
+<a id="__codelineno-0-2533" name="__codelineno-0-2533"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;case-sensitive&quot;</span>
+<a id="__codelineno-0-2534" name="__codelineno-0-2534"></a><span class="sd">        A case-sensitive query. &quot;case-insensitive&quot; A case-insensitive query.</span>
+<a id="__codelineno-0-2535" name="__codelineno-0-2535"></a><span class="sd">        &quot;diacritic-sensitive&quot; A diacritic-sensitive query. &quot;diacritic-insensitive&quot; A</span>
+<a id="__codelineno-0-2536" name="__codelineno-0-2536"></a><span class="sd">        diacritic-insensitive query. &quot;punctuation-sensitive&quot; A punctuation-sensitive</span>
+<a id="__codelineno-0-2537" name="__codelineno-0-2537"></a><span class="sd">        query. &quot;punctuation-insensitive&quot; A punctuation-insensitive query.</span>
+<a id="__codelineno-0-2538" name="__codelineno-0-2538"></a><span class="sd">        &quot;whitespace-sensitive&quot; A whitespace-sensitive query.</span>
+<a id="__codelineno-0-2539" name="__codelineno-0-2539"></a><span class="sd">        &quot;whitespace-insensitive&quot; A whitespace-insensitive query. &quot;stemmed&quot; A stemmed</span>
+<a id="__codelineno-0-2540" name="__codelineno-0-2540"></a><span class="sd">        query. &quot;unstemmed&quot; An unstemmed query. &quot;wildcarded&quot; A wildcarded query.</span>
+<a id="__codelineno-0-2541" name="__codelineno-0-2541"></a><span class="sd">        &quot;unwildcarded&quot; An unwildcarded query. &quot;exact&quot; An exact match query.</span>
+<a id="__codelineno-0-2542" name="__codelineno-0-2542"></a><span class="sd">        Shorthand for &quot;case-sensitive&quot;, &quot;diacritic-sensitive&quot;,</span>
+<a id="__codelineno-0-2543" name="__codelineno-0-2543"></a><span class="sd">        &quot;punctuation-sensitive&quot;, &quot;whitespace-sensitive&quot;, &quot;unstemmed&quot;, and</span>
+<a id="__codelineno-0-2544" name="__codelineno-0-2544"></a><span class="sd">        &quot;unwildcarded&quot;. &quot;lang= iso639code &quot; Specifies the language of the query. The</span>
+<a id="__codelineno-0-2545" name="__codelineno-0-2545"></a><span class="sd">        iso639code code portion is case-insensitive, and uses the languages</span>
+<a id="__codelineno-0-2546" name="__codelineno-0-2546"></a><span class="sd">        specified by ISO 639 . The default is specified in the database</span>
+<a id="__codelineno-0-2547" name="__codelineno-0-2547"></a><span class="sd">        configuration. &quot;min-occurs= number &quot; Specifies the minimum number of</span>
+<a id="__codelineno-0-2548" name="__codelineno-0-2548"></a><span class="sd">        occurrences required. If fewer that this number of words occur, the fragment</span>
+<a id="__codelineno-0-2549" name="__codelineno-0-2549"></a><span class="sd">        does not match. The default is 1. &quot;max-occurs= number &quot; Specifies the</span>
+<a id="__codelineno-0-2550" name="__codelineno-0-2550"></a><span class="sd">        maximum number of occurrences required. If more than this number of words</span>
+<a id="__codelineno-0-2551" name="__codelineno-0-2551"></a><span class="sd">        occur, the fragment does not match. The default is unbounded. &quot;synonym&quot;</span>
+<a id="__codelineno-0-2552" name="__codelineno-0-2552"></a><span class="sd">        Specifies that all of the terms in the $text parameter are considered</span>
+<a id="__codelineno-0-2553" name="__codelineno-0-2553"></a><span class="sd">        synonyms for scoring purposes. The result is that occurrences of more than</span>
+<a id="__codelineno-0-2554" name="__codelineno-0-2554"></a><span class="sd">        one of the synonyms are scored as if there are more occurrences of the same</span>
+<a id="__codelineno-0-2555" name="__codelineno-0-2555"></a><span class="sd">        term (as opposed to having a separate term that contributes to score).</span>
+<a id="__codelineno-0-2556" name="__codelineno-0-2556"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
+<a id="__codelineno-0-2557" name="__codelineno-0-2557"></a><span class="sd">        A weight for this query. Higher weights move search results up in the</span>
+<a id="__codelineno-0-2558" name="__codelineno-0-2558"></a><span class="sd">        relevance order. The default is 1.0. The weight should be between 64 and</span>
+<a id="__codelineno-0-2559" name="__codelineno-0-2559"></a><span class="sd">        -16. Weights greater than 64 will have the same effect as a weight of 64.</span>
+<a id="__codelineno-0-2560" name="__codelineno-0-2560"></a><span class="sd">        Weights less than the absolute value of 0.0625 (between -0.0625 and 0.0625)</span>
+<a id="__codelineno-0-2561" name="__codelineno-0-2561"></a><span class="sd">        are rounded to 0, which means that they do not contribute to the score.</span>
+<a id="__codelineno-0-2562" name="__codelineno-0-2562"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-2563" name="__codelineno-0-2563"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-2564" name="__codelineno-0-2564"></a>        <span class="n">element_name</span><span class="o">=</span><span class="n">as_qname</span><span class="p">(</span><span class="n">element_name</span><span class="p">),</span>
+<a id="__codelineno-0-2565" name="__codelineno-0-2565"></a>        <span class="n">text</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
+<a id="__codelineno-0-2566" name="__codelineno-0-2566"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-2567" name="__codelineno-0-2567"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-2568" name="__codelineno-0-2568"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

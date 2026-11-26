@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16267,7 +16297,7 @@
 <a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="n">doc_type</span><span class="p">:</span> <span class="n">DocumentType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
 <a id="__codelineno-0-54" name="__codelineno-0-54"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="p">):</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize Document instance.</span>
 <a id="__codelineno-0-58" name="__codelineno-0-58"></a>
 <a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">    Parameters</span>
@@ -16314,7 +16344,7 @@
   </span>
 
 <a href="#mlclient.models.Document.content" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">content</span><span class="p">:</span> <span class="n">Any</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">content</span><span class="p">:</span> <span class="n">ElementTree</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16336,7 +16366,7 @@ return type (<code>ElemTree.ElementTree</code>, <code>dict</code>, <code>str</co
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><span title="xml.etree.ElementTree.ElementTree">ElementTree</span> | <span title="dict">dict</span> | <span title="str">str</span> | <span title="bytes">bytes</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16496,7 +16526,7 @@ metadata-only documents.</p>
   </span>
 
 <a href="#mlclient.models.Document.metadata" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16544,7 +16574,7 @@ metadata-only documents.</p>
   </span>
 
 <a href="#mlclient.models.Document.uri" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

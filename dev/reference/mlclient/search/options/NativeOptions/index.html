@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16005,49 +16035,55 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/search/options.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1307">1307</a></span>
-<span class="normal"><a href="#__codelineno-0-1308">1308</a></span>
-<span class="normal"><a href="#__codelineno-0-1309">1309</a></span>
-<span class="normal"><a href="#__codelineno-0-1310">1310</a></span>
-<span class="normal"><a href="#__codelineno-0-1311">1311</a></span>
-<span class="normal"><a href="#__codelineno-0-1312">1312</a></span>
-<span class="normal"><a href="#__codelineno-0-1313">1313</a></span>
-<span class="normal"><a href="#__codelineno-0-1314">1314</a></span>
-<span class="normal"><a href="#__codelineno-0-1315">1315</a></span>
-<span class="normal"><a href="#__codelineno-0-1316">1316</a></span>
-<span class="normal"><a href="#__codelineno-0-1317">1317</a></span>
-<span class="normal"><a href="#__codelineno-0-1318">1318</a></span>
-<span class="normal"><a href="#__codelineno-0-1319">1319</a></span>
-<span class="normal"><a href="#__codelineno-0-1320">1320</a></span>
-<span class="normal"><a href="#__codelineno-0-1321">1321</a></span>
-<span class="normal"><a href="#__codelineno-0-1322">1322</a></span>
-<span class="normal"><a href="#__codelineno-0-1323">1323</a></span>
-<span class="normal"><a href="#__codelineno-0-1324">1324</a></span>
-<span class="normal"><a href="#__codelineno-0-1325">1325</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1325">1325</a></span>
 <span class="normal"><a href="#__codelineno-0-1326">1326</a></span>
 <span class="normal"><a href="#__codelineno-0-1327">1327</a></span>
-<span class="normal"><a href="#__codelineno-0-1328">1328</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1307" name="__codelineno-0-1307"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definition</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="n">elements</span><span class="p">:</span> <span class="n">XmlElement</span><span class="p">):</span>
-<a id="__codelineno-0-1308" name="__codelineno-0-1308"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot independent native forms for reuse in option compositions.</span>
-<a id="__codelineno-0-1309" name="__codelineno-0-1309"></a>
-<a id="__codelineno-0-1310" name="__codelineno-0-1310"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1311" name="__codelineno-0-1311"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1312" name="__codelineno-0-1312"></a><span class="sd">    definition : dict</span>
-<a id="__codelineno-0-1313" name="__codelineno-0-1313"></a><span class="sd">        JSON options members.</span>
-<a id="__codelineno-0-1314" name="__codelineno-0-1314"></a><span class="sd">    *elements : xml.etree.ElementTree.Element</span>
-<a id="__codelineno-0-1315" name="__codelineno-0-1315"></a><span class="sd">        Corresponding XML children in the Search API namespace.</span>
-<a id="__codelineno-0-1316" name="__codelineno-0-1316"></a>
-<a id="__codelineno-0-1317" name="__codelineno-0-1317"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-1318" name="__codelineno-0-1318"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-1319" name="__codelineno-0-1319"></a><span class="sd">    ValueError</span>
-<a id="__codelineno-0-1320" name="__codelineno-0-1320"></a><span class="sd">        If native names, namespaces or definition counts do not match.</span>
-<a id="__codelineno-0-1321" name="__codelineno-0-1321"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1322" name="__codelineno-0-1322"></a>    <span class="n">matched</span> <span class="o">=</span> <span class="n">_pair_native_definitions</span><span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
-<a id="__codelineno-0-1323" name="__codelineno-0-1323"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-1324" name="__codelineno-0-1324"></a>        <span class="o">*</span><span class="p">(</span>
-<a id="__codelineno-0-1325" name="__codelineno-0-1325"></a>            <span class="n">NativeOption</span><span class="p">({</span><span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">member</span><span class="o">.</span><span class="n">native</span><span class="p">[</span><span class="mi">0</span><span class="p">]},</span> <span class="n">member</span><span class="o">.</span><span class="n">native</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<a id="__codelineno-0-1326" name="__codelineno-0-1326"></a>            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">matched</span>
-<a id="__codelineno-0-1327" name="__codelineno-0-1327"></a>        <span class="p">),</span>
-<a id="__codelineno-0-1328" name="__codelineno-0-1328"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-1328">1328</a></span>
+<span class="normal"><a href="#__codelineno-0-1329">1329</a></span>
+<span class="normal"><a href="#__codelineno-0-1330">1330</a></span>
+<span class="normal"><a href="#__codelineno-0-1331">1331</a></span>
+<span class="normal"><a href="#__codelineno-0-1332">1332</a></span>
+<span class="normal"><a href="#__codelineno-0-1333">1333</a></span>
+<span class="normal"><a href="#__codelineno-0-1334">1334</a></span>
+<span class="normal"><a href="#__codelineno-0-1335">1335</a></span>
+<span class="normal"><a href="#__codelineno-0-1336">1336</a></span>
+<span class="normal"><a href="#__codelineno-0-1337">1337</a></span>
+<span class="normal"><a href="#__codelineno-0-1338">1338</a></span>
+<span class="normal"><a href="#__codelineno-0-1339">1339</a></span>
+<span class="normal"><a href="#__codelineno-0-1340">1340</a></span>
+<span class="normal"><a href="#__codelineno-0-1341">1341</a></span>
+<span class="normal"><a href="#__codelineno-0-1342">1342</a></span>
+<span class="normal"><a href="#__codelineno-0-1343">1343</a></span>
+<span class="normal"><a href="#__codelineno-0-1344">1344</a></span>
+<span class="normal"><a href="#__codelineno-0-1345">1345</a></span>
+<span class="normal"><a href="#__codelineno-0-1346">1346</a></span>
+<span class="normal"><a href="#__codelineno-0-1347">1347</a></span>
+<span class="normal"><a href="#__codelineno-0-1348">1348</a></span>
+<span class="normal"><a href="#__codelineno-0-1349">1349</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1325" name="__codelineno-0-1325"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definition</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="n">elements</span><span class="p">:</span> <span class="n">XmlElement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1326" name="__codelineno-0-1326"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot independent native forms for reuse in option compositions.</span>
+<a id="__codelineno-0-1327" name="__codelineno-0-1327"></a>
+<a id="__codelineno-0-1328" name="__codelineno-0-1328"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1329" name="__codelineno-0-1329"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1330" name="__codelineno-0-1330"></a><span class="sd">    definition : dict</span>
+<a id="__codelineno-0-1331" name="__codelineno-0-1331"></a><span class="sd">        JSON options members.</span>
+<a id="__codelineno-0-1332" name="__codelineno-0-1332"></a><span class="sd">    *elements : xml.etree.ElementTree.Element</span>
+<a id="__codelineno-0-1333" name="__codelineno-0-1333"></a><span class="sd">        Corresponding XML children in the Search API namespace.</span>
+<a id="__codelineno-0-1334" name="__codelineno-0-1334"></a>
+<a id="__codelineno-0-1335" name="__codelineno-0-1335"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-1336" name="__codelineno-0-1336"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-1337" name="__codelineno-0-1337"></a><span class="sd">    ValueError</span>
+<a id="__codelineno-0-1338" name="__codelineno-0-1338"></a><span class="sd">        If native names, namespaces or definition counts do not match.</span>
+<a id="__codelineno-0-1339" name="__codelineno-0-1339"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1340" name="__codelineno-0-1340"></a>    <span class="n">matched</span> <span class="o">=</span> <span class="n">_pair_native_definitions</span><span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
+<a id="__codelineno-0-1341" name="__codelineno-0-1341"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-1342" name="__codelineno-0-1342"></a>        <span class="o">*</span><span class="p">(</span>
+<a id="__codelineno-0-1343" name="__codelineno-0-1343"></a>            <span class="n">NativeOption</span><span class="p">(</span>
+<a id="__codelineno-0-1344" name="__codelineno-0-1344"></a>                <span class="p">{</span><span class="n">member</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;tuple[dict, XmlElement]&quot;</span><span class="p">,</span> <span class="n">member</span><span class="o">.</span><span class="n">native</span><span class="p">)[</span><span class="mi">0</span><span class="p">]},</span>
+<a id="__codelineno-0-1345" name="__codelineno-0-1345"></a>                <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;tuple[dict, XmlElement]&quot;</span><span class="p">,</span> <span class="n">member</span><span class="o">.</span><span class="n">native</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+<a id="__codelineno-0-1346" name="__codelineno-0-1346"></a>            <span class="p">)</span>
+<a id="__codelineno-0-1347" name="__codelineno-0-1347"></a>            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">matched</span>
+<a id="__codelineno-0-1348" name="__codelineno-0-1348"></a>        <span class="p">),</span>
+<a id="__codelineno-0-1349" name="__codelineno-0-1349"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15991,42 +16021,7 @@ term that contributes to score).</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-3351">3351</a></span>
-<span class="normal"><a href="#__codelineno-0-3352">3352</a></span>
-<span class="normal"><a href="#__codelineno-0-3353">3353</a></span>
-<span class="normal"><a href="#__codelineno-0-3354">3354</a></span>
-<span class="normal"><a href="#__codelineno-0-3355">3355</a></span>
-<span class="normal"><a href="#__codelineno-0-3356">3356</a></span>
-<span class="normal"><a href="#__codelineno-0-3357">3357</a></span>
-<span class="normal"><a href="#__codelineno-0-3358">3358</a></span>
-<span class="normal"><a href="#__codelineno-0-3359">3359</a></span>
-<span class="normal"><a href="#__codelineno-0-3360">3360</a></span>
-<span class="normal"><a href="#__codelineno-0-3361">3361</a></span>
-<span class="normal"><a href="#__codelineno-0-3362">3362</a></span>
-<span class="normal"><a href="#__codelineno-0-3363">3363</a></span>
-<span class="normal"><a href="#__codelineno-0-3364">3364</a></span>
-<span class="normal"><a href="#__codelineno-0-3365">3365</a></span>
-<span class="normal"><a href="#__codelineno-0-3366">3366</a></span>
-<span class="normal"><a href="#__codelineno-0-3367">3367</a></span>
-<span class="normal"><a href="#__codelineno-0-3368">3368</a></span>
-<span class="normal"><a href="#__codelineno-0-3369">3369</a></span>
-<span class="normal"><a href="#__codelineno-0-3370">3370</a></span>
-<span class="normal"><a href="#__codelineno-0-3371">3371</a></span>
-<span class="normal"><a href="#__codelineno-0-3372">3372</a></span>
-<span class="normal"><a href="#__codelineno-0-3373">3373</a></span>
-<span class="normal"><a href="#__codelineno-0-3374">3374</a></span>
-<span class="normal"><a href="#__codelineno-0-3375">3375</a></span>
-<span class="normal"><a href="#__codelineno-0-3376">3376</a></span>
-<span class="normal"><a href="#__codelineno-0-3377">3377</a></span>
-<span class="normal"><a href="#__codelineno-0-3378">3378</a></span>
-<span class="normal"><a href="#__codelineno-0-3379">3379</a></span>
-<span class="normal"><a href="#__codelineno-0-3380">3380</a></span>
-<span class="normal"><a href="#__codelineno-0-3381">3381</a></span>
-<span class="normal"><a href="#__codelineno-0-3382">3382</a></span>
-<span class="normal"><a href="#__codelineno-0-3383">3383</a></span>
-<span class="normal"><a href="#__codelineno-0-3384">3384</a></span>
-<span class="normal"><a href="#__codelineno-0-3385">3385</a></span>
-<span class="normal"><a href="#__codelineno-0-3386">3386</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-3386">3386</a></span>
 <span class="normal"><a href="#__codelineno-0-3387">3387</a></span>
 <span class="normal"><a href="#__codelineno-0-3388">3388</a></span>
 <span class="normal"><a href="#__codelineno-0-3389">3389</a></span>
@@ -16063,79 +16058,114 @@ term that contributes to score).</p>
 <span class="normal"><a href="#__codelineno-0-3420">3420</a></span>
 <span class="normal"><a href="#__codelineno-0-3421">3421</a></span>
 <span class="normal"><a href="#__codelineno-0-3422">3422</a></span>
-<span class="normal"><a href="#__codelineno-0-3423">3423</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-3351" name="__codelineno-0-3351"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-3352" name="__codelineno-0-3352"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-3353" name="__codelineno-0-3353"></a>    <span class="n">property_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
-<a id="__codelineno-0-3354" name="__codelineno-0-3354"></a>    <span class="n">regions</span><span class="p">:</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-3355" name="__codelineno-0-3355"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-3356" name="__codelineno-0-3356"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-3357" name="__codelineno-0-3357"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-3358" name="__codelineno-0-3358"></a><span class="p">):</span>
-<a id="__codelineno-0-3359" name="__codelineno-0-3359"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-3360" name="__codelineno-0-3360"></a>
-<a id="__codelineno-0-3361" name="__codelineno-0-3361"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-3362" name="__codelineno-0-3362"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-3363" name="__codelineno-0-3363"></a><span class="sd">    property_name : StringInput</span>
-<a id="__codelineno-0-3364" name="__codelineno-0-3364"></a><span class="sd">        One or more json property names to match. When multiple names are specified,</span>
-<a id="__codelineno-0-3365" name="__codelineno-0-3365"></a><span class="sd">        the query matches if any name matches.</span>
-<a id="__codelineno-0-3366" name="__codelineno-0-3366"></a><span class="sd">    regions : XqyExpression | list[XqyExpression] | None</span>
-<a id="__codelineno-0-3367" name="__codelineno-0-3367"></a><span class="sd">        One or more geographic boxes, circles, polygons, or points. Where multiple</span>
-<a id="__codelineno-0-3368" name="__codelineno-0-3368"></a><span class="sd">        regions are specified, the query matches if any region matches.</span>
-<a id="__codelineno-0-3369" name="__codelineno-0-3369"></a><span class="sd">    options : StringInput, optional</span>
-<a id="__codelineno-0-3370" name="__codelineno-0-3370"></a><span class="sd">        Options to this query. The default is (). Options include:</span>
-<a id="__codelineno-0-3371" name="__codelineno-0-3371"></a><span class="sd">        &quot;coordinate-system= string &quot; Use the given coordinate system. Valid values</span>
-<a id="__codelineno-0-3372" name="__codelineno-0-3372"></a><span class="sd">        are: wgs84 The WGS84 coordinate system with degrees as the angular unit.</span>
-<a id="__codelineno-0-3373" name="__codelineno-0-3373"></a><span class="sd">        wgs84/radians The WGS84 coordinate system with radians as the angular unit.</span>
-<a id="__codelineno-0-3374" name="__codelineno-0-3374"></a><span class="sd">        wgs84/double The WGS84 coordinate system at double precision with degrees as</span>
-<a id="__codelineno-0-3375" name="__codelineno-0-3375"></a><span class="sd">        the angular unit. wgs84/radians/double The WGS84 coordinate system at double</span>
-<a id="__codelineno-0-3376" name="__codelineno-0-3376"></a><span class="sd">        precision with radians as the angular unit. etrs89 The ETRS89 coordinate</span>
-<a id="__codelineno-0-3377" name="__codelineno-0-3377"></a><span class="sd">        system. etrs89/double The ETRS89 coordinate system at double precision. raw</span>
-<a id="__codelineno-0-3378" name="__codelineno-0-3378"></a><span class="sd">        The raw (unmapped) coordinate system. raw/double The raw coordinate system</span>
-<a id="__codelineno-0-3379" name="__codelineno-0-3379"></a><span class="sd">        at double precision. &quot;precision= string &quot; Use the coordinate system at the</span>
-<a id="__codelineno-0-3380" name="__codelineno-0-3380"></a><span class="sd">        given precision. Allowed values: float (default) and double . &quot;units= value</span>
-<a id="__codelineno-0-3381" name="__codelineno-0-3381"></a><span class="sd">        &quot; Measure distance and the radii of circles in the specified units. Allowed</span>
-<a id="__codelineno-0-3382" name="__codelineno-0-3382"></a><span class="sd">        values: miles (default), km , feet , meters . &quot;boundaries-included&quot; Points</span>
-<a id="__codelineno-0-3383" name="__codelineno-0-3383"></a><span class="sd">        on boxes&#39;, circles&#39;, and polygons&#39; boundaries are counted as matching. This</span>
-<a id="__codelineno-0-3384" name="__codelineno-0-3384"></a><span class="sd">        is the default. &quot;boundaries-excluded&quot; Points on boxes&#39;, circles&#39;, and</span>
-<a id="__codelineno-0-3385" name="__codelineno-0-3385"></a><span class="sd">        polygons&#39; boundaries are not counted as matching.</span>
-<a id="__codelineno-0-3386" name="__codelineno-0-3386"></a><span class="sd">        &quot;boundaries-latitude-excluded&quot; Points on boxes&#39; latitude boundaries are not</span>
-<a id="__codelineno-0-3387" name="__codelineno-0-3387"></a><span class="sd">        counted as matching. &quot;boundaries-longitude-excluded&quot; Points on boxes&#39;</span>
-<a id="__codelineno-0-3388" name="__codelineno-0-3388"></a><span class="sd">        longitude boundaries are not counted as matching.</span>
-<a id="__codelineno-0-3389" name="__codelineno-0-3389"></a><span class="sd">        &quot;boundaries-south-excluded&quot; Points on the boxes&#39; southern boundaries are not</span>
-<a id="__codelineno-0-3390" name="__codelineno-0-3390"></a><span class="sd">        counted as matching. &quot;boundaries-west-excluded&quot; Points on the boxes&#39; western</span>
-<a id="__codelineno-0-3391" name="__codelineno-0-3391"></a><span class="sd">        boundaries are not counted as matching. &quot;boundaries-north-excluded&quot; Points</span>
-<a id="__codelineno-0-3392" name="__codelineno-0-3392"></a><span class="sd">        on the boxes&#39; northern boundaries are not counted as matching.</span>
-<a id="__codelineno-0-3393" name="__codelineno-0-3393"></a><span class="sd">        &quot;boundaries-east-excluded&quot; Points on the boxes&#39; eastern boundaries are not</span>
-<a id="__codelineno-0-3394" name="__codelineno-0-3394"></a><span class="sd">        counted as matching. &quot;boundaries-circle-excluded&quot; Points on circles&#39;</span>
-<a id="__codelineno-0-3395" name="__codelineno-0-3395"></a><span class="sd">        boundary are not counted as matching. &quot;boundaries-endpoints-excluded&quot; Points</span>
-<a id="__codelineno-0-3396" name="__codelineno-0-3396"></a><span class="sd">        on linestrings&#39; boundary (the endpoints) are not counted as matching.</span>
-<a id="__codelineno-0-3397" name="__codelineno-0-3397"></a><span class="sd">        &quot;cached&quot; Cache the results of this query in the list cache. &quot;uncached&quot; Do</span>
-<a id="__codelineno-0-3398" name="__codelineno-0-3398"></a><span class="sd">        not cache the results of this query in the list cache. &quot;type=long-lat-point&quot;</span>
-<a id="__codelineno-0-3399" name="__codelineno-0-3399"></a><span class="sd">        Specifies the format for the point in the data as longitude first, latitude</span>
-<a id="__codelineno-0-3400" name="__codelineno-0-3400"></a><span class="sd">        second. &quot;type=point&quot; Specifies the format for the point in the data as</span>
-<a id="__codelineno-0-3401" name="__codelineno-0-3401"></a><span class="sd">        latitude first, longitude second. This is the default format.</span>
-<a id="__codelineno-0-3402" name="__codelineno-0-3402"></a><span class="sd">        &quot;score-function= function &quot; Use the selected scoring function. The score</span>
-<a id="__codelineno-0-3403" name="__codelineno-0-3403"></a><span class="sd">        function may be: linear Use a linear function of the difference between the</span>
-<a id="__codelineno-0-3404" name="__codelineno-0-3404"></a><span class="sd">        specified query value and the matching value in the index to calculate a</span>
-<a id="__codelineno-0-3405" name="__codelineno-0-3405"></a><span class="sd">        score for this range query. reciprocal Use a reciprocal function of the</span>
-<a id="__codelineno-0-3406" name="__codelineno-0-3406"></a><span class="sd">        difference between the specified query value and the matching value in the</span>
-<a id="__codelineno-0-3407" name="__codelineno-0-3407"></a><span class="sd">        index to calculate a score for this range query. zero This range query does</span>
-<a id="__codelineno-0-3408" name="__codelineno-0-3408"></a><span class="sd">        not contribute to the score. This is the default. &quot;slope-factor= number &quot;</span>
-<a id="__codelineno-0-3409" name="__codelineno-0-3409"></a><span class="sd">        Apply the given number as a scaling factor to the slope of the scoring</span>
-<a id="__codelineno-0-3410" name="__codelineno-0-3410"></a><span class="sd">        function. The default is 1.0. &quot;synonym&quot; Specifies that all of the terms in</span>
-<a id="__codelineno-0-3411" name="__codelineno-0-3411"></a><span class="sd">        the $regions parameter are considered synonyms for scoring purposes. The</span>
-<a id="__codelineno-0-3412" name="__codelineno-0-3412"></a><span class="sd">        result is that occurrences of more than one of the synonyms are scored as if</span>
-<a id="__codelineno-0-3413" name="__codelineno-0-3413"></a><span class="sd">        there are more occurrence of the same term (as opposed to having a separate</span>
-<a id="__codelineno-0-3414" name="__codelineno-0-3414"></a><span class="sd">        term that contributes to score).</span>
-<a id="__codelineno-0-3415" name="__codelineno-0-3415"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
-<a id="__codelineno-0-3416" name="__codelineno-0-3416"></a><span class="sd">        A weight for this query. The default is 1.0.</span>
-<a id="__codelineno-0-3417" name="__codelineno-0-3417"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-3418" name="__codelineno-0-3418"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-3419" name="__codelineno-0-3419"></a>        <span class="n">property_name</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">property_name</span><span class="p">),</span>
-<a id="__codelineno-0-3420" name="__codelineno-0-3420"></a>        <span class="n">regions</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">regions</span><span class="p">),</span>
-<a id="__codelineno-0-3421" name="__codelineno-0-3421"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-3422" name="__codelineno-0-3422"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-3423" name="__codelineno-0-3423"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-3423">3423</a></span>
+<span class="normal"><a href="#__codelineno-0-3424">3424</a></span>
+<span class="normal"><a href="#__codelineno-0-3425">3425</a></span>
+<span class="normal"><a href="#__codelineno-0-3426">3426</a></span>
+<span class="normal"><a href="#__codelineno-0-3427">3427</a></span>
+<span class="normal"><a href="#__codelineno-0-3428">3428</a></span>
+<span class="normal"><a href="#__codelineno-0-3429">3429</a></span>
+<span class="normal"><a href="#__codelineno-0-3430">3430</a></span>
+<span class="normal"><a href="#__codelineno-0-3431">3431</a></span>
+<span class="normal"><a href="#__codelineno-0-3432">3432</a></span>
+<span class="normal"><a href="#__codelineno-0-3433">3433</a></span>
+<span class="normal"><a href="#__codelineno-0-3434">3434</a></span>
+<span class="normal"><a href="#__codelineno-0-3435">3435</a></span>
+<span class="normal"><a href="#__codelineno-0-3436">3436</a></span>
+<span class="normal"><a href="#__codelineno-0-3437">3437</a></span>
+<span class="normal"><a href="#__codelineno-0-3438">3438</a></span>
+<span class="normal"><a href="#__codelineno-0-3439">3439</a></span>
+<span class="normal"><a href="#__codelineno-0-3440">3440</a></span>
+<span class="normal"><a href="#__codelineno-0-3441">3441</a></span>
+<span class="normal"><a href="#__codelineno-0-3442">3442</a></span>
+<span class="normal"><a href="#__codelineno-0-3443">3443</a></span>
+<span class="normal"><a href="#__codelineno-0-3444">3444</a></span>
+<span class="normal"><a href="#__codelineno-0-3445">3445</a></span>
+<span class="normal"><a href="#__codelineno-0-3446">3446</a></span>
+<span class="normal"><a href="#__codelineno-0-3447">3447</a></span>
+<span class="normal"><a href="#__codelineno-0-3448">3448</a></span>
+<span class="normal"><a href="#__codelineno-0-3449">3449</a></span>
+<span class="normal"><a href="#__codelineno-0-3450">3450</a></span>
+<span class="normal"><a href="#__codelineno-0-3451">3451</a></span>
+<span class="normal"><a href="#__codelineno-0-3452">3452</a></span>
+<span class="normal"><a href="#__codelineno-0-3453">3453</a></span>
+<span class="normal"><a href="#__codelineno-0-3454">3454</a></span>
+<span class="normal"><a href="#__codelineno-0-3455">3455</a></span>
+<span class="normal"><a href="#__codelineno-0-3456">3456</a></span>
+<span class="normal"><a href="#__codelineno-0-3457">3457</a></span>
+<span class="normal"><a href="#__codelineno-0-3458">3458</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-3386" name="__codelineno-0-3386"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-3387" name="__codelineno-0-3387"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-3388" name="__codelineno-0-3388"></a>    <span class="n">property_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span>
+<a id="__codelineno-0-3389" name="__codelineno-0-3389"></a>    <span class="n">regions</span><span class="p">:</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-3390" name="__codelineno-0-3390"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-3391" name="__codelineno-0-3391"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-3392" name="__codelineno-0-3392"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-3393" name="__codelineno-0-3393"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-3394" name="__codelineno-0-3394"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-3395" name="__codelineno-0-3395"></a>
+<a id="__codelineno-0-3396" name="__codelineno-0-3396"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-3397" name="__codelineno-0-3397"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-3398" name="__codelineno-0-3398"></a><span class="sd">    property_name : StringInput</span>
+<a id="__codelineno-0-3399" name="__codelineno-0-3399"></a><span class="sd">        One or more json property names to match. When multiple names are specified,</span>
+<a id="__codelineno-0-3400" name="__codelineno-0-3400"></a><span class="sd">        the query matches if any name matches.</span>
+<a id="__codelineno-0-3401" name="__codelineno-0-3401"></a><span class="sd">    regions : XqyExpression | list[XqyExpression] | None</span>
+<a id="__codelineno-0-3402" name="__codelineno-0-3402"></a><span class="sd">        One or more geographic boxes, circles, polygons, or points. Where multiple</span>
+<a id="__codelineno-0-3403" name="__codelineno-0-3403"></a><span class="sd">        regions are specified, the query matches if any region matches.</span>
+<a id="__codelineno-0-3404" name="__codelineno-0-3404"></a><span class="sd">    options : StringInput, optional</span>
+<a id="__codelineno-0-3405" name="__codelineno-0-3405"></a><span class="sd">        Options to this query. The default is (). Options include:</span>
+<a id="__codelineno-0-3406" name="__codelineno-0-3406"></a><span class="sd">        &quot;coordinate-system= string &quot; Use the given coordinate system. Valid values</span>
+<a id="__codelineno-0-3407" name="__codelineno-0-3407"></a><span class="sd">        are: wgs84 The WGS84 coordinate system with degrees as the angular unit.</span>
+<a id="__codelineno-0-3408" name="__codelineno-0-3408"></a><span class="sd">        wgs84/radians The WGS84 coordinate system with radians as the angular unit.</span>
+<a id="__codelineno-0-3409" name="__codelineno-0-3409"></a><span class="sd">        wgs84/double The WGS84 coordinate system at double precision with degrees as</span>
+<a id="__codelineno-0-3410" name="__codelineno-0-3410"></a><span class="sd">        the angular unit. wgs84/radians/double The WGS84 coordinate system at double</span>
+<a id="__codelineno-0-3411" name="__codelineno-0-3411"></a><span class="sd">        precision with radians as the angular unit. etrs89 The ETRS89 coordinate</span>
+<a id="__codelineno-0-3412" name="__codelineno-0-3412"></a><span class="sd">        system. etrs89/double The ETRS89 coordinate system at double precision. raw</span>
+<a id="__codelineno-0-3413" name="__codelineno-0-3413"></a><span class="sd">        The raw (unmapped) coordinate system. raw/double The raw coordinate system</span>
+<a id="__codelineno-0-3414" name="__codelineno-0-3414"></a><span class="sd">        at double precision. &quot;precision= string &quot; Use the coordinate system at the</span>
+<a id="__codelineno-0-3415" name="__codelineno-0-3415"></a><span class="sd">        given precision. Allowed values: float (default) and double . &quot;units= value</span>
+<a id="__codelineno-0-3416" name="__codelineno-0-3416"></a><span class="sd">        &quot; Measure distance and the radii of circles in the specified units. Allowed</span>
+<a id="__codelineno-0-3417" name="__codelineno-0-3417"></a><span class="sd">        values: miles (default), km , feet , meters . &quot;boundaries-included&quot; Points</span>
+<a id="__codelineno-0-3418" name="__codelineno-0-3418"></a><span class="sd">        on boxes&#39;, circles&#39;, and polygons&#39; boundaries are counted as matching. This</span>
+<a id="__codelineno-0-3419" name="__codelineno-0-3419"></a><span class="sd">        is the default. &quot;boundaries-excluded&quot; Points on boxes&#39;, circles&#39;, and</span>
+<a id="__codelineno-0-3420" name="__codelineno-0-3420"></a><span class="sd">        polygons&#39; boundaries are not counted as matching.</span>
+<a id="__codelineno-0-3421" name="__codelineno-0-3421"></a><span class="sd">        &quot;boundaries-latitude-excluded&quot; Points on boxes&#39; latitude boundaries are not</span>
+<a id="__codelineno-0-3422" name="__codelineno-0-3422"></a><span class="sd">        counted as matching. &quot;boundaries-longitude-excluded&quot; Points on boxes&#39;</span>
+<a id="__codelineno-0-3423" name="__codelineno-0-3423"></a><span class="sd">        longitude boundaries are not counted as matching.</span>
+<a id="__codelineno-0-3424" name="__codelineno-0-3424"></a><span class="sd">        &quot;boundaries-south-excluded&quot; Points on the boxes&#39; southern boundaries are not</span>
+<a id="__codelineno-0-3425" name="__codelineno-0-3425"></a><span class="sd">        counted as matching. &quot;boundaries-west-excluded&quot; Points on the boxes&#39; western</span>
+<a id="__codelineno-0-3426" name="__codelineno-0-3426"></a><span class="sd">        boundaries are not counted as matching. &quot;boundaries-north-excluded&quot; Points</span>
+<a id="__codelineno-0-3427" name="__codelineno-0-3427"></a><span class="sd">        on the boxes&#39; northern boundaries are not counted as matching.</span>
+<a id="__codelineno-0-3428" name="__codelineno-0-3428"></a><span class="sd">        &quot;boundaries-east-excluded&quot; Points on the boxes&#39; eastern boundaries are not</span>
+<a id="__codelineno-0-3429" name="__codelineno-0-3429"></a><span class="sd">        counted as matching. &quot;boundaries-circle-excluded&quot; Points on circles&#39;</span>
+<a id="__codelineno-0-3430" name="__codelineno-0-3430"></a><span class="sd">        boundary are not counted as matching. &quot;boundaries-endpoints-excluded&quot; Points</span>
+<a id="__codelineno-0-3431" name="__codelineno-0-3431"></a><span class="sd">        on linestrings&#39; boundary (the endpoints) are not counted as matching.</span>
+<a id="__codelineno-0-3432" name="__codelineno-0-3432"></a><span class="sd">        &quot;cached&quot; Cache the results of this query in the list cache. &quot;uncached&quot; Do</span>
+<a id="__codelineno-0-3433" name="__codelineno-0-3433"></a><span class="sd">        not cache the results of this query in the list cache. &quot;type=long-lat-point&quot;</span>
+<a id="__codelineno-0-3434" name="__codelineno-0-3434"></a><span class="sd">        Specifies the format for the point in the data as longitude first, latitude</span>
+<a id="__codelineno-0-3435" name="__codelineno-0-3435"></a><span class="sd">        second. &quot;type=point&quot; Specifies the format for the point in the data as</span>
+<a id="__codelineno-0-3436" name="__codelineno-0-3436"></a><span class="sd">        latitude first, longitude second. This is the default format.</span>
+<a id="__codelineno-0-3437" name="__codelineno-0-3437"></a><span class="sd">        &quot;score-function= function &quot; Use the selected scoring function. The score</span>
+<a id="__codelineno-0-3438" name="__codelineno-0-3438"></a><span class="sd">        function may be: linear Use a linear function of the difference between the</span>
+<a id="__codelineno-0-3439" name="__codelineno-0-3439"></a><span class="sd">        specified query value and the matching value in the index to calculate a</span>
+<a id="__codelineno-0-3440" name="__codelineno-0-3440"></a><span class="sd">        score for this range query. reciprocal Use a reciprocal function of the</span>
+<a id="__codelineno-0-3441" name="__codelineno-0-3441"></a><span class="sd">        difference between the specified query value and the matching value in the</span>
+<a id="__codelineno-0-3442" name="__codelineno-0-3442"></a><span class="sd">        index to calculate a score for this range query. zero This range query does</span>
+<a id="__codelineno-0-3443" name="__codelineno-0-3443"></a><span class="sd">        not contribute to the score. This is the default. &quot;slope-factor= number &quot;</span>
+<a id="__codelineno-0-3444" name="__codelineno-0-3444"></a><span class="sd">        Apply the given number as a scaling factor to the slope of the scoring</span>
+<a id="__codelineno-0-3445" name="__codelineno-0-3445"></a><span class="sd">        function. The default is 1.0. &quot;synonym&quot; Specifies that all of the terms in</span>
+<a id="__codelineno-0-3446" name="__codelineno-0-3446"></a><span class="sd">        the $regions parameter are considered synonyms for scoring purposes. The</span>
+<a id="__codelineno-0-3447" name="__codelineno-0-3447"></a><span class="sd">        result is that occurrences of more than one of the synonyms are scored as if</span>
+<a id="__codelineno-0-3448" name="__codelineno-0-3448"></a><span class="sd">        there are more occurrence of the same term (as opposed to having a separate</span>
+<a id="__codelineno-0-3449" name="__codelineno-0-3449"></a><span class="sd">        term that contributes to score).</span>
+<a id="__codelineno-0-3450" name="__codelineno-0-3450"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
+<a id="__codelineno-0-3451" name="__codelineno-0-3451"></a><span class="sd">        A weight for this query. The default is 1.0.</span>
+<a id="__codelineno-0-3452" name="__codelineno-0-3452"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-3453" name="__codelineno-0-3453"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-3454" name="__codelineno-0-3454"></a>        <span class="n">property_name</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">property_name</span><span class="p">),</span>
+<a id="__codelineno-0-3455" name="__codelineno-0-3455"></a>        <span class="n">regions</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">regions</span><span class="p">),</span>
+<a id="__codelineno-0-3456" name="__codelineno-0-3456"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-3457" name="__codelineno-0-3457"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-3458" name="__codelineno-0-3458"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

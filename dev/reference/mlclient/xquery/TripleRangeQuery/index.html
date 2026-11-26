@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15897,7 +15927,7 @@
                 <code>subject</code>
             </td>
             <td>
-                  <code><span title="AtomicInput">AtomicInput</span></code>
+                  <code><span title="mlclient.xquery.expressions.AtomicInput">AtomicInput</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15915,7 +15945,7 @@ triples with any subject are matched.</p>
                 <code>predicate</code>
             </td>
             <td>
-                  <code><span title="AtomicInput">AtomicInput</span></code>
+                  <code><span title="mlclient.xquery.expressions.AtomicInput">AtomicInput</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15933,7 +15963,7 @@ triples with any predicate are matched.</p>
                 <code>object</code>
             </td>
             <td>
-                  <code><span title="AtomicInput">AtomicInput</span></code>
+                  <code><span title="mlclient.xquery.expressions.AtomicInput">AtomicInput</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -16018,46 +16048,7 @@ scaling factor to the slope of the scoring function. The default is 1.0.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5258">5258</a></span>
-<span class="normal"><a href="#__codelineno-0-5259">5259</a></span>
-<span class="normal"><a href="#__codelineno-0-5260">5260</a></span>
-<span class="normal"><a href="#__codelineno-0-5261">5261</a></span>
-<span class="normal"><a href="#__codelineno-0-5262">5262</a></span>
-<span class="normal"><a href="#__codelineno-0-5263">5263</a></span>
-<span class="normal"><a href="#__codelineno-0-5264">5264</a></span>
-<span class="normal"><a href="#__codelineno-0-5265">5265</a></span>
-<span class="normal"><a href="#__codelineno-0-5266">5266</a></span>
-<span class="normal"><a href="#__codelineno-0-5267">5267</a></span>
-<span class="normal"><a href="#__codelineno-0-5268">5268</a></span>
-<span class="normal"><a href="#__codelineno-0-5269">5269</a></span>
-<span class="normal"><a href="#__codelineno-0-5270">5270</a></span>
-<span class="normal"><a href="#__codelineno-0-5271">5271</a></span>
-<span class="normal"><a href="#__codelineno-0-5272">5272</a></span>
-<span class="normal"><a href="#__codelineno-0-5273">5273</a></span>
-<span class="normal"><a href="#__codelineno-0-5274">5274</a></span>
-<span class="normal"><a href="#__codelineno-0-5275">5275</a></span>
-<span class="normal"><a href="#__codelineno-0-5276">5276</a></span>
-<span class="normal"><a href="#__codelineno-0-5277">5277</a></span>
-<span class="normal"><a href="#__codelineno-0-5278">5278</a></span>
-<span class="normal"><a href="#__codelineno-0-5279">5279</a></span>
-<span class="normal"><a href="#__codelineno-0-5280">5280</a></span>
-<span class="normal"><a href="#__codelineno-0-5281">5281</a></span>
-<span class="normal"><a href="#__codelineno-0-5282">5282</a></span>
-<span class="normal"><a href="#__codelineno-0-5283">5283</a></span>
-<span class="normal"><a href="#__codelineno-0-5284">5284</a></span>
-<span class="normal"><a href="#__codelineno-0-5285">5285</a></span>
-<span class="normal"><a href="#__codelineno-0-5286">5286</a></span>
-<span class="normal"><a href="#__codelineno-0-5287">5287</a></span>
-<span class="normal"><a href="#__codelineno-0-5288">5288</a></span>
-<span class="normal"><a href="#__codelineno-0-5289">5289</a></span>
-<span class="normal"><a href="#__codelineno-0-5290">5290</a></span>
-<span class="normal"><a href="#__codelineno-0-5291">5291</a></span>
-<span class="normal"><a href="#__codelineno-0-5292">5292</a></span>
-<span class="normal"><a href="#__codelineno-0-5293">5293</a></span>
-<span class="normal"><a href="#__codelineno-0-5294">5294</a></span>
-<span class="normal"><a href="#__codelineno-0-5295">5295</a></span>
-<span class="normal"><a href="#__codelineno-0-5296">5296</a></span>
-<span class="normal"><a href="#__codelineno-0-5297">5297</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5297">5297</a></span>
 <span class="normal"><a href="#__codelineno-0-5298">5298</a></span>
 <span class="normal"><a href="#__codelineno-0-5299">5299</a></span>
 <span class="normal"><a href="#__codelineno-0-5300">5300</a></span>
@@ -16091,80 +16082,119 @@ scaling factor to the slope of the scoring function. The default is 1.0.</p>
 <span class="normal"><a href="#__codelineno-0-5328">5328</a></span>
 <span class="normal"><a href="#__codelineno-0-5329">5329</a></span>
 <span class="normal"><a href="#__codelineno-0-5330">5330</a></span>
-<span class="normal"><a href="#__codelineno-0-5331">5331</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5258" name="__codelineno-0-5258"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-5259" name="__codelineno-0-5259"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-5260" name="__codelineno-0-5260"></a>    <span class="n">subject</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-5261" name="__codelineno-0-5261"></a>    <span class="o">|</span> <span class="nb">int</span>
-<a id="__codelineno-0-5262" name="__codelineno-0-5262"></a>    <span class="o">|</span> <span class="nb">float</span>
-<a id="__codelineno-0-5263" name="__codelineno-0-5263"></a>    <span class="o">|</span> <span class="nb">bool</span>
-<a id="__codelineno-0-5264" name="__codelineno-0-5264"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
-<a id="__codelineno-0-5265" name="__codelineno-0-5265"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
-<a id="__codelineno-0-5266" name="__codelineno-0-5266"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
-<a id="__codelineno-0-5267" name="__codelineno-0-5267"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5268" name="__codelineno-0-5268"></a>    <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-5269" name="__codelineno-0-5269"></a>    <span class="o">|</span> <span class="nb">int</span>
-<a id="__codelineno-0-5270" name="__codelineno-0-5270"></a>    <span class="o">|</span> <span class="nb">float</span>
-<a id="__codelineno-0-5271" name="__codelineno-0-5271"></a>    <span class="o">|</span> <span class="nb">bool</span>
-<a id="__codelineno-0-5272" name="__codelineno-0-5272"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
-<a id="__codelineno-0-5273" name="__codelineno-0-5273"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
-<a id="__codelineno-0-5274" name="__codelineno-0-5274"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
-<a id="__codelineno-0-5275" name="__codelineno-0-5275"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5276" name="__codelineno-0-5276"></a>    <span class="nb">object</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-5277" name="__codelineno-0-5277"></a>    <span class="o">|</span> <span class="nb">int</span>
-<a id="__codelineno-0-5278" name="__codelineno-0-5278"></a>    <span class="o">|</span> <span class="nb">float</span>
-<a id="__codelineno-0-5279" name="__codelineno-0-5279"></a>    <span class="o">|</span> <span class="nb">bool</span>
-<a id="__codelineno-0-5280" name="__codelineno-0-5280"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
-<a id="__codelineno-0-5281" name="__codelineno-0-5281"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
-<a id="__codelineno-0-5282" name="__codelineno-0-5282"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
-<a id="__codelineno-0-5283" name="__codelineno-0-5283"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5284" name="__codelineno-0-5284"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-5285" name="__codelineno-0-5285"></a>    <span class="n">operator</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5286" name="__codelineno-0-5286"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5287" name="__codelineno-0-5287"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5288" name="__codelineno-0-5288"></a><span class="p">):</span>
-<a id="__codelineno-0-5289" name="__codelineno-0-5289"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-5290" name="__codelineno-0-5290"></a>
-<a id="__codelineno-0-5291" name="__codelineno-0-5291"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-5292" name="__codelineno-0-5292"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-5293" name="__codelineno-0-5293"></a><span class="sd">    subject : AtomicInput</span>
-<a id="__codelineno-0-5294" name="__codelineno-0-5294"></a><span class="sd">        The subjects to look up. When multiple values are specified, the query</span>
-<a id="__codelineno-0-5295" name="__codelineno-0-5295"></a><span class="sd">        matches if any value matches. When the empty sequence is specified, then</span>
-<a id="__codelineno-0-5296" name="__codelineno-0-5296"></a><span class="sd">        triples with any subject are matched.</span>
-<a id="__codelineno-0-5297" name="__codelineno-0-5297"></a><span class="sd">    predicate : AtomicInput</span>
-<a id="__codelineno-0-5298" name="__codelineno-0-5298"></a><span class="sd">        The predicates to look up. When multiple values are specified, the query</span>
-<a id="__codelineno-0-5299" name="__codelineno-0-5299"></a><span class="sd">        matches if any value matches. When the empty sequence is specified, then</span>
-<a id="__codelineno-0-5300" name="__codelineno-0-5300"></a><span class="sd">        triples with any predicate are matched.</span>
-<a id="__codelineno-0-5301" name="__codelineno-0-5301"></a><span class="sd">    object : AtomicInput</span>
-<a id="__codelineno-0-5302" name="__codelineno-0-5302"></a><span class="sd">        The objects to look up. When multiple values are specified, the query</span>
-<a id="__codelineno-0-5303" name="__codelineno-0-5303"></a><span class="sd">        matches if any value matches. When the empty sequence is specified, then</span>
-<a id="__codelineno-0-5304" name="__codelineno-0-5304"></a><span class="sd">        triples with any object are matched.</span>
-<a id="__codelineno-0-5305" name="__codelineno-0-5305"></a><span class="sd">    operator : StringInput, optional</span>
-<a id="__codelineno-0-5306" name="__codelineno-0-5306"></a><span class="sd">        One object operator or three subject/predicate/object operators.</span>
-<a id="__codelineno-0-5307" name="__codelineno-0-5307"></a><span class="sd">        Includes sameTerm; empty sequences use the native default.</span>
-<a id="__codelineno-0-5308" name="__codelineno-0-5308"></a><span class="sd">        MarkLogic validates these operators when the query is evaluated.</span>
-<a id="__codelineno-0-5309" name="__codelineno-0-5309"></a><span class="sd">    options : StringInput, optional</span>
-<a id="__codelineno-0-5310" name="__codelineno-0-5310"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;cached&quot; Cache</span>
-<a id="__codelineno-0-5311" name="__codelineno-0-5311"></a><span class="sd">        the results of this query in the list cache. &quot;uncached&quot; Do not cache the</span>
-<a id="__codelineno-0-5312" name="__codelineno-0-5312"></a><span class="sd">        results of this query in the list cache. &quot;score-function= function &quot; Use the</span>
-<a id="__codelineno-0-5313" name="__codelineno-0-5313"></a><span class="sd">        selected scoring function. The score function may be: linear Use a linear</span>
-<a id="__codelineno-0-5314" name="__codelineno-0-5314"></a><span class="sd">        function of the difference between the specified query value and the</span>
-<a id="__codelineno-0-5315" name="__codelineno-0-5315"></a><span class="sd">        matching value in the index to calculate a score for this range query.</span>
-<a id="__codelineno-0-5316" name="__codelineno-0-5316"></a><span class="sd">        reciprocal Use a reciprocal function of the difference between the specified</span>
-<a id="__codelineno-0-5317" name="__codelineno-0-5317"></a><span class="sd">        query value and the matching value in the index to calculate a score for</span>
-<a id="__codelineno-0-5318" name="__codelineno-0-5318"></a><span class="sd">        this range query. zero This range query does not contribute to the score.</span>
-<a id="__codelineno-0-5319" name="__codelineno-0-5319"></a><span class="sd">        This is the default. &quot;slope-factor= number &quot; Apply the given number as a</span>
-<a id="__codelineno-0-5320" name="__codelineno-0-5320"></a><span class="sd">        scaling factor to the slope of the scoring function. The default is 1.0.</span>
-<a id="__codelineno-0-5321" name="__codelineno-0-5321"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
-<a id="__codelineno-0-5322" name="__codelineno-0-5322"></a><span class="sd">        A weight for this query. The default is 1.0.</span>
-<a id="__codelineno-0-5323" name="__codelineno-0-5323"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-5324" name="__codelineno-0-5324"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-5325" name="__codelineno-0-5325"></a>        <span class="n">subject</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">subject</span><span class="p">),</span>
-<a id="__codelineno-0-5326" name="__codelineno-0-5326"></a>        <span class="n">predicate</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">predicate</span><span class="p">),</span>
-<a id="__codelineno-0-5327" name="__codelineno-0-5327"></a>        <span class="nb">object</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="nb">object</span><span class="p">),</span>
-<a id="__codelineno-0-5328" name="__codelineno-0-5328"></a>        <span class="n">operator</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">operator</span><span class="p">),</span>
-<a id="__codelineno-0-5329" name="__codelineno-0-5329"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-5330" name="__codelineno-0-5330"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-5331" name="__codelineno-0-5331"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-5331">5331</a></span>
+<span class="normal"><a href="#__codelineno-0-5332">5332</a></span>
+<span class="normal"><a href="#__codelineno-0-5333">5333</a></span>
+<span class="normal"><a href="#__codelineno-0-5334">5334</a></span>
+<span class="normal"><a href="#__codelineno-0-5335">5335</a></span>
+<span class="normal"><a href="#__codelineno-0-5336">5336</a></span>
+<span class="normal"><a href="#__codelineno-0-5337">5337</a></span>
+<span class="normal"><a href="#__codelineno-0-5338">5338</a></span>
+<span class="normal"><a href="#__codelineno-0-5339">5339</a></span>
+<span class="normal"><a href="#__codelineno-0-5340">5340</a></span>
+<span class="normal"><a href="#__codelineno-0-5341">5341</a></span>
+<span class="normal"><a href="#__codelineno-0-5342">5342</a></span>
+<span class="normal"><a href="#__codelineno-0-5343">5343</a></span>
+<span class="normal"><a href="#__codelineno-0-5344">5344</a></span>
+<span class="normal"><a href="#__codelineno-0-5345">5345</a></span>
+<span class="normal"><a href="#__codelineno-0-5346">5346</a></span>
+<span class="normal"><a href="#__codelineno-0-5347">5347</a></span>
+<span class="normal"><a href="#__codelineno-0-5348">5348</a></span>
+<span class="normal"><a href="#__codelineno-0-5349">5349</a></span>
+<span class="normal"><a href="#__codelineno-0-5350">5350</a></span>
+<span class="normal"><a href="#__codelineno-0-5351">5351</a></span>
+<span class="normal"><a href="#__codelineno-0-5352">5352</a></span>
+<span class="normal"><a href="#__codelineno-0-5353">5353</a></span>
+<span class="normal"><a href="#__codelineno-0-5354">5354</a></span>
+<span class="normal"><a href="#__codelineno-0-5355">5355</a></span>
+<span class="normal"><a href="#__codelineno-0-5356">5356</a></span>
+<span class="normal"><a href="#__codelineno-0-5357">5357</a></span>
+<span class="normal"><a href="#__codelineno-0-5358">5358</a></span>
+<span class="normal"><a href="#__codelineno-0-5359">5359</a></span>
+<span class="normal"><a href="#__codelineno-0-5360">5360</a></span>
+<span class="normal"><a href="#__codelineno-0-5361">5361</a></span>
+<span class="normal"><a href="#__codelineno-0-5362">5362</a></span>
+<span class="normal"><a href="#__codelineno-0-5363">5363</a></span>
+<span class="normal"><a href="#__codelineno-0-5364">5364</a></span>
+<span class="normal"><a href="#__codelineno-0-5365">5365</a></span>
+<span class="normal"><a href="#__codelineno-0-5366">5366</a></span>
+<span class="normal"><a href="#__codelineno-0-5367">5367</a></span>
+<span class="normal"><a href="#__codelineno-0-5368">5368</a></span>
+<span class="normal"><a href="#__codelineno-0-5369">5369</a></span>
+<span class="normal"><a href="#__codelineno-0-5370">5370</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5297" name="__codelineno-0-5297"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-5298" name="__codelineno-0-5298"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-5299" name="__codelineno-0-5299"></a>    <span class="n">subject</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-5300" name="__codelineno-0-5300"></a>    <span class="o">|</span> <span class="nb">int</span>
+<a id="__codelineno-0-5301" name="__codelineno-0-5301"></a>    <span class="o">|</span> <span class="nb">float</span>
+<a id="__codelineno-0-5302" name="__codelineno-0-5302"></a>    <span class="o">|</span> <span class="nb">bool</span>
+<a id="__codelineno-0-5303" name="__codelineno-0-5303"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
+<a id="__codelineno-0-5304" name="__codelineno-0-5304"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
+<a id="__codelineno-0-5305" name="__codelineno-0-5305"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
+<a id="__codelineno-0-5306" name="__codelineno-0-5306"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5307" name="__codelineno-0-5307"></a>    <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-5308" name="__codelineno-0-5308"></a>    <span class="o">|</span> <span class="nb">int</span>
+<a id="__codelineno-0-5309" name="__codelineno-0-5309"></a>    <span class="o">|</span> <span class="nb">float</span>
+<a id="__codelineno-0-5310" name="__codelineno-0-5310"></a>    <span class="o">|</span> <span class="nb">bool</span>
+<a id="__codelineno-0-5311" name="__codelineno-0-5311"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
+<a id="__codelineno-0-5312" name="__codelineno-0-5312"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
+<a id="__codelineno-0-5313" name="__codelineno-0-5313"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
+<a id="__codelineno-0-5314" name="__codelineno-0-5314"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5315" name="__codelineno-0-5315"></a>    <span class="nb">object</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-5316" name="__codelineno-0-5316"></a>    <span class="o">|</span> <span class="nb">int</span>
+<a id="__codelineno-0-5317" name="__codelineno-0-5317"></a>    <span class="o">|</span> <span class="nb">float</span>
+<a id="__codelineno-0-5318" name="__codelineno-0-5318"></a>    <span class="o">|</span> <span class="nb">bool</span>
+<a id="__codelineno-0-5319" name="__codelineno-0-5319"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span>
+<a id="__codelineno-0-5320" name="__codelineno-0-5320"></a>    <span class="o">|</span> <span class="n">XqyExpression</span>
+<a id="__codelineno-0-5321" name="__codelineno-0-5321"></a>    <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">XqyExpression</span><span class="p">]</span>
+<a id="__codelineno-0-5322" name="__codelineno-0-5322"></a>    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5323" name="__codelineno-0-5323"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5324" name="__codelineno-0-5324"></a>    <span class="n">operator</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5325" name="__codelineno-0-5325"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5326" name="__codelineno-0-5326"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5327" name="__codelineno-0-5327"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-5328" name="__codelineno-0-5328"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-5329" name="__codelineno-0-5329"></a>
+<a id="__codelineno-0-5330" name="__codelineno-0-5330"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-5331" name="__codelineno-0-5331"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-5332" name="__codelineno-0-5332"></a><span class="sd">    subject : AtomicInput</span>
+<a id="__codelineno-0-5333" name="__codelineno-0-5333"></a><span class="sd">        The subjects to look up. When multiple values are specified, the query</span>
+<a id="__codelineno-0-5334" name="__codelineno-0-5334"></a><span class="sd">        matches if any value matches. When the empty sequence is specified, then</span>
+<a id="__codelineno-0-5335" name="__codelineno-0-5335"></a><span class="sd">        triples with any subject are matched.</span>
+<a id="__codelineno-0-5336" name="__codelineno-0-5336"></a><span class="sd">    predicate : AtomicInput</span>
+<a id="__codelineno-0-5337" name="__codelineno-0-5337"></a><span class="sd">        The predicates to look up. When multiple values are specified, the query</span>
+<a id="__codelineno-0-5338" name="__codelineno-0-5338"></a><span class="sd">        matches if any value matches. When the empty sequence is specified, then</span>
+<a id="__codelineno-0-5339" name="__codelineno-0-5339"></a><span class="sd">        triples with any predicate are matched.</span>
+<a id="__codelineno-0-5340" name="__codelineno-0-5340"></a><span class="sd">    object : AtomicInput</span>
+<a id="__codelineno-0-5341" name="__codelineno-0-5341"></a><span class="sd">        The objects to look up. When multiple values are specified, the query</span>
+<a id="__codelineno-0-5342" name="__codelineno-0-5342"></a><span class="sd">        matches if any value matches. When the empty sequence is specified, then</span>
+<a id="__codelineno-0-5343" name="__codelineno-0-5343"></a><span class="sd">        triples with any object are matched.</span>
+<a id="__codelineno-0-5344" name="__codelineno-0-5344"></a><span class="sd">    operator : StringInput, optional</span>
+<a id="__codelineno-0-5345" name="__codelineno-0-5345"></a><span class="sd">        One object operator or three subject/predicate/object operators.</span>
+<a id="__codelineno-0-5346" name="__codelineno-0-5346"></a><span class="sd">        Includes sameTerm; empty sequences use the native default.</span>
+<a id="__codelineno-0-5347" name="__codelineno-0-5347"></a><span class="sd">        MarkLogic validates these operators when the query is evaluated.</span>
+<a id="__codelineno-0-5348" name="__codelineno-0-5348"></a><span class="sd">    options : StringInput, optional</span>
+<a id="__codelineno-0-5349" name="__codelineno-0-5349"></a><span class="sd">        Options to this query. The default is (). Options include: &quot;cached&quot; Cache</span>
+<a id="__codelineno-0-5350" name="__codelineno-0-5350"></a><span class="sd">        the results of this query in the list cache. &quot;uncached&quot; Do not cache the</span>
+<a id="__codelineno-0-5351" name="__codelineno-0-5351"></a><span class="sd">        results of this query in the list cache. &quot;score-function= function &quot; Use the</span>
+<a id="__codelineno-0-5352" name="__codelineno-0-5352"></a><span class="sd">        selected scoring function. The score function may be: linear Use a linear</span>
+<a id="__codelineno-0-5353" name="__codelineno-0-5353"></a><span class="sd">        function of the difference between the specified query value and the</span>
+<a id="__codelineno-0-5354" name="__codelineno-0-5354"></a><span class="sd">        matching value in the index to calculate a score for this range query.</span>
+<a id="__codelineno-0-5355" name="__codelineno-0-5355"></a><span class="sd">        reciprocal Use a reciprocal function of the difference between the specified</span>
+<a id="__codelineno-0-5356" name="__codelineno-0-5356"></a><span class="sd">        query value and the matching value in the index to calculate a score for</span>
+<a id="__codelineno-0-5357" name="__codelineno-0-5357"></a><span class="sd">        this range query. zero This range query does not contribute to the score.</span>
+<a id="__codelineno-0-5358" name="__codelineno-0-5358"></a><span class="sd">        This is the default. &quot;slope-factor= number &quot; Apply the given number as a</span>
+<a id="__codelineno-0-5359" name="__codelineno-0-5359"></a><span class="sd">        scaling factor to the slope of the scoring function. The default is 1.0.</span>
+<a id="__codelineno-0-5360" name="__codelineno-0-5360"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
+<a id="__codelineno-0-5361" name="__codelineno-0-5361"></a><span class="sd">        A weight for this query. The default is 1.0.</span>
+<a id="__codelineno-0-5362" name="__codelineno-0-5362"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-5363" name="__codelineno-0-5363"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-5364" name="__codelineno-0-5364"></a>        <span class="n">subject</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">subject</span><span class="p">),</span>
+<a id="__codelineno-0-5365" name="__codelineno-0-5365"></a>        <span class="n">predicate</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">predicate</span><span class="p">),</span>
+<a id="__codelineno-0-5366" name="__codelineno-0-5366"></a>        <span class="nb">object</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="nb">object</span><span class="p">),</span>
+<a id="__codelineno-0-5367" name="__codelineno-0-5367"></a>        <span class="n">operator</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">operator</span><span class="p">),</span>
+<a id="__codelineno-0-5368" name="__codelineno-0-5368"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-5369" name="__codelineno-0-5369"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-5370" name="__codelineno-0-5370"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

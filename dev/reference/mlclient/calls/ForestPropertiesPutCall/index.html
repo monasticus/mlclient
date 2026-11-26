@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15942,11 +15972,7 @@ https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties</p
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/calls/forests.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-613">613</a></span>
-<span class="normal"><a href="#__codelineno-0-614">614</a></span>
-<span class="normal"><a href="#__codelineno-0-615">615</a></span>
-<span class="normal"><a href="#__codelineno-0-616">616</a></span>
-<span class="normal"><a href="#__codelineno-0-617">617</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-617">617</a></span>
 <span class="normal"><a href="#__codelineno-0-618">618</a></span>
 <span class="normal"><a href="#__codelineno-0-619">619</a></span>
 <span class="normal"><a href="#__codelineno-0-620">620</a></span>
@@ -15961,26 +15987,30 @@ https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties</p
 <span class="normal"><a href="#__codelineno-0-629">629</a></span>
 <span class="normal"><a href="#__codelineno-0-630">630</a></span>
 <span class="normal"><a href="#__codelineno-0-631">631</a></span>
-<span class="normal"><a href="#__codelineno-0-632">632</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-613" name="__codelineno-0-613"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a>    <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-616" name="__codelineno-0-616"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
-<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="p">):</span>
-<a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ForestPropertiesPutCall instance.</span>
-<a id="__codelineno-0-619" name="__codelineno-0-619"></a>
-<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="sd">    forest : str</span>
-<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">        A forest identifier. The forest can be identified either by ID or name.</span>
-<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">    body : str | dict</span>
-<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">        A forest properties in XML or JSON format.</span>
-<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-627" name="__codelineno-0-627"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-628" name="__codelineno-0-628"></a>    <span class="n">content_type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_content_type_header_for_data</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-629" name="__codelineno-0-629"></a>    <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_JSON</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-630" name="__codelineno-0-630"></a>        <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-631" name="__codelineno-0-631"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-632" name="__codelineno-0-632"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
+<span class="normal"><a href="#__codelineno-0-632">632</a></span>
+<span class="normal"><a href="#__codelineno-0-633">633</a></span>
+<span class="normal"><a href="#__codelineno-0-634">634</a></span>
+<span class="normal"><a href="#__codelineno-0-635">635</a></span>
+<span class="normal"><a href="#__codelineno-0-636">636</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a>    <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ForestPropertiesPutCall instance.</span>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">    forest : str</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">        A forest identifier. The forest can be identified either by ID or name.</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a><span class="sd">    body : str | dict</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a><span class="sd">        A forest properties in XML or JSON format.</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>    <span class="n">content_type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_content_type_header_for_data</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a>    <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_JSON</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a>        <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16007,7 +16037,7 @@ https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties</p
   </span>
 
 <a href="#mlclient.calls.ForestPropertiesPutCall.endpoint" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

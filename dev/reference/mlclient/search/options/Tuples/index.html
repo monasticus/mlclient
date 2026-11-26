@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16029,16 +16059,7 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/search/options.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-616">616</a></span>
-<span class="normal"><a href="#__codelineno-0-617">617</a></span>
-<span class="normal"><a href="#__codelineno-0-618">618</a></span>
-<span class="normal"><a href="#__codelineno-0-619">619</a></span>
-<span class="normal"><a href="#__codelineno-0-620">620</a></span>
-<span class="normal"><a href="#__codelineno-0-621">621</a></span>
-<span class="normal"><a href="#__codelineno-0-622">622</a></span>
-<span class="normal"><a href="#__codelineno-0-623">623</a></span>
-<span class="normal"><a href="#__codelineno-0-624">624</a></span>
-<span class="normal"><a href="#__codelineno-0-625">625</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-625">625</a></span>
 <span class="normal"><a href="#__codelineno-0-626">626</a></span>
 <span class="normal"><a href="#__codelineno-0-627">627</a></span>
 <span class="normal"><a href="#__codelineno-0-628">628</a></span>
@@ -16117,95 +16138,104 @@
 <span class="normal"><a href="#__codelineno-0-701">701</a></span>
 <span class="normal"><a href="#__codelineno-0-702">702</a></span>
 <span class="normal"><a href="#__codelineno-0-703">703</a></span>
-<span class="normal"><a href="#__codelineno-0-704">704</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-617" name="__codelineno-0-617"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-618" name="__codelineno-0-618"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-619" name="__codelineno-0-619"></a>    <span class="o">*</span><span class="n">indexes</span><span class="p">:</span> <span class="n">Range</span>
-<a id="__codelineno-0-620" name="__codelineno-0-620"></a>    <span class="o">|</span> <span class="n">GeoElement</span>
-<a id="__codelineno-0-621" name="__codelineno-0-621"></a>    <span class="o">|</span> <span class="n">GeoElementPair</span>
-<a id="__codelineno-0-622" name="__codelineno-0-622"></a>    <span class="o">|</span> <span class="n">GeoAttributePair</span>
-<a id="__codelineno-0-623" name="__codelineno-0-623"></a>    <span class="o">|</span> <span class="n">GeoJsonProperty</span>
-<a id="__codelineno-0-624" name="__codelineno-0-624"></a>    <span class="o">|</span> <span class="n">GeoJsonPropertyPair</span>
-<a id="__codelineno-0-625" name="__codelineno-0-625"></a>    <span class="o">|</span> <span class="n">GeoPath</span>
-<a id="__codelineno-0-626" name="__codelineno-0-626"></a>    <span class="o">|</span> <span class="n">Collection</span>
-<a id="__codelineno-0-627" name="__codelineno-0-627"></a>    <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;uri&quot;</span><span class="p">,</span> <span class="s2">&quot;collection&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-628" name="__codelineno-0-628"></a>    <span class="n">options</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-629" name="__codelineno-0-629"></a>    <span class="n">style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;consistent&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-630" name="__codelineno-0-630"></a>    <span class="n">aggregates</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Aggregate</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
-<a id="__codelineno-0-631" name="__codelineno-0-631"></a>    <span class="n">annotation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-632" name="__codelineno-0-632"></a><span class="p">):</span>
-<a id="__codelineno-0-633" name="__codelineno-0-633"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Define co-occurring values from two or more indexes or lexicons.</span>
-<a id="__codelineno-0-634" name="__codelineno-0-634"></a>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-636" name="__codelineno-0-636"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-637" name="__codelineno-0-637"></a><span class="sd">    name : str</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="sd">        Tuples definition name passed to SearchService.tuples or aggregate.</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a><span class="sd">    *indexes : Range</span>
-<a id="__codelineno-0-640" name="__codelineno-0-640"></a><span class="sd">        Two or more indexes or URI/collection lexicons, in tuple order.</span>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="sd">    options : str | Sequence[str] | None</span>
-<a id="__codelineno-0-642" name="__codelineno-0-642"></a><span class="sd">        Native values-option strings.</span>
-<a id="__codelineno-0-643" name="__codelineno-0-643"></a><span class="sd">    style : {&#39;default&#39;, &#39;consistent&#39;} | None</span>
-<a id="__codelineno-0-644" name="__codelineno-0-644"></a><span class="sd">        Lexicon result style.</span>
-<a id="__codelineno-0-645" name="__codelineno-0-645"></a><span class="sd">    aggregates : Sequence[Aggregate]</span>
-<a id="__codelineno-0-646" name="__codelineno-0-646"></a><span class="sd">        Built-in or native plugin aggregates.</span>
-<a id="__codelineno-0-647" name="__codelineno-0-647"></a><span class="sd">    annotation : str | None</span>
-<a id="__codelineno-0-648" name="__codelineno-0-648"></a><span class="sd">        Tuples definition description.</span>
-<a id="__codelineno-0-649" name="__codelineno-0-649"></a>
-<a id="__codelineno-0-650" name="__codelineno-0-650"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-651" name="__codelineno-0-651"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-652" name="__codelineno-0-652"></a><span class="sd">    ValueError</span>
-<a id="__codelineno-0-653" name="__codelineno-0-653"></a><span class="sd">        If fewer than two indexes are supplied.</span>
-<a id="__codelineno-0-654" name="__codelineno-0-654"></a><span class="sd">    TypeError</span>
-<a id="__codelineno-0-655" name="__codelineno-0-655"></a><span class="sd">        If an index is not a supported range, geospatial or lexicon definition.</span>
-<a id="__codelineno-0-656" name="__codelineno-0-656"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-657" name="__codelineno-0-657"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span>
-<a id="__codelineno-0-658" name="__codelineno-0-658"></a>        <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-659" name="__codelineno-0-659"></a>        <span class="s2">&quot;options&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-660" name="__codelineno-0-660"></a>        <span class="kc">None</span> <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_strings</span><span class="p">(</span><span class="n">options</span><span class="p">)),</span>
-<a id="__codelineno-0-661" name="__codelineno-0-661"></a>    <span class="p">)</span>
-<a id="__codelineno-0-662" name="__codelineno-0-662"></a>    <span class="n">_style</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
-<a id="__codelineno-0-663" name="__codelineno-0-663"></a>    <span class="k">for</span> <span class="n">aggregate</span> <span class="ow">in</span> <span class="n">aggregates</span><span class="p">:</span>
-<a id="__codelineno-0-664" name="__codelineno-0-664"></a>        <span class="n">_require</span><span class="p">(</span><span class="n">aggregate</span><span class="p">,</span> <span class="n">Aggregate</span><span class="p">,</span> <span class="s2">&quot;lexicon aggregate&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-665" name="__codelineno-0-665"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;style&quot;</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
-<a id="__codelineno-0-666" name="__codelineno-0-666"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aggregates&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">aggregates</span><span class="p">))</span>
-<a id="__codelineno-0-667" name="__codelineno-0-667"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;annotation&quot;</span><span class="p">,</span> <span class="n">annotation</span><span class="p">)</span>
-<a id="__codelineno-0-668" name="__codelineno-0-668"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-669" name="__codelineno-0-669"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;indexes&quot;</span><span class="p">,</span> <span class="n">indexes</span><span class="p">)</span>
-<a id="__codelineno-0-670" name="__codelineno-0-670"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_MIN_TUPLE_INDEXES</span><span class="p">:</span>
-<a id="__codelineno-0-671" name="__codelineno-0-671"></a>        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;tuples requires at least two indexes&quot;</span>
-<a id="__codelineno-0-672" name="__codelineno-0-672"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-673" name="__codelineno-0-673"></a>    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
-<a id="__codelineno-0-674" name="__codelineno-0-674"></a>        <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">Range</span><span class="p">,</span> <span class="n">_Geospatial</span><span class="p">,</span> <span class="n">Collection</span><span class="p">))</span>
-<a id="__codelineno-0-675" name="__codelineno-0-675"></a>        <span class="ow">and</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;uri&quot;</span><span class="p">,</span> <span class="s2">&quot;collection&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-676" name="__codelineno-0-676"></a>        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span>
-<a id="__codelineno-0-677" name="__codelineno-0-677"></a>    <span class="p">):</span>
-<a id="__codelineno-0-678" name="__codelineno-0-678"></a>        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-679" name="__codelineno-0-679"></a>            <span class="s2">&quot;tuples indexes must be Range, geospatial, Collection, uri or &quot;</span>
-<a id="__codelineno-0-680" name="__codelineno-0-680"></a>            <span class="s2">&quot;collection definitions&quot;</span>
-<a id="__codelineno-0-681" name="__codelineno-0-681"></a>        <span class="p">)</span>
-<a id="__codelineno-0-682" name="__codelineno-0-682"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-683" name="__codelineno-0-683"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span>
-<a id="__codelineno-0-684" name="__codelineno-0-684"></a>        <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-685" name="__codelineno-0-685"></a>        <span class="s2">&quot;_definition&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-686" name="__codelineno-0-686"></a>        <span class="n">_Definition</span><span class="p">(</span>
-<a id="__codelineno-0-687" name="__codelineno-0-687"></a>            <span class="s2">&quot;tuples&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-688" name="__codelineno-0-688"></a>            <span class="p">{</span>
-<a id="__codelineno-0-689" name="__codelineno-0-689"></a>                <span class="o">**</span><span class="n">_present</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="n">style</span><span class="p">}),</span>
-<a id="__codelineno-0-690" name="__codelineno-0-690"></a>                <span class="o">**</span><span class="n">_option_members</span><span class="p">(</span><span class="s2">&quot;values-option&quot;</span><span class="p">,</span> <span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-691" name="__codelineno-0-691"></a>            <span class="p">},</span>
-<a id="__codelineno-0-692" name="__codelineno-0-692"></a>            <span class="p">(</span>
-<a id="__codelineno-0-693" name="__codelineno-0-693"></a>                <span class="o">*</span><span class="nb">tuple</span><span class="p">(</span>
-<a id="__codelineno-0-694" name="__codelineno-0-694"></a>                    <span class="n">index</span>
-<a id="__codelineno-0-695" name="__codelineno-0-695"></a>                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">QueryComponent</span><span class="p">)</span>
-<a id="__codelineno-0-696" name="__codelineno-0-696"></a>                    <span class="k">else</span> <span class="n">_Definition</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-0-697" name="__codelineno-0-697"></a>                    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span>
-<a id="__codelineno-0-698" name="__codelineno-0-698"></a>                <span class="p">),</span>
-<a id="__codelineno-0-699" name="__codelineno-0-699"></a>                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">aggregates</span><span class="p">,</span>
-<a id="__codelineno-0-700" name="__codelineno-0-700"></a>                <span class="o">*</span><span class="n">_scalars</span><span class="p">({</span><span class="s2">&quot;annotation&quot;</span><span class="p">:</span> <span class="n">annotation</span><span class="p">}),</span>
-<a id="__codelineno-0-701" name="__codelineno-0-701"></a>            <span class="p">),</span>
-<a id="__codelineno-0-702" name="__codelineno-0-702"></a>            <span class="n">repeatable</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;aggregate&quot;</span><span class="p">,</span> <span class="s2">&quot;annotation&quot;</span><span class="p">}),</span>
-<a id="__codelineno-0-703" name="__codelineno-0-703"></a>        <span class="p">),</span>
-<a id="__codelineno-0-704" name="__codelineno-0-704"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-704">704</a></span>
+<span class="normal"><a href="#__codelineno-0-705">705</a></span>
+<span class="normal"><a href="#__codelineno-0-706">706</a></span>
+<span class="normal"><a href="#__codelineno-0-707">707</a></span>
+<span class="normal"><a href="#__codelineno-0-708">708</a></span>
+<span class="normal"><a href="#__codelineno-0-709">709</a></span>
+<span class="normal"><a href="#__codelineno-0-710">710</a></span>
+<span class="normal"><a href="#__codelineno-0-711">711</a></span>
+<span class="normal"><a href="#__codelineno-0-712">712</a></span>
+<span class="normal"><a href="#__codelineno-0-713">713</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a>    <span class="o">*</span><span class="n">indexes</span><span class="p">:</span> <span class="n">Range</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a>    <span class="o">|</span> <span class="n">GeoElement</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a>    <span class="o">|</span> <span class="n">GeoElementPair</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a>    <span class="o">|</span> <span class="n">GeoAttributePair</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>    <span class="o">|</span> <span class="n">GeoJsonProperty</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a>    <span class="o">|</span> <span class="n">GeoJsonPropertyPair</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a>    <span class="o">|</span> <span class="n">GeoPath</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a>    <span class="o">|</span> <span class="n">Collection</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>    <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;uri&quot;</span><span class="p">,</span> <span class="s2">&quot;collection&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a>    <span class="n">options</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a>    <span class="n">style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;consistent&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-639" name="__codelineno-0-639"></a>    <span class="n">aggregates</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Aggregate</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<a id="__codelineno-0-640" name="__codelineno-0-640"></a>    <span class="n">annotation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Define co-occurring values from two or more indexes or lexicons.</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-646" name="__codelineno-0-646"></a><span class="sd">    name : str</span>
+<a id="__codelineno-0-647" name="__codelineno-0-647"></a><span class="sd">        Tuples definition name passed to SearchService.tuples or aggregate.</span>
+<a id="__codelineno-0-648" name="__codelineno-0-648"></a><span class="sd">    *indexes : Range</span>
+<a id="__codelineno-0-649" name="__codelineno-0-649"></a><span class="sd">        Two or more indexes or URI/collection lexicons, in tuple order.</span>
+<a id="__codelineno-0-650" name="__codelineno-0-650"></a><span class="sd">    options : str | Sequence[str] | None</span>
+<a id="__codelineno-0-651" name="__codelineno-0-651"></a><span class="sd">        Native values-option strings.</span>
+<a id="__codelineno-0-652" name="__codelineno-0-652"></a><span class="sd">    style : {&#39;default&#39;, &#39;consistent&#39;} | None</span>
+<a id="__codelineno-0-653" name="__codelineno-0-653"></a><span class="sd">        Lexicon result style.</span>
+<a id="__codelineno-0-654" name="__codelineno-0-654"></a><span class="sd">    aggregates : Sequence[Aggregate]</span>
+<a id="__codelineno-0-655" name="__codelineno-0-655"></a><span class="sd">        Built-in or native plugin aggregates.</span>
+<a id="__codelineno-0-656" name="__codelineno-0-656"></a><span class="sd">    annotation : str | None</span>
+<a id="__codelineno-0-657" name="__codelineno-0-657"></a><span class="sd">        Tuples definition description.</span>
+<a id="__codelineno-0-658" name="__codelineno-0-658"></a>
+<a id="__codelineno-0-659" name="__codelineno-0-659"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-660" name="__codelineno-0-660"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-661" name="__codelineno-0-661"></a><span class="sd">    ValueError</span>
+<a id="__codelineno-0-662" name="__codelineno-0-662"></a><span class="sd">        If fewer than two indexes are supplied.</span>
+<a id="__codelineno-0-663" name="__codelineno-0-663"></a><span class="sd">    TypeError</span>
+<a id="__codelineno-0-664" name="__codelineno-0-664"></a><span class="sd">        If an index is not a supported range, geospatial or lexicon definition.</span>
+<a id="__codelineno-0-665" name="__codelineno-0-665"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-666" name="__codelineno-0-666"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span>
+<a id="__codelineno-0-667" name="__codelineno-0-667"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-668" name="__codelineno-0-668"></a>        <span class="s2">&quot;options&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-669" name="__codelineno-0-669"></a>        <span class="kc">None</span> <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_strings</span><span class="p">(</span><span class="n">options</span><span class="p">)),</span>
+<a id="__codelineno-0-670" name="__codelineno-0-670"></a>    <span class="p">)</span>
+<a id="__codelineno-0-671" name="__codelineno-0-671"></a>    <span class="n">_style</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
+<a id="__codelineno-0-672" name="__codelineno-0-672"></a>    <span class="k">for</span> <span class="n">aggregate</span> <span class="ow">in</span> <span class="n">aggregates</span><span class="p">:</span>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a>        <span class="n">_require</span><span class="p">(</span><span class="n">aggregate</span><span class="p">,</span> <span class="n">Aggregate</span><span class="p">,</span> <span class="s2">&quot;lexicon aggregate&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-674" name="__codelineno-0-674"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;style&quot;</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+<a id="__codelineno-0-675" name="__codelineno-0-675"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;aggregates&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">aggregates</span><span class="p">))</span>
+<a id="__codelineno-0-676" name="__codelineno-0-676"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;annotation&quot;</span><span class="p">,</span> <span class="n">annotation</span><span class="p">)</span>
+<a id="__codelineno-0-677" name="__codelineno-0-677"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-678" name="__codelineno-0-678"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;indexes&quot;</span><span class="p">,</span> <span class="n">indexes</span><span class="p">)</span>
+<a id="__codelineno-0-679" name="__codelineno-0-679"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_MIN_TUPLE_INDEXES</span><span class="p">:</span>
+<a id="__codelineno-0-680" name="__codelineno-0-680"></a>        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;tuples requires at least two indexes&quot;</span>
+<a id="__codelineno-0-681" name="__codelineno-0-681"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-682" name="__codelineno-0-682"></a>    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+<a id="__codelineno-0-683" name="__codelineno-0-683"></a>        <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">Range</span><span class="p">,</span> <span class="n">_Geospatial</span><span class="p">,</span> <span class="n">Collection</span><span class="p">))</span>
+<a id="__codelineno-0-684" name="__codelineno-0-684"></a>        <span class="ow">and</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;uri&quot;</span><span class="p">,</span> <span class="s2">&quot;collection&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-685" name="__codelineno-0-685"></a>        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span>
+<a id="__codelineno-0-686" name="__codelineno-0-686"></a>    <span class="p">):</span>
+<a id="__codelineno-0-687" name="__codelineno-0-687"></a>        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-688" name="__codelineno-0-688"></a>            <span class="s2">&quot;tuples indexes must be Range, geospatial, Collection, uri or &quot;</span>
+<a id="__codelineno-0-689" name="__codelineno-0-689"></a>            <span class="s2">&quot;collection definitions&quot;</span>
+<a id="__codelineno-0-690" name="__codelineno-0-690"></a>        <span class="p">)</span>
+<a id="__codelineno-0-691" name="__codelineno-0-691"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-692" name="__codelineno-0-692"></a>    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span>
+<a id="__codelineno-0-693" name="__codelineno-0-693"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-694" name="__codelineno-0-694"></a>        <span class="s2">&quot;_definition&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-695" name="__codelineno-0-695"></a>        <span class="n">_Definition</span><span class="p">(</span>
+<a id="__codelineno-0-696" name="__codelineno-0-696"></a>            <span class="s2">&quot;tuples&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-697" name="__codelineno-0-697"></a>            <span class="p">{</span>
+<a id="__codelineno-0-698" name="__codelineno-0-698"></a>                <span class="o">**</span><span class="n">_present</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="n">style</span><span class="p">}),</span>
+<a id="__codelineno-0-699" name="__codelineno-0-699"></a>                <span class="o">**</span><span class="n">_option_members</span><span class="p">(</span><span class="s2">&quot;values-option&quot;</span><span class="p">,</span> <span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-700" name="__codelineno-0-700"></a>            <span class="p">},</span>
+<a id="__codelineno-0-701" name="__codelineno-0-701"></a>            <span class="p">(</span>
+<a id="__codelineno-0-702" name="__codelineno-0-702"></a>                <span class="o">*</span><span class="nb">tuple</span><span class="p">(</span>
+<a id="__codelineno-0-703" name="__codelineno-0-703"></a>                    <span class="n">index</span>
+<a id="__codelineno-0-704" name="__codelineno-0-704"></a>                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">QueryComponent</span><span class="p">)</span>
+<a id="__codelineno-0-705" name="__codelineno-0-705"></a>                    <span class="k">else</span> <span class="n">_Definition</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-706" name="__codelineno-0-706"></a>                    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span>
+<a id="__codelineno-0-707" name="__codelineno-0-707"></a>                <span class="p">),</span>
+<a id="__codelineno-0-708" name="__codelineno-0-708"></a>                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">aggregates</span><span class="p">,</span>
+<a id="__codelineno-0-709" name="__codelineno-0-709"></a>                <span class="o">*</span><span class="n">_scalars</span><span class="p">({</span><span class="s2">&quot;annotation&quot;</span><span class="p">:</span> <span class="n">annotation</span><span class="p">}),</span>
+<a id="__codelineno-0-710" name="__codelineno-0-710"></a>            <span class="p">),</span>
+<a id="__codelineno-0-711" name="__codelineno-0-711"></a>            <span class="n">repeatable</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;aggregate&quot;</span><span class="p">,</span> <span class="s2">&quot;annotation&quot;</span><span class="p">}),</span>
+<a id="__codelineno-0-712" name="__codelineno-0-712"></a>        <span class="p">),</span>
+<a id="__codelineno-0-713" name="__codelineno-0-713"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

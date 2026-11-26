@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15938,29 +15968,29 @@ create instances rather than calling the constructor directly.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-832">832</a></span>
-<span class="normal"><a href="#__codelineno-0-833">833</a></span>
-<span class="normal"><a href="#__codelineno-0-834">834</a></span>
-<span class="normal"><a href="#__codelineno-0-835">835</a></span>
-<span class="normal"><a href="#__codelineno-0-836">836</a></span>
-<span class="normal"><a href="#__codelineno-0-837">837</a></span>
-<span class="normal"><a href="#__codelineno-0-838">838</a></span>
-<span class="normal"><a href="#__codelineno-0-839">839</a></span>
-<span class="normal"><a href="#__codelineno-0-840">840</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-840">840</a></span>
 <span class="normal"><a href="#__codelineno-0-841">841</a></span>
 <span class="normal"><a href="#__codelineno-0-842">842</a></span>
-<span class="normal"><a href="#__codelineno-0-843">843</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-832" name="__codelineno-0-832"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-833" name="__codelineno-0-833"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-834" name="__codelineno-0-834"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-835" name="__codelineno-0-835"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-836" name="__codelineno-0-836"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-837" name="__codelineno-0-837"></a><span class="p">):</span>
-<a id="__codelineno-0-838" name="__codelineno-0-838"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-839" name="__codelineno-0-839"></a>        <span class="n">uri</span><span class="p">,</span>
-<a id="__codelineno-0-840" name="__codelineno-0-840"></a>        <span class="n">doc_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-841" name="__codelineno-0-841"></a>        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
-<a id="__codelineno-0-842" name="__codelineno-0-842"></a>        <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
-<a id="__codelineno-0-843" name="__codelineno-0-843"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-843">843</a></span>
+<span class="normal"><a href="#__codelineno-0-844">844</a></span>
+<span class="normal"><a href="#__codelineno-0-845">845</a></span>
+<span class="normal"><a href="#__codelineno-0-846">846</a></span>
+<span class="normal"><a href="#__codelineno-0-847">847</a></span>
+<span class="normal"><a href="#__codelineno-0-848">848</a></span>
+<span class="normal"><a href="#__codelineno-0-849">849</a></span>
+<span class="normal"><a href="#__codelineno-0-850">850</a></span>
+<span class="normal"><a href="#__codelineno-0-851">851</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-840" name="__codelineno-0-840"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-841" name="__codelineno-0-841"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-842" name="__codelineno-0-842"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-843" name="__codelineno-0-843"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-844" name="__codelineno-0-844"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-845" name="__codelineno-0-845"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-846" name="__codelineno-0-846"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-847" name="__codelineno-0-847"></a>        <span class="n">uri</span><span class="p">,</span>
+<a id="__codelineno-0-848" name="__codelineno-0-848"></a>        <span class="n">doc_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-849" name="__codelineno-0-849"></a>        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+<a id="__codelineno-0-850" name="__codelineno-0-850"></a>        <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
+<a id="__codelineno-0-851" name="__codelineno-0-851"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

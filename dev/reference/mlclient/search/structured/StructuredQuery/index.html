@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16021,8 +16051,7 @@ inline options and qtext are included in the search member.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/search/structured.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-232">232</a></span>
-<span class="normal"><a href="#__codelineno-0-233">233</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-233">233</a></span>
 <span class="normal"><a href="#__codelineno-0-234">234</a></span>
 <span class="normal"><a href="#__codelineno-0-235">235</a></span>
 <span class="normal"><a href="#__codelineno-0-236">236</a></span>
@@ -16049,35 +16078,36 @@ inline options and qtext are included in the search member.</p>
 <span class="normal"><a href="#__codelineno-0-257">257</a></span>
 <span class="normal"><a href="#__codelineno-0-258">258</a></span>
 <span class="normal"><a href="#__codelineno-0-259">259</a></span>
-<span class="normal"><a href="#__codelineno-0-260">260</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_combined_query</span><span class="p">(</span>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-234" name="__codelineno-0-234"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-235" name="__codelineno-0-235"></a>    <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">SearchOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-236" name="__codelineno-0-236"></a>    <span class="n">qtext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrap this structured query in a JSON combined query.</span>
-<a id="__codelineno-0-239" name="__codelineno-0-239"></a>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">    options : dict | SearchOptions | None, default None</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">        Inline option members without a wrapper, or a SearchOptions composition.</span>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">    qtext : str | None, default None</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">        Additional string query, AND-related to this query.</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">    dict</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">        ``{&quot;search&quot;: {&quot;query&quot;: ...}}``. A subquery other than Query is</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">        wrapped in a Query first, as the Search API requires. Optional</span>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">        inline options and qtext are included in the search member.</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-255" name="__codelineno-0-255"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="sd">    TypeError</span>
-<a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="sd">        If options or qtext have unsupported types.</span>
-<a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Query</span><span class="p">)</span> <span class="k">else</span> <span class="n">Query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-<a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="k">return</span> <span class="n">build_combined_query</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> <span class="n">qtext</span><span class="o">=</span><span class="n">qtext</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_combined_query</span><span class="p">(</span>
+<a id="__codelineno-0-234" name="__codelineno-0-234"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-236" name="__codelineno-0-236"></a>    <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">SearchOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-237" name="__codelineno-0-237"></a>    <span class="n">qtext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-0-239" name="__codelineno-0-239"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrap this structured query in a JSON combined query.</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240"></a>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">    options : dict | SearchOptions | None, default None</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">        Inline option members without a wrapper, or a SearchOptions composition.</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    qtext : str | None, default None</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">        Additional string query, AND-related to this query.</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">    dict</span>
+<a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">        ``{&quot;search&quot;: {&quot;query&quot;: ...}}``. A subquery other than Query is</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">        wrapped in a Query first, as the Search API requires. Optional</span>
+<a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="sd">        inline options and qtext are included in the search member.</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="sd">    TypeError</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="sd">        If options or qtext have unsupported types.</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Query</span><span class="p">)</span> <span class="k">else</span> <span class="n">Query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>    <span class="k">return</span> <span class="n">build_combined_query</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> <span class="n">qtext</span><span class="o">=</span><span class="n">qtext</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15918,47 +15948,47 @@ query does not contribute to score. That is, the score is always 0.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5057">5057</a></span>
-<span class="normal"><a href="#__codelineno-0-5058">5058</a></span>
-<span class="normal"><a href="#__codelineno-0-5059">5059</a></span>
-<span class="normal"><a href="#__codelineno-0-5060">5060</a></span>
-<span class="normal"><a href="#__codelineno-0-5061">5061</a></span>
-<span class="normal"><a href="#__codelineno-0-5062">5062</a></span>
-<span class="normal"><a href="#__codelineno-0-5063">5063</a></span>
-<span class="normal"><a href="#__codelineno-0-5064">5064</a></span>
-<span class="normal"><a href="#__codelineno-0-5065">5065</a></span>
-<span class="normal"><a href="#__codelineno-0-5066">5066</a></span>
-<span class="normal"><a href="#__codelineno-0-5067">5067</a></span>
-<span class="normal"><a href="#__codelineno-0-5068">5068</a></span>
-<span class="normal"><a href="#__codelineno-0-5069">5069</a></span>
-<span class="normal"><a href="#__codelineno-0-5070">5070</a></span>
-<span class="normal"><a href="#__codelineno-0-5071">5071</a></span>
-<span class="normal"><a href="#__codelineno-0-5072">5072</a></span>
-<span class="normal"><a href="#__codelineno-0-5073">5073</a></span>
-<span class="normal"><a href="#__codelineno-0-5074">5074</a></span>
-<span class="normal"><a href="#__codelineno-0-5075">5075</a></span>
-<span class="normal"><a href="#__codelineno-0-5076">5076</a></span>
-<span class="normal"><a href="#__codelineno-0-5077">5077</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5057" name="__codelineno-0-5057"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-5058" name="__codelineno-0-5058"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-5059" name="__codelineno-0-5059"></a>    <span class="n">nodes</span><span class="p">:</span> <span class="n">NodeInput</span><span class="p">,</span>
-<a id="__codelineno-0-5060" name="__codelineno-0-5060"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-5061" name="__codelineno-0-5061"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5062" name="__codelineno-0-5062"></a><span class="p">):</span>
-<a id="__codelineno-0-5063" name="__codelineno-0-5063"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-5064" name="__codelineno-0-5064"></a>
-<a id="__codelineno-0-5065" name="__codelineno-0-5065"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-5066" name="__codelineno-0-5066"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-5067" name="__codelineno-0-5067"></a><span class="sd">    nodes : NodeInput</span>
-<a id="__codelineno-0-5068" name="__codelineno-0-5068"></a><span class="sd">        Model nodes that must be matchable by queries matched by this reverse query.</span>
-<a id="__codelineno-0-5069" name="__codelineno-0-5069"></a><span class="sd">        See the Usage Notes for more details.</span>
-<a id="__codelineno-0-5070" name="__codelineno-0-5070"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
-<a id="__codelineno-0-5071" name="__codelineno-0-5071"></a><span class="sd">        A weight for this query. This parameter has no effect because a reverse</span>
-<a id="__codelineno-0-5072" name="__codelineno-0-5072"></a><span class="sd">        query does not contribute to score. That is, the score is always 0.</span>
-<a id="__codelineno-0-5073" name="__codelineno-0-5073"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-5074" name="__codelineno-0-5074"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-5075" name="__codelineno-0-5075"></a>        <span class="n">nodes</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span>
-<a id="__codelineno-0-5076" name="__codelineno-0-5076"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-5077" name="__codelineno-0-5077"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5096">5096</a></span>
+<span class="normal"><a href="#__codelineno-0-5097">5097</a></span>
+<span class="normal"><a href="#__codelineno-0-5098">5098</a></span>
+<span class="normal"><a href="#__codelineno-0-5099">5099</a></span>
+<span class="normal"><a href="#__codelineno-0-5100">5100</a></span>
+<span class="normal"><a href="#__codelineno-0-5101">5101</a></span>
+<span class="normal"><a href="#__codelineno-0-5102">5102</a></span>
+<span class="normal"><a href="#__codelineno-0-5103">5103</a></span>
+<span class="normal"><a href="#__codelineno-0-5104">5104</a></span>
+<span class="normal"><a href="#__codelineno-0-5105">5105</a></span>
+<span class="normal"><a href="#__codelineno-0-5106">5106</a></span>
+<span class="normal"><a href="#__codelineno-0-5107">5107</a></span>
+<span class="normal"><a href="#__codelineno-0-5108">5108</a></span>
+<span class="normal"><a href="#__codelineno-0-5109">5109</a></span>
+<span class="normal"><a href="#__codelineno-0-5110">5110</a></span>
+<span class="normal"><a href="#__codelineno-0-5111">5111</a></span>
+<span class="normal"><a href="#__codelineno-0-5112">5112</a></span>
+<span class="normal"><a href="#__codelineno-0-5113">5113</a></span>
+<span class="normal"><a href="#__codelineno-0-5114">5114</a></span>
+<span class="normal"><a href="#__codelineno-0-5115">5115</a></span>
+<span class="normal"><a href="#__codelineno-0-5116">5116</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5096" name="__codelineno-0-5096"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-5097" name="__codelineno-0-5097"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-5098" name="__codelineno-0-5098"></a>    <span class="n">nodes</span><span class="p">:</span> <span class="n">NodeInput</span><span class="p">,</span>
+<a id="__codelineno-0-5099" name="__codelineno-0-5099"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5100" name="__codelineno-0-5100"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5101" name="__codelineno-0-5101"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-5102" name="__codelineno-0-5102"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-5103" name="__codelineno-0-5103"></a>
+<a id="__codelineno-0-5104" name="__codelineno-0-5104"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-5105" name="__codelineno-0-5105"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-5106" name="__codelineno-0-5106"></a><span class="sd">    nodes : NodeInput</span>
+<a id="__codelineno-0-5107" name="__codelineno-0-5107"></a><span class="sd">        Model nodes that must be matchable by queries matched by this reverse query.</span>
+<a id="__codelineno-0-5108" name="__codelineno-0-5108"></a><span class="sd">        See the Usage Notes for more details.</span>
+<a id="__codelineno-0-5109" name="__codelineno-0-5109"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
+<a id="__codelineno-0-5110" name="__codelineno-0-5110"></a><span class="sd">        A weight for this query. This parameter has no effect because a reverse</span>
+<a id="__codelineno-0-5111" name="__codelineno-0-5111"></a><span class="sd">        query does not contribute to score. That is, the score is always 0.</span>
+<a id="__codelineno-0-5112" name="__codelineno-0-5112"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-5113" name="__codelineno-0-5113"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-5114" name="__codelineno-0-5114"></a>        <span class="n">nodes</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span>
+<a id="__codelineno-0-5115" name="__codelineno-0-5115"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-5116" name="__codelineno-0-5116"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

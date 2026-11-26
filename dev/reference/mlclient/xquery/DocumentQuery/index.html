@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15891,27 +15921,27 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1315">1315</a></span>
-<span class="normal"><a href="#__codelineno-0-1316">1316</a></span>
-<span class="normal"><a href="#__codelineno-0-1317">1317</a></span>
-<span class="normal"><a href="#__codelineno-0-1318">1318</a></span>
-<span class="normal"><a href="#__codelineno-0-1319">1319</a></span>
-<span class="normal"><a href="#__codelineno-0-1320">1320</a></span>
-<span class="normal"><a href="#__codelineno-0-1321">1321</a></span>
-<span class="normal"><a href="#__codelineno-0-1322">1322</a></span>
-<span class="normal"><a href="#__codelineno-0-1323">1323</a></span>
-<span class="normal"><a href="#__codelineno-0-1324">1324</a></span>
-<span class="normal"><a href="#__codelineno-0-1325">1325</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1315" name="__codelineno-0-1315"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uris</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">):</span>
-<a id="__codelineno-0-1316" name="__codelineno-0-1316"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot constructor arguments.</span>
-<a id="__codelineno-0-1317" name="__codelineno-0-1317"></a>
-<a id="__codelineno-0-1318" name="__codelineno-0-1318"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1319" name="__codelineno-0-1319"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1320" name="__codelineno-0-1320"></a><span class="sd">    uris : StringInput</span>
-<a id="__codelineno-0-1321" name="__codelineno-0-1321"></a><span class="sd">        One or more document URIs.</span>
-<a id="__codelineno-0-1322" name="__codelineno-0-1322"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1323" name="__codelineno-0-1323"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-1324" name="__codelineno-0-1324"></a>        <span class="n">uris</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">uris</span><span class="p">),</span>
-<a id="__codelineno-0-1325" name="__codelineno-0-1325"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1350">1350</a></span>
+<span class="normal"><a href="#__codelineno-0-1351">1351</a></span>
+<span class="normal"><a href="#__codelineno-0-1352">1352</a></span>
+<span class="normal"><a href="#__codelineno-0-1353">1353</a></span>
+<span class="normal"><a href="#__codelineno-0-1354">1354</a></span>
+<span class="normal"><a href="#__codelineno-0-1355">1355</a></span>
+<span class="normal"><a href="#__codelineno-0-1356">1356</a></span>
+<span class="normal"><a href="#__codelineno-0-1357">1357</a></span>
+<span class="normal"><a href="#__codelineno-0-1358">1358</a></span>
+<span class="normal"><a href="#__codelineno-0-1359">1359</a></span>
+<span class="normal"><a href="#__codelineno-0-1360">1360</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1350" name="__codelineno-0-1350"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uris</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1351" name="__codelineno-0-1351"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot constructor arguments.</span>
+<a id="__codelineno-0-1352" name="__codelineno-0-1352"></a>
+<a id="__codelineno-0-1353" name="__codelineno-0-1353"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1354" name="__codelineno-0-1354"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1355" name="__codelineno-0-1355"></a><span class="sd">    uris : StringInput</span>
+<a id="__codelineno-0-1356" name="__codelineno-0-1356"></a><span class="sd">        One or more document URIs.</span>
+<a id="__codelineno-0-1357" name="__codelineno-0-1357"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1358" name="__codelineno-0-1358"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-1359" name="__codelineno-0-1359"></a>        <span class="n">uris</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">uris</span><span class="p">),</span>
+<a id="__codelineno-0-1360" name="__codelineno-0-1360"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

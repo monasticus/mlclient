@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15871,8 +15901,8 @@
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ServerGetCall</span><span class="p">(</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">host_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">full_refs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">modules</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16042,8 +16072,7 @@ that uses the filesystem for modules. Default: false.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/calls/servers.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-252">252</a></span>
-<span class="normal"><a href="#__codelineno-0-253">253</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-253">253</a></span>
 <span class="normal"><a href="#__codelineno-0-254">254</a></span>
 <span class="normal"><a href="#__codelineno-0-255">255</a></span>
 <span class="normal"><a href="#__codelineno-0-256">256</a></span>
@@ -16099,64 +16128,69 @@ that uses the filesystem for modules. Default: false.</p>
 <span class="normal"><a href="#__codelineno-0-306">306</a></span>
 <span class="normal"><a href="#__codelineno-0-307">307</a></span>
 <span class="normal"><a href="#__codelineno-0-308">308</a></span>
-<span class="normal"><a href="#__codelineno-0-309">309</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-257" name="__codelineno-0-257"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="n">host_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="n">full_refs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="n">modules</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="p">):</span>
-<a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ServerGetCall instance.</span>
-<a id="__codelineno-0-263" name="__codelineno-0-263"></a>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">    server : str</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">        A server identifier. The server can be identified either by ID or name.</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">    group_id : str</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">        The id or name of the group to which the App Server belongs.</span>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">        This parameter is required.</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">    data_format : str</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">        The format of the returned data. Can be either html, json, or xml (default).</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">    view : str</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">        A specific view of the returned data.</span>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">        Can be properties-schema, config, edit, package, describe, status,</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">        xdmp:server-status or default.</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    host_id : str</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">        Meaningful only when view=status. Specifies to return the status for</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">        the server in the specified host. The host can be identified either by id</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">        or name.</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    full_refs : bool</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">        If set to true, full detail is returned for all relationship references.</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">        A value of false (the default) indicates to return detail only for</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">        first references. This parameter is not meaningful with view=package.</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    modules : bool</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">        Meaningful only with view=package. Whether to include a manifest</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">        of the modules database for the App Server in the results, if one exists.</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">        It is an error to request a modules database manifest for an App Server</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">        that uses the filesystem for modules. Default: false.</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>    <span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span> <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;xml&quot;</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="n">view</span> <span class="o">=</span> <span class="n">view</span> <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a>        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="n">accept</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">get_accept_header_for_format</span><span class="p">(</span><span class="n">data_format</span><span class="p">),</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a>    <span class="p">)</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a>    <span class="k">if</span> <span class="n">full_refs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>        <span class="n">full_refs</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_refs</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="k">if</span> <span class="n">modules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="n">modules</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">modules</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">server</span>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GROUP_ID_PARAM</span><span class="p">,</span> <span class="n">group_id</span><span class="p">)</span>
-<a id="__codelineno-0-305" name="__codelineno-0-305"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_PARAM</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_VIEW_PARAM</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_HOST_ID_PARAM</span><span class="p">,</span> <span class="n">host_id</span><span class="p">)</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FULL_REFS_PARAM</span><span class="p">,</span> <span class="n">full_refs</span><span class="p">)</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_MODULES_PARAM</span><span class="p">,</span> <span class="n">modules</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-309">309</a></span>
+<span class="normal"><a href="#__codelineno-0-310">310</a></span>
+<span class="normal"><a href="#__codelineno-0-311">311</a></span>
+<span class="normal"><a href="#__codelineno-0-312">312</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="n">host_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="n">full_refs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>    <span class="n">modules</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ServerGetCall instance.</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">    server : str</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">        A server identifier. The server can be identified either by ID or name.</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">    group_id : str</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">        The id or name of the group to which the App Server belongs.</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">        This parameter is required.</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">    data_format : str</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">        The format of the returned data. Can be either html, json, or xml (default).</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    view : str</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">        A specific view of the returned data.</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">        Can be properties-schema, config, edit, package, describe, status,</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">        xdmp:server-status or default.</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    host_id : str</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">        Meaningful only when view=status. Specifies to return the status for</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">        the server in the specified host. The host can be identified either by id</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">        or name.</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    full_refs : bool</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">        If set to true, full detail is returned for all relationship references.</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">        A value of false (the default) indicates to return detail only for</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">        first references. This parameter is not meaningful with view=package.</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    modules : bool</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">        Meaningful only with view=package. Whether to include a manifest</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">        of the modules database for the App Server in the results, if one exists.</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">        It is an error to request a modules database manifest for an App Server</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">        that uses the filesystem for modules. Default: false.</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span> <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;xml&quot;</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="n">view</span> <span class="o">=</span> <span class="n">view</span> <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="n">accept</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">get_accept_header_for_format</span><span class="p">(</span><span class="n">data_format</span><span class="p">),</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a>    <span class="p">)</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">server</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GROUP_ID_PARAM</span><span class="p">,</span> <span class="n">group_id</span><span class="p">)</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_PARAM</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_VIEW_PARAM</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_HOST_ID_PARAM</span><span class="p">,</span> <span class="n">host_id</span><span class="p">)</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_FULL_REFS_PARAM</span><span class="p">,</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a>        <span class="nb">str</span><span class="p">(</span><span class="n">full_refs</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="n">full_refs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>    <span class="p">)</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_MODULES_PARAM</span><span class="p">,</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>        <span class="nb">str</span><span class="p">(</span><span class="n">modules</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="n">modules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16183,7 +16217,7 @@ that uses the filesystem for modules. Default: false.</p>
   </span>
 
 <a href="#mlclient.calls.ServerGetCall.endpoint" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

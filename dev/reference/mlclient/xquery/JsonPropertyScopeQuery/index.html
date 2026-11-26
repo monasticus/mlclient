@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15911,37 +15941,37 @@ treated as a cts:word-query of the specified string.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-3722">3722</a></span>
-<span class="normal"><a href="#__codelineno-0-3723">3723</a></span>
-<span class="normal"><a href="#__codelineno-0-3724">3724</a></span>
-<span class="normal"><a href="#__codelineno-0-3725">3725</a></span>
-<span class="normal"><a href="#__codelineno-0-3726">3726</a></span>
-<span class="normal"><a href="#__codelineno-0-3727">3727</a></span>
-<span class="normal"><a href="#__codelineno-0-3728">3728</a></span>
-<span class="normal"><a href="#__codelineno-0-3729">3729</a></span>
-<span class="normal"><a href="#__codelineno-0-3730">3730</a></span>
-<span class="normal"><a href="#__codelineno-0-3731">3731</a></span>
-<span class="normal"><a href="#__codelineno-0-3732">3732</a></span>
-<span class="normal"><a href="#__codelineno-0-3733">3733</a></span>
-<span class="normal"><a href="#__codelineno-0-3734">3734</a></span>
-<span class="normal"><a href="#__codelineno-0-3735">3735</a></span>
-<span class="normal"><a href="#__codelineno-0-3736">3736</a></span>
-<span class="normal"><a href="#__codelineno-0-3737">3737</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-3722" name="__codelineno-0-3722"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">):</span>
-<a id="__codelineno-0-3723" name="__codelineno-0-3723"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-3724" name="__codelineno-0-3724"></a>
-<a id="__codelineno-0-3725" name="__codelineno-0-3725"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-3726" name="__codelineno-0-3726"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-3727" name="__codelineno-0-3727"></a><span class="sd">    property_name : StringInput</span>
-<a id="__codelineno-0-3728" name="__codelineno-0-3728"></a><span class="sd">        One or more property names to match. When multiple names are specified, the</span>
-<a id="__codelineno-0-3729" name="__codelineno-0-3729"></a><span class="sd">        query matches if any name matches.</span>
-<a id="__codelineno-0-3730" name="__codelineno-0-3730"></a><span class="sd">    query : str | XqyExpression</span>
-<a id="__codelineno-0-3731" name="__codelineno-0-3731"></a><span class="sd">        A query for the property to match. If a string is entered, the string is</span>
-<a id="__codelineno-0-3732" name="__codelineno-0-3732"></a><span class="sd">        treated as a cts:word-query of the specified string.</span>
-<a id="__codelineno-0-3733" name="__codelineno-0-3733"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-3734" name="__codelineno-0-3734"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-3735" name="__codelineno-0-3735"></a>        <span class="n">property_name</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">property_name</span><span class="p">),</span>
-<a id="__codelineno-0-3736" name="__codelineno-0-3736"></a>        <span class="n">query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">query</span><span class="p">),</span>
-<a id="__codelineno-0-3737" name="__codelineno-0-3737"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-3757">3757</a></span>
+<span class="normal"><a href="#__codelineno-0-3758">3758</a></span>
+<span class="normal"><a href="#__codelineno-0-3759">3759</a></span>
+<span class="normal"><a href="#__codelineno-0-3760">3760</a></span>
+<span class="normal"><a href="#__codelineno-0-3761">3761</a></span>
+<span class="normal"><a href="#__codelineno-0-3762">3762</a></span>
+<span class="normal"><a href="#__codelineno-0-3763">3763</a></span>
+<span class="normal"><a href="#__codelineno-0-3764">3764</a></span>
+<span class="normal"><a href="#__codelineno-0-3765">3765</a></span>
+<span class="normal"><a href="#__codelineno-0-3766">3766</a></span>
+<span class="normal"><a href="#__codelineno-0-3767">3767</a></span>
+<span class="normal"><a href="#__codelineno-0-3768">3768</a></span>
+<span class="normal"><a href="#__codelineno-0-3769">3769</a></span>
+<span class="normal"><a href="#__codelineno-0-3770">3770</a></span>
+<span class="normal"><a href="#__codelineno-0-3771">3771</a></span>
+<span class="normal"><a href="#__codelineno-0-3772">3772</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-3757" name="__codelineno-0-3757"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-3758" name="__codelineno-0-3758"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-3759" name="__codelineno-0-3759"></a>
+<a id="__codelineno-0-3760" name="__codelineno-0-3760"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-3761" name="__codelineno-0-3761"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-3762" name="__codelineno-0-3762"></a><span class="sd">    property_name : StringInput</span>
+<a id="__codelineno-0-3763" name="__codelineno-0-3763"></a><span class="sd">        One or more property names to match. When multiple names are specified, the</span>
+<a id="__codelineno-0-3764" name="__codelineno-0-3764"></a><span class="sd">        query matches if any name matches.</span>
+<a id="__codelineno-0-3765" name="__codelineno-0-3765"></a><span class="sd">    query : str | XqyExpression</span>
+<a id="__codelineno-0-3766" name="__codelineno-0-3766"></a><span class="sd">        A query for the property to match. If a string is entered, the string is</span>
+<a id="__codelineno-0-3767" name="__codelineno-0-3767"></a><span class="sd">        treated as a cts:word-query of the specified string.</span>
+<a id="__codelineno-0-3768" name="__codelineno-0-3768"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-3769" name="__codelineno-0-3769"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-3770" name="__codelineno-0-3770"></a>        <span class="n">property_name</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">property_name</span><span class="p">),</span>
+<a id="__codelineno-0-3771" name="__codelineno-0-3771"></a>        <span class="n">query</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">query</span><span class="p">),</span>
+<a id="__codelineno-0-3772" name="__codelineno-0-3772"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

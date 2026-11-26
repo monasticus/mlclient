@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15950,75 +15980,75 @@ database index.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5178">5178</a></span>
-<span class="normal"><a href="#__codelineno-0-5179">5179</a></span>
-<span class="normal"><a href="#__codelineno-0-5180">5180</a></span>
-<span class="normal"><a href="#__codelineno-0-5181">5181</a></span>
-<span class="normal"><a href="#__codelineno-0-5182">5182</a></span>
-<span class="normal"><a href="#__codelineno-0-5183">5183</a></span>
-<span class="normal"><a href="#__codelineno-0-5184">5184</a></span>
-<span class="normal"><a href="#__codelineno-0-5185">5185</a></span>
-<span class="normal"><a href="#__codelineno-0-5186">5186</a></span>
-<span class="normal"><a href="#__codelineno-0-5187">5187</a></span>
-<span class="normal"><a href="#__codelineno-0-5188">5188</a></span>
-<span class="normal"><a href="#__codelineno-0-5189">5189</a></span>
-<span class="normal"><a href="#__codelineno-0-5190">5190</a></span>
-<span class="normal"><a href="#__codelineno-0-5191">5191</a></span>
-<span class="normal"><a href="#__codelineno-0-5192">5192</a></span>
-<span class="normal"><a href="#__codelineno-0-5193">5193</a></span>
-<span class="normal"><a href="#__codelineno-0-5194">5194</a></span>
-<span class="normal"><a href="#__codelineno-0-5195">5195</a></span>
-<span class="normal"><a href="#__codelineno-0-5196">5196</a></span>
-<span class="normal"><a href="#__codelineno-0-5197">5197</a></span>
-<span class="normal"><a href="#__codelineno-0-5198">5198</a></span>
-<span class="normal"><a href="#__codelineno-0-5199">5199</a></span>
-<span class="normal"><a href="#__codelineno-0-5200">5200</a></span>
-<span class="normal"><a href="#__codelineno-0-5201">5201</a></span>
-<span class="normal"><a href="#__codelineno-0-5202">5202</a></span>
-<span class="normal"><a href="#__codelineno-0-5203">5203</a></span>
-<span class="normal"><a href="#__codelineno-0-5204">5204</a></span>
-<span class="normal"><a href="#__codelineno-0-5205">5205</a></span>
-<span class="normal"><a href="#__codelineno-0-5206">5206</a></span>
-<span class="normal"><a href="#__codelineno-0-5207">5207</a></span>
-<span class="normal"><a href="#__codelineno-0-5208">5208</a></span>
-<span class="normal"><a href="#__codelineno-0-5209">5209</a></span>
-<span class="normal"><a href="#__codelineno-0-5210">5210</a></span>
-<span class="normal"><a href="#__codelineno-0-5211">5211</a></span>
-<span class="normal"><a href="#__codelineno-0-5212">5212</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5178" name="__codelineno-0-5178"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-5179" name="__codelineno-0-5179"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-5180" name="__codelineno-0-5180"></a>    <span class="n">nodes</span><span class="p">:</span> <span class="n">NodeInput</span><span class="p">,</span>
-<a id="__codelineno-0-5181" name="__codelineno-0-5181"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-5182" name="__codelineno-0-5182"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5183" name="__codelineno-0-5183"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">NodeInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5184" name="__codelineno-0-5184"></a><span class="p">):</span>
-<a id="__codelineno-0-5185" name="__codelineno-0-5185"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-5186" name="__codelineno-0-5186"></a>
-<a id="__codelineno-0-5187" name="__codelineno-0-5187"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-5188" name="__codelineno-0-5188"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-5189" name="__codelineno-0-5189"></a><span class="sd">    nodes : NodeInput</span>
-<a id="__codelineno-0-5190" name="__codelineno-0-5190"></a><span class="sd">        Some model nodes.</span>
-<a id="__codelineno-0-5191" name="__codelineno-0-5191"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
-<a id="__codelineno-0-5192" name="__codelineno-0-5192"></a><span class="sd">        A weight for this query. Higher weights move search results up in the</span>
-<a id="__codelineno-0-5193" name="__codelineno-0-5193"></a><span class="sd">        relevance order. The default is 1.0. The weight should be between 64 and</span>
-<a id="__codelineno-0-5194" name="__codelineno-0-5194"></a><span class="sd">        -16. Weights greater than 64 will have the same effect as a weight of 64.</span>
-<a id="__codelineno-0-5195" name="__codelineno-0-5195"></a><span class="sd">        Weights less than the absolute value of 0.0625 (between -0.0625 and 0.0625)</span>
-<a id="__codelineno-0-5196" name="__codelineno-0-5196"></a><span class="sd">        are rounded to 0, which means that they do not contribute to the score.</span>
-<a id="__codelineno-0-5197" name="__codelineno-0-5197"></a><span class="sd">    options : NodeInput, optional</span>
-<a id="__codelineno-0-5198" name="__codelineno-0-5198"></a><span class="sd">        An XML representation of the options for defining which terms to generate</span>
-<a id="__codelineno-0-5199" name="__codelineno-0-5199"></a><span class="sd">        and how to evaluate them. The options node must be in the</span>
-<a id="__codelineno-0-5200" name="__codelineno-0-5200"></a><span class="sd">        cts:distinctive-terms namespace. The following is a sample options node :</span>
-<a id="__codelineno-0-5201" name="__codelineno-0-5201"></a><span class="sd">        &lt;options xmlns=&quot;cts:distinctive-terms&quot;&gt; &lt;max-terms&gt;20&lt;/max-terms&gt; &lt;/options&gt;</span>
-<a id="__codelineno-0-5202" name="__codelineno-0-5202"></a><span class="sd">        See the cts:distinctive-terms options for the valid options to use with this</span>
-<a id="__codelineno-0-5203" name="__codelineno-0-5203"></a><span class="sd">        function. Note that enabling index settings that are disabled in the</span>
-<a id="__codelineno-0-5204" name="__codelineno-0-5204"></a><span class="sd">        database configuration will not affect the results, as similar documents</span>
-<a id="__codelineno-0-5205" name="__codelineno-0-5205"></a><span class="sd">        will not be found on the basis of terms that do not exist in the actual</span>
-<a id="__codelineno-0-5206" name="__codelineno-0-5206"></a><span class="sd">        database index.</span>
-<a id="__codelineno-0-5207" name="__codelineno-0-5207"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-5208" name="__codelineno-0-5208"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-5209" name="__codelineno-0-5209"></a>        <span class="n">nodes</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span>
-<a id="__codelineno-0-5210" name="__codelineno-0-5210"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
-<a id="__codelineno-0-5211" name="__codelineno-0-5211"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
-<a id="__codelineno-0-5212" name="__codelineno-0-5212"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5217">5217</a></span>
+<span class="normal"><a href="#__codelineno-0-5218">5218</a></span>
+<span class="normal"><a href="#__codelineno-0-5219">5219</a></span>
+<span class="normal"><a href="#__codelineno-0-5220">5220</a></span>
+<span class="normal"><a href="#__codelineno-0-5221">5221</a></span>
+<span class="normal"><a href="#__codelineno-0-5222">5222</a></span>
+<span class="normal"><a href="#__codelineno-0-5223">5223</a></span>
+<span class="normal"><a href="#__codelineno-0-5224">5224</a></span>
+<span class="normal"><a href="#__codelineno-0-5225">5225</a></span>
+<span class="normal"><a href="#__codelineno-0-5226">5226</a></span>
+<span class="normal"><a href="#__codelineno-0-5227">5227</a></span>
+<span class="normal"><a href="#__codelineno-0-5228">5228</a></span>
+<span class="normal"><a href="#__codelineno-0-5229">5229</a></span>
+<span class="normal"><a href="#__codelineno-0-5230">5230</a></span>
+<span class="normal"><a href="#__codelineno-0-5231">5231</a></span>
+<span class="normal"><a href="#__codelineno-0-5232">5232</a></span>
+<span class="normal"><a href="#__codelineno-0-5233">5233</a></span>
+<span class="normal"><a href="#__codelineno-0-5234">5234</a></span>
+<span class="normal"><a href="#__codelineno-0-5235">5235</a></span>
+<span class="normal"><a href="#__codelineno-0-5236">5236</a></span>
+<span class="normal"><a href="#__codelineno-0-5237">5237</a></span>
+<span class="normal"><a href="#__codelineno-0-5238">5238</a></span>
+<span class="normal"><a href="#__codelineno-0-5239">5239</a></span>
+<span class="normal"><a href="#__codelineno-0-5240">5240</a></span>
+<span class="normal"><a href="#__codelineno-0-5241">5241</a></span>
+<span class="normal"><a href="#__codelineno-0-5242">5242</a></span>
+<span class="normal"><a href="#__codelineno-0-5243">5243</a></span>
+<span class="normal"><a href="#__codelineno-0-5244">5244</a></span>
+<span class="normal"><a href="#__codelineno-0-5245">5245</a></span>
+<span class="normal"><a href="#__codelineno-0-5246">5246</a></span>
+<span class="normal"><a href="#__codelineno-0-5247">5247</a></span>
+<span class="normal"><a href="#__codelineno-0-5248">5248</a></span>
+<span class="normal"><a href="#__codelineno-0-5249">5249</a></span>
+<span class="normal"><a href="#__codelineno-0-5250">5250</a></span>
+<span class="normal"><a href="#__codelineno-0-5251">5251</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-5217" name="__codelineno-0-5217"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-5218" name="__codelineno-0-5218"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-5219" name="__codelineno-0-5219"></a>    <span class="n">nodes</span><span class="p">:</span> <span class="n">NodeInput</span><span class="p">,</span>
+<a id="__codelineno-0-5220" name="__codelineno-0-5220"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5221" name="__codelineno-0-5221"></a>    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">XqyExpression</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5222" name="__codelineno-0-5222"></a>    <span class="n">options</span><span class="p">:</span> <span class="n">NodeInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-5223" name="__codelineno-0-5223"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-5224" name="__codelineno-0-5224"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-5225" name="__codelineno-0-5225"></a>
+<a id="__codelineno-0-5226" name="__codelineno-0-5226"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-5227" name="__codelineno-0-5227"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-5228" name="__codelineno-0-5228"></a><span class="sd">    nodes : NodeInput</span>
+<a id="__codelineno-0-5229" name="__codelineno-0-5229"></a><span class="sd">        Some model nodes.</span>
+<a id="__codelineno-0-5230" name="__codelineno-0-5230"></a><span class="sd">    weight : float | XqyExpression | None, optional</span>
+<a id="__codelineno-0-5231" name="__codelineno-0-5231"></a><span class="sd">        A weight for this query. Higher weights move search results up in the</span>
+<a id="__codelineno-0-5232" name="__codelineno-0-5232"></a><span class="sd">        relevance order. The default is 1.0. The weight should be between 64 and</span>
+<a id="__codelineno-0-5233" name="__codelineno-0-5233"></a><span class="sd">        -16. Weights greater than 64 will have the same effect as a weight of 64.</span>
+<a id="__codelineno-0-5234" name="__codelineno-0-5234"></a><span class="sd">        Weights less than the absolute value of 0.0625 (between -0.0625 and 0.0625)</span>
+<a id="__codelineno-0-5235" name="__codelineno-0-5235"></a><span class="sd">        are rounded to 0, which means that they do not contribute to the score.</span>
+<a id="__codelineno-0-5236" name="__codelineno-0-5236"></a><span class="sd">    options : NodeInput, optional</span>
+<a id="__codelineno-0-5237" name="__codelineno-0-5237"></a><span class="sd">        An XML representation of the options for defining which terms to generate</span>
+<a id="__codelineno-0-5238" name="__codelineno-0-5238"></a><span class="sd">        and how to evaluate them. The options node must be in the</span>
+<a id="__codelineno-0-5239" name="__codelineno-0-5239"></a><span class="sd">        cts:distinctive-terms namespace. The following is a sample options node :</span>
+<a id="__codelineno-0-5240" name="__codelineno-0-5240"></a><span class="sd">        &lt;options xmlns=&quot;cts:distinctive-terms&quot;&gt; &lt;max-terms&gt;20&lt;/max-terms&gt; &lt;/options&gt;</span>
+<a id="__codelineno-0-5241" name="__codelineno-0-5241"></a><span class="sd">        See the cts:distinctive-terms options for the valid options to use with this</span>
+<a id="__codelineno-0-5242" name="__codelineno-0-5242"></a><span class="sd">        function. Note that enabling index settings that are disabled in the</span>
+<a id="__codelineno-0-5243" name="__codelineno-0-5243"></a><span class="sd">        database configuration will not affect the results, as similar documents</span>
+<a id="__codelineno-0-5244" name="__codelineno-0-5244"></a><span class="sd">        will not be found on the basis of terms that do not exist in the actual</span>
+<a id="__codelineno-0-5245" name="__codelineno-0-5245"></a><span class="sd">        database index.</span>
+<a id="__codelineno-0-5246" name="__codelineno-0-5246"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-5247" name="__codelineno-0-5247"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-5248" name="__codelineno-0-5248"></a>        <span class="n">nodes</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span>
+<a id="__codelineno-0-5249" name="__codelineno-0-5249"></a>        <span class="n">weight</span><span class="o">=</span><span class="n">_optional_double</span><span class="p">(</span><span class="n">weight</span><span class="p">),</span>
+<a id="__codelineno-0-5250" name="__codelineno-0-5250"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_optional</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+<a id="__codelineno-0-5251" name="__codelineno-0-5251"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

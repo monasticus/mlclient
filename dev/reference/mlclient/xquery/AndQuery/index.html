@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15909,33 +15939,33 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-730">730</a></span>
-<span class="normal"><a href="#__codelineno-0-731">731</a></span>
-<span class="normal"><a href="#__codelineno-0-732">732</a></span>
-<span class="normal"><a href="#__codelineno-0-733">733</a></span>
-<span class="normal"><a href="#__codelineno-0-734">734</a></span>
-<span class="normal"><a href="#__codelineno-0-735">735</a></span>
-<span class="normal"><a href="#__codelineno-0-736">736</a></span>
-<span class="normal"><a href="#__codelineno-0-737">737</a></span>
-<span class="normal"><a href="#__codelineno-0-738">738</a></span>
-<span class="normal"><a href="#__codelineno-0-739">739</a></span>
-<span class="normal"><a href="#__codelineno-0-740">740</a></span>
-<span class="normal"><a href="#__codelineno-0-741">741</a></span>
-<span class="normal"><a href="#__codelineno-0-742">742</a></span>
-<span class="normal"><a href="#__codelineno-0-743">743</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-730" name="__codelineno-0-730"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<a id="__codelineno-0-731" name="__codelineno-0-731"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot the subqueries and optional ordering flags.</span>
-<a id="__codelineno-0-732" name="__codelineno-0-732"></a>
-<a id="__codelineno-0-733" name="__codelineno-0-733"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-734" name="__codelineno-0-734"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-735" name="__codelineno-0-735"></a><span class="sd">    queries : StringInput</span>
-<a id="__codelineno-0-736" name="__codelineno-0-736"></a><span class="sd">        Subqueries or strings implicitly converted by MarkLogic to word queries.</span>
-<a id="__codelineno-0-737" name="__codelineno-0-737"></a><span class="sd">    options : StringInput, default None</span>
-<a id="__codelineno-0-738" name="__codelineno-0-738"></a><span class="sd">        Native and-query options.</span>
-<a id="__codelineno-0-739" name="__codelineno-0-739"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-740" name="__codelineno-0-740"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-741" name="__codelineno-0-741"></a>        <span class="n">queries</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">queries</span><span class="p">),</span>
-<a id="__codelineno-0-742" name="__codelineno-0-742"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_choice_options_argument</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">_ORDER_OPTIONS</span><span class="p">,</span> <span class="s2">&quot;and-query&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-743" name="__codelineno-0-743"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-761">761</a></span>
+<span class="normal"><a href="#__codelineno-0-762">762</a></span>
+<span class="normal"><a href="#__codelineno-0-763">763</a></span>
+<span class="normal"><a href="#__codelineno-0-764">764</a></span>
+<span class="normal"><a href="#__codelineno-0-765">765</a></span>
+<span class="normal"><a href="#__codelineno-0-766">766</a></span>
+<span class="normal"><a href="#__codelineno-0-767">767</a></span>
+<span class="normal"><a href="#__codelineno-0-768">768</a></span>
+<span class="normal"><a href="#__codelineno-0-769">769</a></span>
+<span class="normal"><a href="#__codelineno-0-770">770</a></span>
+<span class="normal"><a href="#__codelineno-0-771">771</a></span>
+<span class="normal"><a href="#__codelineno-0-772">772</a></span>
+<span class="normal"><a href="#__codelineno-0-773">773</a></span>
+<span class="normal"><a href="#__codelineno-0-774">774</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-761" name="__codelineno-0-761"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">:</span> <span class="n">StringInput</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">StringInput</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-762" name="__codelineno-0-762"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot the subqueries and optional ordering flags.</span>
+<a id="__codelineno-0-763" name="__codelineno-0-763"></a>
+<a id="__codelineno-0-764" name="__codelineno-0-764"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-765" name="__codelineno-0-765"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-766" name="__codelineno-0-766"></a><span class="sd">    queries : StringInput</span>
+<a id="__codelineno-0-767" name="__codelineno-0-767"></a><span class="sd">        Subqueries or strings implicitly converted by MarkLogic to word queries.</span>
+<a id="__codelineno-0-768" name="__codelineno-0-768"></a><span class="sd">    options : StringInput, default None</span>
+<a id="__codelineno-0-769" name="__codelineno-0-769"></a><span class="sd">        Native and-query options.</span>
+<a id="__codelineno-0-770" name="__codelineno-0-770"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-771" name="__codelineno-0-771"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-772" name="__codelineno-0-772"></a>        <span class="n">queries</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="n">queries</span><span class="p">),</span>
+<a id="__codelineno-0-773" name="__codelineno-0-773"></a>        <span class="n">options</span><span class="o">=</span><span class="n">_choice_options_argument</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">_ORDER_OPTIONS</span><span class="p">,</span> <span class="s2">&quot;and-query&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-774" name="__codelineno-0-774"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

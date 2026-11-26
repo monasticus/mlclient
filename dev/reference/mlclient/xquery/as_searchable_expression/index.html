@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15851,21 +15881,21 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-637">637</a></span>
-<span class="normal"><a href="#__codelineno-0-638">638</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-638">638</a></span>
 <span class="normal"><a href="#__codelineno-0-639">639</a></span>
 <span class="normal"><a href="#__codelineno-0-640">640</a></span>
 <span class="normal"><a href="#__codelineno-0-641">641</a></span>
 <span class="normal"><a href="#__codelineno-0-642">642</a></span>
 <span class="normal"><a href="#__codelineno-0-643">643</a></span>
-<span class="normal"><a href="#__codelineno-0-644">644</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-637" name="__codelineno-0-637"></a><span class="k">def</span><span class="w"> </span><span class="nf">as_searchable_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XqyExpression</span><span class="p">:</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a path string or retain an existing searchable expression.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-640" name="__codelineno-0-640"></a>        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">XqyExpression</span><span class="p">):</span>
-<a id="__codelineno-0-642" name="__codelineno-0-642"></a>        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;searchable expressions require a path string or XqyExpression&quot;</span>
-<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-644" name="__codelineno-0-644"></a>    <span class="k">return</span> <span class="n">expression</span>
+<span class="normal"><a href="#__codelineno-0-644">644</a></span>
+<span class="normal"><a href="#__codelineno-0-645">645</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="k">def</span><span class="w"> </span><span class="nf">as_searchable_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XqyExpression</span><span class="p">:</span>
+<a id="__codelineno-0-639" name="__codelineno-0-639"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a path string or retain an existing searchable expression.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-640" name="__codelineno-0-640"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a>        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">XqyExpression</span><span class="p">):</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;searchable expressions require a path string or XqyExpression&quot;</span>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a>    <span class="k">return</span> <span class="n">expression</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

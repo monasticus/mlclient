@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15976,7 +16006,8 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-411">411</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-410">410</a></span>
+<span class="normal"><a href="#__codelineno-0-411">411</a></span>
 <span class="normal"><a href="#__codelineno-0-412">412</a></span>
 <span class="normal"><a href="#__codelineno-0-413">413</a></span>
 <span class="normal"><a href="#__codelineno-0-414">414</a></span>
@@ -15991,24 +16022,23 @@
 <span class="normal"><a href="#__codelineno-0-423">423</a></span>
 <span class="normal"><a href="#__codelineno-0-424">424</a></span>
 <span class="normal"><a href="#__codelineno-0-425">425</a></span>
-<span class="normal"><a href="#__codelineno-0-426">426</a></span>
-<span class="normal"><a href="#__codelineno-0-427">427</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Map the guarded path over hits without imposing document order.</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">    ctx : XqyCompilationContext</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="sd">        Shared bindings and native path validation for this evaluation.</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">    str</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="sd">        Simple-map expression preserving the inner sequence&#39;s hit order.</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>    <span class="n">inner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">,</span> <span class="p">(</span><span class="n">FunctionCall</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Range</span><span class="p">)):</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>        <span class="n">inner</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2">)&quot;</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2"> ! </span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;xpath&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="normal"><a href="#__codelineno-0-426">426</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">XqyCompilationContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Map the guarded path over hits without imposing document order.</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">    ctx : XqyCompilationContext</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">        Shared bindings and native path validation for this evaluation.</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="sd">    str</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">        Simple-map expression preserving the inner sequence&#39;s hit order.</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>    <span class="n">inner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">,</span> <span class="p">(</span><span class="n">FunctionCall</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Range</span><span class="p">)):</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>        <span class="n">inner</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2">)&quot;</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="s2"> ! </span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;xpath&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

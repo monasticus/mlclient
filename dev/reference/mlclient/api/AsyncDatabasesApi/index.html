@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -16018,9 +16048,9 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-319">319</a></span>
-<span class="normal"><a href="#__codelineno-0-320">320</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api</span><span class="p">:</span> <span class="n">AsyncApiClient</span><span class="p">):</span>
-<a id="__codelineno-0-320" name="__codelineno-0-320"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_api</span> <span class="o">=</span> <span class="n">api</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api</span><span class="p">:</span> <span class="n">AsyncApiClient</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_api</span> <span class="o">=</span> <span class="n">api</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16049,7 +16079,11 @@
   </span>
 
 <a href="#mlclient.api.AsyncDatabasesApi.create" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">create</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">create</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16158,9 +16192,7 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-361">361</a></span>
-<span class="normal"><a href="#__codelineno-0-362">362</a></span>
-<span class="normal"><a href="#__codelineno-0-363">363</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-363">363</a></span>
 <span class="normal"><a href="#__codelineno-0-364">364</a></span>
 <span class="normal"><a href="#__codelineno-0-365">365</a></span>
 <span class="normal"><a href="#__codelineno-0-366">366</a></span>
@@ -16191,40 +16223,42 @@ read timeouts.</p>
 <span class="normal"><a href="#__codelineno-0-391">391</a></span>
 <span class="normal"><a href="#__codelineno-0-392">392</a></span>
 <span class="normal"><a href="#__codelineno-0-393">393</a></span>
-<span class="normal"><a href="#__codelineno-0-394">394</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-361" name="__codelineno-0-361"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span>
-<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
-<a id="__codelineno-0-364" name="__codelineno-0-364"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-366" name="__codelineno-0-366"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new database in the cluster.</span>
-<a id="__codelineno-0-368" name="__codelineno-0-368"></a>
-<a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/POST/manage/v2/databases</span>
+<span class="normal"><a href="#__codelineno-0-394">394</a></span>
+<span class="normal"><a href="#__codelineno-0-395">395</a></span>
+<span class="normal"><a href="#__codelineno-0-396">396</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-363" name="__codelineno-0-363"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new database in the cluster.</span>
 <a id="__codelineno-0-370" name="__codelineno-0-370"></a>
-<a id="__codelineno-0-371" name="__codelineno-0-371"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-372" name="__codelineno-0-372"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="sd">    body : str | dict</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="sd">        A database properties in XML or JSON format.</span>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">        An HTTP response</span>
-<a id="__codelineno-0-385" name="__codelineno-0-385"></a>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-393" name="__codelineno-0-393"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/POST/manage/v2/databases</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">    body : str | dict</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">        A database properties in XML or JSON format.</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382"></a>
+<a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">        An HTTP response</span>
+<a id="__codelineno-0-387" name="__codelineno-0-387"></a>
+<a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-394" name="__codelineno-0-394"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-395" name="__codelineno-0-395"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16247,7 +16281,7 @@ read timeouts.</p>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">forest_delete</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
@@ -16377,9 +16411,7 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-483">483</a></span>
-<span class="normal"><a href="#__codelineno-0-484">484</a></span>
-<span class="normal"><a href="#__codelineno-0-485">485</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-485">485</a></span>
 <span class="normal"><a href="#__codelineno-0-486">486</a></span>
 <span class="normal"><a href="#__codelineno-0-487">487</a></span>
 <span class="normal"><a href="#__codelineno-0-488">488</a></span>
@@ -16417,47 +16449,49 @@ read timeouts.</p>
 <span class="normal"><a href="#__codelineno-0-520">520</a></span>
 <span class="normal"><a href="#__codelineno-0-521">521</a></span>
 <span class="normal"><a href="#__codelineno-0-522">522</a></span>
-<span class="normal"><a href="#__codelineno-0-523">523</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="n">forest_delete</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete the specified database from the cluster.</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name]</span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
+<span class="normal"><a href="#__codelineno-0-525">525</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="n">forest_delete</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete the specified database from the cluster.</span>
 <a id="__codelineno-0-493" name="__codelineno-0-493"></a>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">    database : str</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    forest_delete : str</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        Specifies to delete the forests attached to the database.</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        If unspecified, the forests will not be affected.</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        If &quot;configuration&quot; is specified, the forest configuration will be removed</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        but public forest data will remain.</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        If &quot;data&quot; is specified, the forest configuration and data will be removed.</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">        An HTTP response</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseDeleteCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">forest_delete</span><span class="o">=</span><span class="n">forest_delete</span><span class="p">)</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name]</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    database : str</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    forest_delete : str</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        Specifies to delete the forests attached to the database.</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        If unspecified, the forests will not be affected.</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        If &quot;configuration&quot; is specified, the forest configuration will be removed</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">        but public forest data will remain.</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">        If &quot;data&quot; is specified, the forest configuration and data will be removed.</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">        An HTTP response</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseDeleteCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">forest_delete</span><span class="o">=</span><span class="n">forest_delete</span><span class="p">)</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16481,7 +16515,7 @@ read timeouts.</p>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
@@ -16627,9 +16661,7 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-396">396</a></span>
-<span class="normal"><a href="#__codelineno-0-397">397</a></span>
-<span class="normal"><a href="#__codelineno-0-398">398</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-398">398</a></span>
 <span class="normal"><a href="#__codelineno-0-399">399</a></span>
 <span class="normal"><a href="#__codelineno-0-400">400</a></span>
 <span class="normal"><a href="#__codelineno-0-401">401</a></span>
@@ -16671,51 +16703,53 @@ read timeouts.</p>
 <span class="normal"><a href="#__codelineno-0-437">437</a></span>
 <span class="normal"><a href="#__codelineno-0-438">438</a></span>
 <span class="normal"><a href="#__codelineno-0-439">439</a></span>
-<span class="normal"><a href="#__codelineno-0-440">440</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-398" name="__codelineno-0-398"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve information on the specified database.</span>
-<a id="__codelineno-0-405" name="__codelineno-0-405"></a>
-<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">    The database can be identified either by ID or name.</span>
+<span class="normal"><a href="#__codelineno-0-440">440</a></span>
+<span class="normal"><a href="#__codelineno-0-441">441</a></span>
+<span class="normal"><a href="#__codelineno-0-442">442</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
+<a id="__codelineno-0-399" name="__codelineno-0-399"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-403" name="__codelineno-0-403"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-405" name="__codelineno-0-405"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve information on the specified database.</span>
 <a id="__codelineno-0-407" name="__codelineno-0-407"></a>
-<a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">    The database can be identified either by ID or name.</span>
 <a id="__codelineno-0-409" name="__codelineno-0-409"></a>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">    database : str</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">    data_format : str</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">        The format of the returned data. Can be either html, json, or xml (default).</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">        This parameter is not meaningful with view=edit.</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="sd">    view : str</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="sd">        A specific view of the returned data.</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="sd">        Can be: properties-schema, package, describe, config, counts, edit, status,</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="sd">        forest-storage, or default.</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">        An HTTP response with the database details</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]</span>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">    database : str</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">    data_format : str</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="sd">        The format of the returned data. Can be either html, json, or xml (default).</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="sd">        This parameter is not meaningful with view=edit.</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="sd">    view : str</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="sd">        A specific view of the returned data.</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">        Can be: properties-schema, package, describe, config, counts, edit, status,</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="sd">        forest-storage, or default.</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">        An HTTP response with the database details</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16738,7 +16772,7 @@ read timeouts.</p>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="o">*</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
@@ -16865,9 +16899,7 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-322">322</a></span>
-<span class="normal"><a href="#__codelineno-0-323">323</a></span>
-<span class="normal"><a href="#__codelineno-0-324">324</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-324">324</a></span>
 <span class="normal"><a href="#__codelineno-0-325">325</a></span>
 <span class="normal"><a href="#__codelineno-0-326">326</a></span>
 <span class="normal"><a href="#__codelineno-0-327">327</a></span>
@@ -16902,44 +16934,46 @@ read timeouts.</p>
 <span class="normal"><a href="#__codelineno-0-356">356</a></span>
 <span class="normal"><a href="#__codelineno-0-357">357</a></span>
 <span class="normal"><a href="#__codelineno-0-358">358</a></span>
-<span class="normal"><a href="#__codelineno-0-359">359</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_list</span><span class="p">(</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-324" name="__codelineno-0-324"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve a summary of the databases in the cluster.</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases</span>
+<span class="normal"><a href="#__codelineno-0-359">359</a></span>
+<span class="normal"><a href="#__codelineno-0-360">360</a></span>
+<span class="normal"><a href="#__codelineno-0-361">361</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-324" name="__codelineno-0-324"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_list</span><span class="p">(</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve a summary of the databases in the cluster.</span>
 <a id="__codelineno-0-332" name="__codelineno-0-332"></a>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-335" name="__codelineno-0-335"></a><span class="sd">    data_format : str</span>
-<a id="__codelineno-0-336" name="__codelineno-0-336"></a><span class="sd">        The format of the returned data. Can be either html, json, or xml (default).</span>
-<a id="__codelineno-0-337" name="__codelineno-0-337"></a><span class="sd">    view : str</span>
-<a id="__codelineno-0-338" name="__codelineno-0-338"></a><span class="sd">        A specific view of the returned data.</span>
-<a id="__codelineno-0-339" name="__codelineno-0-339"></a><span class="sd">        Can be schema, properties-schema, metrics, package, describe, or default.</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">        An HTTP response with the databases summary</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-357" name="__codelineno-0-357"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
-<a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a><span class="sd">    data_format : str</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a><span class="sd">        The format of the returned data. Can be either html, json, or xml (default).</span>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a><span class="sd">    view : str</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="sd">        A specific view of the returned data.</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="sd">        Can be schema, properties-schema, metrics, package, describe, or default.</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">        An HTTP response with the databases summary</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16962,7 +16996,7 @@ read timeouts.</p>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
@@ -17089,9 +17123,7 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-525">525</a></span>
-<span class="normal"><a href="#__codelineno-0-526">526</a></span>
-<span class="normal"><a href="#__codelineno-0-527">527</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-527">527</a></span>
 <span class="normal"><a href="#__codelineno-0-528">528</a></span>
 <span class="normal"><a href="#__codelineno-0-529">529</a></span>
 <span class="normal"><a href="#__codelineno-0-530">530</a></span>
@@ -17126,44 +17158,46 @@ read timeouts.</p>
 <span class="normal"><a href="#__codelineno-0-559">559</a></span>
 <span class="normal"><a href="#__codelineno-0-560">560</a></span>
 <span class="normal"><a href="#__codelineno-0-561">561</a></span>
-<span class="normal"><a href="#__codelineno-0-562">562</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_properties</span><span class="p">(</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve the modifiable properties of the specified database.</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties</span>
+<span class="normal"><a href="#__codelineno-0-562">562</a></span>
+<span class="normal"><a href="#__codelineno-0-563">563</a></span>
+<span class="normal"><a href="#__codelineno-0-564">564</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_properties</span><span class="p">(</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve the modifiable properties of the specified database.</span>
 <a id="__codelineno-0-535" name="__codelineno-0-535"></a>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">    database : str</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">    data_format : str</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">        The format of the returned data. Can be either json or xml (default).</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">        This parameter overrides the Accept header if both are present.</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">        An HTTP response with the database properties</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">    database : str</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">    data_format : str</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">        The format of the returned data. Can be either json or xml (default).</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">        This parameter overrides the Accept header if both are present.</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">        An HTTP response with the database properties</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17183,8 +17217,11 @@ read timeouts.</p>
 
 <a href="#mlclient.api.AsyncDatabasesApi.post" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">post</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17311,9 +17348,7 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-442">442</a></span>
-<span class="normal"><a href="#__codelineno-0-443">443</a></span>
-<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-444">444</a></span>
 <span class="normal"><a href="#__codelineno-0-445">445</a></span>
 <span class="normal"><a href="#__codelineno-0-446">446</a></span>
 <span class="normal"><a href="#__codelineno-0-447">447</a></span>
@@ -17350,46 +17385,48 @@ read timeouts.</p>
 <span class="normal"><a href="#__codelineno-0-478">478</a></span>
 <span class="normal"><a href="#__codelineno-0-479">479</a></span>
 <span class="normal"><a href="#__codelineno-0-480">480</a></span>
-<span class="normal"><a href="#__codelineno-0-481">481</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Clear or configure the specified database.</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">    Can be used to clear the contents of the named database and to perform</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">    various configuration operations on the database.</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]</span>
+<span class="normal"><a href="#__codelineno-0-481">481</a></span>
+<span class="normal"><a href="#__codelineno-0-482">482</a></span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Clear or configure the specified database.</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">    Can be used to clear the contents of the named database and to perform</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">    various configuration operations on the database.</span>
 <a id="__codelineno-0-455" name="__codelineno-0-455"></a>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">    database : str</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">    body : str | dict</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        A database properties in XML or JSON format.</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">        An HTTP response</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePostCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">    database : str</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">    body : str | dict</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        A database properties in XML or JSON format.</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">        An HTTP response</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePostCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -17409,8 +17446,11 @@ read timeouts.</p>
 
 <a href="#mlclient.api.AsyncDatabasesApi.put_properties" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">put_properties</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17535,9 +17575,7 @@ read timeouts.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/api/databases.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-564">564</a></span>
-<span class="normal"><a href="#__codelineno-0-565">565</a></span>
-<span class="normal"><a href="#__codelineno-0-566">566</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-566">566</a></span>
 <span class="normal"><a href="#__codelineno-0-567">567</a></span>
 <span class="normal"><a href="#__codelineno-0-568">568</a></span>
 <span class="normal"><a href="#__codelineno-0-569">569</a></span>
@@ -17571,43 +17609,45 @@ read timeouts.</p>
 <span class="normal"><a href="#__codelineno-0-597">597</a></span>
 <span class="normal"><a href="#__codelineno-0-598">598</a></span>
 <span class="normal"><a href="#__codelineno-0-599">599</a></span>
-<span class="normal"><a href="#__codelineno-0-600">600</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put_properties</span><span class="p">(</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Modify the properties of the specified database.</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties</span>
+<span class="normal"><a href="#__codelineno-0-600">600</a></span>
+<span class="normal"><a href="#__codelineno-0-601">601</a></span>
+<span class="normal"><a href="#__codelineno-0-602">602</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put_properties</span><span class="p">(</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">UnsetType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Modify the properties of the specified database.</span>
 <a id="__codelineno-0-574" name="__codelineno-0-574"></a>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">    database : str</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">    body : str | dict</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">        A database properties in XML or JSON format.</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">    Response</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">        An HTTP response</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        read timeouts.</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesPutCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">    Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">    database : str</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">        A database identifier. The database can be identified either by ID or name.</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">    body : str | dict</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">        A database properties in XML or JSON format.</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a><span class="sd">        A per-request timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a><span class="sd">        them. It is an execution option, never sent as a request parameter.</span>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">    Response</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">        An HTTP response</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires on the last</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        attempt the retry policy allows. The default policy does not retry</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a><span class="sd">        read timeouts.</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>    <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesPutCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

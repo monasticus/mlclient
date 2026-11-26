@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15892,35 +15922,35 @@ XDMP-ARG exception in case of an invalid format.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/_cts_query.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1163">1163</a></span>
-<span class="normal"><a href="#__codelineno-0-1164">1164</a></span>
-<span class="normal"><a href="#__codelineno-0-1165">1165</a></span>
-<span class="normal"><a href="#__codelineno-0-1166">1166</a></span>
-<span class="normal"><a href="#__codelineno-0-1167">1167</a></span>
-<span class="normal"><a href="#__codelineno-0-1168">1168</a></span>
-<span class="normal"><a href="#__codelineno-0-1169">1169</a></span>
-<span class="normal"><a href="#__codelineno-0-1170">1170</a></span>
-<span class="normal"><a href="#__codelineno-0-1171">1171</a></span>
-<span class="normal"><a href="#__codelineno-0-1172">1172</a></span>
-<span class="normal"><a href="#__codelineno-0-1173">1173</a></span>
-<span class="normal"><a href="#__codelineno-0-1174">1174</a></span>
-<span class="normal"><a href="#__codelineno-0-1175">1175</a></span>
-<span class="normal"><a href="#__codelineno-0-1176">1176</a></span>
-<span class="normal"><a href="#__codelineno-0-1177">1177</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1163" name="__codelineno-0-1163"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-1164" name="__codelineno-0-1164"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-1165" name="__codelineno-0-1165"></a>    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
-<a id="__codelineno-0-1166" name="__codelineno-0-1166"></a><span class="p">):</span>
-<a id="__codelineno-0-1167" name="__codelineno-0-1167"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
-<a id="__codelineno-0-1168" name="__codelineno-0-1168"></a>
-<a id="__codelineno-0-1169" name="__codelineno-0-1169"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-1170" name="__codelineno-0-1170"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-1171" name="__codelineno-0-1171"></a><span class="sd">    format : str | XqyExpression</span>
-<a id="__codelineno-0-1172" name="__codelineno-0-1172"></a><span class="sd">        Case insensitve one of: &quot;json&quot;,&quot;xml&quot;,&quot;text&quot;,&quot;binary&quot;. This will result in a</span>
-<a id="__codelineno-0-1173" name="__codelineno-0-1173"></a><span class="sd">        XDMP-ARG exception in case of an invalid format.</span>
-<a id="__codelineno-0-1174" name="__codelineno-0-1174"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-1175" name="__codelineno-0-1175"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
-<a id="__codelineno-0-1176" name="__codelineno-0-1176"></a>        <span class="nb">format</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="nb">format</span><span class="p">),</span>
-<a id="__codelineno-0-1177" name="__codelineno-0-1177"></a>    <span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1198">1198</a></span>
+<span class="normal"><a href="#__codelineno-0-1199">1199</a></span>
+<span class="normal"><a href="#__codelineno-0-1200">1200</a></span>
+<span class="normal"><a href="#__codelineno-0-1201">1201</a></span>
+<span class="normal"><a href="#__codelineno-0-1202">1202</a></span>
+<span class="normal"><a href="#__codelineno-0-1203">1203</a></span>
+<span class="normal"><a href="#__codelineno-0-1204">1204</a></span>
+<span class="normal"><a href="#__codelineno-0-1205">1205</a></span>
+<span class="normal"><a href="#__codelineno-0-1206">1206</a></span>
+<span class="normal"><a href="#__codelineno-0-1207">1207</a></span>
+<span class="normal"><a href="#__codelineno-0-1208">1208</a></span>
+<span class="normal"><a href="#__codelineno-0-1209">1209</a></span>
+<span class="normal"><a href="#__codelineno-0-1210">1210</a></span>
+<span class="normal"><a href="#__codelineno-0-1211">1211</a></span>
+<span class="normal"><a href="#__codelineno-0-1212">1212</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1198" name="__codelineno-0-1198"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-1199" name="__codelineno-0-1199"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-1200" name="__codelineno-0-1200"></a>    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">XqyExpression</span><span class="p">,</span>
+<a id="__codelineno-0-1201" name="__codelineno-0-1201"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1202" name="__codelineno-0-1202"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Snapshot native constructor arguments.</span>
+<a id="__codelineno-0-1203" name="__codelineno-0-1203"></a>
+<a id="__codelineno-0-1204" name="__codelineno-0-1204"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-1205" name="__codelineno-0-1205"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-1206" name="__codelineno-0-1206"></a><span class="sd">    format : str | XqyExpression</span>
+<a id="__codelineno-0-1207" name="__codelineno-0-1207"></a><span class="sd">        Case insensitve one of: &quot;json&quot;,&quot;xml&quot;,&quot;text&quot;,&quot;binary&quot;. This will result in a</span>
+<a id="__codelineno-0-1208" name="__codelineno-0-1208"></a><span class="sd">        XDMP-ARG exception in case of an invalid format.</span>
+<a id="__codelineno-0-1209" name="__codelineno-0-1209"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1210" name="__codelineno-0-1210"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">(</span>
+<a id="__codelineno-0-1211" name="__codelineno-0-1211"></a>        <span class="nb">format</span><span class="o">=</span><span class="n">as_expr</span><span class="p">(</span><span class="nb">format</span><span class="p">),</span>
+<a id="__codelineno-0-1212" name="__codelineno-0-1212"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

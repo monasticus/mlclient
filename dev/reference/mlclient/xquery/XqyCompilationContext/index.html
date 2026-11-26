@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15978,15 +16008,15 @@ values. XqyExpression.compile creates a fresh context for every invocation.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-43">43</a></span>
-<span class="normal"><a href="#__codelineno-0-44">44</a></span>
-<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-45">45</a></span>
 <span class="normal"><a href="#__codelineno-0-46">46</a></span>
-<span class="normal"><a href="#__codelineno-0-47">47</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an empty context for one compilation.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_types</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="normal"><a href="#__codelineno-0-47">47</a></span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an empty context for one compilation.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_types</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16059,7 +16089,9 @@ values. XqyExpression.compile creates a fresh context for every invocation.</p>
 
 
 <a href="#mlclient.xquery.XqyCompilationContext.bind" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">bind</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">atomic_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xs:string&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">bind</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">atomic_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xs:string&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16069,17 +16101,17 @@ values. XqyExpression.compile creates a fresh context for every invocation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-54">54</a></span>
-<span class="normal"><a href="#__codelineno-0-55">55</a></span>
-<span class="normal"><a href="#__codelineno-0-56">56</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-56">56</a></span>
 <span class="normal"><a href="#__codelineno-0-57">57</a></span>
 <span class="normal"><a href="#__codelineno-0-58">58</a></span>
-<span class="normal"><a href="#__codelineno-0-59">59</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="k">def</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">atomic_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xs:string&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Bind a JSON-compatible value and return its variable reference.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;v</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">atomic_type</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="k">def</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">atomic_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xs:string&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Bind a JSON-compatible value and return its variable reference.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;v</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">atomic_type</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16165,9 +16197,7 @@ that validates paths before evaluating the reconstructed body.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
-<span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
-<span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
 <span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
 <span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
 <span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
@@ -16213,55 +16243,57 @@ that validates paths before evaluating the reconstructed body.</p>
 <span class="normal"><a href="#__codelineno-0-138">138</a></span>
 <span class="normal"><a href="#__codelineno-0-139">139</a></span>
 <span class="normal"><a href="#__codelineno-0-140">140</a></span>
-<span class="normal"><a href="#__codelineno-0-141">141</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="k">def</span><span class="w"> </span><span class="nf">guard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Consume path placeholders and build their validation boundary.</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">    ``body`` must contain every placeholder returned by :meth:`path` unchanged.</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">    Each marked reference is replaced with its registered path source, then the</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">    complete body is bound as data and evaluated with ``xdmp:value`` only after</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">    all registered paths pass native validation. With no registered paths, the</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">    body is returned unchanged.</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">    body : str</span>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">        Rendered expression containing zero or more NUL-delimited path</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">        placeholders from this compilation context.</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">    str</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        Original body when no paths were registered; otherwise guarded XQuery</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">        that validates paths before evaluating the reconstructed body.</span>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="p">:</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a>        <span class="k">return</span> <span class="n">body</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="n">paths</span> <span class="o">=</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a>        <span class="sa">f</span><span class="s1">&#39;&lt;path kind=&quot;</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">&quot; binding=&quot;</span><span class="si">{</span><span class="n">ref</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s1">&quot;&gt;</span><span class="se">{{</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="se">}}</span><span class="s1">&lt;/path&gt;&#39;</span>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a>        <span class="k">for</span> <span class="n">ref</span><span class="p">,</span> <span class="n">kind</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a>    <span class="p">)</span>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a>    <span class="n">body</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>        <span class="sa">r</span><span class="s2">&quot;\x00\$(v[0-9]+)\x00&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="k">lambda</span> <span class="n">match</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">[</span><span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
-<a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="n">body</span><span class="p">,</span>
-<a id="__codelineno-0-124" name="__codelineno-0-124"></a>    <span class="p">)</span>
-<a id="__codelineno-0-125" name="__codelineno-0-125"></a>    <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="k">return</span> <span class="p">(</span>
-<a id="__codelineno-0-127" name="__codelineno-0-127"></a>        <span class="sa">f</span><span class="s2">&quot;let $invalid-paths := (</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">paths</span><span class="si">}</span><span class="se">\n</span><span class="s2">)[fn:not(</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="s2">&quot;    try { cts:valid-extract-path(.) }</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="s2">&quot;    catch ($error) { fn:false() }</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="s2">&quot;)]</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="s2">&quot;return if (fn:empty($invalid-paths)) then</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-132" name="__codelineno-0-132"></a>        <span class="sa">f</span><span class="s2">&quot;    xdmp:value(</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-133" name="__codelineno-0-133"></a>        <span class="s2">&quot;else</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="s1">&#39;    fn:error(fn:QName(&quot;&quot;, &quot;MLCLIENT-INVALID-PATH&quot;),</span><span class="se">\n</span><span class="s1">&#39;</span>
-<a id="__codelineno-0-135" name="__codelineno-0-135"></a>        <span class="s1">&#39;        fn:concat(&quot;Invalid XPath(s): &quot;, fn:string-join(</span><span class="se">\n</span><span class="s1">&#39;</span>
-<a id="__codelineno-0-136" name="__codelineno-0-136"></a>        <span class="s2">&quot;            for $path in $invalid-paths</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-137" name="__codelineno-0-137"></a>        <span class="s1">&#39;            return fn:concat(&quot;[&quot;, fn:string($path/@kind), &quot;:&quot;,</span><span class="se">\n</span><span class="s1">&#39;</span>
-<a id="__codelineno-0-138" name="__codelineno-0-138"></a>        <span class="s1">&#39;                fn:string($path/@binding), &quot;] &quot;, fn:string($path)),</span><span class="se">\n</span><span class="s1">&#39;</span>
-<a id="__codelineno-0-139" name="__codelineno-0-139"></a>        <span class="s1">&#39;            &quot;; &quot;)),</span><span class="se">\n</span><span class="s1">&#39;</span>
-<a id="__codelineno-0-140" name="__codelineno-0-140"></a>        <span class="s2">&quot;        $invalid-paths)&quot;</span>
-<a id="__codelineno-0-141" name="__codelineno-0-141"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-141">141</a></span>
+<span class="normal"><a href="#__codelineno-0-142">142</a></span>
+<span class="normal"><a href="#__codelineno-0-143">143</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="k">def</span><span class="w"> </span><span class="nf">guard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Consume path placeholders and build their validation boundary.</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">    ``body`` must contain every placeholder returned by :meth:`path` unchanged.</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">    Each marked reference is replaced with its registered path source, then the</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">    complete body is bound as data and evaluated with ``xdmp:value`` only after</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">    all registered paths pass native validation. With no registered paths, the</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">    body is returned unchanged.</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">    body : str</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">        Rendered expression containing zero or more NUL-delimited path</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        placeholders from this compilation context.</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">    str</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">        Original body when no paths were registered; otherwise guarded XQuery</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">        that validates paths before evaluating the reconstructed body.</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="p">:</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a>        <span class="k">return</span> <span class="n">body</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a>    <span class="n">paths</span> <span class="o">=</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="sa">f</span><span class="s1">&#39;&lt;path kind=&quot;</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">&quot; binding=&quot;</span><span class="si">{</span><span class="n">ref</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s1">&quot;&gt;</span><span class="se">{{</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="se">}}</span><span class="s1">&lt;/path&gt;&#39;</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="k">for</span> <span class="n">ref</span><span class="p">,</span> <span class="n">kind</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="p">)</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122"></a>    <span class="n">body</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="sa">r</span><span class="s2">&quot;\x00\$(v[0-9]+)\x00&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>        <span class="k">lambda</span> <span class="n">match</span><span class="p">:</span> <span class="n">type_cast</span><span class="p">(</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">[</span><span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]]),</span>
+<a id="__codelineno-0-125" name="__codelineno-0-125"></a>        <span class="n">body</span><span class="p">,</span>
+<a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="p">)</span>
+<a id="__codelineno-0-127" name="__codelineno-0-127"></a>    <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<a id="__codelineno-0-128" name="__codelineno-0-128"></a>    <span class="k">return</span> <span class="p">(</span>
+<a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="sa">f</span><span class="s2">&quot;let $invalid-paths := (</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">paths</span><span class="si">}</span><span class="se">\n</span><span class="s2">)[fn:not(</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="s2">&quot;    try { cts:valid-extract-path(.) }</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="s2">&quot;    catch ($error) { fn:false() }</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-132" name="__codelineno-0-132"></a>        <span class="s2">&quot;)]</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a>        <span class="s2">&quot;return if (fn:empty($invalid-paths)) then</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="sa">f</span><span class="s2">&quot;    xdmp:value(</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-135" name="__codelineno-0-135"></a>        <span class="s2">&quot;else</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-136" name="__codelineno-0-136"></a>        <span class="s1">&#39;    fn:error(fn:QName(&quot;&quot;, &quot;MLCLIENT-INVALID-PATH&quot;),</span><span class="se">\n</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-137" name="__codelineno-0-137"></a>        <span class="s1">&#39;        fn:concat(&quot;Invalid XPath(s): &quot;, fn:string-join(</span><span class="se">\n</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-138" name="__codelineno-0-138"></a>        <span class="s2">&quot;            for $path in $invalid-paths</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-139" name="__codelineno-0-139"></a>        <span class="s1">&#39;            return fn:concat(&quot;[&quot;, fn:string($path/@kind), &quot;:&quot;,</span><span class="se">\n</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-140" name="__codelineno-0-140"></a>        <span class="s1">&#39;                fn:string($path/@binding), &quot;] &quot;, fn:string($path)),</span><span class="se">\n</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-141" name="__codelineno-0-141"></a>        <span class="s1">&#39;            &quot;; &quot;)),</span><span class="se">\n</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-142" name="__codelineno-0-142"></a>        <span class="s2">&quot;        $invalid-paths)&quot;</span>
+<a id="__codelineno-0-143" name="__codelineno-0-143"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -16360,9 +16392,7 @@ string values; <code>guard</code> consumes the marker before producing XQuery.</
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/xquery/expressions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-69">69</a></span>
-<span class="normal"><a href="#__codelineno-0-70">70</a></span>
-<span class="normal"><a href="#__codelineno-0-71">71</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-71">71</a></span>
 <span class="normal"><a href="#__codelineno-0-72">72</a></span>
 <span class="normal"><a href="#__codelineno-0-73">73</a></span>
 <span class="normal"><a href="#__codelineno-0-74">74</a></span>
@@ -16382,29 +16412,31 @@ string values; <code>guard</code> consumes the marker before producing XQuery.</
 <span class="normal"><a href="#__codelineno-0-88">88</a></span>
 <span class="normal"><a href="#__codelineno-0-89">89</a></span>
 <span class="normal"><a href="#__codelineno-0-90">90</a></span>
-<span class="normal"><a href="#__codelineno-0-91">91</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an executable path and return its guarded-body placeholder.</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">    The returned external-variable reference is delimited with NUL characters.</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">    Renderers must preserve that marker unchanged in the body passed to</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    :meth:`guard`. It distinguishes executable path source from ordinary bound</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    string values; ``guard`` consumes the marker before producing XQuery.</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    source : str</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">        Path source to validate and later insert into the guarded expression.</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    kind : str</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">        Diagnostic role reported if native path validation fails.</span>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">    str</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        NUL-delimited reference to the external binding containing ``source``.</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ref</span><span class="p">,</span> <span class="n">kind</span><span class="p">))</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\0</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="se">\0</span><span class="s2">&quot;</span>
+<span class="normal"><a href="#__codelineno-0-91">91</a></span>
+<span class="normal"><a href="#__codelineno-0-92">92</a></span>
+<span class="normal"><a href="#__codelineno-0-93">93</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an executable path and return its guarded-body placeholder.</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    The returned external-variable reference is delimited with NUL characters.</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    Renderers must preserve that marker unchanged in the body passed to</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">    :meth:`guard`. It distinguishes executable path source from ordinary bound</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    string values; ``guard`` consumes the marker before producing XQuery.</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    source : str</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">        Path source to validate and later insert into the guarded expression.</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">    kind : str</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        Diagnostic role reported if native path validation fails.</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">    str</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">        NUL-delimited reference to the external binding containing ``source``.</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a>    <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_paths</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ref</span><span class="p">,</span> <span class="n">kind</span><span class="p">))</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\0</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="se">\0</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

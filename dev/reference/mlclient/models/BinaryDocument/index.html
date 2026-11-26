@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15913,7 +15943,7 @@
 
 <a href="#mlclient.models.BinaryDocument" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">BinaryDocument</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15938,35 +15968,35 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/models/documents.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-774">774</a></span>
-<span class="normal"><a href="#__codelineno-0-775">775</a></span>
-<span class="normal"><a href="#__codelineno-0-776">776</a></span>
-<span class="normal"><a href="#__codelineno-0-777">777</a></span>
-<span class="normal"><a href="#__codelineno-0-778">778</a></span>
-<span class="normal"><a href="#__codelineno-0-779">779</a></span>
-<span class="normal"><a href="#__codelineno-0-780">780</a></span>
-<span class="normal"><a href="#__codelineno-0-781">781</a></span>
-<span class="normal"><a href="#__codelineno-0-782">782</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-782">782</a></span>
 <span class="normal"><a href="#__codelineno-0-783">783</a></span>
 <span class="normal"><a href="#__codelineno-0-784">784</a></span>
 <span class="normal"><a href="#__codelineno-0-785">785</a></span>
 <span class="normal"><a href="#__codelineno-0-786">786</a></span>
 <span class="normal"><a href="#__codelineno-0-787">787</a></span>
-<span class="normal"><a href="#__codelineno-0-788">788</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-774" name="__codelineno-0-774"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-775" name="__codelineno-0-775"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-776" name="__codelineno-0-776"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
-<a id="__codelineno-0-777" name="__codelineno-0-777"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-778" name="__codelineno-0-778"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-779" name="__codelineno-0-779"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-780" name="__codelineno-0-780"></a><span class="p">):</span>
-<a id="__codelineno-0-781" name="__codelineno-0-781"></a>    <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-782" name="__codelineno-0-782"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-783" name="__codelineno-0-783"></a>            <span class="s2">&quot;BinaryDocument requires content; &quot;</span>
-<a id="__codelineno-0-784" name="__codelineno-0-784"></a>            <span class="s2">&quot;use Document.metadata_update() for metadata-only updates&quot;</span>
-<a id="__codelineno-0-785" name="__codelineno-0-785"></a>        <span class="p">)</span>
-<a id="__codelineno-0-786" name="__codelineno-0-786"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<a id="__codelineno-0-787" name="__codelineno-0-787"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">DocumentType</span><span class="o">.</span><span class="n">BINARY</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="p">)</span>
-<a id="__codelineno-0-788" name="__codelineno-0-788"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span> <span class="o">=</span> <span class="n">content</span>
+<span class="normal"><a href="#__codelineno-0-788">788</a></span>
+<span class="normal"><a href="#__codelineno-0-789">789</a></span>
+<span class="normal"><a href="#__codelineno-0-790">790</a></span>
+<span class="normal"><a href="#__codelineno-0-791">791</a></span>
+<span class="normal"><a href="#__codelineno-0-792">792</a></span>
+<span class="normal"><a href="#__codelineno-0-793">793</a></span>
+<span class="normal"><a href="#__codelineno-0-794">794</a></span>
+<span class="normal"><a href="#__codelineno-0-795">795</a></span>
+<span class="normal"><a href="#__codelineno-0-796">796</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-782" name="__codelineno-0-782"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-783" name="__codelineno-0-783"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-784" name="__codelineno-0-784"></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-785" name="__codelineno-0-785"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-786" name="__codelineno-0-786"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-787" name="__codelineno-0-787"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-788" name="__codelineno-0-788"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-789" name="__codelineno-0-789"></a>    <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-790" name="__codelineno-0-790"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-791" name="__codelineno-0-791"></a>            <span class="s2">&quot;BinaryDocument requires content; &quot;</span>
+<a id="__codelineno-0-792" name="__codelineno-0-792"></a>            <span class="s2">&quot;use Document.metadata_update() for metadata-only updates&quot;</span>
+<a id="__codelineno-0-793" name="__codelineno-0-793"></a>        <span class="p">)</span>
+<a id="__codelineno-0-794" name="__codelineno-0-794"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-0-795" name="__codelineno-0-795"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">DocumentType</span><span class="o">.</span><span class="n">BINARY</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="p">)</span>
+<a id="__codelineno-0-796" name="__codelineno-0-796"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_content_bytes</span> <span class="o">=</span> <span class="n">content</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

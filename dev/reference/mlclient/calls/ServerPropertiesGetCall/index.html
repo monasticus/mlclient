@@ -2369,6 +2369,8 @@
       
         
       
+        
+      
     
     
     
@@ -2424,6 +2426,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15869,8 +15899,10 @@
 
 <a href="#mlclient.calls.ServerPropertiesGetCall" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ServerPropertiesGetCall</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -15963,10 +15995,7 @@ This parameter overrides the Accept header if both are present.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/calls/servers.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-414">414</a></span>
-<span class="normal"><a href="#__codelineno-0-415">415</a></span>
-<span class="normal"><a href="#__codelineno-0-416">416</a></span>
-<span class="normal"><a href="#__codelineno-0-417">417</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-417">417</a></span>
 <span class="normal"><a href="#__codelineno-0-418">418</a></span>
 <span class="normal"><a href="#__codelineno-0-419">419</a></span>
 <span class="normal"><a href="#__codelineno-0-420">420</a></span>
@@ -15991,35 +16020,38 @@ This parameter overrides the Accept header if both are present.</p>
 <span class="normal"><a href="#__codelineno-0-439">439</a></span>
 <span class="normal"><a href="#__codelineno-0-440">440</a></span>
 <span class="normal"><a href="#__codelineno-0-441">441</a></span>
-<span class="normal"><a href="#__codelineno-0-442">442</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a>    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a>    <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="p">):</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ServerPropertiesGetCall instance.</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="sd">    server : str</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">        A server identifier. The server can be identified either by ID or name.</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">    group_id : str</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">        The id or name of the group to which the App Server belongs.</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="sd">        This parameter is required.</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">    data_format : str</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">        The format of the returned data. Can be either json or xml (default).</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">        This parameter overrides the Accept header if both are present.</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span> <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;xml&quot;</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">data_format</span><span class="p">)</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>        <span class="n">accept</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">get_accept_header_for_format</span><span class="p">(</span><span class="n">data_format</span><span class="p">),</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="p">)</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">server</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GROUP_ID_PARAM</span><span class="p">,</span> <span class="n">group_id</span><span class="p">)</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_PARAM</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-442">442</a></span>
+<span class="normal"><a href="#__codelineno-0-443">443</a></span>
+<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+<span class="normal"><a href="#__codelineno-0-445">445</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a>    <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a>    <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a>    <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize ServerPropertiesGetCall instance.</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">    server : str</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="sd">        A server identifier. The server can be identified either by ID or name.</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">    group_id : str</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">        The id or name of the group to which the App Server belongs.</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">        This parameter is required.</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">    data_format : str</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="sd">        The format of the returned data. Can be either json or xml (default).</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">        This parameter overrides the Accept header if both are present.</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span> <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;xml&quot;</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">data_format</span><span class="p">)</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a>        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>        <span class="n">accept</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">get_accept_header_for_format</span><span class="p">(</span><span class="n">data_format</span><span class="p">),</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="p">)</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">server</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GROUP_ID_PARAM</span><span class="p">,</span> <span class="n">group_id</span><span class="p">)</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_PARAM</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -16046,7 +16078,7 @@ This parameter overrides the Accept header if both are present.</p>
   </span>
 
 <a href="#mlclient.calls.ServerPropertiesGetCall.endpoint" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

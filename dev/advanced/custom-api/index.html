@@ -2438,6 +2438,8 @@
       
         
       
+        
+      
     
     
     
@@ -2493,6 +2495,34 @@
     
   
     HTTPConfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/http/UnsetType/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UnsetType
   
 
     
@@ -15998,6 +16028,10 @@ connection limits and cleanup remain owned by the parent client. A per-request
 <code>timeout</code> is forwarded as an execution option, not a query parameter. Use a
 separate configured client when the application lives on another host or needs
 different credentials.</p>
+<p><code>timeout=UNSET</code> keeps the client's configured timeout, while <code>timeout=None</code>
+disables it. To type the forwarding parameter, import
+<a class="autorefs autorefs-internal" title="mlclient.http.UnsetType" href="../../reference/mlclient/http/UnsetType/#mlclient.http.UnsetType"><code>UnsetType</code></a> together with <code>UNSET</code> from <code>mlclient.http</code>
+and annotate it as <code>timeout: httpx.Timeout | float | UnsetType | None = UNSET</code>.</p>
 <p>The async version shares the same Call, since a Call performs no I/O. Only the
 sending and service methods become async. Inside a coroutine:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">custom_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncAppClient</span>

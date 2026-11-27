@@ -10501,6 +10501,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -10836,6 +10840,34 @@
     
   
     AsyncManageApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/mlclient/api/AsyncRequestsApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncRequestsApi
   
 
     
@@ -11304,6 +11336,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../reference/mlclient/api/RequestsApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RequestsApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../reference/mlclient/api/RestApi/" class="md-nav__link">
         
   
@@ -11509,6 +11569,10 @@
   
     
     
+      
+        
+      
+        
       
         
       
@@ -12767,6 +12831,62 @@
     
   
     LogsCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/mlclient/calls/RequestGetCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RequestGetCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/mlclient/calls/RequestsGetCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RequestsGetCall
   
 
     
@@ -16117,6 +16237,19 @@ to replace it, or <code>None</code> to disable it. Timeout components are not me
 settings such as a transaction's <code>time_limit</code> control that separately. In eval,
 <code>timeout</code> is a transport option; use <code>variables={"timeout": value}</code> if your query
 itself declares an external variable with that name.</p>
+<p>An expired read or write timeout does not cancel the request either: MarkLogic
+may still be running it, and an update may still commit. List the requests that
+have run for at least a given number of seconds through the Manage server:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get_list</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">seconds_min</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">list_items</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;request-default-list&quot;</span><span class="p">][</span><span class="s2">&quot;list-items&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">for</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">list_items</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;list-item&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="n">properties</span> <span class="o">=</span> <span class="n">request</span><span class="p">[</span><span class="s2">&quot;item-properties&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s2">&quot;idref&quot;</span><span class="p">],</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;request-text&quot;</span><span class="p">],</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p><a class="autorefs autorefs-internal" title="get" href="../../../reference/mlclient/api/RequestsApi/#mlclient.api.RequestsApi.get"><code>ml.manage.requests.get(idref)</code></a> returns the
+details of one request. MarkLogic has no REST endpoint to cancel a request;
+<code>xdmp:request-cancel</code> through eval does that.</p>
 <p>Streaming, multiple requests, eligible retries and backoff can make an operation
 last longer than one HTTP timeout. It is not a total wall-clock deadline.</p>
 <p>Sessions compare effective timeout components before sharing a connection.

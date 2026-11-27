@@ -261,6 +261,10 @@
          <lastmod>2026-11-27</lastmod>
     </url>
     <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncRequestsApi/</loc>
+         <lastmod>2026-11-27</lastmod>
+    </url>
+    <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/AsyncRestApi/</loc>
          <lastmod>2026-11-27</lastmod>
     </url>
@@ -322,6 +326,10 @@
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/ManageApi/</loc>
+         <lastmod>2026-11-27</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/api/RequestsApi/</loc>
          <lastmod>2026-11-27</lastmod>
     </url>
     <url>
@@ -530,6 +538,14 @@
     </url>
     <url>
          <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/LogsCall/</loc>
+         <lastmod>2026-11-27</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RequestGetCall/</loc>
+         <lastmod>2026-11-27</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/reference/mlclient/calls/RequestsGetCall/</loc>
          <lastmod>2026-11-27</lastmod>
     </url>
     <url>

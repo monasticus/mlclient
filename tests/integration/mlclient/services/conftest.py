@@ -11,7 +11,7 @@ from mlclient.models import JSONDocument, Metadata, XMLDocument
 from tests.utils import resources
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="session")
 def indexed_database():
     port = int(os.environ.get("MLCLIENT_CTS_PORT", "8000"))
     manage_port = int(os.environ.get("MLCLIENT_CTS_MANAGE_PORT", "8002"))
@@ -28,8 +28,7 @@ def indexed_database():
 
 def _create_database(ml: MLClient, name: str) -> None:
     spec = resources.get_test_resource_json(__file__, "database.json")
-    ml.manage.databases.create({"database-name": name}).raise_for_status()
-    ml.manage.databases.put_properties(name, spec).raise_for_status()
+    ml.manage.databases.create({"database-name": name, **spec}).raise_for_status()
 
 
 def _create_forest(ml: MLClient, name: str) -> None:

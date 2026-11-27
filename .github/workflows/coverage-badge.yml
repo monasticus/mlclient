@@ -16,16 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v6
+      - name: Install MLClient with poetry
+        uses: ./.github/actions/setup-poetry
         with:
           python-version: "3.11"
-
-      - name: Install MLClient with poetry
-        run: |
-          pip install poetry==2.2.0
-          poetry install
       - name: Create test report
+        shell: bash
         run: |
           poetry run pytest --cov=mlclient tests/unit/ | tee output.txt
 

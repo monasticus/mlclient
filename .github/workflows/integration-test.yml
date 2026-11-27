@@ -27,18 +27,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-
       - name: Install Kerberos client libraries
         run: sudo apt-get update && sudo apt-get install -y libkrb5-dev krb5-user
 
       - name: Install MLClient with poetry
-        run: |
-          pip install poetry==2.2.0
-          poetry install --extras kerberos
+        uses: ./.github/actions/setup-poetry
+        with:
+          python-version: "3.11"
+          install-args: --extras kerberos
 
       - name: Downgrade direct dependencies to their lowest allowed versions
         if: matrix.dependencies == 'lowest-direct'

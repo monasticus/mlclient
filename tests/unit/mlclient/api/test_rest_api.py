@@ -427,3 +427,73 @@ def test_post_values():
 
     assert resp.status_code == httpx.codes.OK
     assert resp.json() == URIS_VALUES_RESPONSE
+
+
+@respx.mock
+def test_get_documents_forwards_prefixed_params():
+    params = {
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+        "trans:omit": None,
+    }
+    route = respx.get("http://localhost:8000/v1/documents").mock(
+        return_value=httpx.Response(200, content=b"<root/>"),
+    )
+    with MLClient() as ml:
+        ml.rest.documents.get("/a.xml", transform="tag", params=params)
+
+    query = route.calls.last.request.url.params
+    assert query["transform"] == "tag"
+    assert query["trans:flag"] == "false"
+    assert query["trans:limit"] == "0"
+    assert query["trans:label"] == ""
+    assert "trans:omit" not in query
+    assert "trans:trans:flag" not in query
+    assert params == {
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+        "trans:omit": None,
+    }
+
+
+@respx.mock
+def test_post_documents_forwards_prefixed_params():
+    params = {
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+        "trans:omit": None,
+    }
+    route = respx.post("http://localhost:8000/v1/documents").mock(
+        return_value=httpx.Response(200, content=b"<root/>"),
+    )
+    with MLClient() as ml:
+        ml.rest.documents.post(
+            [
+                DocumentsBodyPart(
+                    **{
+                        "content-type": "application/json",
+                        "content-disposition": "inline",
+                        "content": {"root": "data"},
+                    },
+                ),
+            ],
+            transform="tag",
+            params=params,
+        )
+
+    query = route.calls.last.request.url.params
+    assert query["transform"] == "tag"
+    assert query["trans:flag"] == "false"
+    assert query["trans:limit"] == "0"
+    assert query["trans:label"] == ""
+    assert "trans:omit" not in query
+    assert "trans:trans:flag" not in query
+    assert params == {
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+        "trans:omit": None,
+    }

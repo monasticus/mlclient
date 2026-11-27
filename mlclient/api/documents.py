@@ -38,7 +38,7 @@ class DocumentsApi:
         data_format: str | None = None,
         timestamp: str | None = None,
         transform: str | None = None,
-        transform_params: dict | None = None,
+        params: dict | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
@@ -75,10 +75,10 @@ class DocumentsApi:
             Names a content transformation previously installed via
             the /config/transforms service. The service applies the transformation
             to all documents prior to constructing the response.
-        transform_params : dict
-            A transform parameter names and values. For example, { "myparam": 1 }.
-            Transform parameters are passed to the transform named in the transform
-            parameter.
+        params : dict
+            Additional URL parameters with wire names, for example
+            {"trans:myparam": 1}. None values are omitted; zero, False and empty
+            strings are preserved. Explicit nonempty arguments take precedence.
         txid : str
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
@@ -108,7 +108,7 @@ class DocumentsApi:
             data_format=data_format,
             timestamp=timestamp,
             transform=transform,
-            transform_params=transform_params,
+            params=params,
             txid=txid,
         )
         return self._api.call(call, timeout=timeout)
@@ -119,7 +119,7 @@ class DocumentsApi:
         *,
         database: str | None = None,
         transform: str | None = None,
-        transform_params: dict | None = None,
+        params: dict | None = None,
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
@@ -142,10 +142,10 @@ class DocumentsApi:
             the /config/transforms service. Transforms are applied only to content
             parts: the transform is applied to the content of a part prior to
             updating or inserting the document.
-        transform_params : dict
-            A transform parameter names and values. For example, { "myparam": 1 }.
-            Transform parameters are passed to the transform named in the transform
-            parameter.
+        params : dict
+            Additional URL parameters with wire names, for example
+            {"trans:myparam": 1}. None values are omitted; zero, False and empty
+            strings are preserved. Explicit nonempty arguments take precedence.
         txid : str
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
@@ -180,7 +180,7 @@ class DocumentsApi:
             body_parts=body_parts,
             database=database,
             transform=transform,
-            transform_params=transform_params,
+            params=params,
             txid=txid,
             temporal_collection=temporal_collection,
             system_time=system_time,
@@ -282,7 +282,7 @@ class AsyncDocumentsApi:
         data_format: str | None = None,
         timestamp: str | None = None,
         transform: str | None = None,
-        transform_params: dict | None = None,
+        params: dict | None = None,
         txid: str | None = None,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> Response:
@@ -319,10 +319,10 @@ class AsyncDocumentsApi:
             Names a content transformation previously installed via
             the /config/transforms service. The service applies the transformation
             to all documents prior to constructing the response.
-        transform_params : dict
-            A transform parameter names and values. For example, { "myparam": 1 }.
-            Transform parameters are passed to the transform named in the transform
-            parameter.
+        params : dict
+            Additional URL parameters with wire names, for example
+            {"trans:myparam": 1}. None values are omitted; zero, False and empty
+            strings are preserved. Explicit nonempty arguments take precedence.
         txid : str
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
@@ -352,7 +352,7 @@ class AsyncDocumentsApi:
             data_format=data_format,
             timestamp=timestamp,
             transform=transform,
-            transform_params=transform_params,
+            params=params,
             txid=txid,
         )
         return await self._api.call(call, timeout=timeout)
@@ -363,7 +363,7 @@ class AsyncDocumentsApi:
         *,
         database: str | None = None,
         transform: str | None = None,
-        transform_params: dict | None = None,
+        params: dict | None = None,
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
@@ -386,10 +386,10 @@ class AsyncDocumentsApi:
             the /config/transforms service. Transforms are applied only to content
             parts: the transform is applied to the content of a part prior to
             updating or inserting the document.
-        transform_params : dict
-            A transform parameter names and values. For example, { "myparam": 1 }.
-            Transform parameters are passed to the transform named in the transform
-            parameter.
+        params : dict
+            Additional URL parameters with wire names, for example
+            {"trans:myparam": 1}. None values are omitted; zero, False and empty
+            strings are preserved. Explicit nonempty arguments take precedence.
         txid : str
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
@@ -424,7 +424,7 @@ class AsyncDocumentsApi:
             body_parts=body_parts,
             database=database,
             transform=transform,
-            transform_params=transform_params,
+            params=params,
             txid=txid,
             temporal_collection=temporal_collection,
             system_time=system_time,

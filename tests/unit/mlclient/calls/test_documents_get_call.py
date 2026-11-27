@@ -241,9 +241,9 @@ def test_fully_parametrized_call_for_single_uri_content():
         database="Documents",
         timestamp="16692287403272560",
         transform="custom-transformation",
-        transform_params={
-            "custom-param-1": "custom-value-1",
-            "custom-param-2": "custom-value-2",
+        params={
+            "trans:custom-param-1": "custom-value-1",
+            "trans:custom-param-2": "custom-value-2",
         },
     )
     assert call.method == "GET"
@@ -266,9 +266,9 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         category="properties",
         data_format="xml",
         transform="custom-transformation",
-        transform_params={
-            "custom-param-1": "custom-value-1",
-            "custom-param-2": "custom-value-2",
+        params={
+            "trans:custom-param-1": "custom-value-1",
+            "trans:custom-param-2": "custom-value-2",
         },
         txid="transaction",
     )
@@ -297,9 +297,9 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         data_format="json",
         timestamp="16692287403272560",
         transform="custom-transformation",
-        transform_params={
-            "custom-param-1": "custom-value-1",
-            "custom-param-2": "custom-value-2",
+        params={
+            "trans:custom-param-1": "custom-value-1",
+            "trans:custom-param-2": "custom-value-2",
         },
     )
     assert call.method == "GET"
@@ -326,9 +326,9 @@ def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
         category=["collections", "properties"],
         data_format="xml",
         transform="custom-transformation",
-        transform_params={
-            "custom-param-1": "custom-value-1",
-            "custom-param-2": "custom-value-2",
+        params={
+            "trans:custom-param-1": "custom-value-1",
+            "trans:custom-param-2": "custom-value-2",
         },
         txid="transaction",
     )
@@ -349,11 +349,16 @@ def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
     assert call.body is None
 
 
-def test_transform_params_preserve_false_zero_and_empty_values():
+def test_params_preserve_false_zero_and_empty_values():
     call = DocumentsGetCall(
         uri="/a.json",
         transform="tag",
-        transform_params={"flag": False, "limit": 0, "label": "", "omit": None},
+        params={
+            "trans:flag": False,
+            "trans:limit": 0,
+            "trans:label": "",
+            "trans:omit": None,
+        },
     )
 
     assert call.params == {
@@ -366,11 +371,27 @@ def test_transform_params_preserve_false_zero_and_empty_values():
 
 
 @pytest.mark.parametrize("transform", [None, ""])
-def test_transform_params_require_transform(transform):
+def test_prefixed_params_require_transform(transform):
     with pytest.raises(exceptions.WrongParametersError) as error:
         DocumentsGetCall(
             "/example.xml",
             transform=transform,
-            transform_params={"tag": "x"},
+            params={"trans:tag": "x"},
         )
-    assert str(error.value) == "transform_params require transform"
+    assert str(error.value) == "trans: parameters require transform"
+
+
+def test_additional_params_are_validated_with_named_arguments():
+    with pytest.raises(exceptions.WrongParametersError) as error:
+        DocumentsGetCall("/a.xml", timestamp="1", params={"txid": "tx"})
+    assert str(error.value) == "timestamp cannot be combined with txid"
+
+
+def test_named_arguments_take_precedence_over_additional_params():
+    call = DocumentsGetCall("/a.xml", data_format="json", params={"format": "text"})
+    assert call.params["format"] == "json"
+
+
+def test_omitted_transform_params_do_not_require_transform():
+    call = DocumentsGetCall("/a.xml", params={"trans:omit": None})
+    assert call.params == {"uri": "/a.xml"}

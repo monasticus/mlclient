@@ -393,6 +393,24 @@ before any request.
 ...     ml.documents.write(doc, transform="add-tag", transform_params={"tag": "stored"})
 ```
 
+The service adds the `trans:` prefix. Raw document APIs and Calls instead take
+ready-to-send URL parameter names in `params`; they do not add a prefix:
+
+```python
+>>> with MLClient() as ml:
+...     response = ml.rest.documents.get(
+...         "/doc-1.xml", transform="add-tag", params={"trans:tag": "reviewed"},
+...     )
+```
+
+For a standalone request, use
+`DocumentsGetCall("/doc-1.xml", transform="add-tag", params={"trans:tag": "reviewed"})`.
+The POST API and `DocumentsPostCall` use the same `params` convention. Values of
+`None` are omitted; `False`, zero and empty strings are sent unchanged. Explicit
+nonempty named arguments take precedence over matching keys in `params`.
+Parameters whose names start with `trans:` still require `transform` before any
+HTTP request is sent.
+
 ## Point-in-time reads
 
 `read` and `read_stream` take `timestamp` to read documents as they were at an

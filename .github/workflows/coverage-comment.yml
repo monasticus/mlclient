@@ -22,9 +22,9 @@ jobs:
           python-version: "3.11"
 
       - name: Create test reports
+        shell: bash
         run: |
-          poetry run pytest --junitxml=pytest.xml --cov=mlclient tests/unit | tee output.txt
-          poetry run pytest --cov=mlclient --cov-report=xml:coverage.xml tests/unit
+          poetry run pytest --junitxml=pytest.xml --cov=mlclient --cov-report=term --cov-report=xml:coverage.xml tests/unit | tee output.txt
 
       - name: Put an overall test & coverage comment
         uses: MishaKav/pytest-coverage-comment@main

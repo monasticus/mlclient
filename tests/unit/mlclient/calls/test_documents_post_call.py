@@ -123,3 +123,51 @@ def test_fully_parametrized_call_for_multiple_uris_metadata(default_body_part):
     expected_body += '{"root": "data"}\r\n'
     expected_body += f"--{boundary}--\r\n"
     assert call.body == expected_body.encode("utf-8")
+
+
+def test_transform_params_preserve_false_zero_and_empty_values(default_body_part):
+    call = DocumentsPostCall(
+        body_parts=[default_body_part],
+        transform="tag",
+        transform_params={"flag": False, "limit": 0, "label": "", "omit": None},
+    )
+
+    assert call.params == {
+        "transform": "tag",
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+    }
+
+
+@pytest.mark.parametrize("transform", [None, ""])
+def test_transform_params_require_transform(default_body_part, transform):
+    with pytest.raises(exceptions.WrongParametersError) as error:
+        DocumentsPostCall(
+            [default_body_part],
+            transform=transform,
+            transform_params={"tag": "x"},
+        )
+    assert str(error.value) == "transform_params require transform"
+
+
+@pytest.mark.parametrize("temporal_collection", [None, ""])
+def test_system_time_requires_temporal_collection(
+    default_body_part,
+    temporal_collection,
+):
+    with pytest.raises(exceptions.WrongParametersError) as error:
+        DocumentsPostCall(
+            [default_body_part],
+            temporal_collection=temporal_collection,
+            system_time="2026-11-26T00:00:00Z",
+        )
+    assert str(error.value) == "system_time requires temporal_collection"
+
+
+@pytest.mark.parametrize("transform_params", [None, {}])
+def test_transform_without_parameters(default_body_part, transform_params):
+    call = DocumentsPostCall(
+        [default_body_part], transform="tag", transform_params=transform_params,
+    )
+    assert call.params == {"transform": "tag"}

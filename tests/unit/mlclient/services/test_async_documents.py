@@ -287,6 +287,48 @@ async def test_read_forwards_txid(svc):
 
 
 @pytest.mark.asyncio
+@respx.mock
+async def test_read_forwards_transform_and_timestamp(svc):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("transform", "tag")
+    mocker.with_request_param("trans:tag", "x")
+    mocker.with_request_param("timestamp", "17945705371973500")
+    mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+    doc = await svc.read(
+        uri,
+        transform="tag",
+        transform_params={"tag": "x"},
+        timestamp="17945705371973500",
+    )
+
+    assert doc.uri == uri
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_read_accepts_timestamp_when_scoped_txid_is_cleared(svc):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("timestamp", "17945705371973500")
+    mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+    documents = svc(txid="txn-123")
+    doc = await documents.read(uri, timestamp="17945705371973500", txid=None)
+
+    assert doc.uri == uri
+
+
+@pytest.mark.asyncio
 @ml_mocker.router
 async def test_read_stream_single_uri(svc):
     uri = "/some/dir/doc1.xml"
@@ -418,6 +460,30 @@ async def test_create_document_with_temporal_collection(svc):
     documents = resp["documents"]
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_write_forwards_transform_and_system_time(svc):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    mocker = MLRespXMocker(use_router=False, strict_params=True)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("transform", "tag")
+    mocker.with_request_param("trans:tag", "w")
+    mocker.with_request_param("temporal-collection", "temporal-collection")
+    mocker.with_request_param("system-time", "2026-11-13T00:00:00Z")
+    mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+
+    resp = await svc.write(
+        doc,
+        transform="tag",
+        transform_params={"tag": "w"},
+        temporal_collection="temporal-collection",
+        system_time="2026-11-13T00:00:00Z",
+    )
+
+    assert resp["documents"][0]["uri"] == "/some/dir/doc1.xml"
 
 
 @pytest.mark.asyncio
@@ -685,6 +751,32 @@ async def test_read_stream_many_uris_are_batched(svc):
 
     assert len(docs) == 2000
     assert ml_mocker.router.calls.call_count > 1
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_read_stream_sends_transform_and_timestamp_with_every_batch(svc):
+    uris = [f"/some/dir/doc{i:04d}.xml" for i in range(2000)]
+    with ml_doc_mocker.scoped():
+        ml_doc_mocker.mock_document(*(test_data.xml_doc_body_part(uri) for uri in uris))
+
+        docs = [
+            doc
+            async for doc in svc.read_stream(
+                uris,
+                transform="tag",
+                transform_params={"tag": "x"},
+                timestamp="17945705371973500",
+            )
+        ]
+
+    assert len(docs) == 2000
+    assert ml_mocker.router.calls.call_count > 1
+    for call in ml_mocker.router.calls:
+        params = call.request.url.params
+        assert params["timestamp"] == "17945705371973500"
+        assert params["transform"] == "tag"
+        assert params["trans:tag"] == "x"
 
 
 @pytest.mark.asyncio

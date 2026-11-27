@@ -34,20 +34,53 @@ def test_validation_multiple_categories_param():
     assert err.value.args[0] == expected_msg
 
 
-def test_validation_format_param():
+@pytest.mark.parametrize("data_format", ["html", "unknown"])
+@pytest.mark.parametrize(
+    "category",
+    [None, "content", ["content"], "metadata", ["content", "collections"]],
+)
+def test_validation_format_param(category, data_format):
     with pytest.raises(exceptions.WrongParametersError) as err:
-        DocumentsGetCall(uri="/a.xml", data_format="html")
+        DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
 
-    expected_msg = "The supported formats are: binary, json, text, xml"
+    assert str(err.value) == "The supported formats are: binary, json, text, xml"
+
+
+@pytest.mark.parametrize("data_format", ["binary", "text"])
+@pytest.mark.parametrize("category", ["metadata", ["content", "collections"]])
+def test_validation_metadata_format_param(category, data_format):
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
+
+    assert str(err.value) == "The supported metadata formats are: json, xml"
+
+
+@pytest.mark.parametrize("data_format", ["binary", "text"])
+@pytest.mark.parametrize("category", [None, "", [], "content", ["content"]])
+def test_content_only_accepts_text_and_binary_without_conversion(category, data_format):
+    call = DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
+
+    assert call.params["format"] == data_format
+    assert call.headers == {}
+
+
+def test_validation_timestamp_with_txid():
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsGetCall(uri="/a.xml", timestamp="16692287403272560", txid="tx")
+
+    expected_msg = "timestamp cannot be combined with txid"
     assert err.value.args[0] == expected_msg
 
 
-def test_validation_format_param_for_metadata_categories():
-    with pytest.raises(exceptions.WrongParametersError) as err:
-        DocumentsGetCall(uri="/a.xml", category="collections", data_format="text")
+@pytest.mark.parametrize("data_format", ["json", "xml"])
+@pytest.mark.parametrize(
+    "category",
+    [None, "content", ["content"], "metadata", ["content", "collections"]],
+)
+def test_validation_accepts_metadata_format_for_any_category(category, data_format):
+    call = DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
 
-    expected_msg = "The supported metadata formats are: json, xml"
-    assert err.value.args[0] == expected_msg
+    assert call.params["format"] == data_format
 
 
 def test_endpoint(default_documents_get_call):
@@ -107,6 +140,27 @@ def test_headers_for_single_uri_content_category_and_format():
         DocumentsGetCall(uri="/a.xml", category="content", data_format="json").headers
         == {}
     )
+
+
+def test_headers_for_single_uri_content_category_list_and_format():
+    assert (
+        DocumentsGetCall(
+            uri="/a.xml",
+            category=["content"],
+            data_format="json",
+        ).headers
+        == {}
+    )
+
+
+def test_headers_for_single_uri_single_metadata_category_list_and_format():
+    assert DocumentsGetCall(
+        uri="/a.xml",
+        category=["collections"],
+        data_format="xml",
+    ).headers == {
+        "Accept": "application/xml",
+    }
 
 
 def test_headers_for_single_uri_metadata_category_and_json_format():
@@ -191,7 +245,6 @@ def test_fully_parametrized_call_for_single_uri_content():
             "custom-param-1": "custom-value-1",
             "custom-param-2": "custom-value-2",
         },
-        txid="transaction",
     )
     assert call.method == "GET"
     assert call.headers == {}
@@ -202,7 +255,6 @@ def test_fully_parametrized_call_for_single_uri_content():
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
-        "txid": "transaction",
     }
     assert call.body is None
 
@@ -213,7 +265,6 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         database="Documents",
         category="properties",
         data_format="xml",
-        timestamp="16692287403272560",
         transform="custom-transformation",
         transform_params={
             "custom-param-1": "custom-value-1",
@@ -230,7 +281,6 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         "database": "Documents",
         "category": "properties",
         "format": "xml",
-        "timestamp": "16692287403272560",
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
@@ -251,7 +301,6 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
             "custom-param-1": "custom-value-1",
             "custom-param-2": "custom-value-2",
         },
-        txid="transaction",
     )
     assert call.method == "GET"
     assert call.headers == {
@@ -266,7 +315,6 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
-        "txid": "transaction",
     }
     assert call.body is None
 
@@ -277,7 +325,6 @@ def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
         database="Documents",
         category=["collections", "properties"],
         data_format="xml",
-        timestamp="16692287403272560",
         transform="custom-transformation",
         transform_params={
             "custom-param-1": "custom-value-1",
@@ -294,10 +341,44 @@ def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
         "database": "Documents",
         "category": ["collections", "properties"],
         "format": "xml",
-        "timestamp": "16692287403272560",
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
         "txid": "transaction",
     }
     assert call.body is None
+
+
+def test_transform_params_preserve_false_zero_and_empty_values():
+    call = DocumentsGetCall(
+        uri="/a.json",
+        transform="tag",
+        transform_params={"flag": False, "limit": 0, "label": "", "omit": None},
+    )
+
+    assert call.params == {
+        "uri": "/a.json",
+        "transform": "tag",
+        "trans:flag": False,
+        "trans:limit": 0,
+        "trans:label": "",
+    }
+
+
+@pytest.mark.parametrize("transform", [None, ""])
+def test_transform_params_require_transform(transform):
+    with pytest.raises(exceptions.WrongParametersError) as error:
+        DocumentsGetCall(
+            "/example.xml",
+            transform=transform,
+            transform_params={"tag": "x"},
+        )
+    assert str(error.value) == "transform_params require transform"
+
+
+@pytest.mark.parametrize("transform_params", [None, {}])
+def test_transform_without_parameters(transform_params):
+    call = DocumentsGetCall(
+        "/a.xml", transform="tag", transform_params=transform_params,
+    )
+    assert call.params == {"uri": "/a.xml", "transform": "tag"}

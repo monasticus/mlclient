@@ -44,7 +44,6 @@ class DocumentsGetCall(ApiCall):
     _TIMESTAMP_PARAM: str = "timestamp"
     _TRANSFORM_PARAM: str = "transform"
     _TXID_PARAM: str = "txid"
-    _TRANS_PARAM_PREFIX: str = "trans:"
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["binary", "json", "text", "xml"]
     _SUPPORTED_METADATA_FORMATS: ClassVar[list] = ["json", "xml"]
@@ -80,14 +79,15 @@ class DocumentsGetCall(ApiCall):
             Use metadata to request all categories except content.
         data_format : str
             The expected format of metadata returned in the response.
-            Accepted values: xml or json.
+            Metadata accepts xml or json. Content-only reads also accept text
+            and binary; these values do not convert the stored content.
             This parameter does not affect document content.
             For metadata, this parameter overrides the MIME type in the Accept header,
             except when the Accept header is multipart/mixed.
         timestamp : str
             A timestamp returned in the ML-Effective-Timestamp header of a previous
             request. Use this parameter to fetch documents based on the contents
-            of the database at a fixed point-in-time.
+            of the database at a fixed point-in-time. Cannot be combined with txid.
         transform : str
             Names a content transformation previously installed via
             the /config/transforms service. The service applies the transformation
@@ -101,10 +101,18 @@ class DocumentsGetCall(ApiCall):
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
         """
-        self._validate_params(category, data_format)
+        categories = self._categories_list(category)
+        self._validate_params(
+            categories,
+            data_format,
+            timestamp,
+            txid,
+            transform,
+            transform_params,
+        )
 
         super().__init__(method="GET")
-        accept_header = self._get_accept_header(uri, category, data_format)
+        accept_header = self._get_accept_header(uri, categories, data_format)
         self.add_header(constants.HEADER_NAME_ACCEPT, accept_header)
         self.add_param(self._URI_PARAM, uri)
         self.add_param(self._DATABASE_PARAM, database)
@@ -113,10 +121,7 @@ class DocumentsGetCall(ApiCall):
         self.add_param(self._TIMESTAMP_PARAM, timestamp)
         self.add_param(self._TRANSFORM_PARAM, transform)
         self.add_param(self._TXID_PARAM, txid)
-        if transform_params:
-            for trans_param_name, value in transform_params.items():
-                param = self._TRANS_PARAM_PREFIX + trans_param_name
-                self.add_param(param, value)
+        self._params.update(call_utils.query_params({}, transform_params))
 
     @property
     def endpoint(
@@ -131,42 +136,111 @@ class DocumentsGetCall(ApiCall):
         """
         return self._ENDPOINT.format(self._API_VERSION)
 
+    @staticmethod
+    def _categories_list(category: str | list | None) -> list:
+        """Return the requested categories as a list.
+
+        Parameters
+        ----------
+        category : str | list | None
+            One category or several, as passed to the constructor.
+
+        Returns
+        -------
+        list
+            The categories; None, an empty string and an empty list mean content,
+            the server default.
+        """
+        if not category:
+            return [Category.CONTENT.value]
+        if isinstance(category, list):
+            return category
+        return [category]
+
     @classmethod
     def _validate_params(
         cls,
-        category: str | list | None,
+        categories: list[str],
         data_format: str | None,
+        timestamp: str | None,
+        txid: str | None,
+        transform: str | None,
+        transform_params: dict | None,
     ) -> None:
-        categories = [category] if not isinstance(category, list) else category
-        if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
-            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
-            msg = f"The supported categories are: {joined_supported_categories}"
+        """Reject parameters and combinations MarkLogic does not accept.
+
+        A point-in-time read inside a transaction fails on the server with a 500
+        ``XDMP-UPDATETIMESTAMP`` error, so it is rejected before any request.
+
+        Parameters
+        ----------
+        categories : list
+            The requested categories.
+        data_format : str | None
+            The metadata format; None leaves it to the server.
+        timestamp : str | None
+            The point in time to read at.
+        txid : str | None
+            The multi-statement transaction identifier.
+        transform : str | None
+            Installed transform name.
+        transform_params : dict | None
+            Parameters requiring a transform.
+
+        Raises
+        ------
+        WrongParametersError
+            If a category or format is unsupported, metadata requests use a format
+            other than json or xml, or timestamp is combined with txid.
+        """
+        call_utils.validate_supported(
+            categories,
+            cls._SUPPORTED_CATEGORIES,
+            "categories",
+        )
+        if data_format:
+            call_utils.validate_supported(
+                [data_format],
+                cls._SUPPORTED_FORMATS,
+                "formats",
+            )
+            if any(category != Category.CONTENT.value for category in categories):
+                call_utils.validate_supported(
+                    [data_format],
+                    cls._SUPPORTED_METADATA_FORMATS,
+                    "metadata formats",
+                )
+        if timestamp is not None and txid is not None:
+            msg = "timestamp cannot be combined with txid"
             raise exceptions.WrongParametersError(msg)
-        if data_format and data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
-        if (
-            category
-            and category != "content"
-            and data_format
-            and data_format not in cls._SUPPORTED_METADATA_FORMATS
-        ):
-            joined_supported_formats = ", ".join(cls._SUPPORTED_METADATA_FORMATS)
-            msg = f"The supported metadata formats are: {joined_supported_formats}"
-            raise exceptions.WrongParametersError(msg)
+        _validate_transform_params(transform, transform_params)
 
     @staticmethod
     def _get_accept_header(
         uri: str | list,
-        category: str | list | None,
+        categories: list[str],
         data_format: str | None,
     ) -> str | None:
-        if (not isinstance(uri, str) and len(uri) > 1) or (
-            isinstance(category, list) and len(category) > 1
-        ):
+        """Return the Accept header for the requested documents and categories.
+
+        Parameters
+        ----------
+        uri : str | list
+            One or more document URIs.
+        categories : list
+            The requested categories.
+        data_format : str | None
+            The metadata format.
+
+        Returns
+        -------
+        str | None
+            multipart/mixed for several documents or categories, the format's
+            MIME type for metadata of a single document, otherwise None.
+        """
+        if (not isinstance(uri, str) and len(uri) > 1) or len(categories) > 1:
             return constants.HEADER_MULTIPART_MIXED
-        if data_format and category and category != "content":
+        if data_format and categories != [Category.CONTENT.value]:
             return utils.get_accept_header_for_format(data_format)
         return None
 
@@ -190,7 +264,6 @@ class DocumentsPostCall(ApiCall):
     _TXID_PARAM: str = "txid"
     _TEMPORAL_COLLECTION_PARAM: str = "temporal-collection"
     _SYSTEM_TIME_PARAM: str = "system-time"
-    _TRANS_PARAM_PREFIX: str = "trans:"
 
     def __init__(
         self,
@@ -214,8 +287,9 @@ class DocumentsPostCall(ApiCall):
             Using an alternative database requires the "eval-in" privilege.
         transform : str
             Names a content transformation previously installed via
-            the /config/transforms service. The service applies the transformation
-            to all documents prior to constructing the response.
+            the /config/transforms service. Transforms are applied only to content
+            parts: the transform is applied to the content of a part prior to
+            updating or inserting the document.
         transform_params : dict
             A transform parameter names and values. For example, { "myparam": 1 }.
             Transform parameters are passed to the transform named in the transform
@@ -232,7 +306,13 @@ class DocumentsPostCall(ApiCall):
             This time will override the system time set by MarkLogic.
             Ignored if temporal-collection is not included in the request.
         """
-        self._validate_params(body_parts)
+        self._validate_params(
+            body_parts,
+            transform,
+            transform_params,
+            temporal_collection,
+            system_time,
+        )
 
         super().__init__(method="POST")
         self.add_header(constants.HEADER_NAME_ACCEPT, constants.HEADER_JSON)
@@ -241,10 +321,7 @@ class DocumentsPostCall(ApiCall):
         self.add_param(self._TXID_PARAM, txid)
         self.add_param(self._TEMPORAL_COLLECTION_PARAM, temporal_collection)
         self.add_param(self._SYSTEM_TIME_PARAM, system_time)
-        if transform_params:
-            for trans_param_name, value in transform_params.items():
-                param = self._TRANS_PARAM_PREFIX + trans_param_name
-                self.add_param(param, value)
+        self._params.update(call_utils.query_params({}, transform_params))
         body, content_type = self._build_body(body_parts)
         self.add_header(constants.HEADER_NAME_CONTENT_TYPE, content_type)
         self.body = body
@@ -266,10 +343,38 @@ class DocumentsPostCall(ApiCall):
     def _validate_params(
         cls,
         body: list[DocumentsBodyPart] | None,
+        transform: str | None,
+        transform_params: dict | None,
+        temporal_collection: str | None,
+        system_time: str | None,
     ) -> None:
+        """Validate the request body, transform parameters and temporal options.
+
+        Parameters
+        ----------
+        body : list[DocumentsBodyPart] | None
+            Content and metadata parts to write.
+        transform : str | None
+            Installed transform name.
+        transform_params : dict | None
+            Parameters requiring a transform.
+        temporal_collection : str | None
+            Temporal collection receiving the write.
+        system_time : str | None
+            Explicit system time requiring a temporal collection.
+
+        Raises
+        ------
+        WrongParametersError
+            If the body is empty or the transform/temporal options conflict.
+        """
         if body is None or len(body) == 0:
             msg = "No request body provided for POST /v1/documents!"
             raise exceptions.WrongParametersError(msg)
+        if system_time is not None and not temporal_collection:
+            msg = "system_time requires temporal_collection"
+            raise exceptions.WrongParametersError(msg)
+        _validate_transform_params(transform, transform_params)
 
     @classmethod
     def _build_body(
@@ -400,3 +505,26 @@ class DocumentsDeleteCall(ApiCall):
             A Documents call endpoint
         """
         return self._ENDPOINT.format(self._API_VERSION)
+
+
+def _validate_transform_params(
+    transform: str | None,
+    transform_params: dict | None,
+) -> None:
+    """Reject transform parameters sent without a transform to receive them.
+
+    Parameters
+    ----------
+    transform : str | None
+        Name of an installed transform.
+    transform_params : dict | None
+        Parameters for the transform.
+
+    Raises
+    ------
+    WrongParametersError
+        If transform_params are given without transform.
+    """
+    if transform_params and not transform:
+        msg = "transform_params require transform"
+        raise exceptions.WrongParametersError(msg)

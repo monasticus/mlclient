@@ -117,8 +117,11 @@ class DocumentsService:
         self,
         data: Document | Metadata | Sequence[Document | Metadata],
         *,
+        transform: str | None = None,
+        transform_params: dict | None = None,
         database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
+        system_time: str | None = None,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
@@ -128,10 +131,19 @@ class DocumentsService:
         ----------
         data : Document | Metadata | Sequence[Document | Metadata]
             One or more document or default metadata.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content parts only and stores its output.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
+        system_time : str | None, default None
+            System start time (an ISO 8601 dateTime) overriding the one set by
+            MarkLogic; requires temporal_collection and the
+            ``temporal-statement-set-system-time`` privilege.
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
@@ -155,6 +167,9 @@ class DocumentsService:
             read timeouts.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If system_time is given without temporal_collection, or
+            transform_params without transform.
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
@@ -162,8 +177,11 @@ class DocumentsService:
         resp = self._rest.documents.post(
             body_parts,
             database=params["database"],
-            temporal_collection=temporal_collection,
+            transform=transform,
+            transform_params=transform_params,
             txid=params["txid"],
+            temporal_collection=temporal_collection,
+            system_time=system_time,
             timeout=timeout,
         )
         return cast("dict", MLResponseParser.parse(resp))
@@ -173,6 +191,9 @@ class DocumentsService:
         uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -188,6 +209,21 @@ class DocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -213,10 +249,16 @@ class DocumentsService:
             read timeouts.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
         """
         docs = self.read_stream(
             uris,
             category=category,
+            transform=transform,
+            transform_params=transform_params,
+            timestamp=timestamp,
             database=database,
             txid=txid,
             timeout=timeout,
@@ -232,6 +274,9 @@ class DocumentsService:
         uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -248,6 +293,21 @@ class DocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -273,6 +333,10 @@ class DocumentsService:
             read timeouts.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
+            Raised when iteration starts, before any request.
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
@@ -283,6 +347,9 @@ class DocumentsService:
                 category=categories,
                 database=params["database"],
                 data_format="json",
+                timestamp=timestamp,
+                transform=transform,
+                transform_params=transform_params,
                 txid=params["txid"],
                 timeout=timeout,
             )
@@ -485,8 +552,11 @@ class AsyncDocumentsService:
         self,
         data: Document | Metadata | Sequence[Document | Metadata],
         *,
+        transform: str | None = None,
+        transform_params: dict | None = None,
         database: str | UnsetType | None = UNSET,
         temporal_collection: str | None = None,
+        system_time: str | None = None,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
     ) -> dict:
@@ -496,10 +566,19 @@ class AsyncDocumentsService:
         ----------
         data : Document | Metadata | Sequence[Document | Metadata]
             One or more document or default metadata.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content parts only and stores its output.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         temporal_collection : str | None, default None
             Temporal collection name.
+        system_time : str | None, default None
+            System start time (an ISO 8601 dateTime) overriding the one set by
+            MarkLogic; requires temporal_collection and the
+            ``temporal-statement-set-system-time`` privilege.
         txid : str | None, default unset
             Transaction identifier; unset inherits the service scope and
             None clears it.
@@ -523,6 +602,9 @@ class AsyncDocumentsService:
             read timeouts.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If system_time is given without temporal_collection, or
+            transform_params without transform.
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
@@ -530,8 +612,11 @@ class AsyncDocumentsService:
         resp = await self._rest.documents.post(
             body_parts,
             database=params["database"],
-            temporal_collection=temporal_collection,
+            transform=transform,
+            transform_params=transform_params,
             txid=params["txid"],
+            temporal_collection=temporal_collection,
+            system_time=system_time,
             timeout=timeout,
         )
         return cast("dict", MLResponseParser.parse(resp))
@@ -541,6 +626,9 @@ class AsyncDocumentsService:
         uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -556,6 +644,21 @@ class AsyncDocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -581,10 +684,16 @@ class AsyncDocumentsService:
             read timeouts.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
         """
         stream = self.read_stream(
             uris,
             category=category,
+            transform=transform,
+            transform_params=transform_params,
+            timestamp=timestamp,
             database=database,
             txid=txid,
             timeout=timeout,
@@ -598,6 +707,9 @@ class AsyncDocumentsService:
         uris: str | list[str] | tuple[str, ...] | set[str],
         *,
         category: Category | str | list[Category | str] | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        timestamp: str | None = None,
         database: str | UnsetType | None = UNSET,
         txid: str | UnsetType | None = UNSET,
         timeout: httpx.Timeout | float | UnsetType | None = UNSET,
@@ -614,6 +726,21 @@ class AsyncDocumentsService:
             One or more URIs for documents in the database.
         category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
+        transform : str | None, default None
+            Name of a transform installed through ``/v1/config/transforms``.
+            MarkLogic applies it to content only; metadata is returned
+            untransformed.
+        transform_params : dict | None, default None
+            Transform parameters, sent as ``trans:{name}``; requires transform.
+        timestamp : str | None, default None
+            Point in time to read at - the ``ML-Effective-Timestamp`` of an
+            earlier response, such as ``SearchReport.effective_timestamp``.
+            Every request of the operation uses it, so all documents come from
+            one snapshot. The server must still retain that version
+            (``XDMP-OLDSTAMP`` otherwise). Cannot be combined with a txid.
+            It applies to the REST server's default content database:
+            MarkLogic 12.1 ignores it without an error when database names
+            another database.
         database : str | None, default unset
             Content database; unset inherits the service scope and None clears it.
         txid : str | None, default unset
@@ -639,6 +766,10 @@ class AsyncDocumentsService:
             read timeouts.
         MarkLogicError
             If MarkLogic returns an error
+        WrongParametersError
+            If timestamp is combined with a txid (passed or inherited from the
+            service scope), or transform_params are given without transform.
+            Raised when iteration starts, before any request.
         """
         scope = self._scope.overridden_by(ServiceScope(database=database, txid=txid))
         params = scope.request_params()
@@ -649,6 +780,9 @@ class AsyncDocumentsService:
                 category=categories,
                 database=params["database"],
                 data_format="json",
+                timestamp=timestamp,
+                transform=transform,
+                transform_params=transform_params,
                 txid=params["txid"],
                 timeout=timeout,
             )

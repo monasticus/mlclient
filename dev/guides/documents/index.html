@@ -817,6 +817,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#transforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transforms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#point-in-time-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Point-in-time reads
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#temporal-documents" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -833,6 +855,17 @@
     <span class="md-ellipsis">
       
         Write into a temporal collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-the-system-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set the system time
       
     </span>
   </a>
@@ -16549,6 +16582,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#transforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transforms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#point-in-time-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Point-in-time reads
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#temporal-documents" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -16565,6 +16620,17 @@
     <span class="md-ellipsis">
       
         Write into a temporal collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-the-system-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set the system time
       
     </span>
   </a>
@@ -16637,7 +16703,9 @@ and <code>delete</code> - that work with typed <a class="autorefs autorefs-inter
 bodies.</p>
 <p>Every operation accepts one URI or many, an optional <code>database</code>, and a <code>txid</code>
 to run inside a <a href="../transactions/">transaction</a>. <code>read</code> and <code>write</code> also carry
-metadata; <code>write</code> and <code>delete</code> also handle temporal collections.</p>
+metadata and apply <a href="#transforms">content transforms</a>; <code>read</code> can read
+<a href="#point-in-time-reads">at a point in time</a>; <code>write</code> and <code>delete</code> also handle
+temporal collections.</p>
 <p>Before the operations, two models are worth knowing: <a class="autorefs autorefs-internal" title="mlclient.models.Document" href="../../reference/mlclient/models/Document/#mlclient.models.Document"><code>Document</code></a> (what <code>read</code>
 returns and <code>write</code> accepts) and <a class="autorefs autorefs-internal" title="mlclient.models.Metadata" href="../../reference/mlclient/models/Metadata/#mlclient.models.Metadata"><code>Metadata</code></a>.</p>
 <h2 id="the-document-model">The <code>Document</code> model<a class="headerlink" href="#the-document-model" title="Permanent link">&para;</a></h2>
@@ -16938,39 +17006,93 @@ removed or reset to their defaults:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
 <a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s2">&quot;Documents&quot;</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="transforms">Transforms<a class="headerlink" href="#transforms" title="Permanent link">&para;</a></h2>
+<p><code>read</code>, <code>read_stream</code> and <code>write</code> take <code>transform</code> - the name of a transform
+installed through <code>/v1/config/transforms</code> - and <code>transform_params</code>, a <code>dict</code>
+sent as <code>trans:{name}</code> request parameters. MarkLogic applies the transform to
+content only: on <code>read</code> every returned document is transformed while metadata
+comes back unchanged, and on <code>write</code> the transformed content is what gets
+stored. <code>transform_params</code> without <code>transform</code> raises <code>WrongParametersError</code>
+before any request. <code>transform_params</code> is optional: <code>transform="my-transform"</code>
+is enough when the transform does not need arguments.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="o">...</span>     <span class="n">doc</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="o">...</span>         <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="o">...</span>         <span class="n">transform</span><span class="o">=</span><span class="s2">&quot;add-tag&quot;</span><span class="p">,</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="o">...</span>         <span class="n">transform_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;reviewed&quot;</span><span class="p">},</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="o">...</span>     <span class="p">)</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s2">&quot;add-tag&quot;</span><span class="p">,</span> <span class="n">transform_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;stored&quot;</span><span class="p">})</span>
+</code></pre></div>
+<h2 id="point-in-time-reads">Point-in-time reads<a class="headerlink" href="#point-in-time-reads" title="Permanent link">&para;</a></h2>
+<p><code>read</code> and <code>read_stream</code> take <code>timestamp</code> to read documents as they were at an
+earlier point in time. Pass the <code>ML-Effective-Timestamp</code> of an earlier response,
+for example a search report's <code>effective_timestamp</code>, to read the documents a
+search found from the same snapshot even while other requests update them:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="o">...</span>     <span class="n">report</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s2">&quot;coffee&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="o">...</span>     <span class="n">uris</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;uri&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">results</span><span class="p">]</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="o">...</span>     <span class="n">docs</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">report</span><span class="o">.</span><span class="n">effective_timestamp</span><span class="p">)</span>
+</code></pre></div>
+<p>The same <code>timestamp</code> goes to every request of the operation, so a long URI list
+split into several batches is still read from one snapshot. Without
+<code>timestamp</code> each batch reads the latest state; the service does not pin a
+snapshot on its own.</p>
+<ul>
+<li>The server must still retain that version. Once a merge removes it, the read
+  fails with <code>XDMP-OLDSTAMP</code> - keep old versions with the database's merge
+  timestamp when a snapshot has to outlive merges.</li>
+<li>A point-in-time read cannot run inside a transaction: <code>timestamp</code> together with
+  a <code>txid</code> (passed or inherited from the service scope) raises
+  <code>WrongParametersError</code> before any request.</li>
+<li>The timestamp applies to the REST server's default content database. MarkLogic
+  12.1 ignores it when <code>database</code> names another database and returns the latest
+  state.</li>
+</ul>
 <h2 id="temporal-documents">Temporal documents<a class="headerlink" href="#temporal-documents" title="Permanent link">&para;</a></h2>
 <p><code>write</code> and <code>delete</code> take <code>temporal_collection</code> to operate on a
 <a href="https://docs.marklogic.com/guide/temporal">bitemporal</a> document.</p>
 <h3 id="write-into-a-temporal-collection">Write into a temporal collection<a class="headerlink" href="#write-into-a-temporal-collection" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span><span class="p">)</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span><span class="p">)</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="set-the-system-time">Set the system time<a class="headerlink" href="#set-the-system-time" title="Permanent link">&para;</a></h3>
+<p><code>system_time</code> (an ISO 8601 dateTime) overrides the system start time MarkLogic
+would set for the insert or update. It requires <code>temporal_collection</code> - MarkLogic
+ignores it otherwise, so the service raises <code>WrongParametersError</code> - and the
+<code>temporal-statement-set-system-time</code> privilege.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="o">...</span>         <span class="n">doc</span><span class="p">,</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="o">...</span>         <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">,</span>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="o">...</span>         <span class="n">system_time</span><span class="o">=</span><span class="s2">&quot;2026-01-01T00:00:00Z&quot;</span><span class="p">,</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="o">...</span>     <span class="p">)</span>
 </code></pre></div>
 <h3 id="delete-close-a-temporal-document">Delete (close) a temporal document<a class="headerlink" href="#delete-close-a-temporal-document" title="Permanent link">&para;</a></h3>
 <p>Deleting within a temporal collection closes the current version - earlier
 versions remain queryable:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="wipe-every-version">Wipe every version<a class="headerlink" href="#wipe-every-version" title="Permanent link">&para;</a></h3>
 <p><code>wipe_temporal=True</code> removes all versions instead of closing the latest:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="o">...</span>         <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="o">...</span>         <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="o">...</span>         <span class="n">wipe_temporal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="o">...</span>     <span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="o">...</span>     <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="o">...</span>         <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="o">...</span>         <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="o">...</span>         <span class="n">wipe_temporal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="o">...</span>     <span class="p">)</span>
 </code></pre></div>
 <h2 id="within-a-transaction">Within a transaction<a class="headerlink" href="#within-a-transaction" title="Permanent link">&para;</a></h2>
 <p><code>read</code>, <code>write</code> and <code>delete</code> accept a <code>txid</code> to run inside an open
 multi-statement transaction. Pass the id explicitly, or spread a
 <a class="autorefs autorefs-internal" title="mlclient.services.TransactionService" href="../../reference/mlclient/services/TransactionService/#mlclient.services.TransactionService"><code>TransactionService</code></a> with <code>**</code> to carry both the <code>txid</code> and its database. See
 <a href="../transactions/">Transactions</a> for the full lifecycle.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span><span class="p">)</span>
-<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
-<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="o">...</span>     <span class="k">with</span> <span class="n">ml</span><span class="o">.</span><span class="n">transaction</span><span class="p">()</span> <span class="k">as</span> <span class="n">txn</span><span class="p">:</span>
-<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="o">...</span>         <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="o">**</span><span class="n">txn</span><span class="p">)</span>
-<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="o">...</span>         <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txn</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span><span class="p">)</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="o">...</span>     <span class="k">with</span> <span class="n">ml</span><span class="o">.</span><span class="n">transaction</span><span class="p">()</span> <span class="k">as</span> <span class="n">txn</span><span class="p">:</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="o">...</span>         <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="o">**</span><span class="n">txn</span><span class="p">)</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="o">...</span>         <span class="n">ml</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">txid</span><span class="o">=</span><span class="n">txn</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </code></pre></div>
 
 

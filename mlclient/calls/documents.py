@@ -45,7 +45,8 @@ class DocumentsGetCall(ApiCall):
     _TRANSFORM_PARAM: str = "transform"
     _TXID_PARAM: str = "txid"
 
-    _SUPPORTED_FORMATS: ClassVar[list] = ["json", "xml"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["binary", "json", "text", "xml"]
+    _SUPPORTED_METADATA_FORMATS: ClassVar[list] = ["json", "xml"]
     _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
@@ -78,7 +79,8 @@ class DocumentsGetCall(ApiCall):
             Use metadata to request all categories except content.
         data_format : str
             The expected format of metadata returned in the response.
-            Accepted values: xml or json.
+            Metadata accepts xml or json. Content-only reads also accept text
+            and binary; these values do not convert the stored content.
             This parameter does not affect document content.
             For metadata, this parameter overrides the MIME type in the Accept header,
             except when the Accept header is multipart/mixed.
@@ -188,21 +190,26 @@ class DocumentsGetCall(ApiCall):
         Raises
         ------
         WrongParametersError
-            If a category is not supported, the format is neither json nor xml,
-            or timestamp is combined with txid.
+            If a category or format is unsupported, metadata requests use a format
+            other than json or xml, or timestamp is combined with txid.
         """
         call_utils.validate_supported(
             categories,
             cls._SUPPORTED_CATEGORIES,
             "categories",
         )
-        if data_format and data_format not in cls._SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
-            msg = (
-                "The format applies to metadata only; "
-                f"supported formats are: {joined_supported_formats}"
+        if data_format:
+            call_utils.validate_supported(
+                [data_format],
+                cls._SUPPORTED_FORMATS,
+                "formats",
             )
-            raise exceptions.WrongParametersError(msg)
+            if any(category != Category.CONTENT.value for category in categories):
+                call_utils.validate_supported(
+                    [data_format],
+                    cls._SUPPORTED_METADATA_FORMATS,
+                    "metadata formats",
+                )
         if timestamp is not None and txid is not None:
             msg = "timestamp cannot be combined with txid"
             raise exceptions.WrongParametersError(msg)
@@ -300,7 +307,11 @@ class DocumentsPostCall(ApiCall):
             Ignored if temporal-collection is not included in the request.
         """
         self._validate_params(
-            body_parts, transform, transform_params, temporal_collection, system_time,
+            body_parts,
+            transform,
+            transform_params,
+            temporal_collection,
+            system_time,
         )
 
         super().__init__(method="POST")

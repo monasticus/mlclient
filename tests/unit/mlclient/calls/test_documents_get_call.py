@@ -34,7 +34,7 @@ def test_validation_multiple_categories_param():
     assert err.value.args[0] == expected_msg
 
 
-@pytest.mark.parametrize("data_format", ["binary", "text", "html"])
+@pytest.mark.parametrize("data_format", ["html", "unknown"])
 @pytest.mark.parametrize(
     "category",
     [None, "content", ["content"], "metadata", ["content", "collections"]],
@@ -43,10 +43,25 @@ def test_validation_format_param(category, data_format):
     with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
 
-    expected_msg = (
-        "The format applies to metadata only; supported formats are: json, xml"
-    )
-    assert str(err.value) == expected_msg
+    assert str(err.value) == "The supported formats are: binary, json, text, xml"
+
+
+@pytest.mark.parametrize("data_format", ["binary", "text"])
+@pytest.mark.parametrize("category", ["metadata", ["content", "collections"]])
+def test_validation_metadata_format_param(category, data_format):
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
+
+    assert str(err.value) == "The supported metadata formats are: json, xml"
+
+
+@pytest.mark.parametrize("data_format", ["binary", "text"])
+@pytest.mark.parametrize("category", [None, "", [], "content", ["content"]])
+def test_content_only_accepts_text_and_binary_without_conversion(category, data_format):
+    call = DocumentsGetCall(uri="/a.xml", category=category, data_format=data_format)
+
+    assert call.params["format"] == data_format
+    assert call.headers == {}
 
 
 def test_validation_timestamp_with_txid():
@@ -354,6 +369,8 @@ def test_transform_params_preserve_false_zero_and_empty_values():
 def test_transform_params_require_transform(transform):
     with pytest.raises(exceptions.WrongParametersError) as error:
         DocumentsGetCall(
-            "/example.xml", transform=transform, transform_params={"tag": "x"},
+            "/example.xml",
+            transform=transform,
+            transform_params={"tag": "x"},
         )
     assert str(error.value) == "transform_params require transform"

@@ -11533,6 +11533,8 @@
       
         
       
+        
+      
     
     
     
@@ -11939,6 +11941,34 @@
     
   
     DocumentsGetCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DocumentsHeadCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DocumentsHeadCall
   
 
     
@@ -16098,135 +16128,135 @@ a temporal-collection parameter.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/calls/documents.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-430">430</a></span>
-<span class="normal"><a href="#__codelineno-0-431">431</a></span>
-<span class="normal"><a href="#__codelineno-0-432">432</a></span>
-<span class="normal"><a href="#__codelineno-0-433">433</a></span>
-<span class="normal"><a href="#__codelineno-0-434">434</a></span>
-<span class="normal"><a href="#__codelineno-0-435">435</a></span>
-<span class="normal"><a href="#__codelineno-0-436">436</a></span>
-<span class="normal"><a href="#__codelineno-0-437">437</a></span>
-<span class="normal"><a href="#__codelineno-0-438">438</a></span>
-<span class="normal"><a href="#__codelineno-0-439">439</a></span>
-<span class="normal"><a href="#__codelineno-0-440">440</a></span>
-<span class="normal"><a href="#__codelineno-0-441">441</a></span>
-<span class="normal"><a href="#__codelineno-0-442">442</a></span>
-<span class="normal"><a href="#__codelineno-0-443">443</a></span>
-<span class="normal"><a href="#__codelineno-0-444">444</a></span>
-<span class="normal"><a href="#__codelineno-0-445">445</a></span>
-<span class="normal"><a href="#__codelineno-0-446">446</a></span>
-<span class="normal"><a href="#__codelineno-0-447">447</a></span>
-<span class="normal"><a href="#__codelineno-0-448">448</a></span>
-<span class="normal"><a href="#__codelineno-0-449">449</a></span>
-<span class="normal"><a href="#__codelineno-0-450">450</a></span>
-<span class="normal"><a href="#__codelineno-0-451">451</a></span>
-<span class="normal"><a href="#__codelineno-0-452">452</a></span>
-<span class="normal"><a href="#__codelineno-0-453">453</a></span>
-<span class="normal"><a href="#__codelineno-0-454">454</a></span>
-<span class="normal"><a href="#__codelineno-0-455">455</a></span>
-<span class="normal"><a href="#__codelineno-0-456">456</a></span>
-<span class="normal"><a href="#__codelineno-0-457">457</a></span>
-<span class="normal"><a href="#__codelineno-0-458">458</a></span>
-<span class="normal"><a href="#__codelineno-0-459">459</a></span>
-<span class="normal"><a href="#__codelineno-0-460">460</a></span>
-<span class="normal"><a href="#__codelineno-0-461">461</a></span>
-<span class="normal"><a href="#__codelineno-0-462">462</a></span>
-<span class="normal"><a href="#__codelineno-0-463">463</a></span>
-<span class="normal"><a href="#__codelineno-0-464">464</a></span>
-<span class="normal"><a href="#__codelineno-0-465">465</a></span>
-<span class="normal"><a href="#__codelineno-0-466">466</a></span>
-<span class="normal"><a href="#__codelineno-0-467">467</a></span>
-<span class="normal"><a href="#__codelineno-0-468">468</a></span>
-<span class="normal"><a href="#__codelineno-0-469">469</a></span>
-<span class="normal"><a href="#__codelineno-0-470">470</a></span>
-<span class="normal"><a href="#__codelineno-0-471">471</a></span>
-<span class="normal"><a href="#__codelineno-0-472">472</a></span>
-<span class="normal"><a href="#__codelineno-0-473">473</a></span>
-<span class="normal"><a href="#__codelineno-0-474">474</a></span>
-<span class="normal"><a href="#__codelineno-0-475">475</a></span>
-<span class="normal"><a href="#__codelineno-0-476">476</a></span>
-<span class="normal"><a href="#__codelineno-0-477">477</a></span>
-<span class="normal"><a href="#__codelineno-0-478">478</a></span>
-<span class="normal"><a href="#__codelineno-0-479">479</a></span>
-<span class="normal"><a href="#__codelineno-0-480">480</a></span>
-<span class="normal"><a href="#__codelineno-0-481">481</a></span>
-<span class="normal"><a href="#__codelineno-0-482">482</a></span>
-<span class="normal"><a href="#__codelineno-0-483">483</a></span>
-<span class="normal"><a href="#__codelineno-0-484">484</a></span>
-<span class="normal"><a href="#__codelineno-0-485">485</a></span>
-<span class="normal"><a href="#__codelineno-0-486">486</a></span>
-<span class="normal"><a href="#__codelineno-0-487">487</a></span>
-<span class="normal"><a href="#__codelineno-0-488">488</a></span>
-<span class="normal"><a href="#__codelineno-0-489">489</a></span>
-<span class="normal"><a href="#__codelineno-0-490">490</a></span>
-<span class="normal"><a href="#__codelineno-0-491">491</a></span>
-<span class="normal"><a href="#__codelineno-0-492">492</a></span>
-<span class="normal"><a href="#__codelineno-0-493">493</a></span>
-<span class="normal"><a href="#__codelineno-0-494">494</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="n">system_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>    <span class="n">wipe_temporal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize DocumentsDeleteCall instance.</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">    uri : str | list</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">        The URI of a document to delete or for which to remove metadata.</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">        You can specify multiple documents.</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">    database : str</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">        Perform this operation on the named content database instead</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">        of the default content database associated with the REST API instance.</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">        Using an alternative database requires the &quot;eval-in&quot; privilege.</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">    category : str | list</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">        The category of data to remove/reset.</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">        Category may be specified multiple times to remove or reset</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">        any combination of content and metadata.</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">        Valid categories: content (default), metadata, metadata-values,</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        collections, permissions, properties, and quality.</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">        Use metadata to reset all metadata.</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">    txid : str</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        The transaction identifier of the multi-statement transaction in which</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">        to service this request. Use the /transactions service to create and manage</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        multi-statement transactions.</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">    temporal_collection : str</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        Specify the name of a temporal collection that contains the document(s)</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">        to be deleted. Applies to all documents when deleting more than one.</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">    system_time : str</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">        Set the system start time for the insertion or update.</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">        This time will override the system time set by MarkLogic.</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">        Ignored if temporal-collection is not included in the request.</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">        Applies to all documents when deleting more than one.</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">    wipe_temporal : bool</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">        Remove all versions of a temporal document rather than performing</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">        a temporal delete. You can only use this parameter when you also specify</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">        a temporal-collection parameter.</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">    WrongParametersError</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">        If a category, including an empty string, is not supported.</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="n">call_utils</span><span class="o">.</span><span class="n">validate_supported</span><span class="p">(</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>        <span class="n">category</span><span class="p">,</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_SUPPORTED_CATEGORIES</span><span class="p">,</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a>        <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="p">)</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;DELETE&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_URI_PARAM</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DATABASE_PARAM</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_CATEGORY_PARAM</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_TXID_PARAM</span><span class="p">,</span> <span class="n">txid</span><span class="p">)</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_TEMPORAL_COLLECTION_PARAM</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="p">)</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SYSTEM_TIME_PARAM</span><span class="p">,</span> <span class="n">system_time</span><span class="p">)</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a>    <span class="k">if</span> <span class="n">wipe_temporal</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_RESULT_PARAM</span><span class="p">,</span> <span class="s2">&quot;wiped&quot;</span><span class="p">)</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-518">518</a></span>
+<span class="normal"><a href="#__codelineno-0-519">519</a></span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span>
+<span class="normal"><a href="#__codelineno-0-521">521</a></span>
+<span class="normal"><a href="#__codelineno-0-522">522</a></span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
+<span class="normal"><a href="#__codelineno-0-525">525</a></span>
+<span class="normal"><a href="#__codelineno-0-526">526</a></span>
+<span class="normal"><a href="#__codelineno-0-527">527</a></span>
+<span class="normal"><a href="#__codelineno-0-528">528</a></span>
+<span class="normal"><a href="#__codelineno-0-529">529</a></span>
+<span class="normal"><a href="#__codelineno-0-530">530</a></span>
+<span class="normal"><a href="#__codelineno-0-531">531</a></span>
+<span class="normal"><a href="#__codelineno-0-532">532</a></span>
+<span class="normal"><a href="#__codelineno-0-533">533</a></span>
+<span class="normal"><a href="#__codelineno-0-534">534</a></span>
+<span class="normal"><a href="#__codelineno-0-535">535</a></span>
+<span class="normal"><a href="#__codelineno-0-536">536</a></span>
+<span class="normal"><a href="#__codelineno-0-537">537</a></span>
+<span class="normal"><a href="#__codelineno-0-538">538</a></span>
+<span class="normal"><a href="#__codelineno-0-539">539</a></span>
+<span class="normal"><a href="#__codelineno-0-540">540</a></span>
+<span class="normal"><a href="#__codelineno-0-541">541</a></span>
+<span class="normal"><a href="#__codelineno-0-542">542</a></span>
+<span class="normal"><a href="#__codelineno-0-543">543</a></span>
+<span class="normal"><a href="#__codelineno-0-544">544</a></span>
+<span class="normal"><a href="#__codelineno-0-545">545</a></span>
+<span class="normal"><a href="#__codelineno-0-546">546</a></span>
+<span class="normal"><a href="#__codelineno-0-547">547</a></span>
+<span class="normal"><a href="#__codelineno-0-548">548</a></span>
+<span class="normal"><a href="#__codelineno-0-549">549</a></span>
+<span class="normal"><a href="#__codelineno-0-550">550</a></span>
+<span class="normal"><a href="#__codelineno-0-551">551</a></span>
+<span class="normal"><a href="#__codelineno-0-552">552</a></span>
+<span class="normal"><a href="#__codelineno-0-553">553</a></span>
+<span class="normal"><a href="#__codelineno-0-554">554</a></span>
+<span class="normal"><a href="#__codelineno-0-555">555</a></span>
+<span class="normal"><a href="#__codelineno-0-556">556</a></span>
+<span class="normal"><a href="#__codelineno-0-557">557</a></span>
+<span class="normal"><a href="#__codelineno-0-558">558</a></span>
+<span class="normal"><a href="#__codelineno-0-559">559</a></span>
+<span class="normal"><a href="#__codelineno-0-560">560</a></span>
+<span class="normal"><a href="#__codelineno-0-561">561</a></span>
+<span class="normal"><a href="#__codelineno-0-562">562</a></span>
+<span class="normal"><a href="#__codelineno-0-563">563</a></span>
+<span class="normal"><a href="#__codelineno-0-564">564</a></span>
+<span class="normal"><a href="#__codelineno-0-565">565</a></span>
+<span class="normal"><a href="#__codelineno-0-566">566</a></span>
+<span class="normal"><a href="#__codelineno-0-567">567</a></span>
+<span class="normal"><a href="#__codelineno-0-568">568</a></span>
+<span class="normal"><a href="#__codelineno-0-569">569</a></span>
+<span class="normal"><a href="#__codelineno-0-570">570</a></span>
+<span class="normal"><a href="#__codelineno-0-571">571</a></span>
+<span class="normal"><a href="#__codelineno-0-572">572</a></span>
+<span class="normal"><a href="#__codelineno-0-573">573</a></span>
+<span class="normal"><a href="#__codelineno-0-574">574</a></span>
+<span class="normal"><a href="#__codelineno-0-575">575</a></span>
+<span class="normal"><a href="#__codelineno-0-576">576</a></span>
+<span class="normal"><a href="#__codelineno-0-577">577</a></span>
+<span class="normal"><a href="#__codelineno-0-578">578</a></span>
+<span class="normal"><a href="#__codelineno-0-579">579</a></span>
+<span class="normal"><a href="#__codelineno-0-580">580</a></span>
+<span class="normal"><a href="#__codelineno-0-581">581</a></span>
+<span class="normal"><a href="#__codelineno-0-582">582</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a>    <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>    <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>    <span class="n">system_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a>    <span class="n">wipe_temporal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize DocumentsDeleteCall instance.</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">    uri : str | list</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">        The URI of a document to delete or for which to remove metadata.</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="sd">        You can specify multiple documents.</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="sd">    database : str</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">        Perform this operation on the named content database instead</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">        of the default content database associated with the REST API instance.</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">        Using an alternative database requires the &quot;eval-in&quot; privilege.</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">    category : str | list</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">        The category of data to remove/reset.</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">        Category may be specified multiple times to remove or reset</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">        any combination of content and metadata.</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">        Valid categories: content (default), metadata, metadata-values,</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">        collections, permissions, properties, and quality.</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        Use metadata to reset all metadata.</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">    txid : str</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">        The transaction identifier of the multi-statement transaction in which</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">        to service this request. Use the /transactions service to create and manage</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">        multi-statement transactions.</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">    temporal_collection : str</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">        Specify the name of a temporal collection that contains the document(s)</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">        to be deleted. Applies to all documents when deleting more than one.</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">    system_time : str</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">        Set the system start time for the insertion or update.</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a><span class="sd">        This time will override the system time set by MarkLogic.</span>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">        Ignored if temporal-collection is not included in the request.</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">        Applies to all documents when deleting more than one.</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">    wipe_temporal : bool</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">        Remove all versions of a temporal document rather than performing</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">        a temporal delete. You can only use this parameter when you also specify</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">        a temporal-collection parameter.</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">    WrongParametersError</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">        If a category, including an empty string, is not supported.</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>    <span class="n">call_utils</span><span class="o">.</span><span class="n">validate_supported</span><span class="p">(</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>        <span class="n">category</span><span class="p">,</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_SUPPORTED_CATEGORIES</span><span class="p">,</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a>        <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>    <span class="p">)</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;DELETE&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_URI_PARAM</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DATABASE_PARAM</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_CATEGORY_PARAM</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_TXID_PARAM</span><span class="p">,</span> <span class="n">txid</span><span class="p">)</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_TEMPORAL_COLLECTION_PARAM</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="p">)</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SYSTEM_TIME_PARAM</span><span class="p">,</span> <span class="n">system_time</span><span class="p">)</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>    <span class="k">if</span> <span class="n">wipe_temporal</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_RESULT_PARAM</span><span class="p">,</span> <span class="s2">&quot;wiped&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

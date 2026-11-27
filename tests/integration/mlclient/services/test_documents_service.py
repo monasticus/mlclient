@@ -369,7 +369,8 @@ def test_write_within_transaction_rolled_back_is_discarded():
         docs_client_utils.delete_documents(uri)
 
 
-def test_read_single_document_with_transform(tag_transform):
+@pytest.mark.parametrize("value", ["read", None])
+def test_read_single_document_with_transform(tag_transform, value):
     uri = "/some/dir/transform-read.xml"
 
     try:
@@ -378,14 +379,15 @@ def test_read_single_document_with_transform(tag_transform):
             doc = ml.documents.read(
                 uri,
                 transform=tag_transform,
-                transform_params={"value": "read"},
+                transform_params={"value": value} if value is not None else None,
             )
-        assert doc.content.getroot().attrib == {"transformed": "read"}
+        assert doc.content.getroot().attrib == {"transformed": value or ""}
     finally:
         docs_client_utils.delete_documents(uri)
 
 
-def test_read_multiple_documents_with_transform(tag_transform):
+@pytest.mark.parametrize("value", ["read", None])
+def test_read_multiple_documents_with_transform(tag_transform, value):
     uris = ["/some/dir/transform-read-1.xml", "/some/dir/transform-read-2.xml"]
 
     try:
@@ -396,16 +398,17 @@ def test_read_multiple_documents_with_transform(tag_transform):
             docs = ml.documents.read(
                 uris,
                 transform=tag_transform,
-                transform_params={"value": "read"},
+                transform_params={"value": value} if value is not None else None,
             )
         assert {uri: doc.content.getroot().attrib for uri, doc in docs.items()} == {
-            uri: {"transformed": "read"} for uri in uris
+            uri: {"transformed": value or ""} for uri in uris
         }
     finally:
         docs_client_utils.delete_documents(uris)
 
 
-def test_write_with_transform_stores_transformed_content(tag_transform):
+@pytest.mark.parametrize("value", ["write", None])
+def test_write_with_transform_stores_transformed_content(tag_transform, value):
     uri = "/some/dir/transform-write.xml"
 
     try:
@@ -413,10 +416,10 @@ def test_write_with_transform_stores_transformed_content(tag_transform):
             ml.documents.write(
                 XMLDocument(b"<root>data</root>", uri),
                 transform=tag_transform,
-                transform_params={"value": "write"},
+                transform_params={"value": value} if value is not None else None,
             )
             doc = ml.documents.read(uri)
-        assert doc.content.getroot().attrib == {"transformed": "write"}
+        assert doc.content.getroot().attrib == {"transformed": value or ""}
     finally:
         docs_client_utils.delete_documents(uri)
 

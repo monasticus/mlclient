@@ -178,10 +178,7 @@ class DocumentsService:
             body_parts,
             database=params["database"],
             transform=transform,
-            params={
-                f"trans:{name}": value
-                for name, value in (transform_params or {}).items()
-            },
+            transform_params=transform_params,
             txid=params["txid"],
             temporal_collection=temporal_collection,
             system_time=system_time,
@@ -352,10 +349,7 @@ class DocumentsService:
                 data_format="json",
                 timestamp=timestamp,
                 transform=transform,
-                params={
-                    f"trans:{name}": value
-                    for name, value in (transform_params or {}).items()
-                },
+                transform_params=transform_params,
                 txid=params["txid"],
                 timeout=timeout,
             )
@@ -619,10 +613,7 @@ class AsyncDocumentsService:
             body_parts,
             database=params["database"],
             transform=transform,
-            params={
-                f"trans:{name}": value
-                for name, value in (transform_params or {}).items()
-            },
+            transform_params=transform_params,
             txid=params["txid"],
             temporal_collection=temporal_collection,
             system_time=system_time,
@@ -791,10 +782,7 @@ class AsyncDocumentsService:
                 data_format="json",
                 timestamp=timestamp,
                 transform=transform,
-                params={
-                    f"trans:{name}": value
-                    for name, value in (transform_params or {}).items()
-                },
+                transform_params=transform_params,
                 txid=params["txid"],
                 timeout=timeout,
             )

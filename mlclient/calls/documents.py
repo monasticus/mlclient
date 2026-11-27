@@ -57,7 +57,7 @@ class DocumentsGetCall(ApiCall):
         data_format: str | None = None,
         timestamp: str | None = None,
         transform: str | None = None,
-        params: dict | None = None,
+        transform_params: dict | None = None,
         txid: str | None = None,
     ) -> None:
         """Initialize DocumentsGetCall instance.
@@ -92,16 +92,28 @@ class DocumentsGetCall(ApiCall):
             Names a content transformation previously installed via
             the /config/transforms service. The service applies the transformation
             to all documents prior to constructing the response.
-        params : dict
-            Additional URL parameters, including prefixed transform keys such as
-            {"trans:myparam": 1}. None values are omitted; zero, False and empty
-            strings are preserved. Explicit nonempty arguments take precedence.
+        transform_params : dict
+            A transform parameter names and values. For example, { "myparam": 1 }.
+            Transform parameters are passed to the transform named in the transform
+            parameter.
         txid : str
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
         """
+        categories = self._categories_list(category)
+        self._validate_params(
+            categories,
+            data_format,
+            timestamp,
+            txid,
+            transform,
+            transform_params,
+        )
+
         super().__init__(method="GET")
+        accept_header = self._get_accept_header(uri, categories, data_format)
+        self.add_header(constants.HEADER_NAME_ACCEPT, accept_header)
         self.add_param(self._URI_PARAM, uri)
         self.add_param(self._DATABASE_PARAM, database)
         self.add_param(self._CATEGORY_PARAM, category)
@@ -109,19 +121,7 @@ class DocumentsGetCall(ApiCall):
         self.add_param(self._TIMESTAMP_PARAM, timestamp)
         self.add_param(self._TRANSFORM_PARAM, transform)
         self.add_param(self._TXID_PARAM, txid)
-        self._params = {**call_utils.query_params(params or {}, None), **self._params}
-        categories = self._categories_list(self._params.get(self._CATEGORY_PARAM))
-        data_format = self._params.get(self._FORMAT_PARAM)
-        self._validate_params(
-            categories,
-            data_format,
-            self._params.get(self._TIMESTAMP_PARAM),
-            self._params.get(self._TXID_PARAM),
-            self._params.get(self._TRANSFORM_PARAM),
-            self._params,
-        )
-        accept_header = self._get_accept_header(uri, categories, data_format)
-        self.add_header(constants.HEADER_NAME_ACCEPT, accept_header)
+        self._params.update(call_utils.query_params({}, transform_params))
 
     @property
     def endpoint(
@@ -165,7 +165,7 @@ class DocumentsGetCall(ApiCall):
         timestamp: str | None,
         txid: str | None,
         transform: str | None,
-        params: dict,
+        transform_params: dict | None,
     ) -> None:
         """Reject parameters and combinations MarkLogic does not accept.
 
@@ -184,8 +184,8 @@ class DocumentsGetCall(ApiCall):
             The multi-statement transaction identifier.
         transform : str | None
             Installed transform name.
-        params : dict
-            URL parameters; trans: keys require a transform.
+        transform_params : dict | None
+            Parameters requiring a transform.
 
         Raises
         ------
@@ -213,7 +213,7 @@ class DocumentsGetCall(ApiCall):
         if timestamp is not None and txid is not None:
             msg = "timestamp cannot be combined with txid"
             raise exceptions.WrongParametersError(msg)
-        _validate_transform_params(transform, params)
+        _validate_transform_params(transform, transform_params)
 
     @staticmethod
     def _get_accept_header(
@@ -270,7 +270,7 @@ class DocumentsPostCall(ApiCall):
         body_parts: list[DocumentsBodyPart],
         database: str | None = None,
         transform: str | None = None,
-        params: dict | None = None,
+        transform_params: dict | None = None,
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
@@ -290,10 +290,10 @@ class DocumentsPostCall(ApiCall):
             the /config/transforms service. Transforms are applied only to content
             parts: the transform is applied to the content of a part prior to
             updating or inserting the document.
-        params : dict
-            Additional URL parameters, including prefixed transform keys such as
-            {"trans:myparam": 1}. None values are omitted; zero, False and empty
-            strings are preserved. Explicit nonempty arguments take precedence.
+        transform_params : dict
+            A transform parameter names and values. For example, { "myparam": 1 }.
+            Transform parameters are passed to the transform named in the transform
+            parameter.
         txid : str
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
@@ -306,6 +306,14 @@ class DocumentsPostCall(ApiCall):
             This time will override the system time set by MarkLogic.
             Ignored if temporal-collection is not included in the request.
         """
+        self._validate_params(
+            body_parts,
+            transform,
+            transform_params,
+            temporal_collection,
+            system_time,
+        )
+
         super().__init__(method="POST")
         self.add_header(constants.HEADER_NAME_ACCEPT, constants.HEADER_JSON)
         self.add_param(self._DATABASE_PARAM, database)
@@ -313,15 +321,7 @@ class DocumentsPostCall(ApiCall):
         self.add_param(self._TXID_PARAM, txid)
         self.add_param(self._TEMPORAL_COLLECTION_PARAM, temporal_collection)
         self.add_param(self._SYSTEM_TIME_PARAM, system_time)
-        self._params = {**call_utils.query_params(params or {}, None), **self._params}
-        self._validate_params(
-            body_parts,
-            self._params.get(self._TRANSFORM_PARAM),
-            self._params,
-            self._params.get(self._TEMPORAL_COLLECTION_PARAM),
-            self._params.get(self._SYSTEM_TIME_PARAM),
-        )
-
+        self._params.update(call_utils.query_params({}, transform_params))
         body, content_type = self._build_body(body_parts)
         self.add_header(constants.HEADER_NAME_CONTENT_TYPE, content_type)
         self.body = body
@@ -344,7 +344,7 @@ class DocumentsPostCall(ApiCall):
         cls,
         body: list[DocumentsBodyPart] | None,
         transform: str | None,
-        params: dict,
+        transform_params: dict | None,
         temporal_collection: str | None,
         system_time: str | None,
     ) -> None:
@@ -356,8 +356,8 @@ class DocumentsPostCall(ApiCall):
             Content and metadata parts to write.
         transform : str | None
             Installed transform name.
-        params : dict
-            URL parameters; trans: keys require a transform.
+        transform_params : dict | None
+            Parameters requiring a transform.
         temporal_collection : str | None
             Temporal collection receiving the write.
         system_time : str | None
@@ -374,7 +374,7 @@ class DocumentsPostCall(ApiCall):
         if system_time is not None and not temporal_collection:
             msg = "system_time requires temporal_collection"
             raise exceptions.WrongParametersError(msg)
-        _validate_transform_params(transform, params)
+        _validate_transform_params(transform, transform_params)
 
     @classmethod
     def _build_body(
@@ -509,7 +509,7 @@ class DocumentsDeleteCall(ApiCall):
 
 def _validate_transform_params(
     transform: str | None,
-    params: dict,
+    transform_params: dict | None,
 ) -> None:
     """Reject transform parameters sent without a transform to receive them.
 
@@ -517,14 +517,14 @@ def _validate_transform_params(
     ----------
     transform : str | None
         Name of an installed transform.
-    params : dict
-        URL parameters, with transform arguments already prefixed by trans:.
+    transform_params : dict | None
+        Parameters for the transform.
 
     Raises
     ------
     WrongParametersError
-        If trans: parameters are given without transform.
+        If transform_params are given without transform.
     """
-    if any(name.startswith("trans:") for name in params) and not transform:
-        msg = "trans: parameters require transform"
+    if transform_params and not transform:
+        msg = "transform_params require transform"
         raise exceptions.WrongParametersError(msg)

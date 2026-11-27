@@ -15,15 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - name: Install MLClient with poetry
+        uses: ./.github/actions/setup-poetry
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install MLClient with poetry
-        run: |
-          pip install poetry==2.2.0
-          poetry install
 
       - name: Test code with pytest
         run: poetry run pytest tests/unit/
